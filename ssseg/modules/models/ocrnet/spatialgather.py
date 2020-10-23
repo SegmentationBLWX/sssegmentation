@@ -1,0 +1,24 @@
+'''
+Function:
+    define the spatial gather module
+Author:
+    Zhenchao Jin
+'''
+import torch
+import torch.nn as nn
+import torch.nn.functional as F
+
+
+'''spatial gather module'''
+class SpatialGatherModule(nn.Module):
+    def __init__(self, scale=1, **kwargs):
+        super(SpatialGatherModule, self).__init__()
+        self.scale = scale
+    def forward(self, features, probs):
+        batch_size, num_classes, h, w = probs.size()
+        probs = probs.view(batch_size, num_classes, -1)
+        features = features.view(batch_size, features.size(1), -1)
+        features = features.permute(0, 2, 1)
+        probs = F.softmax(self.scale * probs, dim=2)
+        ocr_context = torch.matmul(probs, features).permute(0, 2, 1).unsqueeze(3)
+        return ocr_context

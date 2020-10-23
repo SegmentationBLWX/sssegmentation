@@ -1,0 +1,46 @@
+'''
+Function:
+    load the lib dataset
+Author:
+    Zhenchao Jin
+'''
+import os
+import pandas as pd
+from .base import *
+
+
+'''lib dataset'''
+class LIPDataset(BaseDataset):
+    num_classes = 20
+    classnames = ['__background__', 'hat', 'hair', 'glove', 'sunglasses', 'upperclothes', 'dress', 
+                  'coat', 'socks', 'pants', 'jumpsuits', 'scarf', 'skirt', 'face', 
+                  'leftArm', 'rightArm', 'leftLeg', 'rightLeg', 'leftShoe', 'rightShoe']
+    assert num_classes == len(classnames)
+    def __init__(self, mode, logger_handle, dataset_cfg, **kwargs):
+        super(LIPDataset, self).__init__(mode, logger_handle, dataset_cfg, **kwargs)
+        # obtain the dirs
+        rootdir = dataset_cfg['rootdir']
+        setmap_dict = {'train': 'train', 'val': 'val', 'test': 'testing'}
+        self.image_dir = os.path.join(rootdir, f"{setmap_dict[dataset_cfg['set']]}_images")
+        self.ann_dir = os.path.join(rootdir, f"{setmap_dict[dataset_cfg['set']]}_segmentations")
+        # obatin imageids
+        df = pd.read_csv(os.path.join(rootdir, dataset_cfg['set']+'_id.txt'), names=['imageids'])
+        self.imageids = df['imageids'].values
+        self.imageids = [str(_id) for _id in self.imageids]
+    '''pull item'''
+    def __getitem__(self, index):
+        imageid = self.imageids[index]
+        imagepath = os.path.join(self.image_dir, imageid+'.jpg')
+        annpath = os.path.join(self.ann_dir, imageid+'.png')
+        sample = self.read(imagepath, annpath) if 'test' not in self.dataset_cfg['set'] else self.read(imagepath, annpath, False)
+        sample.update({'id': imageid})
+        if self.mode == 'TRAIN':
+            sample = self.synctransform(sample, 'without_totensor_normalize_pad')
+            sample['edge'] = self.generateedge(sample['segmentation'].copy())
+            sample = self.synctransform(sample, 'only_totensor_normalize_pad')
+        else:
+            sample = self.synctransform(sample, 'all')
+        return sample
+    '''length'''
+    def __len__(self):
+        return len(self.imageids)
