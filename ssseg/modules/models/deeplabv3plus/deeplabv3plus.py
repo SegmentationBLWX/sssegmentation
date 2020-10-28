@@ -98,11 +98,11 @@ class Deeplabv3Plus(nn.Module):
     @staticmethod
     def calculateloss(preds, targets, losses_cfg):
         targets_seg = targets['segmentation']
-        # calculate the auxiliary loss
         supported_losses = {
             'celoss': CrossEntropyLoss,
             'sigmoidfocalloss': SigmoidFocalLoss,
         }
+        # calculate the auxiliary loss
         aux_cfg = losses_cfg['auxiliary']
         loss_aux = 0
         preds_aux = preds['preds_aux'].permute((0, 2, 3, 1)).contiguous()
@@ -113,10 +113,6 @@ class Deeplabv3Plus(nn.Module):
                                               scale_factor=value['scale_factor'],
                                               **value['opts'])
         # calculate the classification loss
-        supported_losses = {
-            'celoss': CrossEntropyLoss,
-            'sigmoidfocalloss': SigmoidFocalLoss,
-        }
         cls_cfg = losses_cfg['classification']
         loss_cls = 0
         preds = preds['preds'].permute((0, 2, 3, 1)).contiguous()

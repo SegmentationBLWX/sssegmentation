@@ -38,7 +38,7 @@ def demo():
     cfg, cfg_file_path = BuildConfig(cmd_args.modelname, cmd_args.datasetname, cmd_args.backbonename)
     cfg.MODEL_CFG['distributed']['is_on'] = False
     cfg.MODEL_CFG['is_multi_gpus'] = False
-    assert cmd_args.imagepath or cmd_args.imagedir, 'imagepath or imagedir should be specified'
+    assert cmd_args.imagepath or cmd_args.imagedir, 'imagepath or imagedir should be specified...'
     cmd_args.outputfilename = ''.join(cmd_args.outputfilename.split('.')[:-1])
     # check backup dir
     common_cfg = cfg.COMMON_CFG['test']

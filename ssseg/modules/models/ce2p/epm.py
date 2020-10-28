@@ -25,6 +25,7 @@ class EdgePerceivingModule(nn.Module):
                                                BuildActivation(activation_opts['type'], **activation_opts['opts'])))
         self.edge_conv = nn.Conv2d(hidden_channels, out_channels, kernel_size=3, stride=1, padding=1, bias=True)
         self.fuse_conv = nn.Conv2d(out_channels * len(in_channels_list), out_channels, kernel_size=1, stride=1, padding=0, bias=True)
+    '''forward'''
     def forward(self, x):
         assert len(x) == len(self.branches)
         h, w = x[0].size(2), x[0].size(3)

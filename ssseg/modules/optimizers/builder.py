@@ -23,7 +23,7 @@ def SGDBuilder(model, cfg, **kwargs):
                               **kwargs)
     else:
         params, all_layers = [], model.alllayers()
-        assert 'others' not in all_layers, 'potential bug in model.alllayers'
+        assert 'others' not in all_layers, 'potential bug in model.alllayers...'
         for key, value in params_rules.items():
             if key == 'others': continue
             params.append({'params': all_layers[key].parameters(), 'lr': cfg['learning_rate'] * value, 'name': key})
@@ -50,7 +50,7 @@ def AdamBuilder(model, cfg, **kwargs):
                                **kwargs)
     else:
         params, all_layers = [], model.alllayers()
-        assert 'others' not in all_layers, 'potential bug in model.alllayers'
+        assert 'others' not in all_layers, 'potential bug in model.alllayers...'
         for key, value in params_rules.items():
             if key == 'others': continue
             params.append({'params': all_layers[key].parameters(), 'lr': cfg['learning_rate'] * value, 'name': key})

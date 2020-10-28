@@ -29,6 +29,7 @@ class SpatialOCRModule(nn.Module):
         self.conv_bn_act = nn.Sequential(nn.Conv2d(in_channels*2, out_channels, kernel_size=1, stride=1, padding=0, bias=False),
                                          BuildNormalizationLayer(normlayer_opts['type'], (out_channels, normlayer_opts['opts'])),
                                          BuildActivation(activation_opts['type'], **activation_opts['opts']))
+    '''forward'''
     def forward(self, x, proxy_feats):
         context = self.object_context_block(x, proxy_feats)
         output = self.conv_bn_act(torch.cat([context, x], dim=1))

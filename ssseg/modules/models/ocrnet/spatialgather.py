@@ -14,6 +14,7 @@ class SpatialGatherModule(nn.Module):
     def __init__(self, scale=1, **kwargs):
         super(SpatialGatherModule, self).__init__()
         self.scale = scale
+    '''forward'''
     def forward(self, features, probs):
         batch_size, num_classes, h, w = probs.size()
         probs = probs.view(batch_size, num_classes, -1)

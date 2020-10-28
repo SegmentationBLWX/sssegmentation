@@ -29,6 +29,7 @@ class PyramidPoolingModule(nn.Module):
                                         BuildActivation(activation_opts['type'], **activation_opts['opts']))
         self.in_channels = in_channels
         self.out_channels = out_channels
+    '''forward'''
     def forward(self, x):
         h, w = x.size(2), x.size(3)
         pyramid_lvls = [x]

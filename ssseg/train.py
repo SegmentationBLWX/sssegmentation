@@ -20,11 +20,11 @@ warnings.filterwarnings('ignore')
 def parseArgs():
     parser = argparse.ArgumentParser(description='sssegmentation is a general framework for our research on strongly supervised semantic segmentation')
     parser.add_argument('--modelname', dest='modelname', help='model you want to train', type=str, required=True)
-    parser.add_argument('--datasetname', dest='datasetname', help='dataset for training', type=str, required=True)
-    parser.add_argument('--backbonename', dest='backbonename', help='backbone network for training', type=str, required=True)
-    parser.add_argument('--checkpointspath', dest='checkpointspath', help='checkpoints you want to resume from', default='', type=str)
+    parser.add_argument('--datasetname', dest='datasetname', help='dataset for training.', type=str, required=True)
     parser.add_argument('--local_rank', dest='local_rank', help='node rank for distributed training', default=0, type=int)
     parser.add_argument('--nproc_per_node', dest='nproc_per_node', help='number of process per node', default=4, type=int)
+    parser.add_argument('--backbonename', dest='backbonename', help='backbone network for training.', type=str, required=True)
+    parser.add_argument('--checkpointspath', dest='checkpointspath', help='checkpoints you want to resume from.', default='', type=str)
     args = parser.parse_args()
     return args
 
@@ -37,7 +37,7 @@ class Trainer():
         self.use_cuda = torch.cuda.is_available()
         # modify config for consistency
         if not self.use_cuda:
-            if cmd_args.local_rank == 0: logger_handle.warning('Cuda is not available, only cpu is used to train the model')
+            if self.cmd_args.local_rank == 0: logger_handle.warning('Cuda is not available, only cpu is used to train the model...')
             self.cfg.MODEL_CFG['distributed']['is_on'] = False
             self.cfg.DATALOADER_CFG['train']['type'] = 'nondistributed'
         if self.cfg.MODEL_CFG['distributed']['is_on']:
@@ -53,14 +53,14 @@ class Trainer():
         distributed_cfg, common_cfg = self.cfg.MODEL_CFG['distributed'], self.cfg.COMMON_CFG['train']
         # instanced dataset and dataloader
         dataset = BuildDataset(mode='TRAIN', logger_handle=logger_handle, dataset_cfg=copy.deepcopy(cfg.DATASET_CFG))
-        assert dataset.num_classes == cfg.MODEL_CFG['num_classes'], 'parsed config file %s error' % cfg_file_path
+        assert dataset.num_classes == cfg.MODEL_CFG['num_classes'], 'parsed config file %s error...' % cfg_file_path
         dataloader_cfg = copy.deepcopy(cfg.DATALOADER_CFG)
         if distributed_cfg['is_on']:
             batch_size, num_workers = dataloader_cfg['train']['batch_size'], dataloader_cfg['train']['num_workers']
             batch_size //= self.ngpus_per_node
             num_workers //= self.ngpus_per_node
-            assert batch_size * self.ngpus_per_node == dataloader_cfg['train']['batch_size'], 'unsuitable batch_size'
-            assert num_workers * self.ngpus_per_node == dataloader_cfg['train']['num_workers'], 'unsuitable num_workers'
+            assert batch_size * self.ngpus_per_node == dataloader_cfg['train']['batch_size'], 'unsuitable batch_size...'
+            assert num_workers * self.ngpus_per_node == dataloader_cfg['train']['num_workers'], 'unsuitable num_workers...'
             dataloader_cfg['train'].update({'batch_size': batch_size, 'num_workers': num_workers})
         dataloader = BuildParallelDataloader(mode='TRAIN', dataset=dataset, cfg=dataloader_cfg)
         # instanced model

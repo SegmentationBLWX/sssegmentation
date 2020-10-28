@@ -93,10 +93,6 @@ class FCN(nn.Module):
                                               scale_factor=value['scale_factor'],
                                               **value['opts'])
         # calculate the classification loss
-        supported_losses = {
-            'celoss': CrossEntropyLoss,
-            'sigmoidfocalloss': SigmoidFocalLoss,
-        }
         cls_cfg = losses_cfg['classification']
         loss_cls = 0
         preds = preds['preds'].permute((0, 2, 3, 1)).contiguous()

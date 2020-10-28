@@ -41,7 +41,7 @@ class BaseDataset(torch.utils.data.Dataset):
             }
     '''
     def synctransform(self, sample, transform_type):
-        assert self.transforms, 'undefined transforms'
+        assert self.transforms, 'undefined transforms...'
         assert transform_type in ['all', 'only_totensor_normalize_pad', 'without_totensor_normalize_pad']
         sample = self.transforms(sample, transform_type)
         return sample

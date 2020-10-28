@@ -42,6 +42,7 @@ class ObjectContextBlock(nn.Module):
         self.f_up = nn.Sequential(nn.Conv2d(key_channels, in_channels, kernel_size=1, stride=1, padding=0, bias=False),
                                   BuildNormalizationLayer(normlayer_opts['type'], (in_channels, normlayer_opts['opts'])),
                                   BuildActivation(activation_opts['type'], **activation_opts['opts']))
+    '''forward'''
     def forward(self, x, proxy_feats):
         batch_size, h, w = x.size(0), x.size(2), x.size(3)
         if self.pool_size > 1: x = self.maxpool(x)

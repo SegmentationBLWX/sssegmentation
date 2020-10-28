@@ -23,13 +23,13 @@ warnings.filterwarnings('ignore')
 '''parse arguments in command line'''
 def parseArgs():
     parser = argparse.ArgumentParser(description='sssegmentation is a general framework for our research on strongly supervised semantic segmentation')
-    parser.add_argument('--noeval', dest='noeval', help='set true if only obtain the outputs without evaluation', type=bool)
     parser.add_argument('--modelname', dest='modelname', help='model you want to test', type=str, required=True)
-    parser.add_argument('--datasetname', dest='datasetname', help='dataset for testing', type=str, required=True)
-    parser.add_argument('--backbonename', dest='backbonename', help='backbone network for testing', type=str, required=True)
-    parser.add_argument('--checkpointspath', dest='checkpointspath', help='checkpoints you want to resume from', type=str, required=True)
+    parser.add_argument('--datasetname', dest='datasetname', help='dataset for testing.', type=str, required=True)
     parser.add_argument('--local_rank', dest='local_rank', help='node rank for distributed testing', default=0, type=int)
     parser.add_argument('--nproc_per_node', dest='nproc_per_node', help='number of process per node', default=4, type=int)
+    parser.add_argument('--backbonename', dest='backbonename', help='backbone network for testing.', type=str, required=True)
+    parser.add_argument('--noeval', dest='noeval', help='set true if no ground truth could be used to eval the results.', type=bool)
+    parser.add_argument('--checkpointspath', dest='checkpointspath', help='checkpoints you want to resume from.', type=str, required=True)
     args = parser.parse_args()
     return args
 
@@ -42,7 +42,7 @@ class Tester():
         self.use_cuda = torch.cuda.is_available()
         # modify config for consistency
         if not self.use_cuda:
-            if cmd_args.local_rank == 0: logger_handle.warning('Cuda is not available, only cpu is used to test the model')
+            if self.cmd_args.local_rank == 0: logger_handle.warning('Cuda is not available, only cpu is used to test the model...')
             self.cfg.MODEL_CFG['distributed']['is_on'] = False
             self.cfg.DATALOADER_CFG['test']['type'] = 'nondistributed'
         if self.cfg.MODEL_CFG['distributed']['is_on']:
@@ -58,14 +58,14 @@ class Tester():
         distributed_cfg, common_cfg = self.cfg.MODEL_CFG['distributed'], self.cfg.COMMON_CFG['train']
         # instanced dataset and dataloader
         dataset = BuildDataset(mode='TEST', logger_handle=logger_handle, dataset_cfg=copy.deepcopy(cfg.DATASET_CFG))
-        assert dataset.num_classes == cfg.MODEL_CFG['num_classes'], 'parsed config file %s error' % cfg_file_path
+        assert dataset.num_classes == cfg.MODEL_CFG['num_classes'], 'parsed config file %s error...' % cfg_file_path
         dataloader_cfg = copy.deepcopy(cfg.DATALOADER_CFG)
         if distributed_cfg['is_on']:
             batch_size, num_workers = dataloader_cfg['test']['batch_size'], dataloader_cfg['test']['num_workers']
             batch_size //= self.ngpus_per_node
             num_workers //= self.ngpus_per_node
-            assert batch_size * self.ngpus_per_node == dataloader_cfg['test']['batch_size'], 'unsuitable batch_size'
-            assert num_workers * self.ngpus_per_node == dataloader_cfg['test']['num_workers'], 'unsuitable num_workers'
+            assert batch_size * self.ngpus_per_node == dataloader_cfg['test']['batch_size'], 'unsuitable batch_size...'
+            assert num_workers * self.ngpus_per_node == dataloader_cfg['test']['num_workers'], 'unsuitable num_workers...'
             dataloader_cfg['test'].update({'batch_size': batch_size, 'num_workers': num_workers})
         dataloader = BuildParallelDataloader(mode='TEST', dataset=dataset, cfg=dataloader_cfg)
         # instanced model
@@ -94,30 +94,61 @@ class Tester():
         model.eval()
         # start to test
         FloatTensor = torch.cuda.FloatTensor if use_cuda else torch.FloatTensor
+        if hasattr(cfg, 'INFERENCE_CFG'):
+            inference_cfg = copy.deepcopy(cfg.INFERENCE_CFG)
+        else:
+            inference_cfg = {'mode': 'whole', 'opts': {}}
         with torch.no_grad():
             if cfg.MODEL_CFG['distributed']['is_on']: dataloader.sampler.set_epoch(0)
             pbar = tqdm(enumerate(dataloader))
             for batch_idx, samples in pbar:
                 if cmd_args.local_rank == 0: pbar.set_description('Processing %s/%s' % (batch_idx+1, len(dataloader)))
                 images, widths, heights, gts = samples['image'], samples['width'], samples['height'], samples['groundtruth']
-                outputs = model(images.type(FloatTensor))
-                for i in range(outputs.size(0)):
-                    output = outputs[i: i+1]
+                outputs = self.inference(model, images.type(FloatTensor), inference_cfg, dataset.num_classes)                    
+                for i in range(len(outputs)):
+                    output = outputs[i].unsqueeze(0)
                     pred = F.interpolate(output, size=(heights[i], widths[i]), mode='bilinear', align_corners=model.align_corners)[0]
                     pred = (torch.argmax(pred, dim=0)).cpu().numpy().astype(np.int32)
                     all_preds.append(pred)
                     gt = gts[i].cpu().numpy().astype(np.int32)
                     gt[gt >= dataset.num_classes] = -1
                     all_gts.append(gt)
+    '''inference'''
+    def inference(self, model, images, inference_cfg, num_classes):
+        assert inference_cfg['mode'] in ['whole', 'slide']
+        if inference_cfg['mode'] == 'whole':
+            outputs = model(images)
+        else:
+            opts = inference_cfg['opts']
+            stride_h, stride_w = opts['stride']
+            cropsize_h, cropsize_w = opts['cropsize']
+            batch_size, _, image_h, image_w = images.size()
+            num_grids_h = max(image_h - cropsize_h + stride_h - 1, 0) // stride_h + 1
+            num_grids_w = max(image_w - cropsize_w + stride_w - 1, 0) // stride_w + 1
+            outputs = images.new_zeros((batch_size, num_classes, image_h, image_w))
+            count_mat = images.new_zeros((batch_size, 1, image_h, image_w))
+            for h_idx in range(num_grids_h):
+                for w_idx in range(num_grids_w):
+                    x1, y1 = w_idx * stride_w, h_idx * stride_h
+                    x2, y2 = min(x1 + cropsize_w, image_w), min(y1 + cropsize_h, image_h)
+                    x1, y1 = max(x2 - cropsize_w, 0), max(y2 - cropsize_h, 0)
+                    crop_images = images[:, :, y1:y2, x1:x2]
+                    outputs_crop = model(crop_images)
+                    outputs += F.pad(outputs_crop, (int(x1), int(outputs.shape[3] - x2), int(y1), int(outputs.shape[2] - y2)))
+                    count_mat[:, :, y1:y2, x1:x2] += 1
+            assert (count_mat == 0).sum() == 0
+            outputs = outputs / count_mat
+        return outputs
 
 
 '''main'''
 def main():
-    # parse arguments
+    # parse arguments, todo: support distributed testing and bs > 1
     args = parseArgs()
     cfg, cfg_file_path = BuildConfig(args.modelname, args.datasetname, args.backbonename)
     cfg.MODEL_CFG['distributed']['is_on'] = False
     cfg.MODEL_CFG['is_multi_gpus'] = False
+    cfg.DATALOADER_CFG['test']['batch_size'] = 1
     # check backup dir
     common_cfg = cfg.COMMON_CFG['test']
     checkdir(common_cfg['backupdir'])
