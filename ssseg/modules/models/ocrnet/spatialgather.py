@@ -21,5 +21,6 @@ class SpatialGatherModule(nn.Module):
         features = features.view(batch_size, features.size(1), -1)
         features = features.permute(0, 2, 1)
         probs = F.softmax(self.scale * probs, dim=2)
-        ocr_context = torch.matmul(probs, features).permute(0, 2, 1).unsqueeze(3)
+        ocr_context = torch.matmul(probs, features)
+        ocr_context = ocr_context.permute(0, 2, 1).contiguous().unsqueeze(3)
         return ocr_context

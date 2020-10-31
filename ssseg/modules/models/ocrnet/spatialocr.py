@@ -12,13 +12,12 @@ from ...backbones import BuildActivation, BuildNormalizationLayer
 
 '''spatial ocr module'''
 class SpatialOCRModule(nn.Module):
-    def __init__(self, in_channels, key_channels, out_channels, pool_size=1, **kwargs):
+    def __init__(self, in_channels, key_channels, out_channels, **kwargs):
         super(SpatialOCRModule, self).__init__()
         align_corners = kwargs.get('align_corners', True)
         normlayer_opts = kwargs.get('normlayer_opts', {'type': 'syncbatchnorm2d', 'opts': {}})
         activation_opts = kwargs.get('activation_opts', {'type': 'relu', 'opts': {'inplace': True}})
         ocb_args = {
-            'pool_size': pool_size,
             'in_channels': in_channels,
             'key_channels': key_channels,
             'align_corners': align_corners,

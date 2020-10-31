@@ -88,7 +88,6 @@ MODEL_CFG = {
             'scale': 1,
         },
     'spatialocr': {
-            'pool_size': 1,
             'in_channels': 2048,
             'key_channels': 256,
             'out_channels': 512,

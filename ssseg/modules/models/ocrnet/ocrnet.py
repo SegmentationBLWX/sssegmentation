@@ -44,7 +44,6 @@ class OCRNet(nn.Module):
         self.spatial_gather_net = SpatialGatherModule(**spatialgather_cfg)
         # build spatial ocr module
         spatialocr_cfg = {
-            'pool_size': cfg['spatialocr']['pool_size'],
             'in_channels': cfg['spatialocr']['in_channels'],
             'key_channels': cfg['spatialocr']['key_channels'],
             'out_channels': cfg['spatialocr']['out_channels'],
