@@ -1,5 +1,12 @@
 # PSPNet
 ```
+@inproceedings{zhao2017pyramid,
+  title={Pyramid scene parsing network},
+  author={Zhao, Hengshuang and Shi, Jianping and Qi, Xiaojuan and Wang, Xiaogang and Jia, Jiaya},
+  booktitle={Proceedings of the IEEE conference on computer vision and pattern recognition},
+  pages={2881--2890},
+  year={2017}
+}
 The implemented details see https://arxiv.org/pdf/1612.01105.pdf.
 ```
 

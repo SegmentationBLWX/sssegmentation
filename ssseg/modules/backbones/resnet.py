@@ -169,7 +169,7 @@ def BuildResNet(resnet_type, **kwargs):
     pretrained = kwargs.get('pretrained', True)
     normlayer_opts = kwargs.get('normlayer_opts', None)
     contract_dilation = kwargs.get('contract_dilation', True)
-    pretrainedmodelpath = kwargs.get('pretrainedmodelpath', '')
+    pretrained_model_path = kwargs.get('pretrained_model_path', '')
     is_improved_version = kwargs.get('is_improved_version', True)
     # obtain args for instanced resnet
     resnet_args = supported_resnets[resnet_type]
@@ -183,9 +183,9 @@ def BuildResNet(resnet_type, **kwargs):
     model = ResNet(**resnet_args)
     # load weights of pretrained model
     if is_improved_version: resnet_type = resnet_type + 'impro'
-    if pretrained and os.path.exists(pretrainedmodelpath):
-        if is_improved_version: state_dict = torch.load(pretrainedmodelpath)['state_dict']
-        else: state_dict = torch.load(pretrainedmodelpath)
+    if pretrained and os.path.exists(pretrained_model_path):
+        if is_improved_version: state_dict = torch.load(pretrained_model_path)['state_dict']
+        else: state_dict = torch.load(pretrained_model_path)
         model.load_state_dict(state_dict, strict=False)
     elif pretrained:
         if is_improved_version: state_dict = model_zoo.load_url(model_urls[resnet_type])['state_dict']

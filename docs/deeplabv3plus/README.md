@@ -1,5 +1,12 @@
 # Deeplabv3Plus
 ```
+@inproceedings{chen2018encoder,
+  title={Encoder-decoder with atrous separable convolution for semantic image segmentation},
+  author={Chen, Liang-Chieh and Zhu, Yukun and Papandreou, George and Schroff, Florian and Adam, Hartwig},
+  booktitle={Proceedings of the European conference on computer vision (ECCV)},
+  pages={801--818},
+  year={2018}
+}
 The implemented details see https://arxiv.org/pdf/1802.02611.pdf.
 ```
 

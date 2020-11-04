@@ -5,8 +5,10 @@ Author:
     Zhenchao Jin
 '''
 from .voc import *
+from .atr import *
 from .lip import *
 from .coco import *
+from .cihp import *
 from .ade20k import *
 from .sbushadow import *
 from .cityscapes import *
@@ -18,8 +20,10 @@ def BuildDataset(mode, logger_handle, dataset_cfg, **kwargs):
     dataset_cfg = dataset_cfg[mode.lower()]
     supported_datasets = {
         'voc': VOCDataset,
+        'atr': ATRDataset,
         'lip': LIPDataset,
         'coco': COCODataset,
+        'cihp': CIHPDataset,
         'ade20k': ADE20kDataset,
         'cocostuff': COCOStuffDataset,
         'sbushadow': SBUShadowDataset,

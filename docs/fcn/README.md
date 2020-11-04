@@ -1,5 +1,12 @@
 # FCN
 ```
+@inproceedings{long2015fully,
+  title={Fully convolutional networks for semantic segmentation},
+  author={Long, Jonathan and Shelhamer, Evan and Darrell, Trevor},
+  booktitle={Proceedings of the IEEE conference on computer vision and pattern recognition},
+  pages={3431--3440},
+  year={2015}
+}
 The implemented details see https://arxiv.org/pdf/1411.4038.pdf.
 ```
 

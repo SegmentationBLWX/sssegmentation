@@ -14,15 +14,18 @@ sssegmentation is a general framework for our research on strongly supervised se
 - [Deeplabv3Plus](https://arxiv.org/pdf/1802.02611.pdf)
 
 ## Supported Backbones
+- [HRNet](https://arxiv.org/pdf/1908.07919.pdf)
 - [ResNet](https://arxiv.org/pdf/1512.03385.pdf)
 
 ## Supported Datasets
 - [LIP](http://sysu-hcp.net/lip/)
+- [ATR](http://sysu-hcp.net/lip/overview.php)
+- [CIHP](http://sysu-hcp.net/lip/overview.php)
 - [ADE20k](https://groups.csail.mit.edu/vision/datasets/ADE20K/)
 - [MS COCO](https://cocodataset.org/#home)
 - [SBUShadow](https://www3.cs.stonybrook.edu/~cvl/projects/shadow_noisy_label/index.html)
-- [PASCAL VOC](http://host.robots.ox.ac.uk/pascal/VOC/)
 - [CityScapes](https://www.cityscapes-dataset.com/)
+- [PASCAL VOC](http://host.robots.ox.ac.uk/pascal/VOC/)
 - [Supervisely](https://supervise.ly/explore/projects/supervisely-person-dataset-23304/datasets)
 
 
@@ -49,9 +52,9 @@ sh scripts/distrain.sh 4 voc resnet101os16 deeplabv3plus
 #### Python
 ```sh
 usage: train.py [-h] --modelname MODELNAME --datasetname DATASETNAME
+                [--local_rank LOCAL_RANK] [--nproc_per_node NPROC_PER_NODE]
                 --backbonename BACKBONENAME
-                [--checkpointspath CHECKPOINTSPATH] [--local_rank LOCAL_RANK]
-                [--nproc_per_node NPROC_PER_NODE]
+                [--checkpointspath CHECKPOINTSPATH]
 
 sssegmentation is a general framework for our research on strongly supervised semantic segmentation
 
@@ -60,15 +63,15 @@ optional arguments:
   --modelname MODELNAME
                         model you want to train
   --datasetname DATASETNAME
-                        dataset for training
-  --backbonename BACKBONENAME
-                        backbone network for training
-  --checkpointspath CHECKPOINTSPATH
-                        checkpoints you want to resume from
+                        dataset for training.
   --local_rank LOCAL_RANK
                         node rank for distributed training
   --nproc_per_node NPROC_PER_NODE
                         number of process per node
+  --backbonename BACKBONENAME
+                        backbone network for training.
+  --checkpointspath CHECKPOINTSPATH
+                        checkpoints you want to resume from.
 
 example:
 python3 ssseg/train.py --datasetname voc --backbonename resnet101os16 --modelname deeplabv3plus
@@ -86,24 +89,29 @@ sh scripts/test.sh voc resnet101os16 deeplabv3plus deeplabv3plus_resnet101os16_v
 ```
 #### Python
 ```sh
-usage: test.py [-h] [--noeval NOEVAL] --modelname MODELNAME --datasetname
-               DATASETNAME --backbonename BACKBONENAME --checkpointspath
+usage: test.py [-h] --modelname MODELNAME --datasetname DATASETNAME
+               [--local_rank LOCAL_RANK] [--nproc_per_node NPROC_PER_NODE]
+               --backbonename BACKBONENAME [--noeval NOEVAL] --checkpointspath
                CHECKPOINTSPATH
 
 sssegmentation is a general framework for our research on strongly supervised semantic segmentation
 
 optional arguments:
   -h, --help            show this help message and exit
-  --noeval NOEVAL       set true if only obtain the outputs without
-                        evaluation
   --modelname MODELNAME
                         model you want to test
   --datasetname DATASETNAME
-                        dataset for testing
+                        dataset for testing.
+  --local_rank LOCAL_RANK
+                        node rank for distributed testing
+  --nproc_per_node NPROC_PER_NODE
+                        number of process per node
   --backbonename BACKBONENAME
-                        backbone network for testing
+                        backbone network for testing.
+  --noeval NOEVAL       set true if no ground truth could be used to eval the
+                        results.
   --checkpointspath CHECKPOINTSPATH
-                        checkpoints you want to resume from
+                        checkpoints you want to resume from.
 
 example: python3 ssseg/test.py --datasetname voc --backbonename resnet101os16 --modelname deeplabv3plus --checkpointspath deeplabv3plus_resnet101os16_voc_train/epoch_60.pth
 ```
