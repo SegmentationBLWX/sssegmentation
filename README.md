@@ -27,10 +27,10 @@ see → [click](./docs)
 - [CIHP](http://sysu-hcp.net/lip/overview.php)
 - [ADE20k](https://groups.csail.mit.edu/vision/datasets/ADE20K/)
 - [MS COCO](https://cocodataset.org/#home)
-- [SBUShadow](https://www3.cs.stonybrook.edu/~cvl/projects/shadow_noisy_label/index.html)
 - [CityScapes](https://www.cityscapes-dataset.com/)
-- [PASCAL VOC](http://host.robots.ox.ac.uk/pascal/VOC/)
 - [Supervisely](https://supervise.ly/explore/projects/supervisely-person-dataset-23304/datasets)
+- [SBUShadow](https://www3.cs.stonybrook.edu/~cvl/projects/shadow_noisy_label/index.html)
+- [PASCAL VOC](http://host.robots.ox.ac.uk/pascal/VOC/)
 
 
 # References
