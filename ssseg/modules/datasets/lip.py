@@ -1,6 +1,6 @@
 '''
 Function:
-    load the lib dataset
+    load the LIP dataset
 Author:
     Zhenchao Jin
 '''
@@ -9,7 +9,7 @@ import pandas as pd
 from .base import *
 
 
-'''lib dataset'''
+'''LIP dataset'''
 class LIPDataset(BaseDataset):
     num_classes = 20
     classnames = ['__background__', 'hat', 'hair', 'glove', 'sunglasses', 'upperclothes', 'dress', 
