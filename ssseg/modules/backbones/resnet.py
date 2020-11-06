@@ -36,6 +36,7 @@ class BasicBlock(nn.Module):
         self.downsample = downsample
         self.stride = stride
         self.dilation = dilation
+    '''forward'''
     def forward(self, x):
         identity = x
         out = self.conv1(x)
@@ -64,6 +65,7 @@ class Bottleneck(nn.Module):
         self.downsample = downsample
         self.stride = stride
         self.dilation = dilation
+    '''forward'''
     def forward(self, x):
         identity = x
         out = self.conv1(x)
@@ -89,9 +91,11 @@ class ResNet(nn.Module):
         101: (Bottleneck, (3, 4, 23, 3)),
         152: (Bottleneck, (3, 8, 36, 3))
     }
-    def __init__(self, depth, outstride, normlayer_opts, contract_dilation=True, is_improved_version=True, **kwargs):
+    def __init__(self, depth, outstride, normlayer_opts, contract_dilation=True, is_improved_version=True, out_indices=(0, 1, 2, 3), **kwargs):
         super(ResNet, self).__init__()
         self.inplanes = 64
+        # set out_indices
+        self.out_indices = out_indices
         # parse depth settings
         assert depth in self.arch_settings, 'unsupport depth %s in ResNet...' % depth
         block, num_blocks_list = self.arch_settings[depth]
@@ -138,6 +142,7 @@ class ResNet(nn.Module):
         self.inplanes = planes * block.expansion
         for i in range(1, num_blocks): layers.append(block(planes * block.expansion, planes, stride=1, dilation=dilations[i], normlayer_opts=normlayer_opts))
         return nn.Sequential(*layers)
+    '''forward'''
     def forward(self, x):
         if self.is_improved_version:
             x = self.stem(x)
@@ -150,7 +155,11 @@ class ResNet(nn.Module):
         x2 = self.layer2(x1)
         x3 = self.layer3(x2)
         x4 = self.layer4(x3)
-        return [x1, x2, x3, x4]
+        outs = []
+        for i, feats in enumerate([x1, x2, x3, x4]):
+            if i in self.out_indices: outs.append(feats)
+        if len(outs) == 1: return outs[0]
+        else: return tuple(outs)
 
 
 '''build resnet'''
@@ -165,12 +174,13 @@ def BuildResNet(resnet_type, **kwargs):
     }
     assert resnet_type in supported_resnets, 'unsupport the resnet_type %s...' % resnet_type
     # parse args
-    outstride = kwargs.get('outstride', 16)
+    outstride = kwargs.get('outstride', 8)
     pretrained = kwargs.get('pretrained', True)
     normlayer_opts = kwargs.get('normlayer_opts', None)
     contract_dilation = kwargs.get('contract_dilation', True)
     pretrained_model_path = kwargs.get('pretrained_model_path', '')
     is_improved_version = kwargs.get('is_improved_version', True)
+    out_indices = kwargs.get('out_indices', (0, 1, 2, 3))
     # obtain args for instanced resnet
     resnet_args = supported_resnets[resnet_type]
     resnet_args.update({
@@ -178,18 +188,21 @@ def BuildResNet(resnet_type, **kwargs):
         'normlayer_opts': normlayer_opts,
         'contract_dilation': contract_dilation,
         'is_improved_version': is_improved_version,
+        'out_indices': out_indices,
     })
     # obtain the instanced resnet
     model = ResNet(**resnet_args)
     # load weights of pretrained model
     if is_improved_version: resnet_type = resnet_type + 'impro'
     if pretrained and os.path.exists(pretrained_model_path):
-        if is_improved_version: state_dict = torch.load(pretrained_model_path)['state_dict']
-        else: state_dict = torch.load(pretrained_model_path)
+        checkpoint = torch.load(pretrained_model_path)
+        if 'state_dict' in checkpoint: state_dict = checkpoint['state_dict']
+        else: state_dict = checkpoint
         model.load_state_dict(state_dict, strict=False)
     elif pretrained:
-        if is_improved_version: state_dict = model_zoo.load_url(model_urls[resnet_type])['state_dict']
-        else: state_dict = model_zoo.load_url(model_urls[resnet_type])
+        checkpoint = model_zoo.load_url(model_urls[resnet_type])
+        if 'state_dict' in checkpoint: state_dict = checkpoint['state_dict']
+        else: state_dict = checkpoint
         model.load_state_dict(state_dict, strict=False)
     # return the model
     return model

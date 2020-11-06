@@ -118,8 +118,10 @@ class HRModule(nn.Module):
 '''hrnet'''
 class HRNet(nn.Module):
     blocks_dict = {'BASIC': BasicBlock, 'BOTTLENECK': Bottleneck}
-    def __init__(self, normlayer_opts, stages_cfg, **kwargs):
+    def __init__(self, normlayer_opts, stages_cfg, out_indices=(0, 1, 2, 3), **kwargs):
         super(HRNet, self).__init__()
+        # set out_indices
+        self.out_indices = out_indices
         # stem net
         self.conv1 = nn.Conv2d(3, 64, kernel_size=3, stride=2, padding=1, bias=False)
         self.bn1 = BuildNormalizationLayer(normlayer_opts['type'], (64, normlayer_opts['opts']))
@@ -187,7 +189,11 @@ class HRNet(nn.Module):
             else:
                 x_list.append(y_list[i])
         y_list = self.stage4(x_list)
-        return y_list
+        outs = []
+        for i, feats in enumerate(y_list):
+            if i in self.out_indices: outs.append(feats)
+        if len(outs) == 1: return outs[0]
+        else: return tuple(outs)
     '''make stage'''
     def makestage(self, layer_config, in_channels, multiscale_output=True, normlayer_opts=None):
         num_modules = layer_config['num_modules']
@@ -410,18 +416,24 @@ def BuildHRNet(hrnet_type, **kwargs):
     pretrained = kwargs.get('pretrained', True)
     normlayer_opts = kwargs.get('normlayer_opts', None)
     pretrained_model_path = kwargs.get('pretrained_model_path', '')
+    out_indices = kwargs.get('out_indices', (0, 1, 2, 3))
     # obtain the instanced hrnet
     hrnet_args = {'stages_cfg': supported_hrnets[hrnet_type]}
     hrnet_args.update({
         'normlayer_opts': normlayer_opts,
+        'out_indices': out_indices
     })
     model = HRNet(**hrnet_args)
     # load weights of pretrained model
     if pretrained and os.path.exists(pretrained_model_path):
-        state_dict = torch.load(pretrained_model_path)
+        checkpoint = torch.load(pretrained_model_path)
+        if 'state_dict' in checkpoint: state_dict = checkpoint['state_dict']
+        else: state_dict = checkpoint
         model.load_state_dict(state_dict, strict=False)
     elif pretrained:
-        state_dict = model_zoo.load_url(model_urls[hrnet_type])
+        checkpoint = model_zoo.load_url(model_urls[hrnet_type])
+        if 'state_dict' in checkpoint: state_dict = checkpoint['state_dict']
+        else: state_dict = checkpoint
         model.load_state_dict(state_dict, strict=False)
     # return the model
     return model

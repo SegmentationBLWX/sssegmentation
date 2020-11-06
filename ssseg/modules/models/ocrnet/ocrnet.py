@@ -66,8 +66,9 @@ class OCRNet(nn.Module):
         # feed to auxiliary decoder
         preds_aux = self.auxiliary_decoder(x3)
         # feed to ocr module
-        context = self.spatial_gather_net(x4, preds_aux)
-        features = self.spatial_ocr_net(x4, context)
+        feats = F.interpolate(x4, size=preds_aux.size()[2:], mode='bilinear', align_corners=self.align_corners)
+        context = self.spatial_gather_net(feats, preds_aux)
+        features = self.spatial_ocr_net(feats, context)
         # feed to decoder
         preds = self.decoder(features)
         # return according to the mode

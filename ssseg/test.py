@@ -78,7 +78,11 @@ class Tester():
             if use_cuda: model = model.cuda()
         # load checkpoints
         checkpoints = loadcheckpoints(cmd_args.checkpointspath, logger_handle=logger_handle, cmd_args=cmd_args)
-        model.load_state_dict(checkpoints['model'])
+        try:
+            model.load_state_dict(checkpoints['model'])
+        except Exception as e:
+            logger_handle.warning(str(e) + '\n' + 'Try to load checkpoints by using strict=False...')
+            model.load_state_dict(checkpoints['model'], strict=False)
         # parallel
         if use_cuda and cfg.MODEL_CFG['is_multi_gpus']:
             model = BuildParallelModel(model, cfg.MODEL_CFG['distributed']['is_on'], device_ids=[cmd_args.local_rank])

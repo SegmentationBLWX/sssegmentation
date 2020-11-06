@@ -20,6 +20,7 @@ class DepthwiseSeparableConv2d(nn.Module):
         self.pointwise_conv = nn.Conv2d(in_channels, out_channels, 1, 1, 0, 1, 1, bias=bias)
         self.pointwise_bn = BuildNormalizationLayer(normlayer_opts['type'], (out_channels, normlayer_opts['opts']))
         self.pointwise_activate = BuildActivation(activation_opts['type'], **activation_opts['opts'])
+    '''forward'''
     def forward(self, x):
         x = self.depthwise_conv(x)
         x = self.depthwise_bn(x)

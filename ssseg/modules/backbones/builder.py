@@ -4,23 +4,22 @@ Function:
 Author:
     Zhenchao Jin
 '''
-from .hrnet import HRNet
+from .hrnet import BuildHRNet
 from .resnet import BuildResNet
+from .mobilenet import BuildMobileNet
 
 
 '''build the backbone'''
 def BuildBackbone(cfg):
     supported_backbones = {
-        'hrnet': HRNet,
+        'hrnet': BuildHRNet,
         'resnet': BuildResNet,
+        'mobilenet': BuildMobileNet,
     }
     assert cfg['series'] in supported_backbones, 'unsupport backbone type %s...' % cfg['type']
-    kwargs = {
-        'outstride': cfg.get('outstride', 16),
-        'pretrained': cfg.get('pretrained', True),
-        'contract_dilation': cfg.get('contract_dilation', True),
-        'pretrained_model_path': cfg.get('pretrained_model_path', ''),
-        'is_improved_version': cfg.get('is_improved_version', True),
-        'normlayer_opts': cfg.get('normlayer_opts', {'type': 'syncbatchnorm2d', 'opts': {}}),
-    }
+    supported_keys = ['outstride', 'pretrained', 'out_indices', 'contract_dilation'
+                      'pretrained_model_path', 'is_improved_version', 'normlayer_opts']
+    kwargs = {}
+    for key in supported_keys:
+        if key in cfg: kwargs.update({key: cfg[key]})
     return supported_backbones[cfg['series']](cfg['type'], **kwargs)

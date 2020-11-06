@@ -80,7 +80,11 @@ class Trainer():
         # load checkpoints
         if cmd_args.checkpointspath:
             checkpoints = loadcheckpoints(cmd_args.checkpointspath, logger_handle=logger_handle, cmd_args=cmd_args)
-            model.load_state_dict(checkpoints['model'])
+            try:
+                model.load_state_dict(checkpoints['model'])
+            except Exception as e:
+                logger_handle.warning(str(e) + '\n' + 'Try to load checkpoints by using strict=False...')
+                model.load_state_dict(checkpoints['model'], strict=False)
             optimizer.load_state_dict(checkpoints['optimizer'])
             start_epoch = checkpoints['epoch'] + 1
         num_iters, max_iters = (start_epoch - 1) * len(dataloader), end_epoch * len(dataloader)
