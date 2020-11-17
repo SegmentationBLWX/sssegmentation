@@ -45,6 +45,7 @@ usage:
 sh scripts/train.sh ${DATASETNAME} ${BACKBONENAME} ${MODELNAME} [optional arguments]
 or
 sh scripts/distrain.sh ${NGPUS} ${DATASETNAME} ${BACKBONENAME} ${MODELNAME} [optional arguments]
+
 example:
 sh scripts/train.sh voc resnet101os16 deeplabv3plus
 or
@@ -85,8 +86,13 @@ python3 -m torch.distributed.launch --nproc_per_node 4 ssseg/train.py --datasetn
 ```sh
 usage:
 sh scripts/test.sh ${DATASETNAME} ${BACKBONENAME} ${MODELNAME} ${CHECKPOINTSPATH} [optional arguments]
+or
+sh scripts/distest.sh ${NGPUS} ${DATASETNAME} ${BACKBONENAME} ${MODELNAME} ${CHECKPOINTSPATH} [optional arguments]
+
 example:
 sh scripts/test.sh voc resnet101os16 deeplabv3plus deeplabv3plus_resnet101os16_voc_train/epoch_60.pth
+or
+sh scripts/distest.sh 4 voc resnet101os16 deeplabv3plus deeplabv3plus_resnet101os16_voc_train/epoch_60.pth
 ```
 #### Python
 ```sh
@@ -114,7 +120,10 @@ optional arguments:
   --checkpointspath CHECKPOINTSPATH
                         checkpoints you want to resume from.
 
-example: python3 ssseg/test.py --datasetname voc --backbonename resnet101os16 --modelname deeplabv3plus --checkpointspath deeplabv3plus_resnet101os16_voc_train/epoch_60.pth
+example:
+python3 ssseg/test.py --datasetname voc --backbonename resnet101os16 --modelname deeplabv3plus --checkpointspath deeplabv3plus_resnet101os16_voc_train/epoch_60.pth
+or
+python3 -m torch.distributed.launch --nproc_per_node 4 ssseg/test.py --datasetname voc --backbonename resnet101os16 --modelname deeplabv3plus --nproc_per_node 4 --checkpointspath deeplabv3plus_resnet101os16_voc_train/epoch_60.pth
 ```
 
 ## Demo

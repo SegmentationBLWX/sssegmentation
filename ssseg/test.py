@@ -101,27 +101,52 @@ class Tester():
         if hasattr(cfg, 'INFERENCE_CFG'):
             inference_cfg = copy.deepcopy(cfg.INFERENCE_CFG)
         else:
-            inference_cfg = {'mode': 'whole', 'opts': {}}
+            inference_cfg = {
+                                'mode': 'whole', 
+                                'opts': {}, 
+                                'tricks': {
+                                    'multiscale': [1],
+                                    'flip': False,
+                                    'use_probs': True
+                                }
+                            }
         with torch.no_grad():
             if cfg.MODEL_CFG['distributed']['is_on']: dataloader.sampler.set_epoch(0)
             pbar = tqdm(enumerate(dataloader))
             for batch_idx, samples in pbar:
-                if cmd_args.local_rank == 0: pbar.set_description('Processing %s/%s' % (batch_idx+1, len(dataloader)))
+                pbar.set_description('Processing %s/%s in rank %s' % (batch_idx+1, len(dataloader), cmd_args.local_rank))
                 images, widths, heights, gts = samples['image'], samples['width'], samples['height'], samples['groundtruth']
-                outputs = self.inference(model, images.type(FloatTensor), inference_cfg, dataset.num_classes)                    
+                infer_tricks, outputs_list, use_probs = inference_cfg['tricks'], [], inference_cfg['tricks']['use_probs']
+                if (infer_tricks['multiscale'] == [1]) and (not infer_tricks['flip']): use_probs = False
+                images_base_size, images_ori = images.size(), images.clone()
+                align_corners = model.align_corners if hasattr(model, 'align_corners') else model.module.align_corners
+                for scale_factor in infer_tricks['multiscale']:
+                    images = F.interpolate(images_ori, scale_factor=scale_factor, mode='bilinear', align_corners=align_corners)
+                    outputs = self.inference(model, images.type(FloatTensor), inference_cfg, dataset.num_classes, use_probs)
+                    if infer_tricks['flip']:
+                        images_flip = torch.from_numpy(np.flip(images.cpu().numpy(), axis=3).copy())
+                        outputs_flip = self.inference(model, images_flip.type(FloatTensor), inference_cfg, dataset.num_classes, use_probs)
+                        outputs_flip = torch.from_numpy(np.flip(outputs_flip.cpu().numpy(), axis=3).copy()).type_as(outputs)
+                    outputs = F.interpolate(outputs, size=images_base_size[2:], mode='bilinear', align_corners=align_corners)
+                    outputs_list.append(outputs)
+                    if infer_tricks['flip']:
+                        outputs_flip = F.interpolate(outputs_flip, size=images_base_size[2:], mode='bilinear', align_corners=align_corners)
+                        outputs_list.append(outputs_flip)
+                outputs = sum(outputs_list) / len(outputs_list)
                 for i in range(len(outputs)):
                     output = outputs[i].unsqueeze(0)
-                    pred = F.interpolate(output, size=(heights[i], widths[i]), mode='bilinear', align_corners=model.align_corners)[0]
+                    pred = F.interpolate(output, size=(heights[i], widths[i]), mode='bilinear', align_corners=align_corners)[0]
                     pred = (torch.argmax(pred, dim=0)).cpu().numpy().astype(np.int32)
                     all_preds.append(pred)
                     gt = gts[i].cpu().numpy().astype(np.int32)
                     gt[gt >= dataset.num_classes] = -1
                     all_gts.append(gt)
     '''inference'''
-    def inference(self, model, images, inference_cfg, num_classes):
+    def inference(self, model, images, inference_cfg, num_classes, use_probs=False):
         assert inference_cfg['mode'] in ['whole', 'slide']
         if inference_cfg['mode'] == 'whole':
-            outputs = model(images)
+            if use_probs: outputs = F.softmax(model(images), dim=1)
+            else: outputs = model(images)
         else:
             opts = inference_cfg['opts']
             stride_h, stride_w = opts['stride']
@@ -137,7 +162,7 @@ class Tester():
                     x2, y2 = min(x1 + cropsize_w, image_w), min(y1 + cropsize_h, image_h)
                     x1, y1 = max(x2 - cropsize_w, 0), max(y2 - cropsize_h, 0)
                     crop_images = images[:, :, y1:y2, x1:x2]
-                    outputs_crop = model(crop_images)
+                    outputs_crop = F.softmax(model(crop_images), dim=1)
                     outputs += F.pad(outputs_crop, (int(x1), int(outputs.shape[3] - x2), int(y1), int(outputs.shape[2] - y2)))
                     count_mat[:, :, y1:y2, x1:x2] += 1
             assert (count_mat == 0).sum() == 0
@@ -147,12 +172,10 @@ class Tester():
 
 '''main'''
 def main():
-    # parse arguments, todo: support distributed testing and bs > 1
+    # parse arguments, todo: support bs > 1 per GPU
     args = parseArgs()
     cfg, cfg_file_path = BuildConfig(args.modelname, args.datasetname, args.backbonename)
-    cfg.MODEL_CFG['distributed']['is_on'] = False
-    cfg.MODEL_CFG['is_multi_gpus'] = False
-    cfg.DATALOADER_CFG['test']['batch_size'] = 1
+    cfg.DATALOADER_CFG['test']['batch_size'] = args.nproc_per_node
     # check backup dir
     common_cfg = cfg.COMMON_CFG['test']
     checkdir(common_cfg['backupdir'])
@@ -161,20 +184,39 @@ def main():
     # number of gpus
     ngpus_per_node = torch.cuda.device_count()
     if ngpus_per_node != args.nproc_per_node:
-        if args.local_rank == 0: logger_handle.warning('ngpus_per_node is not equal to nproc_per_node...')
+        if args.local_rank == 0: logger_handle.warning('ngpus_per_node is not equal to nproc_per_node, force ngpus_per_node = nproc_per_node by default...')
         ngpus_per_node = args.nproc_per_node
     # instanced Tester
     all_preds, all_gts = [], []
     client = Tester(cfg=cfg, ngpus_per_node=ngpus_per_node, logger_handle=logger_handle, cmd_args=args, cfg_file_path=cfg_file_path)
     client.start(all_preds, all_gts)
     # save results and evaluate
-    if args.local_rank == 0: logger_handle.info('Finished, number of preds is %s and number of gts is %s...' % (len(all_preds), len(all_gts)))
-    with open(common_cfg['resultsavepath'], 'wb') as fp:
-        if args.local_rank == 0: pickle.dump([all_preds, all_gts], fp)
-    if not args.noeval:
+    if cfg.MODEL_CFG['distributed']['is_on']:
+        backupdir = common_cfg['backupdir']
+        filename = common_cfg['resultsavepath'].split('/')[-1].split('.')[0] + f'_{args.local_rank}.' + common_cfg['resultsavepath'].split('.')[-1]
+        with open(os.path.join(backupdir, filename), 'wb') as fp:
+            pickle.dump([all_preds, all_gts], fp)
+        rank = torch.tensor([args.local_rank], device='cuda')
+        rank_list = [rank.clone() for _ in range(args.nproc_per_node)]
+        dist.all_gather(rank_list, rank)
+        if args.local_rank == 0:
+            all_preds_gather, all_gts_gather = [], []
+            for rank in rank_list:
+                rank = str(int(rank.item()))
+                filename = common_cfg['resultsavepath'].split('/')[-1].split('.')[0] + f'_{rank}.' + common_cfg['resultsavepath'].split('.')[-1]
+                fp = open(os.path.join(backupdir, filename), 'rb')
+                all_preds, all_gts = pickle.load(fp)
+                all_preds_gather += all_preds
+                all_gts_gather += all_gts
+            all_preds, all_gts = all_preds_gather, all_gts_gather
+    else:
+        with open(common_cfg['resultsavepath'], 'wb') as fp:
+            pickle.dump([all_preds, all_gts], fp)
+    if args.local_rank == 0: logger_handle.info('Finished, all_preds: %s, all_gts: %s' % (len(all_preds), len(all_gts)))
+    if not args.noeval and args.local_rank == 0:
         dataset = BuildDataset(mode='TEST', logger_handle=logger_handle, dataset_cfg=copy.deepcopy(cfg.DATASET_CFG))
         result = dataset.evaluate(all_preds, all_gts)
-        if args.local_rank == 0: logger_handle.info(result)
+        logger_handle.info(result)
 
 
 '''debug'''
