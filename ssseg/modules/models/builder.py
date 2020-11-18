@@ -12,13 +12,14 @@ from .deeplabv3plus import Deeplabv3Plus
 
 
 '''build model'''
-def BuildModel(model_type, cfg, mode):
-    supported_dict = {
+def BuildModel(cfg, mode):
+    supported_models = {
         'fcn': FCN,
         'ce2p': CE2P,
         'pspnet': PSPNet,
         'ocrnet': OCRNet,
         'deeplabv3plus': Deeplabv3Plus,
     }
-    assert model_type in supported_dict, 'unsupport model_type %s...' % model_type
-    return supported_dict[model_type](cfg, mode=mode)
+    model_type = cfg['type']
+    assert model_type in supported_models, 'unsupport model_type %s...' % model_type
+    return supported_models[model_type](cfg, mode=mode)

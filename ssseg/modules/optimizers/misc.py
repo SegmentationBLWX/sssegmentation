@@ -12,17 +12,18 @@ from torch.nn.utils import clip_grad
 '''adjust learning rate'''
 def adjustLearningRate(optimizer, optimizer_cfg=None):
     # parse and check the config for optimizer
-    policy, policy_cfg, type_cfg = optimizer_cfg['policy'], optimizer_cfg['policy_cfg'], optimizer_cfg[optimizer_cfg['type']]
-    if ('params_rules' in type_cfg) and (type_cfg['params_rules']):
-        assert len(optimizer.param_groups) == len(type_cfg['params_rules'])
+    policy_cfg, selected_optim_cfg = optimizer_cfg['policy'], optimizer_cfg[optimizer_cfg['type']]
+    if ('params_rules' in optimizer_cfg) and (optimizer_cfg['params_rules']):
+        assert len(optimizer.param_groups) == len(optimizer_cfg['params_rules'])
     # adjust the learning rate according the policy
-    if policy == 'poly':
-        base_lr, num_iters, max_iters, power, min_lr = type_cfg['learning_rate'], policy_cfg['num_iters'], policy_cfg['max_iters'], policy_cfg['power'], type_cfg.get('min_lr', 1e-4)
+    if policy_cfg['type'] == 'poly':
+        base_lr, min_lr = selected_optim_cfg['learning_rate'], selected_optim_cfg.get('min_lr', 1e-4)
+        num_iters, max_iters, power = policy_cfg['opts']['num_iters'], policy_cfg['opts']['max_iters'], policy_cfg['opts']['power']
         coeff = (1 - num_iters / max_iters) ** power
         target_lr = coeff * (base_lr - min_lr) + min_lr
         for param_group in optimizer.param_groups:
-            if ('params_rules' in type_cfg) and (type_cfg['params_rules']):
-                param_group['lr'] = target_lr * type_cfg['params_rules'][param_group['name']]
+            if ('params_rules' in optimizer_cfg) and (optimizer_cfg['params_rules']):
+                param_group['lr'] = target_lr * optimizer_cfg['params_rules'][param_group['name']]
             else:
                 param_group['lr'] = target_lr
     else:

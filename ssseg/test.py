@@ -23,13 +23,11 @@ warnings.filterwarnings('ignore')
 '''parse arguments in command line'''
 def parseArgs():
     parser = argparse.ArgumentParser(description='sssegmentation is a general framework for our research on strongly supervised semantic segmentation')
-    parser.add_argument('--modelname', dest='modelname', help='model you want to test', type=str, required=True)
-    parser.add_argument('--datasetname', dest='datasetname', help='dataset for testing.', type=str, required=True)
     parser.add_argument('--local_rank', dest='local_rank', help='node rank for distributed testing', default=0, type=int)
     parser.add_argument('--nproc_per_node', dest='nproc_per_node', help='number of process per node', default=4, type=int)
-    parser.add_argument('--backbonename', dest='backbonename', help='backbone network for testing.', type=str, required=True)
-    parser.add_argument('--noeval', dest='noeval', help='set true if no ground truth could be used to eval the results.', type=bool)
-    parser.add_argument('--checkpointspath', dest='checkpointspath', help='checkpoints you want to resume from.', type=str, required=True)
+    parser.add_argument('--cfgfilepath', dest='cfgfilepath', help='config file path you want to use', type=str, required=True)
+    parser.add_argument('--noeval', dest='noeval', help='set true if no ground truth could be used to eval the results', type=bool)
+    parser.add_argument('--checkpointspath', dest='checkpointspath', help='checkpoints you want to resume from', type=str, required=True)
     args = parser.parse_args()
     return args
 
@@ -48,6 +46,7 @@ class Tester():
         if self.cfg.MODEL_CFG['distributed']['is_on']:
             self.cfg.MODEL_CFG['is_multi_gpus'] = True
             self.cfg.DATALOADER_CFG['test']['type'] = 'distributed'
+            self.cfg.DATALOADER_CFG['test']['batch_size'] = self.cmd_args.nproc_per_node
         # init distributed testing if necessary
         distributed_cfg = self.cfg.MODEL_CFG['distributed']
         if distributed_cfg['is_on']:
@@ -67,10 +66,10 @@ class Tester():
             assert batch_size * self.ngpus_per_node == dataloader_cfg['test']['batch_size'], 'unsuitable batch_size...'
             assert num_workers * self.ngpus_per_node == dataloader_cfg['test']['num_workers'], 'unsuitable num_workers...'
             dataloader_cfg['test'].update({'batch_size': batch_size, 'num_workers': num_workers})
-        dataloader = BuildParallelDataloader(mode='TEST', dataset=dataset, cfg=dataloader_cfg)
+        dataloader = BuildParallelDataloader(mode='TEST', dataset=dataset, cfg=copy.deepcopy(dataloader_cfg))
         # instanced model
         cfg.MODEL_CFG['backbone']['pretrained'] = False
-        model = BuildModel(model_type=cmd_args.modelname, cfg=copy.deepcopy(cfg.MODEL_CFG), mode='TEST')
+        model = BuildModel(cfg=copy.deepcopy(cfg.MODEL_CFG), mode='TEST')
         if distributed_cfg['is_on']:
             torch.cuda.set_device(cmd_args.local_rank)
             model.cuda(cmd_args.local_rank)
@@ -90,8 +89,8 @@ class Tester():
                 patch_replication_callback(model)
         # print config
         if cmd_args.local_rank == 0:
-            logger_handle.info('Dataset used: %s, Number of images: %s' % (cmd_args.datasetname, len(dataset)))
-            logger_handle.info('Model Used: %s, Backbone used: %s' % (cmd_args.modelname, cmd_args.backbonename))
+            logger_handle.info('Dataset used: %s, Number of images: %s' % (cfg.DATASET_CFG['train']['type'], len(dataset)))
+            logger_handle.info('Model Used: %s, Backbone used: %s' % (cfg.MODEL_CFG['type'], cfg.MODEL_CFG['backbone']['type']))
             logger_handle.info('Checkpoints used: %s' % cmd_args.checkpointspath)
             logger_handle.info('Config file used: %s' % cfg_file_path)
         # set eval
@@ -115,7 +114,7 @@ class Tester():
             pbar = tqdm(enumerate(dataloader))
             for batch_idx, samples in pbar:
                 pbar.set_description('Processing %s/%s in rank %s' % (batch_idx+1, len(dataloader), cmd_args.local_rank))
-                images, widths, heights, gts = samples['image'], samples['width'], samples['height'], samples['groundtruth']
+                imageids, images, widths, heights, gts = samples['id'], samples['image'], samples['width'], samples['height'], samples['groundtruth']
                 infer_tricks, outputs_list, use_probs = inference_cfg['tricks'], [], inference_cfg['tricks']['use_probs']
                 if (infer_tricks['multiscale'] == [1]) and (not infer_tricks['flip']): use_probs = False
                 images_base_size, images_ori = images.size(), images.clone()
@@ -137,7 +136,7 @@ class Tester():
                     output = outputs[i].unsqueeze(0)
                     pred = F.interpolate(output, size=(heights[i], widths[i]), mode='bilinear', align_corners=align_corners)[0]
                     pred = (torch.argmax(pred, dim=0)).cpu().numpy().astype(np.int32)
-                    all_preds.append(pred)
+                    all_preds.append([imageids[i], pred])
                     gt = gts[i].cpu().numpy().astype(np.int32)
                     gt[gt >= dataset.num_classes] = -1
                     all_gts.append(gt)
@@ -172,10 +171,9 @@ class Tester():
 
 '''main'''
 def main():
-    # parse arguments, todo: support bs > 1 per GPU
+    # parse arguments
     args = parseArgs()
-    cfg, cfg_file_path = BuildConfig(args.modelname, args.datasetname, args.backbonename)
-    cfg.DATALOADER_CFG['test']['batch_size'] = args.nproc_per_node
+    cfg, cfg_file_path = BuildConfig(args.cfgfilepath)
     # check backup dir
     common_cfg = cfg.COMMON_CFG['test']
     checkdir(common_cfg['backupdir'])
@@ -199,6 +197,7 @@ def main():
         rank = torch.tensor([args.local_rank], device='cuda')
         rank_list = [rank.clone() for _ in range(args.nproc_per_node)]
         dist.all_gather(rank_list, rank)
+        logger_handle.info('Rank %s finished...' % int(rank.item()))
         if args.local_rank == 0:
             all_preds_gather, all_gts_gather = [], []
             for rank in rank_list:
@@ -212,11 +211,19 @@ def main():
     else:
         with open(common_cfg['resultsavepath'], 'wb') as fp:
             pickle.dump([all_preds, all_gts], fp)
-    if args.local_rank == 0: logger_handle.info('Finished, all_preds: %s, all_gts: %s' % (len(all_preds), len(all_gts)))
-    if not args.noeval and args.local_rank == 0:
-        dataset = BuildDataset(mode='TEST', logger_handle=logger_handle, dataset_cfg=copy.deepcopy(cfg.DATASET_CFG))
-        result = dataset.evaluate(all_preds, all_gts)
-        logger_handle.info(result)
+    if args.local_rank == 0:
+        all_preds_filtered, all_gts_filtered, all_ids = [], [], []
+        for idx, pred in enumerate(all_preds):
+            if pred[0] in all_ids: continue
+            all_ids.append(pred[0])
+            all_preds_filtered.append(pred[1])
+            all_gts_filtered.append(all_gts[idx])
+        all_preds, all_gts = all_preds_filtered, all_gts_filtered
+        logger_handle.info('All Finished, all_preds: %s, all_gts: %s' % (len(all_preds), len(all_gts)))
+        if not args.noeval:
+            dataset = BuildDataset(mode='TEST', logger_handle=logger_handle, dataset_cfg=copy.deepcopy(cfg.DATASET_CFG))
+            result = dataset.evaluate(all_preds, all_gts)
+            logger_handle.info(result)
 
 
 '''debug'''

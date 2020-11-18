@@ -9,6 +9,7 @@ DATASET_CFG = {
                      ('RandomCrop', {'crop_size': (512, 512), 'one_category_max_ratio': 0.75}),
                      ('RandomFlip', {'flip_prob': 0.5}),
                      ('PhotoMetricDistortion', {}),
+                     ('RandomRotation', {'angle_upper': 10, 'rotation_prob': 0.6}),
                      ('Normalize', {'mean': [123.675, 116.28, 103.53], 'std': [58.395, 57.12, 57.375]}),
                      ('ToTensor', {}),
                      ('Padding', {'output_size': (512, 512), 'data_type': 'tensor'}),]
@@ -45,15 +46,17 @@ DATALOADER_CFG = {
 OPTIMIZER_CFG = {
     'type': 'sgd',
     'sgd': {
-            'learning_rate': 0.01,
-            'momentum': 0.9,
-            'weight_decay': 5e-4,
-            'params_rules': {},
-        },
+        'learning_rate': 0.01,
+        'momentum': 0.9,
+        'weight_decay': 5e-4,
+    },
     'max_epochs': 0,
-    'policy': 'poly',
+    'params_rules': {},
+    'policy': {
+        'type': 'poly',
+        'opts': {'power': 0.9, 'max_iters': None, 'num_iters': None, 'num_epochs': None}
+    },
     'adjust_period': ['iteration', 'epoch'][0],
-    'policy_cfg': {'power': 0.9, 'max_iters': None, 'num_iters': None, 'num_epochs': None}
 }
 # config for losses
 LOSSES_CFG = {

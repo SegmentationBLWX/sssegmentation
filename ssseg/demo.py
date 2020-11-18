@@ -6,6 +6,7 @@ Author:
 '''
 import os
 import cv2
+import copy
 import torch
 import warnings
 import argparse
@@ -22,11 +23,9 @@ def parseArgs():
     parser = argparse.ArgumentParser(description='sssegmentation is a general framework for our research on strongly supervised semantic segmentation')
     parser.add_argument('--imagedir', dest='imagedir', help='images dir for testing multi images', type=str)
     parser.add_argument('--imagepath', dest='imagepath', help='imagepath for testing single image', type=str)
-    parser.add_argument('--modelname', dest='modelname', help='model you want to test', type=str, required=True)
-    parser.add_argument('--backbonename', dest='backbonename', help='backbone network for testing', type=str, required=True)
     parser.add_argument('--outputfilename', dest='outputfilename', help='name to save output image(s)', type=str, default='')
+    parser.add_argument('--cfgfilepath', dest='cfgfilepath', help='config file path you want to use', type=str, required=True)
     parser.add_argument('--checkpointspath', dest='checkpointspath', help='checkpoints you want to resume from', type=str, required=True)
-    parser.add_argument('--datasetname', dest='datasetname', help='dataset you used to train, for locating the config filepath', type=str, required=True)    
     args = parser.parse_args()
     return args
 
@@ -40,7 +39,7 @@ class Demo():
     def start(self):
         # parse arguments
         cmd_args = parseArgs()
-        cfg, cfg_file_path = BuildConfig(cmd_args.modelname, cmd_args.datasetname, cmd_args.backbonename)
+        cfg, cfg_file_path = BuildConfig(cmd_args.cfgfilepath)
         cfg.MODEL_CFG['distributed']['is_on'] = False
         cfg.MODEL_CFG['is_multi_gpus'] = False
         assert cmd_args.imagepath or cmd_args.imagedir, 'imagepath or imagedir should be specified...'
@@ -53,11 +52,11 @@ class Demo():
         logger_handle = Logger(common_cfg['logfilepath'])
         # instanced dataset
         dataset_cfg = cfg.DATASET_CFG['test']
-        dataset = BuildDataset(mode='TEST', logger_handle=logger_handle, dataset_cfg=cfg.DATASET_CFG, get_basedataset=True)
+        dataset = BuildDataset(mode='TEST', logger_handle=logger_handle, dataset_cfg=copy.deepcopy(cfg.DATASET_CFG), get_basedataset=True)
         palette = BuildPalette(dataset_cfg['type'])
         # instanced model
         cfg.MODEL_CFG['backbone']['pretrained'] = False
-        model = BuildModel(model_type=cmd_args.modelname, cfg=cfg.MODEL_CFG, mode='TEST')
+        model = BuildModel(cfg=copy.deepcopy(cfg.MODEL_CFG), mode='TEST')
         if use_cuda: model = model.cuda()
         # load checkpoints
         cmd_args.local_rank = 0

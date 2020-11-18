@@ -42,96 +42,78 @@ sh make.sh
 #### Bash
 ```sh
 usage:
-sh scripts/train.sh ${DATASETNAME} ${BACKBONENAME} ${MODELNAME} [optional arguments]
+sh scripts/train.sh ${CFGFILEPATH} [optional arguments]
 or
-sh scripts/distrain.sh ${NGPUS} ${DATASETNAME} ${BACKBONENAME} ${MODELNAME} [optional arguments]
+sh scripts/distrain.sh ${NGPUS} ${CFGFILEPATH} [optional arguments]
 
 example:
-sh scripts/train.sh voc resnet101os16 deeplabv3plus
+sh scripts/train.sh ssseg/cfgs/deeplabv3plus/cfgs_voc_resnet101os8.py
 or
-sh scripts/distrain.sh 4 voc resnet101os16 deeplabv3plus
+sh scripts/distrain.sh 4 ssseg/cfgs/deeplabv3plus/cfgs_voc_resnet101os8.py
 ```
 #### Python
 ```sh
-usage: train.py [-h] --modelname MODELNAME --datasetname DATASETNAME
-                [--local_rank LOCAL_RANK] [--nproc_per_node NPROC_PER_NODE]
-                --backbonename BACKBONENAME
-                [--checkpointspath CHECKPOINTSPATH]
+usage: train.py [-h] [--local_rank LOCAL_RANK] [--nproc_per_node NPROC_PER_NODE] --cfgfilepath CFGFILEPATH [--checkpointspath CHECKPOINTSPATH]
 
 sssegmentation is a general framework for our research on strongly supervised semantic segmentation
 
 optional arguments:
   -h, --help            show this help message and exit
-  --modelname MODELNAME
-                        model you want to train
-  --datasetname DATASETNAME
-                        dataset for training.
   --local_rank LOCAL_RANK
                         node rank for distributed training
   --nproc_per_node NPROC_PER_NODE
                         number of process per node
-  --backbonename BACKBONENAME
-                        backbone network for training.
+  --cfgfilepath CFGFILEPATH
+                        config file path you want to use
   --checkpointspath CHECKPOINTSPATH
-                        checkpoints you want to resume from.
+                        checkpoints you want to resume from
 
 example:
-python3 ssseg/train.py --datasetname voc --backbonename resnet101os16 --modelname deeplabv3plus
+python3 ssseg/train.py --cfgfilepath ssseg/cfgs/deeplabv3plus/cfgs_voc_resnet101os8.py
 or 
-python3 -m torch.distributed.launch --nproc_per_node 4 ssseg/train.py --datasetname voc --backbonename resnet101os16 --modelname deeplabv3plus --nproc_per_node 4
+python3 -m torch.distributed.launch --nproc_per_node 4 ssseg/train.py --cfgfilepath ssseg/cfgs/deeplabv3plus/cfgs_voc_resnet101os8.py --nproc_per_node 4
 ```
 
 ## Test
 #### Bash
 ```sh
 usage:
-sh scripts/test.sh ${DATASETNAME} ${BACKBONENAME} ${MODELNAME} ${CHECKPOINTSPATH} [optional arguments]
+sh scripts/test.sh ${CFGFILEPATH} ${CHECKPOINTSPATH} [optional arguments]
 or
-sh scripts/distest.sh ${NGPUS} ${DATASETNAME} ${BACKBONENAME} ${MODELNAME} ${CHECKPOINTSPATH} [optional arguments]
+sh scripts/distest.sh ${NGPUS} ${CFGFILEPATH} ${CHECKPOINTSPATH} [optional arguments]
 
 example:
-sh scripts/test.sh voc resnet101os16 deeplabv3plus deeplabv3plus_resnet101os16_voc_train/epoch_60.pth
+sh scripts/test.sh ssseg/cfgs/deeplabv3plus/cfgs_voc_resnet101os8.py deeplabv3plus_resnet101os8_voc_train/epoch_60.pth
 or
-sh scripts/distest.sh 4 voc resnet101os16 deeplabv3plus deeplabv3plus_resnet101os16_voc_train/epoch_60.pth
+sh scripts/distest.sh 4 ssseg/cfgs/deeplabv3plus/cfgs_voc_resnet101os8.py deeplabv3plus_resnet101os8_voc_train/epoch_60.pth
 ```
 #### Python
 ```sh
-usage: test.py [-h] --modelname MODELNAME --datasetname DATASETNAME
-               [--local_rank LOCAL_RANK] [--nproc_per_node NPROC_PER_NODE]
-               --backbonename BACKBONENAME [--noeval NOEVAL] --checkpointspath
-               CHECKPOINTSPATH
+usage: test.py [-h] [--local_rank LOCAL_RANK] [--nproc_per_node NPROC_PER_NODE] --cfgfilepath CFGFILEPATH [--noeval NOEVAL] --checkpointspath CHECKPOINTSPATH
 
 sssegmentation is a general framework for our research on strongly supervised semantic segmentation
 
 optional arguments:
   -h, --help            show this help message and exit
-  --modelname MODELNAME
-                        model you want to test
-  --datasetname DATASETNAME
-                        dataset for testing.
   --local_rank LOCAL_RANK
                         node rank for distributed testing
   --nproc_per_node NPROC_PER_NODE
                         number of process per node
-  --backbonename BACKBONENAME
-                        backbone network for testing.
-  --noeval NOEVAL       set true if no ground truth could be used to eval the
-                        results.
+  --cfgfilepath CFGFILEPATH
+                        config file path you want to use
+  --noeval NOEVAL       set true if no ground truth could be used to eval the results
   --checkpointspath CHECKPOINTSPATH
-                        checkpoints you want to resume from.
+                        checkpoints you want to resume from
 
 example:
-python3 ssseg/test.py --datasetname voc --backbonename resnet101os16 --modelname deeplabv3plus --checkpointspath deeplabv3plus_resnet101os16_voc_train/epoch_60.pth
+python3 ssseg/test.py --cfgfilepath ssseg/cfgs/deeplabv3plus/cfgs_voc_resnet101os8.py --checkpointspath deeplabv3plus_resnet101os8_voc_train/epoch_60.pth
 or
-python3 -m torch.distributed.launch --nproc_per_node 4 ssseg/test.py --datasetname voc --backbonename resnet101os16 --modelname deeplabv3plus --nproc_per_node 4 --checkpointspath deeplabv3plus_resnet101os16_voc_train/epoch_60.pth
+python3 -m torch.distributed.launch --nproc_per_node 4 ssseg/test.py --cfgfilepath ssseg/cfgs/deeplabv3plus/cfgs_voc_resnet101os8.py --nproc_per_node 4 --checkpointspath deeplabv3plus_resnet101os8_voc_train/epoch_60.pth
 ```
 
 ## Demo
 ```sh
-usage: demo.py [-h] [--imagedir IMAGEDIR] [--imagepath IMAGEPATH] --modelname
-               MODELNAME --backbonename BACKBONENAME
-               [--outputfilename OUTPUTFILENAME] --checkpointspath
-               CHECKPOINTSPATH --datasetname DATASETNAME
+usage: demo.py [-h] [--imagedir IMAGEDIR] [--imagepath IMAGEPATH] [--outputfilename OUTPUTFILENAME] --cfgfilepath CFGFILEPATH --checkpointspath CHECKPOINTSPATH
 
 sssegmentation is a general framework for our research on strongly supervised semantic segmentation
 
@@ -140,17 +122,12 @@ optional arguments:
   --imagedir IMAGEDIR   images dir for testing multi images
   --imagepath IMAGEPATH
                         imagepath for testing single image
-  --modelname MODELNAME
-                        model you want to test
-  --backbonename BACKBONENAME
-                        backbone network for testing
   --outputfilename OUTPUTFILENAME
                         name to save output image(s)
+  --cfgfilepath CFGFILEPATH
+                        config file path you want to use
   --checkpointspath CHECKPOINTSPATH
                         checkpoints you want to resume from
-  --datasetname DATASETNAME
-                        dataset you used to train, for locating the config
-                        filepath
 
-example: python3 ssseg/demo.py --datasetname voc --backbonename resnet101os16 --modelname deeplabv3plus --checkpointspath deeplabv3plus_resnet101os16_voc_train/epoch_60.pth --imagepath testedimage.jpg
+example: python3 ssseg/demo.py --cfgfilepath ssseg/cfgs/deeplabv3plus/cfgs_voc_resnet101os8.py --checkpointspath deeplabv3plus_resnet101os8_voc_train/epoch_60.pth --imagepath testedimage.jpg
 ```
