@@ -5,6 +5,7 @@ Author:
     Zhenchao Jin
 '''
 import os
+import time
 import shutil
 import importlib
 
@@ -28,6 +29,7 @@ def BuildConfig(cfg_file_path, tmp_cfg_dir='tmp_cfg', **kwargs):
     # copy config file and the base config file
     shutil.copyfile(cfg_file_path, os.path.join(tmp_cfg_dir, cfg_name + ext))
     shutil.copyfile(base_cfg_file_path, os.path.join(tmp_cfg_dir, 'base_cfg' + ext))
+    time.sleep(0.5)
     # load module from the temp dir
     cfg = importlib.import_module(f'{tmp_cfg_dir}.{cfg_name}', __package__)
     # return cfg

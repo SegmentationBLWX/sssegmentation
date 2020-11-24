@@ -78,7 +78,7 @@ class Demo():
                                 'tricks': {
                                     'multiscale': [1],
                                     'flip': False,
-                                    'use_probs': True
+                                    'use_probs_before_resize': False
                                 }
                             }
         FloatTensor = torch.cuda.FloatTensor if use_cuda else torch.FloatTensor
@@ -91,8 +91,7 @@ class Demo():
         for idx in pbar:
             if imagepath.split('.')[-1] not in ['jpg', 'jpeg', 'png']: continue
             pbar.set_description('Processing %s' % imagepath)
-            infer_tricks, output_list, use_probs = inference_cfg['tricks'], [], inference_cfg['tricks']['use_probs']
-            if (infer_tricks['multiscale'] == [1]) and (not infer_tricks['flip']): use_probs = False
+            infer_tricks, output_list, use_probs_before_resize = inference_cfg['tricks'], [], inference_cfg['tricks']['use_probs_before_resize']
             imagepath = imagepaths[idx]
             sample = dataset.read(imagepath, '', False)
             image = sample['image']
@@ -100,22 +99,21 @@ class Demo():
             image_tensor_ori = sample['image'].unsqueeze(0).type(FloatTensor)
             for scale_factor in infer_tricks['multiscale']:
                 image_tensor = F.interpolate(image_tensor_ori, scale_factor=scale_factor, mode='bilinear', align_corners=model.align_corners)
-                output = self.inference(model, image_tensor.type(FloatTensor), inference_cfg, cfg.MODEL_CFG['num_classes'], use_probs)
-                if infer_tricks['flip']:
-                    image_tensor_flip = torch.from_numpy(np.flip(image_tensor.cpu().numpy(), axis=3).copy())
-                    output_flip = self.inference(model, image_tensor_flip.type(FloatTensor), inference_cfg, cfg.MODEL_CFG['num_classes'], use_probs)
-                    output_flip = torch.from_numpy(np.flip(output_flip.cpu().numpy(), axis=3).copy()).type_as(output)
-                output = F.interpolate(output, size=image_tensor_ori.size()[2:], mode='bilinear', align_corners=model.align_corners)
+                output = self.inference(model, image_tensor.type(FloatTensor), inference_cfg, cfg.MODEL_CFG['num_classes'], use_probs_before_resize)
                 output_list.append(output)
                 if infer_tricks['flip']:
-                    output_flip = F.interpolate(output_flip, size=images_base_size[2:], mode='bilinear', align_corners=model.align_corners)
+                    image_tensor_flip = torch.from_numpy(np.flip(image_tensor.cpu().numpy(), axis=3).copy())
+                    output_flip = self.inference(model, image_tensor_flip.type(FloatTensor), inference_cfg, cfg.MODEL_CFG['num_classes'], use_probs_before_resize)
+                    output_flip = torch.from_numpy(np.flip(output_flip.cpu().numpy(), axis=3).copy()).type_as(output)
                     output_list.append(output_flip)
+            output_list = [
+                F.interpolate(output, size=(sample['height'], sample['width']), mode='bilinear', align_corners=model.align_corners) for output in output_list
+            ]
             output = sum(output_list) / len(output_list)
-            pred = F.interpolate(output, size=(sample['height'], sample['width']), mode='bilinear', align_corners=model.align_corners)[0]
-            pred = (torch.argmax(pred, dim=0)).cpu().numpy().astype(np.int32)
+            pred = (torch.argmax(output[0], dim=0)).cpu().numpy().astype(np.int32)
             mask = np.zeros((pred.shape[0], pred.shape[1], 3), dtype=np.uint8)
             for clsid, color in enumerate(palette):
-                mask[pred == clsid, :] = np.array(color)
+                mask[pred == clsid, :] = np.array(color)[::-1]
             image = image * 0.5 + mask * 0.5
             image = image.astype(np.uint8)
             if cmd_args.outputfilename:
@@ -123,10 +121,10 @@ class Demo():
             else:
                 cv2.imwrite(os.path.join(common_cfg['backupdir'], imagepath.split('/')[-1].split('.')[0] + '.png'), image)
     '''inference'''
-    def inference(self, model, images, inference_cfg, num_classes, use_probs=False):
+    def inference(self, model, images, inference_cfg, num_classes, use_probs_before_resize=False):
         assert inference_cfg['mode'] in ['whole', 'slide']
         if inference_cfg['mode'] == 'whole':
-            if use_probs: outputs = F.softmax(model(images), dim=1)
+            if use_probs_before_resize: outputs = F.softmax(model(images), dim=1)
             else: outputs = model(images)
         else:
             opts = inference_cfg['opts']

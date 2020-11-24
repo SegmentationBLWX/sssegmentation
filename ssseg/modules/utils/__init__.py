@@ -1,5 +1,5 @@
 '''initialize'''
-from .io import *
-from .misc import *
-from .logger import *
-from .palette import *
+from .logger import Logger
+from .misc import setRandomSeed
+from .palette import BuildPalette
+from .io import checkdir, loadcheckpoints, savecheckpoints

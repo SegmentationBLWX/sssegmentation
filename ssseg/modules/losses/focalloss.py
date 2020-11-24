@@ -17,21 +17,21 @@ __all__ = ['SigmoidFocalLoss']
 Function:
     sigmoid focal loss
 Arguments:
-    --preds: prediction of the network
-    --targets: ground truth
+    --prediction: prediction of the network
+    --target: ground truth
     --scale_factor: scale the loss for loss balance
     --lowest_loss_value: added inspired by ICML2020, "Do We Need Zero Training Loss After Achieving Zero Training Error", https://arxiv.org/pdf/2002.08709.pdf
 '''
-def SigmoidFocalLoss(preds, targets, scale_factor=1.0, **kwargs):
+def SigmoidFocalLoss(prediction, target, scale_factor=1.0, **kwargs):
     # filter according to ignore_index
     ignore_index = kwargs.get('ignore_index', None)
     if ignore_index is not None:
-        num_classes = preds.size(-1)
-        mask = (targets != ignore_index)
-        preds, targets = preds[mask].view(-1, num_classes), targets[mask].view(-1)
+        num_classes = prediction.size(-1)
+        mask = (target != ignore_index)
+        prediction, target = prediction[mask].view(-1, num_classes), target[mask].view(-1)
     # calculate the loss
-    gamma, alpha, weight, reduction = kwargs.get('gamma', 2), kwargs.get('alpha', 0.25), kwargs.get('cls_weight', None), kwargs.get('reduction', 'mean')
-    loss = sigmoid_focal_loss(preds, targets.long(), gamma, alpha, weight, reduction)
+    gamma, alpha, cls_weight, reduction = kwargs.get('gamma', 2), kwargs.get('alpha', 0.25), kwargs.get('cls_weight', None), kwargs.get('reduction', 'mean')
+    loss = sigmoid_focal_loss(prediction, target.long(), gamma, alpha, cls_weight, reduction)
     # scale the loss
     loss = loss * scale_factor
     # return the final loss

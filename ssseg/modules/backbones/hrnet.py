@@ -90,9 +90,11 @@ class HRModule(nn.Module):
             for j in range(num_branches):
                 if j > i:
                     fuse_layer.append(
-                        nn.Sequential(nn.Conv2d(in_channels[j], in_channels[i], kernel_size=1, stride=1, padding=0, bias=False),
-                                      BuildNormalizationLayer(normlayer_opts['type'], (in_channels[i], normlayer_opts['opts'])),
-                                      nn.Upsample(scale_factor=2**(j-i), mode='bilinear', align_corners=False)),
+                        nn.Sequential(
+                            nn.Conv2d(in_channels[j], in_channels[i], kernel_size=1, stride=1, padding=0, bias=False),
+                            BuildNormalizationLayer(normlayer_opts['type'], (in_channels[i], normlayer_opts['opts'])),
+                            nn.Upsample(scale_factor=2**(j-i), mode='bilinear', align_corners=False)
+                        )
                     )
                 elif j == i:
                     fuse_layer.append(None)
@@ -101,14 +103,18 @@ class HRModule(nn.Module):
                     for k in range(i - j):
                         if k == i - j - 1:
                             conv_downsamples.append(
-                                nn.Sequential(nn.Conv2d(in_channels[j], in_channels[i], kernel_size=3, stride=2, padding=1, bias=False),
-                                              BuildNormalizationLayer(normlayer_opts['type'], (in_channels[i], normlayer_opts['opts'])))
+                                nn.Sequential(
+                                    nn.Conv2d(in_channels[j], in_channels[i], kernel_size=3, stride=2, padding=1, bias=False),
+                                    BuildNormalizationLayer(normlayer_opts['type'], (in_channels[i], normlayer_opts['opts']))
+                                )
                             )
                         else:
                             conv_downsamples.append(
-                                nn.Sequential(nn.Conv2d(in_channels[j], in_channels[j], kernel_size=3, stride=2, padding=1, bias=False),
-                                              BuildNormalizationLayer(normlayer_opts['type'], (in_channels[j], normlayer_opts['opts'])),
-                                              nn.ReLU(inplace=False))
+                                nn.Sequential(
+                                    nn.Conv2d(in_channels[j], in_channels[j], kernel_size=3, stride=2, padding=1, bias=False),
+                                    BuildNormalizationLayer(normlayer_opts['type'], (in_channels[j], normlayer_opts['opts'])),
+                                    nn.ReLU(inplace=False)
+                                )
                             )
                     fuse_layer.append(nn.Sequential(*conv_downsamples))
             fuse_layers.append(nn.ModuleList(fuse_layer))
@@ -236,9 +242,11 @@ class HRNet(nn.Module):
             if i < num_branches_pre:
                 if num_channels_cur_layer[i] != num_channels_pre_layer[i]:
                      transition_layers.append(
-                         nn.Sequential(nn.Conv2d(num_channels_pre_layer[i], num_channels_cur_layer[i], kernel_size=3, stride=1, padding=1, bias=False),
-                                       BuildNormalizationLayer(normlayer_opts['type'], (num_channels_cur_layer[i], normlayer_opts['opts'])),
-                                       nn.ReLU(inplace=True))
+                        nn.Sequential(
+                            nn.Conv2d(num_channels_pre_layer[i], num_channels_cur_layer[i], kernel_size=3, stride=1, padding=1, bias=False),
+                            BuildNormalizationLayer(normlayer_opts['type'], (num_channels_cur_layer[i], normlayer_opts['opts'])),
+                            nn.ReLU(inplace=True)
+                        )
                      )
                 else:
                     transition_layers.append(None)
@@ -248,9 +256,11 @@ class HRNet(nn.Module):
                     in_channels = num_channels_pre_layer[-1]
                     out_channels = num_channels_cur_layer[i] if j == i - num_branches_pre else in_channels
                     conv_downsamples.append(
-                        nn.Sequential(nn.Conv2d(in_channels, out_channels, kernel_size=3, stride=2, padding=1, bias=False),
-                                      BuildNormalizationLayer(normlayer_opts['type'], (out_channels, normlayer_opts['opts'])),
-                                      nn.ReLU(inplace=True))
+                        nn.Sequential(
+                            nn.Conv2d(in_channels, out_channels, kernel_size=3, stride=2, padding=1, bias=False),
+                            BuildNormalizationLayer(normlayer_opts['type'], (out_channels, normlayer_opts['opts'])),
+                            nn.ReLU(inplace=True)
+                        )
                     )
                 transition_layers.append(nn.Sequential(*conv_downsamples))
         return nn.ModuleList(transition_layers)

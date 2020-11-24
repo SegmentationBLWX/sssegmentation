@@ -4,6 +4,7 @@ Function:
 Author:
     Zhenchao Jin
 '''
+import os
 import cv2
 import copy
 import torch
@@ -84,9 +85,8 @@ class Tester():
             model.load_state_dict(checkpoints['model'], strict=False)
         # parallel
         if use_cuda and cfg.MODEL_CFG['is_multi_gpus']:
-            model = BuildParallelModel(model, cfg.MODEL_CFG['distributed']['is_on'], device_ids=[cmd_args.local_rank])
-            if ('syncbatchnorm' in cfg.MODEL_CFG['normlayer_opts']['type']) and (not cfg.MODEL_CFG['distributed']['is_on']):
-                patch_replication_callback(model)
+            is_distributed_on = cfg.MODEL_CFG['distributed']['is_on']
+            model = BuildParallelModel(model, is_distributed_on, device_ids=[cmd_args.local_rank] if is_distributed_on else None)
         # print config
         if cmd_args.local_rank == 0:
             logger_handle.info('Dataset used: %s, Number of images: %s' % (cfg.DATASET_CFG['train']['type'], len(dataset)))
@@ -106,7 +106,7 @@ class Tester():
                                 'tricks': {
                                     'multiscale': [1],
                                     'flip': False,
-                                    'use_probs': True
+                                    'use_probs_before_resize': False
                                 }
                             }
         with torch.no_grad():
@@ -114,37 +114,33 @@ class Tester():
             pbar = tqdm(enumerate(dataloader))
             for batch_idx, samples in pbar:
                 pbar.set_description('Processing %s/%s in rank %s' % (batch_idx+1, len(dataloader), cmd_args.local_rank))
-                imageids, images, widths, heights, gts = samples['id'], samples['image'], samples['width'], samples['height'], samples['groundtruth']
-                infer_tricks, outputs_list, use_probs = inference_cfg['tricks'], [], inference_cfg['tricks']['use_probs']
-                if (infer_tricks['multiscale'] == [1]) and (not infer_tricks['flip']): use_probs = False
-                images_base_size, images_ori = images.size(), images.clone()
+                imageids, images_ori, widths, heights, gts = samples['id'], samples['image'], samples['width'], samples['height'], samples['groundtruth']
+                infer_tricks, outputs_list, use_probs_before_resize = inference_cfg['tricks'], [], inference_cfg['tricks']['use_probs_before_resize']
                 align_corners = model.align_corners if hasattr(model, 'align_corners') else model.module.align_corners
                 for scale_factor in infer_tricks['multiscale']:
                     images = F.interpolate(images_ori, scale_factor=scale_factor, mode='bilinear', align_corners=align_corners)
-                    outputs = self.inference(model, images.type(FloatTensor), inference_cfg, dataset.num_classes, use_probs)
-                    if infer_tricks['flip']:
-                        images_flip = torch.from_numpy(np.flip(images.cpu().numpy(), axis=3).copy())
-                        outputs_flip = self.inference(model, images_flip.type(FloatTensor), inference_cfg, dataset.num_classes, use_probs)
-                        outputs_flip = torch.from_numpy(np.flip(outputs_flip.cpu().numpy(), axis=3).copy()).type_as(outputs)
-                    outputs = F.interpolate(outputs, size=images_base_size[2:], mode='bilinear', align_corners=align_corners)
+                    outputs = self.inference(model, images.type(FloatTensor), inference_cfg, dataset.num_classes, use_probs_before_resize)
                     outputs_list.append(outputs)
                     if infer_tricks['flip']:
-                        outputs_flip = F.interpolate(outputs_flip, size=images_base_size[2:], mode='bilinear', align_corners=align_corners)
+                        images_flip = torch.from_numpy(np.flip(images.cpu().numpy(), axis=3).copy())
+                        outputs_flip = self.inference(model, images_flip.type(FloatTensor), inference_cfg, dataset.num_classes, use_probs_before_resize)
+                        outputs_flip = torch.from_numpy(np.flip(outputs_flip.cpu().numpy(), axis=3).copy()).type_as(outputs)
                         outputs_list.append(outputs_flip)
-                outputs = sum(outputs_list) / len(outputs_list)
-                for i in range(len(outputs)):
-                    output = outputs[i].unsqueeze(0)
-                    pred = F.interpolate(output, size=(heights[i], widths[i]), mode='bilinear', align_corners=align_corners)[0]
-                    pred = (torch.argmax(pred, dim=0)).cpu().numpy().astype(np.int32)
-                    all_preds.append([imageids[i], pred])
-                    gt = gts[i].cpu().numpy().astype(np.int32)
+                for idx in range(len(outputs_list[0])):
+                    output = [
+                        F.interpolate(outputs[idx: idx+1], size=(heights[idx], widths[idx]), mode='bilinear', align_corners=align_corners) for outputs in outputs_list
+                    ]
+                    output = sum(output) / len(output)
+                    pred = (torch.argmax(output[0], dim=0)).cpu().numpy().astype(np.int32)
+                    all_preds.append([imageids[idx], pred])
+                    gt = gts[idx].cpu().numpy().astype(np.int32)
                     gt[gt >= dataset.num_classes] = -1
                     all_gts.append(gt)
     '''inference'''
-    def inference(self, model, images, inference_cfg, num_classes, use_probs=False):
+    def inference(self, model, images, inference_cfg, num_classes, use_probs_before_resize=False):
         assert inference_cfg['mode'] in ['whole', 'slide']
         if inference_cfg['mode'] == 'whole':
-            if use_probs: outputs = F.softmax(model(images), dim=1)
+            if use_probs_before_resize: outputs = F.softmax(model(images), dim=1)
             else: outputs = model(images)
         else:
             opts = inference_cfg['opts']
@@ -179,9 +175,9 @@ def main():
     checkdir(common_cfg['backupdir'])
     # initialize logger_handle
     logger_handle = Logger(common_cfg['logfilepath'])
-    # number of gpus
+    # number of gpus, for distribued testing, only support a process for a GPU
     ngpus_per_node = torch.cuda.device_count()
-    if ngpus_per_node != args.nproc_per_node:
+    if (ngpus_per_node != args.nproc_per_node) and cfg.MODEL_CFG['distributed']['is_on']:
         if args.local_rank == 0: logger_handle.warning('ngpus_per_node is not equal to nproc_per_node, force ngpus_per_node = nproc_per_node by default...')
         ngpus_per_node = args.nproc_per_node
     # instanced Tester

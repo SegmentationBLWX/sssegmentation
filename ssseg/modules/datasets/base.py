@@ -26,20 +26,7 @@ class BaseDataset(torch.utils.data.Dataset):
     '''length'''
     def __len__(self):
         raise NotImplementedError('not be implemented')
-    '''
-        sync transform: opts is dict which is used to control the data augmentation.
-        opts: {
-                'Resize': {},
-                'RandomResize': {},
-                'RandomCrop': {},
-                'RandomFlip': {},
-                'PhotoMetricDistortion': {},
-                'RandomRotation': {},
-                'Padding': {},
-                'ToTensor': {},
-                'Normalize': {}
-            }
-    '''
+    '''sync transform'''
     def synctransform(self, sample, transform_type):
         assert self.transforms, 'undefined transforms...'
         assert transform_type in ['all', 'only_totensor_normalize_pad', 'without_totensor_normalize_pad']
@@ -75,7 +62,6 @@ class BaseDataset(torch.utils.data.Dataset):
         transforms = []
         supported_transforms = {
             'Resize': Resize,
-            'RandomResize': RandomResize,
             'RandomCrop': RandomCrop,
             'RandomFlip': RandomFlip,
             'PhotoMetricDistortion': PhotoMetricDistortion,

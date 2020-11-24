@@ -9,7 +9,6 @@ DATASET_CFG = {
                      ('RandomCrop', {'crop_size': (512, 512), 'one_category_max_ratio': 0.75}),
                      ('RandomFlip', {'flip_prob': 0.5}),
                      ('PhotoMetricDistortion', {}),
-                     ('RandomRotation', {'angle_upper': 10, 'rotation_prob': 0.6}),
                      ('Normalize', {'mean': [123.675, 116.28, 103.53], 'std': [58.395, 57.12, 57.375]}),
                      ('ToTensor', {}),
                      ('Padding', {'output_size': (512, 512), 'data_type': 'tensor'}),]
@@ -26,21 +25,21 @@ DATASET_CFG = {
 # config for dataloader
 DATALOADER_CFG = {
     'train': {
-                'type': ['nondistributed', 'distributed'][1],
-                'batch_size': 16,
-                'num_workers': 16,
-                'shuffle': True,
-                'pin_memory': True,
-                'drop_last': True,
-        },
+        'type': ['nondistributed', 'distributed'][1],
+        'batch_size': 16,
+        'num_workers': 16,
+        'shuffle': True,
+        'pin_memory': True,
+        'drop_last': True,
+    },
     'test': {
-                'type': ['nondistributed', 'distributed'][1],
-                'batch_size': 1,
-                'num_workers': 16,
-                'shuffle': False,
-                'pin_memory': True,
-                'drop_last': False,
-        }
+        'type': ['nondistributed', 'distributed'][1],
+        'batch_size': 1,
+        'num_workers': 16,
+        'shuffle': False,
+        'pin_memory': True,
+        'drop_last': False,
+    }
 }
 # config for optimizer
 OPTIMIZER_CFG = {
@@ -60,59 +59,61 @@ OPTIMIZER_CFG = {
 }
 # config for losses
 LOSSES_CFG = {
-                'auxiliary': {
-                                'celoss': {'scale_factor': 0.4, 'opts': {'ignore_index': 255, 'reduction': 'mean'}}
-                            },
-                'classification': {
-                                    'celoss': {'scale_factor': 1.0, 'opts': {'ignore_index': 255, 'reduction': 'mean'}}
-                                },
+    'loss_aux': {
+        'celoss': {'scale_factor': 0.4, 'opts': {'ignore_index': 255, 'reduction': 'mean'}}
+    },
+    'loss_cls': {
+        'celoss': {'scale_factor': 1.0, 'opts': {'ignore_index': 255, 'reduction': 'mean'}}
+    },
 }
 # config for model
 MODEL_CFG = {
-    'distributed': {'is_on': True, 'backend': 'nccl'},
     'benchmark': True,
-    'type': 'deeplabv3plus',
     'num_classes': -1,
+    'align_corners': False,
     'is_multi_gpus': True,
-    'normlayer_opts': {'type': 'syncbatchnorm2d', 'opts': {}},
+    'type': 'deeplabv3plus',
+    'distributed': {'is_on': True, 'backend': 'nccl'},
+    'normlayer_opts': {'type': 'syncbatchnorm', 'opts': {}},
+    'activation_opts': {'type': 'relu', 'opts': {'inplace': True}},
     'backbone': {
-                'type': 'resnet101',
-                'series': 'resnet',
-                'pretrained': True,
-                'outstride': 16,
-                'is_improved_version': True
-        },
+        'type': 'resnet101',
+        'series': 'resnet',
+        'pretrained': True,
+        'outstride': 16,
+        'is_improved_version': True
+    },
     'aspp': {
-            'in_channels': 2048,
-            'out_channels': 512,
-            'rates': [1, 6, 12, 18],
-        },
+        'in_channels': 2048,
+        'out_channels': 512,
+        'rates': [1, 6, 12, 18],
+    },
     'shortcut': {
-            'in_channels': 256,
-            'out_channels': 48,
-        },
+        'in_channels': 256,
+        'out_channels': 48,
+    },
     'decoder': {
-            'in_channels': 560,
-            'out_channels': 512,
-            'dropout': 0.1,
-        },
+        'in_channels': 560,
+        'out_channels': 512,
+        'dropout': 0.1,
+    },
     'auxiliary': {
-            'in_channels': 1024,
-            'out_channels': 512,
-            'dropout': 0.1,
-        }
+        'in_channels': 1024,
+        'out_channels': 512,
+        'dropout': 0.1,
+    }
 }
 # config for common
 COMMON_CFG = {
     'train': {
-            'backupdir': '',
-            'logfilepath': '',
-            'loginterval': 50,
-            'saveinterval': 1
-        },
+        'backupdir': '',
+        'logfilepath': '',
+        'loginterval': 50,
+        'saveinterval': 1
+    },
     'test': {
-            'backupdir': '',
-            'logfilepath': '',
-            'resultsavepath': ''
-        }
+        'backupdir': '',
+        'logfilepath': '',
+        'resultsavepath': ''
+    }
 }

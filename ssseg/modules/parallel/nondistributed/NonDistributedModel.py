@@ -5,7 +5,7 @@ Author:
     Zhenchao Jin
 '''
 import torch
-import torch.nn as nn 
+import torch.nn as nn
 
 
 '''non-distributed model'''

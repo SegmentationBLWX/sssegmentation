@@ -17,7 +17,8 @@ def adjustLearningRate(optimizer, optimizer_cfg=None):
         assert len(optimizer.param_groups) == len(optimizer_cfg['params_rules'])
     # adjust the learning rate according the policy
     if policy_cfg['type'] == 'poly':
-        base_lr, min_lr = selected_optim_cfg['learning_rate'], selected_optim_cfg.get('min_lr', 1e-4)
+        base_lr = selected_optim_cfg['learning_rate']
+        min_lr = selected_optim_cfg.get('min_lr', base_lr * 0.01)
         num_iters, max_iters, power = policy_cfg['opts']['num_iters'], policy_cfg['opts']['max_iters'], policy_cfg['opts']['power']
         coeff = (1 - num_iters / max_iters) ** power
         target_lr = coeff * (base_lr - min_lr) + min_lr

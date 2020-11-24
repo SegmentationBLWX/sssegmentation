@@ -20,7 +20,6 @@ class Resize(object):
         self.img_interpolation = kwargs.get('img_interpolation', 'bilinear')
         self.seg_interpolation = kwargs.get('seg_interpolation', 'nearest')
         self.keep_ratio = kwargs.get('keep_ratio', True)
-        self.output_size_auto_adaptive = kwargs.get('output_size_auto_adaptive', True)
         # interpolation to cv2 interpolation
         self.interpolation_dict = {
                                     'nearest': cv2.INTER_NEAREST,
@@ -33,54 +32,25 @@ class Resize(object):
     def __call__(self, sample):
         # parse
         image, segmentation = sample['image'].copy(), sample['segmentation'].copy()
-        h_ori, w_ori = image.shape[:2]
         if self.scale_range is not None:
-            rand_scale = np.random.rand() * (self.scale_range[1] - self.scale_range[0]) + self.scale_range[0]
-            output_size = self.output_size[0] * rand_scale, self.output_size[1] * rand_scale
+            rand_scale = np.random.random_sample() * (self.scale_range[1] - self.scale_range[0]) + self.scale_range[0]
+            output_size = int(self.output_size[0] * rand_scale), int(self.output_size[1] * rand_scale)
         else:
             output_size = self.output_size[0], self.output_size[1]
-        # adjust output size automatically according to image ratio
-        if self.output_size_auto_adaptive:
-            h_out, w_out = output_size
-            if (h_ori > w_ori and h_out < w_out) or (h_ori < w_ori and h_out > w_out):
-                output_size = (w_out, h_out)
         # resize image and segmentation
         if self.keep_ratio:
-            h_rate, w_rate = output_size[0] / h_ori, output_size[1] / w_ori
-            min_rate = h_rate if h_rate < w_rate else w_rate
-            h_out, w_out = int(h_ori * min_rate), int(w_ori * min_rate)
-            image = cv2.resize(image, dsize=(h_out, w_out), interpolation=self.interpolation_dict[self.img_interpolation])
-            segmentation = cv2.resize(segmentation, dsize=(h_out, w_out), interpolation=self.interpolation_dict[self.seg_interpolation])
+            scale_factor = min(max(output_size) / max(image.shape[:2]), min(output_size) / min(image.shape[:2]))
+            dsize = int(image.shape[1] * scale_factor + 0.5), int(image.shape[0] * scale_factor + 0.5)
+            image = cv2.resize(image, dsize=dsize, interpolation=self.interpolation_dict[self.img_interpolation])
+            segmentation = cv2.resize(segmentation, dsize=dsize, interpolation=self.interpolation_dict[self.seg_interpolation])            
         else:
-            output_size = int(output_size[0]), int(output_size[1])
-            image = cv2.resize(image, dsize=output_size, interpolation=self.interpolation_dict[self.img_interpolation])
-            segmentation = cv2.resize(segmentation, dsize=output_size, interpolation=self.interpolation_dict[self.seg_interpolation])
+            if image.shape[0] > image.shape[1]:
+                dsize = min(output_size), max(output_size)
+            else:
+                dsize = max(output_size), min(output_size)
+            image = cv2.resize(image, dsize=dsize, interpolation=self.interpolation_dict[self.img_interpolation])
+            segmentation = cv2.resize(segmentation, dsize=dsize, interpolation=self.interpolation_dict[self.seg_interpolation])
         # update and return sample
-        sample['image'], sample['segmentation'] = image, segmentation
-        return sample
-
-
-'''random resize image'''
-class RandomResize(object):
-    def __init__(self, scale_range=(0.5, 2.0), **kwargs):
-        # set attribute
-        self.scale_range = scale_range
-        self.img_interpolation = kwargs.get('img_interpolation', 'bilinear')
-        self.seg_interpolation = kwargs.get('seg_interpolation', 'nearest')
-        # interpolation to cv2 interpolation
-        self.interpolation_dict = {
-                                    'nearest': cv2.INTER_NEAREST,
-                                    'bilinear': cv2.INTER_LINEAR,
-                                    'bicubic': cv2.INTER_CUBIC,
-                                    'area': cv2.INTER_AREA,
-                                    'lanczos': cv2.INTER_LANCZOS4
-                                }
-    '''call'''
-    def __call__(self, sample):
-        image, segmentation = sample['image'].copy(), sample['segmentation'].copy()
-        rand_scale = np.random.rand() * (self.scale_range[1] - self.scale_range[0]) + self.scale_range[0]
-        image = cv2.resize(image, None, fx=rand_scale, fy=rand_scale, interpolation=self.interpolation_dict[self.img_interpolation])
-        segmentation = cv2.resize(segmentation, None, fx=rand_scale, fy=rand_scale, interpolation=self.interpolation_dict[self.seg_interpolation])
         sample['image'], sample['segmentation'] = image, segmentation
         return sample
 

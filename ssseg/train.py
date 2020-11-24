@@ -88,9 +88,8 @@ class Trainer():
         num_iters, max_iters = (start_epoch - 1) * len(dataloader), end_epoch * len(dataloader)
         # parallel
         if use_cuda and cfg.MODEL_CFG['is_multi_gpus']:
-            model = BuildParallelModel(model, cfg.MODEL_CFG['distributed']['is_on'], device_ids=[cmd_args.local_rank])
-            if ('syncbatchnorm' in cfg.MODEL_CFG['normlayer_opts']['type']) and (not cfg.MODEL_CFG['distributed']['is_on']):
-                patch_replication_callback(model)
+            is_distributed_on = cfg.MODEL_CFG['distributed']['is_on']
+            model = BuildParallelModel(model, is_distributed_on, device_ids=[cmd_args.local_rank] if is_distributed_on else None)
         # print config
         if cmd_args.local_rank == 0:
             logger_handle.info('Dataset used: %s, Number of images: %s' % (cfg.DATASET_CFG['train']['type'], len(dataset)))
@@ -99,7 +98,7 @@ class Trainer():
             logger_handle.info('Config file used: %s' % cfg_file_path)
         # start to train the model
         FloatTensor = torch.cuda.FloatTensor if use_cuda else torch.FloatTensor
-        loss_dict_memory = {}
+        losses_log_dict_memory = {}
         for epoch in range(start_epoch, end_epoch+1):
             # --set train
             model.train()
@@ -117,26 +116,18 @@ class Trainer():
                     learning_rate = adjustLearningRate(optimizer, optimizer_cfg)
                 images, targets = samples['image'].type(FloatTensor), {'segmentation': samples['segmentation'].type(FloatTensor), 'edge': samples['edge'].type(FloatTensor)}
                 optimizer.zero_grad()
-                loss_dict = model(images, targets, cfg.LOSSES_CFG)
-                loss = 0
-                for key, value in loss_dict.items():
-                    loss_dict[key] = value.mean()
-                    loss += loss_dict[key]
-                loss_dict['total'] = loss
-                for key, value in loss_dict.items():
-                    if dist.is_available() and dist.is_initialized():
-                        value = value.data.clone()
-                        dist.all_reduce(value.div_(dist.get_world_size()))
-                    if key in loss_dict_memory: loss_dict_memory[key].append(value.item())
-                    else: loss_dict_memory[key] = [value.item()]
+                loss, losses_log_dict = model(images, targets, cfg.LOSSES_CFG)
+                for key, value in losses_log_dict.items():
+                    if key in losses_log_dict_memory: losses_log_dict_memory[key].append(value)
+                    else: losses_log_dict_memory[key] = [value]
                 loss.backward()
                 optimizer.step()
                 num_iters += 1
                 if (cmd_args.local_rank == 0) and (num_iters % common_cfg['loginterval'] == 0):
                     loss_log = ''
-                    for key, value in loss_dict_memory.items():
+                    for key, value in losses_log_dict_memory.items():
                         loss_log += '%s %.4f, ' % (key, sum(value) / len(value))
-                    loss_dict_memory = dict()
+                    losses_log_dict_memory = dict()
                     logger_handle.info('[EPOCH]: %s/%s, [BATCH]: %s/%s, [LEARNING_RATE]: %s, [DATASET]: %s\n\t[LOSS]: %s' % \
                                         (epoch, end_epoch, (batch_idx+1), len(dataloader), learning_rate, cfg.DATASET_CFG['train']['type'], loss_log))
             # --save checkpoints
@@ -160,9 +151,9 @@ def main():
     checkdir(common_cfg['backupdir'])
     # initialize logger_handle
     logger_handle = Logger(common_cfg['logfilepath'])
-    # number of gpus
+    # number of gpus, for distribued training, only support a process for a GPU
     ngpus_per_node = torch.cuda.device_count()
-    if ngpus_per_node != args.nproc_per_node:
+    if (ngpus_per_node != args.nproc_per_node) and cfg.MODEL_CFG['distributed']['is_on']:
         if args.local_rank == 0: logger_handle.warning('ngpus_per_node is not equal to nproc_per_node, force ngpus_per_node = nproc_per_node by default...')
         ngpus_per_node = args.nproc_per_node
     # instanced Trainer

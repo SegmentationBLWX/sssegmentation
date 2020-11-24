@@ -110,15 +110,17 @@ class ResNet(nn.Module):
         # whether replace the 7x7 conv in the input stem with three 3x3 convs
         self.is_improved_version = is_improved_version
         if is_improved_version:
-            self.stem = nn.Sequential(nn.Conv2d(3, 32, kernel_size=3, stride=2, padding=1, bias=False),
-                                      BuildNormalizationLayer(normlayer_opts['type'], (32, normlayer_opts['opts'])),
-                                      nn.ReLU(inplace=True),
-                                      nn.Conv2d(32, 32, kernel_size=3, stride=1, padding=1, bias=False),
-                                      BuildNormalizationLayer(normlayer_opts['type'], (32, normlayer_opts['opts'])),
-                                      nn.ReLU(inplace=True),
-                                      nn.Conv2d(32, 64, kernel_size=3, stride=1, padding=1, bias=False),
-                                      BuildNormalizationLayer(normlayer_opts['type'], (64, normlayer_opts['opts'])),
-                                      nn.ReLU(inplace=True))
+            self.stem = nn.Sequential(
+                nn.Conv2d(3, 32, kernel_size=3, stride=2, padding=1, bias=False),
+                BuildNormalizationLayer(normlayer_opts['type'], (32, normlayer_opts['opts'])),
+                nn.ReLU(inplace=True),
+                nn.Conv2d(32, 32, kernel_size=3, stride=1, padding=1, bias=False),
+                BuildNormalizationLayer(normlayer_opts['type'], (32, normlayer_opts['opts'])),
+                nn.ReLU(inplace=True),
+                nn.Conv2d(32, 64, kernel_size=3, stride=1, padding=1, bias=False),
+                BuildNormalizationLayer(normlayer_opts['type'], (64, normlayer_opts['opts'])),
+                nn.ReLU(inplace=True)
+            )
         else:
             self.conv1 = nn.Conv2d(3, 64, kernel_size=7, stride=2, padding=3, bias=False)
             self.bn1 = BuildNormalizationLayer(normlayer_opts['type'], (64, normlayer_opts['opts']))
@@ -135,8 +137,10 @@ class ResNet(nn.Module):
         dilations = [dilation] * num_blocks
         if contract_dilation and dilation > 1: dilations[0] = dilation // 2
         if stride != 1 or inplanes != planes * block.expansion:
-            downsample = nn.Sequential(nn.Conv2d(inplanes, planes * block.expansion, kernel_size=1, stride=stride, padding=0, bias=False),
-                                       BuildNormalizationLayer(normlayer_opts['type'], (planes * block.expansion, normlayer_opts['opts'])))
+            downsample = nn.Sequential(
+                nn.Conv2d(inplanes, planes * block.expansion, kernel_size=1, stride=stride, padding=0, bias=False),
+                BuildNormalizationLayer(normlayer_opts['type'], (planes * block.expansion, normlayer_opts['opts']))
+            )
         layers = []
         layers.append(block(inplanes, planes, stride=stride, dilation=dilations[0], downsample=downsample, normlayer_opts=normlayer_opts))
         self.inplanes = planes * block.expansion

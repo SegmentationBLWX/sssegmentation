@@ -1,3 +1,3 @@
 '''initialize'''
-from .replicate import DataParallelWithCallback, patch_replication_callback
-from .batchnorm import SynchronizedBatchNorm1d, SynchronizedBatchNorm2d, SynchronizedBatchNorm3d
+from torch.nn import SyncBatchNorm as TORCHSyncBatchNorm
+from mmcv.utils.parrots_wrapper import SyncBatchNorm as MMCVSyncBatchNorm
