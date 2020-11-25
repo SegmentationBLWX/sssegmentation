@@ -89,10 +89,10 @@ class Demo():
             imagepaths = [os.path.join(cmd_args.imagedir, name) for name in imagenames]
         pbar = tqdm(range(len(imagepaths)))
         for idx in pbar:
+            imagepath = imagepaths[idx]
             if imagepath.split('.')[-1] not in ['jpg', 'jpeg', 'png']: continue
             pbar.set_description('Processing %s' % imagepath)
             infer_tricks, output_list, use_probs_before_resize = inference_cfg['tricks'], [], inference_cfg['tricks']['use_probs_before_resize']
-            imagepath = imagepaths[idx]
             sample = dataset.read(imagepath, '', False)
             image = sample['image']
             sample = dataset.synctransform(sample, 'all')

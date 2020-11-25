@@ -16,7 +16,7 @@ The implemented details see https://arxiv.org/pdf/1612.01105.pdf.
 ## PASCAL VOC
 | Backbone                        | Crop Size  | Schedule                             | Train/Eval Set  | mIoU   | FPS    |
 | :-:                             | :-:        | :-:                                  | :-:             | :-:    | :-:    |
-| ResNet50 (OS=8, PRE=ImageNet)   | 512x512    | LR/POLICY/BS/EPOCH: 0.01/poly/16/60  | trainaug/val    | -      | -      |
+| ResNet50 (OS=8, PRE=ImageNet)   | 512x512    | LR/POLICY/BS/EPOCH: 0.01/poly/16/60  | trainaug/val    | 77.93% | -      |
 | ResNet50 (OS=16, PRE=ImageNet)  | 512x512    | LR/POLICY/BS/EPOCH: 0.01/poly/16/60  | trainaug/val    | -      | -      |
 | ResNet101 (OS=8, PRE=ImageNet)  | 512x512    | LR/POLICY/BS/EPOCH: 0.01/poly/16/60  | trainaug/val    | -      | -      |
 | ResNet101 (OS=16, PRE=ImageNet) | 512x512    | LR/POLICY/BS/EPOCH: 0.01/poly/16/60  | trainaug/val    | -      | -      |
@@ -24,10 +24,10 @@ The implemented details see https://arxiv.org/pdf/1612.01105.pdf.
 ## ADE20k
 | Backbone                        | Crop Size  | Schedule                             | Train/Eval Set  | mIoU   | FPS    |
 | :-:                             | :-:        | :-:                                  | :-:             | :-:    | :-:    |
-| ResNet50 (OS=8, PRE=ImageNet)   | 512x512    | LR/POLICY/BS/EPOCH: 0.01/poly/16/130 | train/val       | -      | -      |
-| ResNet50 (OS=16, PRE=ImageNet)  | 512x512    | LR/POLICY/BS/EPOCH: 0.01/poly/16/130 | train/val       | -      | -      |
+| ResNet50 (OS=8, PRE=ImageNet)   | 512x512    | LR/POLICY/BS/EPOCH: 0.01/poly/16/130 | train/val       | 42.10% | -      |
+| ResNet50 (OS=16, PRE=ImageNet)  | 512x512    | LR/POLICY/BS/EPOCH: 0.01/poly/16/130 | train/val       | 40.23% | -      |
 | ResNet101 (OS=8, PRE=ImageNet)  | 512x512    | LR/POLICY/BS/EPOCH: 0.01/poly/16/130 | train/val       | 44.55% | -      |
-| ResNet101 (OS=16, PRE=ImageNet) | 512x512    | LR/POLICY/BS/EPOCH: 0.01/poly/16/130 | train/val       | -      | -      |
+| ResNet101 (OS=16, PRE=ImageNet) | 512x512    | LR/POLICY/BS/EPOCH: 0.01/poly/16/130 | train/val       | 43.40% | -      |
 
 ## CityScapes
 | Backbone                        | Crop Size  | Schedule                             | Train/Eval Set  | mIoU   | FPS    |
