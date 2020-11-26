@@ -71,12 +71,12 @@ assert len(cityscapes_palette) == 19
 
 
 '''sbushadow'''
-sbushadow_palette = [(0, 0, 0), (192, 128, 128)]
+sbushadow_palette = [(0, 0, 0), (0, 0, 255)]
 assert len(sbushadow_palette) == 2
 
 
 '''supervisely'''
-supervisely_palette = [(0, 0, 0), (192, 128, 128)]
+supervisely_palette = [(0, 0, 0), (0, 0, 255)]
 assert len(supervisely_palette) == 2
 
 

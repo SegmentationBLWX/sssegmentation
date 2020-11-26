@@ -5,20 +5,17 @@ sssegmentation is a general framework for our research on strongly supervised se
 
 
 # Supported
-
-## Supported Models
+#### Supported Models
 - [FCN](https://arxiv.org/pdf/1411.4038.pdf)
 - [CE2P](https://arxiv.org/pdf/1809.05996.pdf)
 - [OCRNet](https://arxiv.org/pdf/1909.11065.pdf)
 - [PSPNet](https://arxiv.org/pdf/1612.01105.pdf)
 - [Deeplabv3Plus](https://arxiv.org/pdf/1802.02611.pdf)
-
-## Supported Backbones
+#### Supported Backbones
 - [HRNet](https://arxiv.org/pdf/1908.07919.pdf)
 - [ResNet](https://arxiv.org/pdf/1512.03385.pdf)
 - [MobileNet](https://arxiv.org/pdf/1801.04381.pdf)
-
-## Supported Datasets
+#### Supported Datasets
 - [LIP](http://sysu-hcp.net/lip/)
 - [ATR](http://sysu-hcp.net/lip/overview.php)
 - [CIHP](http://sysu-hcp.net/lip/overview.php)
@@ -31,15 +28,14 @@ sssegmentation is a general framework for our research on strongly supervised se
 
 
 # Usage
-
-## Build
+#### Build
+You can build the project as follows:
 ```sh
 cd ssseg/libs
 sh make.sh
 ```
-
-## Train
-#### Bash
+#### Train
+You can train the models as follows:
 ```sh
 usage:
 sh scripts/train.sh ${CFGFILEPATH} [optional arguments]
@@ -51,31 +47,8 @@ sh scripts/train.sh ssseg/cfgs/deeplabv3plus/cfgs_voc_resnet101os8.py
 or
 sh scripts/distrain.sh 4 ssseg/cfgs/deeplabv3plus/cfgs_voc_resnet101os8.py
 ```
-#### Python
-```sh
-usage: train.py [-h] [--local_rank LOCAL_RANK] [--nproc_per_node NPROC_PER_NODE] --cfgfilepath CFGFILEPATH [--checkpointspath CHECKPOINTSPATH]
-
-sssegmentation is a general framework for our research on strongly supervised semantic segmentation
-
-optional arguments:
-  -h, --help            show this help message and exit
-  --local_rank LOCAL_RANK
-                        node rank for distributed training
-  --nproc_per_node NPROC_PER_NODE
-                        number of process per node
-  --cfgfilepath CFGFILEPATH
-                        config file path you want to use
-  --checkpointspath CHECKPOINTSPATH
-                        checkpoints you want to resume from
-
-example:
-python3 ssseg/train.py --cfgfilepath ssseg/cfgs/deeplabv3plus/cfgs_voc_resnet101os8.py
-or 
-python3 -m torch.distributed.launch --nproc_per_node 4 ssseg/train.py --cfgfilepath ssseg/cfgs/deeplabv3plus/cfgs_voc_resnet101os8.py --nproc_per_node 4
-```
-
-## Test
-#### Bash
+#### Test
+You can test the models as follows:
 ```sh
 usage:
 sh scripts/test.sh ${CFGFILEPATH} ${CHECKPOINTSPATH} [optional arguments]
@@ -87,31 +60,8 @@ sh scripts/test.sh ssseg/cfgs/deeplabv3plus/cfgs_voc_resnet101os8.py deeplabv3pl
 or
 sh scripts/distest.sh 4 ssseg/cfgs/deeplabv3plus/cfgs_voc_resnet101os8.py deeplabv3plus_resnet101os8_voc_train/epoch_60.pth
 ```
-#### Python
-```sh
-usage: test.py [-h] [--local_rank LOCAL_RANK] [--nproc_per_node NPROC_PER_NODE] --cfgfilepath CFGFILEPATH [--noeval NOEVAL] --checkpointspath CHECKPOINTSPATH
-
-sssegmentation is a general framework for our research on strongly supervised semantic segmentation
-
-optional arguments:
-  -h, --help            show this help message and exit
-  --local_rank LOCAL_RANK
-                        node rank for distributed testing
-  --nproc_per_node NPROC_PER_NODE
-                        number of process per node
-  --cfgfilepath CFGFILEPATH
-                        config file path you want to use
-  --noeval NOEVAL       set true if no ground truth could be used to eval the results
-  --checkpointspath CHECKPOINTSPATH
-                        checkpoints you want to resume from
-
-example:
-python3 ssseg/test.py --cfgfilepath ssseg/cfgs/deeplabv3plus/cfgs_voc_resnet101os8.py --checkpointspath deeplabv3plus_resnet101os8_voc_train/epoch_60.pth
-or
-python3 -m torch.distributed.launch --nproc_per_node 4 ssseg/test.py --cfgfilepath ssseg/cfgs/deeplabv3plus/cfgs_voc_resnet101os8.py --nproc_per_node 4 --checkpointspath deeplabv3plus_resnet101os8_voc_train/epoch_60.pth
-```
-
-## Demo
+#### Demo
+You can apply the models as follows:
 ```sh
 usage: demo.py [-h] [--imagedir IMAGEDIR] [--imagepath IMAGEPATH] [--outputfilename OUTPUTFILENAME] --cfgfilepath CFGFILEPATH --checkpointspath CHECKPOINTSPATH
 
@@ -129,5 +79,8 @@ optional arguments:
   --checkpointspath CHECKPOINTSPATH
                         checkpoints you want to resume from
 
-example: python3 ssseg/demo.py --cfgfilepath ssseg/cfgs/deeplabv3plus/cfgs_voc_resnet101os8.py --checkpointspath deeplabv3plus_resnet101os8_voc_train/epoch_60.pth --imagepath testedimage.jpg
+example: 
+python3 ssseg/demo.py --cfgfilepath ssseg/cfgs/deeplabv3plus/cfgs_voc_resnet101os8.py --checkpointspath deeplabv3plus_resnet101os8_voc_train/epoch_60.pth --imagepath testedimage.jpg
+or
+python3 ssseg/demo.py --cfgfilepath ssseg/cfgs/deeplabv3plus/cfgs_voc_resnet101os8.py --checkpointspath deeplabv3plus_resnet101os8_voc_train/epoch_60.pth --imagedir ./images
 ```

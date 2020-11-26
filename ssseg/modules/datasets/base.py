@@ -77,8 +77,8 @@ class BaseDataset(torch.utils.data.Dataset):
         # return the transforms
         return transforms
     '''eval the resuls'''
-    def evaluate(self, preds, groundtruths):
-        result = eval_semantic_segmentation(preds, groundtruths)
+    def evaluate(self, predictions, groundtruths):
+        result = eval_semantic_segmentation(predictions, groundtruths)
         result_str = 'IoUs: \n'
         for idx, item in enumerate(result['iou']):
             result_str += '%s %s\n' % (self.classnames[idx], item)

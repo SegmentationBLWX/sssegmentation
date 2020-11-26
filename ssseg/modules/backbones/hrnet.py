@@ -195,9 +195,9 @@ class HRNet(nn.Module):
             else:
                 x_list.append(y_list[i])
         y_list = self.stage4(x_list)
-        outs = []
-        for i, feats in enumerate(y_list):
-            if i in self.out_indices: outs.append(feats)
+        out, outs = torch.cat(y_list, dim=1), []
+        for _ in range(len(self.out_indices)):
+            outs.append(out)
         if len(outs) == 1: return outs[0]
         else: return tuple(outs)
     '''make stage'''

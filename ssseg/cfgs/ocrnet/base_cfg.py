@@ -98,6 +98,7 @@ MODEL_CFG = {
     },
     'decoder': {
         'in_channels': 512,
+        'out_channels': 512,
         'dropout': 0.1,
     },
 }

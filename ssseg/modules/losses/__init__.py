@@ -1,3 +1,3 @@
 '''initialize'''
-from .celoss import *
-from .focalloss import *
+from .celoss import CrossEntropyLoss
+from .focalloss import SigmoidFocalLoss

@@ -1,2 +1,2 @@
 '''initialize'''
-from .builder import *
+from .builder import BuildConfig

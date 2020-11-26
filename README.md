@@ -9,20 +9,17 @@ see → [click](./docs)
 
 
 # Supported
-
-## Supported Models
+#### Supported Models
 - [FCN](https://arxiv.org/pdf/1411.4038.pdf)
 - [CE2P](https://arxiv.org/pdf/1809.05996.pdf)
 - [OCRNet](https://arxiv.org/pdf/1909.11065.pdf)
 - [PSPNet](https://arxiv.org/pdf/1612.01105.pdf)
 - [Deeplabv3Plus](https://arxiv.org/pdf/1802.02611.pdf)
-
-## Supported Backbones
+#### Supported Backbones
 - [HRNet](https://arxiv.org/pdf/1908.07919.pdf)
 - [ResNet](https://arxiv.org/pdf/1512.03385.pdf)
 - [MobileNet](https://arxiv.org/pdf/1801.04381.pdf)
-
-## Supported Datasets
+#### Supported Datasets
 - [LIP](http://sysu-hcp.net/lip/)
 - [ATR](http://sysu-hcp.net/lip/overview.php)
 - [CIHP](http://sysu-hcp.net/lip/overview.php)
