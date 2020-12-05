@@ -10,6 +10,8 @@ sssegmentation is a general framework for our research on strongly supervised se
 - [CE2P](https://arxiv.org/pdf/1809.05996.pdf)
 - [OCRNet](https://arxiv.org/pdf/1909.11065.pdf)
 - [PSPNet](https://arxiv.org/pdf/1612.01105.pdf)
+- [UPerNet](https://arxiv.org/pdf/1807.10221.pdf)
+- [Deeplabv3](https://arxiv.org/pdf/1706.05587.pdf)
 - [Deeplabv3Plus](https://arxiv.org/pdf/1802.02611.pdf)
 #### Supported Backbones
 - [HRNet](https://arxiv.org/pdf/1908.07919.pdf)
