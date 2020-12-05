@@ -32,7 +32,7 @@ The implemented details see https://arxiv.org/pdf/1612.01105.pdf.
 ## CityScapes
 | Backbone                        | Crop Size  | Schedule                             | Train/Eval Set  | mIoU   | Download    |
 | :-:                             | :-:        | :-:                                  | :-:             | :-:    | :-:         |
-| ResNet50 (OS=8, PRE=ImageNet)   | 512x1024   | LR/POLICY/BS/EPOCH: 0.01/poly/8/220  | train/val       | -      | -           |
+| ResNet50 (OS=8, PRE=ImageNet)   | 512x1024   | LR/POLICY/BS/EPOCH: 0.01/poly/8/220  | train/val       | 78.33% | -           |
 | ResNet50 (OS=16, PRE=ImageNet)  | 512x1024   | LR/POLICY/BS/EPOCH: 0.01/poly/8/220  | train/val       | 77.13% | -           |
 | ResNet101 (OS=8, PRE=ImageNet)  | 512x1024   | LR/POLICY/BS/EPOCH: 0.01/poly/8/220  | train/val       | 79.94% | -           |
 | ResNet101 (OS=16, PRE=ImageNet) | 512x1024   | LR/POLICY/BS/EPOCH: 0.01/poly/8/220  | train/val       | 77.43% | -           |
