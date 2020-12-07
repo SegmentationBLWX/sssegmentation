@@ -31,10 +31,8 @@ class Deeplabv3(BaseModel):
         # build decoder
         decoder_cfg = cfg['decoder']
         self.decoder = nn.Sequential(
-            DepthwiseSeparableConv2d(decoder_cfg['in_channels'], decoder_cfg['out_channels'], kernel_size=3, stride=1, padding=1, bias=False, activation_opts=activation_opts, normlayer_opts=normlayer_opts),
-            DepthwiseSeparableConv2d(decoder_cfg['out_channels'], decoder_cfg['out_channels'], kernel_size=3, stride=1, padding=1, bias=False, activation_opts=activation_opts, normlayer_opts=normlayer_opts),
             nn.Dropout2d(decoder_cfg['dropout']),
-            nn.Conv2d(decoder_cfg['out_channels'], cfg['num_classes'], kernel_size=1, stride=1, padding=0)
+            nn.Conv2d(decoder_cfg['in_channels'], cfg['num_classes'], kernel_size=1, stride=1, padding=0)
         )
         # build auxiliary decoder
         auxiliary_cfg = cfg['auxiliary']

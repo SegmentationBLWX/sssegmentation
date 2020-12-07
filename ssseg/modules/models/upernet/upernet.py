@@ -29,6 +29,8 @@ class UPerNet(BaseModel):
         }
         self.ppm_net = PyramidPoolingModule(**ppm_cfg)
         # build lateral convs
+        activation_opts_copy = copy.deepcopy(activation_opts)
+        if 'inplace' in activation_opts_copy['opts']: activation_opts_copy['opts']['inplace'] = False
         lateral_cfg = cfg['lateral']
         self.lateral_convs = nn.ModuleList()
         for in_channels in lateral_cfg['in_channels_list']:
@@ -36,7 +38,18 @@ class UPerNet(BaseModel):
                 nn.Sequential(
                     nn.Conv2d(in_channels, lateral_cfg['out_channels'], kernel_size=1, stride=1, padding=0, bias=False),
                     BuildNormalizationLayer(normlayer_opts['type'], (lateral_cfg['out_channels'], normlayer_opts['opts'])),
-                    BuildActivation(activation_opts['type'], **activation_opts['opts']),
+                    BuildActivation(activation_opts_copy['type'], **activation_opts_copy['opts']),
+                )
+            )
+        # build fpn convs
+        fpn_cfg = cfg['fpn']
+        self.fpn_convs = nn.ModuleList()
+        for in_channels in fpn_cfg['in_channels_list']:
+            self.fpn_convs.append(
+                nn.Sequential(
+                    nn.Conv2d(in_channels, fpn_cfg['out_channels'], kernel_size=3, stride=1, padding=1, bias=False),
+                    BuildNormalizationLayer(normlayer_opts['type'], (fpn_cfg['out_channels'], normlayer_opts['opts'])),
+                    BuildActivation(activation_opts_copy['type'], **activation_opts_copy['opts']),
                 )
             )
         # build decoder
@@ -67,14 +80,16 @@ class UPerNet(BaseModel):
         # feed to pyramid pooling module
         ppm_out = self.ppm_net(x4)
         # apply fpn
-        lateral_outputs = [ppm_out]
         inputs = [x1, x2, x3]
-        for idx in reversed(range(len(self.lateral_convs))):
-            out = self.lateral_convs[idx](inputs[idx])
-            out_prev = F.interpolate(lateral_outputs[-1], size=out.size()[2:], mode='bilinear', align_corners=self.align_corners)
-            lateral_outputs.append(out + out_prev)
-        fpn_out = [F.interpolate(out, size=x1.size()[2:], mode='bilinear', align_corners=self.align_corners) for out in lateral_outputs]
-        fpn_out = torch.cat(fpn_out, dim=1)
+        lateral_outputs = [lateral_conv(inputs[i]) for i, lateral_conv in enumerate(self.lateral_convs)]
+        lateral_outputs.append(ppm_out)
+        for i in range(len(lateral_outputs) - 1, 0, -1):
+            prev_shape = lateral_outputs[i - 1].shape[2:]
+            lateral_outputs[i - 1] += F.interpolate(lateral_outputs[i], size=prev_shape, mode='bilinear', align_corners=self.align_corners)
+        fpn_outputs = [self.fpn_convs[i](lateral_outputs[i]) for i in range(len(lateral_outputs) - 1)]
+        fpn_outputs.append(lateral_outputs[-1])
+        fpn_outputs = [F.interpolate(out, size=fpn_outputs[0].size()[2:], mode='bilinear', align_corners=self.align_corners) for out in fpn_outputs]
+        fpn_out = torch.cat(fpn_outputs, dim=1)
         # feed to decoder
         preds = self.decoder(fpn_out)
         # feed to auxiliary decoder and return according to the mode

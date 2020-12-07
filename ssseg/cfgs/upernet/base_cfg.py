@@ -85,15 +85,19 @@ MODEL_CFG = {
     },
     'ppm': {
         'in_channels': 2048,
-        'out_channels': 256,
+        'out_channels': 512,
         'bin_sizes': [1, 2, 3, 6],
     },
     'lateral': {
         'in_channels_list': [256, 512, 1024],
-        'out_channels': 256,
+        'out_channels': 512,
+    },
+    'fpn': {
+        'in_channels_list': [512, 512, 512],
+        'out_channels': 512,
     },
     'decoder': {
-        'in_channels': 1024,
+        'in_channels': 2048,
         'out_channels': 512,
         'dropout': 0.1,
     },
