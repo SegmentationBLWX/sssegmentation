@@ -117,6 +117,10 @@ class Trainer():
                 images, targets = samples['image'].type(FloatTensor), {'segmentation': samples['segmentation'].type(FloatTensor), 'edge': samples['edge'].type(FloatTensor)}
                 optimizer.zero_grad()
                 loss, losses_log_dict = model(images, targets, cfg.LOSSES_CFG)
+                if not distributed_cfg['is_on']:
+                    loss = loss.mean()
+                    for key, value in losses_log_dict.items():
+                        losses_log_dict[key] = value.mean().item()
                 for key, value in losses_log_dict.items():
                     if key in losses_log_dict_memory: losses_log_dict_memory[key].append(value)
                     else: losses_log_dict_memory[key] = [value]

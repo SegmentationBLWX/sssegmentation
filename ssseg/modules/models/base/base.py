@@ -74,7 +74,9 @@ class BaseModel(nn.Module):
             if dist.is_available() and dist.is_initialized():
                 value = value.data.clone()
                 dist.all_reduce(value.div_(dist.get_world_size()))
-            losses_log_dict[key] = value.item()
+                losses_log_dict[key] = value.item()
+            else:
+                losses_log_dict[key] = torch.Tensor([value.item()]).type_as(loss)
         # return the loss and losses_log_dict
         return loss, losses_log_dict
     '''calculate the loss'''
