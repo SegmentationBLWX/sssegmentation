@@ -83,6 +83,7 @@ class BaseModel(nn.Module):
         supported_losses = {
             'celoss': CrossEntropyLoss,
             'sigmoidfocalloss': SigmoidFocalLoss,
+            'binaryceloss': BinaryCrossEntropyLoss,
         }
         # calculate the loss
         loss = 0

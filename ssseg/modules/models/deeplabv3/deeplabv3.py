@@ -8,9 +8,9 @@ import copy
 import torch
 import torch.nn as nn
 import torch.nn.functional as F
+from .aspp import ASPP
 from ...backbones import *
 from ..base import BaseModel
-from ..deeplabv3plus import ASPP
 
 
 '''deeplabv3'''

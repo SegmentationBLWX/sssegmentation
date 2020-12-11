@@ -1,19 +1,19 @@
 '''
 Function:
-    define the Depthwise Separable Atrous Spatial Pyramid Pooling (ASPP)
+    define the Atrous Spatial Pyramid Pooling (ASPP)
 Author:
     Zhenchao Jin
 '''
 import torch
 import torch.nn as nn
 import torch.nn.functional as F
-from ...backbones import BuildActivation, DepthwiseSeparableConv2d, BuildNormalizationLayer
+from ...backbones import BuildActivation, BuildNormalizationLayer
 
 
-'''Depthwise Separable ASPP'''
-class DepthwiseSeparableASPP(nn.Module):
+'''ASPP'''
+class ASPP(nn.Module):
     def __init__(self, in_channels, out_channels, rates, **kwargs):
-        super(DepthwiseSeparableASPP, self).__init__()
+        super(ASPP, self).__init__()
         align_corners, normlayer_opts, activation_opts = kwargs['align_corners'], kwargs['normlayer_opts'], kwargs['activation_opts']
         self.align_corners = align_corners
         self.parallel_branches = nn.ModuleList()
@@ -25,7 +25,11 @@ class DepthwiseSeparableASPP(nn.Module):
                     BuildActivation(activation_opts['type'], **activation_opts['opts'])
                 )
             else:
-                branch = DepthwiseSeparableConv2d(in_channels, out_channels, kernel_size=3, stride=1, padding=rate, dilation=rate, bias=False, normlayer_opts=normlayer_opts, activation_opts=activation_opts)
+                branch = nn.Sequential(
+                    nn.Conv2d(in_channels, out_channels, kernel_size=3, stride=1, padding=rate, dilation=rate, bias=False),
+                    BuildNormalizationLayer(normlayer_opts['type'], (out_channels, normlayer_opts['opts'])),
+                    BuildActivation(activation_opts['type'], **activation_opts['opts'])
+                )
             self.parallel_branches.append(branch)
         self.global_branch = nn.Sequential(
             nn.AdaptiveAvgPool2d((1, 1)),

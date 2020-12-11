@@ -1,3 +1,3 @@
 '''initialize'''
 from .deeplabv3plus import Deeplabv3Plus
-from .aspp import ASPP, DepthwiseSeparableASPP
+from .aspp import DepthwiseSeparableASPP
