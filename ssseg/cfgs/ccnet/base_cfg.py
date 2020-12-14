@@ -1,4 +1,4 @@
-'''base config for ocrnet'''
+'''base config for ccnet'''
 # config for dataset
 DATASET_CFG = {
     'train': {
@@ -68,11 +68,11 @@ LOSSES_CFG = {
 }
 # config for model
 MODEL_CFG = {
-    'type': 'ocrnet',
+    'type': 'ccnet',
     'num_classes': -1,
     'benchmark': True,
-    'align_corners': False,
     'is_multi_gpus': True,
+    'align_corners': False,
     'distributed': {'is_on': True, 'backend': 'nccl'},
     'normlayer_opts': {'type': 'syncbatchnorm', 'opts': {}},
     'activation_opts': {'type': 'relu', 'opts': {'inplace': True}},
@@ -80,30 +80,24 @@ MODEL_CFG = {
         'type': 'resnet101',
         'series': 'resnet',
         'pretrained': True,
-        'outstride': 16,
+        'outstride': 8,
         'is_improved_version': True
+    },
+    'cca': {
+        'num_recurrence': 2,
+        'in_channels': 2048,
+        'out_channels': 512,
+    },
+    'decoder': {
+        'in_channels': 2560,
+        'out_channels': 512,
+        'dropout': 0.1,
     },
     'auxiliary': {
         'in_channels': 1024,
         'out_channels': 512,
         'dropout': 0.1,
-    },
-    'bottleneck': {
-        'in_channels': 2048,
-        'out_channels': 512,
-    },
-    'spatialgather': {
-        'scale': 1,
-    },
-    'spatialocr': {
-        'in_channels': 512,
-        'key_channels': 256,
-        'out_channels': 512,
-    },
-    'decoder': {
-        'in_channels': 512,
-        'dropout': 0.1,
-    },
+    }
 }
 # config for common
 COMMON_CFG = {

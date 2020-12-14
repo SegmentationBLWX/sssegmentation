@@ -1,6 +1,6 @@
 '''
 Function:
-    define the ocrnet
+    Implementation of OCRNet
 Author:
     Zhenchao Jin
 '''
@@ -28,6 +28,13 @@ class OCRNet(BaseModel):
             nn.Dropout2d(auxiliary_cfg['dropout']),
             nn.Conv2d(auxiliary_cfg['out_channels'], cfg['num_classes'], kernel_size=1, stride=1, padding=0)
         )
+        # build bottleneck
+        bottleneck_cfg = cfg['bottleneck']
+        self.bottleneck = nn.Sequential(
+            nn.Conv2d(bottleneck_cfg['in_channels'], bottleneck_cfg['out_channels'], kernel_size=3, stride=1, padding=1, bias=False),
+            BuildNormalizationLayer(normlayer_opts['type'], (bottleneck_cfg['out_channels'], normlayer_opts['opts'])),
+            BuildActivation(activation_opts['type'], **activation_opts['opts']),
+        )
         # build spatial gather module
         spatialgather_cfg = {
             'scale': cfg['spatialgather']['scale']
@@ -46,11 +53,8 @@ class OCRNet(BaseModel):
         # build decoder
         decoder_cfg = cfg['decoder']
         self.decoder = nn.Sequential(
-            nn.Conv2d(decoder_cfg['in_channels'], decoder_cfg['out_channels'], kernel_size=3, stride=1, padding=1),
-            BuildNormalizationLayer(normlayer_opts['type'], (decoder_cfg['out_channels'], normlayer_opts['opts'])),
-            BuildActivation(activation_opts['type'], **activation_opts['opts']),
             nn.Dropout2d(decoder_cfg['dropout']),
-            nn.Conv2d(decoder_cfg['out_channels'], cfg['num_classes'], kernel_size=1, stride=1, padding=0)
+            nn.Conv2d(decoder_cfg['in_channels'], cfg['num_classes'], kernel_size=1, stride=1, padding=0)
         )
         # freeze normalization layer if necessary
         if cfg.get('is_freeze_normlayer', False): self.freezenormlayer()
@@ -61,12 +65,13 @@ class OCRNet(BaseModel):
         x1, x2, x3, x4 = self.backbone_net(x)
         # feed to auxiliary decoder
         preds_aux = self.auxiliary_decoder(x3)
+        # feed to bottleneck
+        feats = self.bottleneck(x4)
         # feed to ocr module
-        feats = F.interpolate(x4, size=preds_aux.size()[2:], mode='bilinear', align_corners=self.align_corners)
         context = self.spatial_gather_net(feats, preds_aux)
-        features = self.spatial_ocr_net(feats, context)
+        feats = self.spatial_ocr_net(feats, context)
         # feed to decoder
-        preds = self.decoder(features)
+        preds = self.decoder(feats)
         # return according to the mode
         if self.mode == 'TRAIN':
             preds = F.interpolate(preds, size=(h, w), mode='bilinear', align_corners=self.align_corners)
@@ -82,6 +87,7 @@ class OCRNet(BaseModel):
         return {
                 'backbone_net': self.backbone_net,
                 'auxiliary_decoder': self.auxiliary_decoder,
+                'bottleneck': self.bottleneck,
                 'spatial_gather_net': self.spatial_gather_net,
                 'spatial_ocr_net': self.spatial_ocr_net,
                 'decoder': self.decoder

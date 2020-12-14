@@ -91,10 +91,6 @@ MODEL_CFG = {
         'out_channels': 512,
         'bin_sizes': [1, 2, 3, 6],
     },
-    'lateral_ppm': {
-        'in_channels': 512,
-        'out_channels': 256
-    },
     'epm': {
         'in_channels_list': [256, 512, 1024],
         'hidden_channels': 256,
@@ -106,13 +102,13 @@ MODEL_CFG = {
     },
     'decoder':{ 
         'stage1': {
-            'in_channels': 304,
-            'out_channels': 256,
+            'in_channels': 560,
+            'out_channels': 512,
             'dropout': 0,
         },
         'stage2': {
-            'in_channels': 1024,
-            'out_channels': 256,
+            'in_channels': 1280,
+            'out_channels': 512,
             'dropout': 0.1
         },
     },

@@ -1,3 +1,3 @@
 '''initialize'''
-from .NonDistributedModel import NonDistributedModel
-from .NonDistributedDataloader import NonDistributedDataloader
+from .model import NonDistributedModel
+from .dataloader import NonDistributedDataloader

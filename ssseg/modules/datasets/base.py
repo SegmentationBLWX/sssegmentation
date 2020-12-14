@@ -7,7 +7,7 @@ Author:
 import cv2
 import torch
 import numpy as np
-from .transformers import *
+from .transforms import *
 from chainercv.evaluations import eval_semantic_segmentation
 
 

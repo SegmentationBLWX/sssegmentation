@@ -1,6 +1,6 @@
 '''
 Function:
-    Implementation of Deeplabv3+
+    Implementation of Deeplabv3plus
 Author:
     Zhenchao Jin
 '''
@@ -13,7 +13,7 @@ from ..base import BaseModel
 from .aspp import DepthwiseSeparableASPP
 
 
-'''deeplabv3 plus'''
+'''Deeplabv3plus'''
 class Deeplabv3Plus(BaseModel):
     def __init__(self, cfg, **kwargs):
         super(Deeplabv3Plus, self).__init__(cfg, **kwargs)

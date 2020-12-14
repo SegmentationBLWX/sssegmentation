@@ -1,6 +1,6 @@
 '''
 Function:
-    define the MobileNet
+    Implementation of MobileNet
 Author:
     Zhenchao Jin
 '''
@@ -18,7 +18,7 @@ model_urls = {
 }
 
 
-'''mobilenetv2'''
+'''MobileNetV2'''
 class MobileNetV2(nn.Module):
     arch_settings = [[1, 16, 1], [6, 24, 2], [6, 32, 3], [6, 64, 4], [6, 96, 3], [6, 160, 3], [6, 320, 1]]
     def __init__(self, widen_factor=1, outstride=8, out_indices=(1, 2, 4, 6), normlayer_opts=None, **kwargs):

@@ -1,6 +1,6 @@
 '''
 Function:
-    Implementation of FCN
+    Implementation of CCNet
 Author:
     Zhenchao Jin
 '''
@@ -10,20 +10,31 @@ import torch.nn as nn
 import torch.nn.functional as F
 from ...backbones import *
 from ..base import BaseModel
+from mmcv.ops import CrissCrossAttention
 
 
-'''FCN'''
-class FCN(BaseModel):
+'''CCNet'''
+class CCNet(BaseModel):
     def __init__(self, cfg, **kwargs):
-        super(FCN, self).__init__(cfg, **kwargs)
+        super(CCNet, self).__init__(cfg, **kwargs)
         align_corners, normlayer_opts, activation_opts = self.align_corners, self.normlayer_opts, self.activation_opts
+        # build criss-cross attention
+        cca_cfg = cfg['cca']
+        self.conv_before_cca = nn.Sequential(
+            nn.Conv2d(cca_cfg['in_channels'], cca_cfg['out_channels'], kernel_size=3, stride=1, padding=1, bias=False),
+            BuildNormalizationLayer(normlayer_opts['type'], (cca_cfg['out_channels'], normlayer_opts['opts'])),
+            BuildActivation(activation_opts['type'], **activation_opts['opts']),
+        )
+        self.cca = CrissCrossAttention(cca_cfg['out_channels'])
+        self.conv_after_cca = nn.Sequential(
+            nn.Conv2d(cca_cfg['out_channels'], cca_cfg['out_channels'], kernel_size=3, stride=1, padding=1, bias=False),
+            BuildNormalizationLayer(normlayer_opts['type'], (cca_cfg['out_channels'], normlayer_opts['opts'])),
+            BuildActivation(activation_opts['type'], **activation_opts['opts']),
+        )
         # build decoder
         decoder_cfg = cfg['decoder']
         self.decoder = nn.Sequential(
             nn.Conv2d(decoder_cfg['in_channels'], decoder_cfg['out_channels'], kernel_size=3, stride=1, padding=1, bias=False),
-            BuildNormalizationLayer(normlayer_opts['type'], (decoder_cfg['out_channels'], normlayer_opts['opts'])),
-            BuildActivation(activation_opts['type'], **activation_opts['opts']),
-            nn.Conv2d(decoder_cfg['out_channels'], decoder_cfg['out_channels'], kernel_size=3, stride=1, padding=1, bias=False),
             BuildNormalizationLayer(normlayer_opts['type'], (decoder_cfg['out_channels'], normlayer_opts['opts'])),
             BuildActivation(activation_opts['type'], **activation_opts['opts']),
             nn.Dropout2d(decoder_cfg['dropout']),
@@ -45,8 +56,14 @@ class FCN(BaseModel):
         h, w = x.size(2), x.size(3)
         # feed to backbone network
         x1, x2, x3, x4 = self.backbone_net(x)
+        # feed to cca
+        feats = self.conv_before_cca(x4)
+        for _ in range(self.cfg['cca']['num_recurrence']):
+            feats = self.cca(feats)
+        feats = self.conv_after_cca(feats)
         # feed to decoder
-        preds = self.decoder(x4)
+        feats = torch.cat([x4, feats], dim=1)
+        preds = self.decoder(feats)
         # feed to auxiliary decoder and return according to the mode
         if self.mode == 'TRAIN':
             preds = F.interpolate(preds, size=(h, w), mode='bilinear', align_corners=self.align_corners)
@@ -62,6 +79,9 @@ class FCN(BaseModel):
     def alllayers(self):
         return {
                 'backbone_net': self.backbone_net,
+                'conv_before_cca': self.conv_before_cca,
+                'cca': self.cca,
+                'conv_after_cca': self.conv_before_cca,
                 'decoder': self.decoder,
                 'auxiliary_decoder': self.auxiliary_decoder
             }

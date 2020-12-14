@@ -13,7 +13,7 @@ from ...backbones import *
 from ..base import BaseModel
 
 
-'''deeplabv3'''
+'''Deeplabv3'''
 class Deeplabv3(BaseModel):
     def __init__(self, cfg, **kwargs):
         super(Deeplabv3, self).__init__(cfg, **kwargs)

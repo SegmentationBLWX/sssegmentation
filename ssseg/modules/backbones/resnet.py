@@ -1,6 +1,6 @@
 '''
 Function:
-    define the resnet
+    Implementation of ResNet
 Author:
     Zhenchao Jin
 '''
@@ -23,7 +23,7 @@ model_urls = {
 }
 
 
-'''basic block'''
+'''BasicBlock'''
 class BasicBlock(nn.Module):
     expansion = 1
     def __init__(self, inplanes, planes, stride=1, dilation=1, downsample=None, normlayer_opts=None):
@@ -50,7 +50,7 @@ class BasicBlock(nn.Module):
         return out
 
 
-'''bottleneck'''
+'''Bottleneck'''
 class Bottleneck(nn.Module):
     expansion = 4
     def __init__(self, inplanes, planes, stride=1, dilation=1, downsample=None, normlayer_opts=None):
@@ -82,7 +82,7 @@ class Bottleneck(nn.Module):
         return out
 
 
-'''resnet'''
+'''ResNet'''
 class ResNet(nn.Module):
     arch_settings = {
         18: (BasicBlock, (2, 2, 2, 2)),

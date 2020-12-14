@@ -1,6 +1,6 @@
 '''
 Function:
-    define the transformers for data augmentations
+    define the transforms for data augmentations
 Author:
     Zhenchao Jin
 '''

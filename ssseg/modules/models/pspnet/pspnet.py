@@ -13,7 +13,7 @@ from ..base import BaseModel
 from .ppm import PyramidPoolingModule
 
 
-'''pspnet'''
+'''PSPNet'''
 class PSPNet(BaseModel):
     def __init__(self, cfg, **kwargs):
         super(PSPNet, self).__init__(cfg, **kwargs)

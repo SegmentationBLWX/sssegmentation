@@ -14,7 +14,7 @@ from .epm import EdgePerceivingModule
 from ..pspnet import PyramidPoolingModule
 
 
-'''ce2p'''
+'''CE2P'''
 class CE2P(BaseModel):
     def __init__(self, cfg, **kwargs):
         super(CE2P, self).__init__(cfg, **kwargs)
@@ -29,12 +29,6 @@ class CE2P(BaseModel):
             'activation_opts': copy.deepcopy(activation_opts),
         }
         self.ppm_net = PyramidPoolingModule(**ppm_cfg)
-        lateral_ppm_cfg = cfg['lateral_ppm']
-        self.lateral_ppm_layer = nn.Sequential(
-            nn.Conv2d(lateral_ppm_cfg['in_channels'], lateral_ppm_cfg['out_channels'], kernel_size=1, stride=1, padding=0, bias=False),
-            BuildNormalizationLayer(normlayer_opts['type'], (lateral_ppm_cfg['out_channels'], normlayer_opts['opts'])),
-            BuildActivation(activation_opts['type'], **activation_opts['opts'])
-        )
         # build edge perceiving module
         epm_cfg = {
             'in_channels_list': cfg['epm']['in_channels_list'],
@@ -70,6 +64,9 @@ class CE2P(BaseModel):
             nn.Conv2d(decoder_cfg['in_channels'], decoder_cfg['out_channels'], kernel_size=1, stride=1, padding=0, bias=False),
             BuildNormalizationLayer(normlayer_opts['type'], (decoder_cfg['out_channels'], normlayer_opts['opts'])),
             BuildActivation(activation_opts['type'], **activation_opts['opts']),
+            nn.Conv2d(decoder_cfg['out_channels'], decoder_cfg['out_channels'], kernel_size=1, stride=1, padding=0, bias=False),
+            BuildNormalizationLayer(normlayer_opts['type'], (decoder_cfg['out_channels'], normlayer_opts['opts'])),
+            BuildActivation(activation_opts['type'], **activation_opts['opts']),
             nn.Dropout2d(decoder_cfg['dropout']), 
             nn.Conv2d(decoder_cfg['out_channels'], cfg['num_classes'], kernel_size=1, stride=1, padding=0)
         )
@@ -82,7 +79,6 @@ class CE2P(BaseModel):
         x1, x2, x3, x4 = self.backbone_net(x)
         # feed to pyramid pooling module
         ppm_out = self.ppm_net(x4)
-        ppm_out = self.lateral_ppm_layer(ppm_out)
         ppm_out = F.interpolate(ppm_out, size=(x1.size(2), x1.size(3)), mode='bilinear', align_corners=self.align_corners)
         # feed to edge perceiving module
         edge, edge_feats = self.edge_net((x1, x2, x3))
@@ -111,7 +107,6 @@ class CE2P(BaseModel):
         return {
                 'backbone_net': self.backbone_net,
                 'ppm_net': self.ppm_net,
-                'lateral_ppm_layer': self.lateral_ppm_layer,
                 'edge_net': self.edge_net,
                 'shortcut': self.shortcut,
                 'decoder_stage1': self.decoder_stage1,

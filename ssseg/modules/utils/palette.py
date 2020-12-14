@@ -94,6 +94,6 @@ supported_palettes = {
 
 
 '''build palette'''
-def BuildPalette(dataset_type):
+def BuildPalette(dataset_type, **kwargs):
     assert dataset_type in supported_palettes, 'unsupport dataset_type %s...' % dataset_type
     return supported_palettes[dataset_type]

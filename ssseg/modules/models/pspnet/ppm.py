@@ -24,7 +24,7 @@ class PyramidPoolingModule(nn.Module):
                 BuildNormalizationLayer(normlayer_opts['type'], (out_channels, normlayer_opts['opts'])),
                 BuildActivation(activation_opts['type'], **activation_opts['opts'])
             ))
-        self.fuse_layer = nn.Sequential(
+        self.bottleneck = nn.Sequential(
             nn.Conv2d(in_channels + out_channels * len(bin_sizes), out_channels, kernel_size=3, stride=1, padding=1, bias=False),
             BuildNormalizationLayer(normlayer_opts['type'], (out_channels, normlayer_opts['opts'])),
             BuildActivation(activation_opts['type'], **activation_opts['opts'])
@@ -39,5 +39,5 @@ class PyramidPoolingModule(nn.Module):
             out = branch(x)
             pyramid_lvls.append(F.interpolate(out, size=(h, w), mode='bilinear', align_corners=self.align_corners))
         output = torch.cat(pyramid_lvls, dim=1)
-        output = self.fuse_layer(output)
+        output = self.bottleneck(output)
         return output

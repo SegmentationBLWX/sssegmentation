@@ -10,7 +10,7 @@ from .mobilenet import BuildMobileNet
 
 
 '''build the backbone'''
-def BuildBackbone(cfg):
+def BuildBackbone(cfg, **kwargs):
     supported_backbones = {
         'hrnet': BuildHRNet,
         'resnet': BuildResNet,

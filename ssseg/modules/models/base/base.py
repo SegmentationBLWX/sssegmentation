@@ -16,6 +16,7 @@ from ...backbones import *
 class BaseModel(nn.Module):
     def __init__(self, cfg, **kwargs):
         super(BaseModel, self).__init__()
+        self.cfg = cfg
         self.mode = kwargs.get('mode')
         assert self.mode in ['TRAIN', 'TEST']
         # parse align_corners, normalization layer and activation layer cfg

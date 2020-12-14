@@ -1,6 +1,6 @@
 '''
 Function:
-    define the HRNet
+    Implementation of HRNet
 Author:
     Zhenchao Jin
 '''
@@ -23,7 +23,7 @@ model_urls = {
 }
 
 
-'''hrmodule'''
+'''HRModule'''
 class HRModule(nn.Module):
     def __init__(self, num_branches, block, num_blocks, in_channels, num_channels, normlayer_opts, multiscale_output=True, **kwargs):
         super(HRModule, self).__init__()
@@ -121,7 +121,7 @@ class HRModule(nn.Module):
         return nn.ModuleList(fuse_layers)
 
 
-'''hrnet'''
+'''HRNet'''
 class HRNet(nn.Module):
     blocks_dict = {'BASIC': BasicBlock, 'BOTTLENECK': Bottleneck}
     def __init__(self, normlayer_opts, stages_cfg, out_indices=(0, 1, 2, 3), **kwargs):

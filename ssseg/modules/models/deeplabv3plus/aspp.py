@@ -33,7 +33,7 @@ class DepthwiseSeparableASPP(nn.Module):
             BuildNormalizationLayer(normlayer_opts['type'], (out_channels, normlayer_opts['opts'])),
             BuildActivation(activation_opts['type'], **activation_opts['opts'])
         )
-        self.fuse_layer = nn.Sequential(
+        self.bottleneck = nn.Sequential(
             nn.Conv2d(out_channels * (len(rates) + 1), out_channels, kernel_size=3, stride=1, padding=1, bias=False),
             BuildNormalizationLayer(normlayer_opts['type'], (out_channels, normlayer_opts['opts'])),
             BuildActivation(activation_opts['type'], **activation_opts['opts'])
@@ -50,5 +50,5 @@ class DepthwiseSeparableASPP(nn.Module):
         global_features = F.interpolate(global_features, size=(size[2], size[3]), mode='bilinear', align_corners=self.align_corners)
         outputs.append(global_features)
         features = torch.cat(outputs, dim=1)
-        features = self.fuse_layer(features)
+        features = self.bottleneck(features)
         return features

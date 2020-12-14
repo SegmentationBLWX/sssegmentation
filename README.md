@@ -12,6 +12,7 @@ see → [click](./docs)
 #### Supported Models
 - [FCN](https://arxiv.org/pdf/1411.4038.pdf)
 - [CE2P](https://arxiv.org/pdf/1809.05996.pdf)
+- [CCNet](https://arxiv.org/pdf/1811.11721.pdf)
 - [OCRNet](https://arxiv.org/pdf/1909.11065.pdf)
 - [PSPNet](https://arxiv.org/pdf/1612.01105.pdf)
 - [UPerNet](https://arxiv.org/pdf/1807.10221.pdf)
