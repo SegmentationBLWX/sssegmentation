@@ -74,8 +74,8 @@ MODEL_CFG = {
     'is_multi_gpus': True,
     'align_corners': False,
     'distributed': {'is_on': True, 'backend': 'nccl'},
-    'normlayer_opts': {'type': 'syncbatchnorm', 'opts': {}},
-    'activation_opts': {'type': 'relu', 'opts': {'inplace': True}},
+    'norm_cfg': {'type': 'syncbatchnorm', 'opts': {}},
+    'act_cfg': {'type': 'relu', 'opts': {'inplace': True}},
     'backbone': {
         'type': 'resnet101',
         'series': 'resnet',

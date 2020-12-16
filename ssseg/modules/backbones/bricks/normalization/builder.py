@@ -4,6 +4,7 @@ Function:
 Author:
     Zhenchao Jin
 '''
+from .layernorm import LayerNorm
 from .batchnorm import BatchNorm1d, BatchNorm2d, BatchNorm3d
 from .syncbatchnorm import MMCVSyncBatchNorm, TORCHSyncBatchNorm
 
@@ -11,6 +12,7 @@ from .syncbatchnorm import MMCVSyncBatchNorm, TORCHSyncBatchNorm
 '''build normalization layer'''
 def BuildNormalizationLayer(norm_type='batchnorm2d', instanced_params=(0, {}), only_get_all_supported=False, **kwargs):
     supported_dict = {
+        'layernorm': LayerNorm,
         'batchnorm1d': BatchNorm1d,
         'batchnorm2d': BatchNorm2d,
         'batchnorm3d': BatchNorm3d,

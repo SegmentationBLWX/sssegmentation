@@ -14,7 +14,7 @@ class SelfAttentionBlock(nn.Module):
     def __init__(self, **kwargs):
         super(SelfAttentionBlock, self).__init__()
         # whether use norm
-        self.norm_opts = kwargs.get('norm_opts', {'is_on': True, 'key_channels': 256})
+        self.matmul_norm_cfg = kwargs.get('matmul_norm_cfg', {'is_on': True, 'key_channels': 256})
         # downsample layers
         self.query_downsample = kwargs.get('query_downsample', None)
         self.key_downsample = kwargs.get('key_downsample', None)
@@ -43,8 +43,8 @@ class SelfAttentionBlock(nn.Module):
         value = value.reshape(*value.shape[:2], -1)
         value = value.permute(0, 2, 1).contiguous()
         sim_map = torch.matmul(query, key)
-        if self.norm_opts['is_on']:
-            sim_map = (self.norm_opts['key_channels'] ** -0.5) * sim_map
+        if self.matmul_norm_cfg['is_on']:
+            sim_map = (self.matmul_norm_cfg['key_channels'] ** -0.5) * sim_map
         sim_map = F.softmax(sim_map, dim=-1)
         context = torch.matmul(sim_map, value)
         context = context.permute(0, 2, 1).contiguous()

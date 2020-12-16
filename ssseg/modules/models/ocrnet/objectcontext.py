@@ -16,39 +16,39 @@ class ObjectContextBlock(nn.Module):
     def __init__(self, in_channels, key_channels, **kwargs):
         super(ObjectContextBlock, self).__init__()
         # parse and set args
-        align_corners, normlayer_opts, activation_opts = kwargs['align_corners'], kwargs['normlayer_opts'], kwargs['activation_opts']
+        align_corners, norm_cfg, act_cfg = kwargs['align_corners'], kwargs['norm_cfg'], kwargs['act_cfg']
         self.align_corners = align_corners
         self.in_channels = in_channels
         self.key_channels = key_channels
         # define the module layers
         query_project = nn.Sequential(
             nn.Conv2d(in_channels, key_channels, kernel_size=1, stride=1, padding=0, bias=False),
-            BuildNormalizationLayer(normlayer_opts['type'], (key_channels, normlayer_opts['opts'])),
-            BuildActivation(activation_opts['type'], **activation_opts['opts']),
+            BuildNormalizationLayer(norm_cfg['type'], (key_channels, norm_cfg['opts'])),
+            BuildActivation(act_cfg['type'], **act_cfg['opts']),
             nn.Conv2d(key_channels, key_channels, kernel_size=1, stride=1, padding=0, bias=False),
-            BuildNormalizationLayer(normlayer_opts['type'], (key_channels, normlayer_opts['opts'])),
-            BuildActivation(activation_opts['type'], **activation_opts['opts'])
+            BuildNormalizationLayer(norm_cfg['type'], (key_channels, norm_cfg['opts'])),
+            BuildActivation(act_cfg['type'], **act_cfg['opts'])
         )
         key_project = nn.Sequential(
             nn.Conv2d(in_channels, key_channels, kernel_size=1, stride=1, padding=0, bias=False),
-            BuildNormalizationLayer(normlayer_opts['type'], (key_channels, normlayer_opts['opts'])),
-            BuildActivation(activation_opts['type'], **activation_opts['opts']),
+            BuildNormalizationLayer(norm_cfg['type'], (key_channels, norm_cfg['opts'])),
+            BuildActivation(act_cfg['type'], **act_cfg['opts']),
             nn.Conv2d(key_channels, key_channels, kernel_size=1, stride=1, padding=0, bias=False),
-            BuildNormalizationLayer(normlayer_opts['type'], (key_channels, normlayer_opts['opts'])),
-            BuildActivation(activation_opts['type'], **activation_opts['opts'])
+            BuildNormalizationLayer(norm_cfg['type'], (key_channels, norm_cfg['opts'])),
+            BuildActivation(act_cfg['type'], **act_cfg['opts'])
         )
         value_project = nn.Sequential(
             nn.Conv2d(in_channels, key_channels, kernel_size=1, stride=1, padding=0, bias=False),
-            BuildNormalizationLayer(normlayer_opts['type'], (key_channels, normlayer_opts['opts'])),
-            BuildActivation(activation_opts['type'], **activation_opts['opts'])
+            BuildNormalizationLayer(norm_cfg['type'], (key_channels, norm_cfg['opts'])),
+            BuildActivation(act_cfg['type'], **act_cfg['opts'])
         )
         out_project = nn.Sequential(
             nn.Conv2d(key_channels, in_channels, kernel_size=1, stride=1, padding=0, bias=False),
-            BuildNormalizationLayer(normlayer_opts['type'], (in_channels, normlayer_opts['opts'])),
-            BuildActivation(activation_opts['type'], **activation_opts['opts'])
+            BuildNormalizationLayer(norm_cfg['type'], (in_channels, norm_cfg['opts'])),
+            BuildActivation(act_cfg['type'], **act_cfg['opts'])
         )
         self_attention_cfg = {
-            'norm_opts': {'is_on': True, 'key_channels': key_channels},
+            'matmul_norm_cfg': {'is_on': True, 'key_channels': key_channels},
             'query_downsample': None,
             'key_downsample': None,
             'query_project': query_project,

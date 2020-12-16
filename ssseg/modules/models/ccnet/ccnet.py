@@ -17,26 +17,26 @@ from mmcv.ops import CrissCrossAttention
 class CCNet(BaseModel):
     def __init__(self, cfg, **kwargs):
         super(CCNet, self).__init__(cfg, **kwargs)
-        align_corners, normlayer_opts, activation_opts = self.align_corners, self.normlayer_opts, self.activation_opts
+        align_corners, norm_cfg, act_cfg = self.align_corners, self.norm_cfg, self.act_cfg
         # build criss-cross attention
         cca_cfg = cfg['cca']
         self.conv_before_cca = nn.Sequential(
             nn.Conv2d(cca_cfg['in_channels'], cca_cfg['out_channels'], kernel_size=3, stride=1, padding=1, bias=False),
-            BuildNormalizationLayer(normlayer_opts['type'], (cca_cfg['out_channels'], normlayer_opts['opts'])),
-            BuildActivation(activation_opts['type'], **activation_opts['opts']),
+            BuildNormalizationLayer(norm_cfg['type'], (cca_cfg['out_channels'], norm_cfg['opts'])),
+            BuildActivation(act_cfg['type'], **act_cfg['opts']),
         )
         self.cca = CrissCrossAttention(cca_cfg['out_channels'])
         self.conv_after_cca = nn.Sequential(
             nn.Conv2d(cca_cfg['out_channels'], cca_cfg['out_channels'], kernel_size=3, stride=1, padding=1, bias=False),
-            BuildNormalizationLayer(normlayer_opts['type'], (cca_cfg['out_channels'], normlayer_opts['opts'])),
-            BuildActivation(activation_opts['type'], **activation_opts['opts']),
+            BuildNormalizationLayer(norm_cfg['type'], (cca_cfg['out_channels'], norm_cfg['opts'])),
+            BuildActivation(act_cfg['type'], **act_cfg['opts']),
         )
         # build decoder
         decoder_cfg = cfg['decoder']
         self.decoder = nn.Sequential(
             nn.Conv2d(decoder_cfg['in_channels'], decoder_cfg['out_channels'], kernel_size=3, stride=1, padding=1, bias=False),
-            BuildNormalizationLayer(normlayer_opts['type'], (decoder_cfg['out_channels'], normlayer_opts['opts'])),
-            BuildActivation(activation_opts['type'], **activation_opts['opts']),
+            BuildNormalizationLayer(norm_cfg['type'], (decoder_cfg['out_channels'], norm_cfg['opts'])),
+            BuildActivation(act_cfg['type'], **act_cfg['opts']),
             nn.Dropout2d(decoder_cfg['dropout']),
             nn.Conv2d(decoder_cfg['out_channels'], cfg['num_classes'], kernel_size=1, stride=1, padding=0)
         )
@@ -44,8 +44,8 @@ class CCNet(BaseModel):
         auxiliary_cfg = cfg['auxiliary']
         self.auxiliary_decoder = nn.Sequential(
             nn.Conv2d(auxiliary_cfg['in_channels'], auxiliary_cfg['out_channels'], kernel_size=3, stride=1, padding=1, bias=False),
-            BuildNormalizationLayer(normlayer_opts['type'], (auxiliary_cfg['out_channels'], normlayer_opts['opts'])),
-            BuildActivation(activation_opts['type'], **activation_opts['opts']),
+            BuildNormalizationLayer(norm_cfg['type'], (auxiliary_cfg['out_channels'], norm_cfg['opts'])),
+            BuildActivation(act_cfg['type'], **act_cfg['opts']),
             nn.Dropout2d(auxiliary_cfg['dropout']),
             nn.Conv2d(auxiliary_cfg['out_channels'], cfg['num_classes'], kernel_size=1, stride=1, padding=0)
         )

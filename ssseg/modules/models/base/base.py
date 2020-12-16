@@ -20,10 +20,10 @@ class BaseModel(nn.Module):
         self.mode = kwargs.get('mode')
         assert self.mode in ['TRAIN', 'TEST']
         # parse align_corners, normalization layer and activation layer cfg
-        self.align_corners, self.normlayer_opts, self.activation_opts = cfg['align_corners'], cfg['normlayer_opts'], cfg['activation_opts']
+        self.align_corners, self.norm_cfg, self.act_cfg = cfg['align_corners'], cfg['norm_cfg'], cfg['act_cfg']
         # build backbone
         backbone_cfg = copy.deepcopy(cfg['backbone'])
-        backbone_cfg.update({'normlayer_opts': copy.deepcopy(self.normlayer_opts)})
+        backbone_cfg.update({'norm_cfg': copy.deepcopy(self.norm_cfg)})
         self.backbone_net = BuildBackbone(backbone_cfg)
     '''forward'''
     def forward(self, x, targets=None, losses_cfg=None):

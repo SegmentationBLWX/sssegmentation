@@ -1,3 +1,3 @@
 '''initialize'''
-from .layers import *
+from .bricks import *
 from .builder import BuildBackbone

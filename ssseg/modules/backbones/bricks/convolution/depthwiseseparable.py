@@ -12,14 +12,14 @@ from ..normalization import BuildNormalizationLayer
 
 '''Depthwise Separable Conv2d'''
 class DepthwiseSeparableConv2d(nn.Module):
-    def __init__(self, in_channels, out_channels, kernel_size=3, stride=1, padding=1, dilation=1, bias=False, normlayer_opts=None, activation_opts=None):
+    def __init__(self, in_channels, out_channels, kernel_size=3, stride=1, padding=1, dilation=1, bias=False, norm_cfg=None, act_cfg=None):
         super(DepthwiseSeparableConv2d, self).__init__()
         self.depthwise_conv = nn.Conv2d(in_channels, in_channels, kernel_size, stride, padding, dilation, groups=in_channels, bias=bias)
-        self.depthwise_bn = BuildNormalizationLayer(normlayer_opts['type'], (in_channels, normlayer_opts['opts']))
-        self.depthwise_activate = BuildActivation(activation_opts['type'], **activation_opts['opts'])
+        self.depthwise_bn = BuildNormalizationLayer(norm_cfg['type'], (in_channels, norm_cfg['opts']))
+        self.depthwise_activate = BuildActivation(act_cfg['type'], **act_cfg['opts'])
         self.pointwise_conv = nn.Conv2d(in_channels, out_channels, 1, 1, 0, 1, 1, bias=bias)
-        self.pointwise_bn = BuildNormalizationLayer(normlayer_opts['type'], (out_channels, normlayer_opts['opts']))
-        self.pointwise_activate = BuildActivation(activation_opts['type'], **activation_opts['opts'])
+        self.pointwise_bn = BuildNormalizationLayer(norm_cfg['type'], (out_channels, norm_cfg['opts']))
+        self.pointwise_activate = BuildActivation(act_cfg['type'], **act_cfg['opts'])
     '''forward'''
     def forward(self, x):
         x = self.depthwise_conv(x)

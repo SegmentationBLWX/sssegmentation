@@ -9,7 +9,7 @@ import torch
 import torch.nn as nn
 import torch.nn.functional as F
 import torch.utils.model_zoo as model_zoo
-from .layers import BuildNormalizationLayer, InvertedResidual
+from .bricks import BuildNormalizationLayer, InvertedResidual
 
 
 '''model urls'''
@@ -21,7 +21,7 @@ model_urls = {
 '''MobileNetV2'''
 class MobileNetV2(nn.Module):
     arch_settings = [[1, 16, 1], [6, 24, 2], [6, 32, 3], [6, 64, 4], [6, 96, 3], [6, 160, 3], [6, 320, 1]]
-    def __init__(self, widen_factor=1, outstride=8, out_indices=(1, 2, 4, 6), normlayer_opts=None, **kwargs):
+    def __init__(self, widen_factor=1, outstride=8, out_indices=(1, 2, 4, 6), norm_cfg=None, **kwargs):
         super(MobileNetV2, self).__init__()
         # set out_indices
         self.out_indices = out_indices
@@ -37,7 +37,7 @@ class MobileNetV2(nn.Module):
         self.in_channels = self.makedivisible(32 * widen_factor, 8)
         self.conv1 = nn.Sequential()
         self.conv1.add_module('conv', nn.Conv2d(3, self.in_channels, kernel_size=3, stride=2, padding=1, bias=False))
-        self.conv1.add_module('bn', BuildNormalizationLayer(normlayer_opts['type'], (self.in_channels, normlayer_opts['opts'])))
+        self.conv1.add_module('bn', BuildNormalizationLayer(norm_cfg['type'], (self.in_channels, norm_cfg['opts'])))
         self.conv1.add_module('activation', nn.ReLU6(inplace=True))
         # make layers
         self.layers = []
@@ -46,7 +46,7 @@ class MobileNetV2(nn.Module):
             stride = stride_list[i]
             dilation = dilation_list[i]
             out_channels = self.makedivisible(channel * widen_factor, 8)
-            inverted_res_layer = self.makelayer(out_channels, num_blocks, stride, dilation, expand_ratio, normlayer_opts)
+            inverted_res_layer = self.makelayer(out_channels, num_blocks, stride, dilation, expand_ratio, norm_cfg)
             layer_name = f'layer{i + 1}'
             self.add_module(layer_name, inverted_res_layer)
             self.layers.append(layer_name)
@@ -68,7 +68,7 @@ class MobileNetV2(nn.Module):
         if new_value < min_ratio * value: new_value += divisor
         return new_value
     '''make layer'''
-    def makelayer(self, out_channels, num_blocks, stride, dilation, expand_ratio, normlayer_opts, activation_opts=None):
+    def makelayer(self, out_channels, num_blocks, stride, dilation, expand_ratio, norm_cfg, activation_opts=None):
         if activation_opts is None: activation_opts = {'type': 'relu6', 'opts': {'inplace': True}}
         layers = []
         for i in range(num_blocks):
@@ -79,7 +79,7 @@ class MobileNetV2(nn.Module):
                     stride=stride if i == 0 else 1, 
                     expand_ratio=expand_ratio, 
                     dilation=dilation if i == 0 else 1, 
-                    normlayer_opts=normlayer_opts, 
+                    norm_cfg=norm_cfg, 
                     activation_opts=activation_opts
                 )
             )
@@ -97,7 +97,7 @@ def BuildMobileNet(mobilenet_type, **kwargs):
     # parse args
     outstride = kwargs.get('outstride', 8)
     pretrained = kwargs.get('pretrained', True)
-    normlayer_opts = kwargs.get('normlayer_opts', None)
+    norm_cfg = kwargs.get('norm_cfg', None)
     pretrained_model_path = kwargs.get('pretrained_model_path', '')
     out_indices = kwargs.get('out_indices', (1, 2, 4, 6))
     # obtain the instanced mobilenet
@@ -105,7 +105,7 @@ def BuildMobileNet(mobilenet_type, **kwargs):
         'widen_factor': 1,
         'outstride': outstride,
         'out_indices': out_indices,
-        'normlayer_opts': normlayer_opts,
+        'norm_cfg': norm_cfg,
     }
     model = supported_mobilenets[mobilenet_type](**args)
     # load weights of pretrained model

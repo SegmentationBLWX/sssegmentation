@@ -7,10 +7,13 @@ Author:
 from .fcn import FCN
 from .ce2p import CE2P
 from .ccnet import CCNet
+from .gcnet import GCNet
 from .pspnet import PSPNet
 from .ocrnet import OCRNet
+from .dnlnet import DNLNet
 from .upernet import UPerNet
 from .deeplabv3 import Deeplabv3
+from .nonlocalnet import NonLocalNet
 from .deeplabv3plus import Deeplabv3Plus
 
 
@@ -20,10 +23,13 @@ def BuildModel(cfg, mode, **kwargs):
         'fcn': FCN,
         'ce2p': CE2P,
         'ccnet': CCNet,
+        'gcnet': GCNet,
         'pspnet': PSPNet,
         'ocrnet': OCRNet,
+        'dnlnet': DNLNet,
         'upernet': UPerNet,
         'deeplabv3': Deeplabv3,
+        'nonlocalnet': NonLocalNet,
         'deeplabv3plus': Deeplabv3Plus,
     }
     model_type = cfg['type']

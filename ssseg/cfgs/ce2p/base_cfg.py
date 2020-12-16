@@ -77,8 +77,8 @@ MODEL_CFG = {
     'align_corners': False,
     'is_multi_gpus': True,
     'distributed': {'is_on': True, 'backend': 'nccl'},
-    'normlayer_opts': {'type': 'syncbatchnorm', 'opts': {}},
-    'activation_opts': {'type': 'leakyrelu', 'opts': {'negative_slope': 0.01, 'inplace': True}},
+    'norm_cfg': {'type': 'syncbatchnorm', 'opts': {}},
+    'act_cfg': {'type': 'leakyrelu', 'opts': {'negative_slope': 0.01, 'inplace': True}},
     'backbone': {
         'type': 'resnet101',
         'series': 'resnet',

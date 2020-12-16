@@ -17,29 +17,29 @@ from .aspp import DepthwiseSeparableASPP
 class Deeplabv3Plus(BaseModel):
     def __init__(self, cfg, **kwargs):
         super(Deeplabv3Plus, self).__init__(cfg, **kwargs)
-        align_corners, normlayer_opts, activation_opts = self.align_corners, self.normlayer_opts, self.activation_opts
+        align_corners, norm_cfg, act_cfg = self.align_corners, self.norm_cfg, self.act_cfg
         # build aspp net
         aspp_cfg = {
             'in_channels': cfg['aspp']['in_channels'],
             'out_channels': cfg['aspp']['out_channels'],
             'rates': cfg['aspp']['rates'],
             'align_corners': align_corners,
-            'normlayer_opts': copy.deepcopy(normlayer_opts),
-            'activation_opts': copy.deepcopy(activation_opts),
+            'norm_cfg': copy.deepcopy(norm_cfg),
+            'act_cfg': copy.deepcopy(act_cfg),
         }
         self.aspp_net = DepthwiseSeparableASPP(**aspp_cfg)
         # build shortcut
         shortcut_cfg = cfg['shortcut']
         self.shortcut = nn.Sequential(
             nn.Conv2d(shortcut_cfg['in_channels'], shortcut_cfg['out_channels'], kernel_size=1, stride=1, padding=0, bias=False),
-            BuildNormalizationLayer(normlayer_opts['type'], (shortcut_cfg['out_channels'], normlayer_opts['opts'])),
-            BuildActivation(activation_opts['type'], **activation_opts['opts'])
+            BuildNormalizationLayer(norm_cfg['type'], (shortcut_cfg['out_channels'], norm_cfg['opts'])),
+            BuildActivation(act_cfg['type'], **act_cfg['opts'])
         )
         # build decoder
         decoder_cfg = cfg['decoder']
         self.decoder = nn.Sequential(
-            DepthwiseSeparableConv2d(decoder_cfg['in_channels'], decoder_cfg['out_channels'], kernel_size=3, stride=1, padding=1, bias=False, activation_opts=activation_opts, normlayer_opts=normlayer_opts),
-            DepthwiseSeparableConv2d(decoder_cfg['out_channels'], decoder_cfg['out_channels'], kernel_size=3, stride=1, padding=1, bias=False, activation_opts=activation_opts, normlayer_opts=normlayer_opts),
+            DepthwiseSeparableConv2d(decoder_cfg['in_channels'], decoder_cfg['out_channels'], kernel_size=3, stride=1, padding=1, bias=False, act_cfg=act_cfg, norm_cfg=norm_cfg),
+            DepthwiseSeparableConv2d(decoder_cfg['out_channels'], decoder_cfg['out_channels'], kernel_size=3, stride=1, padding=1, bias=False, act_cfg=act_cfg, norm_cfg=norm_cfg),
             nn.Dropout2d(decoder_cfg['dropout']),
             nn.Conv2d(decoder_cfg['out_channels'], cfg['num_classes'], kernel_size=1, stride=1, padding=0)
         )
@@ -47,8 +47,8 @@ class Deeplabv3Plus(BaseModel):
         auxiliary_cfg = cfg['auxiliary']
         self.auxiliary_decoder = nn.Sequential(
             nn.Conv2d(auxiliary_cfg['in_channels'], auxiliary_cfg['out_channels'], kernel_size=3, stride=1, padding=1, bias=False),
-            BuildNormalizationLayer(normlayer_opts['type'], (auxiliary_cfg['out_channels'], normlayer_opts['opts'])),
-            BuildActivation(activation_opts['type'], **activation_opts['opts']),
+            BuildNormalizationLayer(norm_cfg['type'], (auxiliary_cfg['out_channels'], norm_cfg['opts'])),
+            BuildActivation(act_cfg['type'], **act_cfg['opts']),
             nn.Dropout2d(auxiliary_cfg['dropout']),
             nn.Conv2d(auxiliary_cfg['out_channels'], cfg['num_classes'], kernel_size=1, stride=1, padding=0)
         )

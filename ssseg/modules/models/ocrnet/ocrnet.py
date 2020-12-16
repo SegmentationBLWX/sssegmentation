@@ -18,13 +18,13 @@ from .spatialgather import SpatialGatherModule
 class OCRNet(BaseModel):
     def __init__(self, cfg, **kwargs):
         super(OCRNet, self).__init__(cfg, **kwargs)
-        align_corners, normlayer_opts, activation_opts = self.align_corners, self.normlayer_opts, self.activation_opts
+        align_corners, norm_cfg, act_cfg = self.align_corners, self.norm_cfg, self.act_cfg
         # build auxiliary decoder
         auxiliary_cfg = cfg['auxiliary']
         self.auxiliary_decoder = nn.Sequential(
             nn.Conv2d(auxiliary_cfg['in_channels'], auxiliary_cfg['out_channels'], kernel_size=3, stride=1, padding=1, bias=False),
-            BuildNormalizationLayer(normlayer_opts['type'], (auxiliary_cfg['out_channels'], normlayer_opts['opts'])),
-            BuildActivation(activation_opts['type'], **activation_opts['opts']),
+            BuildNormalizationLayer(norm_cfg['type'], (auxiliary_cfg['out_channels'], norm_cfg['opts'])),
+            BuildActivation(act_cfg['type'], **act_cfg['opts']),
             nn.Dropout2d(auxiliary_cfg['dropout']),
             nn.Conv2d(auxiliary_cfg['out_channels'], cfg['num_classes'], kernel_size=1, stride=1, padding=0)
         )
@@ -32,8 +32,8 @@ class OCRNet(BaseModel):
         bottleneck_cfg = cfg['bottleneck']
         self.bottleneck = nn.Sequential(
             nn.Conv2d(bottleneck_cfg['in_channels'], bottleneck_cfg['out_channels'], kernel_size=3, stride=1, padding=1, bias=False),
-            BuildNormalizationLayer(normlayer_opts['type'], (bottleneck_cfg['out_channels'], normlayer_opts['opts'])),
-            BuildActivation(activation_opts['type'], **activation_opts['opts']),
+            BuildNormalizationLayer(norm_cfg['type'], (bottleneck_cfg['out_channels'], norm_cfg['opts'])),
+            BuildActivation(act_cfg['type'], **act_cfg['opts']),
         )
         # build spatial gather module
         spatialgather_cfg = {
@@ -46,8 +46,8 @@ class OCRNet(BaseModel):
             'key_channels': cfg['spatialocr']['key_channels'],
             'out_channels': cfg['spatialocr']['out_channels'],
             'align_corners': align_corners,
-            'normlayer_opts': normlayer_opts,
-            'activation_opts': activation_opts,
+            'norm_cfg': norm_cfg,
+            'act_cfg': act_cfg,
         }
         self.spatial_ocr_net = SpatialOCRModule(**spatialocr_cfg)
         # build decoder

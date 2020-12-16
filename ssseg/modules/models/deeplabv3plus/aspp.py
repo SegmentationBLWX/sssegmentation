@@ -14,29 +14,29 @@ from ...backbones import BuildActivation, DepthwiseSeparableConv2d, BuildNormali
 class DepthwiseSeparableASPP(nn.Module):
     def __init__(self, in_channels, out_channels, rates, **kwargs):
         super(DepthwiseSeparableASPP, self).__init__()
-        align_corners, normlayer_opts, activation_opts = kwargs['align_corners'], kwargs['normlayer_opts'], kwargs['activation_opts']
+        align_corners, norm_cfg, act_cfg = kwargs['align_corners'], kwargs['norm_cfg'], kwargs['act_cfg']
         self.align_corners = align_corners
         self.parallel_branches = nn.ModuleList()
         for idx, rate in enumerate(rates):
             if rate == 1:
                 branch = nn.Sequential(
                     nn.Conv2d(in_channels, out_channels, kernel_size=1, stride=1, padding=0, dilation=rate, bias=False),
-                    BuildNormalizationLayer(normlayer_opts['type'], (out_channels, normlayer_opts['opts'])),
-                    BuildActivation(activation_opts['type'], **activation_opts['opts'])
+                    BuildNormalizationLayer(norm_cfg['type'], (out_channels, norm_cfg['opts'])),
+                    BuildActivation(act_cfg['type'], **act_cfg['opts'])
                 )
             else:
-                branch = DepthwiseSeparableConv2d(in_channels, out_channels, kernel_size=3, stride=1, padding=rate, dilation=rate, bias=False, normlayer_opts=normlayer_opts, activation_opts=activation_opts)
+                branch = DepthwiseSeparableConv2d(in_channels, out_channels, kernel_size=3, stride=1, padding=rate, dilation=rate, bias=False, norm_cfg=norm_cfg, act_cfg=act_cfg)
             self.parallel_branches.append(branch)
         self.global_branch = nn.Sequential(
             nn.AdaptiveAvgPool2d((1, 1)),
             nn.Conv2d(in_channels, out_channels, kernel_size=1, stride=1, padding=0, bias=False),
-            BuildNormalizationLayer(normlayer_opts['type'], (out_channels, normlayer_opts['opts'])),
-            BuildActivation(activation_opts['type'], **activation_opts['opts'])
+            BuildNormalizationLayer(norm_cfg['type'], (out_channels, norm_cfg['opts'])),
+            BuildActivation(act_cfg['type'], **act_cfg['opts'])
         )
         self.bottleneck = nn.Sequential(
             nn.Conv2d(out_channels * (len(rates) + 1), out_channels, kernel_size=3, stride=1, padding=1, bias=False),
-            BuildNormalizationLayer(normlayer_opts['type'], (out_channels, normlayer_opts['opts'])),
-            BuildActivation(activation_opts['type'], **activation_opts['opts'])
+            BuildNormalizationLayer(norm_cfg['type'], (out_channels, norm_cfg['opts'])),
+            BuildActivation(act_cfg['type'], **act_cfg['opts'])
         )
         self.in_channels = in_channels
         self.out_channels = out_channels

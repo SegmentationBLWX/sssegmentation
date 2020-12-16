@@ -14,20 +14,20 @@ from ...backbones import BuildActivation, BuildNormalizationLayer
 class PyramidPoolingModule(nn.Module):
     def __init__(self, in_channels, out_channels, bin_sizes, **kwargs):
         super(PyramidPoolingModule, self).__init__()
-        align_corners, normlayer_opts, activation_opts = kwargs['align_corners'], kwargs['normlayer_opts'], kwargs['activation_opts']
+        align_corners, norm_cfg, act_cfg = kwargs['align_corners'], kwargs['norm_cfg'], kwargs['act_cfg']
         self.align_corners = align_corners
         self.branches = nn.ModuleList()
         for bin_size in bin_sizes:
             self.branches.append(nn.Sequential(
                 nn.AdaptiveAvgPool2d(output_size=bin_size),
                 nn.Conv2d(in_channels, out_channels, kernel_size=1, stride=1, padding=0, bias=False),
-                BuildNormalizationLayer(normlayer_opts['type'], (out_channels, normlayer_opts['opts'])),
-                BuildActivation(activation_opts['type'], **activation_opts['opts'])
+                BuildNormalizationLayer(norm_cfg['type'], (out_channels, norm_cfg['opts'])),
+                BuildActivation(act_cfg['type'], **act_cfg['opts'])
             ))
         self.bottleneck = nn.Sequential(
             nn.Conv2d(in_channels + out_channels * len(bin_sizes), out_channels, kernel_size=3, stride=1, padding=1, bias=False),
-            BuildNormalizationLayer(normlayer_opts['type'], (out_channels, normlayer_opts['opts'])),
-            BuildActivation(activation_opts['type'], **activation_opts['opts'])
+            BuildNormalizationLayer(norm_cfg['type'], (out_channels, norm_cfg['opts'])),
+            BuildActivation(act_cfg['type'], **act_cfg['opts'])
         )
         self.in_channels = in_channels
         self.out_channels = out_channels

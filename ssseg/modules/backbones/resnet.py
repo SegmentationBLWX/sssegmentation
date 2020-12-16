@@ -8,7 +8,7 @@ import os
 import torch
 import torch.nn as nn
 import torch.utils.model_zoo as model_zoo
-from .layers import BuildNormalizationLayer
+from .bricks import BuildNormalizationLayer
 
 
 '''model urls'''
@@ -26,12 +26,12 @@ model_urls = {
 '''BasicBlock'''
 class BasicBlock(nn.Module):
     expansion = 1
-    def __init__(self, inplanes, planes, stride=1, dilation=1, downsample=None, normlayer_opts=None):
+    def __init__(self, inplanes, planes, stride=1, dilation=1, downsample=None, norm_cfg=None):
         super(BasicBlock, self).__init__()
         self.conv1 = nn.Conv2d(inplanes, planes, kernel_size=3, stride=stride, padding=dilation, dilation=dilation, bias=False)
-        self.bn1 = BuildNormalizationLayer(normlayer_opts['type'], (planes, normlayer_opts['opts']))
+        self.bn1 = BuildNormalizationLayer(norm_cfg['type'], (planes, norm_cfg['opts']))
         self.conv2 = nn.Conv2d(planes, planes, kernel_size=3, stride=1, padding=1, bias=False)
-        self.bn2 = BuildNormalizationLayer(normlayer_opts['type'], (planes, normlayer_opts['opts']))
+        self.bn2 = BuildNormalizationLayer(norm_cfg['type'], (planes, norm_cfg['opts']))
         self.relu = nn.ReLU(inplace=True)
         self.downsample = downsample
         self.stride = stride
@@ -53,14 +53,14 @@ class BasicBlock(nn.Module):
 '''Bottleneck'''
 class Bottleneck(nn.Module):
     expansion = 4
-    def __init__(self, inplanes, planes, stride=1, dilation=1, downsample=None, normlayer_opts=None):
+    def __init__(self, inplanes, planes, stride=1, dilation=1, downsample=None, norm_cfg=None):
         super(Bottleneck, self).__init__()
         self.conv1 = nn.Conv2d(inplanes, planes, kernel_size=1, stride=1, padding=0, bias=False)
-        self.bn1 = BuildNormalizationLayer(normlayer_opts['type'], (planes, normlayer_opts['opts']))
+        self.bn1 = BuildNormalizationLayer(norm_cfg['type'], (planes, norm_cfg['opts']))
         self.conv2 = nn.Conv2d(planes, planes, kernel_size=3, stride=stride, padding=dilation, dilation=dilation, bias=False)
-        self.bn2 = BuildNormalizationLayer(normlayer_opts['type'], (planes, normlayer_opts['opts']))
+        self.bn2 = BuildNormalizationLayer(norm_cfg['type'], (planes, norm_cfg['opts']))
         self.conv3 = nn.Conv2d(planes, planes * self.expansion, kernel_size=1, stride=1, padding=0, bias=False)
-        self.bn3 = BuildNormalizationLayer(normlayer_opts['type'], (planes * self.expansion, normlayer_opts['opts']))
+        self.bn3 = BuildNormalizationLayer(norm_cfg['type'], (planes * self.expansion, norm_cfg['opts']))
         self.relu = nn.ReLU(inplace=True)
         self.downsample = downsample
         self.stride = stride
@@ -91,7 +91,7 @@ class ResNet(nn.Module):
         101: (Bottleneck, (3, 4, 23, 3)),
         152: (Bottleneck, (3, 8, 36, 3))
     }
-    def __init__(self, depth, outstride, normlayer_opts, contract_dilation=True, is_improved_version=True, out_indices=(0, 1, 2, 3), **kwargs):
+    def __init__(self, depth, outstride, norm_cfg, contract_dilation=True, is_improved_version=True, out_indices=(0, 1, 2, 3), **kwargs):
         super(ResNet, self).__init__()
         self.inplanes = 64
         # set out_indices
@@ -112,39 +112,39 @@ class ResNet(nn.Module):
         if is_improved_version:
             self.stem = nn.Sequential(
                 nn.Conv2d(3, 32, kernel_size=3, stride=2, padding=1, bias=False),
-                BuildNormalizationLayer(normlayer_opts['type'], (32, normlayer_opts['opts'])),
+                BuildNormalizationLayer(norm_cfg['type'], (32, norm_cfg['opts'])),
                 nn.ReLU(inplace=True),
                 nn.Conv2d(32, 32, kernel_size=3, stride=1, padding=1, bias=False),
-                BuildNormalizationLayer(normlayer_opts['type'], (32, normlayer_opts['opts'])),
+                BuildNormalizationLayer(norm_cfg['type'], (32, norm_cfg['opts'])),
                 nn.ReLU(inplace=True),
                 nn.Conv2d(32, 64, kernel_size=3, stride=1, padding=1, bias=False),
-                BuildNormalizationLayer(normlayer_opts['type'], (64, normlayer_opts['opts'])),
+                BuildNormalizationLayer(norm_cfg['type'], (64, norm_cfg['opts'])),
                 nn.ReLU(inplace=True)
             )
         else:
             self.conv1 = nn.Conv2d(3, 64, kernel_size=7, stride=2, padding=3, bias=False)
-            self.bn1 = BuildNormalizationLayer(normlayer_opts['type'], (64, normlayer_opts['opts']))
+            self.bn1 = BuildNormalizationLayer(norm_cfg['type'], (64, norm_cfg['opts']))
             self.relu = nn.ReLU(inplace=True)
         self.maxpool = nn.MaxPool2d(kernel_size=3, stride=2, padding=1)
         # make layers
-        self.layer1 = self.makelayer(block, 64, 64, num_blocks_list[0], stride=stride_list[0], dilation=dilation_list[0], normlayer_opts=normlayer_opts, contract_dilation=contract_dilation)
-        self.layer2 = self.makelayer(block, 256, 128, num_blocks_list[1], stride=stride_list[1], dilation=dilation_list[1], normlayer_opts=normlayer_opts, contract_dilation=contract_dilation)
-        self.layer3 = self.makelayer(block, 512, 256, num_blocks_list[2], stride=stride_list[2], dilation=dilation_list[2], normlayer_opts=normlayer_opts, contract_dilation=contract_dilation)
-        self.layer4 = self.makelayer(block, 1024, 512, num_blocks_list[3], stride=stride_list[3], dilation=dilation_list[3], normlayer_opts=normlayer_opts, contract_dilation=contract_dilation)
+        self.layer1 = self.makelayer(block, 64, 64, num_blocks_list[0], stride=stride_list[0], dilation=dilation_list[0], norm_cfg=norm_cfg, contract_dilation=contract_dilation)
+        self.layer2 = self.makelayer(block, 256, 128, num_blocks_list[1], stride=stride_list[1], dilation=dilation_list[1], norm_cfg=norm_cfg, contract_dilation=contract_dilation)
+        self.layer3 = self.makelayer(block, 512, 256, num_blocks_list[2], stride=stride_list[2], dilation=dilation_list[2], norm_cfg=norm_cfg, contract_dilation=contract_dilation)
+        self.layer4 = self.makelayer(block, 1024, 512, num_blocks_list[3], stride=stride_list[3], dilation=dilation_list[3], norm_cfg=norm_cfg, contract_dilation=contract_dilation)
     '''make res layer'''
-    def makelayer(self, block, inplanes, planes, num_blocks, stride=1, dilation=1, normlayer_opts=None, contract_dilation=True):
+    def makelayer(self, block, inplanes, planes, num_blocks, stride=1, dilation=1, norm_cfg=None, contract_dilation=True):
         downsample = None
         dilations = [dilation] * num_blocks
         if contract_dilation and dilation > 1: dilations[0] = dilation // 2
         if stride != 1 or inplanes != planes * block.expansion:
             downsample = nn.Sequential(
                 nn.Conv2d(inplanes, planes * block.expansion, kernel_size=1, stride=stride, padding=0, bias=False),
-                BuildNormalizationLayer(normlayer_opts['type'], (planes * block.expansion, normlayer_opts['opts']))
+                BuildNormalizationLayer(norm_cfg['type'], (planes * block.expansion, norm_cfg['opts']))
             )
         layers = []
-        layers.append(block(inplanes, planes, stride=stride, dilation=dilations[0], downsample=downsample, normlayer_opts=normlayer_opts))
+        layers.append(block(inplanes, planes, stride=stride, dilation=dilations[0], downsample=downsample, norm_cfg=norm_cfg))
         self.inplanes = planes * block.expansion
-        for i in range(1, num_blocks): layers.append(block(planes * block.expansion, planes, stride=1, dilation=dilations[i], normlayer_opts=normlayer_opts))
+        for i in range(1, num_blocks): layers.append(block(planes * block.expansion, planes, stride=1, dilation=dilations[i], norm_cfg=norm_cfg))
         return nn.Sequential(*layers)
     '''forward'''
     def forward(self, x):
@@ -180,7 +180,7 @@ def BuildResNet(resnet_type, **kwargs):
     # parse args
     outstride = kwargs.get('outstride', 8)
     pretrained = kwargs.get('pretrained', True)
-    normlayer_opts = kwargs.get('normlayer_opts', None)
+    norm_cfg = kwargs.get('norm_cfg', None)
     contract_dilation = kwargs.get('contract_dilation', True)
     pretrained_model_path = kwargs.get('pretrained_model_path', '')
     is_improved_version = kwargs.get('is_improved_version', True)
@@ -189,7 +189,7 @@ def BuildResNet(resnet_type, **kwargs):
     resnet_args = supported_resnets[resnet_type]
     resnet_args.update({
         'outstride': outstride,
-        'normlayer_opts': normlayer_opts,
+        'norm_cfg': norm_cfg,
         'contract_dilation': contract_dilation,
         'is_improved_version': is_improved_version,
         'out_indices': out_indices,

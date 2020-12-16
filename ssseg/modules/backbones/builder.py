@@ -18,7 +18,7 @@ def BuildBackbone(cfg, **kwargs):
     }
     assert cfg['series'] in supported_backbones, 'unsupport backbone type %s...' % cfg['type']
     supported_keys = ['outstride', 'pretrained', 'out_indices', 'contract_dilation'
-                      'pretrained_model_path', 'is_improved_version', 'normlayer_opts']
+                      'pretrained_model_path', 'is_improved_version', 'norm_cfg']
     kwargs = {}
     for key in supported_keys:
         if key in cfg: kwargs.update({key: cfg[key]})
