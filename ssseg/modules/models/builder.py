@@ -8,6 +8,7 @@ from .fcn import FCN
 from .ce2p import CE2P
 from .ccnet import CCNet
 from .gcnet import GCNet
+from .apcnet import APCNet
 from .pspnet import PSPNet
 from .ocrnet import OCRNet
 from .dnlnet import DNLNet
@@ -24,6 +25,7 @@ def BuildModel(cfg, mode, **kwargs):
         'ce2p': CE2P,
         'ccnet': CCNet,
         'gcnet': GCNet,
+        'apcnet': APCNet,
         'pspnet': PSPNet,
         'ocrnet': OCRNet,
         'dnlnet': DNLNet,

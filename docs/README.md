@@ -13,6 +13,7 @@ sssegmentation is a general framework for our research on strongly supervised se
 - [OCRNet](https://arxiv.org/pdf/1909.11065.pdf)
 - [DNLNet](https://arxiv.org/pdf/2006.06668.pdf)
 - [PSPNet](https://arxiv.org/pdf/1612.01105.pdf)
+- [APCNet](https://openaccess.thecvf.com/content_CVPR_2019/papers/He_Adaptive_Pyramid_Context_Network_for_Semantic_Segmentation_CVPR_2019_paper.pdf)
 - [UPerNet](https://arxiv.org/pdf/1807.10221.pdf)
 - [Deeplabv3](https://arxiv.org/pdf/1706.05587.pdf)
 - [NonLocalNet](https://arxiv.org/pdf/1711.07971.pdf)
@@ -33,7 +34,7 @@ sssegmentation is a general framework for our research on strongly supervised se
 - [PASCAL VOC](http://host.robots.ox.ac.uk/pascal/VOC/)
 
 
-# Usage
+# Quick Start
 #### Build
 You can build the project as follows:
 ```sh

@@ -25,7 +25,7 @@ class _NonLocalNd(nn.Module, metaclass=ABCMeta):
             nn.Conv2d(self.in_channels, self.inter_channels, kernel_size=1, stride=1, padding=0)
         )
         self.conv_out = nn.Sequential(
-            nn.Conv2d(self.inter_channels, self.in_channels, kernel_size=1, stride=1, padding=0),
+            nn.Conv2d(self.inter_channels, self.in_channels, kernel_size=1, stride=1, padding=0, bias=False),
             BuildNormalizationLayer(norm_cfg['type'], (self.in_channels, norm_cfg['opts'])),
         )
         if self.mode != 'gaussian':

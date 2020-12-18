@@ -1,11 +1,11 @@
 # Introduction
 ```
-@inproceedings{wang2018non,
-    title={Non-local neural networks},
-    author={Wang, Xiaolong and Girshick, Ross and Gupta, Abhinav and He, Kaiming},
-    booktitle={Proceedings of the IEEE conference on computer vision and pattern recognition},
-    pages={7794--7803},
-    year={2018}
+@InProceedings{He_2019_CVPR,
+    author = {He, Junjun and Deng, Zhongying and Zhou, Lei and Wang, Yali and Qiao, Yu},
+    title = {Adaptive Pyramid Context Network for Semantic Segmentation},
+    booktitle = {Proceedings of the IEEE/CVF Conference on Computer Vision and Pattern Recognition (CVPR)},
+    month = {June},
+    year = {2019}
 }
 All the reported models here are available at https://pan.baidu.com/s/1nPxHw5Px7a7jZMiX-ZxRhA (code is 3jvr)
 ```
