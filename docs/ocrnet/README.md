@@ -1,4 +1,4 @@
-# OCRNet
+# Introduction
 ```
 @article{yuan2019object,
   title={Object-contextual representations for semantic segmentation},
@@ -6,40 +6,40 @@
   journal={arXiv preprint arXiv:1909.11065},
   year={2019}
 }
-The implemented details see https://arxiv.org/pdf/1909.11065.pdf.
+All the reported models here are available at https://pan.baidu.com/s/1nPxHw5Px7a7jZMiX-ZxRhA (code is 3jvr)
 ```
 
 
 # Results
 
 ## PASCAL VOC
-| Backbone                 | Crop Size  | Schedule                             | Train/Eval Set  | mIoU   | Download    |
-| :-:                      | :-:        | :-:                                  | :-:             | :-:    | :-:         |
-| R-50-D8 (PRE=ImageNet)   | 512x512    | LR/POLICY/BS/EPOCH: 0.01/poly/16/60  | trainaug/val    | -      | -           |
-| R-50-D16 (PRE=ImageNet)  | 512x512    | LR/POLICY/BS/EPOCH: 0.01/poly/16/60  | trainaug/val    | -      | -           |
-| R-101-D8 (PRE=ImageNet)  | 512x512    | LR/POLICY/BS/EPOCH: 0.01/poly/16/60  | trainaug/val    | -      | -           |
-| R-101-D16 (PRE=ImageNet) | 512x512    | LR/POLICY/BS/EPOCH: 0.01/poly/16/60  | trainaug/val    | -      | -           |
+| Backbone  | Crop Size  | Schedule                             | Train/Eval Set  | mIoU   | Download                 |
+| :-:       | :-:        | :-:                                  | :-:             | :-:    | :-:                      |
+| R-50-D8   | 512x512    | LR/POLICY/BS/EPOCH: 0.01/poly/16/60  | trainaug/val    | -      | [model]() &#124; [log]() |
+| R-50-D16  | 512x512    | LR/POLICY/BS/EPOCH: 0.01/poly/16/60  | trainaug/val    | -      | [model]() &#124; [log]() |
+| R-101-D8  | 512x512    | LR/POLICY/BS/EPOCH: 0.01/poly/16/60  | trainaug/val    | -      | [model]() &#124; [log]() |
+| R-101-D16 | 512x512    | LR/POLICY/BS/EPOCH: 0.01/poly/16/60  | trainaug/val    | -      | [model]() &#124; [log]() |
 
 ## LIP
-| Backbone                 | Crop Size  | Schedule                             | Train/Eval Set  | mIoU   | Download    |
-| :-:                      | :-:        | :-:                                  | :-:             | :-:    | :-:         |
-| R-50-D8 (PRE=ImageNet)   | 473x473    | LR/POLICY/BS/EPOCH: 0.01/poly/32/150 | train/val       | -      | -           |
-| R-50-D16 (PRE=ImageNet)  | 473x473    | LR/POLICY/BS/EPOCH: 0.01/poly/32/150 | train/val       | -      | -           |
-| R-101-D8 (PRE=ImageNet)  | 473x473    | LR/POLICY/BS/EPOCH: 0.01/poly/32/150 | train/val       | -      | -           |
-| R-101-D16 (PRE=ImageNet) | 473x473    | LR/POLICY/BS/EPOCH: 0.01/poly/32/150 | train/val       | -      | -           |
+| Backbone  | Crop Size  | Schedule                             | Train/Eval Set  | mIoU   | Download                 |
+| :-:       | :-:        | :-:                                  | :-:             | :-:    | :-:                      |
+| R-50-D8   | 473x473    | LR/POLICY/BS/EPOCH: 0.01/poly/32/150 | train/val       | -      | [model]() &#124; [log]() |
+| R-50-D16  | 473x473    | LR/POLICY/BS/EPOCH: 0.01/poly/32/150 | train/val       | -      | [model]() &#124; [log]() |
+| R-101-D8  | 473x473    | LR/POLICY/BS/EPOCH: 0.01/poly/32/150 | train/val       | -      | [model]() &#124; [log]() |
+| R-101-D16 | 473x473    | LR/POLICY/BS/EPOCH: 0.01/poly/32/150 | train/val       | -      | [model]() &#124; [log]() |
 
 ## CIHP
-| Backbone                 | Crop Size  | Schedule                             | Train/Eval Set  | mIoU   | Download    |
-| :-:                      | :-:        | :-:                                  | :-:             | :-:    | :-:         |
-| R-50-D8 (PRE=ImageNet)   | 473x473    | LR/POLICY/BS/EPOCH: 0.01/poly/32/150 | train/val       | -      | -           |
-| R-50-D16 (PRE=ImageNet)  | 473x473    | LR/POLICY/BS/EPOCH: 0.01/poly/32/150 | train/val       | -      | -           |
-| R-101-D8 (PRE=ImageNet)  | 473x473    | LR/POLICY/BS/EPOCH: 0.01/poly/32/150 | train/val       | -      | -           |
-| R-101-D16 (PRE=ImageNet) | 473x473    | LR/POLICY/BS/EPOCH: 0.01/poly/32/150 | train/val       | -      | -           |
+| Backbone  | Crop Size  | Schedule                             | Train/Eval Set  | mIoU   | Download                 |
+| :-:       | :-:        | :-:                                  | :-:             | :-:    | :-:                      |
+| R-50-D8   | 473x473    | LR/POLICY/BS/EPOCH: 0.01/poly/32/150 | train/val       | -      | [model]() &#124; [log]() |
+| R-50-D16  | 473x473    | LR/POLICY/BS/EPOCH: 0.01/poly/32/150 | train/val       | -      | [model]() &#124; [log]() |
+| R-101-D8  | 473x473    | LR/POLICY/BS/EPOCH: 0.01/poly/32/150 | train/val       | -      | [model]() &#124; [log]() |
+| R-101-D16 | 473x473    | LR/POLICY/BS/EPOCH: 0.01/poly/32/150 | train/val       | -      | [model]() &#124; [log]() |
 
 ## ATR
-| Backbone                 | Crop Size  | Schedule                             | Train/Eval Set  | mIoU   | Download    |
-| :-:                      | :-:        | :-:                                  | :-:             | :-:    | :-:         |
-| R-50-D8 (PRE=ImageNet)   | 473x473    | LR/POLICY/BS/EPOCH: 0.01/poly/32/150 | train/val       | -      | -           |
-| R-50-D16 (PRE=ImageNet)  | 473x473    | LR/POLICY/BS/EPOCH: 0.01/poly/32/150 | train/val       | -      | -           |
-| R-101-D8 (PRE=ImageNet)  | 473x473    | LR/POLICY/BS/EPOCH: 0.01/poly/32/150 | train/val       | -      | -           |
-| R-101-D16 (PRE=ImageNet) | 473x473    | LR/POLICY/BS/EPOCH: 0.01/poly/32/150 | train/val       | -      | -           |
+| Backbone  | Crop Size  | Schedule                             | Train/Eval Set  | mIoU   | Download                 |
+| :-:       | :-:        | :-:                                  | :-:             | :-:    | :-:                      |
+| R-50-D8   | 473x473    | LR/POLICY/BS/EPOCH: 0.01/poly/32/150 | train/val       | -      | [model]() &#124; [log]() |
+| R-50-D16  | 473x473    | LR/POLICY/BS/EPOCH: 0.01/poly/32/150 | train/val       | -      | [model]() &#124; [log]() |
+| R-101-D8  | 473x473    | LR/POLICY/BS/EPOCH: 0.01/poly/32/150 | train/val       | -      | [model]() &#124; [log]() |
+| R-101-D16 | 473x473    | LR/POLICY/BS/EPOCH: 0.01/poly/32/150 | train/val       | -      | [model]() &#124; [log]() |
