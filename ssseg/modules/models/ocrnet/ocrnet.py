@@ -85,10 +85,10 @@ class OCRNet(BaseModel):
     '''return all layers'''
     def alllayers(self):
         return {
-                'backbone_net': self.backbone_net,
-                'auxiliary_decoder': self.auxiliary_decoder,
-                'bottleneck': self.bottleneck,
-                'spatial_gather_net': self.spatial_gather_net,
-                'spatial_ocr_net': self.spatial_ocr_net,
-                'decoder': self.decoder
-            }
+            'backbone_net': self.backbone_net,
+            'auxiliary_decoder': self.auxiliary_decoder,
+            'bottleneck': self.bottleneck,
+            'spatial_gather_net': self.spatial_gather_net,
+            'spatial_ocr_net': self.spatial_ocr_net,
+            'decoder': self.decoder
+        }

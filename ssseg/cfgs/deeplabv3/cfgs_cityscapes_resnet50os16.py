@@ -52,7 +52,7 @@ MODEL_CFG.update(
             'series': 'resnet',
             'pretrained': True,
             'outstride': 16,
-            'is_improved_version': True
+            'is_use_stem': True
         },
     }
 )

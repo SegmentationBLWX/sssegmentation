@@ -84,10 +84,10 @@ class GCNet(BaseModel):
     '''return all layers'''
     def alllayers(self):
         return {
-                'backbone_net': self.backbone_net,
-                'conv_before_cb': self.conv_before_cb,
-                'contextblock_net': self.contextblock_net,
-                'conv_after_cb': self.conv_after_cb,
-                'decoder': self.decoder,
-                'auxiliary_decoder': self.auxiliary_decoder
-            }
+            'backbone_net': self.backbone_net,
+            'conv_before_cb': self.conv_before_cb,
+            'contextblock_net': self.contextblock_net,
+            'conv_after_cb': self.conv_after_cb,
+            'decoder': self.decoder,
+            'auxiliary_decoder': self.auxiliary_decoder
+        }

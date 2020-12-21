@@ -84,10 +84,10 @@ class NonLocalNet(BaseModel):
     '''return all layers'''
     def alllayers(self):
         return {
-                'backbone_net': self.backbone_net,
-                'conv_before_nl': self.conv_before_nl,
-                'nl_block': self.nl_block,
-                'conv_after_nl': self.conv_after_nl,
-                'decoder': self.decoder,
-                'auxiliary_decoder': self.auxiliary_decoder
-            }
+            'backbone_net': self.backbone_net,
+            'conv_before_nl': self.conv_before_nl,
+            'nl_block': self.nl_block,
+            'conv_after_nl': self.conv_after_nl,
+            'decoder': self.decoder,
+            'auxiliary_decoder': self.auxiliary_decoder
+        }

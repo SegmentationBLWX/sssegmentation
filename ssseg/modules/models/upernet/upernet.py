@@ -106,9 +106,9 @@ class UPerNet(BaseModel):
     '''return all layers'''
     def alllayers(self):
         return {
-                'backbone_net': self.backbone_net,
-                'ppm_net': self.ppm_net,
-                'lateral_convs': self.lateral_convs,
-                'decoder': self.decoder,
-                'auxiliary_decoder': self.auxiliary_decoder
-            }
+            'backbone_net': self.backbone_net,
+            'ppm_net': self.ppm_net,
+            'lateral_convs': self.lateral_convs,
+            'decoder': self.decoder,
+            'auxiliary_decoder': self.auxiliary_decoder
+        }

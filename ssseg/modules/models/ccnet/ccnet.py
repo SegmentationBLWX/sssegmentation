@@ -78,10 +78,10 @@ class CCNet(BaseModel):
     '''return all layers'''
     def alllayers(self):
         return {
-                'backbone_net': self.backbone_net,
-                'conv_before_cca': self.conv_before_cca,
-                'cca': self.cca,
-                'conv_after_cca': self.conv_before_cca,
-                'decoder': self.decoder,
-                'auxiliary_decoder': self.auxiliary_decoder
-            }
+            'backbone_net': self.backbone_net,
+            'conv_before_cca': self.conv_before_cca,
+            'cca': self.cca,
+            'conv_after_cca': self.conv_before_cca,
+            'decoder': self.decoder,
+            'auxiliary_decoder': self.auxiliary_decoder
+        }

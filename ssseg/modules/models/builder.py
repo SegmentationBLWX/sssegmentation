@@ -9,6 +9,7 @@ from .ce2p import CE2P
 from .ccnet import CCNet
 from .gcnet import GCNet
 from .apcnet import APCNet
+from .emanet import EMANet
 from .pspnet import PSPNet
 from .ocrnet import OCRNet
 from .dnlnet import DNLNet
@@ -26,6 +27,7 @@ def BuildModel(cfg, mode, **kwargs):
         'ccnet': CCNet,
         'gcnet': GCNet,
         'apcnet': APCNet,
+        'emanet': EMANet,
         'pspnet': PSPNet,
         'ocrnet': OCRNet,
         'dnlnet': DNLNet,

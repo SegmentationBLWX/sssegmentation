@@ -85,10 +85,10 @@ class DNLNet(BaseModel):
     '''return all layers'''
     def alllayers(self):
         return {
-                'backbone_net': self.backbone_net,
-                'conv_before_dnl': self.conv_before_dnl,
-                'dnl_block': self.dnl_block,
-                'conv_after_dnl': self.conv_after_dnl,
-                'decoder': self.decoder,
-                'auxiliary_decoder': self.auxiliary_decoder
-            }
+            'backbone_net': self.backbone_net,
+            'conv_before_dnl': self.conv_before_dnl,
+            'dnl_block': self.dnl_block,
+            'conv_after_dnl': self.conv_after_dnl,
+            'decoder': self.decoder,
+            'auxiliary_decoder': self.auxiliary_decoder
+        }

@@ -18,8 +18,8 @@ model_urls = {
     'resnet50': 'https://download.pytorch.org/models/resnet50-19c8e357.pth',
     'resnet101': 'https://download.pytorch.org/models/resnet101-5d3b4d8f.pth',
     'resnet152': 'https://download.pytorch.org/models/resnet152-b121ed2d.pth',
-    'resnet50impro': 'https://openmmlab.oss-accelerate.aliyuncs.com/pretrain/third_party/resnet50_v1c-2cccc1ad.pth',
-    'resnet101impro': 'https://openmmlab.oss-accelerate.aliyuncs.com/pretrain/third_party/resnet101_v1c-e67eebb6.pth',
+    'resnet50stem': 'https://openmmlab.oss-accelerate.aliyuncs.com/pretrain/third_party/resnet50_v1c-2cccc1ad.pth',
+    'resnet101stem': 'https://openmmlab.oss-accelerate.aliyuncs.com/pretrain/third_party/resnet101_v1c-e67eebb6.pth',
 }
 
 
@@ -91,7 +91,7 @@ class ResNet(nn.Module):
         101: (Bottleneck, (3, 4, 23, 3)),
         152: (Bottleneck, (3, 8, 36, 3))
     }
-    def __init__(self, depth, outstride, norm_cfg, contract_dilation=True, is_improved_version=True, out_indices=(0, 1, 2, 3), **kwargs):
+    def __init__(self, depth, outstride, norm_cfg, contract_dilation=True, is_use_stem=True, out_indices=(0, 1, 2, 3), **kwargs):
         super(ResNet, self).__init__()
         self.inplanes = 64
         # set out_indices
@@ -108,8 +108,8 @@ class ResNet(nn.Module):
         assert outstride in outstride_to_strides_and_dilations, 'unsupport outstride %s in ResNet...' % outstride
         stride_list, dilation_list = outstride_to_strides_and_dilations[outstride]
         # whether replace the 7x7 conv in the input stem with three 3x3 convs
-        self.is_improved_version = is_improved_version
-        if is_improved_version:
+        self.is_use_stem = is_use_stem
+        if is_use_stem:
             self.stem = nn.Sequential(
                 nn.Conv2d(3, 32, kernel_size=3, stride=2, padding=1, bias=False),
                 BuildNormalizationLayer(norm_cfg['type'], (32, norm_cfg['opts'])),
@@ -148,7 +148,7 @@ class ResNet(nn.Module):
         return nn.Sequential(*layers)
     '''forward'''
     def forward(self, x):
-        if self.is_improved_version:
+        if self.is_use_stem:
             x = self.stem(x)
         else:
             x = self.conv1(x)
@@ -183,7 +183,7 @@ def BuildResNet(resnet_type, **kwargs):
     norm_cfg = kwargs.get('norm_cfg', None)
     contract_dilation = kwargs.get('contract_dilation', True)
     pretrained_model_path = kwargs.get('pretrained_model_path', '')
-    is_improved_version = kwargs.get('is_improved_version', True)
+    is_use_stem = kwargs.get('is_use_stem', True)
     out_indices = kwargs.get('out_indices', (0, 1, 2, 3))
     # obtain args for instanced resnet
     resnet_args = supported_resnets[resnet_type]
@@ -191,13 +191,13 @@ def BuildResNet(resnet_type, **kwargs):
         'outstride': outstride,
         'norm_cfg': norm_cfg,
         'contract_dilation': contract_dilation,
-        'is_improved_version': is_improved_version,
+        'is_use_stem': is_use_stem,
         'out_indices': out_indices,
     })
     # obtain the instanced resnet
     model = ResNet(**resnet_args)
     # load weights of pretrained model
-    if is_improved_version: resnet_type = resnet_type + 'impro'
+    if is_use_stem: resnet_type = resnet_type + 'stem'
     if pretrained and os.path.exists(pretrained_model_path):
         checkpoint = torch.load(pretrained_model_path)
         if 'state_dict' in checkpoint: state_dict = checkpoint['state_dict']

@@ -23,10 +23,10 @@ All the reported models here are available at https://pan.baidu.com/s/1nPxHw5Px7
 ## ADE20k
 | Backbone  | Crop Size  | Schedule                             | Train/Eval Set  | mIoU   | Download                 |
 | :-:       | :-:        | :-:                                  | :-:             | :-:    | :-:                      |
-| R-50-D8   | 512x512    | LR/POLICY/BS/EPOCH: 0.01/poly/16/130 | train/val       | -      | [model]() &#124; [log]() |
-| R-50-D16  | 512x512    | LR/POLICY/BS/EPOCH: 0.01/poly/16/130 | train/val       | -      | [model]() &#124; [log]() |
-| R-101-D8  | 512x512    | LR/POLICY/BS/EPOCH: 0.01/poly/16/130 | train/val       | -      | [model]() &#124; [log]() |
-| R-101-D16 | 512x512    | LR/POLICY/BS/EPOCH: 0.01/poly/16/130 | train/val       | -      | [model]() &#124; [log]() |
+| R-50-D8   | 512x512    | LR/POLICY/BS/EPOCH: 0.01/poly/16/130 | train/val       | 43.50% | [model]() &#124; [log]() |
+| R-50-D16  | 512x512    | LR/POLICY/BS/EPOCH: 0.01/poly/16/130 | train/val       | 40.68% | [model]() &#124; [log]() |
+| R-101-D8  | 512x512    | LR/POLICY/BS/EPOCH: 0.01/poly/16/130 | train/val       | 43.87% | [model]() &#124; [log]() |
+| R-101-D16 | 512x512    | LR/POLICY/BS/EPOCH: 0.01/poly/16/130 | train/val       | 41.80% | [model]() &#124; [log]() |
 
 ## CityScapes
 | Backbone  | Crop Size  | Schedule                             | Train/Eval Set  | mIoU   | Download                 |

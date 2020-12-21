@@ -105,10 +105,10 @@ class CE2P(BaseModel):
     '''return all layers'''
     def alllayers(self):
         return {
-                'backbone_net': self.backbone_net,
-                'ppm_net': self.ppm_net,
-                'edge_net': self.edge_net,
-                'shortcut': self.shortcut,
-                'decoder_stage1': self.decoder_stage1,
-                'decoder_stage2': self.decoder_stage2,
-            }
+            'backbone_net': self.backbone_net,
+            'ppm_net': self.ppm_net,
+            'edge_net': self.edge_net,
+            'shortcut': self.shortcut,
+            'decoder_stage1': self.decoder_stage1,
+            'decoder_stage2': self.decoder_stage2,
+        }

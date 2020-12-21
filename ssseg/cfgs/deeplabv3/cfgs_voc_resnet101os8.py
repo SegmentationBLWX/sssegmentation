@@ -38,7 +38,7 @@ MODEL_CFG.update(
             'series': 'resnet',
             'pretrained': True,
             'outstride': 8,
-            'is_improved_version': True
+            'is_use_stem': True
         },
         'aspp': {
             'in_channels': 2048,

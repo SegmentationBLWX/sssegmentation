@@ -68,8 +68,8 @@ class Deeplabv3(BaseModel):
     '''return all layers'''
     def alllayers(self):
         return {
-                'backbone_net': self.backbone_net, 
-                'aspp_net': self.aspp_net, 
-                'decoder': self.decoder,
-                'auxiliary_decoder': self.auxiliary_decoder
-            }
+            'backbone_net': self.backbone_net, 
+            'aspp_net': self.aspp_net, 
+            'decoder': self.decoder,
+            'auxiliary_decoder': self.auxiliary_decoder
+        }
