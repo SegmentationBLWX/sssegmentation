@@ -22,7 +22,7 @@ class EMANet(BaseModel):
         ema_cfg = cfg['ema']
         self.ema_in_conv = nn.Sequential(
             nn.Conv2d(ema_cfg['in_channels'], ema_cfg['ema_channels'], kernel_size=3, stride=1, padding=1, bias=False),
-            BuildNormalizationLayer(norm_cfg['type'], (ema_cfg['ema_channels'], norm_cfg['opts'])),
+            BuildNormalization(norm_cfg['type'], (ema_cfg['ema_channels'], norm_cfg['opts'])),
             BuildActivation(act_cfg['type'], **act_cfg['opts']),
         )
         self.ema_mid_conv = nn.Conv2d(ema_cfg['ema_channels'], ema_cfg['ema_channels'], kernel_size=1, stride=1, padding=0)
@@ -36,18 +36,18 @@ class EMANet(BaseModel):
         )
         self.ema_out_conv = nn.Sequential(
             nn.Conv2d(ema_cfg['ema_channels'], ema_cfg['ema_channels'], kernel_size=1, stride=1, padding=0, bias=False),
-            BuildNormalizationLayer(norm_cfg['type'], (ema_cfg['ema_channels'], norm_cfg['opts'])),
+            BuildNormalization(norm_cfg['type'], (ema_cfg['ema_channels'], norm_cfg['opts'])),
         )
         self.bottleneck = nn.Sequential(
             nn.Conv2d(ema_cfg['ema_channels'], ema_cfg['ema_channels'], kernel_size=3, stride=1, padding=1, bias=False),
-            BuildNormalizationLayer(norm_cfg['type'], (ema_cfg['ema_channels'], norm_cfg['opts'])),
+            BuildNormalization(norm_cfg['type'], (ema_cfg['ema_channels'], norm_cfg['opts'])),
             BuildActivation(act_cfg['type'], **act_cfg['opts']),
         )
         # build decoder
         decoder_cfg = cfg['decoder']
         self.decoder = nn.Sequential(
             nn.Conv2d(decoder_cfg['in_channels'], decoder_cfg['out_channels'], kernel_size=3, stride=1, padding=1, bias=False),
-            BuildNormalizationLayer(norm_cfg['type'], (decoder_cfg['out_channels'], norm_cfg['opts'])),
+            BuildNormalization(norm_cfg['type'], (decoder_cfg['out_channels'], norm_cfg['opts'])),
             BuildActivation(act_cfg['type'], **act_cfg['opts']),
             nn.Dropout2d(decoder_cfg['dropout']),
             nn.Conv2d(decoder_cfg['out_channels'], cfg['num_classes'], kernel_size=1, stride=1, padding=0)
@@ -56,7 +56,7 @@ class EMANet(BaseModel):
         auxiliary_cfg = cfg['auxiliary']
         self.auxiliary_decoder = nn.Sequential(
             nn.Conv2d(auxiliary_cfg['in_channels'], auxiliary_cfg['out_channels'], kernel_size=3, stride=1, padding=1, bias=False),
-            BuildNormalizationLayer(norm_cfg['type'], (auxiliary_cfg['out_channels'], norm_cfg['opts'])),
+            BuildNormalization(norm_cfg['type'], (auxiliary_cfg['out_channels'], norm_cfg['opts'])),
             BuildActivation(act_cfg['type'], **act_cfg['opts']),
             nn.Dropout2d(auxiliary_cfg['dropout']),
             nn.Conv2d(auxiliary_cfg['out_channels'], cfg['num_classes'], kernel_size=1, stride=1, padding=0)

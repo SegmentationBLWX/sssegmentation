@@ -1,2 +1,2 @@
 '''initialize'''
-from .builder import BuildNormalizationLayer
+from .builder import BuildNormalization

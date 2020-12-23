@@ -86,7 +86,7 @@ MODEL_CFG = {
     'aspp': {
         'in_channels': 2048,
         'out_channels': 512,
-        'rates': [1, 6, 12, 18],
+        'dilations': [1, 6, 12, 18],
     },
     'decoder': {
         'in_channels': 512,

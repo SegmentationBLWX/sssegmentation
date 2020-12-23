@@ -10,7 +10,7 @@ import torch.nn as nn
 import torch.nn.functional as F
 from ...backbones import *
 from ..base import BaseModel
-from .spatialocr import SpatialOCRModule
+from .objectcontext import ObjectContextBlock
 from .spatialgather import SpatialGatherModule
 
 
@@ -23,7 +23,7 @@ class OCRNet(BaseModel):
         auxiliary_cfg = cfg['auxiliary']
         self.auxiliary_decoder = nn.Sequential(
             nn.Conv2d(auxiliary_cfg['in_channels'], auxiliary_cfg['out_channels'], kernel_size=3, stride=1, padding=1, bias=False),
-            BuildNormalizationLayer(norm_cfg['type'], (auxiliary_cfg['out_channels'], norm_cfg['opts'])),
+            BuildNormalization(norm_cfg['type'], (auxiliary_cfg['out_channels'], norm_cfg['opts'])),
             BuildActivation(act_cfg['type'], **act_cfg['opts']),
             nn.Dropout2d(auxiliary_cfg['dropout']),
             nn.Conv2d(auxiliary_cfg['out_channels'], cfg['num_classes'], kernel_size=1, stride=1, padding=0)
@@ -32,24 +32,24 @@ class OCRNet(BaseModel):
         bottleneck_cfg = cfg['bottleneck']
         self.bottleneck = nn.Sequential(
             nn.Conv2d(bottleneck_cfg['in_channels'], bottleneck_cfg['out_channels'], kernel_size=3, stride=1, padding=1, bias=False),
-            BuildNormalizationLayer(norm_cfg['type'], (bottleneck_cfg['out_channels'], norm_cfg['opts'])),
+            BuildNormalization(norm_cfg['type'], (bottleneck_cfg['out_channels'], norm_cfg['opts'])),
             BuildActivation(act_cfg['type'], **act_cfg['opts']),
         )
         # build spatial gather module
         spatialgather_cfg = {
             'scale': cfg['spatialgather']['scale']
         }
-        self.spatial_gather_net = SpatialGatherModule(**spatialgather_cfg)
-        # build spatial ocr module
-        spatialocr_cfg = {
-            'in_channels': cfg['spatialocr']['in_channels'],
-            'key_channels': cfg['spatialocr']['key_channels'],
-            'out_channels': cfg['spatialocr']['out_channels'],
-            'align_corners': align_corners,
-            'norm_cfg': norm_cfg,
-            'act_cfg': act_cfg,
-        }
-        self.spatial_ocr_net = SpatialOCRModule(**spatialocr_cfg)
+        self.spatial_gather_module = SpatialGatherModule(**spatialgather_cfg)
+        # build object context block
+        ocb_cfg = cfg['objectcontext']
+        self.object_context_block = ObjectContextBlock(
+            in_channels=ocb_cfg['in_channels'], 
+            transform_channels=ocb_cfg['transform_channels'], 
+            scale=ocb_cfg['scale'],
+            align_corners=align_corners,
+            norm_cfg=copy.deepcopy(norm_cfg),
+            act_cfg=copy.deepcopy(act_cfg),
+        )
         # build decoder
         decoder_cfg = cfg['decoder']
         self.decoder = nn.Sequential(
@@ -68,8 +68,8 @@ class OCRNet(BaseModel):
         # feed to bottleneck
         feats = self.bottleneck(x4)
         # feed to ocr module
-        context = self.spatial_gather_net(feats, preds_aux)
-        feats = self.spatial_ocr_net(feats, context)
+        context = self.spatial_gather_module(feats, preds_aux)
+        feats = self.object_context_block(feats, context)
         # feed to decoder
         preds = self.decoder(feats)
         # return according to the mode
@@ -88,7 +88,7 @@ class OCRNet(BaseModel):
             'backbone_net': self.backbone_net,
             'auxiliary_decoder': self.auxiliary_decoder,
             'bottleneck': self.bottleneck,
-            'spatial_gather_net': self.spatial_gather_net,
-            'spatial_ocr_net': self.spatial_ocr_net,
+            'spatial_gather_module': self.spatial_gather_module,
+            'object_context_block': self.object_context_block,
             'decoder': self.decoder
         }

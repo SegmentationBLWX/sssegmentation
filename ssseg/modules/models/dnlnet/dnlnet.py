@@ -22,7 +22,7 @@ class DNLNet(BaseModel):
         dnl_cfg = cfg['dnl']
         self.conv_before_dnl = nn.Sequential(
             nn.Conv2d(dnl_cfg['in_channels'], dnl_cfg['out_channels'], kernel_size=3, stride=1, padding=1, bias=False),
-            BuildNormalizationLayer(norm_cfg['type'], (dnl_cfg['out_channels'], norm_cfg['opts'])),
+            BuildNormalization(norm_cfg['type'], (dnl_cfg['out_channels'], norm_cfg['opts'])),
             BuildActivation(act_cfg['type'], **act_cfg['opts']),
         )
         self.dnl_block = DisentangledNonLocal2d(
@@ -36,14 +36,14 @@ class DNLNet(BaseModel):
         )
         self.conv_after_dnl = nn.Sequential(
             nn.Conv2d(dnl_cfg['out_channels'], dnl_cfg['out_channels'], kernel_size=3, stride=1, padding=1, bias=False),
-            BuildNormalizationLayer(norm_cfg['type'], (dnl_cfg['out_channels'], norm_cfg['opts'])),
+            BuildNormalization(norm_cfg['type'], (dnl_cfg['out_channels'], norm_cfg['opts'])),
             BuildActivation(act_cfg['type'], **act_cfg['opts']),
         )
         # build decoder
         decoder_cfg = cfg['decoder']
         self.decoder = nn.Sequential(
             nn.Conv2d(decoder_cfg['in_channels'], decoder_cfg['out_channels'], kernel_size=3, stride=1, padding=1, bias=False),
-            BuildNormalizationLayer(norm_cfg['type'], (decoder_cfg['out_channels'], norm_cfg['opts'])),
+            BuildNormalization(norm_cfg['type'], (decoder_cfg['out_channels'], norm_cfg['opts'])),
             BuildActivation(act_cfg['type'], **act_cfg['opts']),
             nn.Dropout2d(decoder_cfg['dropout']),
             nn.Conv2d(decoder_cfg['out_channels'], cfg['num_classes'], kernel_size=1, stride=1, padding=0)
@@ -52,7 +52,7 @@ class DNLNet(BaseModel):
         auxiliary_cfg = cfg['auxiliary']
         self.auxiliary_decoder = nn.Sequential(
             nn.Conv2d(auxiliary_cfg['in_channels'], auxiliary_cfg['out_channels'], kernel_size=3, stride=1, padding=1, bias=False),
-            BuildNormalizationLayer(norm_cfg['type'], (auxiliary_cfg['out_channels'], norm_cfg['opts'])),
+            BuildNormalization(norm_cfg['type'], (auxiliary_cfg['out_channels'], norm_cfg['opts'])),
             BuildActivation(act_cfg['type'], **act_cfg['opts']),
             nn.Dropout2d(auxiliary_cfg['dropout']),
             nn.Conv2d(auxiliary_cfg['out_channels'], cfg['num_classes'], kernel_size=1, stride=1, padding=0)
@@ -64,7 +64,7 @@ class DNLNet(BaseModel):
         h, w = x.size(2), x.size(3)
         # feed to backbone network
         x1, x2, x3, x4 = self.backbone_net(x)
-        # feed to non-local block
+        # feed to disentangled non-local block
         feats = self.conv_before_dnl(x4)
         feats = self.dnl_block(feats)
         feats = self.conv_after_dnl(feats)

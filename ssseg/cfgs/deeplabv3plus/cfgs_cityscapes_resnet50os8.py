@@ -57,7 +57,7 @@ MODEL_CFG.update(
         'aspp': {
             'in_channels': 2048,
             'out_channels': 512,
-            'rates': [1, 12, 24, 36],
+            'dilations': [1, 12, 24, 36],
         },
     }
 )

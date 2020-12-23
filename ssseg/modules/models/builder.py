@@ -13,6 +13,7 @@ from .emanet import EMANet
 from .pspnet import PSPNet
 from .ocrnet import OCRNet
 from .dnlnet import DNLNet
+from .annnet import ANNNet
 from .upernet import UPerNet
 from .deeplabv3 import Deeplabv3
 from .nonlocalnet import NonLocalNet
@@ -31,6 +32,7 @@ def BuildModel(cfg, mode, **kwargs):
         'pspnet': PSPNet,
         'ocrnet': OCRNet,
         'dnlnet': DNLNet,
+        'annnet': ANNNet,
         'upernet': UPerNet,
         'deeplabv3': Deeplabv3,
         'nonlocalnet': NonLocalNet,

@@ -34,7 +34,7 @@ class BaseModel(nn.Module):
     '''freeze normalization layer'''
     def freezenormlayer(self):
         for module in self.modules():
-            if type(module) in BuildNormalizationLayer(only_get_all_supported=True):
+            if type(module) in BuildNormalization(only_get_all_supported=True):
                 module.eval()
     '''calculate the losses'''
     def calculatelosses(self, predictions, targets, losses_cfg):

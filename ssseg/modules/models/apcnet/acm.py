@@ -7,7 +7,7 @@ Author:
 import torch
 import torch.nn as nn
 import torch.nn.functional as F
-from ...backbones import BuildActivation, BuildNormalizationLayer
+from ...backbones import BuildActivation, BuildNormalization
 
 
 '''adaptive context module'''
@@ -18,28 +18,28 @@ class AdaptiveContextModule(nn.Module):
         self.align_corners, norm_cfg, act_cfg = kwargs['align_corners'], kwargs['norm_cfg'], kwargs['act_cfg']
         self.pooled_redu_conv = nn.Sequential(
             nn.Conv2d(in_channels, out_channels, kernel_size=1, stride=1, padding=0, bias=False),
-            BuildNormalizationLayer(norm_cfg['type'], (out_channels, norm_cfg['opts'])),
+            BuildNormalization(norm_cfg['type'], (out_channels, norm_cfg['opts'])),
             BuildActivation(act_cfg['type'], **act_cfg['opts']),
         )
         self.input_redu_conv = nn.Sequential(
             nn.Conv2d(in_channels, out_channels, kernel_size=1, stride=1, padding=0, bias=False),
-            BuildNormalizationLayer(norm_cfg['type'], (out_channels, norm_cfg['opts'])),
+            BuildNormalization(norm_cfg['type'], (out_channels, norm_cfg['opts'])),
             BuildActivation(act_cfg['type'], **act_cfg['opts']),
         )
         self.global_info = nn.Sequential(
             nn.Conv2d(out_channels, out_channels, kernel_size=1, stride=1, padding=0, bias=False),
-            BuildNormalizationLayer(norm_cfg['type'], (out_channels, norm_cfg['opts'])),
+            BuildNormalization(norm_cfg['type'], (out_channels, norm_cfg['opts'])),
             BuildActivation(act_cfg['type'], **act_cfg['opts']),
         )
         self.gla = nn.Conv2d(out_channels, pool_scale**2, kernel_size=1, stride=1, padding=0)
         self.residual_conv = nn.Sequential(
             nn.Conv2d(out_channels, out_channels, kernel_size=1, stride=1, padding=0, bias=False),
-            BuildNormalizationLayer(norm_cfg['type'], (out_channels, norm_cfg['opts'])),
+            BuildNormalization(norm_cfg['type'], (out_channels, norm_cfg['opts'])),
             BuildActivation(act_cfg['type'], **act_cfg['opts']),
         )
         self.fusion_conv = nn.Sequential(
             nn.Conv2d(out_channels, out_channels, kernel_size=1, stride=1, padding=0, bias=False),
-            BuildNormalizationLayer(norm_cfg['type'], (out_channels, norm_cfg['opts'])),
+            BuildNormalization(norm_cfg['type'], (out_channels, norm_cfg['opts'])),
             BuildActivation(act_cfg['type'], **act_cfg['opts']),
         )
     '''forward'''

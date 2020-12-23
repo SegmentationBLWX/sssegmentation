@@ -86,7 +86,7 @@ MODEL_CFG = {
     'ppm': {
         'in_channels': 2048,
         'out_channels': 512,
-        'bin_sizes': [1, 2, 3, 6],
+        'pool_scales': [1, 2, 3, 6],
     },
     'lateral': {
         'in_channels_list': [256, 512, 1024],

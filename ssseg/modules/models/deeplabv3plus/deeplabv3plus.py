@@ -22,7 +22,7 @@ class Deeplabv3Plus(BaseModel):
         aspp_cfg = {
             'in_channels': cfg['aspp']['in_channels'],
             'out_channels': cfg['aspp']['out_channels'],
-            'rates': cfg['aspp']['rates'],
+            'dilations': cfg['aspp']['dilations'],
             'align_corners': align_corners,
             'norm_cfg': copy.deepcopy(norm_cfg),
             'act_cfg': copy.deepcopy(act_cfg),
@@ -32,7 +32,7 @@ class Deeplabv3Plus(BaseModel):
         shortcut_cfg = cfg['shortcut']
         self.shortcut = nn.Sequential(
             nn.Conv2d(shortcut_cfg['in_channels'], shortcut_cfg['out_channels'], kernel_size=1, stride=1, padding=0, bias=False),
-            BuildNormalizationLayer(norm_cfg['type'], (shortcut_cfg['out_channels'], norm_cfg['opts'])),
+            BuildNormalization(norm_cfg['type'], (shortcut_cfg['out_channels'], norm_cfg['opts'])),
             BuildActivation(act_cfg['type'], **act_cfg['opts'])
         )
         # build decoder
@@ -47,7 +47,7 @@ class Deeplabv3Plus(BaseModel):
         auxiliary_cfg = cfg['auxiliary']
         self.auxiliary_decoder = nn.Sequential(
             nn.Conv2d(auxiliary_cfg['in_channels'], auxiliary_cfg['out_channels'], kernel_size=3, stride=1, padding=1, bias=False),
-            BuildNormalizationLayer(norm_cfg['type'], (auxiliary_cfg['out_channels'], norm_cfg['opts'])),
+            BuildNormalization(norm_cfg['type'], (auxiliary_cfg['out_channels'], norm_cfg['opts'])),
             BuildActivation(act_cfg['type'], **act_cfg['opts']),
             nn.Dropout2d(auxiliary_cfg['dropout']),
             nn.Conv2d(auxiliary_cfg['out_channels'], cfg['num_classes'], kernel_size=1, stride=1, padding=0)

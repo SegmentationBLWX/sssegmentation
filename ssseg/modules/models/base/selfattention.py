@@ -7,26 +7,59 @@ Author:
 import torch
 import torch.nn as nn
 import torch.nn.functional as F
+from ...backbones import BuildActivation, BuildNormalization
 
 
 '''self attention block'''
 class SelfAttentionBlock(nn.Module):
-    def __init__(self, **kwargs):
+    def __init__(self, key_in_channels, query_in_channels, transform_channels, out_channels, share_key_query, 
+                 query_downsample, key_downsample, key_query_num_convs, value_out_num_convs, key_query_norm, 
+                 value_out_norm, matmul_norm, with_out_project, **kwargs):
         super(SelfAttentionBlock, self).__init__()
-        # whether use norm
-        self.matmul_norm_cfg = kwargs.get('matmul_norm_cfg', {'is_on': True, 'key_channels': 256})
-        # downsample layers
-        self.query_downsample = kwargs.get('query_downsample', None)
-        self.key_downsample = kwargs.get('key_downsample', None)
-        # query and key project
-        self.query_project = kwargs.get('query_project', None)
-        assert self.query_project is not None
-        self.key_project = kwargs.get('key_project', None)
-        assert self.key_project is not None
-        self.value_project = kwargs.get('value_project', None)
-        assert self.value_project is not None
-        # out project
-        self.out_project = kwargs.get('out_project', None)
+        norm_cfg, act_cfg = kwargs['norm_cfg'], kwargs['act_cfg']
+        # key project
+        self.key_project = self.buildproject(
+            in_channels=key_in_channels,
+            out_channels=transform_channels,
+            num_convs=key_query_num_convs,
+            is_use_norm=key_query_norm,
+            norm_cfg=norm_cfg,
+            act_cfg=act_cfg,
+        )
+        if share_key_query:
+            assert key_in_channels == query_in_channels
+            self.query_project = self.key_project
+        else:
+            self.query_project = self.buildproject(
+                in_channels=query_in_channels,
+                out_channels=transform_channels,
+                num_convs=key_query_num_convs,
+                is_use_norm=key_query_norm,
+                norm_cfg=norm_cfg,
+                act_cfg=act_cfg,
+            )
+        self.value_project = self.buildproject(
+            in_channels=key_in_channels,
+            out_channels=transform_channels if with_out_project else out_channels,
+            num_convs=value_out_num_convs,
+            is_use_norm=value_out_norm,
+            norm_cfg=norm_cfg,
+            act_cfg=act_cfg,
+        )
+        self.out_project = None
+        if with_out_project:
+            self.out_project = self.buildproject(
+                in_channels=transform_channels,
+                out_channels=out_channels,
+                num_convs=value_out_num_convs,
+                is_use_norm=value_out_norm,
+                norm_cfg=norm_cfg,
+                act_cfg=act_cfg,
+            )
+        self.query_downsample = query_downsample
+        self.key_downsample = key_downsample
+        self.matmul_norm = matmul_norm
+        self.transform_channels = transform_channels
     '''forward'''
     def forward(self, query_feats, key_feats):
         batch_size = query_feats.size(0)
@@ -43,8 +76,8 @@ class SelfAttentionBlock(nn.Module):
         value = value.reshape(*value.shape[:2], -1)
         value = value.permute(0, 2, 1).contiguous()
         sim_map = torch.matmul(query, key)
-        if self.matmul_norm_cfg['is_on']:
-            sim_map = (self.matmul_norm_cfg['key_channels'] ** -0.5) * sim_map
+        if self.matmul_norm:
+            sim_map = (self.transform_channels ** -0.5) * sim_map
         sim_map = F.softmax(sim_map, dim=-1)
         context = torch.matmul(sim_map, value)
         context = context.permute(0, 2, 1).contiguous()
@@ -52,3 +85,29 @@ class SelfAttentionBlock(nn.Module):
         if self.out_project is not None:
             context = self.out_project(context)
         return context
+    '''build project'''
+    def buildproject(self, in_channels, out_channels, num_convs, is_use_norm, norm_cfg, act_cfg):
+        if is_use_norm:
+            convs = [
+                nn.Sequential(
+                    nn.Conv2d(in_channels, out_channels, kernel_size=1, stride=1, padding=0, bias=False),
+                    BuildNormalization(norm_cfg['type'], (out_channels, norm_cfg['opts'])),
+                    BuildActivation(act_cfg['type'], **act_cfg['opts'])
+                )
+            ]
+            for _ in range(num_convs - 1):
+                convs.append(
+                    nn.Sequential(
+                        nn.Conv2d(out_channels, out_channels, kernel_size=1, stride=1, padding=0, bias=False),
+                        BuildNormalization(norm_cfg['type'], (out_channels, norm_cfg['opts'])),
+                        BuildActivation(act_cfg['type'], **act_cfg['opts'])
+                    )
+                )
+        else:
+            convs = [nn.Conv2d(in_channels, out_channels, kernel_size=1, stride=1, padding=0, bias=False)]
+            for _ in range(num_convs - 1):
+                convs.append(
+                    nn.Conv2d(out_channels, out_channels, kernel_size=1, stride=1, padding=0, bias=False)
+                )
+        if len(convs) > 1: return nn.Sequential(*convs)
+        return convs[0]

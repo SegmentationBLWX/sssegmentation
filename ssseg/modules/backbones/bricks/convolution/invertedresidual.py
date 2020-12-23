@@ -7,7 +7,7 @@ Author:
 import torch
 import torch.nn as nn
 from ..activation import BuildActivation
-from ..normalization import BuildNormalizationLayer
+from ..normalization import BuildNormalization
 
 
 '''InvertedResidual'''
@@ -21,17 +21,17 @@ class InvertedResidual(nn.Module):
         if expand_ratio != 1:
             layer = nn.Sequential()
             layer.add_module('conv', nn.Conv2d(in_channels, hidden_dim, kernel_size=1, stride=1, padding=0, bias=False))
-            layer.add_module('bn', BuildNormalizationLayer(norm_cfg['type'], (hidden_dim, norm_cfg['opts'])))
+            layer.add_module('bn', BuildNormalization(norm_cfg['type'], (hidden_dim, norm_cfg['opts'])))
             layer.add_module('activation', BuildActivation(act_cfg['type'], **act_cfg['opts']))
             layers.append(layer)
         layer = nn.Sequential()
         layer.add_module('conv', nn.Conv2d(hidden_dim, hidden_dim, kernel_size=3, stride=stride, padding=dilation, dilation=dilation, groups=hidden_dim, bias=False))
-        layer.add_module('bn', BuildNormalizationLayer(norm_cfg['type'], (hidden_dim, norm_cfg['opts'])))
+        layer.add_module('bn', BuildNormalization(norm_cfg['type'], (hidden_dim, norm_cfg['opts'])))
         layer.add_module('activation', BuildActivation(act_cfg['type'], **act_cfg['opts']))
         layers.extend([layer])
         layer = nn.Sequential()
         layer.add_module('conv', nn.Conv2d(hidden_dim, out_channels, kernel_size=1, stride=1, padding=0, bias=False))
-        layer.add_module('bn', BuildNormalizationLayer(norm_cfg['type'], (out_channels, norm_cfg['opts'])))
+        layer.add_module('bn', BuildNormalization(norm_cfg['type'], (out_channels, norm_cfg['opts'])))
         layers.extend([layer])
         self.conv = nn.Sequential(*layers)
     '''forward'''

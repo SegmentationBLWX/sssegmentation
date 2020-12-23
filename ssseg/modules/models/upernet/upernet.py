@@ -22,7 +22,7 @@ class UPerNet(BaseModel):
         ppm_cfg = {
             'in_channels': cfg['ppm']['in_channels'],
             'out_channels': cfg['ppm']['out_channels'],
-            'bin_sizes': cfg['ppm']['bin_sizes'],
+            'pool_scales': cfg['ppm']['pool_scales'],
             'align_corners': align_corners,
             'norm_cfg': copy.deepcopy(norm_cfg),
             'act_cfg': copy.deepcopy(act_cfg),
@@ -37,7 +37,7 @@ class UPerNet(BaseModel):
             self.lateral_convs.append(
                 nn.Sequential(
                     nn.Conv2d(in_channels, lateral_cfg['out_channels'], kernel_size=1, stride=1, padding=0, bias=False),
-                    BuildNormalizationLayer(norm_cfg['type'], (lateral_cfg['out_channels'], norm_cfg['opts'])),
+                    BuildNormalization(norm_cfg['type'], (lateral_cfg['out_channels'], norm_cfg['opts'])),
                     BuildActivation(act_cfg_copy['type'], **act_cfg_copy['opts']),
                 )
             )
@@ -48,7 +48,7 @@ class UPerNet(BaseModel):
             self.fpn_convs.append(
                 nn.Sequential(
                     nn.Conv2d(in_channels, fpn_cfg['out_channels'], kernel_size=3, stride=1, padding=1, bias=False),
-                    BuildNormalizationLayer(norm_cfg['type'], (fpn_cfg['out_channels'], norm_cfg['opts'])),
+                    BuildNormalization(norm_cfg['type'], (fpn_cfg['out_channels'], norm_cfg['opts'])),
                     BuildActivation(act_cfg_copy['type'], **act_cfg_copy['opts']),
                 )
             )
@@ -56,7 +56,7 @@ class UPerNet(BaseModel):
         decoder_cfg = cfg['decoder']
         self.decoder = nn.Sequential(
             nn.Conv2d(decoder_cfg['in_channels'], decoder_cfg['out_channels'], kernel_size=3, stride=1, padding=1, bias=False),
-            BuildNormalizationLayer(norm_cfg['type'], (decoder_cfg['out_channels'], norm_cfg['opts'])),
+            BuildNormalization(norm_cfg['type'], (decoder_cfg['out_channels'], norm_cfg['opts'])),
             BuildActivation(act_cfg['type'], **act_cfg['opts']),
             nn.Dropout2d(decoder_cfg['dropout']),
             nn.Conv2d(decoder_cfg['out_channels'], cfg['num_classes'], kernel_size=1, stride=1, padding=0)
@@ -65,7 +65,7 @@ class UPerNet(BaseModel):
         auxiliary_cfg = cfg['auxiliary']
         self.auxiliary_decoder = nn.Sequential(
             nn.Conv2d(auxiliary_cfg['in_channels'], auxiliary_cfg['out_channels'], kernel_size=3, stride=1, padding=1, bias=False),
-            BuildNormalizationLayer(norm_cfg['type'], (auxiliary_cfg['out_channels'], norm_cfg['opts'])),
+            BuildNormalization(norm_cfg['type'], (auxiliary_cfg['out_channels'], norm_cfg['opts'])),
             BuildActivation(act_cfg['type'], **act_cfg['opts']),
             nn.Dropout2d(auxiliary_cfg['dropout']),
             nn.Conv2d(auxiliary_cfg['out_channels'], cfg['num_classes'], kernel_size=1, stride=1, padding=0)

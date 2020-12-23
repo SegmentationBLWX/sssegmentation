@@ -8,7 +8,7 @@ import os
 import torch
 import torch.nn as nn
 import torch.utils.model_zoo as model_zoo
-from .bricks import BuildNormalizationLayer
+from .bricks import BuildNormalization
 
 
 '''model urls'''
@@ -29,9 +29,9 @@ class BasicBlock(nn.Module):
     def __init__(self, inplanes, planes, stride=1, dilation=1, downsample=None, norm_cfg=None):
         super(BasicBlock, self).__init__()
         self.conv1 = nn.Conv2d(inplanes, planes, kernel_size=3, stride=stride, padding=dilation, dilation=dilation, bias=False)
-        self.bn1 = BuildNormalizationLayer(norm_cfg['type'], (planes, norm_cfg['opts']))
+        self.bn1 = BuildNormalization(norm_cfg['type'], (planes, norm_cfg['opts']))
         self.conv2 = nn.Conv2d(planes, planes, kernel_size=3, stride=1, padding=1, bias=False)
-        self.bn2 = BuildNormalizationLayer(norm_cfg['type'], (planes, norm_cfg['opts']))
+        self.bn2 = BuildNormalization(norm_cfg['type'], (planes, norm_cfg['opts']))
         self.relu = nn.ReLU(inplace=True)
         self.downsample = downsample
         self.stride = stride
@@ -56,11 +56,11 @@ class Bottleneck(nn.Module):
     def __init__(self, inplanes, planes, stride=1, dilation=1, downsample=None, norm_cfg=None):
         super(Bottleneck, self).__init__()
         self.conv1 = nn.Conv2d(inplanes, planes, kernel_size=1, stride=1, padding=0, bias=False)
-        self.bn1 = BuildNormalizationLayer(norm_cfg['type'], (planes, norm_cfg['opts']))
+        self.bn1 = BuildNormalization(norm_cfg['type'], (planes, norm_cfg['opts']))
         self.conv2 = nn.Conv2d(planes, planes, kernel_size=3, stride=stride, padding=dilation, dilation=dilation, bias=False)
-        self.bn2 = BuildNormalizationLayer(norm_cfg['type'], (planes, norm_cfg['opts']))
+        self.bn2 = BuildNormalization(norm_cfg['type'], (planes, norm_cfg['opts']))
         self.conv3 = nn.Conv2d(planes, planes * self.expansion, kernel_size=1, stride=1, padding=0, bias=False)
-        self.bn3 = BuildNormalizationLayer(norm_cfg['type'], (planes * self.expansion, norm_cfg['opts']))
+        self.bn3 = BuildNormalization(norm_cfg['type'], (planes * self.expansion, norm_cfg['opts']))
         self.relu = nn.ReLU(inplace=True)
         self.downsample = downsample
         self.stride = stride
@@ -112,18 +112,18 @@ class ResNet(nn.Module):
         if is_use_stem:
             self.stem = nn.Sequential(
                 nn.Conv2d(3, 32, kernel_size=3, stride=2, padding=1, bias=False),
-                BuildNormalizationLayer(norm_cfg['type'], (32, norm_cfg['opts'])),
+                BuildNormalization(norm_cfg['type'], (32, norm_cfg['opts'])),
                 nn.ReLU(inplace=True),
                 nn.Conv2d(32, 32, kernel_size=3, stride=1, padding=1, bias=False),
-                BuildNormalizationLayer(norm_cfg['type'], (32, norm_cfg['opts'])),
+                BuildNormalization(norm_cfg['type'], (32, norm_cfg['opts'])),
                 nn.ReLU(inplace=True),
                 nn.Conv2d(32, 64, kernel_size=3, stride=1, padding=1, bias=False),
-                BuildNormalizationLayer(norm_cfg['type'], (64, norm_cfg['opts'])),
+                BuildNormalization(norm_cfg['type'], (64, norm_cfg['opts'])),
                 nn.ReLU(inplace=True)
             )
         else:
             self.conv1 = nn.Conv2d(3, 64, kernel_size=7, stride=2, padding=3, bias=False)
-            self.bn1 = BuildNormalizationLayer(norm_cfg['type'], (64, norm_cfg['opts']))
+            self.bn1 = BuildNormalization(norm_cfg['type'], (64, norm_cfg['opts']))
             self.relu = nn.ReLU(inplace=True)
         self.maxpool = nn.MaxPool2d(kernel_size=3, stride=2, padding=1)
         # make layers
@@ -139,7 +139,7 @@ class ResNet(nn.Module):
         if stride != 1 or inplanes != planes * block.expansion:
             downsample = nn.Sequential(
                 nn.Conv2d(inplanes, planes * block.expansion, kernel_size=1, stride=stride, padding=0, bias=False),
-                BuildNormalizationLayer(norm_cfg['type'], (planes * block.expansion, norm_cfg['opts']))
+                BuildNormalization(norm_cfg['type'], (planes * block.expansion, norm_cfg['opts']))
             )
         layers = []
         layers.append(block(inplanes, planes, stride=stride, dilation=dilations[0], downsample=downsample, norm_cfg=norm_cfg))

@@ -9,7 +9,7 @@ import torch
 import torch.nn as nn
 import torch.nn.functional as F
 import torch.utils.model_zoo as model_zoo
-from .bricks import BuildNormalizationLayer, InvertedResidual
+from .bricks import BuildNormalization, InvertedResidual
 
 
 '''model urls'''
@@ -37,7 +37,7 @@ class MobileNetV2(nn.Module):
         self.in_channels = self.makedivisible(32 * widen_factor, 8)
         self.conv1 = nn.Sequential()
         self.conv1.add_module('conv', nn.Conv2d(3, self.in_channels, kernel_size=3, stride=2, padding=1, bias=False))
-        self.conv1.add_module('bn', BuildNormalizationLayer(norm_cfg['type'], (self.in_channels, norm_cfg['opts'])))
+        self.conv1.add_module('bn', BuildNormalization(norm_cfg['type'], (self.in_channels, norm_cfg['opts'])))
         self.conv1.add_module('activation', nn.ReLU6(inplace=True))
         # make layers
         self.layers = []

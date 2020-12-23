@@ -9,8 +9,8 @@ import torch
 import torch.nn as nn
 import torch.nn.functional as F
 import torch.utils.model_zoo as model_zoo
+from .bricks import BuildNormalization
 from .resnet import BasicBlock, Bottleneck
-from .bricks import BuildNormalizationLayer
 
 
 '''model urls'''
@@ -69,7 +69,7 @@ class HRModule(nn.Module):
         if stride != 1 or self.in_channels[branch_index] != num_channels[branch_index] * block.expansion:
             downsample = nn.Sequential(
                 nn.Conv2d(self.in_channels[branch_index], num_channels[branch_index] * block.expansion, kernel_size=1, stride=stride, padding=0, bias=False),
-                BuildNormalizationLayer(norm_cfg['type'], (num_channels[branch_index] * block.expansion, norm_cfg['opts'])),
+                BuildNormalization(norm_cfg['type'], (num_channels[branch_index] * block.expansion, norm_cfg['opts'])),
             )
         layers = []
         layers.append(block(self.in_channels[branch_index], num_channels[branch_index], stride, downsample=downsample, norm_cfg=norm_cfg))
@@ -92,7 +92,7 @@ class HRModule(nn.Module):
                     fuse_layer.append(
                         nn.Sequential(
                             nn.Conv2d(in_channels[j], in_channels[i], kernel_size=1, stride=1, padding=0, bias=False),
-                            BuildNormalizationLayer(norm_cfg['type'], (in_channels[i], norm_cfg['opts'])),
+                            BuildNormalization(norm_cfg['type'], (in_channels[i], norm_cfg['opts'])),
                             nn.Upsample(scale_factor=2**(j-i), mode='bilinear', align_corners=False)
                         )
                     )
@@ -105,14 +105,14 @@ class HRModule(nn.Module):
                             conv_downsamples.append(
                                 nn.Sequential(
                                     nn.Conv2d(in_channels[j], in_channels[i], kernel_size=3, stride=2, padding=1, bias=False),
-                                    BuildNormalizationLayer(norm_cfg['type'], (in_channels[i], norm_cfg['opts']))
+                                    BuildNormalization(norm_cfg['type'], (in_channels[i], norm_cfg['opts']))
                                 )
                             )
                         else:
                             conv_downsamples.append(
                                 nn.Sequential(
                                     nn.Conv2d(in_channels[j], in_channels[j], kernel_size=3, stride=2, padding=1, bias=False),
-                                    BuildNormalizationLayer(norm_cfg['type'], (in_channels[j], norm_cfg['opts'])),
+                                    BuildNormalization(norm_cfg['type'], (in_channels[j], norm_cfg['opts'])),
                                     nn.ReLU(inplace=False)
                                 )
                             )
@@ -130,9 +130,9 @@ class HRNet(nn.Module):
         self.out_indices = out_indices
         # stem net
         self.conv1 = nn.Conv2d(3, 64, kernel_size=3, stride=2, padding=1, bias=False)
-        self.bn1 = BuildNormalizationLayer(norm_cfg['type'], (64, norm_cfg['opts']))
+        self.bn1 = BuildNormalization(norm_cfg['type'], (64, norm_cfg['opts']))
         self.conv2 = nn.Conv2d(64, 64, kernel_size=3, stride=2, padding=1, bias=False)
-        self.bn2 = BuildNormalizationLayer(norm_cfg['type'], (64, norm_cfg['opts']))
+        self.bn2 = BuildNormalization(norm_cfg['type'], (64, norm_cfg['opts']))
         self.relu = nn.ReLU(inplace=True)
         # stage1
         self.stage1_cfg = stages_cfg['stage1']
@@ -221,7 +221,7 @@ class HRNet(nn.Module):
         if stride != 1 or inplanes != planes * block.expansion:
             downsample = nn.Sequential(
                 nn.Conv2d(inplanes, planes * block.expansion, kernel_size=1, stride=1, padding=0, bias=False),
-                BuildNormalizationLayer(norm_cfg['type'], (planes * block.expansion, norm_cfg['opts']))
+                BuildNormalization(norm_cfg['type'], (planes * block.expansion, norm_cfg['opts']))
             )
         layers = []
         layers.append(
@@ -244,7 +244,7 @@ class HRNet(nn.Module):
                      transition_layers.append(
                         nn.Sequential(
                             nn.Conv2d(num_channels_pre_layer[i], num_channels_cur_layer[i], kernel_size=3, stride=1, padding=1, bias=False),
-                            BuildNormalizationLayer(norm_cfg['type'], (num_channels_cur_layer[i], norm_cfg['opts'])),
+                            BuildNormalization(norm_cfg['type'], (num_channels_cur_layer[i], norm_cfg['opts'])),
                             nn.ReLU(inplace=True)
                         )
                      )
@@ -258,7 +258,7 @@ class HRNet(nn.Module):
                     conv_downsamples.append(
                         nn.Sequential(
                             nn.Conv2d(in_channels, out_channels, kernel_size=3, stride=2, padding=1, bias=False),
-                            BuildNormalizationLayer(norm_cfg['type'], (out_channels, norm_cfg['opts'])),
+                            BuildNormalization(norm_cfg['type'], (out_channels, norm_cfg['opts'])),
                             nn.ReLU(inplace=True)
                         )
                     )

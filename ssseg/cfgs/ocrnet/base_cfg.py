@@ -95,10 +95,10 @@ MODEL_CFG = {
     'spatialgather': {
         'scale': 1,
     },
-    'spatialocr': {
+    'objectcontext': {
         'in_channels': 512,
-        'key_channels': 256,
-        'out_channels': 512,
+        'transform_channels': 256,
+        'scale': 1,
     },
     'decoder': {
         'in_channels': 512,

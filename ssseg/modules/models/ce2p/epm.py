@@ -7,7 +7,7 @@ Author:
 import torch
 import torch.nn as nn
 import torch.nn.functional as F
-from ...backbones import BuildActivation, BuildNormalizationLayer
+from ...backbones import BuildActivation, BuildNormalization
 
 
 '''edge perceiving module'''
@@ -20,7 +20,7 @@ class EdgePerceivingModule(nn.Module):
         for in_channels in in_channels_list:
             self.branches.append(nn.Sequential(
                 nn.Conv2d(in_channels, hidden_channels, kernel_size=1, stride=1, padding=0, bias=False),
-                BuildNormalizationLayer(norm_cfg['type'], (hidden_channels, norm_cfg['opts'])),
+                BuildNormalization(norm_cfg['type'], (hidden_channels, norm_cfg['opts'])),
                 BuildActivation(act_cfg['type'], **act_cfg['opts'])
             ))
         self.edge_conv = nn.Conv2d(hidden_channels, out_channels, kernel_size=3, stride=1, padding=1, bias=True)

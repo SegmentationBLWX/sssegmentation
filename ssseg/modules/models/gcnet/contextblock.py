@@ -6,7 +6,7 @@ Author:
 '''
 import torch
 import torch.nn as nn
-from ...backbones import BuildActivation, BuildNormalizationLayer
+from ...backbones import BuildActivation, BuildNormalization
 
 
 '''context block'''
@@ -32,7 +32,7 @@ class ContextBlock(nn.Module):
         if 'channel_add' in fusion_types:
             self.channel_add_conv = nn.Sequential(
                 nn.Conv2d(self.in_channels, self.planes, kernel_size=1, stride=1, padding=0),
-                BuildNormalizationLayer(norm_cfg['type'], ([self.planes, 1, 1], norm_cfg['opts'])),
+                BuildNormalization(norm_cfg['type'], ([self.planes, 1, 1], norm_cfg['opts'])),
                 BuildActivation(act_cfg['type'], **act_cfg['opts']),
                 nn.Conv2d(self.planes, self.in_channels, kernel_size=1, stride=1, padding=0)
             )
@@ -41,7 +41,7 @@ class ContextBlock(nn.Module):
         if 'channel_mul' in fusion_types:
             self.channel_mul_conv = nn.Sequential(
                 nn.Conv2d(self.in_channels, self.planes, kernel_size=1, stride=1, padding=0),
-                BuildNormalizationLayer(norm_cfg['type'], ([self.planes, 1, 1], norm_cfg['opts'])),
+                BuildNormalization(norm_cfg['type'], ([self.planes, 1, 1], norm_cfg['opts'])),
                 BuildActivation(act_cfg['type'], **act_cfg['opts']),
                 nn.Conv2d(self.planes, self.in_channels, kernel_size=1, stride=1, padding=0)
             )
