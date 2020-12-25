@@ -7,13 +7,13 @@ DATASET_CFG = DATASET_CFG.copy()
 DATASET_CFG['train'].update(
     {
         'type': 'ade20k',
-        'rootdir': '/data/ADE20k',
+        'rootdir': 'data/ADE20k',
     }
 )
 DATASET_CFG['test'].update(
     {
         'type': 'ade20k',
-        'rootdir': '/data/ADE20k',
+        'rootdir': 'data/ADE20k',
     }
 )
 # modify dataloader config

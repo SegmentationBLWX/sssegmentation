@@ -8,13 +8,13 @@ DATASET_CFG['train'].update(
     {
         'type': 'voc',
         'set': 'trainaug',
-        'rootdir': '/data/VOCdevkit/VOC2012',
+        'rootdir': 'data/VOCdevkit/VOC2012',
     }
 )
 DATASET_CFG['test'].update(
     {
         'type': 'voc',
-        'rootdir': '/data/VOCdevkit/VOC2012',
+        'rootdir': 'data/VOCdevkit/VOC2012',
     }
 )
 # modify dataloader config
@@ -38,7 +38,7 @@ MODEL_CFG.update(
             'series': 'resnet',
             'pretrained': True,
             'outstride': 8,
-            'is_use_stem': True
+            'use_stem': True
         },
         'aspp': {
             'in_channels': 2048,

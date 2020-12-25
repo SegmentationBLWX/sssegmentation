@@ -7,7 +7,7 @@ DATASET_CFG = DATASET_CFG.copy()
 DATASET_CFG['train'].update(
     {
         'type': 'lip',
-        'rootdir': '/data/LIP',
+        'rootdir': 'data/LIP',
         'aug_opts': [('Resize', {'output_size': (520, 520), 'keep_ratio': False, 'scale_range': (0.75, 1.25)}),
                      ('RandomCrop', {'crop_size': (473, 473), 'one_category_max_ratio': 0.75}),
                      ('RandomFlip', {'flip_prob': 0.5, 'fix_ann_pairs': [(15, 14), (17, 16), (19, 18)]}),
@@ -21,7 +21,7 @@ DATASET_CFG['train'].update(
 DATASET_CFG['test'].update(
     {
         'type': 'lip',
-        'rootdir': '/data/LIP',
+        'rootdir': 'data/LIP',
         'aug_opts': [('Resize', {'output_size': (473, 473), 'keep_ratio': False, 'scale_range': None}),
                      ('Normalize', {'mean': [123.675, 116.28, 103.53], 'std': [58.395, 57.12, 57.375]}),
                      ('ToTensor', {}),]

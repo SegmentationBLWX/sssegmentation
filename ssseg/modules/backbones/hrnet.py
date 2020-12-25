@@ -124,12 +124,12 @@ class HRModule(nn.Module):
 '''HRNet'''
 class HRNet(nn.Module):
     blocks_dict = {'BASIC': BasicBlock, 'BOTTLENECK': Bottleneck}
-    def __init__(self, norm_cfg, stages_cfg, out_indices=(0, 1, 2, 3), **kwargs):
+    def __init__(self, in_channels=3, norm_cfg=None, stages_cfg=None, out_indices=(0, 1, 2, 3), **kwargs):
         super(HRNet, self).__init__()
         # set out_indices
         self.out_indices = out_indices
         # stem net
-        self.conv1 = nn.Conv2d(3, 64, kernel_size=3, stride=2, padding=1, bias=False)
+        self.conv1 = nn.Conv2d(in_channels, 64, kernel_size=3, stride=2, padding=1, bias=False)
         self.bn1 = BuildNormalization(norm_cfg['type'], (64, norm_cfg['opts']))
         self.conv2 = nn.Conv2d(64, 64, kernel_size=3, stride=2, padding=1, bias=False)
         self.bn2 = BuildNormalization(norm_cfg['type'], (64, norm_cfg['opts']))
@@ -423,24 +423,26 @@ def BuildHRNet(hrnet_type, **kwargs):
     }
     assert hrnet_type in supported_hrnets, 'unsupport the hrnet_type %s...' % hrnet_type
     # parse args
-    pretrained = kwargs.get('pretrained', True)
-    norm_cfg = kwargs.get('norm_cfg', None)
-    pretrained_model_path = kwargs.get('pretrained_model_path', '')
-    out_indices = kwargs.get('out_indices', (0, 1, 2, 3))
+    default_args = {
+        'norm_cfg': None,
+        'in_channels': 3,
+        'pretrained': True,
+        'pretrained_model_path': '',
+        'out_indices': (0, 1, 2, 3),
+    }
+    for key, value in kwargs.items():
+        if key in default_args: default_args.update({key: value})
     # obtain the instanced hrnet
     hrnet_args = {'stages_cfg': supported_hrnets[hrnet_type]}
-    hrnet_args.update({
-        'norm_cfg': norm_cfg,
-        'out_indices': out_indices
-    })
+    hrnet_args.update(default_args)
     model = HRNet(**hrnet_args)
     # load weights of pretrained model
-    if pretrained and os.path.exists(pretrained_model_path):
-        checkpoint = torch.load(pretrained_model_path)
+    if default_args['pretrained'] and os.path.exists(default_args['pretrained_model_path']):
+        checkpoint = torch.load(default_args['pretrained_model_path'])
         if 'state_dict' in checkpoint: state_dict = checkpoint['state_dict']
         else: state_dict = checkpoint
         model.load_state_dict(state_dict, strict=False)
-    elif pretrained:
+    elif default_args['pretrained']:
         checkpoint = model_zoo.load_url(model_urls[hrnet_type])
         if 'state_dict' in checkpoint: state_dict = checkpoint['state_dict']
         else: state_dict = checkpoint

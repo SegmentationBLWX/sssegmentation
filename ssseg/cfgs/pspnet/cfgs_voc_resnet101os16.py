@@ -8,13 +8,13 @@ DATASET_CFG['train'].update(
     {
         'type': 'voc',
         'set': 'trainaug',
-        'rootdir': '/data/VOCdevkit/VOC2012',
+        'rootdir': 'data/VOCdevkit/VOC2012',
     }
 )
 DATASET_CFG['test'].update(
     {
         'type': 'voc',
-        'rootdir': '/data/VOCdevkit/VOC2012',
+        'rootdir': 'data/VOCdevkit/VOC2012',
     }
 )
 # modify dataloader config
@@ -34,12 +34,12 @@ MODEL_CFG.update(
     {
         'num_classes': 21,
         'backbone': {
-                'type': 'resnet101',
-                'series': 'resnet',
-                'pretrained': True,
-                'outstride': 16,
-                'is_use_stem': True
-            },
+            'type': 'resnet101',
+            'series': 'resnet',
+            'pretrained': True,
+            'outstride': 16,
+            'use_stem': True
+        },
     }
 )
 # modify common config

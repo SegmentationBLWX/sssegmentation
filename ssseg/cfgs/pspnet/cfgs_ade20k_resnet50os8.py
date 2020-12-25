@@ -7,13 +7,13 @@ DATASET_CFG = DATASET_CFG.copy()
 DATASET_CFG['train'].update(
     {
         'type': 'ade20k',
-        'rootdir': '/data/ADE20k',
+        'rootdir': 'data/ADE20k',
     }
 )
 DATASET_CFG['test'].update(
     {
         'type': 'ade20k',
-        'rootdir': '/data/ADE20k',
+        'rootdir': 'data/ADE20k',
     }
 )
 # modify dataloader config
@@ -33,12 +33,12 @@ MODEL_CFG.update(
     {
         'num_classes': 150,
         'backbone': {
-                'type': 'resnet50',
-                'series': 'resnet',
-                'pretrained': True,
-                'outstride': 8,
-                'is_use_stem': True
-            },
+            'type': 'resnet50',
+            'series': 'resnet',
+            'pretrained': True,
+            'outstride': 8,
+            'use_stem': True
+        },
     }
 )
 # modify common config

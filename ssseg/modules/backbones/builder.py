@@ -6,6 +6,7 @@ Author:
 '''
 from .hrnet import BuildHRNet
 from .resnet import BuildResNet
+from .resnest import BuildResNeSt
 from .mobilenet import BuildMobileNet
 
 
@@ -14,12 +15,8 @@ def BuildBackbone(cfg, **kwargs):
     supported_backbones = {
         'hrnet': BuildHRNet,
         'resnet': BuildResNet,
+        'resnest': BuildResNeSt,
         'mobilenet': BuildMobileNet,
     }
     assert cfg['series'] in supported_backbones, 'unsupport backbone type %s...' % cfg['type']
-    supported_keys = ['outstride', 'pretrained', 'out_indices', 'contract_dilation'
-                      'pretrained_model_path', 'is_use_stem', 'norm_cfg']
-    kwargs = {}
-    for key in supported_keys:
-        if key in cfg: kwargs.update({key: cfg[key]})
-    return supported_backbones[cfg['series']](cfg['type'], **kwargs)
+    return supported_backbones[cfg['series']](cfg['type'], **cfg)

@@ -8,13 +8,13 @@ DATASET_CFG['train'].update(
     {
         'type': 'voc',
         'set': 'trainaug',
-        'rootdir': '/data/VOCdevkit/VOC2012',
+        'rootdir': 'data/VOCdevkit/VOC2012',
     }
 )
 DATASET_CFG['test'].update(
     {
         'type': 'voc',
-        'rootdir': '/data/VOCdevkit/VOC2012',
+        'rootdir': 'data/VOCdevkit/VOC2012',
     }
 )
 # modify dataloader config

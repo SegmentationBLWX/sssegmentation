@@ -21,7 +21,7 @@ model_urls = {
 '''MobileNetV2'''
 class MobileNetV2(nn.Module):
     arch_settings = [[1, 16, 1], [6, 24, 2], [6, 32, 3], [6, 64, 4], [6, 96, 3], [6, 160, 3], [6, 320, 1]]
-    def __init__(self, widen_factor=1, outstride=8, out_indices=(1, 2, 4, 6), norm_cfg=None, **kwargs):
+    def __init__(self, in_channels=3, widen_factor=1, outstride=8, out_indices=(1, 2, 4, 6), norm_cfg=None, **kwargs):
         super(MobileNetV2, self).__init__()
         # set out_indices
         self.out_indices = out_indices
@@ -36,7 +36,7 @@ class MobileNetV2(nn.Module):
         # conv1
         self.in_channels = self.makedivisible(32 * widen_factor, 8)
         self.conv1 = nn.Sequential()
-        self.conv1.add_module('conv', nn.Conv2d(3, self.in_channels, kernel_size=3, stride=2, padding=1, bias=False))
+        self.conv1.add_module('conv', nn.Conv2d(in_channels, self.in_channels, kernel_size=3, stride=2, padding=1, bias=False))
         self.conv1.add_module('bn', BuildNormalization(norm_cfg['type'], (self.in_channels, norm_cfg['opts'])))
         self.conv1.add_module('activation', nn.ReLU6(inplace=True))
         # make layers
@@ -68,8 +68,8 @@ class MobileNetV2(nn.Module):
         if new_value < min_ratio * value: new_value += divisor
         return new_value
     '''make layer'''
-    def makelayer(self, out_channels, num_blocks, stride, dilation, expand_ratio, norm_cfg, activation_opts=None):
-        if activation_opts is None: activation_opts = {'type': 'relu6', 'opts': {'inplace': True}}
+    def makelayer(self, out_channels, num_blocks, stride, dilation, expand_ratio, norm_cfg, act_cfg=None):
+        if act_cfg is None: act_cfg = {'type': 'relu6', 'opts': {'inplace': True}}
         layers = []
         for i in range(num_blocks):
             layers.append(
@@ -80,7 +80,7 @@ class MobileNetV2(nn.Module):
                     expand_ratio=expand_ratio, 
                     dilation=dilation if i == 0 else 1, 
                     norm_cfg=norm_cfg, 
-                    activation_opts=activation_opts
+                    act_cfg=act_cfg
                 )
             )
             self.in_channels = out_channels
@@ -95,22 +95,23 @@ def BuildMobileNet(mobilenet_type, **kwargs):
     }
     assert mobilenet_type in supported_mobilenets, 'unsupport the mobilenet_type %s...' % mobilenet_type
     # parse args
-    outstride = kwargs.get('outstride', 8)
-    pretrained = kwargs.get('pretrained', True)
-    norm_cfg = kwargs.get('norm_cfg', None)
-    pretrained_model_path = kwargs.get('pretrained_model_path', '')
-    out_indices = kwargs.get('out_indices', (1, 2, 4, 6))
-    # obtain the instanced mobilenet
-    args = {
+    default_args = {
+        'outstride': 8,
+        'norm_cfg': None,
+        'in_channels': 3,
         'widen_factor': 1,
-        'outstride': outstride,
-        'out_indices': out_indices,
-        'norm_cfg': norm_cfg,
+        'pretrained': True,
+        'out_indices': (1, 2, 4, 6),
+        'pretrained_model_path': '',
     }
-    model = supported_mobilenets[mobilenet_type](**args)
+    for key, value in kwargs.items():
+        if key in default_args: default_args.update({key: value})
+    # obtain the instanced mobilenet
+    mobilenet_args = default_args.copy()
+    model = supported_mobilenets[mobilenet_type](**mobilenet_args)
     # load weights of pretrained model
-    if pretrained and os.path.exists(pretrained_model_path):
-        checkpoint = torch.load(pretrained_model_path)
+    if default_args['pretrained'] and os.path.exists(default_args['pretrained_model_path']):
+        checkpoint = torch.load(default_args['pretrained_model_path'])
         if 'state_dict' in checkpoint: state_dict = checkpoint['state_dict']
         else: state_dict = checkpoint
         keys = list(state_dict.keys())
@@ -120,7 +121,7 @@ def BuildMobileNet(mobilenet_type, **kwargs):
                 key = '.'.join(key.split('.')[1:])
                 state_dict[key] = value
         model.load_state_dict(state_dict, strict=False)
-    elif pretrained:
+    elif default_args['pretrained']:
         checkpoint = model_zoo.load_url(model_urls[mobilenet_type])
         if 'state_dict' in checkpoint: state_dict = checkpoint['state_dict']
         else: state_dict = checkpoint

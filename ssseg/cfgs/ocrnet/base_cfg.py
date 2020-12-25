@@ -81,7 +81,7 @@ MODEL_CFG = {
         'series': 'resnet',
         'pretrained': True,
         'outstride': 16,
-        'is_use_stem': True
+        'use_stem': True
     },
     'auxiliary': {
         'in_channels': 1024,
