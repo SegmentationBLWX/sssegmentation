@@ -51,7 +51,7 @@ If you use this framework in your research, please cite this project.
     title = {SSSegmentation: A general framework for strongly supervised semantic segmentation},
     year = {2020},
     publisher = {GitHub},
-    journal = {GitHub repository}
+    journal = {GitHub repository},
     howpublished = {\url{https://github.com/SegmentationBLWX/sssegmentation}},
 }
 ```
