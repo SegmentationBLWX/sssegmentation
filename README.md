@@ -46,11 +46,13 @@ see → [click](./docs)
 # Citation
 If you use this framework in your research, please cite this project.
 ```
-@article{jzcs2seg,
-    Author = {Zhenchao Jin},
-    Title = {SSSegmentation: A general framework for strongly supervised semantic segmentation},
-    Journal = {https://github.com/SegmentationBLWX/sssegmentation},
-    Year = {2020}
+@misc{jzc2020ssseg,
+    author = {Zhenchao Jin},
+    title = {SSSegmentation: A general framework for strongly supervised semantic segmentation},
+    year = {2020},
+    publisher = {GitHub},
+    journal = {GitHub repository}
+    howpublished = {\url{https://github.com/SegmentationBLWX/sssegmentation}},
 }
 ```
 
