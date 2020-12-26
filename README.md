@@ -46,11 +46,11 @@ see → [click](./docs)
 # Citation
 If you use this framework in your research, please cite this project.
 ```
-@article{jjfaster2rcnn,
+@article{jzcs2seg,
     Author = {Zhenchao Jin},
     Title = {SSSegmentation: A general framework for strongly supervised semantic segmentation},
-    Journal = {https://github.com/jwyang/faster-rcnn.pytorch},
-    Year = {2017}
+    Journal = {https://github.com/SegmentationBLWX/sssegmentation},
+    Year = {2020}
 }
 ```
 
