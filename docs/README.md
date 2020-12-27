@@ -46,6 +46,11 @@ You can build the project as follows:
 cd ssseg/libs
 sh make.sh
 ```
+The datasets sssegmentation supports could be downloaded from here:
+```
+URL: https://pan.baidu.com/s/1TZbgxPnY0Als6LoiV80Xrw 
+CODE: fn1i 
+```
 #### Train
 You can train the models as follows:
 ```sh
