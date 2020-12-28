@@ -1,4 +1,4 @@
-'''define the config file for voc and resnet50os8'''
+'''define the config file for voc and hrnetv2-w18'''
 from .base_cfg import *
 
 
@@ -33,27 +33,20 @@ MODEL_CFG = MODEL_CFG.copy()
 MODEL_CFG.update(
     {
         'num_classes': 21,
-        'backbone': {
-            'type': 'resnet50',
-            'series': 'resnet',
-            'pretrained': True,
-            'outstride': 8,
-            'use_stem': True
-        }
     }
 )
 # modify common config
 COMMON_CFG = COMMON_CFG.copy()
 COMMON_CFG['train'].update(
     {
-        'backupdir': 'ocrnet_resnet50os8_voc_train',
-        'logfilepath': 'ocrnet_resnet50os8_voc_train/train.log',
+        'backupdir': 'ocrnet_hrnetv2w18_voc_train',
+        'logfilepath': 'ocrnet_hrnetv2w18_voc_train/train.log',
     }
 )
 COMMON_CFG['test'].update(
     {
-        'backupdir': 'ocrnet_resnet50os8_voc_test',
-        'logfilepath': 'ocrnet_resnet50os8_voc_test/test.log',
-        'resultsavepath': 'ocrnet_resnet50os8_voc_test/ocrnet_resnet50os8_voc_results.pkl'
+        'backupdir': 'ocrnet_hrnetv2w18_voc_test',
+        'logfilepath': 'ocrnet_hrnetv2w18_voc_test/test.log',
+        'resultsavepath': 'ocrnet_hrnetv2w18_voc_test/ocrnet_hrnetv2w18_voc_results.pkl'
     }
 )

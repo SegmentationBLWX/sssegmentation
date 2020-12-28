@@ -1,12 +1,12 @@
 # Introduction
 ```
 @inproceedings{ruan2019devil,
-  title={Devil in the details: Towards accurate single and multiple human parsing},
-  author={Ruan, Tao and Liu, Ting and Huang, Zilong and Wei, Yunchao and Wei, Shikui and Zhao, Yao},
-  booktitle={Proceedings of the AAAI Conference on Artificial Intelligence},
-  volume={33},
-  pages={4814--4821},
-  year={2019}
+    title={Devil in the details: Towards accurate single and multiple human parsing},
+    author={Ruan, Tao and Liu, Ting and Huang, Zilong and Wei, Yunchao and Wei, Shikui and Zhao, Yao},
+    booktitle={Proceedings of the AAAI Conference on Artificial Intelligence},
+    volume={33},
+    pages={4814--4821},
+    year={2019}
 }
 All the reported models here are available at https://pan.baidu.com/s/1nPxHw5Px7a7jZMiX-ZxRhA (code is 3jvr)
 ```

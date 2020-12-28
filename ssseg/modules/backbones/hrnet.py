@@ -195,7 +195,9 @@ class HRNet(nn.Module):
             else:
                 x_list.append(y_list[i])
         y_list = self.stage4(x_list)
-        out, outs = torch.cat(y_list, dim=1), []
+        h, w = max([y.shape[2] for y in y_list]), max([y.shape[3] for y in y_list])
+        out = torch.cat([F.interpolate(y, size=(h, w), mode='bilinear', align_corners=False) for y in y_list], dim=1)
+        outs = []
         for _ in range(len(self.out_indices)):
             outs.append(out)
         if len(outs) == 1: return outs[0]

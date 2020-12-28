@@ -1,11 +1,11 @@
 # Introduction
 ```
 @inproceedings{xiao2018unified,
-  title={Unified perceptual parsing for scene understanding},
-  author={Xiao, Tete and Liu, Yingcheng and Zhou, Bolei and Jiang, Yuning and Sun, Jian},
-  booktitle={Proceedings of the European Conference on Computer Vision (ECCV)},
-  pages={418--434},
-  year={2018}
+    title={Unified perceptual parsing for scene understanding},
+    author={Xiao, Tete and Liu, Yingcheng and Zhou, Bolei and Jiang, Yuning and Sun, Jian},
+    booktitle={Proceedings of the European Conference on Computer Vision (ECCV)},
+    pages={418--434},
+    year={2018}
 }
 All the reported models here are available at https://pan.baidu.com/s/1nPxHw5Px7a7jZMiX-ZxRhA (code is 3jvr)
 ```

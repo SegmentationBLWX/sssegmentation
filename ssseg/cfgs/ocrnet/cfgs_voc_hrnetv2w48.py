@@ -1,4 +1,4 @@
-'''define the config file for voc and resnet50os16'''
+'''define the config file for voc and hrnetv2-w48'''
 from .base_cfg import *
 
 
@@ -34,26 +34,33 @@ MODEL_CFG.update(
     {
         'num_classes': 21,
         'backbone': {
-            'type': 'resnet50',
-            'series': 'resnet',
+            'type': 'hrnetv2_w48',
+            'series': 'hrnet',
             'pretrained': True,
-            'outstride': 16,
-            'use_stem': True
-        }
+        },
+        'auxiliary': {
+            'in_channels': sum([48, 96, 192, 384]),
+            'out_channels': 512,
+            'dropout': 0,
+        },
+        'bottleneck': {
+            'in_channels': sum([48, 96, 192, 384]),
+            'out_channels': 512,
+        },
     }
 )
 # modify common config
 COMMON_CFG = COMMON_CFG.copy()
 COMMON_CFG['train'].update(
     {
-        'backupdir': 'ocrnet_resnet50os16_voc_train',
-        'logfilepath': 'ocrnet_resnet50os16_voc_train/train.log',
+        'backupdir': 'ocrnet_hrnetv2w48_voc_train',
+        'logfilepath': 'ocrnet_hrnetv2w48_voc_train/train.log',
     }
 )
 COMMON_CFG['test'].update(
     {
-        'backupdir': 'ocrnet_resnet50os16_voc_test',
-        'logfilepath': 'ocrnet_resnet50os16_voc_test/test.log',
-        'resultsavepath': 'ocrnet_resnet50os16_voc_test/ocrnet_resnet50os16_voc_results.pkl'
+        'backupdir': 'ocrnet_hrnetv2w48_voc_test',
+        'logfilepath': 'ocrnet_hrnetv2w48_voc_test/test.log',
+        'resultsavepath': 'ocrnet_hrnetv2w48_voc_test/ocrnet_hrnetv2w48_voc_results.pkl'
     }
 )

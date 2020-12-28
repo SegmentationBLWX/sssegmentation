@@ -1,11 +1,11 @@
 # Introduction
 ```
 @inproceedings{chen2018encoder,
-  title={Encoder-decoder with atrous separable convolution for semantic image segmentation},
-  author={Chen, Liang-Chieh and Zhu, Yukun and Papandreou, George and Schroff, Florian and Adam, Hartwig},
-  booktitle={Proceedings of the European conference on computer vision (ECCV)},
-  pages={801--818},
-  year={2018}
+    title={Encoder-decoder with atrous separable convolution for semantic image segmentation},
+    author={Chen, Liang-Chieh and Zhu, Yukun and Papandreou, George and Schroff, Florian and Adam, Hartwig},
+    booktitle={Proceedings of the European conference on computer vision (ECCV)},
+    pages={801--818},
+    year={2018}
 }
 All the reported models here are available at https://pan.baidu.com/s/1nPxHw5Px7a7jZMiX-ZxRhA (code is 3jvr)
 ```

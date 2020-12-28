@@ -1,11 +1,11 @@
 # Introduction
 ```
 @inproceedings{long2015fully,
-  title={Fully convolutional networks for semantic segmentation},
-  author={Long, Jonathan and Shelhamer, Evan and Darrell, Trevor},
-  booktitle={Proceedings of the IEEE conference on computer vision and pattern recognition},
-  pages={3431--3440},
-  year={2015}
+    title={Fully convolutional networks for semantic segmentation},
+    author={Long, Jonathan and Shelhamer, Evan and Darrell, Trevor},
+    booktitle={Proceedings of the IEEE conference on computer vision and pattern recognition},
+    pages={3431--3440},
+    year={2015}
 }
 All the reported models here are available at https://pan.baidu.com/s/1nPxHw5Px7a7jZMiX-ZxRhA (code is 3jvr)
 ```
@@ -16,9 +16,9 @@ All the reported models here are available at https://pan.baidu.com/s/1nPxHw5Px7
 ## PASCAL VOC
 | Backbone  | Crop Size  | Schedule                             | Train/Eval Set  | mIoU   | Download                 |
 | :-:       | :-:        | :-:                                  | :-:             | :-:    | :-:                      |
-| R-50-D8   | 512x512    | LR/POLICY/BS/EPOCH: 0.01/poly/16/60  | trainaug/val    | 66.86% | [model]() &#124; [log]() |
+| R-50-D8   | 512x512    | LR/POLICY/BS/EPOCH: 0.01/poly/16/60  | trainaug/val    | 67.80% | [model]() &#124; [log]() |
 | R-50-D16  | 512x512    | LR/POLICY/BS/EPOCH: 0.01/poly/16/60  | trainaug/val    | 66.58% | [model]() &#124; [log]() |
-| R-101-D8  | 512x512    | LR/POLICY/BS/EPOCH: 0.01/poly/16/60  | trainaug/val    | 69.86% | [model]() &#124; [log]() |
+| R-101-D8  | 512x512    | LR/POLICY/BS/EPOCH: 0.01/poly/16/60  | trainaug/val    | 70.59% | [model]() &#124; [log]() |
 | R-101-D16 | 512x512    | LR/POLICY/BS/EPOCH: 0.01/poly/16/60  | trainaug/val    | 69.39% | [model]() &#124; [log]() |
 
 ## ADE20k

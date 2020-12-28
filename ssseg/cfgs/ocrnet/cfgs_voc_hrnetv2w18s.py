@@ -1,4 +1,4 @@
-'''define the config file for voc and resnet101os16'''
+'''define the config file for voc and hrnetv2-w18-small'''
 from .base_cfg import *
 
 
@@ -32,21 +32,26 @@ LOSSES_CFG = LOSSES_CFG.copy()
 MODEL_CFG = MODEL_CFG.copy()
 MODEL_CFG.update(
     {
-        'num_classes': 21
+        'num_classes': 21,
+        'backbone': {
+            'type': 'hrnetv2_w18_small',
+            'series': 'hrnet',
+            'pretrained': True,
+        },
     }
 )
 # modify common config
 COMMON_CFG = COMMON_CFG.copy()
 COMMON_CFG['train'].update(
     {
-        'backupdir': 'ocrnet_resnet101os16_voc_train',
-        'logfilepath': 'ocrnet_resnet101os16_voc_train/train.log',
+        'backupdir': 'ocrnet_hrnetv2w18s_voc_train',
+        'logfilepath': 'ocrnet_hrnetv2w18s_voc_train/train.log',
     }
 )
 COMMON_CFG['test'].update(
     {
-        'backupdir': 'ocrnet_resnet101os16_voc_test',
-        'logfilepath': 'ocrnet_resnet101os16_voc_test/test.log',
-        'resultsavepath': 'ocrnet_resnet101os16_voc_test/ocrnet_resnet101os16_voc_results.pkl'
+        'backupdir': 'ocrnet_hrnetv2w18s_voc_test',
+        'logfilepath': 'ocrnet_hrnetv2w18s_voc_test/test.log',
+        'resultsavepath': 'ocrnet_hrnetv2w18s_voc_test/ocrnet_hrnetv2w18s_voc_results.pkl'
     }
 )

@@ -1,11 +1,11 @@
 # Introduction
 ```
 @inproceedings{zhao2017pyramid,
-  title={Pyramid scene parsing network},
-  author={Zhao, Hengshuang and Shi, Jianping and Qi, Xiaojuan and Wang, Xiaogang and Jia, Jiaya},
-  booktitle={Proceedings of the IEEE conference on computer vision and pattern recognition},
-  pages={2881--2890},
-  year={2017}
+    title={Pyramid scene parsing network},
+    author={Zhao, Hengshuang and Shi, Jianping and Qi, Xiaojuan and Wang, Xiaogang and Jia, Jiaya},
+    booktitle={Proceedings of the IEEE conference on computer vision and pattern recognition},
+    pages={2881--2890},
+    year={2017}
 }
 All the reported models here are available at https://pan.baidu.com/s/1nPxHw5Px7a7jZMiX-ZxRhA (code is 3jvr)
 ```

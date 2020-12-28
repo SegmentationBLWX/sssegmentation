@@ -77,19 +77,17 @@ MODEL_CFG = {
     'norm_cfg': {'type': 'syncbatchnorm', 'opts': {}},
     'act_cfg': {'type': 'relu', 'opts': {'inplace': True}},
     'backbone': {
-        'type': 'resnet101',
-        'series': 'resnet',
+        'type': 'hrnetv2_w18',
+        'series': 'hrnet',
         'pretrained': True,
-        'outstride': 16,
-        'use_stem': True
     },
     'auxiliary': {
-        'in_channels': 1024,
+        'in_channels': sum([18, 36, 72, 144]),
         'out_channels': 512,
-        'dropout': 0.1,
+        'dropout': 0,
     },
     'bottleneck': {
-        'in_channels': 2048,
+        'in_channels': sum([18, 36, 72, 144]),
         'out_channels': 512,
     },
     'spatialgather': {
@@ -102,7 +100,7 @@ MODEL_CFG = {
     },
     'decoder': {
         'in_channels': 512,
-        'dropout': 0.1,
+        'dropout': 0,
     },
 }
 # config for common

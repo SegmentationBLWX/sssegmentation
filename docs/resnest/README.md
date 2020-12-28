@@ -15,7 +15,7 @@ All the reported models here are available at https://pan.baidu.com/s/1nPxHw5Px7
 ## PASCAL VOC
 | Model         | Backbone    | Crop Size  | Schedule                             | Train/Eval Set  | mIoU   | Download                 |
 | :-:           | :-:         | :-:        | :-:                                  | :-:             | :-:    | :-:                      |
-| FCN           | Rst-50-D8   | 512x512    | LR/POLICY/BS/EPOCH: 0.01/poly/16/60  | trainaug/val    | -      | [model]() &#124; [log]() |
+| FCN           | Rst-50-D8   | 512x512    | LR/POLICY/BS/EPOCH: 0.01/poly/16/60  | trainaug/val    | 77.41% | [model]() &#124; [log]() |
 | PSPNet        | Rst-50-D16  | 512x512    | LR/POLICY/BS/EPOCH: 0.01/poly/16/60  | trainaug/val    | -      | [model]() &#124; [log]() |
 | DeepLabV3     | Rst-101-D8  | 512x512    | LR/POLICY/BS/EPOCH: 0.01/poly/16/60  | trainaug/val    | -      | [model]() &#124; [log]() |
 | DeepLabV3plus | Rst-101-D16 | 512x512    | LR/POLICY/BS/EPOCH: 0.01/poly/16/60  | trainaug/val    | -      | [model]() &#124; [log]() |

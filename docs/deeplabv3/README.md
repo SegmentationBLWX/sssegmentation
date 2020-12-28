@@ -1,10 +1,10 @@
 # Introduction
 ```
 @article{chen2017rethinking,
-  title={Rethinking atrous convolution for semantic image segmentation},
-  author={Chen, Liang-Chieh and Papandreou, George and Schroff, Florian and Adam, Hartwig},
-  journal={arXiv preprint arXiv:1706.05587},
-  year={2017}
+    title={Rethinking atrous convolution for semantic image segmentation},
+    author={Chen, Liang-Chieh and Papandreou, George and Schroff, Florian and Adam, Hartwig},
+    journal={arXiv preprint arXiv:1706.05587},
+    year={2017}
 }
 All the reported models here are available at https://pan.baidu.com/s/1nPxHw5Px7a7jZMiX-ZxRhA (code is 3jvr)
 ```
