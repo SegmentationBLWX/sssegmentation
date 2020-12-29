@@ -37,8 +37,6 @@ class BaseDataset(torch.utils.data.Dataset):
         assert self.mode in ['TRAIN', 'TEST']
         # read image
         image = cv2.imread(imagepath)
-        if image.shape[-1] == 1: image = image[..., 0]
-        if len(image.shape) < 3: image = np.expand_dims(image, -1)
         # read annotation
         segmentation = cv2.imread(annpath, cv2.IMREAD_GRAYSCALE) if with_ann else np.zeros((image.shape[0], image.shape[1]))
         if with_ann and hasattr(self, 'clsid2label'):
