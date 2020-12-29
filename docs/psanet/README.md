@@ -33,6 +33,6 @@ All the reported models here are available at https://pan.baidu.com/s/1nPxHw5Px7
 | Backbone  | Crop Size  | Schedule                             | Train/Eval Set  | mIoU   | Download                 |
 | :-:       | :-:        | :-:                                  | :-:             | :-:    | :-:                      |
 | R-50-D8   | 512x1024   | LR/POLICY/BS/EPOCH: 0.01/poly/8/220  | train/val       | 78.88% | [model]() &#124; [log]() |
-| R-50-D16  | 512x1024   | LR/POLICY/BS/EPOCH: 0.01/poly/8/220  | train/val       | -      | [model]() &#124; [log]() |
+| R-50-D16  | 512x1024   | LR/POLICY/BS/EPOCH: 0.01/poly/8/220  | train/val       | 76.66% | [model]() &#124; [log]() |
 | R-101-D8  | 512x1024   | LR/POLICY/BS/EPOCH: 0.01/poly/8/220  | train/val       | 79.65% | [model]() &#124; [log]() |
 | R-101-D16 | 512x1024   | LR/POLICY/BS/EPOCH: 0.01/poly/8/220  | train/val       | 77.04% | [model]() &#124; [log]() |

@@ -48,12 +48,12 @@ class BaseDataset(torch.utils.data.Dataset):
         edge = np.zeros((image.shape[0], image.shape[1]))
         # return sample
         sample = {
-                    'image': image, 
-                    'segmentation': segmentation.copy(), 
-                    'edge': edge, 
-                    'width': image.shape[1], 
-                    'height': image.shape[0]
-                }
+            'image': image, 
+            'segmentation': segmentation.copy(), 
+            'edge': edge, 
+            'width': image.shape[1], 
+            'height': image.shape[0]
+        }
         if self.mode == 'TEST': sample.update({'groundtruth': segmentation.copy()})
         return sample
     '''construct the transforms'''

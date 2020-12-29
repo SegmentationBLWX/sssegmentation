@@ -22,12 +22,12 @@ class Resize(object):
         self.keep_ratio = kwargs.get('keep_ratio', True)
         # interpolation to cv2 interpolation
         self.interpolation_dict = {
-                                    'nearest': cv2.INTER_NEAREST,
-                                    'bilinear': cv2.INTER_LINEAR,
-                                    'bicubic': cv2.INTER_CUBIC,
-                                    'area': cv2.INTER_AREA,
-                                    'lanczos': cv2.INTER_LANCZOS4
-                                }
+            'nearest': cv2.INTER_NEAREST,
+            'bilinear': cv2.INTER_LINEAR,
+            'bicubic': cv2.INTER_CUBIC,
+            'area': cv2.INTER_AREA,
+            'lanczos': cv2.INTER_LANCZOS4
+        }
     '''call'''
     def __call__(self, sample):
         # parse
@@ -167,12 +167,12 @@ class RandomRotation(object):
         self.seg_interpolation = kwargs.get('seg_interpolation', 'nearest')
         # interpolation to cv2 interpolation
         self.interpolation_dict = {
-                                    'nearest': cv2.INTER_NEAREST,
-                                    'bilinear': cv2.INTER_LINEAR,
-                                    'bicubic': cv2.INTER_CUBIC,
-                                    'area': cv2.INTER_AREA,
-                                    'lanczos': cv2.INTER_LANCZOS4
-                                }
+            'nearest': cv2.INTER_NEAREST,
+            'bilinear': cv2.INTER_LINEAR,
+            'bicubic': cv2.INTER_CUBIC,
+            'area': cv2.INTER_AREA,
+            'lanczos': cv2.INTER_LANCZOS4
+        }
     def __call__(self, sample):
         if np.random.rand() > self.rotation_prob: return sample
         image, segmentation = sample['image'].copy(), sample['segmentation'].copy()

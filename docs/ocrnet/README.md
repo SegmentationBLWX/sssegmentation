@@ -17,7 +17,7 @@ All the reported models here are available at https://pan.baidu.com/s/1nPxHw5Px7
 | :-:                | :-:        | :-:                                  | :-:             | :-:    | :-:                      |
 | HRNetV2p-W18-Small | 512x512    | LR/POLICY/BS/EPOCH: 0.01/poly/16/60  | trainaug/val    | -      | [model]() &#124; [log]() |
 | HRNetV2p-W18       | 512x512    | LR/POLICY/BS/EPOCH: 0.01/poly/16/60  | trainaug/val    | -      | [model]() &#124; [log]() |
-| HRNetV2p-W48       | 512x512    | LR/POLICY/BS/EPOCH: 0.01/poly/16/60  | trainaug/val    | -      | [model]() &#124; [log]() |
+| HRNetV2p-W48       | 512x512    | LR/POLICY/BS/EPOCH: 0.01/poly/16/60  | trainaug/val    | 77.60% | [model]() &#124; [log]() |
 
 ## ADE20k
 | Backbone           | Crop Size  | Schedule                             | Train/Eval Set  | mIoU   | Download                 |
