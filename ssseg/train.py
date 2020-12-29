@@ -137,10 +137,10 @@ class Trainer():
             # --save checkpoints
             if (epoch % common_cfg['saveinterval'] == 0) or (epoch == end_epoch):
                 state_dict = {
-                                'epoch': epoch,
-                                'model': model.module.state_dict() if cfg.MODEL_CFG['is_multi_gpus'] else model.state_dict(),
-                                'optimizer': optimizer.state_dict()
-                            }
+                    'epoch': epoch,
+                    'model': model.module.state_dict() if cfg.MODEL_CFG['is_multi_gpus'] else model.state_dict(),
+                    'optimizer': optimizer.state_dict()
+                }
                 savepath = os.path.join(common_cfg['backupdir'], 'epoch_%s.pth' % epoch)
                 if cmd_args.local_rank == 0: savecheckpoints(state_dict, savepath, logger_handle, cmd_args=cmd_args)
 

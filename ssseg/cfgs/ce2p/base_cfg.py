@@ -113,6 +113,16 @@ MODEL_CFG = {
         },
     },
 }
+# config for inference
+INFERENCE_CFG = {
+    'mode': 'whole',
+    'opts': {}, 
+    'tricks': {
+        'multiscale': [1],
+        'flip': False,
+        'use_probs_before_resize': False
+    }
+}
 # config for common
 COMMON_CFG = {
     'train': {

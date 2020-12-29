@@ -97,18 +97,7 @@ class Tester():
         model.eval()
         # start to test
         FloatTensor = torch.cuda.FloatTensor if use_cuda else torch.FloatTensor
-        if hasattr(cfg, 'INFERENCE_CFG'):
-            inference_cfg = copy.deepcopy(cfg.INFERENCE_CFG)
-        else:
-            inference_cfg = {
-                                'mode': 'whole', 
-                                'opts': {}, 
-                                'tricks': {
-                                    'multiscale': [1],
-                                    'flip': False,
-                                    'use_probs_before_resize': False
-                                }
-                            }
+        inference_cfg = copy.deepcopy(cfg.INFERENCE_CFG)
         with torch.no_grad():
             if cfg.MODEL_CFG['distributed']['is_on']: dataloader.sampler.set_epoch(0)
             pbar = tqdm(enumerate(dataloader))

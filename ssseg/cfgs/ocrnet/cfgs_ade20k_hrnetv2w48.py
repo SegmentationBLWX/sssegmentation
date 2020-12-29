@@ -48,6 +48,8 @@ MODEL_CFG.update(
         },
     }
 )
+# modify inference config
+INFERENCE_CFG = INFERENCE_CFG.copy()
 # modify common config
 COMMON_CFG = COMMON_CFG.copy()
 COMMON_CFG['train'].update(

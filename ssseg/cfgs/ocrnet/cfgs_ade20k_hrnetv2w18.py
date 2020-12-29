@@ -34,6 +34,8 @@ MODEL_CFG.update(
         'num_classes': 150,
     }
 )
+# modify inference config
+INFERENCE_CFG = INFERENCE_CFG.copy()
 # modify common config
 COMMON_CFG = COMMON_CFG.copy()
 COMMON_CFG['train'].update(

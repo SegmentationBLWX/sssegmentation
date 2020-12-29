@@ -76,14 +76,19 @@ class BaseDataset(torch.utils.data.Dataset):
             transforms.append(supported_transforms[key](**value))
         # return the transforms
         return transforms
-    '''eval the resuls'''
-    def evaluate(self, predictions, groundtruths):
+    '''evaluate the predictions'''
+    def evaluate(self, predictions, groundtruths, metric_list=['iou', 'miou']):
         result = eval_semantic_segmentation(predictions, groundtruths)
-        result_str = 'IoUs: \n'
-        for idx, item in enumerate(result['iou']):
-            result_str += '%s %s\n' % (self.classnames[idx], item)
-        result_str += 'MIoU: %s' % result['miou']
-        return result_str
+        result_selected = {}
+        for metric in metric_list:
+            result_selected[metric] = result[metric]
+        if 'iou' in result_selected:
+            iou_list = result_selected['iou']
+            iou_dict = {}
+            for idx, item in enumerate(iou_list):
+                iou_dict[self.classnames[idx]] = item
+            result_selected['iou'] = iou_dict
+        return result_selected
     '''convert label to one-hot format'''
     def onehot(self, label, num_classes):
         label = np.eye(num_classes)[label]
