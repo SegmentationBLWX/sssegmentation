@@ -18,7 +18,7 @@ All the reported models here are available at https://pan.baidu.com/s/1nPxHw5Px7
 | :-:       | :-:        | :-:                                  | :-:             | :-:    | :-:                      |
 | R-50-D8   | 512x512    | LR/POLICY/BS/EPOCH: 0.01/poly/16/60  | trainaug/val    | 76.50% | [model]() &#124; [log]() |
 | R-50-D16  | 512x512    | LR/POLICY/BS/EPOCH: 0.01/poly/16/60  | trainaug/val    | 76.22% | [model]() &#124; [log]() |
-| R-101-D8  | 512x512    | LR/POLICY/BS/EPOCH: 0.01/poly/16/60  | trainaug/val    | 77.72% | [model]() &#124; [log]() |
+| R-101-D8  | 512x512    | LR/POLICY/BS/EPOCH: 0.01/poly/16/60  | trainaug/val    | 78.81% | [model]() &#124; [log]() |
 | R-101-D16 | 512x512    | LR/POLICY/BS/EPOCH: 0.01/poly/16/60  | trainaug/val    | 77.45% | [model]() &#124; [log]() |
 
 ## ADE20k

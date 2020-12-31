@@ -46,9 +46,12 @@ class COCODataset(BaseDataset):
         # read image
         image = cv2.imread(imagepath)
         image = cv2.cvtColor(image, cv2.COLOR_BGR2RGB)
-        # read annotation, for coco, only support train and val set, therefore, segmentation always exists
-        target = self.coco_api.loadAnns(self.coco_api.getAnnIds(imgIds=imageid))
-        segmentation = self.getsegmentation(target, image_meta['height'], image_meta['width'])
+        # read annotation
+        if self.dataset_cfg.get('with_ann', True):
+            target = self.coco_api.loadAnns(self.coco_api.getAnnIds(imgIds=imageid))
+            segmentation = self.getsegmentation(target, image_meta['height'], image_meta['width'])
+        else:
+            segmentation = np.zeros((image.shape[0], image.shape[1]))
         # construct sample
         if self.mode == 'TRAIN':
             sample = {'image': image, 'segmentation': segmentation, 'width': image.shape[1], 'height': image.shape[0]}

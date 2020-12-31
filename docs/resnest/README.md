@@ -25,7 +25,7 @@ All the reported models here are available at https://pan.baidu.com/s/1nPxHw5Px7
 | :-:           | :-:         | :-:        | :-:                                  | :-:             | :-:    | :-:                      |
 | FCN           | Rst-50-D8   | 512x512    | LR/POLICY/BS/EPOCH: 0.01/poly/16/130 | train/val       | -      | [model]() &#124; [log]() |
 | PSPNet        | Rst-50-D16  | 512x512    | LR/POLICY/BS/EPOCH: 0.01/poly/16/130 | train/val       | 46.03% | [model]() &#124; [log]() |
-| DeepLabV3     | Rst-101-D8  | 512x512    | LR/POLICY/BS/EPOCH: 0.01/poly/16/130 | train/val       | -      | [model]() &#124; [log]() |
+| DeepLabV3     | Rst-101-D8  | 512x512    | LR/POLICY/BS/EPOCH: 0.01/poly/16/130 | train/val       | 46.24% | [model]() &#124; [log]() |
 | DeepLabV3plus | Rst-101-D16 | 512x512    | LR/POLICY/BS/EPOCH: 0.01/poly/16/130 | train/val       | -      | [model]() &#124; [log]() |
 
 ## CityScapes
@@ -33,5 +33,5 @@ All the reported models here are available at https://pan.baidu.com/s/1nPxHw5Px7
 | :-:           | :-:         | :-:        | :-:                                  | :-:             | :-:    | :-:                      |
 | FCN           | Rst-50-D8   | 512x1024   | LR/POLICY/BS/EPOCH: 0.01/poly/8/220  | train/val       | 78.14% | [model]() &#124; [log]() |
 | PSPNet        | Rst-50-D16  | 512x1024   | LR/POLICY/BS/EPOCH: 0.01/poly/8/220  | train/val       | -      | [model]() &#124; [log]() |
-| DeepLabV3     | Rst-101-D8  | 512x1024   | LR/POLICY/BS/EPOCH: 0.01/poly/8/220  | train/val       | -      | [model]() &#124; [log]() |
+| DeepLabV3     | Rst-101-D8  | 512x1024   | LR/POLICY/BS/EPOCH: 0.01/poly/8/220  | train/val       | 79.75% | [model]() &#124; [log]() |
 | DeepLabV3plus | Rst-101-D16 | 512x1024   | LR/POLICY/BS/EPOCH: 0.01/poly/8/220  | train/val       | 80.30% | [model]() &#124; [log]() |

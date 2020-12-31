@@ -15,7 +15,6 @@ from chainercv.evaluations import eval_semantic_segmentation
 class BaseDataset(torch.utils.data.Dataset):
     def __init__(self, mode, logger_handle, dataset_cfg, **kwargs):
         assert mode in ['TRAIN', 'TEST']
-        assert ('train' in dataset_cfg['set']) or ('val' in dataset_cfg['set']) or ('test' in dataset_cfg['set'])
         self.mode = mode
         self.logger_handle = logger_handle
         self.dataset_cfg = dataset_cfg
@@ -28,7 +27,7 @@ class BaseDataset(torch.utils.data.Dataset):
         raise NotImplementedError('not be implemented')
     '''sync transform'''
     def synctransform(self, sample, transform_type):
-        assert self.transforms, 'undefined transforms...'
+        assert hasattr(self, 'transforms') and self.transforms, 'undefined transforms...'
         assert transform_type in ['all', 'only_totensor_normalize_pad', 'without_totensor_normalize_pad']
         sample = self.transforms(sample, transform_type)
         return sample

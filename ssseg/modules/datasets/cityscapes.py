@@ -38,7 +38,7 @@ class CityScapesDataset(BaseDataset):
         imageid = self.imageids[index]
         imagepath = os.path.join(self.image_dir, imageid+'.png')
         annpath = os.path.join(self.ann_dir, imageid.replace('leftImg8bit', 'gtFine_labelIds')+'.png')
-        sample = self.read(imagepath, annpath) if 'test' not in self.dataset_cfg['set'] else self.read(imagepath, annpath, False)
+        sample = self.read(imagepath, annpath, self.dataset_cfg.get('with_ann', True))
         sample.update({'id': imageid})
         if self.mode == 'TRAIN':
             sample = self.synctransform(sample, 'without_totensor_normalize_pad')

@@ -29,7 +29,7 @@ class SuperviselyDataset(BaseDataset):
         imageid = self.imageids[index]
         imagepath = os.path.join(self.image_dir, imageid+'.jpg')
         annpath = os.path.join(self.ann_dir, imageid+'.png')
-        sample = self.read(imagepath, annpath) if 'test' not in self.dataset_cfg['set'] else self.read(imagepath, annpath, False)
+        sample = self.read(imagepath, annpath, self.dataset_cfg.get('with_ann', True))
         sample.update({'id': imageid})
         if self.mode == 'TRAIN':
             sample['segmentation'][sample['segmentation'] == 255] = 1.
