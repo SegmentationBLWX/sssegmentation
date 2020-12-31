@@ -16,12 +16,12 @@ class CityScapesDataset(BaseDataset):
                   'traffic_sign', 'vegetation', 'terrain', 'sky', 'person', 'rider', 'car', 
                   'truck', 'bus', 'train', 'motorcycle', 'bicycle']
     clsid2label = {
-                    -1: 255, 0: 255, 1: 255, 2: 255, 3: 255, 4: 255, 5: 255, 6: 255,
-                    7: 0, 8: 1, 9: 255, 10: 255, 11: 2, 12: 3, 13: 4, 14: 255, 
-                    15: 255, 16: 255, 17: 5, 18: 255, 19: 6, 20: 7, 21: 8, 22: 9, 
-                    23: 10, 24: 11, 25: 12, 26: 13, 27: 14, 28: 15, 29: 255, 30: 255, 
-                    31: 16, 32: 17, 33: 18
-                }
+        -1: 255, 0: 255, 1: 255, 2: 255, 3: 255, 4: 255, 5: 255, 6: 255,
+        7: 0, 8: 1, 9: 255, 10: 255, 11: 2, 12: 3, 13: 4, 14: 255, 
+        15: 255, 16: 255, 17: 5, 18: 255, 19: 6, 20: 7, 21: 8, 22: 9, 
+        23: 10, 24: 11, 25: 12, 26: 13, 27: 14, 28: 15, 29: 255, 30: 255, 
+        31: 16, 32: 17, 33: 18
+    }
     assert num_classes == len(classnames)
     def __init__(self, mode, logger_handle, dataset_cfg, **kwargs):
         super(CityScapesDataset, self).__init__(mode, logger_handle, dataset_cfg, **kwargs)

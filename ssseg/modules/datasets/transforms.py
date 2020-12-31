@@ -88,6 +88,7 @@ class RandomFlip(object):
     def __init__(self, flip_prob, fix_ann_pairs=None, **kwargs):
         self.flip_prob = flip_prob
         self.fix_ann_pairs = fix_ann_pairs
+    '''call'''
     def __call__(self, sample):
         if np.random.rand() > self.flip_prob: return sample
         image, segmentation = sample['image'].copy(), sample['segmentation'].copy()
@@ -173,6 +174,7 @@ class RandomRotation(object):
             'area': cv2.INTER_AREA,
             'lanczos': cv2.INTER_LANCZOS4
         }
+    '''call'''
     def __call__(self, sample):
         if np.random.rand() > self.rotation_prob: return sample
         image, segmentation = sample['image'].copy(), sample['segmentation'].copy()
@@ -233,6 +235,7 @@ class Padding(object):
 
 '''np.array to torch.Tensor'''
 class ToTensor(object):
+    '''call'''
     def __call__(self, sample):
         for key in sample.keys():
             if key == 'image':
@@ -242,12 +245,13 @@ class ToTensor(object):
         return sample
 
 
-'''normalize'''
+'''normalize the input image'''
 class Normalize(object):
     def __init__(self, mean, std, **kwargs):
         self.mean = np.array(mean)
         self.std = np.array(std)
         self.to_rgb = kwargs.get('to_rgb', True)
+    '''call'''
     def __call__(self, sample):
         for key in sample.keys():
             if key == 'image':
@@ -259,14 +263,13 @@ class Normalize(object):
                 cv2.multiply(image, stdinv, image)
                 sample[key] = image
         return sample
-    def __repr__(self):
-        return self.__class__.__name__ + '(mean={0}, std={1})'.format(self.mean, self.std)
 
 
-'''compose'''
+'''wrap the transforms'''
 class Compose(object):
     def __init__(self, transforms, **kwargs):
         self.transforms = transforms
+    '''call'''
     def __call__(self, sample, transform_type):
         if transform_type == 'all':
             for transform in self.transforms:
