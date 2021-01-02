@@ -1,3 +1,3 @@
 '''initialize'''
 from .builder import BuildOptimizer
-from .misc import adjustLearningRate, clipGradients
+from .utils import adjustLearningRate, clipGradients

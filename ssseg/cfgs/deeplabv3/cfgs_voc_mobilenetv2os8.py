@@ -1,4 +1,4 @@
-'''define the config file for voc and resnest101os8'''
+'''define the config file for voc and mobilenetv2os8'''
 from .base_cfg import *
 
 
@@ -34,15 +34,20 @@ MODEL_CFG.update(
     {
         'num_classes': 21,
         'backbone': {
-            'type': 'resnest101',
-            'series': 'resnest',
+            'type': 'mobilenetv2',
+            'series': 'mobilenet',
             'pretrained': True,
             'outstride': 8,
         },
         'aspp': {
-            'in_channels': 2048,
+            'in_channels': 320,
             'out_channels': 512,
             'dilations': [1, 12, 24, 36],
+        },
+        'auxiliary': {
+            'in_channels': 96,
+            'out_channels': 512,
+            'dropout': 0.1,
         },
     }
 )
@@ -52,14 +57,14 @@ INFERENCE_CFG = INFERENCE_CFG.copy()
 COMMON_CFG = COMMON_CFG.copy()
 COMMON_CFG['train'].update(
     {
-        'backupdir': 'deeplabv3plus_resnest101os8_voc_train',
-        'logfilepath': 'deeplabv3plus_resnest101os8_voc_train/train.log',
+        'backupdir': 'deeplabv3_mobilenetv2os8_voc_train',
+        'logfilepath': 'deeplabv3_mobilenetv2os8_voc_train/train.log',
     }
 )
 COMMON_CFG['test'].update(
     {
-        'backupdir': 'deeplabv3plus_resnest101os8_voc_test',
-        'logfilepath': 'deeplabv3plus_resnest101os8_voc_test/test.log',
-        'resultsavepath': 'deeplabv3plus_resnest101os8_voc_test/deeplabv3plus_resnest101os8_voc_results.pkl'
+        'backupdir': 'deeplabv3_mobilenetv2os8_voc_test',
+        'logfilepath': 'deeplabv3_mobilenetv2os8_voc_test/test.log',
+        'resultsavepath': 'deeplabv3_mobilenetv2os8_voc_test/deeplabv3_mobilenetv2os8_voc_results.pkl'
     }
 )

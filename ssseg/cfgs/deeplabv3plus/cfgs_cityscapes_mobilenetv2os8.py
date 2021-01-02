@@ -1,4 +1,4 @@
-'''define the config file for cityscapes and resnest101os8'''
+'''define the config file for cityscapes and mobilenetv2os8'''
 from .base_cfg import *
 
 
@@ -48,15 +48,24 @@ MODEL_CFG.update(
     {
         'num_classes': 19,
         'backbone': {
-            'type': 'resnest101',
-            'series': 'resnest',
+            'type': 'mobilenetv2',
+            'series': 'mobilenet',
             'pretrained': True,
             'outstride': 8,
         },
         'aspp': {
-            'in_channels': 2048,
+            'in_channels': 320,
             'out_channels': 512,
             'dilations': [1, 12, 24, 36],
+        },
+        'shortcut': {
+            'in_channels': 24,
+            'out_channels': 48,
+        },
+        'auxiliary': {
+            'in_channels': 96,
+            'out_channels': 512,
+            'dropout': 0.1,
         },
     }
 )
@@ -66,14 +75,14 @@ INFERENCE_CFG = INFERENCE_CFG.copy()
 COMMON_CFG = COMMON_CFG.copy()
 COMMON_CFG['train'].update(
     {
-        'backupdir': 'deeplabv3_resnest101os8_cityscapes_train',
-        'logfilepath': 'deeplabv3_resnest101os8_cityscapes_train/train.log',
+        'backupdir': 'deeplabv3plus_mobilenetv2os8_cityscapes_train',
+        'logfilepath': 'deeplabv3plus_mobilenetv2os8_cityscapes_train/train.log',
     }
 )
 COMMON_CFG['test'].update(
     {
-        'backupdir': 'deeplabv3_resnest101os8_cityscapes_test',
-        'logfilepath': 'deeplabv3_resnest101os8_cityscapes_test/test.log',
-        'resultsavepath': 'deeplabv3_resnest101os8_cityscapes_test/deeplabv3_resnest101os8_cityscapes_results.pkl'
+        'backupdir': 'deeplabv3plus_mobilenetv2os8_cityscapes_test',
+        'logfilepath': 'deeplabv3plus_mobilenetv2os8_cityscapes_test/test.log',
+        'resultsavepath': 'deeplabv3plus_mobilenetv2os8_cityscapes_test/deeplabv3plus_mobilenetv2os8_cityscapes_results.pkl'
     }
 )

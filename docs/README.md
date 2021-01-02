@@ -26,7 +26,8 @@ sssegmentation is a general framework for our research on strongly supervised se
 - [HRNet](https://arxiv.org/pdf/1908.07919.pdf)
 - [ResNet](https://arxiv.org/pdf/1512.03385.pdf)
 - [ResNeSt](https://arxiv.org/pdf/2004.08955.pdf)
-- [MobileNet](https://arxiv.org/pdf/1801.04381.pdf)
+- [MobileNetV2](https://arxiv.org/pdf/1801.04381.pdf)
+- [MobileNetV3](https://arxiv.org/pdf/1905.02244.pdf)
 #### Supported Datasets
 - [LIP](http://sysu-hcp.net/lip/)
 - [ATR](http://sysu-hcp.net/lip/overview.php)

@@ -11,8 +11,8 @@ import torch.nn as nn
 import torch.nn.functional as F
 import torch.utils.model_zoo as model_zoo
 from .resnet import ResNet
-from .bricks import BuildNormalization
 from .resnet import Bottleneck as _Bottleneck
+from .bricks import BuildNormalization, BuildActivation
 
 
 '''model urls'''
@@ -43,13 +43,13 @@ class RSoftmax(nn.Module):
 
 '''Split-Attention Conv2d in ResNeSt'''
 class SplitAttentionConv2d(nn.Module):
-    def __init__(self, in_channels, channels, kernel_size, stride=1, padding=0, dilation=1, groups=1, radix=2, reduction_factor=4, norm_cfg=None):
+    def __init__(self, in_channels, channels, kernel_size, stride=1, padding=0, dilation=1, groups=1, radix=2, reduction_factor=4, norm_cfg=None, act_cfg=None, **kwargs):
         super(SplitAttentionConv2d, self).__init__()
         inter_channels = max(in_channels * radix // reduction_factor, 32)
         self.radix = radix
         self.conv = nn.Conv2d(in_channels, channels * radix, kernel_size=kernel_size, stride=stride, padding=padding, dilation=dilation, groups=groups * radix, bias=False)
         self.bn0 = BuildNormalization(norm_cfg['type'], (channels * radix, norm_cfg['opts']))
-        self.relu = nn.ReLU(inplace=True)
+        self.relu = BuildActivation(act_cfg['type'], **act_cfg['opts'])
         self.fc1 = nn.Conv2d(channels, inter_channels, kernel_size=1, stride=1, padding=0, groups=groups)
         self.bn1 = BuildNormalization(norm_cfg['type'], (inter_channels, norm_cfg['opts']))
         self.fc2 = nn.Conv2d(inter_channels, channels * radix, kernel_size=1, stride=1, padding=0, groups=groups)
@@ -87,7 +87,7 @@ class Bottleneck(_Bottleneck):
         super(Bottleneck, self).__init__(inplanes, planes, **kwargs)
         if groups == 1: width = planes
         else: width = math.floor(planes * (base_width / base_channels)) * groups
-        norm_cfg = kwargs['norm_cfg']
+        norm_cfg, act_cfg = kwargs['norm_cfg'], kwargs['act_cfg']
         self.use_avg_after_block_conv2 = use_avg_after_block_conv2 and self.stride > 1
         self.conv1 = nn.Conv2d(inplanes, width, kernel_size=1, stride=1, padding=0, bias=False)
         self.bn1 = BuildNormalization(norm_cfg['type'], (width, norm_cfg['opts']))
@@ -101,7 +101,8 @@ class Bottleneck(_Bottleneck):
             groups=groups,
             radix=radix,
             reduction_factor=reduction_factor,
-            norm_cfg=norm_cfg
+            norm_cfg=norm_cfg,
+            act_cfg=act_cfg,
         )
         delattr(self, 'bn2')
         self.conv3 = nn.Conv2d(width, planes * self.expansion, kernel_size=1, stride=1, padding=0, bias=False)
@@ -142,7 +143,7 @@ class ResNeSt(ResNet):
         }
         super(ResNeSt, self).__init__(**kwargs)
     '''make res layer'''
-    def makelayer(self, block, inplanes, planes, num_blocks, stride=1, dilation=1, norm_cfg=None, contract_dilation=True, use_avg_for_downsample=False, **kwargs):
+    def makelayer(self, block, inplanes, planes, num_blocks, stride=1, dilation=1, contract_dilation=True, use_avg_for_downsample=False, norm_cfg=None, act_cfg=None, **kwargs):
         kwargs.update(self.extra_args_for_makelayer)
         downsample = None
         dilations = [dilation] * num_blocks
@@ -160,9 +161,9 @@ class ResNeSt(ResNet):
                     BuildNormalization(norm_cfg['type'], (planes * block.expansion, norm_cfg['opts']))
                 )
         layers = []
-        layers.append(block(inplanes, planes, stride=stride, dilation=dilations[0], downsample=downsample, norm_cfg=norm_cfg, **kwargs))
+        layers.append(block(inplanes, planes, stride=stride, dilation=dilations[0], downsample=downsample, norm_cfg=norm_cfg, act_cfg=act_cfg, **kwargs))
         self.inplanes = planes * block.expansion
-        for i in range(1, num_blocks): layers.append(block(planes * block.expansion, planes, stride=1, dilation=dilations[i], norm_cfg=norm_cfg, **kwargs))
+        for i in range(1, num_blocks): layers.append(block(planes * block.expansion, planes, stride=1, dilation=dilations[i], norm_cfg=norm_cfg, act_cfg=act_cfg, **kwargs))
         return nn.Sequential(*layers)
 
 
@@ -194,6 +195,7 @@ def BuildResNeSt(resnest_type, **kwargs):
         'pretrained_model_path': '',
         'use_avg_for_downsample': True,
         'use_avg_after_block_conv2': True,
+        'act_cfg': {'type': 'relu', 'opts': {'inplace': True}},
     }
     for key, value in kwargs.items():
         if key in default_args: default_args.update({key: value})

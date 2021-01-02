@@ -82,7 +82,7 @@ class PSANet(BaseModel):
     def forward(self, x, targets=None, losses_cfg=None):
         h_input, w_input = x.size(2), x.size(3)
         # feed to backbone network
-        x1, x2, x3, x4 = self.backbone_net(x)
+        x1, x2, x3, x4 = self.transforminputs(self.backbone_net(x), selected_indices=self.cfg['backbone'].get('selected_indices'))
         # feed to psa
         identity = x4
         shrink_factor, align_corners = self.cfg['psa']['shrink_factor'], self.align_corners

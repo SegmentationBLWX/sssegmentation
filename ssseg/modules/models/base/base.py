@@ -28,6 +28,17 @@ class BaseModel(nn.Module):
     '''forward'''
     def forward(self, x, targets=None, losses_cfg=None):
         raise NotImplementedError('not to be implemented')
+    '''transform inputs'''
+    def transforminputs(self, x_list, selected_indices=None):
+        if selected_indices is None:
+            if self.cfg['backbone']['series'] in ['hrnet']:
+                selected_indices = [0, 0, 0, 0]
+            else:
+                selected_indices = [0, 1, 2, 3]
+        outs = []
+        for idx in selected_indices:
+            outs.append(x_list[idx])
+        return outs
     '''return all layers with learnable parameters'''
     def alllayers(self):
         raise NotImplementedError('not to be implemented')

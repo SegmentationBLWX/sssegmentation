@@ -1,4 +1,4 @@
-'''define the config file for cityscapes and resnest101os8'''
+'''define the config file for cityscapes and resnet50os8'''
 from .base_cfg import *
 
 
@@ -37,7 +37,7 @@ DATALOADER_CFG['train'].update(
 OPTIMIZER_CFG = OPTIMIZER_CFG.copy()
 OPTIMIZER_CFG.update(
     {
-        'max_epochs': 220
+        'max_epochs': 440
     }
 )
 # modify losses config
@@ -48,15 +48,20 @@ MODEL_CFG.update(
     {
         'num_classes': 19,
         'backbone': {
-            'type': 'resnest101',
-            'series': 'resnest',
+            'type': 'resnet50',
+            'series': 'resnet',
             'pretrained': True,
             'outstride': 8,
+            'use_stem': True
         },
-        'aspp': {
+        'auxiliary': {
+            'in_channels': 1024,
+            'out_channels': 512,
+            'dropout': 0,
+        },
+        'bottleneck': {
             'in_channels': 2048,
             'out_channels': 512,
-            'dilations': [1, 12, 24, 36],
         },
     }
 )
@@ -66,14 +71,14 @@ INFERENCE_CFG = INFERENCE_CFG.copy()
 COMMON_CFG = COMMON_CFG.copy()
 COMMON_CFG['train'].update(
     {
-        'backupdir': 'deeplabv3_resnest101os8_cityscapes_train',
-        'logfilepath': 'deeplabv3_resnest101os8_cityscapes_train/train.log',
+        'backupdir': 'ocrnet_resnet50os8_cityscapes_train',
+        'logfilepath': 'ocrnet_resnet50os8_cityscapes_train/train.log',
     }
 )
 COMMON_CFG['test'].update(
     {
-        'backupdir': 'deeplabv3_resnest101os8_cityscapes_test',
-        'logfilepath': 'deeplabv3_resnest101os8_cityscapes_test/test.log',
-        'resultsavepath': 'deeplabv3_resnest101os8_cityscapes_test/deeplabv3_resnest101os8_cityscapes_results.pkl'
+        'backupdir': 'ocrnet_resnet50os8_cityscapes_test',
+        'logfilepath': 'ocrnet_resnet50os8_cityscapes_test/test.log',
+        'resultsavepath': 'ocrnet_resnet50os8_cityscapes_test/ocrnet_resnet50os8_cityscapes_results.pkl'
     }
 )

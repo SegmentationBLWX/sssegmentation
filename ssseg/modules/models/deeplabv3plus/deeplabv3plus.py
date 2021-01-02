@@ -58,7 +58,7 @@ class Deeplabv3Plus(BaseModel):
     def forward(self, x, targets=None, losses_cfg=None):
         h, w = x.size(2), x.size(3)
         # feed to backbone network
-        x1, x2, x3, x4 = self.backbone_net(x)
+        x1, x2, x3, x4 = self.transforminputs(self.backbone_net(x), selected_indices=self.cfg['backbone'].get('selected_indices'))
         # feed to aspp
         aspp_out = self.aspp_net(x4)
         aspp_out = F.interpolate(aspp_out, size=(x1.size(2), x1.size(3)), mode='bilinear', align_corners=self.align_corners)

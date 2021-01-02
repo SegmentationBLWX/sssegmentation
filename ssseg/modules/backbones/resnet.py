@@ -8,7 +8,7 @@ import os
 import torch
 import torch.nn as nn
 import torch.utils.model_zoo as model_zoo
-from .bricks import BuildNormalization
+from .bricks import BuildNormalization, BuildActivation
 
 
 '''model urls'''
@@ -18,21 +18,22 @@ model_urls = {
     'resnet50': 'https://download.pytorch.org/models/resnet50-19c8e357.pth',
     'resnet101': 'https://download.pytorch.org/models/resnet101-5d3b4d8f.pth',
     'resnet152': 'https://download.pytorch.org/models/resnet152-b121ed2d.pth',
-    'resnet50stem': 'https://openmmlab.oss-accelerate.aliyuncs.com/pretrain/third_party/resnet50_v1c-2cccc1ad.pth',
-    'resnet101stem': 'https://openmmlab.oss-accelerate.aliyuncs.com/pretrain/third_party/resnet101_v1c-e67eebb6.pth',
+    'resnet18stem': 'https://download.openmmlab.com/pretrain/third_party/resnet18_v1c-b5776b93.pth',
+    'resnet50stem': 'https://download.openmmlab.com/pretrain/third_party/resnet50_v1c-2cccc1ad.pth',
+    'resnet101stem': 'https://download.openmmlab.com/pretrain/third_party/resnet101_v1c-e67eebb6.pth',
 }
 
 
 '''BasicBlock'''
 class BasicBlock(nn.Module):
     expansion = 1
-    def __init__(self, inplanes, planes, stride=1, dilation=1, downsample=None, norm_cfg=None):
+    def __init__(self, inplanes, planes, stride=1, dilation=1, downsample=None, norm_cfg=None, act_cfg=None):
         super(BasicBlock, self).__init__()
         self.conv1 = nn.Conv2d(inplanes, planes, kernel_size=3, stride=stride, padding=dilation, dilation=dilation, bias=False)
         self.bn1 = BuildNormalization(norm_cfg['type'], (planes, norm_cfg['opts']))
         self.conv2 = nn.Conv2d(planes, planes, kernel_size=3, stride=1, padding=1, bias=False)
         self.bn2 = BuildNormalization(norm_cfg['type'], (planes, norm_cfg['opts']))
-        self.relu = nn.ReLU(inplace=True)
+        self.relu = BuildActivation(act_cfg['type'], **act_cfg['opts'])
         self.downsample = downsample
         self.stride = stride
         self.dilation = dilation
@@ -53,7 +54,7 @@ class BasicBlock(nn.Module):
 '''Bottleneck'''
 class Bottleneck(nn.Module):
     expansion = 4
-    def __init__(self, inplanes, planes, stride=1, dilation=1, downsample=None, norm_cfg=None):
+    def __init__(self, inplanes, planes, stride=1, dilation=1, downsample=None, norm_cfg=None, act_cfg=None):
         super(Bottleneck, self).__init__()
         self.conv1 = nn.Conv2d(inplanes, planes, kernel_size=1, stride=1, padding=0, bias=False)
         self.bn1 = BuildNormalization(norm_cfg['type'], (planes, norm_cfg['opts']))
@@ -61,7 +62,7 @@ class Bottleneck(nn.Module):
         self.bn2 = BuildNormalization(norm_cfg['type'], (planes, norm_cfg['opts']))
         self.conv3 = nn.Conv2d(planes, planes * self.expansion, kernel_size=1, stride=1, padding=0, bias=False)
         self.bn3 = BuildNormalization(norm_cfg['type'], (planes * self.expansion, norm_cfg['opts']))
-        self.relu = nn.ReLU(inplace=True)
+        self.relu = BuildActivation(act_cfg['type'], **act_cfg['opts'])
         self.downsample = downsample
         self.stride = stride
         self.dilation = dilation
@@ -91,7 +92,9 @@ class ResNet(nn.Module):
         101: (Bottleneck, (3, 4, 23, 3)),
         152: (Bottleneck, (3, 8, 36, 3))
     }
-    def __init__(self, in_channels=3, base_channels=64, stem_channels=64, depth=101, outstride=8, norm_cfg=None, contract_dilation=True, use_stem=True, out_indices=(0, 1, 2, 3), use_avg_for_downsample=False, **kwargs):
+    def __init__(self, in_channels=3, base_channels=64, stem_channels=64, depth=101, outstride=8, 
+                 contract_dilation=True, use_stem=True, out_indices=(0, 1, 2, 3), use_avg_for_downsample=False, 
+                 norm_cfg=None, act_cfg=None, **kwargs):
         super(ResNet, self).__init__()
         self.inplanes = stem_channels
         # set out_indices
@@ -113,18 +116,18 @@ class ResNet(nn.Module):
             self.stem = nn.Sequential(
                 nn.Conv2d(in_channels, stem_channels // 2, kernel_size=3, stride=2, padding=1, bias=False),
                 BuildNormalization(norm_cfg['type'], (stem_channels // 2, norm_cfg['opts'])),
-                nn.ReLU(inplace=True),
+                BuildActivation(act_cfg['type'], **act_cfg['opts']),
                 nn.Conv2d(stem_channels // 2, stem_channels // 2, kernel_size=3, stride=1, padding=1, bias=False),
                 BuildNormalization(norm_cfg['type'], (stem_channels // 2, norm_cfg['opts'])),
-                nn.ReLU(inplace=True),
+                BuildActivation(act_cfg['type'], **act_cfg['opts']),
                 nn.Conv2d(stem_channels // 2, stem_channels, kernel_size=3, stride=1, padding=1, bias=False),
                 BuildNormalization(norm_cfg['type'], (stem_channels, norm_cfg['opts'])),
-                nn.ReLU(inplace=True)
+                BuildActivation(act_cfg['type'], **act_cfg['opts']),
             )
         else:
             self.conv1 = nn.Conv2d(in_channels, stem_channels, kernel_size=7, stride=2, padding=3, bias=False)
             self.bn1 = BuildNormalization(norm_cfg['type'], (stem_channels, norm_cfg['opts']))
-            self.relu = nn.ReLU(inplace=True)
+            self.relu = BuildActivation(act_cfg['type'], **act_cfg['opts'])
         self.maxpool = nn.MaxPool2d(kernel_size=3, stride=2, padding=1)
         # make layers
         self.layer1 = self.makelayer(
@@ -134,9 +137,10 @@ class ResNet(nn.Module):
             num_blocks=num_blocks_list[0], 
             stride=stride_list[0], 
             dilation=dilation_list[0], 
-            norm_cfg=norm_cfg, 
             contract_dilation=contract_dilation, 
-            use_avg_for_downsample=use_avg_for_downsample
+            use_avg_for_downsample=use_avg_for_downsample,
+            norm_cfg=norm_cfg, 
+            act_cfg=act_cfg,
         )
         self.layer2 = self.makelayer(
             block=block, 
@@ -145,9 +149,10 @@ class ResNet(nn.Module):
             num_blocks=num_blocks_list[1], 
             stride=stride_list[1], 
             dilation=dilation_list[1], 
-            norm_cfg=norm_cfg, 
             contract_dilation=contract_dilation, 
-            use_avg_for_downsample=use_avg_for_downsample
+            use_avg_for_downsample=use_avg_for_downsample,
+            norm_cfg=norm_cfg, 
+            act_cfg=act_cfg,
         )
         self.layer3 = self.makelayer(
             block=block, 
@@ -156,9 +161,10 @@ class ResNet(nn.Module):
             num_blocks=num_blocks_list[2], 
             stride=stride_list[2], 
             dilation=dilation_list[2], 
-            norm_cfg=norm_cfg, 
             contract_dilation=contract_dilation, 
-            use_avg_for_downsample=use_avg_for_downsample
+            use_avg_for_downsample=use_avg_for_downsample,
+            norm_cfg=norm_cfg, 
+            act_cfg=act_cfg,
         )
         self.layer4 = self.makelayer(
             block=block, 
@@ -167,12 +173,13 @@ class ResNet(nn.Module):
             num_blocks=num_blocks_list[3], 
             stride=stride_list[3], 
             dilation=dilation_list[3], 
-            norm_cfg=norm_cfg, 
             contract_dilation=contract_dilation, 
-            use_avg_for_downsample=use_avg_for_downsample
+            use_avg_for_downsample=use_avg_for_downsample,
+            norm_cfg=norm_cfg, 
+            act_cfg=act_cfg,
         )
     '''make res layer'''
-    def makelayer(self, block, inplanes, planes, num_blocks, stride=1, dilation=1, norm_cfg=None, contract_dilation=True, use_avg_for_downsample=False, **kwargs):
+    def makelayer(self, block, inplanes, planes, num_blocks, stride=1, dilation=1, contract_dilation=True, use_avg_for_downsample=False, norm_cfg=None, act_cfg=None, **kwargs):
         downsample = None
         dilations = [dilation] * num_blocks
         if contract_dilation and dilation > 1: dilations[0] = dilation // 2
@@ -189,9 +196,9 @@ class ResNet(nn.Module):
                     BuildNormalization(norm_cfg['type'], (planes * block.expansion, norm_cfg['opts']))
                 )
         layers = []
-        layers.append(block(inplanes, planes, stride=stride, dilation=dilations[0], downsample=downsample, norm_cfg=norm_cfg, **kwargs))
+        layers.append(block(inplanes, planes, stride=stride, dilation=dilations[0], downsample=downsample, norm_cfg=norm_cfg, act_cfg=act_cfg, **kwargs))
         self.inplanes = planes * block.expansion
-        for i in range(1, num_blocks): layers.append(block(planes * block.expansion, planes, stride=1, dilation=dilations[i], norm_cfg=norm_cfg, **kwargs))
+        for i in range(1, num_blocks): layers.append(block(planes * block.expansion, planes, stride=1, dilation=dilations[i], norm_cfg=norm_cfg, act_cfg=act_cfg, **kwargs))
         return nn.Sequential(*layers)
     '''forward'''
     def forward(self, x):
@@ -209,8 +216,7 @@ class ResNet(nn.Module):
         outs = []
         for i, feats in enumerate([x1, x2, x3, x4]):
             if i in self.out_indices: outs.append(feats)
-        if len(outs) == 1: return outs[0]
-        else: return tuple(outs)
+        return tuple(outs)
 
 
 '''build resnet'''
@@ -237,6 +243,7 @@ def BuildResNet(resnet_type, **kwargs):
         'out_indices': (0, 1, 2, 3),
         'pretrained_model_path': '',
         'use_avg_for_downsample': False,
+        'act_cfg': {'type': 'relu', 'opts': {'inplace': True}},
     }
     for key, value in kwargs.items():
         if key in default_args: default_args.update({key: value})

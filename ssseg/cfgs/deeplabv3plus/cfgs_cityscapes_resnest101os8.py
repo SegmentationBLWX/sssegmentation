@@ -52,7 +52,6 @@ MODEL_CFG.update(
             'series': 'resnest',
             'pretrained': True,
             'outstride': 8,
-            'use_stem': True
         },
         'aspp': {
             'in_channels': 2048,
