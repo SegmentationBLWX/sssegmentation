@@ -39,10 +39,10 @@ MODEL_CFG.update(
             'pretrained': True,
             'outstride': 8,
         },
-        'decoder': {
+        'ppm': {
             'in_channels': 320,
             'out_channels': 512,
-            'dropout': 0.1,
+            'pool_scales': [1, 2, 3, 6],
         },
         'auxiliary': {
             'in_channels': 96,
