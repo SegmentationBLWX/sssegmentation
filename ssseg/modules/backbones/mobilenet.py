@@ -100,9 +100,10 @@ class MobileNetV3(nn.Module):
         assert arch_type in self.arch_settings
         assert isinstance(reduction_factor, int) and reduction_factor > 0
         assert outstride in [8, 16, 32], 'unsupport outstride %s in MobileNetV3...' % outstride
-        self.layers = self.makelayers(in_channels, arch_type, out_indices, reduction_factor, outstride, norm_cfg, act_cfg)
+        self.out_indices = out_indices
+        self.layers = self.makelayers(in_channels, arch_type, reduction_factor, outstride, norm_cfg, act_cfg)
     '''make layers'''
-    def makelayers(self, in_channels, arch_type, out_indices, reduction_factor, outstride, norm_cfg=None, act_cfg=None):
+    def makelayers(self, in_channels, arch_type, reduction_factor, outstride, norm_cfg=None, act_cfg=None):
         layers, act_cfg_default = [], act_cfg.copy()
         # build the first layer
         in_channels_first_layer, in_channels = in_channels, 16
@@ -227,9 +228,9 @@ def BuildMobileNet(mobilenet_type, **kwargs):
             'norm_cfg': None,
             'in_channels': 3,
             'pretrained': True,
-            'arch_type': 'small',
+            'arch_type': 'large',
             'reduction_factor': 1,
-            'out_indices': (0, 1, 12),
+            'out_indices': (1, 3, 16),
             'pretrained_model_path': '',
             'act_cfg': {'type': 'hardswish', 'opts': {}},
         }

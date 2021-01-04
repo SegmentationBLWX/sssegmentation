@@ -18,6 +18,7 @@ from .dnlnet import DNLNet
 from .annnet import ANNNet
 from .upernet import UPerNet
 from .deeplabv3 import Deeplabv3
+from .lrasppnet import LRASPPNet
 from .nonlocalnet import NonLocalNet
 from .deeplabv3plus import Deeplabv3Plus
 
@@ -39,6 +40,7 @@ def BuildModel(cfg, mode, **kwargs):
         'annnet': ANNNet,
         'upernet': UPerNet,
         'deeplabv3': Deeplabv3,
+        'lrasppnet': LRASPPNet,
         'nonlocalnet': NonLocalNet,
         'deeplabv3plus': Deeplabv3Plus,
     }

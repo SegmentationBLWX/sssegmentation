@@ -25,23 +25,29 @@ All the reported models here are available at https://pan.baidu.com/s/1nPxHw5Px7
 ## PASCAL VOC
 | Model         | Backbone | Crop Size  | Schedule                             | Train/Eval Set  | mIoU   | Download                 |
 | :-:           | :-:      | :-:        | :-:                                  | :-:             | :-:    | :-:                      |
-| FCN           | M-V2-D8  | 512x512    | LR/POLICY/BS/EPOCH: 0.01/poly/16/60  | trainaug/val    | -      | [model]() &#124; [log]() |
-| PSPNet        | M-V2-D8  | 512x512    | LR/POLICY/BS/EPOCH: 0.01/poly/16/60  | trainaug/val    | -      | [model]() &#124; [log]() |
-| DeepLabV3     | M-V2-D8  | 512x512    | LR/POLICY/BS/EPOCH: 0.01/poly/16/60  | trainaug/val    | -      | [model]() &#124; [log]() |
-| DeepLabV3plus | M-V2-D8  | 512x512    | LR/POLICY/BS/EPOCH: 0.01/poly/16/60  | trainaug/val    | -      | [model]() &#124; [log]() |
+| FCN           | M-V2-D8  | 512x512    | LR/POLICY/BS/EPOCH: 0.01/poly/16/60  | trainaug/val    | 59.89% | [model]() &#124; [log]() |
+| PSPNet        | M-V2-D8  | 512x512    | LR/POLICY/BS/EPOCH: 0.01/poly/16/60  | trainaug/val    | 68.40% | [model]() &#124; [log]() |
+| DeepLabV3     | M-V2-D8  | 512x512    | LR/POLICY/BS/EPOCH: 0.01/poly/16/60  | trainaug/val    | 70.08% | [model]() &#124; [log]() |
+| DeepLabV3plus | M-V2-D8  | 512x512    | LR/POLICY/BS/EPOCH: 0.01/poly/16/60  | trainaug/val    | 70.04% | [model]() &#124; [log]() |
+| LRASPPNet     | M-V3S-D8 | 512x512    | LR/POLICY/BS/EPOCH: 0.01/poly/16/60  | trainaug/val    | -      | [model]() &#124; [log]() |
+| LRASPPNet     | M-V3L-D8 | 512x512    | LR/POLICY/BS/EPOCH: 0.01/poly/16/60  | trainaug/val    | -      | [model]() &#124; [log]() |
 
 ## ADE20k
 | Model         | Backbone | Crop Size  | Schedule                             | Train/Eval Set  | mIoU   | Download                 |
 | :-:           | :-:      | :-:        | :-:                                  | :-:             | :-:    | :-:                      |
-| FCN           | M-V2-D8  | 512x512    | LR/POLICY/BS/EPOCH: 0.01/poly/16/130 | train/val       | -      | [model]() &#124; [log]() |
-| PSPNet        | M-V2-D8  | 512x512    | LR/POLICY/BS/EPOCH: 0.01/poly/16/130 | train/val       | -      | [model]() &#124; [log]() |
-| DeepLabV3     | M-V2-D8  | 512x512    | LR/POLICY/BS/EPOCH: 0.01/poly/16/130 | train/val       | -      | [model]() &#124; [log]() |
-| DeepLabV3plus | M-V2-D8  | 512x512    | LR/POLICY/BS/EPOCH: 0.01/poly/16/130 | train/val       | -      | [model]() &#124; [log]() |
+| FCN           | M-V2-D8  | 512x512    | LR/POLICY/BS/EPOCH: 0.01/poly/16/130 | train/val       | 30.85% | [model]() &#124; [log]() |
+| PSPNet        | M-V2-D8  | 512x512    | LR/POLICY/BS/EPOCH: 0.01/poly/16/130 | train/val       | 35.09% | [model]() &#124; [log]() |
+| DeepLabV3     | M-V2-D8  | 512x512    | LR/POLICY/BS/EPOCH: 0.01/poly/16/130 | train/val       | 37.55% | [model]() &#124; [log]() |
+| DeepLabV3plus | M-V2-D8  | 512x512    | LR/POLICY/BS/EPOCH: 0.01/poly/16/130 | train/val       | 37.66% | [model]() &#124; [log]() |
+| LRASPPNet     | M-V3S-D8 | 512x512    | LR/POLICY/BS/EPOCH: 0.01/poly/16/130 | train/val       | -      | [model]() &#124; [log]() |
+| LRASPPNet     | M-V3L-D8 | 512x512    | LR/POLICY/BS/EPOCH: 0.01/poly/16/130 | train/val       | -      | [model]() &#124; [log]() |
 
 ## CityScapes
 | Model         | Backbone | Crop Size  | Schedule                             | Train/Eval Set  | mIoU   | Download                 |
 | :-:           | :-:      | :-:        | :-:                                  | :-:             | :-:    | :-:                      |
-| FCN           | M-V2-D8  | 512x1024   | LR/POLICY/BS/EPOCH: 0.01/poly/8/220  | train/val       | -      | [model]() &#124; [log]() |
+| FCN           | M-V2-D8  | 512x1024   | LR/POLICY/BS/EPOCH: 0.01/poly/8/220  | train/val       | 70.77% | [model]() &#124; [log]() |
 | PSPNet        | M-V2-D8  | 512x1024   | LR/POLICY/BS/EPOCH: 0.01/poly/8/220  | train/val       | -      | [model]() &#124; [log]() |
 | DeepLabV3     | M-V2-D8  | 512x1024   | LR/POLICY/BS/EPOCH: 0.01/poly/8/220  | train/val       | -      | [model]() &#124; [log]() |
 | DeepLabV3plus | M-V2-D8  | 512x1024   | LR/POLICY/BS/EPOCH: 0.01/poly/8/220  | train/val       | -      | [model]() &#124; [log]() |
+| LRASPPNet     | M-V3S-D8 | 512x1024   | LR/POLICY/BS/EPOCH: 0.01/poly/8/660  | train/val       | -      | [model]() &#124; [log]() |
+| LRASPPNet     | M-V3L-D8 | 512x1024   | LR/POLICY/BS/EPOCH: 0.01/poly/8/660  | train/val       | -      | [model]() &#124; [log]() |
