@@ -5,6 +5,12 @@ sssegmentation is a general framework for our research on strongly supervised se
 
 
 # Supported
+#### Supported Backbones
+- [HRNet](https://arxiv.org/pdf/1908.07919.pdf)
+- [ResNet](https://arxiv.org/pdf/1512.03385.pdf)
+- [ResNeSt](https://arxiv.org/pdf/2004.08955.pdf)
+- [MobileNetV2](https://arxiv.org/pdf/1801.04381.pdf)
+- [MobileNetV3](https://arxiv.org/pdf/1905.02244.pdf)
 #### Supported Models
 - [FCN](https://arxiv.org/pdf/1411.4038.pdf)
 - [CE2P](https://arxiv.org/pdf/1809.05996.pdf)
@@ -23,12 +29,6 @@ sssegmentation is a general framework for our research on strongly supervised se
 - [Deeplabv3](https://arxiv.org/pdf/1706.05587.pdf)
 - [NonLocalNet](https://arxiv.org/pdf/1711.07971.pdf)
 - [Deeplabv3Plus](https://arxiv.org/pdf/1802.02611.pdf)
-#### Supported Backbones
-- [HRNet](https://arxiv.org/pdf/1908.07919.pdf)
-- [ResNet](https://arxiv.org/pdf/1512.03385.pdf)
-- [ResNeSt](https://arxiv.org/pdf/2004.08955.pdf)
-- [MobileNetV2](https://arxiv.org/pdf/1801.04381.pdf)
-- [MobileNetV3](https://arxiv.org/pdf/1905.02244.pdf)
 #### Supported Datasets
 - [LIP](http://sysu-hcp.net/lip/)
 - [ATR](http://sysu-hcp.net/lip/overview.php)
@@ -60,8 +60,9 @@ usage:
 sh scripts/train.sh ${CFGFILEPATH} [optional arguments]
 or
 sh scripts/distrain.sh ${NGPUS} ${CFGFILEPATH} [optional arguments]
-
-example:
+```
+Here is an example:
+```sh
 sh scripts/train.sh ssseg/cfgs/deeplabv3plus/cfgs_voc_resnet101os8.py
 or
 sh scripts/distrain.sh 4 ssseg/cfgs/deeplabv3plus/cfgs_voc_resnet101os8.py
@@ -73,8 +74,9 @@ usage:
 sh scripts/test.sh ${CFGFILEPATH} ${CHECKPOINTSPATH} [optional arguments]
 or
 sh scripts/distest.sh ${NGPUS} ${CFGFILEPATH} ${CHECKPOINTSPATH} [optional arguments]
-
-example:
+```
+Here is an example:
+```sh
 sh scripts/test.sh ssseg/cfgs/deeplabv3plus/cfgs_voc_resnet101os8.py deeplabv3plus_resnet101os8_voc_train/epoch_60.pth
 or
 sh scripts/distest.sh 4 ssseg/cfgs/deeplabv3plus/cfgs_voc_resnet101os8.py deeplabv3plus_resnet101os8_voc_train/epoch_60.pth
@@ -97,8 +99,9 @@ optional arguments:
                         config file path you want to use
   --checkpointspath CHECKPOINTSPATH
                         checkpoints you want to resume from
-
-example: 
+```
+Here is an example:
+```sh
 python3 ssseg/demo.py --cfgfilepath ssseg/cfgs/deeplabv3plus/cfgs_voc_resnet101os8.py --checkpointspath deeplabv3plus_resnet101os8_voc_train/epoch_60.pth --imagepath testedimage.jpg
 or
 python3 ssseg/demo.py --cfgfilepath ssseg/cfgs/deeplabv3plus/cfgs_voc_resnet101os8.py --checkpointspath deeplabv3plus_resnet101os8_voc_train/epoch_60.pth --imagedir ./images
