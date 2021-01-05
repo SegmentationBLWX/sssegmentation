@@ -22,7 +22,7 @@ class SelfAttentionBlock(nn.Module):
             in_channels=key_in_channels,
             out_channels=transform_channels,
             num_convs=key_query_num_convs,
-            is_use_norm=key_query_norm,
+            use_norm=key_query_norm,
             norm_cfg=norm_cfg,
             act_cfg=act_cfg,
         )
@@ -34,7 +34,7 @@ class SelfAttentionBlock(nn.Module):
                 in_channels=query_in_channels,
                 out_channels=transform_channels,
                 num_convs=key_query_num_convs,
-                is_use_norm=key_query_norm,
+                use_norm=key_query_norm,
                 norm_cfg=norm_cfg,
                 act_cfg=act_cfg,
             )
@@ -42,7 +42,7 @@ class SelfAttentionBlock(nn.Module):
             in_channels=key_in_channels,
             out_channels=transform_channels if with_out_project else out_channels,
             num_convs=value_out_num_convs,
-            is_use_norm=value_out_norm,
+            use_norm=value_out_norm,
             norm_cfg=norm_cfg,
             act_cfg=act_cfg,
         )
@@ -52,7 +52,7 @@ class SelfAttentionBlock(nn.Module):
                 in_channels=transform_channels,
                 out_channels=out_channels,
                 num_convs=value_out_num_convs,
-                is_use_norm=value_out_norm,
+                use_norm=value_out_norm,
                 norm_cfg=norm_cfg,
                 act_cfg=act_cfg,
             )
@@ -86,8 +86,8 @@ class SelfAttentionBlock(nn.Module):
             context = self.out_project(context)
         return context
     '''build project'''
-    def buildproject(self, in_channels, out_channels, num_convs, is_use_norm, norm_cfg, act_cfg):
-        if is_use_norm:
+    def buildproject(self, in_channels, out_channels, num_convs, use_norm, norm_cfg, act_cfg):
+        if use_norm:
             convs = [
                 nn.Sequential(
                     nn.Conv2d(in_channels, out_channels, kernel_size=1, stride=1, padding=0, bias=False),

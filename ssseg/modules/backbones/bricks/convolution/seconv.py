@@ -6,7 +6,7 @@ Author:
 '''
 import torch
 import torch.nn as nn
-from ..utils import makedivisible
+from ..misc import makedivisible
 from ..activation import BuildActivation
 
 

@@ -1,4 +1,4 @@
-'''define the config file for voc and mobilenetv3sos8'''
+'''define the config file for voc and resnet50os16'''
 from .base_cfg import *
 
 
@@ -23,7 +23,7 @@ DATALOADER_CFG = DATALOADER_CFG.copy()
 OPTIMIZER_CFG = OPTIMIZER_CFG.copy()
 OPTIMIZER_CFG.update(
     {
-        'max_epochs': 180,
+        'max_epochs': 60,
     }
 )
 # modify losses config
@@ -34,18 +34,11 @@ MODEL_CFG.update(
     {
         'num_classes': 21,
         'backbone': {
-            'type': 'mobilenetv3',
-            'series': 'mobilenet',
+            'type': 'resnet50',
+            'series': 'resnet',
             'pretrained': True,
-            'outstride': 8,
-            'arch_type': 'small',
-            'out_indices': (0, 1, 12),
-            'selected_indices': (0, 1, 2),
-        },
-        'aspp': {
-            'in_channels_list': [16, 16, 576],
-            'branch_channels_list': [32, 64],
-            'out_channels': 128,
+            'outstride': 16,
+            'use_stem': True
         },
     }
 )
@@ -55,14 +48,14 @@ INFERENCE_CFG = INFERENCE_CFG.copy()
 COMMON_CFG = COMMON_CFG.copy()
 COMMON_CFG['train'].update(
     {
-        'backupdir': 'lrasppnet_mobilenetv3sos8_voc_train',
-        'logfilepath': 'lrasppnet_mobilenetv3sos8_voc_train/train.log',
+        'backupdir': 'danet_resnet50os16_voc_train',
+        'logfilepath': 'danet_resnet50os16_voc_train/train.log',
     }
 )
 COMMON_CFG['test'].update(
     {
-        'backupdir': 'lrasppnet_mobilenetv3sos8_voc_test',
-        'logfilepath': 'lrasppnet_mobilenetv3sos8_voc_test/test.log',
-        'resultsavepath': 'lrasppnet_mobilenetv3sos8_voc_test/lrasppnet_mobilenetv3sos8_voc_results.pkl'
+        'backupdir': 'danet_resnet50os16_voc_test',
+        'logfilepath': 'danet_resnet50os16_voc_test/test.log',
+        'resultsavepath': 'danet_resnet50os16_voc_test/danet_resnet50os16_voc_results.pkl'
     }
 )

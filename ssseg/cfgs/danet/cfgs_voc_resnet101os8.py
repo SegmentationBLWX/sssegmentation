@@ -1,4 +1,4 @@
-'''define the config file for voc and mobilenetv3los8'''
+'''define the config file for voc and resnet101os8'''
 from .base_cfg import *
 
 
@@ -23,7 +23,7 @@ DATALOADER_CFG = DATALOADER_CFG.copy()
 OPTIMIZER_CFG = OPTIMIZER_CFG.copy()
 OPTIMIZER_CFG.update(
     {
-        'max_epochs': 180,
+        'max_epochs': 60,
     }
 )
 # modify losses config
@@ -41,14 +41,14 @@ INFERENCE_CFG = INFERENCE_CFG.copy()
 COMMON_CFG = COMMON_CFG.copy()
 COMMON_CFG['train'].update(
     {
-        'backupdir': 'lrasppnet_mobilenetv3los8_voc_train',
-        'logfilepath': 'lrasppnet_mobilenetv3los8_voc_train/train.log',
+        'backupdir': 'danet_resnet101os8_voc_train',
+        'logfilepath': 'danet_resnet101os8_voc_train/train.log',
     }
 )
 COMMON_CFG['test'].update(
     {
-        'backupdir': 'lrasppnet_mobilenetv3los8_voc_test',
-        'logfilepath': 'lrasppnet_mobilenetv3los8_voc_test/test.log',
-        'resultsavepath': 'lrasppnet_mobilenetv3los8_voc_test/lrasppnet_mobilenetv3los8_voc_results.pkl'
+        'backupdir': 'danet_resnet101os8_voc_test',
+        'logfilepath': 'danet_resnet101os8_voc_test/test.log',
+        'resultsavepath': 'danet_resnet101os8_voc_test/danet_resnet101os8_voc_results.pkl'
     }
 )

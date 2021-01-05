@@ -7,6 +7,7 @@ Author:
 from .fcn import FCN
 from .ce2p import CE2P
 from .ccnet import CCNet
+from .danet import DANet
 from .gcnet import GCNet
 from .dmnet import DMNet
 from .apcnet import APCNet
@@ -29,6 +30,7 @@ def BuildModel(cfg, mode, **kwargs):
         'fcn': FCN,
         'ce2p': CE2P,
         'ccnet': CCNet,
+        'danet': DANet,
         'gcnet': GCNet,
         'dmnet': DMNet,
         'apcnet': APCNet,

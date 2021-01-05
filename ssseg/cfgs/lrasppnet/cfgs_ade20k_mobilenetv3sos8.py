@@ -22,7 +22,7 @@ DATALOADER_CFG = DATALOADER_CFG.copy()
 OPTIMIZER_CFG = OPTIMIZER_CFG.copy()
 OPTIMIZER_CFG.update(
     {
-        'max_epochs': 130
+        'max_epochs': 390
     }
 )
 # modify losses config

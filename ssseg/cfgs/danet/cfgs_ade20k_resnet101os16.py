@@ -1,4 +1,4 @@
-'''define the config file for ade20k and mobilenetv3los8'''
+'''define the config file for ade20k and resnet101os16'''
 from .base_cfg import *
 
 
@@ -22,7 +22,7 @@ DATALOADER_CFG = DATALOADER_CFG.copy()
 OPTIMIZER_CFG = OPTIMIZER_CFG.copy()
 OPTIMIZER_CFG.update(
     {
-        'max_epochs': 390
+        'max_epochs': 130
     }
 )
 # modify losses config
@@ -32,6 +32,13 @@ MODEL_CFG = MODEL_CFG.copy()
 MODEL_CFG.update(
     {
         'num_classes': 150,
+        'backbone': {
+            'type': 'resnet101',
+            'series': 'resnet',
+            'pretrained': True,
+            'outstride': 16,
+            'use_stem': True
+        },
     }
 )
 # modify inference config
@@ -40,14 +47,14 @@ INFERENCE_CFG = INFERENCE_CFG.copy()
 COMMON_CFG = COMMON_CFG.copy()
 COMMON_CFG['train'].update(
     {
-        'backupdir': 'lrasppnet_mobilenetv3los8_ade20k_train',
-        'logfilepath': 'lrasppnet_mobilenetv3los8_ade20k_train/train.log',
+        'backupdir': 'danet_resnet101os16_ade20k_train',
+        'logfilepath': 'danet_resnet101os16_ade20k_train/train.log',
     }
 )
 COMMON_CFG['test'].update(
     {
-        'backupdir': 'lrasppnet_mobilenetv3los8_ade20k_test',
-        'logfilepath': 'lrasppnet_mobilenetv3los8_ade20k_test/test.log',
-        'resultsavepath': 'lrasppnet_mobilenetv3los8_ade20k_test/lrasppnet_mobilenetv3los8_ade20k_results.pkl'
+        'backupdir': 'danet_resnet101os16_ade20k_test',
+        'logfilepath': 'danet_resnet101os16_ade20k_test/test.log',
+        'resultsavepath': 'danet_resnet101os16_ade20k_test/danet_resnet101os16_ade20k_results.pkl'
     }
 )
