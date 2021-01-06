@@ -38,6 +38,7 @@ MODEL_CFG.update(
             'series': 'mobilenet',
             'pretrained': True,
             'outstride': 8,
+            'selected_indices': (2, 3),
         },
         'decoder': {
             'in_channels': 320,

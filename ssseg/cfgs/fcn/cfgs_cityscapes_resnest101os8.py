@@ -52,6 +52,7 @@ MODEL_CFG.update(
             'series': 'resnest',
             'pretrained': True,
             'outstride': 8,
+            'selected_indices': (2, 3),
         },
     }
 )

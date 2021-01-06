@@ -34,12 +34,13 @@ MODEL_CFG.update(
     {
         'num_classes': 21,
         'backbone': {
-                'type': 'resnet101',
-                'series': 'resnet',
-                'pretrained': True,
-                'outstride': 16,
-                'use_stem': True
-            },
+            'type': 'resnet101',
+            'series': 'resnet',
+            'pretrained': True,
+            'outstride': 16,
+            'use_stem': True,
+            'selected_indices': (2, 3),
+        },
     }
 )
 # modify inference config

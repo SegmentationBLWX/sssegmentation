@@ -86,10 +86,6 @@ class BaseDataset(torch.utils.data.Dataset):
                 iou_dict[self.classnames[idx]] = item
             result_selected['iou'] = iou_dict
         return result_selected
-    '''convert label to one-hot format'''
-    def onehot(self, label, num_classes):
-        label = np.eye(num_classes)[label]
-        return label
     '''generate edge'''
     def generateedge(self, segmentation, edge_width=3, ignore_index=255):
         h, w = segmentation.shape

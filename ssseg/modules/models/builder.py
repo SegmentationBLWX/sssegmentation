@@ -10,6 +10,7 @@ from .ccnet import CCNet
 from .danet import DANet
 from .gcnet import GCNet
 from .dmnet import DMNet
+from .encnet import ENCNet
 from .apcnet import APCNet
 from .emanet import EMANet
 from .pspnet import PSPNet
@@ -33,6 +34,7 @@ def BuildModel(cfg, mode, **kwargs):
         'danet': DANet,
         'gcnet': GCNet,
         'dmnet': DMNet,
+        'encnet': ENCNet,
         'apcnet': APCNet,
         'emanet': EMANet,
         'pspnet': PSPNet,

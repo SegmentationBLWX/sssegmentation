@@ -52,6 +52,7 @@ MODEL_CFG.update(
             'series': 'resnest',
             'pretrained': True,
             'outstride': 8,
+            'selected_indices': (0, 1, 2, 3),
         },
         'aspp': {
             'in_channels': 2048,

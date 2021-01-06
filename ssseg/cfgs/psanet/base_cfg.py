@@ -81,7 +81,8 @@ MODEL_CFG = {
         'series': 'resnet',
         'pretrained': True,
         'outstride': 8,
-        'use_stem': True
+        'use_stem': True,
+        'selected_indices': (2, 3),
     },
     'psa': {
         'in_channels': 2048,

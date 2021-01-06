@@ -32,9 +32,9 @@ class BaseModel(nn.Module):
     def transforminputs(self, x_list, selected_indices=None):
         if selected_indices is None:
             if self.cfg['backbone']['series'] in ['hrnet']:
-                selected_indices = [0, 0, 0, 0]
+                selected_indices = (0, 0, 0, 0)
             else:
-                selected_indices = [0, 1, 2, 3]
+                selected_indices = (0, 1, 2, 3)
         outs = []
         for idx in selected_indices:
             outs.append(x_list[idx])
@@ -99,14 +99,22 @@ class BaseModel(nn.Module):
             'sigmoidfocalloss': SigmoidFocalLoss,
             'binaryceloss': BinaryCrossEntropyLoss,
         }
+        # format prediction
+        if prediction.dim() == 4:
+            prediction = prediction.permute((0, 2, 3, 1)).contiguous()
+        elif prediction.dim() == 3:
+            prediction = prediction.permute((0, 2, 1)).contiguous()
+        prediction = prediction.view(-1, prediction.size(-1))
         # calculate the loss
         loss = 0
-        prediction = prediction.permute((0, 2, 3, 1)).contiguous()
         for key, value in loss_cfg.items():
             assert key in supported_losses, 'unsupport loss type %s...' % key
+            target_iter = target.view(-1)
+            if (key in ['binaryceloss']) and hasattr(self, 'onehot'):
+                target_iter = self.onehot(target, self.cfg['num_classes'])
             loss += supported_losses[key](
-                prediction=prediction.view(-1, prediction.size(3)), 
-                target=target.view(-1), 
+                prediction=prediction, 
+                target=target_iter, 
                 scale_factor=value['scale_factor'],
                 **value['opts']
             )

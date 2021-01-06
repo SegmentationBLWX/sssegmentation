@@ -51,6 +51,7 @@ MODEL_CFG.update(
             'type': 'hrnetv2_w48',
             'series': 'hrnet',
             'pretrained': True,
+            'selected_indices': (0, 0),
         },
         'auxiliary': {
             'in_channels': sum([48, 96, 192, 384]),

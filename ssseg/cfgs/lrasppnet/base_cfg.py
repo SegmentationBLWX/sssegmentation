@@ -76,7 +76,7 @@ MODEL_CFG = {
     'backbone': {
         'type': 'mobilenetv3',
         'series': 'mobilenet',
-        'pretrained': True,
+        'pretrained': False,
         'outstride': 8,
         'arch_type': 'large',
         'selected_indices': (0, 1, 2),

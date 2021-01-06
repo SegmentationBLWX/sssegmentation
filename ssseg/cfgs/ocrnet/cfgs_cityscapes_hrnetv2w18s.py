@@ -51,6 +51,7 @@ MODEL_CFG.update(
             'type': 'hrnetv2_w18_small',
             'series': 'hrnet',
             'pretrained': True,
+            'selected_indices': (0, 0),
         },
     }
 )

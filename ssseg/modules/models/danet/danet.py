@@ -76,7 +76,7 @@ class DANet(BaseModel):
     def forward(self, x, targets=None, losses_cfg=None):
         h, w = x.size(2), x.size(3)
         # feed to backbone network
-        x1, x2, x3, x4 = self.transforminputs(self.backbone_net(x), selected_indices=self.cfg['backbone'].get('selected_indices'))
+        x3, x4 = self.transforminputs(self.backbone_net(x), selected_indices=self.cfg['backbone'].get('selected_indices'))
         # feed to pam
         feats_pam = self.pam_in_conv(x4)
         feats_pam = self.pam_net(feats_pam)
@@ -102,7 +102,7 @@ class DANet(BaseModel):
                 targets=targets, 
                 losses_cfg=losses_cfg
             )
-        return preds_pam_cam
+        return preds_pamcam
     '''return all layers'''
     def alllayers(self):
         return {

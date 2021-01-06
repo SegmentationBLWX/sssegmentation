@@ -80,6 +80,7 @@ MODEL_CFG = {
         'type': 'hrnetv2_w18',
         'series': 'hrnet',
         'pretrained': True,
+        'selected_indices': (0, 0),
     },
     'auxiliary': {
         'in_channels': sum([18, 36, 72, 144]),
