@@ -26,6 +26,7 @@ class SelfAttentionBlock(nn.Module):
             norm_cfg=norm_cfg,
             act_cfg=act_cfg,
         )
+        # query project
         if share_key_query:
             assert key_in_channels == query_in_channels
             self.query_project = self.key_project
@@ -38,6 +39,7 @@ class SelfAttentionBlock(nn.Module):
                 norm_cfg=norm_cfg,
                 act_cfg=act_cfg,
             )
+        # value project
         self.value_project = self.buildproject(
             in_channels=key_in_channels,
             out_channels=transform_channels if with_out_project else out_channels,
@@ -46,6 +48,7 @@ class SelfAttentionBlock(nn.Module):
             norm_cfg=norm_cfg,
             act_cfg=act_cfg,
         )
+        # out project
         self.out_project = None
         if with_out_project:
             self.out_project = self.buildproject(
@@ -56,6 +59,7 @@ class SelfAttentionBlock(nn.Module):
                 norm_cfg=norm_cfg,
                 act_cfg=act_cfg,
             )
+        # downsample
         self.query_downsample = query_downsample
         self.key_downsample = key_downsample
         self.matmul_norm = matmul_norm

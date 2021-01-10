@@ -30,7 +30,7 @@ DATASET_CFG['test'].update(
 DATALOADER_CFG = DATALOADER_CFG.copy()
 DATALOADER_CFG['train'].update(
     {
-        'batch_size': 8,
+        'batch_size': 16,
     }
 )
 # modify optimizer config

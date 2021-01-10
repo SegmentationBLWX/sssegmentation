@@ -36,7 +36,7 @@ MODEL_CFG.update(
         'backbone': {
             'type': 'mobilenetv3',
             'series': 'mobilenet',
-            'pretrained': False,
+            'pretrained': True,
             'outstride': 8,
             'arch_type': 'small',
             'out_indices': (0, 1, 12),

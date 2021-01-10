@@ -26,7 +26,7 @@ DATASET_CFG = {
 DATALOADER_CFG = {
     'train': {
         'type': ['nondistributed', 'distributed'][1],
-        'batch_size': 16,
+        'batch_size': 32,
         'num_workers': 16,
         'shuffle': True,
         'pin_memory': True,
@@ -76,7 +76,7 @@ MODEL_CFG = {
     'backbone': {
         'type': 'mobilenetv3',
         'series': 'mobilenet',
-        'pretrained': False,
+        'pretrained': True,
         'outstride': 8,
         'arch_type': 'large',
         'selected_indices': (0, 1, 2),
