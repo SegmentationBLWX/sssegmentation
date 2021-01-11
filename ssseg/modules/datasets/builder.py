@@ -4,15 +4,16 @@ Function:
 Author:
     Zhenchao Jin
 '''
-from .voc import *
-from .atr import *
-from .lip import *
-from .coco import *
-from .cihp import *
-from .ade20k import *
-from .sbushadow import *
-from .cityscapes import *
-from .supervisely import *
+from .lip import LIPDataset
+from .atr import ATRDataset
+from .base import BaseDataset
+from .cihp import CIHPDataset
+from .ade20k import ADE20kDataset
+from .sbushadow import SBUShadowDataset
+from .cityscapes import CityScapesDataset
+from .supervisely import SuperviselyDataset
+from .voc import VOCDataset, VOCContextDataset
+from .coco import COCODataset, COCOStuffDataset
 
 
 '''build dataset'''

@@ -51,7 +51,7 @@ class DMNet(BaseModel):
             nn.Conv2d(auxiliary_cfg['out_channels'], cfg['num_classes'], kernel_size=1, stride=1, padding=0)
         )
         # freeze normalization layer if necessary
-        if cfg.get('is_freeze_normlayer', False): self.freezenormlayer()
+        if cfg.get('is_freeze_norm', False): self.freezenormalization()
     '''forward'''
     def forward(self, x, targets=None, losses_cfg=None):
         h, w = x.size(2), x.size(3)

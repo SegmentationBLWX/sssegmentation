@@ -42,8 +42,8 @@ class BaseModel(nn.Module):
     '''return all layers with learnable parameters'''
     def alllayers(self):
         raise NotImplementedError('not to be implemented')
-    '''freeze normalization layer'''
-    def freezenormlayer(self):
+    '''freeze normalization'''
+    def freezenormalization(self):
         for module in self.modules():
             if type(module) in BuildNormalization(only_get_all_supported=True):
                 module.eval()

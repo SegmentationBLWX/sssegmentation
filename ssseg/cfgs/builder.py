@@ -31,6 +31,11 @@ def BuildConfig(cfg_file_path, tmp_cfg_dir='tmp_cfg', **kwargs):
     shutil.copyfile(base_cfg_file_path, os.path.join(tmp_cfg_dir, 'base_cfg' + ext))
     time.sleep(0.5)
     # load module from the temp dir
-    cfg = importlib.import_module(f'{tmp_cfg_dir}.{cfg_name}', __package__)
+    try:
+        cfg = importlib.import_module(f'{tmp_cfg_dir}.{cfg_name}', __package__)
+    except:
+        import sys
+        sys.path.insert(0, '.')
+        cfg = importlib.import_module(f'{tmp_cfg_dir}.{cfg_name}', __package__)
     # return cfg
     return cfg, cfg_file_path
