@@ -28,6 +28,7 @@ sssegmentation is a general framework for our research on strongly supervised se
 - [APCNet](https://openaccess.thecvf.com/content_CVPR_2019/papers/He_Adaptive_Pyramid_Context_Network_for_Semantic_Segmentation_CVPR_2019_paper.pdf)
 - [UPerNet](https://arxiv.org/pdf/1807.10221.pdf)
 - [Deeplabv3](https://arxiv.org/pdf/1706.05587.pdf)
+- [SemanticFPN](https://arxiv.org/pdf/1901.02446.pdf)
 - [NonLocalNet](https://arxiv.org/pdf/1711.07971.pdf)
 - [Deeplabv3Plus](https://arxiv.org/pdf/1802.02611.pdf)
 #### Supported Datasets

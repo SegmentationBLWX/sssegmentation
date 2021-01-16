@@ -30,8 +30,8 @@ def SigmoidFocalLoss(prediction, target, scale_factor=1.0, **kwargs):
         mask = (target != ignore_index)
         prediction, target = prediction[mask].view(-1, num_classes), target[mask].view(-1)
     # calculate the loss
-    gamma, alpha, cls_weight, reduction = kwargs.get('gamma', 2), kwargs.get('alpha', 0.25), kwargs.get('cls_weight', None), kwargs.get('reduction', 'mean')
-    loss = sigmoid_focal_loss(prediction, target.long(), gamma, alpha, cls_weight, reduction)
+    gamma, alpha, weight, reduction = kwargs.get('gamma', 2), kwargs.get('alpha', 0.25), kwargs.get('weight', None), kwargs.get('reduction', 'mean')
+    loss = sigmoid_focal_loss(prediction, target.long(), gamma, alpha, weight, reduction)
     # scale the loss
     loss = loss * scale_factor
     # return the final loss

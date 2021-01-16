@@ -21,6 +21,7 @@ from .annnet import ANNNet
 from .upernet import UPerNet
 from .deeplabv3 import Deeplabv3
 from .lrasppnet import LRASPPNet
+from .semanticfpn import SemanticFPN
 from .nonlocalnet import NonLocalNet
 from .deeplabv3plus import Deeplabv3Plus
 
@@ -45,6 +46,7 @@ def BuildModel(cfg, mode, **kwargs):
         'upernet': UPerNet,
         'deeplabv3': Deeplabv3,
         'lrasppnet': LRASPPNet,
+        'semanticfpn': SemanticFPN,
         'nonlocalnet': NonLocalNet,
         'deeplabv3plus': Deeplabv3Plus,
     }

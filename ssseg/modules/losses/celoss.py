@@ -24,7 +24,7 @@ Arguments:
 def CrossEntropyLoss(prediction, target, scale_factor=1.0, **kwargs):
     # calculate the loss
     ce_args = {
-        'weight': kwargs.get('cls_weight', None),
+        'weight': kwargs.get('weight', None),
         'ignore_index': kwargs.get('ignore_index', 255),
         'reduction': kwargs.get('reduction', 'mean'),
     }
@@ -52,7 +52,7 @@ def BinaryCrossEntropyLoss(prediction, target, scale_factor=1.0, **kwargs):
     if prediction.dim() != target.dim():
         assert (prediction.dim() == 2 and target.dim() == 1) or (prediction.dim() == 4 and target.dim() == 3)
         ignore_index = kwargs.get('ignore_index', 255)
-        target_binary = target.new_zeros(prediction.shape)
+        target_binary = target.new_zeros(prediction.shape).type_as(prediction)
         valid_mask = (target >= 0) & (target != ignore_index)
         idxs = torch.nonzero(valid_mask, as_tuple=True)
         if idxs[0].numel() > 0:
@@ -60,11 +60,13 @@ def BinaryCrossEntropyLoss(prediction, target, scale_factor=1.0, **kwargs):
                 target_binary[idxs[0], target[valid_mask].long(), idxs[1], idxs[2]] = 1
             else:
                 target_binary[idxs[0], target[valid_mask].long()] = 1
+        prediction = prediction[valid_mask]
+        if 'weight' in kwargs: kwargs['weight'] = kwargs['weight'][valid_mask]
     else:
         target_binary = target
     # calculate the loss
     ce_args = {
-        'weight': kwargs.get('cls_weight', None),
+        'weight': kwargs.get('weight', None),
         'reduction': kwargs.get('reduction', 'mean'),
         'pos_weight': kwargs.get('pos_weight', None)
     }
