@@ -12,6 +12,7 @@ from .ade20k import ADE20kDataset
 from .sbushadow import SBUShadowDataset
 from .cityscapes import CityScapesDataset
 from .supervisely import SuperviselyDataset
+from .mhp import MHPv1Dataset, MHPv2Dataset
 from .voc import VOCDataset, VOCContextDataset
 from .coco import COCODataset, COCOStuffDataset
 
@@ -25,6 +26,8 @@ def BuildDataset(mode, logger_handle, dataset_cfg, **kwargs):
         'lip': LIPDataset,
         'coco': COCODataset,
         'cihp': CIHPDataset,
+        'mhpv1': MHPv1Dataset,
+        'mhpv2': MHPv2Dataset,
         'ade20k': ADE20kDataset,
         'cocostuff': COCOStuffDataset,
         'sbushadow': SBUShadowDataset,

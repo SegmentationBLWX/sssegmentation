@@ -41,6 +41,7 @@ https://github.com/SegmentationBLWX/sssegmentation/tree/main/docs
 - [ATR](http://sysu-hcp.net/lip/overview.php)
 - [CIHP](http://sysu-hcp.net/lip/overview.php)
 - [ADE20k](https://groups.csail.mit.edu/vision/datasets/ADE20K/)
+- [MHPv1&V2](https://lv-mhp.github.io/dataset)
 - [MS COCO](https://cocodataset.org/#home)
 - [CityScapes](https://www.cityscapes-dataset.com/)
 - [Supervisely](https://supervise.ly/explore/projects/supervisely-person-dataset-23304/datasets)

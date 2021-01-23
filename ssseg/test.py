@@ -41,7 +41,7 @@ class Tester():
         self.use_cuda = torch.cuda.is_available()
         # modify config for consistency
         if not self.use_cuda:
-            if self.cmd_args.local_rank == 0: logger_handle.warning('Cuda is not available, only cpu is used to test the model...')
+            if self.cmd_args.local_rank == 0: self.logger_handle.warning('Cuda is not available, only cpu is used to test the model...')
             self.cfg.MODEL_CFG['distributed']['is_on'] = False
             self.cfg.DATALOADER_CFG['test']['type'] = 'nondistributed'
         if self.cfg.MODEL_CFG['distributed']['is_on']:

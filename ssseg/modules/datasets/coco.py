@@ -45,7 +45,6 @@ class COCODataset(BaseDataset):
         imagepath = os.path.join(self.image_dir, image_meta['file_name'])
         # read image
         image = cv2.imread(imagepath)
-        image = cv2.cvtColor(image, cv2.COLOR_BGR2RGB)
         # read annotation
         if self.dataset_cfg.get('with_ann', True):
             target = self.coco_api.loadAnns(self.coco_api.getAnnIds(imgIds=imageid))
@@ -109,9 +108,30 @@ class COCOStuffDataset(BaseDataset):
     assert num_classes == len(classnames)
     def __init__(self, mode, logger_handle, dataset_cfg, **kwargs):
         super(COCOStuffDataset, self).__init__(mode, logger_handle, dataset_cfg, **kwargs)
+        from pycocotools import mask
+        from pycocotools.coco import COCO
+        # obtain the dirs
+        rootdir = dataset_cfg['rootdir']
+        self.image_dir = os.path.join(rootdir, f"{dataset_cfg['set']}2017")
+        # obatin imageids
+        self.annfilepath = os.path.join(rootdir, f"annotations/stuff_{dataset_cfg['set']}2017.json")
+        self.coco_api = COCO(self.annfilepath)
+        self.imageids = list(self.coco_api.imgs.keys())
     '''pull item'''
     def __getitem__(self, index):
-        raise NotImplementedError('not be implemented')
+        imageid = self.imageids[index]
+        image_meta = self.coco_api.loadImgs(imageid)[0]
+        imagepath = os.path.join(self.image_dir, image_meta['file_name'])
+        annpath = imagepath.replace('jpg', 'png')
+        sample = self.read(imagepath, annpath, self.dataset_cfg.get('with_ann', True))
+        sample.update({'id': imageid})
+        if self.mode == 'TRAIN':
+            sample = self.synctransform(sample, 'without_totensor_normalize_pad')
+            sample['edge'] = self.generateedge(sample['segmentation'].copy())
+            sample = self.synctransform(sample, 'only_totensor_normalize_pad')
+        else:
+            sample = self.synctransform(sample, 'all')
+        return sample
     '''length'''
     def __len__(self):
         return len(self.imageids)

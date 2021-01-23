@@ -35,7 +35,7 @@ class Trainer():
         self.use_cuda = torch.cuda.is_available()
         # modify config for consistency
         if not self.use_cuda:
-            if self.cmd_args.local_rank == 0: logger_handle.warning('Cuda is not available, only cpu is used to train the model...')
+            if self.cmd_args.local_rank == 0: self.logger_handle.warning('Cuda is not available, only cpu is used to train the model...')
             self.cfg.MODEL_CFG['distributed']['is_on'] = False
             self.cfg.DATALOADER_CFG['train']['type'] = 'nondistributed'
         if self.cfg.MODEL_CFG['distributed']['is_on']:
@@ -76,7 +76,7 @@ class Trainer():
         start_epoch = 1
         end_epoch = cfg.OPTIMIZER_CFG['max_epochs']
         # load checkpoints
-        if cmd_args.checkpointspath:
+        if cmd_args.checkpointspath and os.path.exists(cmd_args.checkpointspath):
             checkpoints = loadcheckpoints(cmd_args.checkpointspath, logger_handle=logger_handle, cmd_args=cmd_args)
             try:
                 model.load_state_dict(checkpoints['model'])
@@ -85,6 +85,8 @@ class Trainer():
                 model.load_state_dict(checkpoints['model'], strict=False)
             optimizer.load_state_dict(checkpoints['optimizer'])
             start_epoch = checkpoints['epoch'] + 1
+        else:
+            cmd_args.checkpointspath = ''
         num_iters, max_iters = (start_epoch - 1) * len(dataloader), end_epoch * len(dataloader)
         # parallel
         if use_cuda and cfg.MODEL_CFG['is_multi_gpus']:
