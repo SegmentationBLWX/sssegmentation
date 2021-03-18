@@ -47,12 +47,13 @@ https://github.com/SegmentationBLWX/sssegmentation/tree/main/docs
 - [Supervisely](https://supervise.ly/explore/projects/supervisely-person-dataset-23304/datasets)
 - [SBUShadow](https://www3.cs.stonybrook.edu/~cvl/projects/shadow_noisy_label/index.html)
 - [PASCAL VOC](http://host.robots.ox.ac.uk/pascal/VOC/)
+- [COCOStuff10k](https://cocodataset.org/#home)
 
 
 # Citation
 If you use this framework in your research, please cite this project.
 ```
-@misc{jzc2020ssseg,
+@misc{ssseg2020,
     author = {Zhenchao Jin},
     title = {SSSegmentation: A general framework for strongly supervised semantic segmentation},
     year = {2020},

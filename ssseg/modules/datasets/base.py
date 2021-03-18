@@ -7,6 +7,7 @@ Author:
 import cv2
 import torch
 import numpy as np
+import scipy.io as sio
 from .transforms import *
 from chainercv.evaluations import eval_semantic_segmentation
 
@@ -37,7 +38,14 @@ class BaseDataset(torch.utils.data.Dataset):
         # read image
         image = cv2.imread(imagepath)
         # read annotation
-        segmentation = cv2.imread(annpath, cv2.IMREAD_GRAYSCALE) if with_ann else np.zeros((image.shape[0], image.shape[1]))
+        if annpath.endswith('.png'):
+            segmentation = cv2.imread(annpath, cv2.IMREAD_GRAYSCALE) if with_ann else np.zeros((image.shape[0], image.shape[1]))
+        elif annpath.endswith('.mat'):
+            segmentation = sio.loadmat(annpath)
+            if self.dataset_cfg['type'] in ['cocostuff10k']:
+                segmentation = segmentation['S']
+        else:
+            raise NotImplementedError('Unsupport data type of %s...' % annpath.split('.')[-1])
         if with_ann and hasattr(self, 'clsid2label'):
             for key, value in self.clsid2label.items():
                 segmentation[segmentation == key] = value

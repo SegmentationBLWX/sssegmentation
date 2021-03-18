@@ -82,7 +82,7 @@ class Demo():
             if imagepath.split('.')[-1] not in ['jpg', 'jpeg', 'png']: continue
             pbar.set_description('Processing %s' % imagepath)
             infer_tricks, output_list, use_probs_before_resize = inference_cfg['tricks'], [], inference_cfg['tricks']['use_probs_before_resize']
-            sample = dataset.read(imagepath, '', False)
+            sample = dataset.read(imagepath, 'none.png', False)
             image = sample['image']
             sample = dataset.synctransform(sample, 'all')
             image_tensor_ori = sample['image'].unsqueeze(0).type(FloatTensor)
@@ -116,6 +116,8 @@ class Demo():
             if use_probs_before_resize: outputs = F.softmax(model(images), dim=1)
             else: outputs = model(images)
         else:
+            assert use_probs_before_resize, 'use_probs_before_resize should be set as True when using slide mode'
+            align_corners = model.align_corners if hasattr(model, 'align_corners') else model.module.align_corners
             opts = inference_cfg['opts']
             stride_h, stride_w = opts['stride']
             cropsize_h, cropsize_w = opts['cropsize']
@@ -130,7 +132,7 @@ class Demo():
                     x2, y2 = min(x1 + cropsize_w, image_w), min(y1 + cropsize_h, image_h)
                     x1, y1 = max(x2 - cropsize_w, 0), max(y2 - cropsize_h, 0)
                     crop_images = images[:, :, y1:y2, x1:x2]
-                    outputs_crop = F.softmax(model(crop_images), dim=1)
+                    outputs_crop = F.softmax(F.interpolate(model(crop_images), size=crop_images.size()[2:], mode='bilinear', align_corners=align_corners), dim=1)
                     outputs += F.pad(outputs_crop, (int(x1), int(outputs.shape[3] - x2), int(y1), int(outputs.shape[2] - y2)))
                     count_mat[:, :, y1:y2, x1:x2] += 1
             assert (count_mat == 0).sum() == 0
@@ -140,5 +142,6 @@ class Demo():
 
 '''debug'''
 if __name__ == '__main__':
-    client = Demo()
-    client.start()
+    with torch.no_grad():
+        client = Demo()
+        client.start()

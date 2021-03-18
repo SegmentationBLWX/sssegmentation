@@ -42,6 +42,7 @@ sssegmentation is a general framework for our research on strongly supervised se
 - [Supervisely](https://supervise.ly/explore/projects/supervisely-person-dataset-23304/datasets)
 - [SBUShadow](https://www3.cs.stonybrook.edu/~cvl/projects/shadow_noisy_label/index.html)
 - [PASCAL VOC](http://host.robots.ox.ac.uk/pascal/VOC/)
+- [COCOStuff10k](https://cocodataset.org/#home)
 
 
 # Quick Start

@@ -7,6 +7,7 @@ Author:
 import os
 import pandas as pd
 from .base import *
+from PIL import Image
 
 
 '''CityScapes dataset'''
@@ -50,3 +51,28 @@ class CityScapesDataset(BaseDataset):
     '''length'''
     def __len__(self):
         return len(self.imageids)
+    '''format results for test set of Cityscapes'''
+    @staticmethod
+    def formatresults(results, filenames, to_label_id=True, savedir='results'):
+        assert len(filenames) == len(results)
+        def convert(result):
+            import cityscapesscripts.helpers.labels as CSLabels
+            result_copy = result.copy()
+            for trainId, label in CSLabels.trainId2label.items():
+                result_copy[result == trainId] = label.id
+            return result_copy
+        if not os.path.exists(savedir): os.mkdir(savedir)
+        result_files = []
+        for idx in range(len(results)):
+            result = results[idx]
+            filename = filenames[idx]
+            if to_label_id: result = convert(result)
+            basename = os.path.splitext(os.path.basename(filename))[0]
+            png_filename = os.path.join(savedir, f'{basename}.png')
+            output = Image.fromarray(result.astype(np.uint8)).convert('P')
+            import cityscapesscripts.helpers.labels as CSLabels
+            palette = np.zeros((len(CSLabels.id2label), 3), dtype=np.uint8)
+            for label_id, label in CSLabels.id2label.items():
+                palette[label_id] = label.color
+            output.putpalette(palette)
+            output.save(png_filename)

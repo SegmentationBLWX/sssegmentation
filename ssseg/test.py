@@ -27,7 +27,7 @@ def parseArgs():
     parser.add_argument('--local_rank', dest='local_rank', help='node rank for distributed testing', default=0, type=int)
     parser.add_argument('--nproc_per_node', dest='nproc_per_node', help='number of process per node', default=4, type=int)
     parser.add_argument('--cfgfilepath', dest='cfgfilepath', help='config file path you want to use', type=str, required=True)
-    parser.add_argument('--noeval', dest='noeval', help='set true if no ground truth could be used to eval the results', type=bool)
+    parser.add_argument('--evalmode', dest='evalmode', help='evaluate mode, support online and offline', default='offline', type=str)
     parser.add_argument('--checkpointspath', dest='checkpointspath', help='checkpoints you want to resume from', type=str, required=True)
     args = parser.parse_args()
     return args
@@ -113,6 +113,15 @@ class Tester():
                     if infer_tricks['flip']:
                         images_flip = torch.from_numpy(np.flip(images.cpu().numpy(), axis=3).copy())
                         outputs_flip = self.inference(model, images_flip.type(FloatTensor), inference_cfg, dataset.num_classes, use_probs_before_resize)
+                        fix_ann_pairs = inference_cfg.get('fix_ann_pairs', None)
+                        if fix_ann_pairs is None:
+                            for aug_opt in self.cfg.DATASET_CFG['train']['aug_opts']:
+                                if 'RandomFlip' in aug_opt: fix_ann_pairs = aug_opt[-1].get('fix_ann_pairs', None)
+                        if fix_ann_pairs is not None:
+                            outputs_flip_clone = outputs_flip.data.clone()
+                            for (pair_a, pair_b) in fix_ann_pairs:
+                                outputs_flip[:, pair_a, :, :] = outputs_flip_clone[:, pair_b, :, :]
+                                outputs_flip[:, pair_b, :, :] = outputs_flip_clone[:, pair_a, :, :]
                         outputs_flip = torch.from_numpy(np.flip(outputs_flip.cpu().numpy(), axis=3).copy()).type_as(outputs)
                         outputs_list.append(outputs_flip)
                 for idx in range(len(outputs_list[0])):
@@ -132,6 +141,8 @@ class Tester():
             if use_probs_before_resize: outputs = F.softmax(model(images), dim=1)
             else: outputs = model(images)
         else:
+            assert use_probs_before_resize, 'use_probs_before_resize should be set as True when using slide mode'
+            align_corners = model.align_corners if hasattr(model, 'align_corners') else model.module.align_corners
             opts = inference_cfg['opts']
             stride_h, stride_w = opts['stride']
             cropsize_h, cropsize_w = opts['cropsize']
@@ -146,7 +157,7 @@ class Tester():
                     x2, y2 = min(x1 + cropsize_w, image_w), min(y1 + cropsize_h, image_h)
                     x1, y1 = max(x2 - cropsize_w, 0), max(y2 - cropsize_h, 0)
                     crop_images = images[:, :, y1:y2, x1:x2]
-                    outputs_crop = F.softmax(model(crop_images), dim=1)
+                    outputs_crop = F.softmax(F.interpolate(model(crop_images), size=crop_images.size()[2:], mode='bilinear', align_corners=align_corners), dim=1)
                     outputs += F.pad(outputs_crop, (int(x1), int(outputs.shape[3] - x2), int(y1), int(outputs.shape[2] - y2)))
                     count_mat[:, :, y1:y2, x1:x2] += 1
             assert (count_mat == 0).sum() == 0
@@ -205,10 +216,12 @@ def main():
             all_gts_filtered.append(all_gts[idx])
         all_preds, all_gts = all_preds_filtered, all_gts_filtered
         logger_handle.info('All Finished, all_preds: %s, all_gts: %s' % (len(all_preds), len(all_gts)))
-        if not args.noeval:
-            dataset = BuildDataset(mode='TEST', logger_handle=logger_handle, dataset_cfg=copy.deepcopy(cfg.DATASET_CFG))
+        dataset = BuildDataset(mode='TEST', logger_handle=logger_handle, dataset_cfg=copy.deepcopy(cfg.DATASET_CFG))
+        if args.evalmode == 'offline':
             result = dataset.evaluate(all_preds, all_gts)
             logger_handle.info(result)
+        else:
+            dataset.formatresults(all_preds, all_ids)
 
 
 '''debug'''
