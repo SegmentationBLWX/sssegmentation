@@ -13,7 +13,7 @@ from .sbushadow import SBUShadowDataset
 from .cityscapes import CityScapesDataset
 from .supervisely import SuperviselyDataset
 from .mhp import MHPv1Dataset, MHPv2Dataset
-from .voc import VOCDataset, VOCContextDataset
+from .voc import VOCDataset, PascalContextDataset
 from .coco import COCODataset, COCOStuffDataset, COCOStuff10kDataset
 
 
@@ -31,10 +31,10 @@ def BuildDataset(mode, logger_handle, dataset_cfg, **kwargs):
         'ade20k': ADE20kDataset,
         'cocostuff': COCOStuffDataset,
         'sbushadow': SBUShadowDataset,
-        'voccontext': VOCContextDataset,
         'cityscapes': CityScapesDataset,
         'supervisely': SuperviselyDataset,
         'cocostuff10k': COCOStuff10kDataset,
+        'pascalcontext': PascalContextDataset,
     }
     assert dataset_cfg['type'] in supported_datasets, 'unsupport dataset type %s...' % dataset_cfg['type']
     if kwargs.get('get_basedataset', False): return BaseDataset(mode=mode, logger_handle=logger_handle, dataset_cfg=dataset_cfg, **kwargs)
