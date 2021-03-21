@@ -37,6 +37,6 @@ All the reported models here are available at https://pan.baidu.com/s/1nPxHw5Px7
 | R-101-D16 | 512x1024   | LR/POLICY/BS/EPOCH: 0.01/poly/8/220  | train/val       | 78.03% | [model]() &#124; [log]() |
 
 ## PASCAL Context
-| Backbone  | Crop Size  | Schedule                             | Train/Eval Set  | mIoU   | Download                 |
-| :-:       | :-:        | :-:                                  | :-:             | :-:    | :-:                      |
-| R-101-D8  | 512x1024   | LR/POLICY/BS/EPOCH: 0.01/poly/8/220  | train/val       | 48.43% | [model]() &#124; [log]() |
+| Backbone  | Crop Size  | Schedule                               | Train/Eval Set  | mIoU   | Download                 |
+| :-:       | :-:        | :-:                                    | :-:             | :-:    | :-:                      |
+| R-101-D8  | 480x480    | LR/POLICY/BS/EPOCH: 0.004/poly/16/260  | train/val       | 48.43% | [model]() &#124; [log]() |

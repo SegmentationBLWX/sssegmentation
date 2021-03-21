@@ -49,7 +49,7 @@ MODEL_CFG.update(
     {
         'num_classes': 60,
         'backbone': {
-            'type': 'resnet101',
+            'type': 'resnet50',
             'series': 'resnet',
             'pretrained': True,
             'outstride': 8,
