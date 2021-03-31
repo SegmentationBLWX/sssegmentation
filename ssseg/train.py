@@ -83,8 +83,8 @@ class Trainer():
             except Exception as e:
                 logger_handle.warning(str(e) + '\n' + 'Try to load checkpoints by using strict=False...')
                 model.load_state_dict(checkpoints['model'], strict=False)
-            optimizer.load_state_dict(checkpoints['optimizer'])
-            start_epoch = checkpoints['epoch'] + 1
+            if 'optimizer' in checkpoints: optimizer.load_state_dict(checkpoints['optimizer'])
+            if 'epoch' in checkpoints: start_epoch = checkpoints['epoch'] + 1
         else:
             cmd_args.checkpointspath = ''
         num_iters, max_iters = (start_epoch - 1) * len(dataloader), end_epoch * len(dataloader)

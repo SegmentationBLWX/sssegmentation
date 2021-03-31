@@ -39,4 +39,5 @@ All the reported models here are available at https://pan.baidu.com/s/1nPxHw5Px7
 ## PASCAL Context
 | Backbone  | Crop Size  | Schedule                               | Train/Eval Set  | mIoU   | Download                 |
 | :-:       | :-:        | :-:                                    | :-:             | :-:    | :-:                      |
+| R-50-D8   | 480x480    | LR/POLICY/BS/EPOCH: 0.004/poly/16/260  | train/val       | 46.31% | [model]() &#124; [log]() |
 | R-101-D8  | 480x480    | LR/POLICY/BS/EPOCH: 0.004/poly/16/260  | train/val       | 48.43% | [model]() &#124; [log]() |
