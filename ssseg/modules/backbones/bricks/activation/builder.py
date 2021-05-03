@@ -14,6 +14,7 @@ from .hardsigmoid import HardSigmoid
 def BuildActivation(activation_type, **kwargs):
     supported_activations = {
         'relu': nn.ReLU,
+        'gelu': nn.GELU,
         'relu6': nn.ReLU6,
         'sigmoid': nn.Sigmoid,
         'hardswish': HardSwish,

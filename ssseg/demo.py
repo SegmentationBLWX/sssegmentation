@@ -53,7 +53,7 @@ class Demo():
         # instanced dataset
         dataset_cfg = cfg.DATASET_CFG['test']
         dataset = BuildDataset(mode='TEST', logger_handle=logger_handle, dataset_cfg=copy.deepcopy(cfg.DATASET_CFG), get_basedataset=True)
-        palette = BuildPalette(dataset_cfg['type'])
+        palette = BuildPalette(dataset_type=dataset_cfg['type'], num_classes=dataset.num_classes, logger_handle=logger_handle)
         # instanced model
         cfg.MODEL_CFG['backbone']['pretrained'] = False
         model = BuildModel(cfg=copy.deepcopy(cfg.MODEL_CFG), mode='TEST')

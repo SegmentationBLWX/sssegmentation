@@ -1,4 +1,5 @@
 '''initialize'''
+from .diceloss import DiceLoss
+from .lovaszloss import LovaszLoss
 from .focalloss import SigmoidFocalLoss
-from .lovaszloss import LovaszHingeLoss, LovaszSoftmaxLoss
 from .celoss import CrossEntropyLoss, BinaryCrossEntropyLoss

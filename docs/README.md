@@ -11,6 +11,7 @@ sssegmentation is a general framework for our research on strongly supervised se
 - [ResNeSt](https://arxiv.org/pdf/2004.08955.pdf)
 - [MobileNetV2](https://arxiv.org/pdf/1801.04381.pdf)
 - [MobileNetV3](https://arxiv.org/pdf/1905.02244.pdf)
+- [VisionTransformer](https://arxiv.org/pdf/2010.11929.pdf)
 #### Supported Models
 - [FCN](https://arxiv.org/pdf/1411.4038.pdf)
 - [CE2P](https://arxiv.org/pdf/1809.05996.pdf)

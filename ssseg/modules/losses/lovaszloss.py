@@ -9,7 +9,7 @@ import torch.nn.functional as F
 
 
 '''define all'''
-__all__ = ['LovaszHingeLoss', 'LovaszSoftmaxLoss']
+__all__ = ['LovaszHingeLoss', 'LovaszSoftmaxLoss', 'LovaszLoss']
 
 
 '''computes gradient of the lovasz extension w.r.t sorted errors'''
@@ -147,3 +147,13 @@ def LovaszSoftmaxLoss(prediction, target, scale_factor=1.0, **kwargs):
     if lowest_loss_value:
         return torch.abs(loss - lowest_loss_value) + lowest_loss_value
     return loss
+
+
+'''lovasz loss'''
+def LovaszLoss(mode='multi_class', **kwargs):
+    support_modes = {
+        'binary': LovaszHingeLoss,
+        'multi_class': LovaszSoftmaxLoss,
+    }
+    assert mode in support_modes, 'unsupport mode %s...' % mode
+    return support_modes[mode](**kwargs)

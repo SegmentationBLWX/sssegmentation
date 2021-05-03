@@ -95,25 +95,35 @@ class BaseModel(nn.Module):
     def calculateloss(self, prediction, target, loss_cfg):
         # define the supported losses
         supported_losses = {
+            'diceloss': DiceLoss,
+            'lovaszloss': LovaszLoss,
             'celoss': CrossEntropyLoss,
             'sigmoidfocalloss': SigmoidFocalLoss,
             'binaryceloss': BinaryCrossEntropyLoss,
         }
         # format prediction
         if prediction.dim() == 4:
-            prediction = prediction.permute((0, 2, 3, 1)).contiguous()
+            prediction_format = prediction.permute((0, 2, 3, 1)).contiguous()
         elif prediction.dim() == 3:
-            prediction = prediction.permute((0, 2, 1)).contiguous()
-        prediction = prediction.view(-1, prediction.size(-1))
+            prediction_format = prediction.permute((0, 2, 1)).contiguous()
+        else:
+            prediction_format = prediction
+        prediction_format = prediction_format.view(-1, prediction_format.size(-1))
         # calculate the loss
         loss = 0
         for key, value in loss_cfg.items():
             assert key in supported_losses, 'unsupport loss type %s...' % key
-            target_iter = target.view(-1)
             if (key in ['binaryceloss']) and hasattr(self, 'onehot'):
+                prediction_iter = prediction_format
                 target_iter = self.onehot(target, self.cfg['num_classes'])
+            elif key in ['diceloss', 'lovaszloss']:
+                prediction_iter = prediction
+                target_iter = target
+            else:
+                prediction_iter = prediction_format
+                target_iter = target.view(-1)
             loss += supported_losses[key](
-                prediction=prediction, 
+                prediction=prediction_iter, 
                 target=target_iter, 
                 scale_factor=value['scale_factor'],
                 **value['opts']
