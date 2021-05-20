@@ -9,13 +9,13 @@
 
 
 ## Installation
-1. Clone the sssegmentation repository.
+(1) Clone the sssegmentation repository.
 ```sh 
 git clone https://github.com/SegmentationBLWX/sssegmentation.git
 cd sssegmentation
 ```
 
-2. Install requirements.
+(2) Install requirements.
 ```sh
 pip install -r requirements.txt
 ```
@@ -31,7 +31,7 @@ pip install torch==1.8.0+cu111 torchvision==0.9.0+cu111 torchaudio==0.8.0 -f htt
 pip install torch==1.8.0 torchvision==0.9.0 torchaudio==0.8.0
 ```
 
-3. Build some apis, e.g., coco api.
+(3) Build some apis, e.g., coco api.
 ```sh
 cd ssseg/libs
 sh make.sh
