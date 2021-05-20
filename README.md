@@ -6,7 +6,7 @@ sssegmentation is a general framework for our research on strongly supervised se
 
 # Documents
 #### In English
-https://github.com/SegmentationBLWX/sssegmentation/tree/main/docs
+https://sssegmentation.readthedocs.io/en/latest/
 
 
 # Supported

@@ -1,5 +1,8 @@
-# Train
-## Bash
+# Quick Start
+
+
+## Train
+#### Bash
 You can train the models as follows:
 ```sh
 usage:
@@ -14,7 +17,7 @@ or
 sh scripts/distrain.sh 4 ssseg/cfgs/deeplabv3plus/cfgs_voc_resnet101os8.py
 ```
 
-## Python
+#### Python
 You can train the models as follows:
 ```sh
 usage: train.py [-h] [--local_rank LOCAL_RANK]
@@ -37,8 +40,8 @@ optional arguments:
 ```
 
 
-# Test
-## Bash
+## Test
+#### Bash
 You can test the models as follows:
 ```sh
 usage:
@@ -53,7 +56,7 @@ or
 sh scripts/distest.sh 4 ssseg/cfgs/deeplabv3plus/cfgs_voc_resnet101os8.py deeplabv3plus_resnet101os8_voc_train/epoch_60.pth
 ```
 
-## Python
+#### Python
 You can test the models as follows:
 ```sh
 usage: test.py [-h] [--local_rank LOCAL_RANK]
@@ -77,8 +80,8 @@ optional arguments:
 ```
 
 
-# Inference
-## Python
+## Inference
+#### Python
 You can apply the models as follows:
 ```sh
 usage: demo.py [-h] [--imagedir IMAGEDIR] [--imagepath IMAGEPATH]

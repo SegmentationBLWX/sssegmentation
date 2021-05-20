@@ -1,4 +1,6 @@
-# Prerequisites
+# Installation
+
+## Prerequisites
 - Linux or macOS (Windows is in experimental support)
 - Python 3.6+
 - PyTorch 1.3+
@@ -6,7 +8,7 @@
 - GCC 5+
 
 
-# Installation
+## Installation
 1. Clone the sssegmentation repository.  
 ```sh 
 git clone https://github.com/SegmentationBLWX/sssegmentation.git
