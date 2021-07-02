@@ -129,7 +129,7 @@ You can download the [paper](https://arxiv.org/pdf/2004.08955.pdf) to learn the 
 
 (2) The reported performance.
 
-Please refer to [ResNeSt](https://github.com/SegmentationBLWX/sssegmentation/tree/main/docs/resnest) for details.
+Please refer to [ResNeSt](https://github.com/SegmentationBLWX/sssegmentation/tree/main/docs/performances/resnest) for details.
 
 #### MobileNetV2
 (1) The related paper.
@@ -138,7 +138,7 @@ You can download the [paper](https://arxiv.org/pdf/1801.04381.pdf) to learn the 
 
 (2) The reported performance.
 
-Please refer to [MobileNetV2](https://github.com/SegmentationBLWX/sssegmentation/tree/main/docs/mobilenet) for details.
+Please refer to [MobileNetV2](https://github.com/SegmentationBLWX/sssegmentation/tree/main/docs/performances/mobilenet) for details.
 
 #### MobileNetV3
 (1) The related paper.
@@ -147,7 +147,7 @@ You can download the [paper](https://arxiv.org/pdf/1905.02244.pdf) to learn the 
 
 (2) The reported performance.
 
-Please refer to [MobileNetV3](https://github.com/SegmentationBLWX/sssegmentation/tree/main/docs/mobilenet) for details.
+Please refer to [MobileNetV3](https://github.com/SegmentationBLWX/sssegmentation/tree/main/docs/performances/mobilenet) for details.
 
 #### VisionTransformer
 (1) The related paper.
@@ -163,7 +163,7 @@ You can download the [paper](https://arxiv.org/pdf/1411.4038.pdf) to learn the d
 
 (2) The reported performance.
 
-Please refer to [FCN](https://github.com/SegmentationBLWX/sssegmentation/tree/main/docs/fcn) for details.
+Please refer to [FCN](https://github.com/SegmentationBLWX/sssegmentation/tree/main/docs/performances/fcn) for details.
 
 #### CE2P
 (1) The related paper.
@@ -172,7 +172,7 @@ You can download the [paper](https://arxiv.org/pdf/1809.05996.pdf) to learn the 
 
 (2) The reported performance.
 
-Please refer to [CE2P](https://github.com/SegmentationBLWX/sssegmentation/tree/main/docs/ce2p) for details.
+Please refer to [CE2P](https://github.com/SegmentationBLWX/sssegmentation/tree/main/docs/performances/ce2p) for details.
 
 #### CCNet
 (1) The related paper.
@@ -181,7 +181,7 @@ You can download the [paper](https://arxiv.org/pdf/1811.11721.pdf) to learn the 
 
 (2) The reported performance.
 
-Please refer to [CCNet](https://github.com/SegmentationBLWX/sssegmentation/tree/main/docs/ccnet) for details.
+Please refer to [CCNet](https://github.com/SegmentationBLWX/sssegmentation/tree/main/docs/performances/ccnet) for details.
 
 #### DANet
 (1) The related paper.
@@ -190,7 +190,7 @@ You can download the [paper](https://arxiv.org/pdf/1809.02983.pdf) to learn the 
 
 (2) The reported performance.
 
-Please refer to [DANet](https://github.com/SegmentationBLWX/sssegmentation/tree/main/docs/danet) for details.
+Please refer to [DANet](https://github.com/SegmentationBLWX/sssegmentation/tree/main/docs/performances/danet) for details.
 
 #### GCNet
 (1) The related paper.
@@ -199,7 +199,7 @@ You can download the [paper](https://arxiv.org/pdf/1904.11492.pdf) to learn the 
 
 (2) The reported performance.
 
-Please refer to [GCNet](https://github.com/SegmentationBLWX/sssegmentation/tree/main/docs/gcnet) for details.
+Please refer to [GCNet](https://github.com/SegmentationBLWX/sssegmentation/tree/main/docs/performances/gcnet) for details.
 
 #### DMNet
 (1) The related paper.
@@ -208,7 +208,7 @@ You can download the [paper](https://openaccess.thecvf.com/content_ICCV_2019/pap
 
 (2) The reported performance.
 
-Please refer to [DMNet](https://github.com/SegmentationBLWX/sssegmentation/tree/main/docs/dmnet) for details.
+Please refer to [DMNet](https://github.com/SegmentationBLWX/sssegmentation/tree/main/docs/performances/dmnet) for details.
 
 #### EncNet
 (1) The related paper.
@@ -217,7 +217,7 @@ You can download the [paper](https://arxiv.org/pdf/1803.08904.pdf) to learn the 
 
 (2) The reported performance.
 
-Please refer to [EncNet](https://github.com/SegmentationBLWX/sssegmentation/tree/main/docs/encnet) for details.
+Please refer to [EncNet](https://github.com/SegmentationBLWX/sssegmentation/tree/main/docs/performances/encnet) for details.
 
 #### OCRNet
 (1) The related paper.
@@ -226,7 +226,7 @@ You can download the [paper](https://arxiv.org/pdf/1909.11065.pdf) to learn the 
 
 (2) The reported performance.
 
-Please refer to [OCRNet](https://github.com/SegmentationBLWX/sssegmentation/tree/main/docs/ocrnet) for details.
+Please refer to [OCRNet](https://github.com/SegmentationBLWX/sssegmentation/tree/main/docs/performances/ocrnet) for details.
 
 #### DNLNet
 (1) The related paper.
@@ -235,7 +235,7 @@ You can download the [paper](https://arxiv.org/pdf/2006.06668.pdf) to learn the 
 
 (2) The reported performance.
 
-Please refer to [DNLNet](https://github.com/SegmentationBLWX/sssegmentation/tree/main/docs/dnlnet) for details.
+Please refer to [DNLNet](https://github.com/SegmentationBLWX/sssegmentation/tree/main/docs/performances/dnlnet) for details.
 
 #### ANNNet
 (1) The related paper.
@@ -244,7 +244,7 @@ You can download the [paper](https://arxiv.org/pdf/1908.07678.pdf) to learn the 
 
 (2) The reported performance.
 
-Please refer to [ANNNet](https://github.com/SegmentationBLWX/sssegmentation/tree/main/docs/annnet) for details.
+Please refer to [ANNNet](https://github.com/SegmentationBLWX/sssegmentation/tree/main/docs/performances/annnet) for details.
 
 #### EMANet
 (1) The related paper.
@@ -253,7 +253,7 @@ You can download the [paper](https://arxiv.org/pdf/1907.13426.pdf) to learn the 
 
 (2) The reported performance.
 
-Please refer to [EMANet](https://github.com/SegmentationBLWX/sssegmentation/tree/main/docs/emanet) for details.
+Please refer to [EMANet](https://github.com/SegmentationBLWX/sssegmentation/tree/main/docs/performances/emanet) for details.
 
 #### PSPNet
 (1) The related paper.
@@ -262,7 +262,7 @@ You can download the [paper](https://arxiv.org/pdf/1612.01105.pdf) to learn the 
 
 (2) The reported performance.
 
-Please refer to [PSPNet](https://github.com/SegmentationBLWX/sssegmentation/tree/main/docs/pspnet) for details.
+Please refer to [PSPNet](https://github.com/SegmentationBLWX/sssegmentation/tree/main/docs/performances/pspnet) for details.
 
 #### PSANet
 (1) The related paper.
@@ -271,7 +271,7 @@ You can download the [paper](https://openaccess.thecvf.com/content_ECCV_2018/pap
 
 (2) The reported performance.
 
-Please refer to [PSANet](https://github.com/SegmentationBLWX/sssegmentation/tree/main/docs/psanet) for details.
+Please refer to [PSANet](https://github.com/SegmentationBLWX/sssegmentation/tree/main/docs/performances/psanet) for details.
 
 #### APCNet
 (1) The related paper.
@@ -280,7 +280,7 @@ You can download the [paper](https://openaccess.thecvf.com/content_CVPR_2019/pap
 
 (2) The reported performance.
 
-Please refer to [APCNet](https://github.com/SegmentationBLWX/sssegmentation/tree/main/docs/apcnet) for details.
+Please refer to [APCNet](https://github.com/SegmentationBLWX/sssegmentation/tree/main/docs/performances/apcnet) for details.
 
 #### UPerNet
 (1) The related paper.
@@ -289,7 +289,7 @@ You can download the [paper](https://arxiv.org/pdf/1807.10221.pdf) to learn the 
 
 (2) The reported performance.
 
-Please refer to [UPerNet](https://github.com/SegmentationBLWX/sssegmentation/tree/main/docs/upernet) for details.
+Please refer to [UPerNet](https://github.com/SegmentationBLWX/sssegmentation/tree/main/docs/performances/upernet) for details.
 
 #### Deeplabv3
 (1) The related paper.
@@ -298,7 +298,7 @@ You can download the [paper](https://arxiv.org/pdf/1706.05587.pdf) to learn the 
 
 (2) The reported performance.
 
-Please refer to [Deeplabv3](https://github.com/SegmentationBLWX/sssegmentation/tree/main/docs/deeplabv3) for details.
+Please refer to [Deeplabv3](https://github.com/SegmentationBLWX/sssegmentation/tree/main/docs/performances/deeplabv3) for details.
 
 #### SemanticFPN
 (1) The related paper.
@@ -307,7 +307,7 @@ You can download the [paper](https://arxiv.org/pdf/1901.02446.pdf) to learn the 
 
 (2) The reported performance.
 
-Please refer to [SemanticFPN](https://github.com/SegmentationBLWX/sssegmentation/tree/main/docs/semanticfpn) for details.
+Please refer to [SemanticFPN](https://github.com/SegmentationBLWX/sssegmentation/tree/main/docs/performances/semanticfpn) for details.
 
 #### NonLocalNet
 (1) The related paper.
@@ -316,7 +316,7 @@ You can download the [paper](https://arxiv.org/pdf/1711.07971.pdf) to learn the 
 
 (2) The reported performance.
 
-Please refer to [NonLocalNet](https://github.com/SegmentationBLWX/sssegmentation/tree/main/docs/nonlocalnet) for details.
+Please refer to [NonLocalNet](https://github.com/SegmentationBLWX/sssegmentation/tree/main/docs/performances/nonlocalnet) for details.
 
 #### Deeplabv3Plus
 (1) The related paper.
@@ -325,4 +325,13 @@ You can download the [paper](https://arxiv.org/pdf/1802.02611.pdf) to learn the 
 
 (2) The reported performance.
 
-Please refer to [Deeplabv3Plus](https://github.com/SegmentationBLWX/sssegmentation/tree/main/docs/deeplabv3plus) for details.
+Please refer to [Deeplabv3Plus](https://github.com/SegmentationBLWX/sssegmentation/tree/main/docs/performances/deeplabv3plus) for details.
+
+#### SETR
+(1) The related paper.
+
+You can download the [paper](https://arxiv.org/pdf/2012.15840.pdf) to learn the details of SETR.
+
+(2) The reported performance.
+
+Please refer to [SETR](https://github.com/SegmentationBLWX/sssegmentation/tree/main/docs/performances/setr) for details.

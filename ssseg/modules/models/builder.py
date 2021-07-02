@@ -10,6 +10,7 @@ from .ccnet import CCNet
 from .danet import DANet
 from .gcnet import GCNet
 from .dmnet import DMNet
+from .setr import SETRUP
 from .encnet import ENCNet
 from .apcnet import APCNet
 from .emanet import EMANet
@@ -43,6 +44,7 @@ def BuildModel(cfg, mode, **kwargs):
         'ocrnet': OCRNet,
         'dnlnet': DNLNet,
         'annnet': ANNNet,
+        'setrup': SETRUP,
         'upernet': UPerNet,
         'deeplabv3': Deeplabv3,
         'lrasppnet': LRASPPNet,

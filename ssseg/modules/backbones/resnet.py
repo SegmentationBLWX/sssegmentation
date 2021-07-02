@@ -168,7 +168,7 @@ class ResNet(nn.Module):
         )
         self.layer4 = self.makelayer(
             block=block, 
-            inplanes=base_channels * 16 if depth >= 50 else base_channels * 4, 
+            inplanes=base_channels * 16 if depth >= 50 else base_channels * 4,  
             planes=base_channels * 8, 
             num_blocks=num_blocks_list[3], 
             stride=stride_list[3], 

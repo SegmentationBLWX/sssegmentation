@@ -20,6 +20,7 @@ https://sssegmentation.readthedocs.io/en/latest/
 #### Supported Models
 - [FCN](https://arxiv.org/pdf/1411.4038.pdf)
 - [CE2P](https://arxiv.org/pdf/1809.05996.pdf)
+- [SETR](https://arxiv.org/pdf/2012.15840.pdf)
 - [CCNet](https://arxiv.org/pdf/1811.11721.pdf)
 - [DANet](https://arxiv.org/pdf/1809.02983.pdf)
 - [GCNet](https://arxiv.org/pdf/1904.11492.pdf)

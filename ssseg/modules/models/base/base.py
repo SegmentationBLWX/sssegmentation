@@ -23,7 +23,8 @@ class BaseModel(nn.Module):
         self.align_corners, self.norm_cfg, self.act_cfg = cfg['align_corners'], cfg['norm_cfg'], cfg['act_cfg']
         # build backbone
         backbone_cfg = copy.deepcopy(cfg['backbone'])
-        backbone_cfg.update({'norm_cfg': copy.deepcopy(self.norm_cfg)})
+        if 'norm_cfg' not in backbone_cfg:
+            backbone_cfg.update({'norm_cfg': copy.deepcopy(self.norm_cfg)})
         self.backbone_net = BuildBackbone(backbone_cfg)
     '''forward'''
     def forward(self, x, targets=None, losses_cfg=None):
