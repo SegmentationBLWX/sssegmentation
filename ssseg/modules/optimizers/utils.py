@@ -41,7 +41,7 @@ def adjustLearningRate(optimizer, optimizer_cfg=None):
         for param_group in optimizer.param_groups:
             if ('params_rules' in optimizer_cfg) and (optimizer_cfg['params_rules']):
                 value = optimizer_cfg['params_rules'][param_group['name']]
-                if isinstance(value, int): value = (value, value)
+                if not isinstance(value, tuple): value = (value, value)
                 param_group['lr'] = target_lr * value[0]
             else:
                 param_group['lr'] = target_lr

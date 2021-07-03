@@ -17,7 +17,7 @@ def BuildAdamW(model, cfg, **kwargs):
         params, all_layers = [], model.alllayers()
         assert 'others' not in all_layers, 'potential bug in model.alllayers...'
         for key, value in params_rules.items():
-            if isinstance(value, int): value = (value, value)
+            if not isinstance(value, tuple): value = (value, value)
             if key == 'others': continue
             params.append({
                 'params': all_layers[key].parameters() if not filter_params else filter(lambda p: p.requires_grad, all_layers[key].parameters()), 
@@ -29,7 +29,7 @@ def BuildAdamW(model, cfg, **kwargs):
         for key, layer in all_layers.items():
             if key not in params_rules: others.append(layer)
         others = nn.Sequential(*others)
-        value = (params_rules['others'], params_rules['others']) if isinstance(params_rules['others'], int) else params_rules['others']
+        value = (params_rules['others'], params_rules['others']) if not isinstance(params_rules['others'], tuple) else params_rules['others']
         params.append({
             'params': others.parameters() if not filter_params else filter(lambda p: p.requires_grad, others.parameters()), 
             'lr': cfg['learning_rate'] * value[0], 

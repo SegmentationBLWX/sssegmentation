@@ -22,6 +22,12 @@ DATALOADER_CFG = DATALOADER_CFG.copy()
 OPTIMIZER_CFG = OPTIMIZER_CFG.copy()
 OPTIMIZER_CFG.update(
     {
+        'type': 'sgd',
+        'sgd': {
+            'learning_rate': 0.1,
+            'momentum': 0.9,
+            'weight_decay': 0.0,
+        },
         'max_epochs': 130
     }
 )
