@@ -12,7 +12,7 @@ from ..activation import BuildActivation
 
 '''feed-forward networks (FFNs) with identity connection'''
 class FFN(nn.Module):
-    def __init__(self, embed_dims=256, feedforward_channels=1024, num_fcs=2, act_cfg=dict(type='ReLU', inplace=True), ffn_drop=0., dropout_cfg=None, add_identity=True, **kwargs):
+    def __init__(self, embed_dims=256, feedforward_channels=1024, num_fcs=2, act_cfg=None, ffn_drop=0., dropout_cfg=None, add_identity=True, **kwargs):
         super(FFN, self).__init__()
         assert num_fcs >= 2, f'num_fcs should be no less than 2. got {num_fcs}.'
         self.embed_dims = embed_dims

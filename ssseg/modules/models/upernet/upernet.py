@@ -105,10 +105,27 @@ class UPerNet(BaseModel):
         return preds
     '''return all layers'''
     def alllayers(self):
-        return {
-            'backbone_net': self.backbone_net,
-            'ppm_net': self.ppm_net,
-            'lateral_convs': self.lateral_convs,
-            'decoder': self.decoder,
-            'auxiliary_decoder': self.auxiliary_decoder
-        }
+        if self.cfg['backbone']['series'] in ['swin']:
+            layers = {
+                'ppm_net': self.ppm_net,
+                'lateral_convs': self.lateral_convs,
+                'decoder': self.decoder,
+                'auxiliary_decoder': self.auxiliary_decoder
+            }
+            tmp_layers = []
+            for key, value in self.backbone_net.zerowdlayers().items():
+                tmp_layers.append(value)
+            layers.update({'backbone_net_zerowd': nn.Sequential(*tmp_layers)})
+            tmp_layers = []
+            for key, value in self.backbone_net.nonzerowdlayers().items():
+                tmp_layers.append(value)
+            layers.update({'backbone_net_nonzerowd': nn.Sequential(*tmp_layers)})
+            return layers
+        else:
+            return {
+                'backbone_net': self.backbone_net,
+                'ppm_net': self.ppm_net,
+                'lateral_convs': self.lateral_convs,
+                'decoder': self.decoder,
+                'auxiliary_decoder': self.auxiliary_decoder
+            }

@@ -83,7 +83,7 @@ MODEL_CFG = {
     'norm_cfg': {'type': 'syncbatchnorm', 'opts': {}},
     'act_cfg': {'type': 'relu', 'opts': {'inplace': True}},
     'backbone': {
-        'type': 'vit_large',
+        'type': 'jx_vit_large_p16_384',
         'series': 'vit',
         'img_size': (512, 512),
         'out_indices': (9, 14, 19, 23),

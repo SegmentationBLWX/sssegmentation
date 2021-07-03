@@ -14,8 +14,8 @@ All the reported models here are available at https://pan.baidu.com/s/1nPxHw5Px7
 # Results
 
 ## ADE20k
-| Backbone        | Crop Size  | Schedule                             | Train/Eval Set  | mIoU   | Download                 |
-| :-:             | :-:        | :-:                                  | :-:             | :-:    | :-:                      |
-| ViT-Large-Naive | 512x512    | LR/POLICY/BS/EPOCH: 0.01/poly/16/130 | train/val       | -      | [model]() &#124; [log]() |
-| ViT-Large-PUP   | 512x512    | LR/POLICY/BS/EPOCH: 0.01/poly/16/130 | train/val       | -      | [model]() &#124; [log]() |
-| ViT-Large-MLA   | 512x512    | LR/POLICY/BS/EPOCH: 0.01/poly/16/130 | train/val       | -      | [model]() &#124; [log]() |
+| Model         | Backbone    | Crop Size  | Schedule                             | Train/Eval Set  | mIoU   | Download                 |
+| :-:           | :-:         | :-:        | :-:                                  | :-:             | :-:    | :-:                      |
+| Naive         | ViT-Large   | 512x512    | LR/POLICY/BS/EPOCH: 0.01/poly/16/130 | train/val       | -      | [model]() &#124; [log]() |
+| PUP           | ViT-Large   | 512x512    | LR/POLICY/BS/EPOCH: 0.01/poly/16/130 | train/val       | -      | [model]() &#124; [log]() |
+| MLA           | ViT-Large   | 512x512    | LR/POLICY/BS/EPOCH: 0.01/poly/16/130 | train/val       | -      | [model]() &#124; [log]() |

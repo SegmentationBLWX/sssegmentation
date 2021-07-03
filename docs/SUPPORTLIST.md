@@ -149,6 +149,15 @@ You can download the [paper](https://arxiv.org/pdf/1905.02244.pdf) to learn the 
 
 Please refer to [MobileNetV3](https://github.com/SegmentationBLWX/sssegmentation/tree/main/docs/performances/mobilenet) for details.
 
+#### SwinTransformer
+(1) The related paper.
+
+You can download the [paper](https://arxiv.org/pdf/2103.14030.pdf) to learn the details of SwinTransformer.
+
+(2) The reported performance.
+
+Please refer to [SwinTransformer](https://github.com/SegmentationBLWX/sssegmentation/tree/main/docs/performances/swin) for details.
+
 #### VisionTransformer
 (1) The related paper.
 
@@ -173,6 +182,15 @@ You can download the [paper](https://arxiv.org/pdf/1809.05996.pdf) to learn the 
 (2) The reported performance.
 
 Please refer to [CE2P](https://github.com/SegmentationBLWX/sssegmentation/tree/main/docs/performances/ce2p) for details.
+
+#### SETR
+(1) The related paper.
+
+You can download the [paper](https://arxiv.org/pdf/2012.15840.pdf) to learn the details of SETR.
+
+(2) The reported performance.
+
+Please refer to [SETR](https://github.com/SegmentationBLWX/sssegmentation/tree/main/docs/performances/setr) for details.
 
 #### CCNet
 (1) The related paper.
@@ -326,12 +344,3 @@ You can download the [paper](https://arxiv.org/pdf/1802.02611.pdf) to learn the 
 (2) The reported performance.
 
 Please refer to [Deeplabv3Plus](https://github.com/SegmentationBLWX/sssegmentation/tree/main/docs/performances/deeplabv3plus) for details.
-
-#### SETR
-(1) The related paper.
-
-You can download the [paper](https://arxiv.org/pdf/2012.15840.pdf) to learn the details of SETR.
-
-(2) The reported performance.
-
-Please refer to [SETR](https://github.com/SegmentationBLWX/sssegmentation/tree/main/docs/performances/setr) for details.

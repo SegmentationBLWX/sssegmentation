@@ -16,6 +16,7 @@ https://sssegmentation.readthedocs.io/en/latest/
 - [ResNeSt](https://arxiv.org/pdf/2004.08955.pdf)
 - [MobileNetV2](https://arxiv.org/pdf/1801.04381.pdf)
 - [MobileNetV3](https://arxiv.org/pdf/1905.02244.pdf)
+- [SwinTransformer](https://arxiv.org/pdf/2103.14030.pdf)
 - [VisionTransformer](https://arxiv.org/pdf/2010.11929.pdf)
 #### Supported Models
 - [FCN](https://arxiv.org/pdf/1411.4038.pdf)

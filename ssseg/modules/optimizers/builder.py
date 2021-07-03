@@ -4,15 +4,17 @@ Funtion:
 Author:
     Zhenchao Jin
 '''
-from .sgd import SGDBuilder
-from .adam import AdamBuilder
+from .sgd import BuildSGD
+from .adam import BuildAdam
+from .adamw import BuildAdamW
 
 
 '''build optimizer'''
 def BuildOptimizer(model, cfg, **kwargs):
     supported_optimizers = {
-        'sgd': SGDBuilder,
-        'adam': AdamBuilder
+        'sgd': BuildSGD,
+        'adam': BuildAdam,
+        'adamw': BuildAdamW,
     }
     assert cfg['type'] in supported_optimizers, 'unsupport optimizer type %s...' % cfg['type']
     selected_optim_cfg = {

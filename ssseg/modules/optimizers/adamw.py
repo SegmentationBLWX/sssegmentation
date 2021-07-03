@@ -1,6 +1,6 @@
 '''
 Funtion:
-    define SGD optimizer
+    define AdamW optimizer
 Author:
     Zhenchao Jin
 '''
@@ -8,8 +8,8 @@ import torch.nn as nn
 import torch.optim as optim
 
 
-'''sgd builder'''
-def BuildSGD(model, cfg, **kwargs):
+'''AdamW builder'''
+def BuildAdamW(model, cfg, **kwargs):
     params_rules, filter_params = cfg.get('params_rules', {}), cfg.get('filter_params', False)
     if not params_rules:
         params = model.parameters() if not filter_params else filter(lambda p: p.requires_grad, model.parameters())
@@ -36,12 +36,12 @@ def BuildSGD(model, cfg, **kwargs):
             'name': 'others',
             'weight_decay': cfg['weight_decay'] * value[1],
         })
-    optimizer = optim.SGD(
-        params, 
-        lr=cfg['learning_rate'], 
-        momentum=cfg['momentum'], 
+    optimizer = optim.AdamW(
+        params,
+        lr=cfg['learning_rate'],
+        betas=cfg.get('betas', (0.9, 0.999)),
+        eps=cfg.get('eps', 1e-08),
         weight_decay=cfg['weight_decay'],
-        dampening=cfg.get('dampening', 0),
-        nesterov=cfg.get('nesterov', False)
+        amsgrad=cfg.get('amsgrad', False)
     )
     return optimizer

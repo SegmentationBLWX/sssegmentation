@@ -8,6 +8,7 @@ from .hrnet import BuildHRNet
 from .resnet import BuildResNet
 from .resnest import BuildResNeSt
 from .mobilenet import BuildMobileNet
+from .swin import BuildSwinTransformer
 from .vit import BuildVisionTransformer
 
 
@@ -18,6 +19,7 @@ def BuildBackbone(cfg, **kwargs):
         'resnet': BuildResNet,
         'resnest': BuildResNeSt,
         'mobilenet': BuildMobileNet,
+        'swin': BuildSwinTransformer,
         'vit': BuildVisionTransformer,
     }
     assert cfg['series'] in supported_backbones, 'unsupport backbone type %s...' % cfg['type']

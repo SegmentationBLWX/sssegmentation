@@ -15,7 +15,7 @@ from .bricks import BuildNormalization, BuildActivation, MultiheadAttention, FFN
 
 '''model urls'''
 model_urls = {
-    'vit_large': 'https://github.com/rwightman/pytorch-image-models/releases/download/v0.1-vitjx/jx_vit_large_p16_384-b3be5167.pth',
+    'jx_vit_large_p16_384': 'https://github.com/rwightman/pytorch-image-models/releases/download/v0.1-vitjx/jx_vit_large_p16_384-b3be5167.pth',
 }
 
 
@@ -123,7 +123,7 @@ class VisionTransformer(nn.Module):
         if final_norm:
             self.ln1 = BuildNormalization(norm_cfg['type'], (embed_dims, norm_cfg['opts']))
     '''initialize backbone'''
-    def initweights(self, vit_type='vit_large', pretrained_style='timm', pretrained_model_path=''):
+    def initweights(self, vit_type='jx_vit_large_p16_384', pretrained_style='timm', pretrained_model_path=''):
         assert pretrained_style in ['timm', 'mmcls']
         if pretrained_model_path:
             checkpoint = torch.load(pretrained_model_path, map_location='cpu')
@@ -225,10 +225,10 @@ class VisionTransformer(nn.Module):
 
 
 '''build vision transformer'''
-def BuildVisionTransformer(vit_type='vit_large', **kwargs):
+def BuildVisionTransformer(vit_type='jx_vit_large_p16_384', **kwargs):
     # assert whether support
     supported_vits = {
-        'vit_large': {
+        'jx_vit_large_p16_384': {
             'img_size': 384,
             'patch_size': 16,
             'embed_dims': 1024,
@@ -245,6 +245,7 @@ def BuildVisionTransformer(vit_type='vit_large', **kwargs):
             'num_fcs': 2,
         }
     }
+    assert vit_type in supported_vits, 'unspport the vit_type %s...' % vit_type
     # parse args
     default_args = {
         'in_channels': 3,
