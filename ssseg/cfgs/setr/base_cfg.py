@@ -102,12 +102,13 @@ MODEL_CFG = {
         'dropout': 0,
         'num_convs': 4,
         'scale_factor': 2,
+        'kernel_size': 3,
     },
     'auxiliary': [
-        {'in_channels': 1024, 'out_channels': 256, 'dropout': 0, 'num_convs': 1, 'scale_factor': 4},
-        {'in_channels': 1024, 'out_channels': 256, 'dropout': 0, 'num_convs': 1, 'scale_factor': 4},
-        {'in_channels': 1024, 'out_channels': 256, 'dropout': 0, 'num_convs': 1, 'scale_factor': 4},
-    ]
+        {'in_channels': 1024, 'out_channels': 256, 'dropout': 0, 'num_convs': 1, 'scale_factor': 4, 'kernel_size': 3},
+        {'in_channels': 1024, 'out_channels': 256, 'dropout': 0, 'num_convs': 1, 'scale_factor': 4, 'kernel_size': 3},
+        {'in_channels': 1024, 'out_channels': 256, 'dropout': 0, 'num_convs': 1, 'scale_factor': 4, 'kernel_size': 3},
+    ],
 }
 # config for inference
 INFERENCE_CFG = {
@@ -116,7 +117,7 @@ INFERENCE_CFG = {
     'tricks': {
         'multiscale': [1],
         'flip': False,
-        'use_probs_before_resize': False
+        'use_probs_before_resize': True
     }
 }
 # config for common

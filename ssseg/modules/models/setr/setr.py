@@ -23,12 +23,12 @@ class SETRUP(BaseModel):
             norm_layer = BuildNormalization(cfg['normlayer']['type'], (in_channels, cfg['normlayer']['opts']))
             self.norm_layers.append(norm_layer)
         # build decoder
-        self.decoder = self.builddecoder(cfg['decoder'], norm_cfg, act_cfg, cfg['num_classes'], align_corners)
+        self.decoder = self.builddecoder(cfg['decoder'])
         # build auxiliary decoder
         auxiliary_cfg_list = cfg['auxiliary']
         self.auxiliary_decoders = nn.ModuleList()
         for auxiliary_cfg in auxiliary_cfg_list:
-            decoder = self.builddecoder(auxiliary_cfg, norm_cfg, act_cfg, cfg['num_classes'], align_corners)
+            decoder = self.builddecoder(auxiliary_cfg)
             self.auxiliary_decoders.append(decoder)
         # freeze normalization layer if necessary
         if cfg.get('is_freeze_norm', False): self.freezenormalization()
@@ -67,13 +67,13 @@ class SETRUP(BaseModel):
         x = x.transpose(1, 2).reshape(n, c, h, w).contiguous()
         return x
     '''build decoder'''
-    def builddecoder(self, decoder_cfg, norm_cfg, act_cfg, num_classes, align_corners):
-        layers = []
+    def builddecoder(self, decoder_cfg):
+        layers, norm_cfg, act_cfg, num_classes, align_corners, kernel_size = [], self.norm_cfg.copy(), self.act_cfg.copy(), self.cfg['num_classes'], self.align_corners, decoder_cfg['kernel_size']
         for idx in range(decoder_cfg['num_convs']):
             if idx == 0:
-                layers.append(nn.Conv2d(decoder_cfg['in_channels'], decoder_cfg['out_channels'], kernel_size=3, stride=1, padding=1, bias=False))
+                layers.append(nn.Conv2d(decoder_cfg['in_channels'], decoder_cfg['out_channels'], kernel_size=kernel_size, stride=1, padding=int(kernel_size - 1) // 2, bias=False))
             else:
-                layers.append(nn.Conv2d(decoder_cfg['out_channels'], decoder_cfg['out_channels'], kernel_size=3, stride=1, padding=1, bias=False))
+                layers.append(nn.Conv2d(decoder_cfg['out_channels'], decoder_cfg['out_channels'], kernel_size=kernel_size, stride=1, padding=int(kernel_size - 1) // 2, bias=False))
             layers.append(BuildNormalization(norm_cfg['type'], (decoder_cfg['out_channels'], norm_cfg['opts'])))
             layers.append(BuildActivation(act_cfg['type'], **act_cfg['opts']))
             layers.append(nn.Upsample(scale_factor=decoder_cfg['scale_factor'], mode='bilinear', align_corners=align_corners))
