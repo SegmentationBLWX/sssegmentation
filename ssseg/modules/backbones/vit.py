@@ -10,7 +10,7 @@ import torch
 import torch.nn as nn
 import torch.nn.functional as F
 import torch.utils.model_zoo as model_zoo
-from .bricks import BuildNormalization, BuildActivation, MultiheadAttention, FFN
+from .bricks import BuildNormalization, BuildActivation, MultiheadAttention, FFN, PatchEmbed
 
 
 '''model urls'''
@@ -49,45 +49,30 @@ class TransformerEncoderLayer(nn.Module):
         return x
 
 
-'''Image to Patch Embedding'''
-class PatchEmbed(nn.Module):
-    def __init__(self, patch_size=16, in_channels=3, embed_dims=768, norm_cfg=None):
-        super(PatchEmbed, self).__init__()
-        self.projection = nn.Conv2d(in_channels, embed_dims, kernel_size=patch_size, stride=patch_size)
-        if norm_cfg is not None:
-            self.ln = BuildNormalization(norm_cfg['type'], (embed_dims, norm_cfg['opts']))
-        else:
-            self.ln = None
-    '''forward'''
-    def forward(self, x):
-        x = self.projection(x).flatten(2).transpose(1, 2)
-        if self.ln is not None:
-            x = self.ln(x)
-        return x
-
-
 '''Vision Transformer'''
 class VisionTransformer(nn.Module):
     def __init__(self, img_size=224, patch_size=16, in_channels=3, embed_dims=768, num_layers=12, num_heads=12, mlp_ratio=4, out_indices=-1, qkv_bias=True,
-                 drop_rate=0., attn_drop_rate=0., drop_path_rate=0., with_cls_token=True, norm_cfg=None, act_cfg=None, patch_norm=False, final_norm=False,
-                 out_shape='NCHW', interpolate_mode='bicubic', num_fcs=2, **kwargs):
+                 drop_rate=0., attn_drop_rate=0., drop_path_rate=0., with_cls_token=True, output_cls_token=False, norm_cfg=None, act_cfg=None, 
+                 patch_norm=False, final_norm=False, interpolate_mode='bicubic', num_fcs=2, **kwargs):
         super(VisionTransformer, self).__init__()
         if isinstance(img_size, int):
             img_size = (img_size, img_size)
-        assert out_shape in ['NLC', 'NCHW'], 'output shape must be "NLC" or "NCHW".'
+        if output_cls_token:
+            assert with_cls_token, 'with_cls_token must be True if set output_cls_token to True.'
         self.img_size = img_size
         self.patch_size = patch_size
-        self.out_shape = out_shape
         self.interpolate_mode = interpolate_mode
         # Image to Patch Embedding
         self.patch_embed = PatchEmbed(
-            patch_size=patch_size,
             in_channels=in_channels,
             embed_dims=embed_dims,
-            norm_cfg=norm_cfg if patch_norm else None
+            kernel_size=patch_size,
+            stride=patch_size,
+            norm_cfg=norm_cfg if patch_norm else None,
         )
         num_patches = (img_size[0] // patch_size) * (img_size[1] // patch_size)
         self.with_cls_token = with_cls_token
+        self.output_cls_token = output_cls_token
         self.cls_token = nn.Parameter(torch.zeros(1, 1, embed_dims))
         self.pos_embed = nn.Parameter(torch.zeros(1, num_patches + 1, embed_dims))
         self.drop_after_pos = nn.Dropout(p=drop_rate)
@@ -119,7 +104,6 @@ class VisionTransformer(nn.Module):
                 )
             )
         self.final_norm = final_norm
-        self.out_shape = out_shape
         if final_norm:
             self.ln1 = BuildNormalization(norm_cfg['type'], (embed_dims, norm_cfg['opts']))
     '''initialize backbone'''
@@ -141,7 +125,12 @@ class VisionTransformer(nn.Module):
             if self.pos_embed.shape != state_dict['pos_embed'].shape:
                 h, w = self.img_size
                 pos_size = int(math.sqrt(state_dict['pos_embed'].shape[1] - 1))
-                state_dict['pos_embed'] = self.resizeposembed(state_dict['pos_embed'], (h, w), (pos_size, pos_size), self.patch_size, self.interpolate_mode)
+                state_dict['pos_embed'] = self.resizeposembed(
+                    state_dict['pos_embed'], 
+                    (h // self.patch_size, w // self.patch_size),
+                    (pos_size, pos_size), 
+                    self.interpolate_mode
+                )
         self.load_state_dict(state_dict, False)
     '''vit convert'''
     @staticmethod
@@ -169,7 +158,7 @@ class VisionTransformer(nn.Module):
             new_ckpt[new_k] = v
         return new_ckpt
     '''positiong embeding method'''
-    def posembeding(self, img, patched_img, pos_embed):
+    def posembeding(self, patched_img, hw_shape, pos_embed):
         assert patched_img.ndim == 3 and pos_embed.ndim == 3, 'the shapes of patched_img and pos_embed must be [B, L, C]'
         x_len, pos_len = patched_img.shape[1], pos_embed.shape[1]
         if x_len != pos_len:
@@ -178,18 +167,17 @@ class VisionTransformer(nn.Module):
                 pos_w = self.img_size[1] // self.patch_size
             else:
                 raise ValueError('Unexpected shape of pos_embed, got {}.'.format(pos_embed.shape))
-            pos_embed = self.resizeposembed(pos_embed, img.shape[2:], (pos_h, pos_w), self.patch_size, self.interpolate_mode)
+            pos_embed = self.resizeposembed(pos_embed, hw_shape, (pos_h, pos_w), self.interpolate_mode)
         return self.drop_after_pos(patched_img + pos_embed)
     '''resize pos_embed weights'''
     @staticmethod
-    def resizeposembed(pos_embed, input_shpae, pos_shape, patch_size, mode):
+    def resizeposembed(pos_embed, input_shpae, pos_shape, mode):
         assert pos_embed.ndim == 3, 'shape of pos_embed must be [B, L, C]'
-        input_h, input_w = input_shpae
         pos_h, pos_w = pos_shape
         cls_token_weight = pos_embed[:, 0]
         pos_embed_weight = pos_embed[:, (-1 * pos_h * pos_w):]
         pos_embed_weight = pos_embed_weight.reshape(1, pos_h, pos_w, pos_embed.shape[2]).permute(0, 3, 1, 2)
-        pos_embed_weight = F.interpolate(pos_embed_weight, size=(input_h // patch_size, input_w // patch_size), align_corners=False, mode=mode)
+        pos_embed_weight = F.interpolate(pos_embed_weight, size=input_shpae, align_corners=False, mode=mode)
         cls_token_weight = cls_token_weight.unsqueeze(1)
         pos_embed_weight = torch.flatten(pos_embed_weight, 2).transpose(1, 2)
         pos_embed = torch.cat((cls_token_weight, pos_embed_weight), dim=1)
@@ -197,11 +185,11 @@ class VisionTransformer(nn.Module):
     '''forward'''
     def forward(self, inputs):
         batch_size = inputs.shape[0]
-        x = self.patch_embed(inputs)
+        x, hw_shape = self.patch_embed(inputs), (self.patch_embed.DH, self.patch_embed.DW)
         # stole cls_tokens impl from Phil Wang, thanks
         cls_tokens = self.cls_token.expand(batch_size, -1, -1)
         x = torch.cat((cls_tokens, x), dim=1)
-        x = self.posembeding(inputs, x, self.pos_embed)
+        x = self.posembeding(x, hw_shape, self.pos_embed)
         # Remove class token for transformer encoder input
         if not self.with_cls_token:
             x = x[:, 1:]
@@ -217,9 +205,9 @@ class VisionTransformer(nn.Module):
                     out = x[:, 1:]
                 else:
                     out = x
-                if self.out_shape == 'NCHW':
-                    b, _, c = out.shape
-                    out = out.reshape(b, inputs.shape[2] // self.patch_size, inputs.shape[3] // self.patch_size, c).permute(0, 3, 1, 2)
+                B, _, C = out.shape
+                out = out.reshape(B, hw_shape[0], hw_shape[1], C).permute(0, 3, 1, 2)
+                if self.output_cls_token: out = [out, x[:, 0]]
                 outs.append(out)
         return tuple(outs)
 
@@ -240,6 +228,7 @@ def BuildVisionTransformer(vit_type='jx_vit_large_p16_384', **kwargs):
             'attn_drop_rate': 0.,
             'drop_path_rate': 0.,
             'with_cls_token': True,
+            'output_cls_token': False,
             'patch_norm': False,
             'final_norm': False,
             'num_fcs': 2,
@@ -252,7 +241,6 @@ def BuildVisionTransformer(vit_type='jx_vit_large_p16_384', **kwargs):
         'out_indices': (9, 14, 19, 23),
         'norm_cfg': {'type': 'layernorm', 'opts': {'eps': 1e-6}},
         'act_cfg': {'type': 'gelu', 'opts': {}},
-        'out_shape': 'NCHW',
         'interpolate_mode': 'bilinear',
         'pretrained': True,
         'pretrained_style': 'timm',

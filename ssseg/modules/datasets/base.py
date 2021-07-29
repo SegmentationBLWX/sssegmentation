@@ -50,7 +50,7 @@ class BaseDataset(torch.utils.data.Dataset):
             for key, value in self.clsid2label.items():
                 segmentation[segmentation == key] = value
         # edge placeholder
-        edge = np.zeros((image.shape[0], image.shape[1]))
+        edge = np.zeros((32, 32))
         # return sample
         sample = {
             'image': image, 

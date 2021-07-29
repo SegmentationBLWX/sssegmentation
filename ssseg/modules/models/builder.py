@@ -10,7 +10,6 @@ from .ccnet import CCNet
 from .danet import DANet
 from .gcnet import GCNet
 from .dmnet import DMNet
-from .setr import SETRUP
 from .encnet import ENCNet
 from .apcnet import APCNet
 from .emanet import EMANet
@@ -22,6 +21,7 @@ from .annnet import ANNNet
 from .upernet import UPerNet
 from .deeplabv3 import Deeplabv3
 from .lrasppnet import LRASPPNet
+from .setr import SETRUP, SETRMLA
 from .semanticfpn import SemanticFPN
 from .nonlocalnet import NonLocalNet
 from .deeplabv3plus import Deeplabv3Plus
@@ -45,6 +45,7 @@ def BuildModel(cfg, mode, **kwargs):
         'dnlnet': DNLNet,
         'annnet': ANNNet,
         'setrup': SETRUP,
+        'setrmla': SETRMLA,
         'upernet': UPerNet,
         'deeplabv3': Deeplabv3,
         'lrasppnet': LRASPPNet,

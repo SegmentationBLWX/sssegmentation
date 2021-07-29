@@ -61,6 +61,7 @@ def BinaryCrossEntropyLoss(prediction, target, scale_factor=1.0, **kwargs):
             else:
                 target_binary[idxs[0], target[valid_mask].long()] = 1
         prediction = prediction[valid_mask]
+        target_binary = target_binary[valid_mask]
         if 'weight' in kwargs: kwargs['weight'] = kwargs['weight'][valid_mask]
     else:
         target_binary = target

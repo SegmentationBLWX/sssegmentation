@@ -31,6 +31,7 @@ LOSSES_CFG = LOSSES_CFG.copy()
 MODEL_CFG = MODEL_CFG.copy()
 MODEL_CFG.update(
     {
+        'type': 'setrmla',
         'num_classes': 150,
         'backbone': {
             'type': 'jx_vit_large_p16_384',
@@ -42,18 +43,26 @@ MODEL_CFG.update(
             'pretrained': True,
             'selected_indices': (0, 1, 2, 3),
         },
-        'decoder': {
-            'in_channels': 1024,
+        'normlayer': {
+            'in_channels_list': [1024, 1024, 1024, 1024],
+            'type': 'layernorm', 
+            'opts': {'eps': 1e-6},
+        },
+        'mla': {
+            'in_channels_list': (1024, 1024, 1024, 1024),
             'out_channels': 256,
-            'dropout': 0,
-            'num_convs': 2,
+        },
+        'decoder': {
+            'in_channels_list': (256, 256, 256, 256),
+            'mla_channels': 128,
+            'out_channels': 512,
             'scale_factor': 4,
-            'kernel_size': 3,
+            'dropout': 0,
         },
         'auxiliary': [
-            {'in_channels': 1024, 'out_channels': 256, 'dropout': 0, 'num_convs': 2, 'scale_factor': 4, 'kernel_size': 3},
-            {'in_channels': 1024, 'out_channels': 256, 'dropout': 0, 'num_convs': 2, 'scale_factor': 4, 'kernel_size': 3},
-            {'in_channels': 1024, 'out_channels': 256, 'dropout': 0, 'num_convs': 2, 'scale_factor': 4, 'kernel_size': 3},
+            {'in_channels': 256, 'out_channels': 256, 'dropout': 0, 'num_convs': 2, 'scale_factor': 4, 'kernel_size': 3},
+            {'in_channels': 256, 'out_channels': 256, 'dropout': 0, 'num_convs': 2, 'scale_factor': 4, 'kernel_size': 3},
+            {'in_channels': 256, 'out_channels': 256, 'dropout': 0, 'num_convs': 2, 'scale_factor': 4, 'kernel_size': 3},
         ],
     }
 )
@@ -63,14 +72,14 @@ INFERENCE_CFG = INFERENCE_CFG.copy()
 COMMON_CFG = COMMON_CFG.copy()
 COMMON_CFG['train'].update(
     {
-        'backupdir': 'setrnaive_vitlarge_ade20k_train',
-        'logfilepath': 'setrnaive_vitlarge_ade20k_train/train.log',
+        'backupdir': 'setrmla_vitlarge_ade20k_train',
+        'logfilepath': 'setrmla_vitlarge_ade20k_train/train.log',
     }
 )
 COMMON_CFG['test'].update(
     {
-        'backupdir': 'setrnaive_vitlarge_ade20k_test',
-        'logfilepath': 'setrnaive_vitlarge_ade20k_test/test.log',
-        'resultsavepath': 'setrnaive_vitlarge_ade20k_test/setrnaive_vitlarge_ade20k_results.pkl'
+        'backupdir': 'setrmla_vitlarge_ade20k_test',
+        'logfilepath': 'setrmla_vitlarge_ade20k_test/test.log',
+        'resultsavepath': 'setrmla_vitlarge_ade20k_test/setrmla_vitlarge_ade20k_results.pkl'
     }
 )
