@@ -318,6 +318,15 @@ You can download the [paper](https://arxiv.org/pdf/1706.05587.pdf) to learn the 
 
 Please refer to [Deeplabv3](https://github.com/SegmentationBLWX/sssegmentation/tree/main/docs/performances/deeplabv3) for details.
 
+#### Segformer
+(1) The related paper.
+
+You can download the [paper](https://arxiv.org/pdf/2105.15203.pdf) to learn the details of Segformer.
+
+(2) The reported performance.
+
+Please refer to [Segformer](https://github.com/SegmentationBLWX/sssegmentation/tree/main/docs/performances/segformer) for details.
+
 #### SemanticFPN
 (1) The related paper.
 

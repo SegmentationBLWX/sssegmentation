@@ -41,10 +41,11 @@ class PatchMerging(nn.Module):
         self.reduction = nn.Linear(sample_dim, out_channels, bias=bias)
     '''layers with zero weight decay'''
     def zerowdlayers(self):
+        if self.norm is None: return {}
         return {'PatchMerging.norm': self.norm}
     '''layers with non zero weight decay'''
     def nonzerowdlayers(self):
-        return {}
+        return {'PatchMerging.reduction': self.reduction}
     '''forward'''
     def forward(self, x, hw_shape):
         B, L, C = x.shape
@@ -67,6 +68,7 @@ class PatchEmbed(PatchEmbedBase):
         super(PatchEmbed, self).__init__(**kwargs)
     '''layers with zero weight decay'''
     def zerowdlayers(self):
+        if self.norm is None: return {}
         return {'PatchEmbed.norm': self.norm}
     '''layers with non zero weight decay'''
     def nonzerowdlayers(self):

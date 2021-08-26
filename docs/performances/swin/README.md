@@ -16,5 +16,5 @@ All the reported models here are available at https://pan.baidu.com/s/1nPxHw5Px7
 | Model         | Backbone    | Crop Size  | Schedule                                | Train/Eval Set  | mIoU   | Download                 |
 | :-:           | :-:         | :-:        | :-:                                     | :-:             | :-:    | :-:                      |
 | UperNet       | Swin-T      | 512x512    | LR/POLICY/BS/EPOCH: 0.00006/poly/16/130 | train/val       | 44.42% | [model]() &#124; [log]() |
-| UperNet       | Swin-S      | 512x512    | LR/POLICY/BS/EPOCH: 0.00006/poly/16/130 | train/val       | 48.08% | [model]() &#124; [log]() |
-| UperNet       | Swin-B      | 512x512    | LR/POLICY/BS/EPOCH: 0.00006/poly/16/130 | train/val       | 50.77% | [model]() &#124; [log]() |
+| UperNet       | Swin-S      | 512x512    | LR/POLICY/BS/EPOCH: 0.00006/poly/16/130 | train/val       | 48.39% | [model]() &#124; [log]() |
+| UperNet       | Swin-B      | 512x512    | LR/POLICY/BS/EPOCH: 0.00006/poly/16/130 | train/val       | 51.02% | [model]() &#124; [log]() |

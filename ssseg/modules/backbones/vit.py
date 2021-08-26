@@ -1,6 +1,6 @@
 '''
 Function:
-    Implementation of VIT
+    Implementation of ViT
 Author:
     Zhenchao Jin
 '''
@@ -10,6 +10,7 @@ import torch
 import torch.nn as nn
 import torch.nn.functional as F
 import torch.utils.model_zoo as model_zoo
+import torch.utils.checkpoint as checkpoint
 from .bricks import BuildNormalization, BuildActivation, MultiheadAttention, FFN, PatchEmbed
 
 
@@ -53,7 +54,7 @@ class TransformerEncoderLayer(nn.Module):
 class VisionTransformer(nn.Module):
     def __init__(self, img_size=224, patch_size=16, in_channels=3, embed_dims=768, num_layers=12, num_heads=12, mlp_ratio=4, out_indices=-1, qkv_bias=True,
                  drop_rate=0., attn_drop_rate=0., drop_path_rate=0., with_cls_token=True, output_cls_token=False, norm_cfg=None, act_cfg=None, 
-                 patch_norm=False, final_norm=False, interpolate_mode='bicubic', num_fcs=2, **kwargs):
+                 patch_norm=False, final_norm=False, interpolate_mode='bicubic', num_fcs=2, use_checkpoint=False, **kwargs):
         super(VisionTransformer, self).__init__()
         if isinstance(img_size, int):
             img_size = (img_size, img_size)
@@ -62,6 +63,7 @@ class VisionTransformer(nn.Module):
         self.img_size = img_size
         self.patch_size = patch_size
         self.interpolate_mode = interpolate_mode
+        self.use_checkpoint = use_checkpoint
         # Image to Patch Embedding
         self.patch_embed = PatchEmbed(
             in_channels=in_channels,
@@ -195,7 +197,10 @@ class VisionTransformer(nn.Module):
             x = x[:, 1:]
         outs = []
         for i, layer in enumerate(self.layers):
-            x = layer(x)
+            if self.use_checkpoint:
+                x = checkpoint.checkpoint(layer, x)
+            else:
+                x = layer(x)
             if i == len(self.layers) - 1:
                 if self.final_norm:
                     x = self.ln1(x)
@@ -245,6 +250,7 @@ def BuildVisionTransformer(vit_type='jx_vit_large_p16_384', **kwargs):
         'pretrained': True,
         'pretrained_style': 'timm',
         'pretrained_model_path': '',
+        'use_checkpoint': False,
     }
     default_args.update(supported_vits[vit_type])
     for key, value in kwargs.items():
