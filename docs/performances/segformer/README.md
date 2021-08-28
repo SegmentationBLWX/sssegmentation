@@ -6,7 +6,7 @@
     journal={arXiv preprint arXiv:2105.15203},
     year={2021}
 }
-All the reported models here are available at https://pan.baidu.com/s/1nPxHw5Px7a7jZMiX-ZxRhA (code is 3jvr)
+All the reported models here are available at https://pan.baidu.com/s/1gD-NJJWOtaHCtB0qHE79rA (code is s757).
 ```
 
 
@@ -19,5 +19,5 @@ All the reported models here are available at https://pan.baidu.com/s/1nPxHw5Px7
 | MIT-B1      | 512x512    | LR/POLICY/BS/EPOCH: 0.00006/poly/16/130 | train/val       | 42.25% | [model]() &#124; [log]() |
 | MIT-B2      | 512x512    | LR/POLICY/BS/EPOCH: 0.00006/poly/16/130 | train/val       | 46.35% | [model]() &#124; [log]() |
 | MIT-B3      | 512x512    | LR/POLICY/BS/EPOCH: 0.00006/poly/16/130 | train/val       | 48.31% | [model]() &#124; [log]() |
-| MIT-B4      | 512x512    | LR/POLICY/BS/EPOCH: 0.00006/poly/16/130 | train/val       |        | [model]() &#124; [log]() |
-| MIT-B5      | 512x512    | LR/POLICY/BS/EPOCH: 0.00006/poly/16/130 | train/val       |        | [model]() &#124; [log]() |
+| MIT-B4      | 512x512    | LR/POLICY/BS/EPOCH: 0.00006/poly/16/130 | train/val       | 48.59% | [model]() &#124; [log]() |
+| MIT-B5      | 512x512    | LR/POLICY/BS/EPOCH: 0.00006/poly/16/130 | train/val       | 49.61% | [model]() &#124; [log]() |

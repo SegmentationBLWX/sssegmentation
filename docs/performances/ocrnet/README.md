@@ -6,7 +6,7 @@
     journal={arXiv preprint arXiv:1909.11065},
     year={2019}
 }
-All the reported models here are available at https://pan.baidu.com/s/1nPxHw5Px7a7jZMiX-ZxRhA (code is 3jvr)
+All the reported models here are available at https://pan.baidu.com/s/1gD-NJJWOtaHCtB0qHE79rA (code is s757).
 ```
 
 
