@@ -8,6 +8,7 @@ from .fcn import FCN
 from .ce2p import CE2P
 from .ccnet import CCNet
 from .danet import DANet
+from .isnet import ISNet
 from .gcnet import GCNet
 from .dmnet import DMNet
 from .encnet import ENCNet
@@ -35,6 +36,7 @@ def BuildModel(cfg, mode, **kwargs):
         'ce2p': CE2P,
         'ccnet': CCNet,
         'danet': DANet,
+        'isnet': ISNet,
         'gcnet': GCNet,
         'dmnet': DMNet,
         'encnet': ENCNet,

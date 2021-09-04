@@ -118,7 +118,10 @@ class Trainer():
                     learning_rate = adjustLearningRate(optimizer, optimizer_cfg)
                 images, targets = samples['image'].type(FloatTensor), {'segmentation': samples['segmentation'].type(FloatTensor), 'edge': samples['edge'].type(FloatTensor)}
                 optimizer.zero_grad()
-                loss, losses_log_dict = model(images, targets, cfg.LOSSES_CFG)
+                if cfg.MODEL_CFG['type'] in ['memorynet', 'memorynetv2']:
+                    loss, losses_log_dict = model(images, targets, cfg.LOSSES_CFG, learning_rate=learning_rate, epoch=epoch)
+                else:
+                    loss, losses_log_dict = model(images, targets, cfg.LOSSES_CFG)
                 if not distributed_cfg['is_on']:
                     loss = loss.mean()
                     for key, value in losses_log_dict.items():
