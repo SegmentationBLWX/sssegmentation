@@ -16,23 +16,23 @@ All the reported models here are available at https://pan.baidu.com/s/1gD-NJJWOt
 ## PASCAL VOC
 | Backbone  | Crop Size  | Schedule                             | Train/Eval Set  | mIoU   | Download                 |
 | :-:       | :-:        | :-:                                  | :-:             | :-:    | :-:                      |
-| R-50-D8   | 512x512    | LR/POLICY/BS/EPOCH: 0.01/poly/16/60  | trainaug/val    | 75.53% | [model]() &#124; [log]() |
-| R-50-D16  | 512x512    | LR/POLICY/BS/EPOCH: 0.01/poly/16/60  | trainaug/val    | 74.55% | [model]() &#124; [log]() |
-| R-101-D8  | 512x512    | LR/POLICY/BS/EPOCH: 0.01/poly/16/60  | trainaug/val    | 77.61% | [model]() &#124; [log]() |
-| R-101-D16 | 512x512    | LR/POLICY/BS/EPOCH: 0.01/poly/16/60  | trainaug/val    | 76.41% | [model]() &#124; [log]() |
+| R-50-D8   | 512x512    | LR/POLICY/BS/EPOCH: 0.01/poly/16/60  | trainaug/val    | 75.53% | [model](https://github.com/SegmentationBLWX/modelstore/releases/download/ssseg_encnet/encnet_resnet50os8_voc_train.pth) &#124; [log](https://github.com/SegmentationBLWX/modelstore/releases/download/ssseg_encnet/encnet_resnet50os8_voc_train.log) |
+| R-50-D16  | 512x512    | LR/POLICY/BS/EPOCH: 0.01/poly/16/60  | trainaug/val    | 74.55% | [model](https://github.com/SegmentationBLWX/modelstore/releases/download/ssseg_encnet/encnet_resnet50os16_voc_train.pth) &#124; [log](https://github.com/SegmentationBLWX/modelstore/releases/download/ssseg_encnet/encnet_resnet50os16_voc_train.log) |
+| R-101-D8  | 512x512    | LR/POLICY/BS/EPOCH: 0.01/poly/16/60  | trainaug/val    | 77.61% | [model](https://github.com/SegmentationBLWX/modelstore/releases/download/ssseg_encnet/encnet_resnet101os8_voc_train.pth) &#124; [log](https://github.com/SegmentationBLWX/modelstore/releases/download/ssseg_encnet/encnet_resnet101os8_voc_train.log) |
+| R-101-D16 | 512x512    | LR/POLICY/BS/EPOCH: 0.01/poly/16/60  | trainaug/val    | 76.41% | [model](https://github.com/SegmentationBLWX/modelstore/releases/download/ssseg_encnet/encnet_resnet101os16_voc_train.pth) &#124; [log](https://github.com/SegmentationBLWX/modelstore/releases/download/ssseg_encnet/encnet_resnet101os16_voc_train.log) |
 
 ## ADE20k
 | Backbone  | Crop Size  | Schedule                             | Train/Eval Set  | mIoU   | Download                 |
 | :-:       | :-:        | :-:                                  | :-:             | :-:    | :-:                      |
-| R-50-D8   | 512x512    | LR/POLICY/BS/EPOCH: 0.01/poly/16/130 | train/val       | 40.60% | [model]() &#124; [log]() |
-| R-50-D16  | 512x512    | LR/POLICY/BS/EPOCH: 0.01/poly/16/130 | train/val       | 39.70% | [model]() &#124; [log]() |
-| R-101-D8  | 512x512    | LR/POLICY/BS/EPOCH: 0.01/poly/16/130 | train/val       | 43.43% | [model]() &#124; [log]() |
-| R-101-D16 | 512x512    | LR/POLICY/BS/EPOCH: 0.01/poly/16/130 | train/val       | 41.65% | [model]() &#124; [log]() |
+| R-50-D8   | 512x512    | LR/POLICY/BS/EPOCH: 0.01/poly/16/130 | train/val       | 40.60% | [model](https://github.com/SegmentationBLWX/modelstore/releases/download/ssseg_encnet/encnet_resnet50os8_ade20k_train.pth) &#124; [log](https://github.com/SegmentationBLWX/modelstore/releases/download/ssseg_encnet/encnet_resnet50os8_ade20k_train.log) |
+| R-50-D16  | 512x512    | LR/POLICY/BS/EPOCH: 0.01/poly/16/130 | train/val       | 39.70% | [model](https://github.com/SegmentationBLWX/modelstore/releases/download/ssseg_encnet/encnet_resnet50os16_ade20k_train.pth) &#124; [log](https://github.com/SegmentationBLWX/modelstore/releases/download/ssseg_encnet/encnet_resnet50os16_ade20k_train.log) |
+| R-101-D8  | 512x512    | LR/POLICY/BS/EPOCH: 0.01/poly/16/130 | train/val       | 43.43% | [model](https://github.com/SegmentationBLWX/modelstore/releases/download/ssseg_encnet/encnet_resnet101os8_ade20k_train.pth) &#124; [log](https://github.com/SegmentationBLWX/modelstore/releases/download/ssseg_encnet/encnet_resnet101os8_ade20k_train.log) |
+| R-101-D16 | 512x512    | LR/POLICY/BS/EPOCH: 0.01/poly/16/130 | train/val       | 41.65% | [model](https://github.com/SegmentationBLWX/modelstore/releases/download/ssseg_encnet/encnet_resnet101os16_ade20k_train.pth) &#124; [log](https://github.com/SegmentationBLWX/modelstore/releases/download/ssseg_encnet/encnet_resnet101os16_ade20k_train.log) |
 
 ## CityScapes
 | Backbone  | Crop Size  | Schedule                             | Train/Eval Set  | mIoU   | Download                 |
 | :-:       | :-:        | :-:                                  | :-:             | :-:    | :-:                      |
-| R-50-D8   | 512x1024   | LR/POLICY/BS/EPOCH: 0.01/poly/8/220  | train/val       | 77.98% | [model]() &#124; [log]() |
-| R-50-D16  | 512x1024   | LR/POLICY/BS/EPOCH: 0.01/poly/8/220  | train/val       | 75.98% | [model]() &#124; [log]() |
-| R-101-D8  | 512x1024   | LR/POLICY/BS/EPOCH: 0.01/poly/8/220  | train/val       | 78.70% | [model]() &#124; [log]() |
-| R-101-D16 | 512x1024   | LR/POLICY/BS/EPOCH: 0.01/poly/8/220  | train/val       | 77.46% | [model]() &#124; [log]() |
+| R-50-D8   | 512x1024   | LR/POLICY/BS/EPOCH: 0.01/poly/8/220  | train/val       | 77.98% | [model](https://github.com/SegmentationBLWX/modelstore/releases/download/ssseg_encnet/encnet_resnet50os8_cityscapes_train.pth) &#124; [log](https://github.com/SegmentationBLWX/modelstore/releases/download/ssseg_encnet/encnet_resnet50os8_cityscapes_train.log) |
+| R-50-D16  | 512x1024   | LR/POLICY/BS/EPOCH: 0.01/poly/8/220  | train/val       | 75.98% | [model](https://github.com/SegmentationBLWX/modelstore/releases/download/ssseg_encnet/encnet_resnet50os16_cityscapes_train.pth) &#124; [log](https://github.com/SegmentationBLWX/modelstore/releases/download/ssseg_encnet/encnet_resnet50os16_cityscapes_train.log) |
+| R-101-D8  | 512x1024   | LR/POLICY/BS/EPOCH: 0.01/poly/8/220  | train/val       | 78.70% | [model](https://github.com/SegmentationBLWX/modelstore/releases/download/ssseg_encnet/encnet_resnet101os8_cityscapes_train.pth) &#124; [log](https://github.com/SegmentationBLWX/modelstore/releases/download/ssseg_encnet/encnet_resnet101os8_cityscapes_train.log) |
+| R-101-D16 | 512x1024   | LR/POLICY/BS/EPOCH: 0.01/poly/8/220  | train/val       | 77.46% | [model](https://github.com/SegmentationBLWX/modelstore/releases/download/ssseg_encnet/encnet_resnet101os16_cityscapes_train.pth) &#124; [log](https://github.com/SegmentationBLWX/modelstore/releases/download/ssseg_encnet/encnet_resnet101os16_cityscapes_train.log) |

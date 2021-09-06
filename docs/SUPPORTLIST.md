@@ -192,6 +192,15 @@ You can download the [paper](https://arxiv.org/pdf/2012.15840.pdf) to learn the 
 
 Please refer to [SETR](https://github.com/SegmentationBLWX/sssegmentation/tree/main/docs/performances/setr) for details.
 
+#### ISNet
+(1) The related paper.
+
+You can download the [paper](https://arxiv.org/pdf/2108.12382.pdf) to learn the details of ISNet.
+
+(2) The reported performance.
+
+Please refer to [ISNet](https://github.com/SegmentationBLWX/sssegmentation/tree/main/docs/performances/isnet) for details.
+
 #### CCNet
 (1) The related paper.
 
@@ -227,15 +236,6 @@ You can download the [paper](https://openaccess.thecvf.com/content_ICCV_2019/pap
 (2) The reported performance.
 
 Please refer to [DMNet](https://github.com/SegmentationBLWX/sssegmentation/tree/main/docs/performances/dmnet) for details.
-
-#### ISNet
-(1) The related paper.
-
-You can download the [paper](https://arxiv.org/pdf/2108.12382.pdf) to learn the details of ISNet.
-
-(2) The reported performance.
-
-Please refer to [ISNet](https://github.com/SegmentationBLWX/sssegmentation/tree/main/docs/performances/isnet) for details.
 
 #### EncNet
 (1) The related paper.

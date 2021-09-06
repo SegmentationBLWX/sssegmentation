@@ -15,6 +15,6 @@ All the reported models here are available at https://pan.baidu.com/s/1gD-NJJWOt
 ## ADE20k
 | Model         | Backbone    | Crop Size  | Schedule                                | Train/Eval Set  | mIoU   | Download                 |
 | :-:           | :-:         | :-:        | :-:                                     | :-:             | :-:    | :-:                      |
-| UperNet       | Swin-T      | 512x512    | LR/POLICY/BS/EPOCH: 0.00006/poly/16/130 | train/val       | 44.58% | [model]() &#124; [log]() |
-| UperNet       | Swin-S      | 512x512    | LR/POLICY/BS/EPOCH: 0.00006/poly/16/130 | train/val       | 48.39% | [model]() &#124; [log]() |
-| UperNet       | Swin-B      | 512x512    | LR/POLICY/BS/EPOCH: 0.00006/poly/16/130 | train/val       | 51.02% | [model]() &#124; [log]() |
+| UperNet       | Swin-T      | 512x512    | LR/POLICY/BS/EPOCH: 0.00006/poly/16/130 | train/val       | 44.58% | [model](https://github.com/SegmentationBLWX/modelstore/releases/download/ssseg_swin/upernet_swintiny_ade20k_train.pth) &#124; [log](https://github.com/SegmentationBLWX/modelstore/releases/download/ssseg_swin/upernet_swintiny_ade20k_train.log) |
+| UperNet       | Swin-S      | 512x512    | LR/POLICY/BS/EPOCH: 0.00006/poly/16/130 | train/val       | 48.39% | [model](https://github.com/SegmentationBLWX/modelstore/releases/download/ssseg_swin/upernet_swinsmall_ade20k_train.pth) &#124; [log](https://github.com/SegmentationBLWX/modelstore/releases/download/ssseg_swin/upernet_swinsmall_ade20k_train.log) |
+| UperNet       | Swin-B      | 512x512    | LR/POLICY/BS/EPOCH: 0.00006/poly/16/130 | train/val       | 51.02% | [model](https://github.com/SegmentationBLWX/modelstore/releases/download/ssseg_swin/upernet_swinbase_ade20k_train.pth) &#124; [log](https://github.com/SegmentationBLWX/modelstore/releases/download/ssseg_swin/upernet_swinbase_ade20k_train.log) |

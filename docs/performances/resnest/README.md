@@ -13,25 +13,25 @@ All the reported models here are available at https://pan.baidu.com/s/1gD-NJJWOt
 # Results
 
 ## PASCAL VOC
-| Model         | Backbone    | Crop Size  | Schedule                             | Train/Eval Set  | mIoU   | Download                 |
-| :-:           | :-:         | :-:        | :-:                                  | :-:             | :-:    | :-:                      |
-| FCN           | Rst-50-D8   | 512x512    | LR/POLICY/BS/EPOCH: 0.01/poly/16/60  | trainaug/val    | 77.41% | [model]() &#124; [log]() |
-| PSPNet        | Rst-50-D16  | 512x512    | LR/POLICY/BS/EPOCH: 0.01/poly/16/60  | trainaug/val    | 79.07% | [model]() &#124; [log]() |
-| DeepLabV3     | Rst-101-D8  | 512x512    | LR/POLICY/BS/EPOCH: 0.01/poly/16/60  | trainaug/val    | 78.97% | [model]() &#124; [log]() |
-| DeepLabV3plus | Rst-101-D16 | 512x512    | LR/POLICY/BS/EPOCH: 0.01/poly/16/60  | trainaug/val    | 79.76% | [model]() &#124; [log]() |
+| Model         | Backbone  | Crop Size  | Schedule                             | Train/Eval Set  | mIoU   | Download                 |
+| :-:           | :-:       | :-:        | :-:                                  | :-:             | :-:    | :-:                      |
+| FCN           | S-101-D8  | 512x512    | LR/POLICY/BS/EPOCH: 0.01/poly/16/60  | trainaug/val    | 77.41% | [model](https://github.com/SegmentationBLWX/modelstore/releases/download/ssseg_resnest/fcn_resnest101os8_voc_train.pth) &#124; [log](https://github.com/SegmentationBLWX/modelstore/releases/download/ssseg_resnest/fcn_resnest101os8_voc_train.log) |
+| PSPNet        | S-101-D8  | 512x512    | LR/POLICY/BS/EPOCH: 0.01/poly/16/60  | trainaug/val    | 79.07% | [model](https://github.com/SegmentationBLWX/modelstore/releases/download/ssseg_resnest/pspnet_resnest101os8_voc_train.pth) &#124; [log](https://github.com/SegmentationBLWX/modelstore/releases/download/ssseg_resnest/pspnet_resnest101os8_voc_train.log) |
+| DeepLabV3     | S-101-D8  | 512x512    | LR/POLICY/BS/EPOCH: 0.01/poly/16/60  | trainaug/val    | 78.97% | [model](https://github.com/SegmentationBLWX/modelstore/releases/download/ssseg_resnest/deeplabv3_resnest101os8_voc_train.pth) &#124; [log](https://github.com/SegmentationBLWX/modelstore/releases/download/ssseg_resnest/deeplabv3_resnest101os8_voc_train.log) |
+| DeepLabV3plus | S-101-D8  | 512x512    | LR/POLICY/BS/EPOCH: 0.01/poly/16/60  | trainaug/val    | 79.76% | [model](https://github.com/SegmentationBLWX/modelstore/releases/download/ssseg_resnest/deeplabv3plus_resnest101os8_voc_train.pth) &#124; [log](https://github.com/SegmentationBLWX/modelstore/releases/download/ssseg_resnest/deeplabv3plus_resnest101os8_voc_train.log) |
 
 ## ADE20k
-| Model         | Backbone    | Crop Size  | Schedule                             | Train/Eval Set  | mIoU   | Download                 |
-| :-:           | :-:         | :-:        | :-:                                  | :-:             | :-:    | :-:                      |
-| FCN           | Rst-50-D8   | 512x512    | LR/POLICY/BS/EPOCH: 0.01/poly/16/130 | train/val       | 45.74% | [model]() &#124; [log]() |
-| PSPNet        | Rst-50-D16  | 512x512    | LR/POLICY/BS/EPOCH: 0.01/poly/16/130 | train/val       | 46.03% | [model]() &#124; [log]() |
-| DeepLabV3     | Rst-101-D8  | 512x512    | LR/POLICY/BS/EPOCH: 0.01/poly/16/130 | train/val       | 46.24% | [model]() &#124; [log]() |
-| DeepLabV3plus | Rst-101-D16 | 512x512    | LR/POLICY/BS/EPOCH: 0.01/poly/16/130 | train/val       | 46.48% | [model]() &#124; [log]() |
+| Model         | Backbone  | Crop Size  | Schedule                             | Train/Eval Set  | mIoU   | Download                 |
+| :-:           | :-:       | :-:        | :-:                                  | :-:             | :-:    | :-:                      |
+| FCN           | S-101-D8  | 512x512    | LR/POLICY/BS/EPOCH: 0.01/poly/16/130 | train/val       | 45.74% | [model](https://github.com/SegmentationBLWX/modelstore/releases/download/ssseg_resnest/fcn_resnest101os8_ade20k_train.pth) &#124; [log](https://github.com/SegmentationBLWX/modelstore/releases/download/ssseg_resnest/fcn_resnest101os8_ade20k_train.log) |
+| PSPNet        | S-101-D8  | 512x512    | LR/POLICY/BS/EPOCH: 0.01/poly/16/130 | train/val       | 46.03% | [model](https://github.com/SegmentationBLWX/modelstore/releases/download/ssseg_resnest/pspnet_resnest101os8_ade20k_train.pth) &#124; [log](https://github.com/SegmentationBLWX/modelstore/releases/download/ssseg_resnest/pspnet_resnest101os8_ade20k_train.log) |
+| DeepLabV3     | S-101-D8  | 512x512    | LR/POLICY/BS/EPOCH: 0.01/poly/16/130 | train/val       | 46.24% | [model](https://github.com/SegmentationBLWX/modelstore/releases/download/ssseg_resnest/deeplabv3_resnest101os8_ade20k_train.pth) &#124; [log](https://github.com/SegmentationBLWX/modelstore/releases/download/ssseg_resnest/deeplabv3_resnest101os8_ade20k_train.log) |
+| DeepLabV3plus | S-101-D8  | 512x512    | LR/POLICY/BS/EPOCH: 0.01/poly/16/130 | train/val       | 46.48% | [model](https://github.com/SegmentationBLWX/modelstore/releases/download/ssseg_resnest/deeplabv3plus_resnest101os8_ade20k_train.pth) &#124; [log](https://github.com/SegmentationBLWX/modelstore/releases/download/ssseg_resnest/deeplabv3plus_resnest101os8_ade20k_train.log) |
 
 ## CityScapes
-| Model         | Backbone    | Crop Size  | Schedule                             | Train/Eval Set  | mIoU   | Download                 |
-| :-:           | :-:         | :-:        | :-:                                  | :-:             | :-:    | :-:                      |
-| FCN           | Rst-50-D8   | 512x1024   | LR/POLICY/BS/EPOCH: 0.01/poly/8/220  | train/val       | 78.14% | [model]() &#124; [log]() |
-| PSPNet        | Rst-50-D16  | 512x1024   | LR/POLICY/BS/EPOCH: 0.01/poly/8/220  | train/val       | 78.70% | [model]() &#124; [log]() |
-| DeepLabV3     | Rst-101-D8  | 512x1024   | LR/POLICY/BS/EPOCH: 0.01/poly/8/220  | train/val       | 79.75% | [model]() &#124; [log]() |
-| DeepLabV3plus | Rst-101-D16 | 512x1024   | LR/POLICY/BS/EPOCH: 0.01/poly/8/220  | train/val       | 80.30% | [model]() &#124; [log]() |
+| Model         | Backbone  | Crop Size  | Schedule                             | Train/Eval Set  | mIoU   | Download                 |
+| :-:           | :-:       | :-:        | :-:                                  | :-:             | :-:    | :-:                      |
+| FCN           | S-101-D8  | 512x1024   | LR/POLICY/BS/EPOCH: 0.01/poly/8/220  | train/val       | 78.14% | [model](https://github.com/SegmentationBLWX/modelstore/releases/download/ssseg_resnest/fcn_resnest101os8_cityscapes_train.pth) &#124; [log](https://github.com/SegmentationBLWX/modelstore/releases/download/ssseg_resnest/fcn_resnest101os8_cityscapes_train.log) |
+| PSPNet        | S-101-D8  | 512x1024   | LR/POLICY/BS/EPOCH: 0.01/poly/8/220  | train/val       | 78.70% | [model](https://github.com/SegmentationBLWX/modelstore/releases/download/ssseg_resnest/pspnet_resnest101os8_cityscapes_train.pth) &#124; [log](https://github.com/SegmentationBLWX/modelstore/releases/download/ssseg_resnest/pspnet_resnest101os8_cityscapes_train.log) |
+| DeepLabV3     | S-101-D8  | 512x1024   | LR/POLICY/BS/EPOCH: 0.01/poly/8/220  | train/val       | 79.75% | [model](https://github.com/SegmentationBLWX/modelstore/releases/download/ssseg_resnest/deeplabv3_resnest101os8_cityscapes_train.pth) &#124; [log](https://github.com/SegmentationBLWX/modelstore/releases/download/ssseg_resnest/deeplabv3_resnest101os8_cityscapes_train.log) |
+| DeepLabV3plus | S-101-D8  | 512x1024   | LR/POLICY/BS/EPOCH: 0.01/poly/8/220  | train/val       | 80.30% | [model](https://github.com/SegmentationBLWX/modelstore/releases/download/ssseg_resnest/deeplabv3plus_resnest101os8_cityscapes_train.pth) &#124; [log](https://github.com/SegmentationBLWX/modelstore/releases/download/ssseg_resnest/deeplabv3plus_resnest101os8_cityscapes_train.log) |

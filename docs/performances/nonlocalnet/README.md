@@ -16,23 +16,23 @@ All the reported models here are available at https://pan.baidu.com/s/1gD-NJJWOt
 ## PASCAL VOC
 | Backbone  | Crop Size  | Schedule                             | Train/Eval Set  | mIoU   | Download                 |
 | :-:       | :-:        | :-:                                  | :-:             | :-:    | :-:                      |
-| R-50-D8   | 512x512    | LR/POLICY/BS/EPOCH: 0.01/poly/16/60  | trainaug/val    | 77.08% | [model]() &#124; [log]() |
-| R-50-D16  | 512x512    | LR/POLICY/BS/EPOCH: 0.01/poly/16/60  | trainaug/val    | 76.17% | [model]() &#124; [log]() |
-| R-101-D8  | 512x512    | LR/POLICY/BS/EPOCH: 0.01/poly/16/60  | trainaug/val    | 78.89% | [model]() &#124; [log]() |
-| R-101-D16 | 512x512    | LR/POLICY/BS/EPOCH: 0.01/poly/16/60  | trainaug/val    | 77.48% | [model]() &#124; [log]() |
+| R-50-D8   | 512x512    | LR/POLICY/BS/EPOCH: 0.01/poly/16/60  | trainaug/val    | 77.08% | [model](https://github.com/SegmentationBLWX/modelstore/releases/download/ssseg_nonlocalnet/nonlocalnet_resnet50os8_voc_train.pth) &#124; [log](https://github.com/SegmentationBLWX/modelstore/releases/download/ssseg_nonlocalnet/nonlocalnet_resnet50os8_voc_train.log) |
+| R-50-D16  | 512x512    | LR/POLICY/BS/EPOCH: 0.01/poly/16/60  | trainaug/val    | 76.17% | [model](https://github.com/SegmentationBLWX/modelstore/releases/download/ssseg_nonlocalnet/nonlocalnet_resnet50os16_voc_train.pth) &#124; [log](https://github.com/SegmentationBLWX/modelstore/releases/download/ssseg_nonlocalnet/nonlocalnet_resnet50os16_voc_train.log) |
+| R-101-D8  | 512x512    | LR/POLICY/BS/EPOCH: 0.01/poly/16/60  | trainaug/val    | 78.89% | [model](https://github.com/SegmentationBLWX/modelstore/releases/download/ssseg_nonlocalnet/nonlocalnet_resnet101os8_voc_train.pth) &#124; [log](https://github.com/SegmentationBLWX/modelstore/releases/download/ssseg_nonlocalnet/nonlocalnet_resnet101os8_voc_train.log) |
+| R-101-D16 | 512x512    | LR/POLICY/BS/EPOCH: 0.01/poly/16/60  | trainaug/val    | 77.48% | [model](https://github.com/SegmentationBLWX/modelstore/releases/download/ssseg_nonlocalnet/nonlocalnet_resnet101os16_voc_train.pth) &#124; [log](https://github.com/SegmentationBLWX/modelstore/releases/download/ssseg_nonlocalnet/nonlocalnet_resnet101os16_voc_train.log) |
 
 ## ADE20k
 | Backbone  | Crop Size  | Schedule                             | Train/Eval Set  | mIoU   | Download                 |
 | :-:       | :-:        | :-:                                  | :-:             | :-:    | :-:                      |
-| R-50-D8   | 512x512    | LR/POLICY/BS/EPOCH: 0.01/poly/16/130 | train/val       | 42.15% | [model]() &#124; [log]() |
-| R-50-D16  | 512x512    | LR/POLICY/BS/EPOCH: 0.01/poly/16/130 | train/val       | 41.17% | [model]() &#124; [log]() |
-| R-101-D8  | 512x512    | LR/POLICY/BS/EPOCH: 0.01/poly/16/130 | train/val       | 44.49% | [model]() &#124; [log]() |
-| R-101-D16 | 512x512    | LR/POLICY/BS/EPOCH: 0.01/poly/16/130 | train/val       | 42.45% | [model]() &#124; [log]() |
+| R-50-D8   | 512x512    | LR/POLICY/BS/EPOCH: 0.01/poly/16/130 | train/val       | 42.15% | [model](https://github.com/SegmentationBLWX/modelstore/releases/download/ssseg_nonlocalnet/nonlocalnet_resnet50os8_ade20k_train.pth) &#124; [log](https://github.com/SegmentationBLWX/modelstore/releases/download/ssseg_nonlocalnet/nonlocalnet_resnet50os8_ade20k_train.log) |
+| R-50-D16  | 512x512    | LR/POLICY/BS/EPOCH: 0.01/poly/16/130 | train/val       | 41.17% | [model](https://github.com/SegmentationBLWX/modelstore/releases/download/ssseg_nonlocalnet/nonlocalnet_resnet50os16_ade20k_train.pth) &#124; [log](https://github.com/SegmentationBLWX/modelstore/releases/download/ssseg_nonlocalnet/nonlocalnet_resnet50os16_ade20k_train.log) |
+| R-101-D8  | 512x512    | LR/POLICY/BS/EPOCH: 0.01/poly/16/130 | train/val       | 44.49% | [model](https://github.com/SegmentationBLWX/modelstore/releases/download/ssseg_nonlocalnet/nonlocalnet_resnet101os8_ade20k_train.pth) &#124; [log](https://github.com/SegmentationBLWX/modelstore/releases/download/ssseg_nonlocalnet/nonlocalnet_resnet101os8_ade20k_train.log) |
+| R-101-D16 | 512x512    | LR/POLICY/BS/EPOCH: 0.01/poly/16/130 | train/val       | 42.45% | [model](https://github.com/SegmentationBLWX/modelstore/releases/download/ssseg_nonlocalnet/nonlocalnet_resnet101os16_ade20k_train.pth) &#124; [log](https://github.com/SegmentationBLWX/modelstore/releases/download/ssseg_nonlocalnet/nonlocalnet_resnet101os16_ade20k_train.log) |
 
 ## CityScapes
 | Backbone  | Crop Size  | Schedule                             | Train/Eval Set  | mIoU   | Download                 |
 | :-:       | :-:        | :-:                                  | :-:             | :-:    | :-:                      |
-| R-50-D8   | 512x1024   | LR/POLICY/BS/EPOCH: 0.01/poly/8/220  | train/val       | 78.34% | [model]() &#124; [log]() |
-| R-50-D16  | 512x1024   | LR/POLICY/BS/EPOCH: 0.01/poly/8/220  | train/val       | 77.18% | [model]() &#124; [log]() |
-| R-101-D8  | 512x1024   | LR/POLICY/BS/EPOCH: 0.01/poly/8/220  | train/val       | 80.42% | [model]() &#124; [log]() |
-| R-101-D16 | 512x1024   | LR/POLICY/BS/EPOCH: 0.01/poly/8/220  | train/val       | 78.48% | [model]() &#124; [log]() |
+| R-50-D8   | 512x1024   | LR/POLICY/BS/EPOCH: 0.01/poly/8/220  | train/val       | 78.34% | [model](https://github.com/SegmentationBLWX/modelstore/releases/download/ssseg_nonlocalnet/nonlocalnet_resnet50os8_cityscapes_train.pth) &#124; [log](https://github.com/SegmentationBLWX/modelstore/releases/download/ssseg_nonlocalnet/nonlocalnet_resnet50os8_cityscapes_train.log) |
+| R-50-D16  | 512x1024   | LR/POLICY/BS/EPOCH: 0.01/poly/8/220  | train/val       | 77.18% | [model](https://github.com/SegmentationBLWX/modelstore/releases/download/ssseg_nonlocalnet/nonlocalnet_resnet50os16_cityscapes_train.pth) &#124; [log](https://github.com/SegmentationBLWX/modelstore/releases/download/ssseg_nonlocalnet/nonlocalnet_resnet50os16_cityscapes_train.log) |
+| R-101-D8  | 512x1024   | LR/POLICY/BS/EPOCH: 0.01/poly/8/220  | train/val       | 80.42% | [model](https://github.com/SegmentationBLWX/modelstore/releases/download/ssseg_nonlocalnet/nonlocalnet_resnet101os8_cityscapes_train.pth) &#124; [log](https://github.com/SegmentationBLWX/modelstore/releases/download/ssseg_nonlocalnet/nonlocalnet_resnet101os8_cityscapes_train.log) |
+| R-101-D16 | 512x1024   | LR/POLICY/BS/EPOCH: 0.01/poly/8/220  | train/val       | 78.48% | [model](https://github.com/SegmentationBLWX/modelstore/releases/download/ssseg_nonlocalnet/nonlocalnet_resnet101os16_cityscapes_train.pth) &#124; [log](https://github.com/SegmentationBLWX/modelstore/releases/download/ssseg_nonlocalnet/nonlocalnet_resnet101os16_cityscapes_train.log) |
