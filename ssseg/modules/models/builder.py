@@ -23,6 +23,7 @@ from .upernet import UPerNet
 from .deeplabv3 import Deeplabv3
 from .lrasppnet import LRASPPNet
 from .segformer import Segformer
+from .memorynet import MemoryNet
 from .setr import SETRUP, SETRMLA
 from .semanticfpn import SemanticFPN
 from .nonlocalnet import NonLocalNet
@@ -51,6 +52,7 @@ def BuildModel(cfg, mode, **kwargs):
         'setrmla': SETRMLA,
         'upernet': UPerNet,
         'segformer': Segformer,
+        'memorynet': MemoryNet,
         'deeplabv3': Deeplabv3,
         'lrasppnet': LRASPPNet,
         'semanticfpn': SemanticFPN,

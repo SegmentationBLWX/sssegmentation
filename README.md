@@ -41,6 +41,7 @@ https://sssegmentation.readthedocs.io/en/latest/
 - [SemanticFPN](https://arxiv.org/pdf/1901.02446.pdf)
 - [NonLocalNet](https://arxiv.org/pdf/1711.07971.pdf)
 - [Deeplabv3Plus](https://arxiv.org/pdf/1802.02611.pdf)
+- [MemoryNet-MCIBI](https://arxiv.org/pdf/2108.11819.pdf)
 #### Supported Datasets
 - [LIP](http://sysu-hcp.net/lip/)
 - [ATR](http://sysu-hcp.net/lip/overview.php)
