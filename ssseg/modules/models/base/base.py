@@ -8,8 +8,8 @@ import copy
 import torch
 import torch.nn as nn
 import torch.distributed as dist
-from ...losses import *
 from ...backbones import *
+from ...losses import BuildLoss
 
 
 '''base model'''
@@ -94,14 +94,6 @@ class BaseModel(nn.Module):
         return loss, losses_log_dict
     '''calculate the loss'''
     def calculateloss(self, prediction, target, loss_cfg):
-        # define the supported losses
-        supported_losses = {
-            'diceloss': DiceLoss,
-            'lovaszloss': LovaszLoss,
-            'celoss': CrossEntropyLoss,
-            'sigmoidfocalloss': SigmoidFocalLoss,
-            'binaryceloss': BinaryCrossEntropyLoss,
-        }
         # format prediction
         if prediction.dim() == 4:
             prediction_format = prediction.permute((0, 2, 3, 1)).contiguous()
@@ -113,7 +105,6 @@ class BaseModel(nn.Module):
         # calculate the loss
         loss = 0
         for key, value in loss_cfg.items():
-            assert key in supported_losses, 'unsupport loss type %s...' % key
             if (key in ['binaryceloss']) and hasattr(self, 'onehot'):
                 prediction_iter = prediction_format
                 target_iter = self.onehot(target, self.cfg['num_classes'])
@@ -123,7 +114,7 @@ class BaseModel(nn.Module):
             else:
                 prediction_iter = prediction_format
                 target_iter = target.view(-1)
-            loss += supported_losses[key](
+            loss += BuildLoss(key)(
                 prediction=prediction_iter, 
                 target=target_iter, 
                 scale_factor=value['scale_factor'],
