@@ -362,3 +362,21 @@ You can download the [paper](https://arxiv.org/pdf/1802.02611.pdf) to learn the 
 (2) The reported performance.
 
 Please refer to [Deeplabv3Plus](https://github.com/SegmentationBLWX/sssegmentation/tree/main/docs/performances/deeplabv3plus) for details.
+
+#### MemoryNet-MCIBI
+(1) The related paper.
+
+You can download the [paper](https://arxiv.org/pdf/2108.11819.pdf) to learn the details of MemoryNet-MCIBI.
+
+(2) The reported performance.
+
+Please refer to [MemoryNet-MCIBI](https://github.com/SegmentationBLWX/sssegmentation/tree/main/docs/performances/memorynet) for details.
+
+#### Mixed Precision (FP16) Training
+(1) The related paper.
+
+You can download the [paper](https://arxiv.org/pdf/1710.03740.pdf) to learn the details of Mixed Precision (FP16) Training.
+
+(2) The reported performance.
+
+Please refer to [Mixed Precision (FP16) Training](https://github.com/SegmentationBLWX/sssegmentation/tree/main/docs/performances/fp16) for details.

@@ -42,6 +42,7 @@ https://sssegmentation.readthedocs.io/en/latest/
 - [NonLocalNet](https://arxiv.org/pdf/1711.07971.pdf)
 - [Deeplabv3Plus](https://arxiv.org/pdf/1802.02611.pdf)
 - [MemoryNet-MCIBI](https://arxiv.org/pdf/2108.11819.pdf)
+- [Mixed Precision (FP16) Training](https://arxiv.org/pdf/1710.03740.pdf)
 #### Supported Datasets
 - [LIP](http://sysu-hcp.net/lip/)
 - [ATR](http://sysu-hcp.net/lip/overview.php)

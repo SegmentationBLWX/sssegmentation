@@ -75,6 +75,14 @@ class Trainer():
         optimizer = BuildOptimizer(model, copy.deepcopy(optimizer_cfg))
         start_epoch = 1
         end_epoch = cfg.OPTIMIZER_CFG['max_epochs']
+        # whether use fp16
+        fp16_cfg = self.cfg.MODEL_CFG.get('fp16', {'is_on': False, 'opts': {'opt_level': 'O1'}})
+        if fp16_cfg['is_on']:
+            import apex
+            model, optimizer = apex.amp.initialize(model, optimizer, **fp16_cfg['opts'])
+            for m in model.modules():
+                if hasattr(m, "fp16_enabled"):
+                    m.fp16_enabled = True
         # load checkpoints
         if cmd_args.checkpointspath and os.path.exists(cmd_args.checkpointspath):
             checkpoints = loadcheckpoints(cmd_args.checkpointspath, logger_handle=logger_handle, cmd_args=cmd_args)
@@ -129,7 +137,11 @@ class Trainer():
                 for key, value in losses_log_dict.items():
                     if key in losses_log_dict_memory: losses_log_dict_memory[key].append(value)
                     else: losses_log_dict_memory[key] = [value]
-                loss.backward()
+                if fp16_cfg['is_on']:
+                    with apex.amp.scale_loss(loss, optimizer) as scaled_loss:
+                        scaled_loss.backward()
+                else:
+                    loss.backward()
                 optimizer.step()
                 num_iters += 1
                 if (cmd_args.local_rank == 0) and (num_iters % common_cfg['loginterval'] == 0):
