@@ -18,6 +18,7 @@ def BuildActivation(activation_type, **kwargs):
         'relu6': nn.ReLU6,
         'sigmoid': nn.Sigmoid,
         'hardswish': HardSwish,
+        'identity': nn.Identity,
         'leakyrelu': nn.LeakyReLU,
         'hardsigmoid': HardSigmoid,
     }
