@@ -237,6 +237,15 @@ You can download the [paper](https://openaccess.thecvf.com/content_ICCV_2019/pap
 
 Please refer to [DMNet](https://github.com/SegmentationBLWX/sssegmentation/tree/main/docs/performances/dmnet) for details.
 
+#### ISANet
+(1) The related paper.
+
+You can download the [paper](https://arxiv.org/pdf/1907.12273.pdf) to learn the details of ISANet.
+
+(2) The reported performance.
+
+Please refer to [ISANet](https://github.com/SegmentationBLWX/sssegmentation/tree/main/docs/performances/isanet) for details.
+
 #### EncNet
 (1) The related paper.
 

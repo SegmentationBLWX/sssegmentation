@@ -27,6 +27,7 @@ https://sssegmentation.readthedocs.io/en/latest/
 - [DANet](https://arxiv.org/pdf/1809.02983.pdf)
 - [GCNet](https://arxiv.org/pdf/1904.11492.pdf)
 - [DMNet](https://openaccess.thecvf.com/content_ICCV_2019/papers/He_Dynamic_Multi-Scale_Filters_for_Semantic_Segmentation_ICCV_2019_paper.pdf)
+- [ISANet](https://arxiv.org/pdf/1907.12273.pdf)
 - [EncNet](https://arxiv.org/pdf/1803.08904.pdf)
 - [OCRNet](https://arxiv.org/pdf/1909.11065.pdf)
 - [DNLNet](https://arxiv.org/pdf/2006.06668.pdf)

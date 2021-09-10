@@ -15,10 +15,10 @@ All the reported models here are available at https://pan.baidu.com/s/1gD-NJJWOt
 ## ADE20k
 | Model         | Backbone    | Crop Size  | Schedule                             | Train/Eval Set  | mIoU   | Download                 |
 | :-:           | :-:         | :-:        | :-:                                  | :-:             | :-:    | :-:                      |
-| FCN           | R-50-D8     | 512x512    | LR/POLICY/BS/EPOCH: 0.01/poly/16/130 | train/val       | -      | [model]() &#124; [log]() |
-| PSPNet        | R-50-D8     | 512x512    | LR/POLICY/BS/EPOCH: 0.01/poly/16/130 | train/val       | -      | [model]() &#124; [log]() |
-| DeepLabV3     | R-50-D8     | 512x512    | LR/POLICY/BS/EPOCH: 0.01/poly/16/130 | train/val       | -      | [model]() &#124; [log]() |
-| DeepLabV3plus | R-50-D8     | 512x512    | LR/POLICY/BS/EPOCH: 0.01/poly/16/130 | train/val       | -      | [model]() &#124; [log]() |
+| FCN           | R-50-D8     | 512x512    | LR/POLICY/BS/EPOCH: 0.01/poly/16/130 | train/val       | 36.67% | [model](https://github.com/SegmentationBLWX/modelstore/releases/download/ssseg_fp16/fcn_r50_ade20k.pth) &#124; [log](https://github.com/SegmentationBLWX/modelstore/releases/download/ssseg_fp16/fcn_r50_ade20k.log) |
+| PSPNet        | R-50-D8     | 512x512    | LR/POLICY/BS/EPOCH: 0.01/poly/16/130 | train/val       | 42.06% | [model](https://github.com/SegmentationBLWX/modelstore/releases/download/ssseg_fp16/pspnet_r50_ade20k.pth) &#124; [log](https://github.com/SegmentationBLWX/modelstore/releases/download/ssseg_fp16/pspnet_r50_ade20k.log) |
+| DeepLabV3     | R-50-D8     | 512x512    | LR/POLICY/BS/EPOCH: 0.01/poly/16/130 | train/val       | 43.54% | [model](https://github.com/SegmentationBLWX/modelstore/releases/download/ssseg_fp16/deeplabv3_r50_ade20k.pth) &#124; [log](https://github.com/SegmentationBLWX/modelstore/releases/download/ssseg_fp16/deeplabv3_r50_ade20k.log) |
+| DeepLabV3plus | R-50-D8     | 512x512    | LR/POLICY/BS/EPOCH: 0.01/poly/16/130 | train/val       | 43.87% | [model](https://github.com/SegmentationBLWX/modelstore/releases/download/ssseg_fp16/deeplabv3plus_r50_ade20k.pth) &#124; [log](https://github.com/SegmentationBLWX/modelstore/releases/download/ssseg_fp16/deeplabv3plus_r50_ade20k.log) |
 
 
 # Notes

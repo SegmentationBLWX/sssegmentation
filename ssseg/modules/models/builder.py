@@ -6,11 +6,12 @@ Author:
 '''
 from .fcn import FCN
 from .ce2p import CE2P
+from .isnet import ISNet
 from .ccnet import CCNet
 from .danet import DANet
-from .isnet import ISNet
 from .gcnet import GCNet
 from .dmnet import DMNet
+from .isanet import ISANet
 from .encnet import ENCNet
 from .apcnet import APCNet
 from .emanet import EMANet
@@ -35,11 +36,12 @@ def BuildModel(cfg, mode, **kwargs):
     supported_models = {
         'fcn': FCN,
         'ce2p': CE2P,
+        'isnet': ISNet,
         'ccnet': CCNet,
         'danet': DANet,
-        'isnet': ISNet,
         'gcnet': GCNet,
         'dmnet': DMNet,
+        'isanet': ISANet,
         'encnet': ENCNet,
         'apcnet': APCNet,
         'emanet': EMANet,
