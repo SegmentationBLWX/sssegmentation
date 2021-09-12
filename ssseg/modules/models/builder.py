@@ -21,6 +21,7 @@ from .ocrnet import OCRNet
 from .dnlnet import DNLNet
 from .annnet import ANNNet
 from .upernet import UPerNet
+from .pointrend import PointRend
 from .deeplabv3 import Deeplabv3
 from .lrasppnet import LRASPPNet
 from .segformer import Segformer
@@ -55,6 +56,7 @@ def BuildModel(cfg, mode, **kwargs):
         'upernet': UPerNet,
         'segformer': Segformer,
         'memorynet': MemoryNet,
+        'pointrend': PointRend,
         'deeplabv3': Deeplabv3,
         'lrasppnet': LRASPPNet,
         'semanticfpn': SemanticFPN,

@@ -37,6 +37,7 @@ https://sssegmentation.readthedocs.io/en/latest/
 - [PSANet](https://openaccess.thecvf.com/content_ECCV_2018/papers/Hengshuang_Zhao_PSANet_Point-wise_Spatial_ECCV_2018_paper.pdf)
 - [APCNet](https://openaccess.thecvf.com/content_CVPR_2019/papers/He_Adaptive_Pyramid_Context_Network_for_Semantic_Segmentation_CVPR_2019_paper.pdf)
 - [UPerNet](https://arxiv.org/pdf/1807.10221.pdf)
+- [PointRend](https://arxiv.org/pdf/1912.08193.pdf)
 - [Deeplabv3](https://arxiv.org/pdf/1706.05587.pdf)
 - [Segformer](https://arxiv.org/pdf/2105.15203.pdf)
 - [SemanticFPN](https://arxiv.org/pdf/1901.02446.pdf)

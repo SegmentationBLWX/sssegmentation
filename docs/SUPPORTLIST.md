@@ -327,6 +327,15 @@ You can download the [paper](https://arxiv.org/pdf/1807.10221.pdf) to learn the 
 
 Please refer to [UPerNet](https://github.com/SegmentationBLWX/sssegmentation/tree/main/docs/performances/upernet) for details.
 
+#### PointRend
+(1) The related paper.
+
+You can download the [paper](https://arxiv.org/pdf/1912.08193.pdf) to learn the details of PointRend.
+
+(2) The reported performance.
+
+Please refer to [PointRend](https://github.com/SegmentationBLWX/sssegmentation/tree/main/docs/performances/pointrend) for details.
+
 #### Deeplabv3
 (1) The related paper.
 
