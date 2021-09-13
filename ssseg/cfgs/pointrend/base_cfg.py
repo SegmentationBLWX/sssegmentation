@@ -81,17 +81,16 @@ MODEL_CFG = {
         'type': 'resnet101',
         'series': 'resnet',
         'pretrained': True,
-        'outstride': 8,
+        'outstride': 32,
         'use_stem': True,
         'selected_indices': (0, 1, 2, 3),
     },
-    'lateral': {
+    'fpn': {
         'in_channels_list': [256, 512, 1024, 2048],
         'out_channels': 256,
-    },
-    'fpn': {
-        'in_channels_list': [256, 256, 256, 256],
-        'out_channels': 256,
+        'upsample_cfg': {'mode': 'nearest'},
+        'feature_stride_list': [4, 8, 16, 32],
+        'scale_head_channels': 128,
     },
     'pointrend': {
         'num_fcs': 3,
@@ -105,8 +104,7 @@ MODEL_CFG = {
         'dropout': 0,
     },
     'auxiliary': {
-        'in_channels': 1024,
-        'out_channels': 512,
+        'in_channels': 128,
         'dropout': 0,
     }
 }

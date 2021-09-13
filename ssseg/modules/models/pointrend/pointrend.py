@@ -6,10 +6,11 @@ Author:
 '''
 import copy
 import torch
+import numpy as np
 import torch.nn as nn
 import torch.nn.functional as F
 from ...backbones import *
-from ..base import BaseModel
+from ..base import FPN, BaseModel
 from mmcv.ops import point_sample as PointSample
 
 
@@ -18,30 +19,32 @@ class PointRend(BaseModel):
     def __init__(self, cfg, **kwargs):
         super(PointRend, self).__init__(cfg, **kwargs)
         align_corners, norm_cfg, act_cfg = self.align_corners, self.norm_cfg, self.act_cfg
-        # build lateral convs
-        act_cfg_copy = copy.deepcopy(act_cfg)
-        if 'inplace' in act_cfg_copy['opts']: act_cfg_copy['opts']['inplace'] = False
-        lateral_cfg = cfg['lateral']
-        self.lateral_convs = nn.ModuleList()
-        for in_channels in lateral_cfg['in_channels_list']:
-            self.lateral_convs.append(
-                nn.Sequential(
-                    nn.Conv2d(in_channels, lateral_cfg['out_channels'], kernel_size=1, stride=1, padding=0, bias=False),
-                    BuildNormalization(norm_cfg['type'], (lateral_cfg['out_channels'], norm_cfg['opts'])),
-                    BuildActivation(act_cfg_copy['type'], **act_cfg_copy['opts']),
-                )
-            )
-        # build fpn convs
+        # build fpn
         fpn_cfg = cfg['fpn']
-        self.fpn_convs = nn.ModuleList()
-        for in_channels in fpn_cfg['in_channels_list']:
-            self.fpn_convs.append(
-                nn.Sequential(
-                    nn.Conv2d(in_channels, fpn_cfg['out_channels'], kernel_size=3, stride=1, padding=1, bias=False),
-                    BuildNormalization(norm_cfg['type'], (fpn_cfg['out_channels'], norm_cfg['opts'])),
-                    BuildActivation(act_cfg_copy['type'], **act_cfg_copy['opts']),
+        self.fpn_neck = FPN(
+            in_channels_list=fpn_cfg['in_channels_list'],
+            out_channels=fpn_cfg['out_channels'],
+            upsample_cfg=fpn_cfg['upsample_cfg'],
+            norm_cfg=norm_cfg,
+            act_cfg=act_cfg,
+        )
+        self.scale_heads, feature_stride_list = nn.ModuleList(), fpn_cfg['feature_stride_list']
+        for i in range(len(feature_stride_list)):
+            head_length = max(1, int(np.log2(feature_stride_list[i]) - np.log2(feature_stride_list[0])))
+            scale_head = []
+            for k in range(head_length):
+                scale_head.append(
+                    nn.Sequential(
+                        nn.Conv2d(fpn_cfg['out_channels'] if k == 0 else fpn_cfg['scale_head_channels'], fpn_cfg['scale_head_channels'], kernel_size=3, stride=1, padding=1, bias=False),
+                        BuildNormalization(norm_cfg['type'], (fpn_cfg['scale_head_channels'], norm_cfg['opts'])),
+                        BuildActivation(act_cfg['type'], **act_cfg['opts']),
+                    )
                 )
-            )
+                if feature_stride_list[i] != feature_stride_list[0]:
+                    scale_head.append(
+                        nn.Upsample(scale_factor=2, mode='bilinear', align_corners=align_corners)
+                    )
+            self.scale_heads.append(nn.Sequential(*scale_head))
         # point rend
         pointrend_cfg = cfg['pointrend']
         self.num_fcs, self.coarse_pred_each_layer = pointrend_cfg['num_fcs'], pointrend_cfg['coarse_pred_each_layer']
@@ -66,11 +69,8 @@ class PointRend(BaseModel):
         # build auxiliary decoder
         auxiliary_cfg = cfg['auxiliary']
         self.auxiliary_decoder = nn.Sequential(
-            nn.Conv2d(auxiliary_cfg['in_channels'], auxiliary_cfg['out_channels'], kernel_size=3, stride=1, padding=1, bias=False),
-            BuildNormalization(norm_cfg['type'], (auxiliary_cfg['out_channels'], norm_cfg['opts'])),
-            BuildActivation(act_cfg['type'], **act_cfg['opts']),
             nn.Dropout2d(auxiliary_cfg['dropout']),
-            nn.Conv2d(auxiliary_cfg['out_channels'], cfg['num_classes'], kernel_size=1, stride=1, padding=0)
+            nn.Conv2d(auxiliary_cfg['in_channels'], cfg['num_classes'], kernel_size=1, stride=1, padding=0)
         )
         # freeze normalization layer if necessary
         if cfg.get('is_freeze_norm', False): self.freezenormalization()
@@ -79,18 +79,14 @@ class PointRend(BaseModel):
         h, w = x.size(2), x.size(3)
         # feed to backbone network
         x1, x2, x3, x4 = self.transforminputs(self.backbone_net(x), selected_indices=self.cfg['backbone'].get('selected_indices'))
-        # apply fpn
-        inputs = [x1, x2, x3, x4]
-        lateral_outputs = [lateral_conv(inputs[i]) for i, lateral_conv in enumerate(self.lateral_convs)]
-        for i in range(len(lateral_outputs) - 1, 0, -1):
-            prev_shape = lateral_outputs[i - 1].shape[2:]
-            lateral_outputs[i - 1] += F.interpolate(lateral_outputs[i], size=prev_shape, mode='bilinear', align_corners=self.align_corners)
-        fpn_outputs = [self.fpn_convs[i](lateral_outputs[i]) for i in range(len(lateral_outputs))]
-        fpn_outputs = [F.interpolate(out, size=fpn_outputs[0].size()[2:], mode='bilinear', align_corners=self.align_corners) for out in fpn_outputs]
-        fpn_out = torch.cat(fpn_outputs, dim=1)
+        # feed to fpn
+        fpn_outs = self.fpn_neck([x1, x2, x3, x4])
+        feats = self.scale_heads[0](fpn_outs[0])
+        for i in range(1, len(self.cfg['fpn']['feature_stride_list'])):
+            feats = feats + F.interpolate(self.scale_heads[i](fpn_outs[i]), size=feats.shape[2:], mode='bilinear', align_corners=self.align_corners)
         # feed to auxiliary decoder
-        preds_aux = self.auxiliary_decoder(fpn_out)
-        feats = fpn_outputs[0]
+        preds_aux = self.auxiliary_decoder(feats)
+        feats = fpn_outs[0]
         # if mode is TRAIN
         if self.mode == 'TRAIN':
             with torch.no_grad():
@@ -195,8 +191,8 @@ class PointRend(BaseModel):
     def alllayers(self):
         return {
             'backbone_net': self.backbone_net,
-            'lateral_convs': self.lateral_convs,
-            'fpn_convs': self.fpn_convs,
+            'fpn_neck': self.fpn_neck,
+            'scale_heads': self.scale_heads,
             'fcs': self.fcs,
             'decoder': self.decoder,
             'auxiliary_decoder': self.auxiliary_decoder

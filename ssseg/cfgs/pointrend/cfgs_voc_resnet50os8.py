@@ -37,7 +37,7 @@ MODEL_CFG.update(
             'type': 'resnet50',
             'series': 'resnet',
             'pretrained': True,
-            'outstride': 8,
+            'outstride': 32,
             'use_stem': True,
             'selected_indices': (0, 1, 2, 3),
         },
