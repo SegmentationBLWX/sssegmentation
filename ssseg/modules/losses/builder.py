@@ -4,6 +4,7 @@ Function:
 Author:
     Zhenchao Jin
 '''
+from .klloss import KLDivLoss
 from .diceloss import DiceLoss
 from .lovaszloss import LovaszLoss
 from .focalloss import SigmoidFocalLoss
@@ -14,6 +15,7 @@ from .celoss import CrossEntropyLoss, BinaryCrossEntropyLoss
 def BuildLoss(loss_type, **kwargs):
     supported_losses = {
         'diceloss': DiceLoss,
+        'kldivloss': KLDivLoss,
         'lovaszloss': LovaszLoss,
         'celoss': CrossEntropyLoss,
         'sigmoidfocalloss': SigmoidFocalLoss,
