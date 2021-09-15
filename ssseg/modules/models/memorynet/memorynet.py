@@ -1,6 +1,6 @@
 '''
 Function:
-    Implementation of MemoryNet
+    Implementation of MemoryNet - Mining Contextual Information Beyond Image for Semantic Segmentation
 Author:
     Zhenchao Jin
 '''

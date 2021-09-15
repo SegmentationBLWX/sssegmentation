@@ -79,6 +79,7 @@ class RandomCrop(object):
             counts = counts[labels != self.ignore_index]
             if len(counts) > 1 and np.max(counts) / np.sum(counts) < self.one_category_max_ratio: break
         # update and return sample
+        if len(counts) == 0: return sample
         sample['image'], sample['segmentation'] = image, segmentation
         return sample
 

@@ -4,6 +4,7 @@ Function:
 Author:
     Zhenchao Jin
 '''
+from .unet import BuildUNet
 from .hrnet import BuildHRNet
 from .resnet import BuildResNet
 from .resnest import BuildResNeSt
@@ -16,6 +17,7 @@ from .mit import BuildMixVisionTransformer
 '''build the backbone'''
 def BuildBackbone(cfg, **kwargs):
     supported_backbones = {
+        'unet': BuildUNet,
         'hrnet': BuildHRNet,
         'resnet': BuildResNet,
         'resnest': BuildResNeSt,

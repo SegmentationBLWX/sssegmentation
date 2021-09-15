@@ -89,7 +89,7 @@ class Tester():
             model = BuildParallelModel(model, is_distributed_on, device_ids=[cmd_args.local_rank] if is_distributed_on else None)
         # print config
         if cmd_args.local_rank == 0:
-            logger_handle.info('Dataset used: %s, Number of images: %s' % (cfg.DATASET_CFG['train']['type'], len(dataset)))
+            logger_handle.info('Dataset used: %s, Number of images: %s' % (cfg.DATASET_CFG['type'], len(dataset)))
             logger_handle.info('Model Used: %s, Backbone used: %s' % (cfg.MODEL_CFG['type'], cfg.MODEL_CFG['backbone']['type']))
             logger_handle.info('Checkpoints used: %s' % cmd_args.checkpointspath)
             logger_handle.info('Config file used: %s' % cfg_file_path)

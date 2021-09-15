@@ -19,7 +19,10 @@ from .voc import VOCDataset, PascalContextDataset, PascalContext59Dataset
 
 '''build dataset'''
 def BuildDataset(mode, logger_handle, dataset_cfg, **kwargs):
-    dataset_cfg = dataset_cfg[mode.lower()]
+    cfg = dataset_cfg[mode.lower()].copy()
+    dataset_cfg.pop('train')
+    dataset_cfg.pop('test')
+    dataset_cfg.update(cfg)
     supported_datasets = {
         'voc': VOCDataset,
         'atr': ATRDataset,
