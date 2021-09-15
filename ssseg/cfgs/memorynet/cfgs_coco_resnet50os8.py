@@ -1,21 +1,14 @@
 '''define the config file for coco and resnet50os8'''
+import os
 from .base_cfg import *
 
 
 # modify dataset config
 DATASET_CFG = DATASET_CFG.copy()
-DATASET_CFG['train'].update(
-    {
-        'type': 'coco',
-        'rootdir': 'data/COCO',
-    }
-)
-DATASET_CFG['test'].update(
-    {
-        'type': 'coco',
-        'rootdir': 'data/COCO',
-    }
-)
+DATASET_CFG.update({
+    'type': 'coco',
+    'rootdir': os.path.join(os.getcwd(), 'COCO'),
+})
 # modify dataloader config
 DATALOADER_CFG = DATALOADER_CFG.copy()
 # modify optimizer config

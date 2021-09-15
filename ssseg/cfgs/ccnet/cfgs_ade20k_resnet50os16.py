@@ -1,21 +1,14 @@
 '''define the config file for ade20k and resnet50os16'''
+import os
 from .base_cfg import *
 
 
 # modify dataset config
 DATASET_CFG = DATASET_CFG.copy()
-DATASET_CFG['train'].update(
-    {
-        'type': 'ade20k',
-        'rootdir': 'data/ADE20k',
-    }
-)
-DATASET_CFG['test'].update(
-    {
-        'type': 'ade20k',
-        'rootdir': 'data/ADE20k',
-    }
-)
+DATASET_CFG.update({
+    'type': 'ade20k',
+    'rootdir': os.path.join(os.getcwd(), 'ADE20k'),
+})
 # modify dataloader config
 DATALOADER_CFG = DATALOADER_CFG.copy()
 # modify optimizer config

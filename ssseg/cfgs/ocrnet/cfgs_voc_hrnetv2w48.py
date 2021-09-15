@@ -1,22 +1,15 @@
 '''define the config file for voc and hrnetv2-w48'''
+import os
 from .base_cfg import *
 
 
 # modify dataset config
 DATASET_CFG = DATASET_CFG.copy()
-DATASET_CFG['train'].update(
-    {
-        'type': 'voc',
-        'set': 'trainaug',
-        'rootdir': 'data/VOCdevkit/VOC2012',
-    }
-)
-DATASET_CFG['test'].update(
-    {
-        'type': 'voc',
-        'rootdir': 'data/VOCdevkit/VOC2012',
-    }
-)
+DATASET_CFG.update({
+    'type': 'voc',
+    'rootdir': os.path.join(os.getcwd(), 'VOCdevkit/VOC2012'),
+})
+DATASET_CFG['train']['set'] = 'trainaug'
 # modify dataloader config
 DATALOADER_CFG = DATALOADER_CFG.copy()
 # modify optimizer config
