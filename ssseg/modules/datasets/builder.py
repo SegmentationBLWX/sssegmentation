@@ -6,9 +6,13 @@ Author:
 '''
 from .lip import LIPDataset
 from .atr import ATRDataset
+from .hrf import HRFDataset
 from .base import BaseDataset
 from .cihp import CIHPDataset
+from .stare import STAREDataset
+from .drive import DRIVEDataset
 from .ade20k import ADE20kDataset
+from .chasedb1 import ChaseDB1Dataset
 from .sbushadow import SBUShadowDataset
 from .cityscapes import CityScapesDataset
 from .supervisely import SuperviselyDataset
@@ -25,13 +29,17 @@ def BuildDataset(mode, logger_handle, dataset_cfg, **kwargs):
     dataset_cfg.update(cfg)
     supported_datasets = {
         'voc': VOCDataset,
-        'atr': ATRDataset,
         'lip': LIPDataset,
+        'atr': ATRDataset,
+        'hrf': HRFDataset,
         'coco': COCODataset,
         'cihp': CIHPDataset,
         'mhpv1': MHPv1Dataset,
         'mhpv2': MHPv2Dataset,
+        'stare': STAREDataset,
+        'drive': DRIVEDataset,
         'ade20k': ADE20kDataset,
+        'chasedb1': ChaseDB1Dataset,
         'cocostuff': COCOStuffDataset,
         'sbushadow': SBUShadowDataset,
         'cityscapes': CityScapesDataset,

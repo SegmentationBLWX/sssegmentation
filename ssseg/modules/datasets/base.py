@@ -9,6 +9,7 @@ import torch
 import numpy as np
 import scipy.io as sio
 from .transforms import *
+from .evaluation import Evaluation
 from chainercv.evaluations import eval_semantic_segmentation
 
 
@@ -82,17 +83,30 @@ class BaseDataset(torch.utils.data.Dataset):
         # return the transforms
         return transforms
     '''evaluate the predictions'''
-    def evaluate(self, predictions, groundtruths, metric_list=['iou', 'miou']):
+    def evaluate(self, predictions, groundtruths, metric_list=['iou', 'miou'], num_classes=None, ignore_index=-1, **kwargs):
+        eval_client = None
         result = eval_semantic_segmentation(predictions, groundtruths)
         result_selected = {}
         for metric in metric_list:
-            result_selected[metric] = result[metric]
+            if metric in result:
+                result_selected[metric] = result[metric]
+            else:
+                if eval_client is None:
+                    eval_client = Evaluation(predictions, groundtruths, num_classes, ignore_index, **kwargs)
+                assert metric in eval_client.all_metric_results, 'unsupport %s as the metric...' % metric
+                result_selected[metric] = eval_client.all_metric_results[metric]
         if 'iou' in result_selected:
             iou_list = result_selected['iou']
             iou_dict = {}
             for idx, item in enumerate(iou_list):
                 iou_dict[self.classnames[idx]] = item
             result_selected['iou'] = iou_dict
+        if 'dice' in result_selected:
+            dice_list = result_selected['dice']
+            dice_dict = {}
+            for idx, item in enumerate(dice_list):
+                dice_dict[self.classnames[idx]] = item
+            result_selected['dice'] = dice_dict
         return result_selected
     '''generate edge'''
     def generateedge(self, segmentation, edge_width=3, ignore_index=255):

@@ -116,7 +116,7 @@ class UpConvBlock(nn.Module):
 '''UNet backbone'''
 class UNet(nn.Module):
     def __init__(self, in_channels=3, base_channels=64, num_stages=5, strides=(1, 1, 1, 1, 1), enc_num_convs=(2, 2, 2, 2, 2), dec_num_convs=(2, 2, 2, 2),
-                 downsamples=(True, True, True, True), enc_dilations=(1, 1, 1, 1, 1), dec_dilations=(1, 1, 1, 1), norm_cfg=None, act_cfg=None, upsample_type='InterpConv'):
+                 downsamples=(True, True, True, True), enc_dilations=(1, 1, 1, 1, 1), dec_dilations=(1, 1, 1, 1), norm_cfg=None, act_cfg=None, upsample_type='InterpConv', **kwargs):
         super(UNet, self).__init__()
         assert (len(strides) == num_stages) and (len(enc_num_convs) == num_stages) \
             and (len(dec_num_convs) == (num_stages - 1)) and (len(downsamples) == (num_stages - 1)) \

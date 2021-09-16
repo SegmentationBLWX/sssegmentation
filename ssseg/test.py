@@ -220,7 +220,13 @@ def main():
         logger_handle.info('All Finished, all_preds: %s, all_gts: %s' % (len(all_preds), len(all_gts)))
         dataset = BuildDataset(mode='TEST', logger_handle=logger_handle, dataset_cfg=copy.deepcopy(cfg.DATASET_CFG))
         if args.evalmode == 'offline':
-            result = dataset.evaluate(all_preds, all_gts)
+            result = dataset.evaluate(
+                predictions=all_preds, 
+                groundtruths=all_gts, 
+                metric_list=cfg.INFERENCE_CFG.get('metric_list', ['iou', 'miou']),
+                num_classes=cfg.MODEL_CFG['num_classes'],
+                ignore_index=-1,
+            )
             logger_handle.info(result)
         else:
             dataset.formatresults(all_preds, all_ids)

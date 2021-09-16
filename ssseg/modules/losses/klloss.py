@@ -7,7 +7,6 @@ Author:
 import torch
 import torch.nn as nn
 import torch.nn.functional as F
-from mmcv.ops import sigmoid_focal_loss
 
 
 '''define all'''
