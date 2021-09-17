@@ -30,7 +30,7 @@ class DRIVEDataset(BaseDataset):
     def __getitem__(self, index):
         imageid = self.imageids[index % len(self.imageids)]
         imagepath = os.path.join(self.image_dir, imageid)
-        annpath = os.path.join(self.ann_dir, imageid)
+        annpath = os.path.join(self.ann_dir, imageid.split('.')[0] + '_manual1.png')
         sample = self.read(imagepath, annpath, self.dataset_cfg.get('with_ann', True))
         sample.update({'id': imageid})
         if self.mode == 'TRAIN':
