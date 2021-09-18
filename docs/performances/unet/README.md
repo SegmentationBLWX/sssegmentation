@@ -19,7 +19,7 @@ All the reported models here are available at https://pan.baidu.com/s/1gD-NJJWOt
 | :-:           | :-:          | :-:        | :-:                                  | :-:             | :-:    | :-:                      |
 | FCN           | UNet-S5-D16  | 256x256    | LR/POLICY/BS/EPOCH: 0.01/poly/16/1   | train/val       | 79.88% | [model]() &#124; [log]() |
 | PSPNet        | UNet-S5-D16  | 256x256    | LR/POLICY/BS/EPOCH: 0.01/poly/16/1   | train/val       | 80.26% | [model]() &#124; [log]() |
-| DeepLabV3     | UNet-S5-D16  | 256x256    | LR/POLICY/BS/EPOCH: 0.01/poly/16/1   | train/val       | -      | [model]() &#124; [log]() |
+| DeepLabV3     | UNet-S5-D16  | 256x256    | LR/POLICY/BS/EPOCH: 0.01/poly/16/1   | train/val       | 80.29% | [model]() &#124; [log]() |
 
 ## DRIVE
 | Model         | Backbone     | Crop Size  | Schedule                             | Train/Eval Set  | Dice   | Download                 |
@@ -32,7 +32,7 @@ All the reported models here are available at https://pan.baidu.com/s/1gD-NJJWOt
 | Model         | Backbone     | Crop Size  | Schedule                             | Train/Eval Set  | Dice   | Download                 |
 | :-:           | :-:          | :-:        | :-:                                  | :-:             | :-:    | :-:                      |
 | FCN           | UNet-S5-D16  | 128x128    | LR/POLICY/BS/EPOCH: 0.01/poly/16/1   | train/val       | -      | [model]() &#124; [log]() |
-| PSPNet        | UNet-S5-D16  | 128x128    | LR/POLICY/BS/EPOCH: 0.01/poly/16/1   | train/val       | -      | [model]() &#124; [log]() |
+| PSPNet        | UNet-S5-D16  | 128x128    | LR/POLICY/BS/EPOCH: 0.01/poly/16/1   | train/val       | 81.24% | [model]() &#124; [log]() |
 | DeepLabV3     | UNet-S5-D16  | 128x128    | LR/POLICY/BS/EPOCH: 0.01/poly/16/1   | train/val       | 81.03% | [model]() &#124; [log]() |
 
 ## CHASE DB1

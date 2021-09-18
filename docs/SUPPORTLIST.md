@@ -153,6 +153,11 @@ You can visit https://cs.stanford.edu/~roozbeh/pascal-context/ to learn the deta
 
 You can download the [paper](https://arxiv.org/pdf/1505.04597.pdf) to learn the details of UNet.
 
+#### CGNet
+(1) The related paper.
+
+You can download the [paper](https://arxiv.org/pdf/1811.08201.pdf) to learn the details of CGNet.
+
 #### HRNet
 (1) The related paper.
 

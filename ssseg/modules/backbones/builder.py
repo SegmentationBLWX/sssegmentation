@@ -5,6 +5,7 @@ Author:
     Zhenchao Jin
 '''
 from .unet import BuildUNet
+from .cgnet import BuildCGNet
 from .hrnet import BuildHRNet
 from .resnet import BuildResNet
 from .resnest import BuildResNeSt
@@ -18,6 +19,7 @@ from .mit import BuildMixVisionTransformer
 def BuildBackbone(cfg, **kwargs):
     supported_backbones = {
         'unet': BuildUNet,
+        'cgnet': BuildCGNet,
         'hrnet': BuildHRNet,
         'resnet': BuildResNet,
         'resnest': BuildResNeSt,
