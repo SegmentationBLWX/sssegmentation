@@ -75,13 +75,14 @@ class ISNet(BaseModel):
             )
         # build auxiliary decoder
         auxiliary_cfg = cfg['auxiliary']
-        self.auxiliary_decoder = nn.Sequential(
-            nn.Conv2d(auxiliary_cfg['in_channels'], auxiliary_cfg['out_channels'], kernel_size=3, stride=1, padding=1, bias=False),
-            BuildNormalization(norm_cfg['type'], (auxiliary_cfg['out_channels'], norm_cfg['opts'])),
-            BuildActivation(act_cfg['type'], **act_cfg['opts']),
-            nn.Dropout2d(auxiliary_cfg['dropout']),
-            nn.Conv2d(auxiliary_cfg['out_channels'], cfg['num_classes'], kernel_size=1, stride=1, padding=0)
-        )
+        if auxiliary_cfg is not None:
+            self.auxiliary_decoder = nn.Sequential(
+                nn.Conv2d(auxiliary_cfg['in_channels'], auxiliary_cfg['out_channels'], kernel_size=3, stride=1, padding=1, bias=False),
+                BuildNormalization(norm_cfg['type'], (auxiliary_cfg['out_channels'], norm_cfg['opts'])),
+                BuildActivation(act_cfg['type'], **act_cfg['opts']),
+                nn.Dropout2d(auxiliary_cfg['dropout']),
+                nn.Conv2d(auxiliary_cfg['out_channels'], cfg['num_classes'], kernel_size=1, stride=1, padding=0)
+            )
         # freeze normalization layer if necessary
         if cfg.get('is_freeze_norm', False): self.freezenormalization()
     '''forward'''
@@ -108,12 +109,15 @@ class ISNet(BaseModel):
         preds_stage2 = self.decoder_stage2(feats_sl)
         # return according to the mode
         if self.mode == 'TRAIN':
-            preds_aux = self.auxiliary_decoder(x3)
-            preds_aux = F.interpolate(preds_aux, size=(h, w), mode='bilinear', align_corners=self.align_corners)
             preds_stage1 = F.interpolate(preds_stage1, size=(h, w), mode='bilinear', align_corners=self.align_corners)
             preds_stage2 = F.interpolate(preds_stage2, size=(h, w), mode='bilinear', align_corners=self.align_corners)
+            outputs_dict = {'loss_cls_stage1': preds_stage1, 'loss_cls_stage2': preds_stage2}
+            if hasattr(self, 'auxiliary_decoder'):
+                preds_aux = self.auxiliary_decoder(x3)
+                preds_aux = F.interpolate(preds_aux, size=(h, w), mode='bilinear', align_corners=self.align_corners)
+                outputs_dict = {'loss_cls_stage1': preds_stage1, 'loss_cls_stage2': preds_stage2, 'loss_aux': preds_aux}
             return self.calculatelosses(
-                predictions={'loss_cls_stage1': preds_stage1, 'loss_cls_stage2': preds_stage2, 'loss_aux': preds_aux}, 
+                predictions=outputs_dict, 
                 targets=targets, 
                 losses_cfg=losses_cfg
             )
@@ -127,10 +131,13 @@ class ISNet(BaseModel):
             'slc_net': self.slc_net,
             'decoder_stage1': self.decoder_stage1,
             'decoder_stage2': self.decoder_stage2,
-            'auxiliary_decoder': self.auxiliary_decoder,
         }
         if hasattr(self, 'shortcut'):
             all_layers.update({
                 'shortcut': self.shortcut
+            })
+        if hasattr(self, 'auxiliary_decoder'):
+            all_layers.update({
+                'auxiliary_decoder': self.auxiliary_decoder
             })
         return all_layers

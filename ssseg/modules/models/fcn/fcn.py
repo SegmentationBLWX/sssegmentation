@@ -19,16 +19,18 @@ class FCN(BaseModel):
         align_corners, norm_cfg, act_cfg = self.align_corners, self.norm_cfg, self.act_cfg
         # build decoder
         decoder_cfg = cfg['decoder']
-        self.decoder = nn.Sequential(
-            nn.Conv2d(decoder_cfg['in_channels'], decoder_cfg['out_channels'], kernel_size=3, stride=1, padding=1, bias=False),
-            BuildNormalization(norm_cfg['type'], (decoder_cfg['out_channels'], norm_cfg['opts'])),
-            BuildActivation(act_cfg['type'], **act_cfg['opts']),
-            nn.Conv2d(decoder_cfg['out_channels'], decoder_cfg['out_channels'], kernel_size=3, stride=1, padding=1, bias=False),
-            BuildNormalization(norm_cfg['type'], (decoder_cfg['out_channels'], norm_cfg['opts'])),
-            BuildActivation(act_cfg['type'], **act_cfg['opts']),
-            nn.Dropout2d(decoder_cfg['dropout']),
-            nn.Conv2d(decoder_cfg['out_channels'], cfg['num_classes'], kernel_size=1, stride=1, padding=0)
-        )
+        convs = []
+        for idx in range(decoder_cfg.get('num_convs', 2)):
+            if idx == 0:
+                conv = nn.Conv2d(decoder_cfg['in_channels'], decoder_cfg['out_channels'], kernel_size=3, stride=1, padding=1, bias=False)
+            else:
+                conv = nn.Conv2d(decoder_cfg['out_channels'], decoder_cfg['out_channels'], kernel_size=3, stride=1, padding=1, bias=False)
+            norm = BuildNormalization(norm_cfg['type'], (decoder_cfg['out_channels'], norm_cfg['opts']))
+            act = BuildActivation(act_cfg['type'], **act_cfg['opts'])
+            convs += [conv, norm, act]
+        convs.append(nn.Dropout2d(decoder_cfg['dropout']))
+        convs.append(nn.Conv2d(decoder_cfg['out_channels'], cfg['num_classes'], kernel_size=1, stride=1, padding=0))
+        self.decoder = nn.Sequential(*convs)
         # build auxiliary decoder
         auxiliary_cfg = cfg['auxiliary']
         if auxiliary_cfg is not None:
@@ -51,13 +53,13 @@ class FCN(BaseModel):
         # feed to auxiliary decoder and return according to the mode
         if self.mode == 'TRAIN':
             preds = F.interpolate(preds, size=(h, w), mode='bilinear', align_corners=self.align_corners)
-            predictions = {'loss_cls': preds}
-            if hasattr(self, 'auxiliary_decoder'): 
+            outputs_dict = {'loss_cls': preds}
+            if hasattr(self, 'auxiliary_decoder'):
                 preds_aux = self.auxiliary_decoder(x3)
                 preds_aux = F.interpolate(preds_aux, size=(h, w), mode='bilinear', align_corners=self.align_corners)
-                predictions = {'loss_cls': preds, 'loss_aux': preds_aux}
+                outputs_dict = {'loss_cls': preds, 'loss_aux': preds_aux}
             return self.calculatelosses(
-                predictions=predictions, 
+                predictions=outputs_dict, 
                 targets=targets, 
                 losses_cfg=losses_cfg
             )

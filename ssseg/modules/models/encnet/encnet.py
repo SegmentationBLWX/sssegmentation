@@ -57,13 +57,14 @@ class ENCNet(BaseModel):
         )
         # build auxiliary decoder
         auxiliary_cfg = cfg['auxiliary']
-        self.auxiliary_decoder = nn.Sequential(
-            nn.Conv2d(auxiliary_cfg['in_channels'], auxiliary_cfg['out_channels'], kernel_size=3, stride=1, padding=1, bias=False),
-            BuildNormalization(norm_cfg['type'], (auxiliary_cfg['out_channels'], norm_cfg['opts'])),
-            BuildActivation(act_cfg['type'], **act_cfg['opts']),
-            nn.Dropout2d(auxiliary_cfg['dropout']),
-            nn.Conv2d(auxiliary_cfg['out_channels'], cfg['num_classes'], kernel_size=1, stride=1, padding=0)
-        )
+        if auxiliary_cfg is not None:
+            self.auxiliary_decoder = nn.Sequential(
+                nn.Conv2d(auxiliary_cfg['in_channels'], auxiliary_cfg['out_channels'], kernel_size=3, stride=1, padding=1, bias=False),
+                BuildNormalization(norm_cfg['type'], (auxiliary_cfg['out_channels'], norm_cfg['opts'])),
+                BuildActivation(act_cfg['type'], **act_cfg['opts']),
+                nn.Dropout2d(auxiliary_cfg['dropout']),
+                nn.Conv2d(auxiliary_cfg['out_channels'], cfg['num_classes'], kernel_size=1, stride=1, padding=0)
+            )
         # freeze normalization layer if necessary
         if cfg.get('is_freeze_norm', False): self.freezenormalization()
     '''forward'''
@@ -86,31 +87,33 @@ class ENCNet(BaseModel):
         # feed to auxiliary decoder and return according to the mode
         if self.mode == 'TRAIN':
             preds = F.interpolate(preds, size=(h, w), mode='bilinear', align_corners=self.align_corners)
-            preds_aux = self.auxiliary_decoder(outputs[-2])
-            preds_aux = F.interpolate(preds_aux, size=(h, w), mode='bilinear', align_corners=self.align_corners)
             if hasattr(self, 'se_layer'):
-                predictions = {'loss_cls': preds, 'loss_se': preds_se, 'loss_aux': preds_aux}
+                outputs_dict = {'loss_cls': preds, 'loss_se': preds_se}
             else:
-                predictions = {'loss_cls': preds, 'loss_aux': preds_aux}
+                outputs_dict = {'loss_cls': preds}
+            if hasattr(self, 'auxiliary_decoder'):
+                preds_aux = self.auxiliary_decoder(outputs[-2])
+                preds_aux = F.interpolate(preds_aux, size=(h, w), mode='bilinear', align_corners=self.align_corners)
+                outputs_dict['loss_aux'] = preds_aux
             return self.calculatelosses(
-                predictions=predictions, 
+                predictions=outputs_dict, 
                 targets=targets, 
                 losses_cfg=losses_cfg
             )
         return preds
     '''return all layers'''
     def alllayers(self):
-        layers = {
+        all_layers = {
             'backbone_net': self.backbone_net,
             'bottleneck': self.bottleneck,
             'enc_module': self.enc_module,
             'decoder': self.decoder,
-            'auxiliary_decoder': self.auxiliary_decoder
         }
-        if hasattr(self, 'lateral_convs'): layers['lateral_convs'] = self.lateral_convs
-        if hasattr(self, 'fusion'): layers['fusion'] = self.fusion
-        if hasattr(self, 'se_layer'): layers['se_layer'] = self.se_layer
-        return layers
+        if hasattr(self, 'lateral_convs'): all_layers['lateral_convs'] = self.lateral_convs
+        if hasattr(self, 'fusion'): all_layers['fusion'] = self.fusion
+        if hasattr(self, 'se_layer'): all_layers['se_layer'] = self.se_layer
+        if hasattr(self, 'auxiliary_decoder'): all_layers['auxiliary_decoder'] = self.auxiliary_decoder
+        return all_layers
     '''convert to onehot labels'''
     def onehot(self, labels, num_classes):
         batch_size = labels.size(0)

@@ -69,13 +69,14 @@ class PSANet(BaseModel):
         )
         # build auxiliary decoder
         auxiliary_cfg = cfg['auxiliary']
-        self.auxiliary_decoder = nn.Sequential(
-            nn.Conv2d(auxiliary_cfg['in_channels'], auxiliary_cfg['out_channels'], kernel_size=3, stride=1, padding=1, bias=False),
-            BuildNormalization(norm_cfg['type'], (auxiliary_cfg['out_channels'], norm_cfg['opts'])),
-            BuildActivation(act_cfg['type'], **act_cfg['opts']),
-            nn.Dropout2d(auxiliary_cfg['dropout']),
-            nn.Conv2d(auxiliary_cfg['out_channels'], cfg['num_classes'], kernel_size=1, stride=1, padding=0)
-        )
+        if auxiliary_cfg is not None:
+            self.auxiliary_decoder = nn.Sequential(
+                nn.Conv2d(auxiliary_cfg['in_channels'], auxiliary_cfg['out_channels'], kernel_size=3, stride=1, padding=1, bias=False),
+                BuildNormalization(norm_cfg['type'], (auxiliary_cfg['out_channels'], norm_cfg['opts'])),
+                BuildActivation(act_cfg['type'], **act_cfg['opts']),
+                nn.Dropout2d(auxiliary_cfg['dropout']),
+                nn.Conv2d(auxiliary_cfg['out_channels'], cfg['num_classes'], kernel_size=1, stride=1, padding=0)
+            )
         # freeze normalization layer if necessary
         if cfg.get('is_freeze_norm', False): self.freezenormalization()
     '''forward'''
@@ -144,27 +145,30 @@ class PSANet(BaseModel):
         # feed to auxiliary decoder and return according to the mode
         if self.mode == 'TRAIN':
             preds = F.interpolate(preds, size=(h_input, w_input), mode='bilinear', align_corners=self.align_corners)
-            preds_aux = self.auxiliary_decoder(x3)
-            preds_aux = F.interpolate(preds_aux, size=(h_input, w_input), mode='bilinear', align_corners=self.align_corners)
+            outputs_dict = {'loss_cls': preds}
+            if hasattr(self, 'auxiliary_decoder'):
+                preds_aux = self.auxiliary_decoder(x3)
+                preds_aux = F.interpolate(preds_aux, size=(h_input, w_input), mode='bilinear', align_corners=self.align_corners)
+                outputs_dict = {'loss_cls': preds, 'loss_aux': preds_aux}
             return self.calculatelosses(
-                predictions={'loss_cls': preds, 'loss_aux': preds_aux}, 
+                predictions=outputs_dict, 
                 targets=targets, 
                 losses_cfg=losses_cfg
             )
         return preds
     '''return all layers'''
     def alllayers(self):
-        layers = {
+        all_layers = {
             'backbone_net': self.backbone_net,
             'reduce': self.reduce,
             'attention': self.attention,
             'proj': self.proj,
             'decoder': self.decoder,
-            'auxiliary_decoder': self.auxiliary_decoder
         }
-        if hasattr(self, 'reduce_p'): layers['reduce_p'] = self.reduce_p
-        if hasattr(self, 'attention_p'): layers['attention_p'] = self.attention_p
-        if hasattr(self, 'psamask_collect'): layers['psamask_collect'] = self.psamask_collect
-        if hasattr(self, 'psamask_distribute'): layers['psamask_distribute'] = self.psamask_distribute
-        if hasattr(self, 'psamask'): layers['psamask'] = self.psamask
-        return layers
+        if hasattr(self, 'reduce_p'): all_layers['reduce_p'] = self.reduce_p
+        if hasattr(self, 'attention_p'): all_layers['attention_p'] = self.attention_p
+        if hasattr(self, 'psamask_collect'): all_layers['psamask_collect'] = self.psamask_collect
+        if hasattr(self, 'psamask_distribute'): all_layers['psamask_distribute'] = self.psamask_distribute
+        if hasattr(self, 'psamask'): all_layers['psamask'] = self.psamask
+        if hasattr(self, 'auxiliary_decoder'): all_layers['auxiliary_decoder'] = self.auxiliary_decoder
+        return all_layers

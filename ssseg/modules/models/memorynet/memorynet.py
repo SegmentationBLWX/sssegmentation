@@ -145,7 +145,7 @@ class MemoryNet(BaseModel):
                     preds_aux1 = F.interpolate(preds_aux1, size=(h, w), mode='bilinear', align_corners=self.align_corners)
                     preds_aux2 = F.interpolate(preds_aux2, size=(h, w), mode='bilinear', align_corners=self.align_corners)
                     preds_aux3 = F.interpolate(preds_aux3, size=(h, w), mode='bilinear', align_corners=self.align_corners)
-                    predictions = {
+                    outputs_dict = {
                         'loss_cls_stage1': preds_stage1, 
                         'loss_cls_stage2': preds_stage2, 
                         'loss_aux1': preds_aux1,
@@ -155,13 +155,13 @@ class MemoryNet(BaseModel):
                 else:
                     preds_aux = self.auxiliary_decoder(x3)
                     preds_aux = F.interpolate(preds_aux, size=(h, w), mode='bilinear', align_corners=self.align_corners)
-                    predictions = {
+                    outputs_dict = {
                         'loss_cls_stage1': preds_stage1, 
                         'loss_cls_stage2': preds_stage2, 
                         'loss_aux': preds_aux
                     }
             else:
-                predictions = {
+                outputs_dict = {
                     'loss_cls_stage1': preds_stage1, 
                     'loss_cls_stage2': preds_stage2, 
                 }
@@ -173,7 +173,7 @@ class MemoryNet(BaseModel):
                     **self.cfg['memory']['update_cfg']
                 )
             loss, losses_log_dict = self.calculatelosses(
-                predictions=predictions, 
+                predictions=outputs_dict, 
                 targets=targets, 
                 losses_cfg=losses_cfg
             )

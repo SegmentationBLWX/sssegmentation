@@ -76,6 +76,7 @@ MODEL_CFG.update(
             'in_channels': 256,
             'out_channels': 256,
             'dropout': 0,
+            'num_convs': 0,
         },
         'auxiliary': None,
     }

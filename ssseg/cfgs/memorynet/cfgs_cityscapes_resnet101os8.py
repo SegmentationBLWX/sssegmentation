@@ -18,6 +18,7 @@ DATASET_CFG['train']['aug_opts'] = [
     ('ToTensor', {}),
     ('Padding', {'output_size': (512, 1024), 'data_type': 'tensor'}),
 ]
+DATASET_CFG['train']['set'] = 'trainval'
 DATASET_CFG['test']['aug_opts'] = [
     ('Resize', {'output_size': (2048, 1024), 'keep_ratio': True, 'scale_range': None}),
     ('Normalize', {'mean': [123.675, 116.28, 103.53], 'std': [58.395, 57.12, 57.375]}),

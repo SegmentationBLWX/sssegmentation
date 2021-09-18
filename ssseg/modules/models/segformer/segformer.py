@@ -61,16 +61,16 @@ class Segformer(BaseModel):
         return preds
     '''return all layers'''
     def alllayers(self):
-        layers = {
+        all_layers = {
             'convs': self.convs,
             'decoder': self.decoder,
         }
         tmp_layers = []
         for key, value in self.backbone_net.zerowdlayers().items():
             tmp_layers.append(value)
-        layers.update({'backbone_net_zerowd': nn.Sequential(*tmp_layers)})
+        all_layers.update({'backbone_net_zerowd': nn.Sequential(*tmp_layers)})
         tmp_layers = []
         for key, value in self.backbone_net.nonzerowdlayers().items():
             tmp_layers.append(value)
-        layers.update({'backbone_net_nonzerowd': nn.Sequential(*tmp_layers)})
-        return layers
+        all_layers.update({'backbone_net_nonzerowd': nn.Sequential(*tmp_layers)})
+        return all_layers
