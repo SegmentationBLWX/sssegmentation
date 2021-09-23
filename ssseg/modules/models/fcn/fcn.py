@@ -29,7 +29,10 @@ class FCN(BaseModel):
             act = BuildActivation(act_cfg['type'], **act_cfg['opts'])
             convs += [conv, norm, act]
         convs.append(nn.Dropout2d(decoder_cfg['dropout']))
-        convs.append(nn.Conv2d(decoder_cfg['out_channels'], cfg['num_classes'], kernel_size=1, stride=1, padding=0))
+        if decoder_cfg.get('num_convs', 2) > 0:
+            convs.append(nn.Conv2d(decoder_cfg['out_channels'], cfg['num_classes'], kernel_size=1, stride=1, padding=0))
+        else:
+            convs.append(nn.Conv2d(decoder_cfg['in_channels'], cfg['num_classes'], kernel_size=1, stride=1, padding=0))
         self.decoder = nn.Sequential(*convs)
         # build auxiliary decoder
         auxiliary_cfg = cfg['auxiliary']
