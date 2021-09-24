@@ -1,2 +1,2 @@
 '''initialize'''
-from .fcn import FCN
+from .fcn import FCN, DepthwiseSeparableFCN

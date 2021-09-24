@@ -177,6 +177,15 @@ You can download the [paper](https://arxiv.org/pdf/2004.08955.pdf) to learn the 
 
 Please refer to [ResNeSt](https://github.com/SegmentationBLWX/sssegmentation/tree/main/docs/performances/resnest) for details.
 
+#### FastSCNN
+(1) The related paper.
+
+You can download the [paper](https://arxiv.org/pdf/1902.04502.pdf) to learn the details of FastSCNN.
+
+(2) The reported performance.
+
+Please refer to [FastSCNN](https://github.com/SegmentationBLWX/sssegmentation/tree/main/docs/performances/fastscnn) for details.
+
 #### MobileNetV2
 (1) The related paper.
 

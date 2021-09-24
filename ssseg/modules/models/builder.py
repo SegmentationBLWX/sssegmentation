@@ -4,7 +4,6 @@ Function:
 Author:
     Zhenchao Jin
 '''
-from .fcn import FCN
 from .ce2p import CE2P
 from .isnet import ISNet
 from .ccnet import CCNet
@@ -30,6 +29,7 @@ from .setr import SETRUP, SETRMLA
 from .semanticfpn import SemanticFPN
 from .nonlocalnet import NonLocalNet
 from .deeplabv3plus import Deeplabv3Plus
+from .fcn import FCN, DepthwiseSeparableFCN
 
 
 '''build model'''
@@ -62,6 +62,7 @@ def BuildModel(cfg, mode, **kwargs):
         'semanticfpn': SemanticFPN,
         'nonlocalnet': NonLocalNet,
         'deeplabv3plus': Deeplabv3Plus,
+        'depthwiseseparablefcn': DepthwiseSeparableFCN,
     }
     model_type = cfg['type']
     assert model_type in supported_models, 'unsupport model_type %s...' % model_type

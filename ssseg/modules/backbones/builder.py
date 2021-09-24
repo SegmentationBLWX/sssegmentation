@@ -9,6 +9,7 @@ from .cgnet import BuildCGNet
 from .hrnet import BuildHRNet
 from .resnet import BuildResNet
 from .resnest import BuildResNeSt
+from .fastscnn import BuildFastSCNN
 from .mobilenet import BuildMobileNet
 from .swin import BuildSwinTransformer
 from .vit import BuildVisionTransformer
@@ -23,6 +24,7 @@ def BuildBackbone(cfg, **kwargs):
         'hrnet': BuildHRNet,
         'resnet': BuildResNet,
         'resnest': BuildResNeSt,
+        'fastscnn': BuildFastSCNN,
         'mobilenet': BuildMobileNet,
         'swin': BuildSwinTransformer,
         'vit': BuildVisionTransformer,

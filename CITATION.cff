@@ -2,7 +2,7 @@ cff-version: 1.2.0
 message: "If you use this software, please cite it as below."
 authors:
   - name: "Zhenchao Jin"
-title: "SSSegmentation: A general framework for strongly supervised semantic segmentation"
+title: "SSSegmentation: An Open Source Strongly Supervised Semantic Segmentation Toolbox Based on PyTorch"
 date-released: 2020-10-23
 url: "https://github.com/SegmentationBLWX/sssegmentation"
 license: MIT License

@@ -1,7 +1,6 @@
 # Introduction
-```
-sssegmentation is a general framework for our research on strongly supervised semantic segmentation.
-```
+**SSSegmentation** is an open source strongly supervised semantic segmentation toolbox based on PyTorch.
+You can star this repository to keep track of the project if it's helpful for you, thank you for your support.
 
 
 # Documents
@@ -16,6 +15,7 @@ https://sssegmentation.readthedocs.io/en/latest/
 - [HRNet](https://arxiv.org/pdf/1908.07919.pdf)
 - [ResNet](https://arxiv.org/pdf/1512.03385.pdf)
 - [ResNeSt](https://arxiv.org/pdf/2004.08955.pdf)
+- [FastSCNN](https://arxiv.org/pdf/1902.04502.pdf)
 - [MobileNetV2](https://arxiv.org/pdf/1801.04381.pdf)
 - [MobileNetV3](https://arxiv.org/pdf/1905.02244.pdf)
 - [SwinTransformer](https://arxiv.org/pdf/2103.14030.pdf)
@@ -71,7 +71,7 @@ If you use this framework in your research, please cite this project:
 ```
 @misc{ssseg2020,
     author = {Zhenchao Jin},
-    title = {SSSegmentation: A general framework for strongly supervised semantic segmentation},
+    title = {SSSegmentation: An Open Source Strongly Supervised Semantic Segmentation Toolbox Based on PyTorch},
     year = {2020},
     publisher = {GitHub},
     journal = {GitHub repository},
@@ -95,7 +95,5 @@ If you use this framework in your research, please cite this project:
 
 
 # References
-```
-[1]. https://github.com/open-mmlab/mmcv
-[2]. https://github.com/open-mmlab/mmsegmentation
-```
+- [MMCV](https://github.com/open-mmlab/mmcv)
+- [MMSegmentation](https://github.com/open-mmlab/mmsegmentation)

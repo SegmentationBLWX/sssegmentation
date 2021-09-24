@@ -16,6 +16,6 @@ All the reported models here are available at https://pan.baidu.com/s/1gD-NJJWOt
 # Results
 
 ## CityScapes
-| Model         | Backbone     | Crop Size  | Schedule                              | Train/Eval Set  | Dice   | Download                 |
+| Model         | Backbone     | Crop Size  | Schedule                              | Train/Eval Set  | mIoU   | Download                 |
 | :-:           | :-:          | :-:        | :-:                                   | :-:             | :-:    | :-:                      |
 | FCN           | M3N21        | 512x1024   | LR/POLICY/BS/EPOCH: 0.001/poly/16/340 | train/val       | 68.53% | [model](https://github.com/SegmentationBLWX/modelstore/releases/download/ssseg_cgnet/fcn_cgnetm3n21_cityscapes_train.pth) &#124; [log](https://github.com/SegmentationBLWX/modelstore/releases/download/ssseg_cgnet/fcn_cgnetm3n21_cityscapes_train.log) |
