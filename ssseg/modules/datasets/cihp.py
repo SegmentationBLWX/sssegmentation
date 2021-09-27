@@ -12,9 +12,11 @@ from .base import *
 '''CIHP dataset'''
 class CIHPDataset(BaseDataset):
     num_classes = 20
-    classnames = ['__background__', 'hat', 'hair', 'glove', 'sunglasses', 'upperclothes', 'dress', 
-                  'coat', 'socks', 'pants', 'torsoSkin', 'scarf', 'skirt', 'face', 
-                  'leftArm', 'rightArm', 'leftLeg', 'rightLeg', 'leftShoe', 'rightShoe']
+    classnames = [
+        '__background__', 'hat', 'hair', 'glove', 'sunglasses', 'upperclothes', 'dress', 
+        'coat', 'socks', 'pants', 'torsoSkin', 'scarf', 'skirt', 'face', 
+        'leftArm', 'rightArm', 'leftLeg', 'rightLeg', 'leftShoe', 'rightShoe'
+    ]
     assert num_classes == len(classnames)
     def __init__(self, mode, logger_handle, dataset_cfg, **kwargs):
         super(CIHPDataset, self).__init__(mode, logger_handle, dataset_cfg, **kwargs)

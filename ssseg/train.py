@@ -18,7 +18,7 @@ warnings.filterwarnings('ignore')
 
 '''parse arguments in command line'''
 def parseArgs():
-    parser = argparse.ArgumentParser(description='sssegmentation is a general framework for our research on strongly supervised semantic segmentation')
+    parser = argparse.ArgumentParser(description='SSSegmentation is an open source strongly supervised semantic segmentation toolbox based on PyTorch')
     parser.add_argument('--local_rank', dest='local_rank', help='node rank for distributed training', default=0, type=int)
     parser.add_argument('--nproc_per_node', dest='nproc_per_node', help='number of process per node', default=4, type=int)
     parser.add_argument('--cfgfilepath', dest='cfgfilepath', help='config file path you want to use', type=str, required=True)
@@ -100,12 +100,12 @@ class Trainer():
         if use_cuda and cfg.MODEL_CFG['is_multi_gpus']:
             is_distributed_on = cfg.MODEL_CFG['distributed']['is_on']
             model = BuildParallelModel(model, is_distributed_on, device_ids=[cmd_args.local_rank] if is_distributed_on else None)
-        # print config
+        # print information
         if cmd_args.local_rank == 0:
-            logger_handle.info('Dataset used: %s, Number of images: %s' % (cfg.DATASET_CFG['type'], len(dataset)))
-            logger_handle.info('Model Used: %s, Backbone used: %s' % (cfg.MODEL_CFG['type'], cfg.MODEL_CFG['backbone']['type']))
-            logger_handle.info('Checkpoints used: %s' % cmd_args.checkpointspath)
-            logger_handle.info('Config file used: %s' % cfg_file_path)
+            logger_handle.info('Dataset: %s-%s, Number of images: %s' % (cfg.DATASET_CFG['type'], cfg.DATASET_CFG['train']['set'], len(dataset)))
+            logger_handle.info('Model: %s, Backbone: %s-%s' % (cfg.MODEL_CFG['type'], cfg.MODEL_CFG['backbone']['series'], cfg.MODEL_CFG['backbone']['type']))
+            logger_handle.info('Resume from: %s' % cmd_args.checkpointspath)
+            logger_handle.info('Config file path: %s' % cfg_file_path)
         # start to train the model
         FloatTensor = torch.cuda.FloatTensor if use_cuda else torch.FloatTensor
         losses_log_dict_memory = {}

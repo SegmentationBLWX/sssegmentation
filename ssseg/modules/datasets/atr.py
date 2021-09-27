@@ -12,9 +12,11 @@ from .base import *
 '''ATR dataset'''
 class ATRDataset(BaseDataset):
     num_classes = 18
-    classnames = ['__background__', 'hat', 'hair', 'sunglasses', 'coat', 'skirt', 
-                  'pants', 'dress', 'belt', 'leftShoe', 'rightShoe', 'face', 
-                  'leftLeg', 'rightLeg', 'leftHand', 'rightHand', 'bags', 'scarf']
+    classnames = [
+        '__background__', 'hat', 'hair', 'sunglasses', 'coat', 'skirt', 
+        'pants', 'dress', 'belt', 'leftShoe', 'rightShoe', 'face', 
+        'leftLeg', 'rightLeg', 'leftHand', 'rightHand', 'bags', 'scarf'
+    ]
     assert num_classes == len(classnames)
     def __init__(self, mode, logger_handle, dataset_cfg, **kwargs):
         super(ATRDataset, self).__init__(mode, logger_handle, dataset_cfg, **kwargs)

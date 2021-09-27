@@ -186,6 +186,15 @@ You can download the [paper](https://arxiv.org/pdf/1902.04502.pdf) to learn the 
 
 Please refer to [FastSCNN](https://github.com/SegmentationBLWX/sssegmentation/tree/main/docs/performances/fastscnn) for details.
 
+#### BiSeNetV2
+(1) The related paper.
+
+You can download the [paper](https://arxiv.org/pdf/2004.02147.pdf) to learn the details of BiSeNetV2.
+
+(2) The reported performance.
+
+Please refer to [BiSeNetV2](https://github.com/SegmentationBLWX/sssegmentation/tree/main/docs/performances/bisenetv2) for details.
+
 #### MobileNetV2
 (1) The related paper.
 

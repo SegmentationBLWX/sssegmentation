@@ -13,9 +13,11 @@ from .base import *
 '''MHPv1 dataset'''
 class MHPv1Dataset(BaseDataset):
     num_classes = 19
-    classnames = ['__background__', 'hat', 'hair', 'sunglasses', 'upper clothes', 'skirt', 'pants',
-                  'dress', 'belt', 'left shoe', 'right shoe', 'face', 'left leg', 'right leg',
-                  'left arm', 'right arm', 'bag', 'scarf', 'torso skin']
+    classnames = [
+        '__background__', 'hat', 'hair', 'sunglasses', 'upper clothes', 'skirt', 'pants',
+        'dress', 'belt', 'left shoe', 'right shoe', 'face', 'left leg', 'right leg',
+        'left arm', 'right arm', 'bag', 'scarf', 'torso skin'
+    ]
     assert num_classes == len(classnames)
     def __init__(self, mode, logger_handle, dataset_cfg, **kwargs):
         super(MHPv1Dataset, self).__init__(mode, logger_handle, dataset_cfg, **kwargs)
@@ -56,14 +58,16 @@ class MHPv1Dataset(BaseDataset):
 '''MHPv2 dataset'''
 class MHPv2Dataset(BaseDataset):
     num_classes = 59
-    classnames = ['__background__', 'cap/hat', 'helmet', 'face', 'hair', 'left-arm', 'right-arm', 'left-hand', 'right-hand',
-                  'protector', 'bikini/bra', 'jacket/windbreaker/hoodie', 't-shirt', 'polo-shirt', 'sweater', 'sin-glet',
-                  'torso-skin', 'pants', 'shorts/swim-shorts', 'skirt', 'stock-ings', 'socks', 'left-boot', 'right-boot',
-                  'left-shoe', 'right-shoe', 'left-highheel', 'right-highheel', 'left-sandal', 'right-sandal', 'left-leg',
-                  'right-leg', 'left-foot', 'right-foot', 'coat', 'dress', 'robe', 'jumpsuits', 'other-full-body-clothes',
-                  'headwear', 'backpack', 'ball', 'bats', 'belt', 'bottle', 'carrybag', 'cases', 'sunglasses', 'eyewear',
-                  'gloves', 'scarf', 'umbrella', 'wallet/purse', 'watch', 'wristband', 'tie', 'other-accessaries',
-                  'other-upper-body-clothes', 'other-lower-body-clothes']
+    classnames = [
+        '__background__', 'cap/hat', 'helmet', 'face', 'hair', 'left-arm', 'right-arm', 'left-hand', 'right-hand',
+        'protector', 'bikini/bra', 'jacket/windbreaker/hoodie', 't-shirt', 'polo-shirt', 'sweater', 'sin-glet',
+        'torso-skin', 'pants', 'shorts/swim-shorts', 'skirt', 'stock-ings', 'socks', 'left-boot', 'right-boot',
+        'left-shoe', 'right-shoe', 'left-highheel', 'right-highheel', 'left-sandal', 'right-sandal', 'left-leg',
+        'right-leg', 'left-foot', 'right-foot', 'coat', 'dress', 'robe', 'jumpsuits', 'other-full-body-clothes',
+        'headwear', 'backpack', 'ball', 'bats', 'belt', 'bottle', 'carrybag', 'cases', 'sunglasses', 'eyewear',
+        'gloves', 'scarf', 'umbrella', 'wallet/purse', 'watch', 'wristband', 'tie', 'other-accessaries',
+        'other-upper-body-clothes', 'other-lower-body-clothes'
+    ]
     assert num_classes == len(classnames)
     def __init__(self, mode, logger_handle, dataset_cfg, **kwargs):
         super(MHPv2Dataset, self).__init__(mode, logger_handle, dataset_cfg, **kwargs)

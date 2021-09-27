@@ -12,9 +12,11 @@ from .base import *
 '''voc dataset'''
 class VOCDataset(BaseDataset):
     num_classes = 21
-    classnames = ['__background__', 'aeroplane', 'bicycle', 'bird', 'boat', 'bottle', 'bus',
-                  'car', 'cat', 'chair', 'cow', 'diningtable', 'dog', 'horse',
-                  'motorbike', 'person', 'pottedplant', 'sheep', 'sofa', 'train', 'tvmonitor']
+    classnames = [
+        '__background__', 'aeroplane', 'bicycle', 'bird', 'boat', 'bottle', 'bus',
+        'car', 'cat', 'chair', 'cow', 'diningtable', 'dog', 'horse',
+        'motorbike', 'person', 'pottedplant', 'sheep', 'sofa', 'train', 'tvmonitor'
+    ]
     assert num_classes == len(classnames)
     def __init__(self, mode, logger_handle, dataset_cfg, **kwargs):
         super(VOCDataset, self).__init__(mode, logger_handle, dataset_cfg, **kwargs)
@@ -50,11 +52,13 @@ class VOCDataset(BaseDataset):
 '''pascal context dataset'''
 class PascalContextDataset(BaseDataset):
     num_classes = 60
-    classnames = ['__background__', 'aeroplane', 'bag', 'bed', 'bedclothes', 'bench', 'bicycle', 'bird', 'boat', 'book', 'bottle', 'building', 'bus',
-                  'cabinet', 'car', 'cat', 'ceiling', 'chair', 'cloth', 'computer', 'cow', 'cup', 'curtain', 'dog', 'door', 'fence',
-                  'floor', 'flower', 'food', 'grass', 'ground', 'horse', 'keyboard', 'light', 'motorbike', 'mountain', 'mouse', 'person',
-                  'plate', 'platform', 'pottedplant', 'road', 'rock', 'sheep', 'shelves', 'sidewalk', 'sign', 'sky', 'snow', 'sofa', 'table',
-                  'track', 'train', 'tree', 'truck', 'tvmonitor', 'wall', 'water', 'window', 'wood']
+    classnames = [
+        '__background__', 'aeroplane', 'bag', 'bed', 'bedclothes', 'bench', 'bicycle', 'bird', 'boat', 'book', 'bottle', 'building', 'bus',
+        'cabinet', 'car', 'cat', 'ceiling', 'chair', 'cloth', 'computer', 'cow', 'cup', 'curtain', 'dog', 'door', 'fence',
+        'floor', 'flower', 'food', 'grass', 'ground', 'horse', 'keyboard', 'light', 'motorbike', 'mountain', 'mouse', 'person',
+        'plate', 'platform', 'pottedplant', 'road', 'rock', 'sheep', 'shelves', 'sidewalk', 'sign', 'sky', 'snow', 'sofa', 'table',
+        'track', 'train', 'tree', 'truck', 'tvmonitor', 'wall', 'water', 'window', 'wood'
+    ]
     assert num_classes == len(classnames)
     def __init__(self, mode, logger_handle, dataset_cfg, **kwargs):
         super(PascalContextDataset, self).__init__(mode, logger_handle, dataset_cfg, **kwargs)
@@ -89,11 +93,13 @@ class PascalContextDataset(BaseDataset):
 '''pascal context 59 dataset'''
 class PascalContext59Dataset(BaseDataset):
     num_classes = 59
-    classnames = ['aeroplane', 'bag', 'bed', 'bedclothes', 'bench', 'bicycle', 'bird', 'boat', 'book', 'bottle', 'building', 'bus',
-                  'cabinet', 'car', 'cat', 'ceiling', 'chair', 'cloth', 'computer', 'cow', 'cup', 'curtain', 'dog', 'door', 'fence',
-                  'floor', 'flower', 'food', 'grass', 'ground', 'horse', 'keyboard', 'light', 'motorbike', 'mountain', 'mouse', 'person',
-                  'plate', 'platform', 'pottedplant', 'road', 'rock', 'sheep', 'shelves', 'sidewalk', 'sign', 'sky', 'snow', 'sofa', 'table',
-                  'track', 'train', 'tree', 'truck', 'tvmonitor', 'wall', 'water', 'window', 'wood']
+    classnames = [
+        'aeroplane', 'bag', 'bed', 'bedclothes', 'bench', 'bicycle', 'bird', 'boat', 'book', 'bottle', 'building', 'bus',
+        'cabinet', 'car', 'cat', 'ceiling', 'chair', 'cloth', 'computer', 'cow', 'cup', 'curtain', 'dog', 'door', 'fence',
+        'floor', 'flower', 'food', 'grass', 'ground', 'horse', 'keyboard', 'light', 'motorbike', 'mountain', 'mouse', 'person',
+        'plate', 'platform', 'pottedplant', 'road', 'rock', 'sheep', 'shelves', 'sidewalk', 'sign', 'sky', 'snow', 'sofa', 'table',
+        'track', 'train', 'tree', 'truck', 'tvmonitor', 'wall', 'water', 'window', 'wood'
+    ]
     clsid2label = {0: 255}
     for i in range(1, num_classes+1): clsid2label[i] = i - 1
     assert num_classes == len(classnames)

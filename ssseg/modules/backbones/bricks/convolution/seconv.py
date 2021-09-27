@@ -14,6 +14,7 @@ from ..activation import BuildActivation
 class SqueezeExcitationConv2d(nn.Module):
     def __init__(self, channels, ratio=16, act_cfgs=None):
         super(SqueezeExcitationConv2d, self).__init__()
+        assert act_cfgs is not None, 'argument act_cfgs should be given'
         assert len(act_cfgs) == 2, 'length of act_cfgs should be equal to 2'
         self.global_avgpool = nn.AdaptiveAvgPool2d(1)
         act_cfg = act_cfgs[0]

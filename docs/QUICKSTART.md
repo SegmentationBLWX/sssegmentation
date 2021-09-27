@@ -24,8 +24,8 @@ usage: train.py [-h] [--local_rank LOCAL_RANK]
                 [--nproc_per_node NPROC_PER_NODE] --cfgfilepath CFGFILEPATH
                 [--checkpointspath CHECKPOINTSPATH]
 
-sssegmentation is a general framework for our research on strongly supervised
-semantic segmentation
+SSSegmentation is an open source strongly supervised semantic segmentation toolbox 
+based on PyTorch
 
 optional arguments:
   -h, --help            show this help message and exit
@@ -63,8 +63,8 @@ usage: test.py [-h] [--local_rank LOCAL_RANK]
                [--nproc_per_node NPROC_PER_NODE] --cfgfilepath CFGFILEPATH
                [--evalmode EVALMODE] --checkpointspath CHECKPOINTSPATH
 
-sssegmentation is a general framework for our research on strongly supervised
-semantic segmentation
+SSSegmentation is an open source strongly supervised semantic segmentation toolbox 
+based on PyTorch
 
 optional arguments:
   -h, --help            show this help message and exit
@@ -84,12 +84,12 @@ optional arguments:
 #### Python
 You can apply the models as follows:
 ```sh
-usage: demo.py [-h] [--imagedir IMAGEDIR] [--imagepath IMAGEPATH]
+usage: inference.py [-h] [--imagedir IMAGEDIR] [--imagepath IMAGEPATH]
                [--outputfilename OUTPUTFILENAME] --cfgfilepath CFGFILEPATH
                --checkpointspath CHECKPOINTSPATH
 
-sssegmentation is a general framework for our research on strongly supervised
-semantic segmentation
+SSSegmentation is an open source strongly supervised semantic segmentation toolbox 
+based on PyTorch
 
 optional arguments:
   -h, --help            show this help message and exit

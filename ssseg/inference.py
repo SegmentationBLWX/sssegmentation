@@ -1,6 +1,6 @@
 '''
 Function:
-    demo for segmentation
+    Visualize the segmentation results by using our segmentors
 Author:
     Zhenchao Jin
 '''
@@ -20,7 +20,7 @@ warnings.filterwarnings('ignore')
 
 '''parse arguments in command line'''
 def parseArgs():
-    parser = argparse.ArgumentParser(description='sssegmentation is a general framework for our research on strongly supervised semantic segmentation')
+    parser = argparse.ArgumentParser(description='SSSegmentation is an open source strongly supervised semantic segmentation toolbox based on PyTorch')
     parser.add_argument('--imagedir', dest='imagedir', help='images dir for testing multi images', type=str)
     parser.add_argument('--imagepath', dest='imagepath', help='imagepath for testing single image', type=str)
     parser.add_argument('--outputfilename', dest='outputfilename', help='name to save output image(s)', type=str, default='')
@@ -115,7 +115,6 @@ class Demo():
             if use_probs_before_resize: outputs = F.softmax(model(images), dim=1)
             else: outputs = model(images)
         else:
-            assert use_probs_before_resize, 'use_probs_before_resize should be set as True when using slide mode'
             align_corners = model.align_corners if hasattr(model, 'align_corners') else model.module.align_corners
             opts = inference_cfg['opts']
             stride_h, stride_w = opts['stride']
@@ -131,7 +130,10 @@ class Demo():
                     x2, y2 = min(x1 + cropsize_w, image_w), min(y1 + cropsize_h, image_h)
                     x1, y1 = max(x2 - cropsize_w, 0), max(y2 - cropsize_h, 0)
                     crop_images = images[:, :, y1:y2, x1:x2]
-                    outputs_crop = F.softmax(F.interpolate(model(crop_images), size=crop_images.size()[2:], mode='bilinear', align_corners=align_corners), dim=1)
+                    if use_probs_before_resize:
+                        outputs_crop = F.softmax(F.interpolate(model(crop_images), size=crop_images.size()[2:], mode='bilinear', align_corners=align_corners), dim=1)
+                    else:
+                        outputs_crop = F.interpolate(model(crop_images), size=crop_images.size()[2:], mode='bilinear', align_corners=align_corners)
                     outputs += F.pad(outputs_crop, (int(x1), int(outputs.shape[3] - x2), int(y1), int(outputs.shape[2] - y2)))
                     count_mat[:, :, y1:y2, x1:x2] += 1
             assert (count_mat == 0).sum() == 0

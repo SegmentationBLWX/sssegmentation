@@ -8,8 +8,7 @@ import cv2
 import torch
 import numpy as np
 import scipy.io as sio
-from .transforms import *
-from .evaluation import Evaluation
+from .pipelines import *
 from chainercv.evaluations import eval_semantic_segmentation
 
 

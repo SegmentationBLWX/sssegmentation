@@ -14,9 +14,11 @@ from tqdm import tqdm
 '''coco dataset pretraining for VOC'''
 class COCODataset(BaseDataset):
     num_classes = 21
-    classnames = ['__background__', 'airplane', 'bicycle', 'bird', 'boat', 'bottle', 'bus', 'car', 
-                  'cat', 'chair', 'cow', 'diningtable', 'dog', 'horse', 'motorcycle', 'person', 
-                  'potted-plant', 'sheep', 'sofa', 'train', 'tv']
+    classnames = [
+        '__background__', 'airplane', 'bicycle', 'bird', 'boat', 'bottle', 'bus', 'car', 
+        'cat', 'chair', 'cow', 'diningtable', 'dog', 'horse', 'motorcycle', 'person', 
+        'potted-plant', 'sheep', 'sofa', 'train', 'tv'
+    ]
     valid_clsids = [0, 5, 2, 16, 9, 44, 6, 3, 17, 62, 21, 67, 18, 19, 4, 1, 64, 20, 63, 7, 72]
     assert num_classes == len(classnames)
     def __init__(self, mode, logger_handle, dataset_cfg, **kwargs):

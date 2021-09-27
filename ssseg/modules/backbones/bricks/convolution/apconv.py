@@ -12,7 +12,7 @@ import torch.nn.functional as F
 
 '''Adptive Padding Conv Module'''
 class AdptivePaddingConv2d(nn.Conv2d):
-    def __init__(self, in_channels, out_channels, kernel_size, stride=1, padding=0, dilation=1, groups=1, bias=True):
+    def __init__(self, in_channels, out_channels, kernel_size, stride=1, padding=0, dilation=1, groups=1, bias=True, norm_cfg=None, act_cfg=None):
         super(AdptivePaddingConv2d, self).__init__(
             in_channels=in_channels, 
             out_channels=out_channels, 
@@ -23,6 +23,10 @@ class AdptivePaddingConv2d(nn.Conv2d):
             groups=groups, 
             bias=bias
         )
+        if norm_cfg is not None: 
+            self.norm = BuildNormalization(norm_cfg['type'], (out_channels, norm_cfg['opts']))
+        if act_cfg is not None: 
+            self.activation = BuildActivation(act_cfg['type'], **act_cfg['opts'])
     '''forward'''
     def forward(self, x):
         img_h, img_w = x.size()[-2:]
@@ -34,4 +38,7 @@ class AdptivePaddingConv2d(nn.Conv2d):
         pad_w = (max((output_w - 1) * self.stride[1] + (kernel_w - 1) * self.dilation[1] + 1 - img_w, 0))
         if pad_h > 0 or pad_w > 0:
             x = F.pad(x, [pad_w // 2, pad_w - pad_w // 2, pad_h // 2, pad_h - pad_h // 2])
-        return F.conv2d(x, self.weight, self.bias, self.stride, self.padding, self.dilation, self.groups)
+        output = F.conv2d(x, self.weight, self.bias, self.stride, self.padding, self.dilation, self.groups)
+        if hasattr(self, 'norm'): output = self.norm(output)
+        if hasattr(self, 'activation'): output = self.activation(output)
+        return output

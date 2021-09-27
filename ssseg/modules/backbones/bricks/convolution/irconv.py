@@ -23,17 +23,22 @@ class InvertedResidual(nn.Module):
         if expand_ratio != 1:
             layer = nn.Sequential()
             layer.add_module('conv', nn.Conv2d(in_channels, hidden_dim, kernel_size=1, stride=1, padding=0, bias=False))
-            layer.add_module('bn', BuildNormalization(norm_cfg['type'], (hidden_dim, norm_cfg['opts'])))
-            layer.add_module('activation', BuildActivation(act_cfg['type'], **act_cfg['opts']))
+            if norm_cfg is not None:
+                layer.add_module('bn', BuildNormalization(norm_cfg['type'], (hidden_dim, norm_cfg['opts'])))
+            if act_cfg is not None:
+                layer.add_module('activation', BuildActivation(act_cfg['type'], **act_cfg['opts']))
             layers.append(layer)
         layer = nn.Sequential()
         layer.add_module('conv', nn.Conv2d(hidden_dim, hidden_dim, kernel_size=3, stride=stride, padding=dilation, dilation=dilation, groups=hidden_dim, bias=False))
-        layer.add_module('bn', BuildNormalization(norm_cfg['type'], (hidden_dim, norm_cfg['opts'])))
-        layer.add_module('activation', BuildActivation(act_cfg['type'], **act_cfg['opts']))
+        if norm_cfg is not None:
+            layer.add_module('bn', BuildNormalization(norm_cfg['type'], (hidden_dim, norm_cfg['opts'])))
+        if act_cfg is not None:
+            layer.add_module('activation', BuildActivation(act_cfg['type'], **act_cfg['opts']))
         layers.extend([layer])
         layer = nn.Sequential()
         layer.add_module('conv', nn.Conv2d(hidden_dim, out_channels, kernel_size=1, stride=1, padding=0, bias=False))
-        layer.add_module('bn', BuildNormalization(norm_cfg['type'], (out_channels, norm_cfg['opts'])))
+        if norm_cfg is not None:
+            layer.add_module('bn', BuildNormalization(norm_cfg['type'], (out_channels, norm_cfg['opts'])))
         layers.extend([layer])
         self.conv = nn.Sequential(*layers)
     '''forward'''
@@ -55,22 +60,29 @@ class InvertedResidualV3(nn.Module):
         if self.with_expand_conv:
             self.expand_conv = nn.Sequential()
             self.expand_conv.add_module('conv', nn.Conv2d(in_channels, mid_channels, kernel_size=1, stride=1, padding=0, bias=False))
-            self.expand_conv.add_module('bn', BuildNormalization(norm_cfg['type'], (mid_channels, norm_cfg['opts'])))
-            self.expand_conv.add_module('activation', BuildActivation(act_cfg['type'], **act_cfg['opts']))
+            if norm_cfg is not None:
+                self.expand_conv.add_module('bn', BuildNormalization(norm_cfg['type'], (mid_channels, norm_cfg['opts'])))
+            if act_cfg is not None:
+                self.expand_conv.add_module('activation', BuildActivation(act_cfg['type'], **act_cfg['opts']))
         self.depthwise_conv = nn.Sequential()
         if stride == 2:
             self.depthwise_conv.add_module('conv', AdptivePaddingConv2d(mid_channels, mid_channels, kernel_size=kernel_size, stride=stride, padding=kernel_size//2, groups=mid_channels, bias=False))
-            self.depthwise_conv.add_module('bn', BuildNormalization(norm_cfg['type'], (mid_channels, norm_cfg['opts'])))
-            self.depthwise_conv.add_module('activation', BuildActivation(act_cfg['type'], **act_cfg['opts']))
+            if norm_cfg is not None:
+                self.depthwise_conv.add_module('bn', BuildNormalization(norm_cfg['type'], (mid_channels, norm_cfg['opts'])))
+            if act_cfg is not None:
+                self.depthwise_conv.add_module('activation', BuildActivation(act_cfg['type'], **act_cfg['opts']))
         else:
             self.depthwise_conv.add_module('conv', nn.Conv2d(mid_channels, mid_channels, kernel_size=kernel_size, stride=stride, padding=kernel_size//2, groups=mid_channels, bias=False))
-            self.depthwise_conv.add_module('bn', BuildNormalization(norm_cfg['type'], (mid_channels, norm_cfg['opts'])))
-            self.depthwise_conv.add_module('activation', BuildActivation(act_cfg['type'], **act_cfg['opts']))
+            if norm_cfg is not None:
+                self.depthwise_conv.add_module('bn', BuildNormalization(norm_cfg['type'], (mid_channels, norm_cfg['opts'])))
+            if act_cfg is not None:
+                self.depthwise_conv.add_module('activation', BuildActivation(act_cfg['type'], **act_cfg['opts']))
         if se_cfg is not None:
             self.se = SqueezeExcitationConv2d(**se_cfg)
         self.linear_conv = nn.Sequential()
         self.linear_conv.add_module('conv', nn.Conv2d(mid_channels, out_channels, kernel_size=1, stride=1, padding=0, bias=False))
-        self.linear_conv.add_module('bn', BuildNormalization(norm_cfg['type'], (out_channels, norm_cfg['opts'])))
+        if norm_cfg is not None:
+            self.linear_conv.add_module('bn', BuildNormalization(norm_cfg['type'], (out_channels, norm_cfg['opts'])))
     '''forward'''
     def forward(self, x):
         out = x

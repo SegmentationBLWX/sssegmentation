@@ -68,7 +68,8 @@ class LearningToDownsample(nn.Module):
             stride=2, 
             padding=1,
             norm_cfg=self.norm_cfg,
-            act_cfg=self.dw_act_cfg,
+            act_cfg=self.act_cfg,
+            dw_act_cfg=self.dw_act_cfg,
         )
         self.dsconv2 = DepthwiseSeparableConv2d(
             in_channels=dw_channels2,
@@ -77,7 +78,8 @@ class LearningToDownsample(nn.Module):
             stride=2, 
             padding=1,
             norm_cfg=self.norm_cfg,
-            act_cfg=self.dw_act_cfg,
+            act_cfg=self.act_cfg,
+            dw_act_cfg=self.dw_act_cfg,
         )
     '''forward'''
     def forward(self, x):
@@ -206,7 +208,7 @@ class FastSCNN(nn.Module):
             lower_in_channels=lower_in_channels, 
             out_channels=fusion_out_channels, 
             norm_cfg=self.norm_cfg, 
-            dwconv_act_cfg=self.dw_act_cfg, 
+            dwconv_act_cfg=self.act_cfg, 
             conv_act_cfg=self.act_cfg, 
             align_corners=self.align_corners,
         )

@@ -1,5 +1,5 @@
 # Introduction
-**SSSegmentation** is an open source strongly supervised semantic segmentation toolbox based on PyTorch.
+SSSegmentation is an open source strongly supervised semantic segmentation toolbox based on PyTorch.
 You can star this repository to keep track of the project if it's helpful for you, thank you for your support.
 
 
@@ -16,6 +16,7 @@ https://sssegmentation.readthedocs.io/en/latest/
 - [ResNet](https://arxiv.org/pdf/1512.03385.pdf)
 - [ResNeSt](https://arxiv.org/pdf/2004.08955.pdf)
 - [FastSCNN](https://arxiv.org/pdf/1902.04502.pdf)
+- [BiSeNetV2](https://arxiv.org/pdf/2004.02147.pdf)
 - [MobileNetV2](https://arxiv.org/pdf/1801.04381.pdf)
 - [MobileNetV3](https://arxiv.org/pdf/1905.02244.pdf)
 - [SwinTransformer](https://arxiv.org/pdf/2103.14030.pdf)

@@ -7,6 +7,8 @@ Author:
 import torch
 import torch.nn as nn
 import torch.nn.functional as F
+from ..activation import BuildActivation
+from ..normalization import BuildNormalization
 
 
 '''Attention 2d'''
@@ -33,7 +35,7 @@ class Attention2d(nn.Module):
 
 '''Dynamic Convolution: Attention over Convolution Kernels'''
 class DynamicConv2d(nn.Module):
-    def __init__(self, in_channels, out_channels, kernel_size=1, stride=1, padding=0, dilation=1, groups=1, bias=True, K=4, temperature=34):
+    def __init__(self, in_channels, out_channels, kernel_size=1, stride=1, padding=0, dilation=1, groups=1, bias=True, K=4, temperature=34, norm_cfg=None, act_cfg=None):
         super(DynamicConv2d, self).__init__()
         assert in_channels % groups == 0
         # set attrs
@@ -47,11 +49,17 @@ class DynamicConv2d(nn.Module):
         self.bias = None
         self.K = K
         self.temperature = temperature
+        self.norm_cfg = norm_cfg
+        self.act_cfg = act_cfg
         # define modules
         self.attention = Attention2d(in_channels, K, temperature)
         self.weight = nn.Parameter(torch.randn(K, out_channels, in_channels//groups, kernel_size, kernel_size), requires_grad=True)
         if bias:
             self.bias = nn.Parameter(torch.randn(K, out_channels))
+        if norm_cfg is not None: 
+            self.norm = BuildNormalization(norm_cfg['type'], (out_channels, norm_cfg['opts']))
+        if act_cfg is not None: 
+            self.activation = BuildActivation(act_cfg['type'], **act_cfg['opts'])
     '''update'''
     def update(self):
         self.attention.update()
@@ -85,4 +93,6 @@ class DynamicConv2d(nn.Module):
                 groups=self.groups * batch_size,
             )
         output = output.view(batch_size, self.out_channels, output.size(-2), output.size(-1))
+        if hasattr(self, 'norm'): output = self.norm(output)
+        if hasattr(self, 'activation'): output = self.activation(output)
         return output

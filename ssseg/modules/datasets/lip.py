@@ -12,9 +12,11 @@ from .base import *
 '''LIP dataset'''
 class LIPDataset(BaseDataset):
     num_classes = 20
-    classnames = ['__background__', 'hat', 'hair', 'glove', 'sunglasses', 'upperclothes', 'dress', 
-                  'coat', 'socks', 'pants', 'jumpsuits', 'scarf', 'skirt', 'face', 
-                  'leftArm', 'rightArm', 'leftLeg', 'rightLeg', 'leftShoe', 'rightShoe']
+    classnames = [
+        '__background__', 'hat', 'hair', 'glove', 'sunglasses', 'upperclothes', 'dress', 
+        'coat', 'socks', 'pants', 'jumpsuits', 'scarf', 'skirt', 'face', 
+        'leftArm', 'rightArm', 'leftLeg', 'rightLeg', 'leftShoe', 'rightShoe'
+    ]
     assert num_classes == len(classnames)
     def __init__(self, mode, logger_handle, dataset_cfg, **kwargs):
         super(LIPDataset, self).__init__(mode, logger_handle, dataset_cfg, **kwargs)
