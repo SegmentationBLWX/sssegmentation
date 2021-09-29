@@ -9,11 +9,11 @@ import torch
 import torch.nn as nn
 import torch.nn.functional as F
 import torch.distributed as dist
-from ...backbones import *
 from ..base import BaseModel
 from ..deeplabv3 import ASPP
 from .memory import FeaturesMemory
 from ..pspnet import PyramidPoolingModule
+from ...backbones import BuildActivation, BuildNormalization
 
 
 '''MemoryNet'''
@@ -84,90 +84,45 @@ class MemoryNet(BaseModel):
             nn.Conv2d(decoder_cfg['out_channels'], cfg['num_classes'], kernel_size=1, stride=1, padding=0)
         )
         # build auxiliary decoder
-        auxiliary_cfg = cfg['auxiliary']
-        if auxiliary_cfg is not None:
-            assert type(auxiliary_cfg) in [dict, list], 'auxiliary_cfg parse error...'
-            if isinstance(auxiliary_cfg, list):
-                self.auxiliary_decoder = nn.ModuleList()
-                for aux_cfg in auxiliary_cfg:
-                    decoder = nn.Sequential(
-                        nn.Conv2d(aux_cfg['in_channels'], aux_cfg['out_channels'], kernel_size=3, stride=1, padding=1, bias=False),
-                        BuildNormalization(norm_cfg['type'], (aux_cfg['out_channels'], norm_cfg['opts'])),
-                        BuildActivation(act_cfg['type'], **act_cfg['opts']),
-                        nn.Upsample(scale_factor=4),
-                        nn.Conv2d(aux_cfg['out_channels'], aux_cfg['out_channels'], kernel_size=3, stride=1, padding=1, bias=False),
-                        BuildNormalization(norm_cfg['type'], (aux_cfg['out_channels'], norm_cfg['opts'])),
-                        BuildActivation(act_cfg['type'], **act_cfg['opts']),
-                        nn.Upsample(scale_factor=4),
-                        nn.Dropout2d(aux_cfg['dropout']),
-                        nn.Conv2d(aux_cfg['out_channels'], cfg['num_classes'], kernel_size=1, stride=1, padding=0)
-                    )
-                    self.auxiliary_decoder.append(decoder)
-            else:
-                self.auxiliary_decoder = nn.Sequential(
-                    nn.Conv2d(auxiliary_cfg['in_channels'], auxiliary_cfg['out_channels'], kernel_size=3, stride=1, padding=1, bias=False),
-                    BuildNormalization(norm_cfg['type'], (auxiliary_cfg['out_channels'], norm_cfg['opts'])),
-                    BuildActivation(act_cfg['type'], **act_cfg['opts']),
-                    nn.Dropout2d(auxiliary_cfg['dropout']),
-                    nn.Conv2d(auxiliary_cfg['out_channels'], cfg['num_classes'], kernel_size=1, stride=1, padding=0)
-                )
+        self.setauxiliarydecoder(cfg['auxiliary'])
         # freeze normalization layer if necessary
         if cfg.get('is_freeze_norm', False): self.freezenormalization()
     '''forward'''
     def forward(self, x, targets=None, losses_cfg=None, **kwargs):
-        h, w = x.size(2), x.size(3)
+        img_size = x.size(2), x.size(3)
         # feed to backbone network
-        x1, x2, x3, x4 = self.transforminputs(self.backbone_net(x), selected_indices=self.cfg['backbone'].get('selected_indices'))
+        backbone_outputs = self.transforminputs(self.backbone_net(x), selected_indices=self.cfg['backbone'].get('selected_indices'))
         if hasattr(self, 'norm_layers'):
-            x1 = self.norm(x1, self.norm_layers[0])
-            x2 = self.norm(x2, self.norm_layers[1])
-            x3 = self.norm(x3, self.norm_layers[2])
-            x4 = self.norm(x4, self.norm_layers[3])
+            assert len(backbone_outputs) == len(self.norm_layers)
+            for idx in range(len(backbone_outputs)):
+                backbone_outputs[idx] = self.norm(backbone_outputs[idx], self.norm_layers[idx])
         if self.cfg['memory']['downsample_backbone']['stride'] > 1:
-            x1, x2, x3, x4 = self.downsample_backbone(x1), self.downsample_backbone(x2), self.downsample_backbone(x3), self.downsample_backbone(x4)
+            for idx in range(len(backbone_outputs)):
+                backbone_outputs[idx] = self.downsample_backbone(backbone_outputs[idx])
         # feed to context within image module
-        feats_ms = self.context_within_image_module(x4) if hasattr(self, 'context_within_image_module') else None
+        feats_ms = self.context_within_image_module(backbone_outputs[-1]) if hasattr(self, 'context_within_image_module') else None
         # feed to memory
-        memory_input = self.bottleneck(x4)
+        memory_input = self.bottleneck(backbone_outputs[-1])
         preds_stage1 = self.decoder_stage1(memory_input)
         stored_memory, memory_output = self.memory_module(memory_input, preds_stage1, feats_ms)
         # feed to decoder
         preds_stage2 = self.decoder_stage2(memory_output)
-        # feed to auxiliary decoder and return according to the mode
+        # forward according to the mode
         if self.mode == 'TRAIN':
-            preds_stage1 = F.interpolate(preds_stage1, size=(h, w), mode='bilinear', align_corners=self.align_corners)
-            preds_stage2 = F.interpolate(preds_stage2, size=(h, w), mode='bilinear', align_corners=self.align_corners)
-            if hasattr(self, 'auxiliary_decoder'):
-                if isinstance(self.cfg['auxiliary'], list):
-                    preds_aux1 = self.auxiliary_decoder[0](x1)
-                    preds_aux2 = self.auxiliary_decoder[1](x2)
-                    preds_aux3 = self.auxiliary_decoder[2](x3)
-                    preds_aux1 = F.interpolate(preds_aux1, size=(h, w), mode='bilinear', align_corners=self.align_corners)
-                    preds_aux2 = F.interpolate(preds_aux2, size=(h, w), mode='bilinear', align_corners=self.align_corners)
-                    preds_aux3 = F.interpolate(preds_aux3, size=(h, w), mode='bilinear', align_corners=self.align_corners)
-                    outputs_dict = {
-                        'loss_cls_stage1': preds_stage1, 
-                        'loss_cls_stage2': preds_stage2, 
-                        'loss_aux1': preds_aux1,
-                        'loss_aux2': preds_aux2,
-                        'loss_aux3': preds_aux3,
-                    }
-                else:
-                    preds_aux = self.auxiliary_decoder(x3)
-                    preds_aux = F.interpolate(preds_aux, size=(h, w), mode='bilinear', align_corners=self.align_corners)
-                    outputs_dict = {
-                        'loss_cls_stage1': preds_stage1, 
-                        'loss_cls_stage2': preds_stage2, 
-                        'loss_aux': preds_aux
-                    }
-            else:
-                outputs_dict = {
-                    'loss_cls_stage1': preds_stage1, 
-                    'loss_cls_stage2': preds_stage2, 
-                }
+            outputs_dict = self.forwardtrain(
+                predictions=preds_stage2,
+                targets=targets,
+                backbone_outputs=backbone_outputs,
+                losses_cfg=losses_cfg,
+                img_size=img_size,
+                compute_loss=False,
+            )
+            preds_stage2 = outputs_dict.pop('loss_cls')
+            preds_stage1 = F.interpolate(preds_stage1, size=img_size, mode='bilinear', align_corners=self.align_corners)
+            outputs_dict.update({'loss_cls_stage1': preds_stage1, 'loss_cls_stage2': preds_stage2})
             with torch.no_grad():
                 self.memory_module.update(
-                    features=F.interpolate(memory_input, size=(h, w), mode='bilinear', align_corners=self.align_corners), 
+                    features=F.interpolate(memory_input, size=img_size, mode='bilinear', align_corners=self.align_corners), 
                     segmentation=targets['segmentation'],
                     learning_rate=kwargs['learning_rate'],
                     **self.cfg['memory']['update_cfg']

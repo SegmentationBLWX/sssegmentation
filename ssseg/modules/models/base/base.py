@@ -7,9 +7,10 @@ Author:
 import copy
 import torch
 import torch.nn as nn
+import torch.nn.functional as F
 import torch.distributed as dist
-from ...backbones import *
 from ...losses import BuildLoss
+from ...backbones import BuildBackbone, BuildActivation, BuildNormalization
 
 
 '''base model'''
@@ -29,6 +30,32 @@ class BaseModel(nn.Module):
     '''forward'''
     def forward(self, x, targets=None, losses_cfg=None):
         raise NotImplementedError('not to be implemented')
+    '''forward when mode = `TRAIN`'''
+    def forwardtrain(self, predictions, targets, backbone_outputs, losses_cfg, img_size, compute_loss=True):
+        predictions = F.interpolate(predictions, size=img_size, mode='bilinear', align_corners=self.align_corners)
+        outputs_dict = {'loss_cls': predictions}
+        if hasattr(self, 'auxiliary_decoder'):
+            backbone_outputs = backbone_outputs[:-1]
+            if isinstance(self.auxiliary_decoder, nn.ModuleList):
+                assert len(backbone_outputs) >= len(self.auxiliary_decoder)
+                backbone_outputs = backbone_outputs[-len(self.auxiliary_decoder):]
+                for idx, (out, dec) in enumerate(zip(backbone_outputs, self.auxiliary_decoder)):
+                    predictions_aux = dec(out)
+                    predictions_aux = F.interpolate(predictions_aux, size=img_size, mode='bilinear', align_corners=self.align_corners)
+                    outputs_dict[f'loss_aux{idx+1}'] = predictions_aux
+            else:
+                predictions_aux = self.auxiliary_decoder(backbone_outputs[-1])
+                predictions_aux = F.interpolate(predictions_aux, size=img_size, mode='bilinear', align_corners=self.align_corners)
+                outputs_dict = {'loss_cls': predictions, 'loss_aux': predictions_aux}
+        if not compute_loss: return outputs_dict
+        return self.calculatelosses(
+            predictions=outputs_dict, 
+            targets=targets, 
+            losses_cfg=losses_cfg
+        )
+    '''forward when mode = `TEST`'''
+    def forwardtest(self):
+        raise NotImplementedError('not to be implemented')
     '''transform inputs'''
     def transforminputs(self, x_list, selected_indices=None):
         if selected_indices is None:
@@ -43,6 +70,36 @@ class BaseModel(nn.Module):
     '''return all layers with learnable parameters'''
     def alllayers(self):
         raise NotImplementedError('not to be implemented')
+    '''set auxiliary decoder as attribute'''
+    def setauxiliarydecoder(self, auxiliary_cfg):
+        norm_cfg, act_cfg, num_classes = self.norm_cfg.copy(), self.act_cfg.copy(), self.cfg['num_classes']
+        if auxiliary_cfg is None: return
+        if isinstance(auxiliary_cfg, dict):
+            auxiliary_cfg = [auxiliary_cfg]
+        self.auxiliary_decoder = nn.ModuleList()
+        for aux_cfg in auxiliary_cfg:
+            num_convs = aux_cfg.get('num_convs', 1)
+            dec = []
+            for idx in range(num_convs):
+                if idx == 0:
+                    dec += [nn.Conv2d(aux_cfg['in_channels'], aux_cfg['out_channels'], kernel_size=3, stride=1, padding=1, bias=False),]
+                else:
+                    dec += [nn.Conv2d(aux_cfg['out_channels'], aux_cfg['out_channels'], kernel_size=3, stride=1, padding=1, bias=False),]
+                dec += [
+                    BuildNormalization(norm_cfg['type'], (aux_cfg['out_channels'], norm_cfg['opts'])),
+                    BuildActivation(act_cfg['type'], **act_cfg['opts'])
+                ]
+                if 'upsample' in aux_cfg:
+                    dec += [nn.Upsample(**aux_cfg['upsample'])]
+            dec.append(nn.Dropout2d(aux_cfg['dropout']))
+            if num_convs > 0:
+                dec.append(nn.Conv2d(aux_cfg['out_channels'], num_classes, kernel_size=1, stride=1, padding=0))
+            else:
+                dec.append(nn.Conv2d(aux_cfg['in_channels'], num_classes, kernel_size=1, stride=1, padding=0))
+            dec = nn.Sequential(*dec)
+            self.auxiliary_decoder.append(dec)
+        if len(self.auxiliary_decoder) == 1:
+            self.auxiliary_decoder = self.auxiliary_decoder[0]
     '''freeze normalization'''
     def freezenormalization(self):
         for module in self.modules():

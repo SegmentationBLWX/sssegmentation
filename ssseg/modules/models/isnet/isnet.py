@@ -8,10 +8,10 @@ import copy
 import torch
 import torch.nn as nn
 import torch.nn.functional as F
-from ...backbones import *
 from ..base import BaseModel
 from .imagelevel import ImageLevelContext
 from .semanticlevel import SemanticLevelContext
+from ...backbones import BuildActivation, BuildNormalization
 
 
 '''ISNet'''
@@ -74,24 +74,16 @@ class ISNet(BaseModel):
                 nn.Conv2d(decoder_cfg['out_channels'], cfg['num_classes'], kernel_size=1, stride=1, padding=0)
             )
         # build auxiliary decoder
-        auxiliary_cfg = cfg['auxiliary']
-        if auxiliary_cfg is not None:
-            self.auxiliary_decoder = nn.Sequential(
-                nn.Conv2d(auxiliary_cfg['in_channels'], auxiliary_cfg['out_channels'], kernel_size=3, stride=1, padding=1, bias=False),
-                BuildNormalization(norm_cfg['type'], (auxiliary_cfg['out_channels'], norm_cfg['opts'])),
-                BuildActivation(act_cfg['type'], **act_cfg['opts']),
-                nn.Dropout2d(auxiliary_cfg['dropout']),
-                nn.Conv2d(auxiliary_cfg['out_channels'], cfg['num_classes'], kernel_size=1, stride=1, padding=0)
-            )
+        self.setauxiliarydecoder(cfg['auxiliary'])
         # freeze normalization layer if necessary
         if cfg.get('is_freeze_norm', False): self.freezenormalization()
     '''forward'''
     def forward(self, x, targets=None, losses_cfg=None):
-        h, w = x.size(2), x.size(3)
+        img_size = x.size(2), x.size(3)
         # feed to backbone network
-        x1, x2, x3, x4 = self.transforminputs(self.backbone_net(x), selected_indices=self.cfg['backbone'].get('selected_indices'))
+        backbone_outputs = self.transforminputs(self.backbone_net(x), selected_indices=self.cfg['backbone'].get('selected_indices'))
         # feed to bottleneck
-        feats = self.bottleneck(x4)
+        feats = self.bottleneck(backbone_outputs[-1])
         # feed to image-level context module
         feats_il = self.ilc_net(feats)
         # feed to decoder stage1
@@ -103,19 +95,23 @@ class ISNet(BaseModel):
         feats_sl = self.slc_net(feats, preds, feats_il)
         # feed to decoder stage2
         if hasattr(self, 'shortcut'):
-            shortcut_out = self.shortcut(x1)
+            shortcut_out = self.shortcut(backbone_outputs[0])
             feats_sl = F.interpolate(feats_sl, size=shortcut_out.shape[2:], mode='bilinear', align_corners=self.align_corners)
             feats_sl = torch.cat([feats_sl, shortcut_out], dim=1)
         preds_stage2 = self.decoder_stage2(feats_sl)
         # return according to the mode
         if self.mode == 'TRAIN':
-            preds_stage1 = F.interpolate(preds_stage1, size=(h, w), mode='bilinear', align_corners=self.align_corners)
-            preds_stage2 = F.interpolate(preds_stage2, size=(h, w), mode='bilinear', align_corners=self.align_corners)
-            outputs_dict = {'loss_cls_stage1': preds_stage1, 'loss_cls_stage2': preds_stage2}
-            if hasattr(self, 'auxiliary_decoder'):
-                preds_aux = self.auxiliary_decoder(x3)
-                preds_aux = F.interpolate(preds_aux, size=(h, w), mode='bilinear', align_corners=self.align_corners)
-                outputs_dict = {'loss_cls_stage1': preds_stage1, 'loss_cls_stage2': preds_stage2, 'loss_aux': preds_aux}
+            outputs_dict = self.forwardtrain(
+                predictions=preds_stage2,
+                targets=targets,
+                backbone_outputs=backbone_outputs,
+                losses_cfg=losses_cfg,
+                img_size=img_size,
+                compute_loss=False,
+            )
+            preds_stage2 = outputs_dict.pop('loss_cls')
+            preds_stage1 = F.interpolate(preds_stage1, size=img_size, mode='bilinear', align_corners=self.align_corners)
+            outputs_dict.update({'loss_cls_stage1': preds_stage1, 'loss_cls_stage2': preds_stage2})
             return self.calculatelosses(
                 predictions=outputs_dict, 
                 targets=targets, 

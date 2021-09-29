@@ -9,8 +9,8 @@ import torch
 import numpy as np
 import torch.nn as nn
 import torch.nn.functional as F
-from ...backbones import *
 from ..base import FPN, BaseModel
+from ...backbones import BuildActivation, BuildNormalization
 
 
 '''SemanticFPN'''
@@ -32,13 +32,11 @@ class SemanticFPN(BaseModel):
             head_length = max(1, int(np.log2(feature_stride_list[i]) - np.log2(feature_stride_list[0])))
             scale_head = []
             for k in range(head_length):
-                scale_head.append(
-                    nn.Sequential(
-                        nn.Conv2d(fpn_cfg['out_channels'] if k == 0 else fpn_cfg['scale_head_channels'], fpn_cfg['scale_head_channels'], kernel_size=3, stride=1, padding=1, bias=False),
-                        BuildNormalization(norm_cfg['type'], (fpn_cfg['scale_head_channels'], norm_cfg['opts'])),
-                        BuildActivation(act_cfg['type'], **act_cfg['opts']),
-                    )
-                )
+                scale_head.append(nn.Sequential(
+                    nn.Conv2d(fpn_cfg['out_channels'] if k == 0 else fpn_cfg['scale_head_channels'], fpn_cfg['scale_head_channels'], kernel_size=3, stride=1, padding=1, bias=False),
+                    BuildNormalization(norm_cfg['type'], (fpn_cfg['scale_head_channels'], norm_cfg['opts'])),
+                    BuildActivation(act_cfg['type'], **act_cfg['opts']),
+                ))
                 if feature_stride_list[i] != feature_stride_list[0]:
                     scale_head.append(
                         nn.Upsample(scale_factor=2, mode='bilinear', align_corners=align_corners)
@@ -54,25 +52,27 @@ class SemanticFPN(BaseModel):
         if cfg.get('is_freeze_norm', False): self.freezenormalization()
     '''forward'''
     def forward(self, x, targets=None, losses_cfg=None):
-        h, w = x.size(2), x.size(3)
+        img_size = x.size(2), x.size(3)
         # feed to backbone network
-        x1, x2, x3, x4 = self.transforminputs(self.backbone_net(x), selected_indices=self.cfg['backbone'].get('selected_indices'))
+        backbone_outputs = self.transforminputs(self.backbone_net(x), selected_indices=self.cfg['backbone'].get('selected_indices'))
         # feed to fpn
-        fpn_outs = self.fpn_neck([x1, x2, x3, x4])
+        fpn_outs = self.fpn_neck(list(backbone_outputs))
         feats = self.scale_heads[0](fpn_outs[0])
         for i in range(1, len(self.cfg['fpn']['feature_stride_list'])):
             feats = feats + F.interpolate(self.scale_heads[i](fpn_outs[i]), size=feats.shape[2:], mode='bilinear', align_corners=self.align_corners)
         # feed to decoder
-        preds = self.decoder(feats)
-        # feed to auxiliary decoder and return according to the mode
+        predictions = self.decoder(feats)
+        # forward according to the mode
         if self.mode == 'TRAIN':
-            preds = F.interpolate(preds, size=(h, w), mode='bilinear', align_corners=self.align_corners)
-            return self.calculatelosses(
-                predictions={'loss_cls': preds}, 
-                targets=targets, 
-                losses_cfg=losses_cfg
+            loss, losses_log_dict = self.forwardtrain(
+                predictions=predictions,
+                targets=targets,
+                backbone_outputs=backbone_outputs,
+                losses_cfg=losses_cfg,
+                img_size=img_size,
             )
-        return preds
+            return loss, losses_log_dict
+        return predictions
     '''return all layers'''
     def alllayers(self):
         return {

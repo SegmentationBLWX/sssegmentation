@@ -9,9 +9,9 @@ import torch
 import numpy as np
 import torch.nn as nn
 import torch.nn.functional as F
-from ...backbones import *
 from ..base import FPN, BaseModel
 from mmcv.ops import point_sample as PointSample
+from ...backbones import BuildActivation, BuildNormalization
 
 
 '''PointRend'''
@@ -33,13 +33,11 @@ class PointRend(BaseModel):
             head_length = max(1, int(np.log2(feature_stride_list[i]) - np.log2(feature_stride_list[0])))
             scale_head = []
             for k in range(head_length):
-                scale_head.append(
-                    nn.Sequential(
-                        nn.Conv2d(fpn_cfg['out_channels'] if k == 0 else fpn_cfg['scale_head_channels'], fpn_cfg['scale_head_channels'], kernel_size=3, stride=1, padding=1, bias=False),
-                        BuildNormalization(norm_cfg['type'], (fpn_cfg['scale_head_channels'], norm_cfg['opts'])),
-                        BuildActivation(act_cfg['type'], **act_cfg['opts']),
-                    )
-                )
+                scale_head.append(nn.Sequential(
+                    nn.Conv2d(fpn_cfg['out_channels'] if k == 0 else fpn_cfg['scale_head_channels'], fpn_cfg['scale_head_channels'], kernel_size=3, stride=1, padding=1, bias=False),
+                    BuildNormalization(norm_cfg['type'], (fpn_cfg['scale_head_channels'], norm_cfg['opts'])),
+                    BuildActivation(act_cfg['type'], **act_cfg['opts']),
+                ))
                 if feature_stride_list[i] != feature_stride_list[0]:
                     scale_head.append(
                         nn.Upsample(scale_factor=2, mode='bilinear', align_corners=align_corners)
@@ -67,50 +65,47 @@ class PointRend(BaseModel):
             nn.Conv1d(fc_in_channels, cfg['num_classes'], kernel_size=1, stride=1, padding=0)
         )
         # build auxiliary decoder
-        auxiliary_cfg = cfg['auxiliary']
-        self.auxiliary_decoder = nn.Sequential(
-            nn.Dropout2d(auxiliary_cfg['dropout']),
-            nn.Conv2d(auxiliary_cfg['in_channels'], cfg['num_classes'], kernel_size=1, stride=1, padding=0)
-        )
+        assert (cfg['auxiliary'] is not None) and isinstance(cfg['auxiliary'], dict), 'auxiliary must be given and only support dict type'
+        self.setauxiliarydecoder(cfg['auxiliary'])
         # freeze normalization layer if necessary
         if cfg.get('is_freeze_norm', False): self.freezenormalization()
     '''forward'''
     def forward(self, x, targets=None, losses_cfg=None):
-        h, w = x.size(2), x.size(3)
+        img_size = x.size(2), x.size(3)
         # feed to backbone network
-        x1, x2, x3, x4 = self.transforminputs(self.backbone_net(x), selected_indices=self.cfg['backbone'].get('selected_indices'))
+        backbone_outputs = self.transforminputs(self.backbone_net(x), selected_indices=self.cfg['backbone'].get('selected_indices'))
         # feed to fpn
-        fpn_outs = self.fpn_neck([x1, x2, x3, x4])
+        fpn_outs = self.fpn_neck(list(backbone_outputs))
         feats = self.scale_heads[0](fpn_outs[0])
         for i in range(1, len(self.cfg['fpn']['feature_stride_list'])):
             feats = feats + F.interpolate(self.scale_heads[i](fpn_outs[i]), size=feats.shape[2:], mode='bilinear', align_corners=self.align_corners)
         # feed to auxiliary decoder
-        preds_aux = self.auxiliary_decoder(feats)
+        predictions_aux = self.auxiliary_decoder(feats)
         feats = fpn_outs[0]
         # if mode is TRAIN
         if self.mode == 'TRAIN':
             with torch.no_grad():
-                points = self.getpointstrain(preds_aux, self.calculateuncertainty, cfg=self.cfg['pointrend']['train'])
+                points = self.getpointstrain(predictions_aux, self.calculateuncertainty, cfg=self.cfg['pointrend']['train'])
             fine_grained_point_feats = self.getfinegrainedpointfeats([feats], points)
-            coarse_point_feats = self.getcoarsepointfeats(preds_aux, points)
+            coarse_point_feats = self.getcoarsepointfeats(predictions_aux, points)
             outputs = torch.cat([fine_grained_point_feats, coarse_point_feats], dim=1)
             for fc in self.fcs:
                 outputs = fc(outputs)
                 if self.coarse_pred_each_layer:
                     outputs = torch.cat([outputs, coarse_point_feats], dim=1)
-            preds = self.decoder(outputs)
+            predictions = self.decoder(outputs)
             point_labels = PointSample(targets['segmentation'].unsqueeze(1).float(), points, mode='nearest', align_corners=self.align_corners)
             point_labels = point_labels.squeeze(1).long()
             targets['point_labels'] = point_labels
-            preds_aux = F.interpolate(preds_aux, size=(h, w), mode='bilinear', align_corners=self.align_corners)
+            predictions_aux = F.interpolate(predictions_aux, size=img_size, mode='bilinear', align_corners=self.align_corners)
             return self.calculatelosses(
-                predictions={'loss_cls': preds, 'loss_aux': preds_aux}, 
+                predictions={'loss_cls': predictions, 'loss_aux': predictions_aux}, 
                 targets=targets,
                 losses_cfg=losses_cfg,
                 targets_keys_dict={'loss_cls': 'point_labels', 'loss_aux': 'segmentation'}
             )
         # if mode is TEST
-        refined_seg_logits = preds_aux.clone()
+        refined_seg_logits = predictions_aux.clone()
         for _ in range(self.cfg['pointrend']['test']['subdivision_steps']):
             refined_seg_logits = F.interpolate(
                 input=refined_seg_logits, 
@@ -121,16 +116,16 @@ class PointRend(BaseModel):
             batch_size, channels, height, width = refined_seg_logits.shape
             point_indices, points = self.getpointstest(refined_seg_logits, self.calculateuncertainty, cfg=self.cfg['pointrend']['test'])
             fine_grained_point_feats = self.getfinegrainedpointfeats([feats], points)
-            coarse_point_feats = self.getcoarsepointfeats(preds_aux, points)
+            coarse_point_feats = self.getcoarsepointfeats(predictions_aux, points)
             outputs = torch.cat([fine_grained_point_feats, coarse_point_feats], dim=1)
             for fc in self.fcs:
                 outputs = fc(outputs)
                 if self.coarse_pred_each_layer:
                     outputs = torch.cat([outputs, coarse_point_feats], dim=1)
-            preds = self.decoder(outputs)
+            predictions = self.decoder(outputs)
             point_indices = point_indices.unsqueeze(1).expand(-1, channels, -1)
             refined_seg_logits = refined_seg_logits.reshape(batch_size, channels, height * width)
-            refined_seg_logits = refined_seg_logits.scatter_(2, point_indices, preds)
+            refined_seg_logits = refined_seg_logits.scatter_(2, point_indices, predictions)
             refined_seg_logits = refined_seg_logits.view(batch_size, channels, height, width)
         return refined_seg_logits
     '''sample from coarse grained features'''

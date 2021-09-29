@@ -8,8 +8,8 @@ import copy
 import torch
 import torch.nn as nn
 import torch.nn.functional as F
-from ...backbones import *
 from ..base import BaseModel
+from ...backbones import BuildActivation, BuildNormalization
 
 
 '''LRASPPNet'''
@@ -55,27 +55,29 @@ class LRASPPNet(BaseModel):
         if cfg.get('is_freeze_norm', False): self.freezenormalization()
     '''forward'''
     def forward(self, x, targets=None, losses_cfg=None):
-        h, w = x.size(2), x.size(3)
+        img_size = x.size(2), x.size(3)
         # feed to backbone network
-        outputs = self.transforminputs(self.backbone_net(x), selected_indices=self.cfg['backbone'].get('selected_indices'))
+        backbone_outputs = self.transforminputs(self.backbone_net(x), selected_indices=self.cfg['backbone'].get('selected_indices'))
         # feed to aspp
-        feats = self.aspp_conv(outputs[-1]) * F.interpolate(self.image_pool(outputs[-1]), size=outputs[-1].size()[2:], mode='bilinear', align_corners=self.align_corners)
+        feats = self.aspp_conv(backbone_outputs[-1]) * F.interpolate(self.image_pool(backbone_outputs[-1]), size=backbone_outputs[-1].size()[2:], mode='bilinear', align_corners=self.align_corners)
         feats = self.bottleneck(feats)
         for idx in range(len(self.cfg['aspp']['branch_channels_list']) - 1, -1, -1):
-            feats = F.interpolate(feats, size=outputs[idx].size()[2:], mode='bilinear', align_corners=self.align_corners)
-            feats = torch.cat([feats, self.branch_convs[idx](outputs[idx])], dim=1)
+            feats = F.interpolate(feats, size=backbone_outputs[idx].size()[2:], mode='bilinear', align_corners=self.align_corners)
+            feats = torch.cat([feats, self.branch_convs[idx](backbone_outputs[idx])], dim=1)
             feats = self.branch_ups[idx](feats)
         # feed to decoder
-        preds = self.decoder(feats)
-        # feed to auxiliary decoder and return according to the mode
+        predictions = self.decoder(feats)
+        # return according to the mode
         if self.mode == 'TRAIN':
-            preds = F.interpolate(preds, size=(h, w), mode='bilinear', align_corners=self.align_corners)
-            return self.calculatelosses(
-                predictions={'loss_cls': preds}, 
-                targets=targets, 
-                losses_cfg=losses_cfg
+            loss, losses_log_dict = self.forwardtrain(
+                predictions=predictions,
+                targets=targets,
+                backbone_outputs=backbone_outputs,
+                losses_cfg=losses_cfg,
+                img_size=img_size,
             )
-        return preds
+            return loss, losses_log_dict
+        return predictions
     '''return all layers'''
     def alllayers(self):
         return {

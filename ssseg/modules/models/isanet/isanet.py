@@ -9,9 +9,9 @@ import math
 import torch
 import torch.nn as nn
 import torch.nn.functional as F
-from ...backbones import *
 from ..base import BaseModel
 from ..base import SelfAttentionBlock as _SelfAttentionBlock
+from ...backbones import BuildActivation, BuildNormalization
 
 
 '''Self-Attention Module'''
@@ -85,24 +85,16 @@ class ISANet(BaseModel):
             nn.Conv2d(decoder_cfg['in_channels'], cfg['num_classes'], kernel_size=1, stride=1, padding=0)
         )
         # build auxiliary decoder
-        auxiliary_cfg = cfg['auxiliary']
-        if auxiliary_cfg is not None:
-            self.auxiliary_decoder = nn.Sequential(
-                nn.Conv2d(auxiliary_cfg['in_channels'], auxiliary_cfg['out_channels'], kernel_size=3, stride=1, padding=1, bias=False),
-                BuildNormalization(norm_cfg['type'], (auxiliary_cfg['out_channels'], norm_cfg['opts'])),
-                BuildActivation(act_cfg['type'], **act_cfg['opts']),
-                nn.Dropout2d(auxiliary_cfg['dropout']),
-                nn.Conv2d(auxiliary_cfg['out_channels'], cfg['num_classes'], kernel_size=1, stride=1, padding=0)
-            )
+        self.setauxiliarydecoder(cfg['auxiliary'])
         # freeze normalization layer if necessary
         if cfg.get('is_freeze_norm', False): self.freezenormalization()
     '''forward'''
     def forward(self, x, targets=None, losses_cfg=None):
-        h_ori, w_ori = x.size(2), x.size(3)
+        img_size = x.size(2), x.size(3)
         # feed to backbone network
-        x3, x4 = self.transforminputs(self.backbone_net(x), selected_indices=self.cfg['backbone'].get('selected_indices'))
+        backbone_outputs = self.transforminputs(self.backbone_net(x), selected_indices=self.cfg['backbone'].get('selected_indices'))
         # feed to isa module
-        feats = self.in_conv(x4)
+        feats = self.in_conv(backbone_outputs[-1])
         residual = feats
         n, c, h, w = feats.size()
         loc_h, loc_w = self.down_factor
@@ -133,21 +125,18 @@ class ISANet(BaseModel):
             feats = feats[:, :, pad_h//2: pad_h//2+h, pad_w//2: pad_w//2+w]
         feats = self.out_conv(torch.cat([feats, residual], dim=1))
         # feed to decoder
-        preds = self.decoder(feats)
+        predictions = self.decoder(feats)
         # return according to the mode
         if self.mode == 'TRAIN':
-            preds = F.interpolate(preds, size=(h_ori, w_ori), mode='bilinear', align_corners=self.align_corners)
-            outputs_dict = {'loss_cls': preds}
-            if hasattr(self, 'auxiliary_decoder'):
-                preds_aux = self.auxiliary_decoder(x3)
-                preds_aux = F.interpolate(preds_aux, size=(h_ori, w_ori), mode='bilinear', align_corners=self.align_corners)
-                outputs_dict = {'loss_cls': preds, 'loss_aux': preds_aux}
-            return self.calculatelosses(
-                predictions=outputs_dict, 
-                targets=targets, 
-                losses_cfg=losses_cfg
+            loss, losses_log_dict = self.forwardtrain(
+                predictions=predictions,
+                targets=targets,
+                backbone_outputs=backbone_outputs,
+                losses_cfg=losses_cfg,
+                img_size=img_size,
             )
-        return preds
+            return loss, losses_log_dict
+        return predictions
     '''return all layers'''
     def alllayers(self):
         all_layers = {

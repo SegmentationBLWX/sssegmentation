@@ -66,9 +66,9 @@ MODEL_CFG.update(
             'opts': {'eps': 1e-6},
         },
         'auxiliary': [
-            {'in_channels': 1024, 'out_channels': 512, 'dropout': 0.1},
-            {'in_channels': 1024, 'out_channels': 512, 'dropout': 0.1},
-            {'in_channels': 1024, 'out_channels': 512, 'dropout': 0.1},
+            {'in_channels': 1024, 'out_channels': 512, 'dropout': 0.1, 'num_convs': 2, 'upsample': {'scale_factor': 4}},
+            {'in_channels': 1024, 'out_channels': 512, 'dropout': 0.1, 'num_convs': 2, 'upsample': {'scale_factor': 4}},
+            {'in_channels': 1024, 'out_channels': 512, 'dropout': 0.1, 'num_convs': 2, 'upsample': {'scale_factor': 4}},
         ],
     }
 )

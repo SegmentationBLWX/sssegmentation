@@ -8,10 +8,10 @@ import copy
 import torch
 import torch.nn as nn
 import torch.nn.functional as F
-from ...backbones import *
 from ..base import BaseModel
 from .objectcontext import ObjectContextBlock
 from .spatialgather import SpatialGatherModule
+from ...backbones import BuildActivation, BuildNormalization
 
 
 '''OCRNet'''
@@ -20,14 +20,8 @@ class OCRNet(BaseModel):
         super(OCRNet, self).__init__(cfg, **kwargs)
         align_corners, norm_cfg, act_cfg = self.align_corners, self.norm_cfg, self.act_cfg
         # build auxiliary decoder
-        auxiliary_cfg = cfg['auxiliary']
-        self.auxiliary_decoder = nn.Sequential(
-            nn.Conv2d(auxiliary_cfg['in_channels'], auxiliary_cfg['out_channels'], kernel_size=3, stride=1, padding=1, bias=False),
-            BuildNormalization(norm_cfg['type'], (auxiliary_cfg['out_channels'], norm_cfg['opts'])),
-            BuildActivation(act_cfg['type'], **act_cfg['opts']),
-            nn.Dropout2d(auxiliary_cfg['dropout']),
-            nn.Conv2d(auxiliary_cfg['out_channels'], cfg['num_classes'], kernel_size=1, stride=1, padding=0)
-        )
+        assert (cfg['auxiliary'] is not None) and isinstance(cfg['auxiliary'], dict), 'auxiliary must be given and only support dict type'
+        self.setauxiliarydecoder(cfg['auxiliary'])
         # build bottleneck
         bottleneck_cfg = cfg['bottleneck']
         self.bottleneck = nn.Sequential(
@@ -60,28 +54,28 @@ class OCRNet(BaseModel):
         if cfg.get('is_freeze_norm', False): self.freezenormalization()
     '''forward'''
     def forward(self, x, targets=None, losses_cfg=None):
-        h, w = x.size(2), x.size(3)
+        img_size = x.size(2), x.size(3)
         # feed to backbone network
-        x3, x4 = self.transforminputs(self.backbone_net(x), selected_indices=self.cfg['backbone'].get('selected_indices'))
+        backbone_outputs = self.transforminputs(self.backbone_net(x), selected_indices=self.cfg['backbone'].get('selected_indices'))
         # feed to auxiliary decoder
-        preds_aux = self.auxiliary_decoder(x3)
+        predictions_aux = self.auxiliary_decoder(backbone_outputs[-2])
         # feed to bottleneck
-        feats = self.bottleneck(x4)
+        feats = self.bottleneck(backbone_outputs[-1])
         # feed to ocr module
-        context = self.spatial_gather_module(feats, preds_aux)
+        context = self.spatial_gather_module(feats, predictions_aux)
         feats = self.object_context_block(feats, context)
         # feed to decoder
-        preds = self.decoder(feats)
+        predictions = self.decoder(feats)
         # return according to the mode
         if self.mode == 'TRAIN':
-            preds = F.interpolate(preds, size=(h, w), mode='bilinear', align_corners=self.align_corners)
-            preds_aux = F.interpolate(preds_aux, size=(h, w), mode='bilinear', align_corners=self.align_corners)
+            predictions = F.interpolate(predictions, size=img_size, mode='bilinear', align_corners=self.align_corners)
+            predictions_aux = F.interpolate(predictions_aux, size=img_size, mode='bilinear', align_corners=self.align_corners)
             return self.calculatelosses(
-                predictions={'loss_cls': preds, 'loss_aux': preds_aux}, 
+                predictions={'loss_cls': predictions, 'loss_aux': predictions_aux}, 
                 targets=targets, 
                 losses_cfg=losses_cfg
             )
-        return preds
+        return predictions
     '''return all layers'''
     def alllayers(self):
         return {

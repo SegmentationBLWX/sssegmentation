@@ -108,6 +108,7 @@ MODEL_CFG = {
     'auxiliary': {
         'in_channels': 128,
         'dropout': 0,
+        'num_convs': 0,
     }
 }
 # config for inference

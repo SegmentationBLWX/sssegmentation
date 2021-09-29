@@ -1,6 +1,6 @@
 '''
 Function:
-    Pyramid Pooling Module that only concat the features of each layer
+    Pyramid Pooling Module (Concat only)
 Author:
     Zhenchao Jin
 '''
@@ -8,7 +8,7 @@ import torch
 import torch.nn as nn
 
 
-'''Pyramid Pooling Module that only concat the features of each layer'''
+'''Pyramid Pooling Module (Concat only)'''
 class PPMConcat(nn.Module):
     def __init__(self, pool_scales, **kwargs):
         super(PPMConcat, self).__init__()

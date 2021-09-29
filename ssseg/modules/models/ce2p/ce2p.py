@@ -8,10 +8,10 @@ import copy
 import torch
 import torch.nn as nn
 import torch.nn.functional as F
-from ...backbones import *
 from ..base import BaseModel
 from .epm import EdgePerceivingModule
 from ..pspnet import PyramidPoolingModule
+from ...backbones import BuildActivation, BuildNormalization
 
 
 '''CE2P'''
@@ -74,28 +74,28 @@ class CE2P(BaseModel):
         if cfg.get('is_freeze_norm', False): self.freezenormalization()
     '''forward'''
     def forward(self, x, targets=None, losses_cfg=None):
-        h, w = x.size(2), x.size(3)
+        img_size = x.size(2), x.size(3)
         # feed to backbone network
-        x1, x2, x3, x4 = self.transforminputs(self.backbone_net(x), selected_indices=self.cfg['backbone'].get('selected_indices'))
+        backbone_outputs = self.transforminputs(self.backbone_net(x), selected_indices=self.cfg['backbone'].get('selected_indices'))
         # feed to pyramid pooling module
-        ppm_out = self.ppm_net(x4)
-        ppm_out = F.interpolate(ppm_out, size=(x1.size(2), x1.size(3)), mode='bilinear', align_corners=self.align_corners)
+        ppm_out = self.ppm_net(backbone_outputs[-1])
+        ppm_out = F.interpolate(ppm_out, size=backbone_outputs[0].shape[2:], mode='bilinear', align_corners=self.align_corners)
         # feed to edge perceiving module
-        edge, edge_feats = self.edge_net((x1, x2, x3))
-        edge = F.interpolate(edge, size=(h, w), mode='bilinear', align_corners=self.align_corners)
+        edge, edge_feats = self.edge_net(backbone_outputs[:-1])
         # feed to shortcut
-        shortcut_out = self.shortcut(x1)
+        shortcut_out = self.shortcut(backbone_outputs[0])
         # feed to decoder stage1
-        features = torch.cat([ppm_out, shortcut_out], dim=1)
-        features = self.decoder_stage1[:-1](features)
-        preds_stage1 = self.decoder_stage1[-1](features)
-        preds_stage1 = F.interpolate(preds_stage1, size=(h, w), mode='bilinear', align_corners=self.align_corners)
+        feats_stage1 = torch.cat([ppm_out, shortcut_out], dim=1)
+        feats_stage1 = self.decoder_stage1[:-1](feats_stage1)
         # feed to decoder stage2
-        features = torch.cat([features, edge_feats], dim=1)
-        preds_stage2 = self.decoder_stage2(features)
-        # return according to the mode
+        feats_stage2 = torch.cat([feats_stage1, edge_feats], dim=1)
+        preds_stage2 = self.decoder_stage2(feats_stage2)
+        # forward according to the mode
         if self.mode == 'TRAIN':
-            preds_stage2 = F.interpolate(preds_stage2, size=(h, w), mode='bilinear', align_corners=self.align_corners)
+            edge = F.interpolate(edge, size=img_size, mode='bilinear', align_corners=self.align_corners)
+            preds_stage1 = self.decoder_stage1[-1](feats_stage1)
+            preds_stage1 = F.interpolate(preds_stage1, size=img_size, mode='bilinear', align_corners=self.align_corners)
+            preds_stage2 = F.interpolate(preds_stage2, size=img_size, mode='bilinear', align_corners=self.align_corners)
             return self.calculatelosses(
                 predictions={'loss_cls_stage1': preds_stage1, 'loss_cls_stage2': preds_stage2, 'loss_edge': edge}, 
                 targets=targets, 
