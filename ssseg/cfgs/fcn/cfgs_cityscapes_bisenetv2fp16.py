@@ -52,16 +52,16 @@ OPTIMIZER_CFG.update(
 # modify losses config
 LOSSES_CFG = {
     'loss_aux1': {
-        'celoss': {'scale_factor': 0.4, 'opts': {'ignore_index': 255, 'reduction': 'mean'}}
+        'celoss': {'scale_factor': 1.0, 'opts': {'ignore_index': 255, 'reduction': 'mean'}}
     },
     'loss_aux2': {
-        'celoss': {'scale_factor': 0.4, 'opts': {'ignore_index': 255, 'reduction': 'mean'}}
+        'celoss': {'scale_factor': 1.0, 'opts': {'ignore_index': 255, 'reduction': 'mean'}}
     },
     'loss_aux3': {
-        'celoss': {'scale_factor': 0.4, 'opts': {'ignore_index': 255, 'reduction': 'mean'}}
+        'celoss': {'scale_factor': 1.0, 'opts': {'ignore_index': 255, 'reduction': 'mean'}}
     },
     'loss_aux4': {
-        'celoss': {'scale_factor': 0.4, 'opts': {'ignore_index': 255, 'reduction': 'mean'}}
+        'celoss': {'scale_factor': 1.0, 'opts': {'ignore_index': 255, 'reduction': 'mean'}}
     },
     'loss_cls': {
         'celoss': {'scale_factor': 1.0, 'opts': {'ignore_index': 255, 'reduction': 'mean'}}
@@ -86,10 +86,10 @@ MODEL_CFG.update(
             'num_convs': 1,
         },
         'auxiliary': [
-            {'in_channels': 16, 'out_channels': 16, 'dropout': 0.1},
-            {'in_channels': 32, 'out_channels': 64, 'dropout': 0.1},
-            {'in_channels': 64, 'out_channels': 256, 'dropout': 0.1},
-            {'in_channels': 128, 'out_channels': 1024, 'dropout': 0.1},
+            {'in_channels': 16, 'out_channels': 16, 'dropout': 0.1, 'num_convs': 2},
+            {'in_channels': 32, 'out_channels': 64, 'dropout': 0.1, 'num_convs': 2},
+            {'in_channels': 64, 'out_channels': 256, 'dropout': 0.1, 'num_convs': 2},
+            {'in_channels': 128, 'out_channels': 1024, 'dropout': 0.1, 'num_convs': 2},
         ],
     }
 )

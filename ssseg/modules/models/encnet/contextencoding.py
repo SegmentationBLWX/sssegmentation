@@ -1,6 +1,6 @@
 '''
 Function:
-    define the Context Encoding Module
+    Implementation of Context Encoding Module
 Author:
     Zhenchao Jin
 '''

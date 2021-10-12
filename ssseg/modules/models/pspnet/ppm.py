@@ -1,6 +1,6 @@
 '''
 Function:
-    define the Pyramid Pooling Module
+    Implementation of Pyramid Pooling Module
 Author:
     Zhenchao Jin
 '''

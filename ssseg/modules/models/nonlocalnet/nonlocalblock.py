@@ -1,6 +1,6 @@
 '''
 Function:
-    define the non-local block
+    Implementation of NonLocal2d, NonLocal3d, NonLocal3d
 Author:
     Zhenchao Jin
 '''

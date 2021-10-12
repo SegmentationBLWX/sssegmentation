@@ -5,6 +5,7 @@ Author:
     Zhenchao Jin
 '''
 from .ce2p import CE2P
+from .icnet import ICNet
 from .isnet import ISNet
 from .ccnet import CCNet
 from .danet import DANet
@@ -19,6 +20,7 @@ from .psanet import PSANet
 from .ocrnet import OCRNet
 from .dnlnet import DNLNet
 from .annnet import ANNNet
+from .fastfcn import FastFCN
 from .upernet import UPerNet
 from .pointrend import PointRend
 from .deeplabv3 import Deeplabv3
@@ -37,6 +39,7 @@ def BuildModel(cfg, mode, **kwargs):
     supported_models = {
         'fcn': FCN,
         'ce2p': CE2P,
+        'icnet': ICNet,
         'isnet': ISNet,
         'ccnet': CCNet,
         'danet': DANet,
@@ -53,6 +56,7 @@ def BuildModel(cfg, mode, **kwargs):
         'annnet': ANNNet,
         'setrup': SETRUP,
         'setrmla': SETRMLA,
+        'fastfcn': FastFCN,
         'upernet': UPerNet,
         'segformer': Segformer,
         'memorynet': MemoryNet,

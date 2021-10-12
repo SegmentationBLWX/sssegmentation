@@ -1,6 +1,6 @@
 '''
 Function:
-    define the Position Attention Module (PAM)
+    Implementation of Position Attention Module (PAM)
 Author:
     Zhenchao Jin
 '''

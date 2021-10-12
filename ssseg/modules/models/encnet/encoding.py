@@ -1,6 +1,6 @@
 '''
 Function:
-    define the Encoding Layer: a learnable residual encoder
+    Implementation of Encoding Layer: a learnable residual encoder
 Author:
     Zhenchao Jin
 '''

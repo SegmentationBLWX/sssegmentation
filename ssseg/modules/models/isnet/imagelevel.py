@@ -1,6 +1,6 @@
 '''
 Function:
-    define the image-level context module
+    Implementation of ImageLevelContext
 Author:
     Zhenchao Jin
 '''

@@ -1,6 +1,6 @@
 '''
 Function:
-    define the Feature Pyramid Network
+    Implementation of Feature Pyramid Network
 Author:
     Zhenchao Jin
 '''

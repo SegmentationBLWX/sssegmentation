@@ -1,6 +1,6 @@
 '''
 Function:
-    define the spatial gather module
+    Implementation of SpatialGatherModule
 Author:
     Zhenchao Jin
 '''

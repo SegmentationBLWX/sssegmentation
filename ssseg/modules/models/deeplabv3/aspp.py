@@ -1,6 +1,6 @@
 '''
 Function:
-    define the Atrous Spatial Pyramid Pooling (ASPP)
+    Implementation of Atrous Spatial Pyramid Pooling (ASPP)
 Author:
     Zhenchao Jin
 '''

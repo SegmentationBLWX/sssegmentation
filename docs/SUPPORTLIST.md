@@ -186,6 +186,15 @@ You can download the [paper](https://arxiv.org/pdf/1902.04502.pdf) to learn the 
 
 Please refer to [FastSCNN](https://github.com/SegmentationBLWX/sssegmentation/tree/main/docs/performances/fastscnn) for details.
 
+#### BiSeNetV1
+(1) The related paper.
+
+You can download the [paper](https://arxiv.org/pdf/1808.00897.pdf) to learn the details of BiSeNetV1.
+
+(2) The reported performance.
+
+Please refer to [BiSeNetV1](https://github.com/SegmentationBLWX/sssegmentation/tree/main/docs/performances/bisenetv1) for details.
+
 #### BiSeNetV2
 (1) The related paper.
 
@@ -264,6 +273,15 @@ You can download the [paper](https://arxiv.org/pdf/2108.12382.pdf) to learn the 
 (2) The reported performance.
 
 Please refer to [ISNet](https://github.com/SegmentationBLWX/sssegmentation/tree/main/docs/performances/isnet) for details.
+
+#### ICNet
+(1) The related paper.
+
+You can download the [paper](https://arxiv.org/pdf/1704.08545.pdf) to learn the details of ICNet.
+
+(2) The reported performance.
+
+Please refer to [ICNet](https://github.com/SegmentationBLWX/sssegmentation/tree/main/docs/performances/icnet) for details.
 
 #### CCNet
 (1) The related paper.
@@ -381,6 +399,15 @@ You can download the [paper](https://openaccess.thecvf.com/content_CVPR_2019/pap
 (2) The reported performance.
 
 Please refer to [APCNet](https://github.com/SegmentationBLWX/sssegmentation/tree/main/docs/performances/apcnet) for details.
+
+#### FastFCN
+(1) The related paper.
+
+You can download the [paper](https://arxiv.org/pdf/1903.11816.pdf) to learn the details of FastFCN.
+
+(2) The reported performance.
+
+Please refer to [FastFCN](https://github.com/SegmentationBLWX/sssegmentation/tree/main/docs/performances/fastfcn) for details.
 
 #### UPerNet
 (1) The related paper.

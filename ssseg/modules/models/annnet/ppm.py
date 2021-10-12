@@ -1,6 +1,6 @@
 '''
 Function:
-    Pyramid Pooling Module (Concat only)
+    Implementation of Pyramid Pooling Module (Concat only)
 Author:
     Zhenchao Jin
 '''

@@ -1,6 +1,6 @@
 '''
 Function:
-    define the Expectation Maximization Attention Module
+    Implementation of Expectation Maximization Attention Module
 Author:
     Zhenchao Jin
 '''

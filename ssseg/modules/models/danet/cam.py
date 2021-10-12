@@ -1,6 +1,6 @@
 '''
 Function:
-    define the Channel Attention Module (CAM)
+    Implementation of Channel Attention Module (CAM)
 Author:
     Zhenchao Jin
 '''

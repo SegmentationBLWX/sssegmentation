@@ -1,6 +1,6 @@
 '''
 Function:
-    define the context block
+    Implementation of ContextBlock
 Author:
     Zhenchao Jin
 '''

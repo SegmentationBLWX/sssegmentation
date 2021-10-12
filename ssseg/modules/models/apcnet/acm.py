@@ -1,6 +1,6 @@
 '''
 Function:
-    define the adaptive context module
+    Implementation of AdaptiveContextModule
 Author:
     Zhenchao Jin
 '''

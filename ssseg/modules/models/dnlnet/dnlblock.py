@@ -1,6 +1,6 @@
 '''
 Function:
-    define the disentangled non-local block
+    Implementation of Disentangled Non-Local Block
 Author:
     Zhenchao Jin
 '''

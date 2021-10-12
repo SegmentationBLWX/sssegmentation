@@ -1,6 +1,6 @@
 '''
 Function:
-    define the object context block
+    Implementation of ObjectContextBlock
 Author:
     Zhenchao Jin
 '''

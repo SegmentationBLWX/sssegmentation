@@ -1,6 +1,6 @@
 '''
 Function:
-    define the Dynamic Convolutional Module
+    Implementation of Dynamic Convolutional Module
 Author:
     Zhenchao Jin
 '''

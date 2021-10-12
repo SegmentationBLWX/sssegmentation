@@ -1,6 +1,6 @@
 '''
 Function:
-    define the features memory
+    Implementation of FeaturesMemory
 Author:
     Zhenchao Jin
 '''

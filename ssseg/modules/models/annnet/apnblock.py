@@ -1,6 +1,6 @@
 '''
 Function:
-    Asymmetric Pyramid Non-local Block (APNB)
+    Implementation of Asymmetric Pyramid Non-local Block (APNB)
 Author:
     Zhenchao Jin
 '''

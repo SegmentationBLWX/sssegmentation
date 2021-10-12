@@ -1,4 +1,4 @@
-'''define the config file for cityscapes and bisenetv2'''
+'''define the config file for cityscapes and bisenetv1-resnet50os32'''
 import os
 from .base_cfg import *
 
@@ -25,11 +25,6 @@ DATASET_CFG['test']['aug_opts'] = [
 ]
 # modify dataloader config
 DATALOADER_CFG = DATALOADER_CFG.copy()
-DATALOADER_CFG['train'].update(
-    {
-        'batch_size': 32,
-    }
-)
 # modify optimizer config
 OPTIMIZER_CFG = OPTIMIZER_CFG.copy()
 OPTIMIZER_CFG.update(
@@ -41,7 +36,7 @@ OPTIMIZER_CFG.update(
             'weight_decay': 5e-4,
             'min_lr': 1e-4,
         },
-        'max_epochs': 1720,
+        'max_epochs': 860,
         'policy': {
             'type': 'poly',
             'opts': {'power': 0.9, 'max_iters': None, 'num_iters': None, 'num_epochs': None},
@@ -57,12 +52,6 @@ LOSSES_CFG = {
     'loss_aux2': {
         'celoss': {'scale_factor': 1.0, 'opts': {'ignore_index': 255, 'reduction': 'mean'}}
     },
-    'loss_aux3': {
-        'celoss': {'scale_factor': 1.0, 'opts': {'ignore_index': 255, 'reduction': 'mean'}}
-    },
-    'loss_aux4': {
-        'celoss': {'scale_factor': 1.0, 'opts': {'ignore_index': 255, 'reduction': 'mean'}}
-    },
     'loss_cls': {
         'celoss': {'scale_factor': 1.0, 'opts': {'ignore_index': 255, 'reduction': 'mean'}}
     },
@@ -74,21 +63,29 @@ MODEL_CFG.update(
         'num_classes': 19,
         'backbone': {
             'type': None,
-            'series': 'bisenetv2',
+            'series': 'bisenetv1',
             'pretrained': False,
-            'selected_indices': (0, 1, 2, 3, 4),
+            'selected_indices': (0, 1, 2),
+            'spatial_channels_list': (256, 256, 256, 512),
+            'context_channels_list': (512, 1024, 2048),
+            'out_channels': 1024,
+            'backbone_cfg': {
+                'type': 'resnet50',
+                'series': 'resnet',
+                'pretrained': True,
+                'outstride': 8,
+                'use_stem': True,
+            },
         },
         'decoder': {
-            'in_channels': 128, 
+            'in_channels': 1024, 
             'out_channels': 1024, 
             'dropout': 0.1, 
             'num_convs': 1,
         },
         'auxiliary': [
-            {'in_channels': 16, 'out_channels': 16, 'dropout': 0.1, 'num_convs': 2},
-            {'in_channels': 32, 'out_channels': 64, 'dropout': 0.1, 'num_convs': 2},
-            {'in_channels': 64, 'out_channels': 256, 'dropout': 0.1, 'num_convs': 2},
-            {'in_channels': 128, 'out_channels': 1024, 'dropout': 0.1, 'num_convs': 2},
+            {'in_channels': 512, 'out_channels': 256, 'dropout': 0.1, 'num_convs': 1},
+            {'in_channels': 512, 'out_channels': 256, 'dropout': 0.1, 'num_convs': 1},
         ],
     }
 )
@@ -98,14 +95,14 @@ INFERENCE_CFG = INFERENCE_CFG.copy()
 COMMON_CFG = COMMON_CFG.copy()
 COMMON_CFG['train'].update(
     {
-        'backupdir': 'fcn_bisenetv2_cityscapes_train',
-        'logfilepath': 'fcn_bisenetv2_cityscapes_train/train.log',
+        'backupdir': 'fcn_bisenetv1_resnet50os32_cityscapes_train',
+        'logfilepath': 'fcn_bisenetv1_resnet50os32_cityscapes_train/train.log',
     }
 )
 COMMON_CFG['test'].update(
     {
-        'backupdir': 'fcn_bisenetv2_cityscapes_test',
-        'logfilepath': 'fcn_bisenetv2_cityscapes_test/test.log',
-        'resultsavepath': 'fcn_bisenetv2_cityscapes_test/fcn_bisenetv2_cityscapes_results.pkl'
+        'backupdir': 'fcn_bisenetv1_resnet50os32_cityscapes_test',
+        'logfilepath': 'fcn_bisenetv1_resnet50os32_cityscapes_test/test.log',
+        'resultsavepath': 'fcn_bisenetv1_resnet50os32_cityscapes_test/fcn_bisenetv1_resnet50os32_cityscapes_results.pkl'
     }
 )

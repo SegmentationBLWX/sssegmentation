@@ -1,6 +1,6 @@
 '''
 Function:
-    define the edge perceiving module
+    Implementation of EdgePerceivingModule
 Author:
     Zhenchao Jin
 '''

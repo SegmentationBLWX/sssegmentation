@@ -1,6 +1,6 @@
 '''
 Function:
-    define the self attention block
+    Implementation of SelfAttentionBlock
 Author:
     Zhenchao Jin
 '''

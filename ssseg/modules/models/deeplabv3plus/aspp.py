@@ -1,6 +1,6 @@
 '''
 Function:
-    define the Depthwise Separable Atrous Spatial Pyramid Pooling (ASPP)
+    Implementation of Depthwise Separable Atrous Spatial Pyramid Pooling (ASPP)
 Author:
     Zhenchao Jin
 '''

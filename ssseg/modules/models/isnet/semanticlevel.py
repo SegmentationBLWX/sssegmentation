@@ -1,6 +1,6 @@
 '''
 Function:
-    define the semantic-level context module
+    Implementation of SemanticLevelContext
 Author:
     Zhenchao Jin
 '''

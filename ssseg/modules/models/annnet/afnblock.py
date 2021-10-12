@@ -1,6 +1,6 @@
 '''
 Function:
-    Asymmetric Fusion Non-local Block (AFNB)
+    Implementation of Asymmetric Fusion Non-local Block (AFNB)
 Author:
     Zhenchao Jin
 '''
