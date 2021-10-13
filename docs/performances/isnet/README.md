@@ -1,9 +1,10 @@
 # Introduction
 ```
-@article{jin2021isnet,
+@inproceedings{jin2021isnet,
   title={ISNet: Integrate Image-Level and Semantic-Level Context for Semantic Segmentation},
   author={Jin, Zhenchao and Liu, Bin and Chu, Qi and Yu, Nenghai},
-  journal={arXiv preprint arXiv:2108.12382},
+  booktitle={Proceedings of the IEEE/CVF International Conference on Computer Vision},
+  pages={7189--7198},
   year={2021}
 }
 All the reported models here are available at https://pan.baidu.com/s/1gD-NJJWOtaHCtB0qHE79rA (code is s757).

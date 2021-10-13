@@ -82,17 +82,19 @@ If you use this framework in your research, please cite this project:
     howpublished = {\url{https://github.com/SegmentationBLWX/sssegmentation}},
 }
 
-@article{jin2021isnet,
+@inproceedings{jin2021isnet,
   title={ISNet: Integrate Image-Level and Semantic-Level Context for Semantic Segmentation},
   author={Jin, Zhenchao and Liu, Bin and Chu, Qi and Yu, Nenghai},
-  journal={arXiv preprint arXiv:2108.12382},
+  booktitle={Proceedings of the IEEE/CVF International Conference on Computer Vision},
+  pages={7189--7198},
   year={2021}
 }
 
-@article{jin2021mining,
+@inproceedings{jin2021mining,
   title={Mining Contextual Information Beyond Image for Semantic Segmentation},
   author={Jin, Zhenchao and Gong, Tao and Yu, Dongdong and Chu, Qi and Wang, Jian and Wang, Changhu and Shao, Jie},
-  journal={arXiv preprint arXiv:2108.11819},
+  booktitle={Proceedings of the IEEE/CVF International Conference on Computer Vision},
+  pages={7231--7241},
   year={2021}
 }
 ```

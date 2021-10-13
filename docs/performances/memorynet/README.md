@@ -1,9 +1,10 @@
 # Introduction
 ```
-@article{jin2021mining,
+@inproceedings{jin2021mining,
   title={Mining Contextual Information Beyond Image for Semantic Segmentation},
   author={Jin, Zhenchao and Gong, Tao and Yu, Dongdong and Chu, Qi and Wang, Jian and Wang, Changhu and Shao, Jie},
-  journal={arXiv preprint arXiv:2108.11819},
+  booktitle={Proceedings of the IEEE/CVF International Conference on Computer Vision},
+  pages={7231--7241},
   year={2021}
 }
 All the reported models here are available at https://pan.baidu.com/s/1gD-NJJWOtaHCtB0qHE79rA (code is s757).
