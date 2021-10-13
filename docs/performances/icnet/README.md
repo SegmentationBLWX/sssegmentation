@@ -16,5 +16,5 @@ All the reported models here are available at https://pan.baidu.com/s/1gD-NJJWOt
 ## CityScapes
 | Backbone  | Crop Size  | Schedule                            | Train/Eval Set  | mIoU   | Download                 |
 | :-:       | :-:        | :-:                                 | :-:             | :-:    | :-:                      |
-| R-50-D8   | 832x832    | LR/POLICY/BS/EPOCH: 0.01/poly/8/440 | train/val       | 76.60% | [model]() &#124; [log]() |
-| R-101-D8  | 832x832    | LR/POLICY/BS/EPOCH: 0.01/poly/8/440 | train/val       | 76.27% | [model]() &#124; [log]() |
+| R-50-D8   | 832x832    | LR/POLICY/BS/EPOCH: 0.01/poly/8/440 | train/val       | 76.60% | [model](https://github.com/SegmentationBLWX/modelstore/releases/download/ssseg_icnet/icnet_resnet50os8_cityscapes_train.pth) &#124; [log](https://github.com/SegmentationBLWX/modelstore/releases/download/ssseg_icnet/icnet_resnet50os8_cityscapes_train.log) |
+| R-101-D8  | 832x832    | LR/POLICY/BS/EPOCH: 0.01/poly/8/440 | train/val       | 76.27% | [model](https://github.com/SegmentationBLWX/modelstore/releases/download/ssseg_icnet/icnet_resnet101os8_cityscapes_train.pth) &#124; [log](https://github.com/SegmentationBLWX/modelstore/releases/download/ssseg_icnet/icnet_resnet101os8_cityscapes_train.log) |
