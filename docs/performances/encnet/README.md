@@ -2,7 +2,7 @@
 
 <a href="https://github.com/zhanghang1989/PyTorch-Encoding">Official Repo</a>
 
-<a href="https://github.com/SegmentationBLWX/sssegmentation/tree/main/ssseg/modules/models/encnet>Code Snippet</a>
+<a href="https://github.com/SegmentationBLWX/sssegmentation/tree/main/ssseg/modules/models/encnet">Code Snippet</a>
 
 <details>
 <summary align="left"><a href="https://arxiv.org/pdf/1803.08904.pdf">EncNet (CVPR'2018)</a></summary>

@@ -20,8 +20,8 @@ https://sssegmentation.readthedocs.io/en/latest/
 - [FastSCNN](./docs/performances/fastscnn)
 - [BiSeNetV1](./docs/performances/bisenetv1)
 - [BiSeNetV2](./docs/performances/bisenetv2)
-- [MobileNetV2](./docs/performances/mobilenetv2)
-- [MobileNetV3](./docs/performances/mobilenetv3)
+- [MobileNetV2](./docs/performances/mobilenet)
+- [MobileNetV3](./docs/performances/mobilenet)
 - [SwinTransformer](./docs/performances/swin)
 - [VisionTransformer](https://arxiv.org/pdf/2010.11929.pdf)
 
