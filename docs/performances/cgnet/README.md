@@ -1,5 +1,13 @@
 # Introduction
-```
+
+<a href="https://github.com/wutianyiRosun/CGNet">Official Repo</a>
+
+<a href="https://github.com/SegmentationBLWX/sssegmentation/tree/main/ssseg/modules/backbones">Code Snippet</a>
+
+<details>
+<summary align="left"><a href="https://arxiv.org/pdf/1811.08201.pdf">CGNet (TIP'2020)</a></summary>
+
+```latex
 @article{wu2020cgnet,
     title={Cgnet: A light-weight context guided network for semantic segmentation},
     author={Wu, Tianyi and Tang, Sheng and Zhang, Rui and Cao, Juan and Zhang, Yongdong},
@@ -9,8 +17,9 @@
     year={2020},
     publisher={IEEE}
 }
-All the reported models here are available at https://pan.baidu.com/s/1gD-NJJWOtaHCtB0qHE79rA (code is s757).
 ```
+
+</details>
 
 
 # Results
@@ -19,3 +28,8 @@ All the reported models here are available at https://pan.baidu.com/s/1gD-NJJWOt
 | Model         | Backbone     | Crop Size  | Schedule                              | Train/Eval Set  | mIoU   | Download                 |
 | :-:           | :-:          | :-:        | :-:                                   | :-:             | :-:    | :-:                      |
 | FCN           | M3N21        | 512x1024   | LR/POLICY/BS/EPOCH: 0.001/poly/16/340 | train/val       | 68.53% | [model](https://github.com/SegmentationBLWX/modelstore/releases/download/ssseg_cgnet/fcn_cgnetm3n21_cityscapes_train.pth) &#124; [log](https://github.com/SegmentationBLWX/modelstore/releases/download/ssseg_cgnet/fcn_cgnetm3n21_cityscapes_train.log) |
+
+
+# More
+You can also download the model weights from following sources:
+- BaiduNetdisk: https://pan.baidu.com/s/1gD-NJJWOtaHCtB0qHE79rA with access code **s757**

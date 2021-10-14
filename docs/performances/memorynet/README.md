@@ -1,14 +1,23 @@
 # Introduction
-```
+
+<a href="https://github.com/SegmentationBLWX/sssegmentation">Official Repo</a>
+
+<a href="https://github.com/SegmentationBLWX/sssegmentation/tree/main/ssseg/modules/models/memorynet">Code Snippet</a>
+
+<details>
+<summary align="left"><a href="https://arxiv.org/pdf/2108.11819.pdf">MemoryNet-MCIBI (ICCV'2021)</a></summary>
+
+```latex
 @inproceedings{jin2021mining,
-  title={Mining Contextual Information Beyond Image for Semantic Segmentation},
-  author={Jin, Zhenchao and Gong, Tao and Yu, Dongdong and Chu, Qi and Wang, Jian and Wang, Changhu and Shao, Jie},
-  booktitle={Proceedings of the IEEE/CVF International Conference on Computer Vision},
-  pages={7231--7241},
-  year={2021}
+    title={Mining Contextual Information Beyond Image for Semantic Segmentation},
+    author={Jin, Zhenchao and Gong, Tao and Yu, Dongdong and Chu, Qi and Wang, Jian and Wang, Changhu and Shao, Jie},
+    booktitle={Proceedings of the IEEE/CVF International Conference on Computer Vision},
+    pages={7231--7241},
+    year={2021}
 }
-All the reported models here are available at https://pan.baidu.com/s/1gD-NJJWOtaHCtB0qHE79rA (code is s757).
 ```
+
+</details>
 
 
 # Performance
@@ -46,3 +55,8 @@ All the reported models here are available at https://pan.baidu.com/s/1gD-NJJWOt
 | DeepLabV3     | R-101-D8     | 473x473    | LR/POLICY/BS/EPOCH: 0.01/poly/32/150  | train/val       | 55.02%/55.42%        | [model](https://github.com/SegmentationBLWX/modelstore/releases/download/ssseg_memorynet/deeplabv3_r101_lip.pth) &#124; [log](https://github.com/SegmentationBLWX/modelstore/releases/download/ssseg_memorynet/deeplabv3_r101_lip.log) |
 | DeepLabV3     | S-101-D8     | 473x473    | LR/POLICY/BS/EPOCH: 0.007/poly/40/150 | train/val       | 56.21%/56.34%        | [model](https://github.com/SegmentationBLWX/modelstore/releases/download/ssseg_memorynet/deeplabv3_s101_lip.pth) &#124; [log](https://github.com/SegmentationBLWX/modelstore/releases/download/ssseg_memorynet/deeplabv3_s101_lip.log) |
 | DeepLabV3     | HRNetV2p-W48 | 473x473    | LR/POLICY/BS/EPOCH: 0.007/poly/40/150 | train/val       | 56.40%/56.99%        | [model](https://github.com/SegmentationBLWX/modelstore/releases/download/ssseg_memorynet/deeplabv3_hrnetv2w48_lip.pth) &#124; [log](https://github.com/SegmentationBLWX/modelstore/releases/download/ssseg_memorynet/deeplabv3_hrnetv2w48_lip.log) |
+
+
+# More
+You can also download the model weights from following sources:
+- BaiduNetdisk: https://pan.baidu.com/s/1gD-NJJWOtaHCtB0qHE79rA with access code **s757**

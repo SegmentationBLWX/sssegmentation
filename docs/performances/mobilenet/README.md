@@ -1,5 +1,13 @@
 # Introduction
-```
+
+<a href="https://github.com/tensorflow/models/tree/master/research/deeplab">Official Repo</a>
+
+<a href="https://github.com/SegmentationBLWX/sssegmentation/tree/main/ssseg/modules/backbones">Code Snippet</a>
+
+<details>
+<summary align="left"><a href="https://arxiv.org/pdf/1801.04381.pdf">MobileNetV2 (CVPR'2018)</a></summary>
+
+```latex
 @inproceedings{sandler2018mobilenetv2,
     title={Mobilenetv2: Inverted residuals and linear bottlenecks},
     author={Sandler, Mark and Howard, Andrew and Zhu, Menglong and Zhmoginov, Andrey and Chen, Liang-Chieh},
@@ -7,6 +15,14 @@
     pages={4510--4520},
     year={2018}
 }
+```
+
+</details>
+
+<details>
+<summary align="left"><a href="https://arxiv.org/pdf/1905.02244.pdf">MobileNetV3 (ICCV'2019)</a></summary>
+
+```latex
 @inproceedings{Howard_2019_ICCV,
     title={Searching for MobileNetV3},
     author={Howard, Andrew and Sandler, Mark and Chu, Grace and Chen, Liang-Chieh and Chen, Bo and Tan, Mingxing and Wang, Weijun and Zhu, Yukun and Pang, Ruoming and Vasudevan, Vijay and Le, Quoc V. and Adam, Hartwig},
@@ -16,8 +32,9 @@
     year={2019},
     doi={10.1109/ICCV.2019.00140}}
 }
-All the reported models here are available at https://pan.baidu.com/s/1gD-NJJWOtaHCtB0qHE79rA (code is s757).
 ```
+
+</details>
 
 
 # Results
@@ -51,3 +68,8 @@ All the reported models here are available at https://pan.baidu.com/s/1gD-NJJWOt
 | DeepLabV3plus | M-V2-D8  | 512x1024   | LR/POLICY/BS/EPOCH: 0.01/poly/8/220  | train/val       | 76.68% | [model](https://github.com/SegmentationBLWX/modelstore/releases/download/ssseg_mobilenet/deeplabv3plus_mobilenetv2os8_cityscapes_train.pth) &#124; [log](https://github.com/SegmentationBLWX/modelstore/releases/download/ssseg_mobilenet/deeplabv3plus_mobilenetv2os8_cityscapes_train.log) |
 | LRASPPNet     | M-V3S-D8 | 512x1024   | LR/POLICY/BS/EPOCH: 0.01/poly/16/660 | train/val       | 65.06% | [model](https://github.com/SegmentationBLWX/modelstore/releases/download/ssseg_mobilenet/lrasppnet_mobilenetv3sos8_cityscapes_train.pth) &#124; [log](https://github.com/SegmentationBLWX/modelstore/releases/download/ssseg_mobilenet/lrasppnet_mobilenetv3sos8_cityscapes_train.log) |
 | LRASPPNet     | M-V3L-D8 | 512x1024   | LR/POLICY/BS/EPOCH: 0.01/poly/16/660 | train/val       | 69.98% | [model](https://github.com/SegmentationBLWX/modelstore/releases/download/ssseg_mobilenet/lrasppnet_mobilenetv3los8_cityscapes_train.pth) &#124; [log](https://github.com/SegmentationBLWX/modelstore/releases/download/ssseg_mobilenet/lrasppnet_mobilenetv3los8_cityscapes_train.log) |
+
+
+# More
+You can also download the model weights from following sources:
+- BaiduNetdisk: https://pan.baidu.com/s/1gD-NJJWOtaHCtB0qHE79rA with access code **s757**

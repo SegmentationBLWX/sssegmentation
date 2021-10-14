@@ -1,13 +1,22 @@
 # Introduction
-```
+
+<a href="https://github.com/tensorflow/models/tree/master/research/deeplab">Official Repo</a>
+
+<a href="https://github.com/SegmentationBLWX/sssegmentation/tree/main/ssseg/modules/models/deeplabv3">Code Snippet</a>
+
+<details>
+<summary align="left"><a href="https://arxiv.org/pdf/1706.05587.pdf">DeepLabV3 (ArXiv'2017)</a></summary>
+
+```latex
 @article{chen2017rethinking,
     title={Rethinking atrous convolution for semantic image segmentation},
     author={Chen, Liang-Chieh and Papandreou, George and Schroff, Florian and Adam, Hartwig},
     journal={arXiv preprint arXiv:1706.05587},
     year={2017}
 }
-All the reported models here are available at https://pan.baidu.com/s/1gD-NJJWOtaHCtB0qHE79rA (code is s757).
 ```
+
+</details>
 
 
 # Results
@@ -47,3 +56,8 @@ All the reported models here are available at https://pan.baidu.com/s/1gD-NJJWOt
 | :-:       | :-:        | :-:                                    | :-:             | :-:    | :-:                      |
 | R-50-D8   | 480x480    | LR/POLICY/BS/EPOCH: 0.004/poly/16/260  | train/val       | 51.69% | [model](https://github.com/SegmentationBLWX/modelstore/releases/download/ssseg_deeplabv3/deeplabv3_resnet50os8_pascalcontext59_train.pth) &#124; [log](https://github.com/SegmentationBLWX/modelstore/releases/download/ssseg_deeplabv3/deeplabv3_resnet50os8_pascalcontext59_train.log) |
 | R-101-D8  | 480x480    | LR/POLICY/BS/EPOCH: 0.004/poly/16/260  | train/val       | 53.81% | [model](https://github.com/SegmentationBLWX/modelstore/releases/download/ssseg_deeplabv3/deeplabv3_resnet101os8_pascalcontext59_train.pth) &#124; [log](https://github.com/SegmentationBLWX/modelstore/releases/download/ssseg_deeplabv3/deeplabv3_resnet101os8_pascalcontext59_train.log) |
+
+
+# More
+You can also download the model weights from following sources:
+- BaiduNetdisk: https://pan.baidu.com/s/1gD-NJJWOtaHCtB0qHE79rA with access code **s757**

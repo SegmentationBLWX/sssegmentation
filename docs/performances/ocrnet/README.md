@@ -1,13 +1,22 @@
 # Introduction
-```
+
+<a href="https://github.com/openseg-group/OCNet.pytorch">Official Repo</a>
+
+<a href="https://github.com/SegmentationBLWX/sssegmentation/tree/main/ssseg/modules/models/ocrnet">Code Snippet</a>
+
+<details>
+<summary align="left"><a href="https://arxiv.org/pdf/1909.11065.pdf">OCRNet (ECCV'2020)</a></summary>
+
+```latex
 @article{yuan2019object,
     title={Object-contextual representations for semantic segmentation},
     author={Yuan, Yuhui and Chen, Xilin and Wang, Jingdong},
     journal={arXiv preprint arXiv:1909.11065},
     year={2019}
 }
-All the reported models here are available at https://pan.baidu.com/s/1gD-NJJWOtaHCtB0qHE79rA (code is s757).
 ```
+
+</details>
 
 
 # Results
@@ -38,3 +47,8 @@ All the reported models here are available at https://pan.baidu.com/s/1gD-NJJWOt
 | HRNetV2p-W18-Small | 512x1024   | LR/POLICY/BS/EPOCH: 0.01/poly/8/440  | train/val       | 79.30% | [model](https://github.com/SegmentationBLWX/modelstore/releases/download/ssseg_ocrnet/ocrnet_hrnetv2w18s_cityscapes_train.pth) &#124; [log](https://github.com/SegmentationBLWX/modelstore/releases/download/ssseg_ocrnet/ocrnet_hrnetv2w18s_cityscapes_train.log) |
 | HRNetV2p-W18       | 512x1024   | LR/POLICY/BS/EPOCH: 0.01/poly/8/440  | train/val       | 80.58% | [model](https://github.com/SegmentationBLWX/modelstore/releases/download/ssseg_ocrnet/ocrnet_hrnetv2w18_cityscapes_train.pth) &#124; [log](https://github.com/SegmentationBLWX/modelstore/releases/download/ssseg_ocrnet/ocrnet_hrnetv2w18_cityscapes_train.log) |
 | HRNetV2p-W48       | 512x1024   | LR/POLICY/BS/EPOCH: 0.01/poly/8/440  | train/val       | 81.44% | [model](https://github.com/SegmentationBLWX/modelstore/releases/download/ssseg_ocrnet/ocrnet_hrnetv2w48_cityscapes_train.pth) &#124; [log](https://github.com/SegmentationBLWX/modelstore/releases/download/ssseg_ocrnet/ocrnet_hrnetv2w48_cityscapes_train.log) |
+
+
+# More
+You can also download the model weights from following sources:
+- BaiduNetdisk: https://pan.baidu.com/s/1gD-NJJWOtaHCtB0qHE79rA with access code **s757**

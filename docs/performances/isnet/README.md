@@ -1,14 +1,23 @@
 # Introduction
-```
+
+<a href="https://github.com/SegmentationBLWX/sssegmentation">Official Repo</a>
+
+<a href="https://github.com/SegmentationBLWX/sssegmentation/tree/main/ssseg/modules/models/isnet">Code Snippet</a>
+
+<details>
+<summary align="left"><a href="https://arxiv.org/pdf/2108.12382.pdf">ISNet (ICCV'2021)</a></summary>
+
+```latex
 @inproceedings{jin2021isnet,
-  title={ISNet: Integrate Image-Level and Semantic-Level Context for Semantic Segmentation},
-  author={Jin, Zhenchao and Liu, Bin and Chu, Qi and Yu, Nenghai},
-  booktitle={Proceedings of the IEEE/CVF International Conference on Computer Vision},
-  pages={7189--7198},
-  year={2021}
+    title={ISNet: Integrate Image-Level and Semantic-Level Context for Semantic Segmentation},
+    author={Jin, Zhenchao and Liu, Bin and Chu, Qi and Yu, Nenghai},
+    booktitle={Proceedings of the IEEE/CVF International Conference on Computer Vision},
+    pages={7189--7198},
+    year={2021}
 }
-All the reported models here are available at https://pan.baidu.com/s/1gD-NJJWOtaHCtB0qHE79rA (code is s757).
 ```
+
+</details>
 
 
 # Results
@@ -40,3 +49,8 @@ All the reported models here are available at https://pan.baidu.com/s/1gD-NJJWOt
 | R-50-D8   | 473x473    | LR/POLICY/BS/EPOCH: 0.01/poly/32/150  | train/val       | 53.14%/53.41%        | [model](https://github.com/SegmentationBLWX/modelstore/releases/download/ssseg_isnet/isnet_resnet50os8_lip_train.pth) &#124; [log](https://github.com/SegmentationBLWX/modelstore/releases/download/ssseg_isnet/isnet_resnet50os8_lip_train.log) |
 | R-101-D8  | 473x473    | LR/POLICY/BS/EPOCH: 0.01/poly/32/150  | train/val       | 54.96%/55.41%        | [model](https://github.com/SegmentationBLWX/modelstore/releases/download/ssseg_isnet/isnet_resnet101os8_lip_train.pth) &#124; [log](https://github.com/SegmentationBLWX/modelstore/releases/download/ssseg_isnet/isnet_resnet101os8_lip_train.log) |
 | S-101-D8  | 473x473    | LR/POLICY/BS/EPOCH: 0.007/poly/40/150 | train/val       | 56.52%/56.81%        | [model](https://github.com/SegmentationBLWX/modelstore/releases/download/ssseg_isnet/isnet_resnest101os8_lip_train.pth) &#124; [log](https://github.com/SegmentationBLWX/modelstore/releases/download/ssseg_isnet/isnet_resnest101os8_lip_train.log) |
+
+
+# More
+You can also download the model weights from following sources:
+- BaiduNetdisk: https://pan.baidu.com/s/1gD-NJJWOtaHCtB0qHE79rA with access code **s757**

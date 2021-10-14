@@ -1,5 +1,13 @@
 # Introduction
-```
+
+<a href="https://github.com/liutinglt/CE2P">Official Repo</a>
+
+<a href="https://github.com/SegmentationBLWX/sssegmentation/tree/main/ssseg/modules/models/ce2p">Code Snippet</a>
+
+<details>
+<summary align="left"><a href="https://arxiv.org/pdf/1809.05996.pdf">CE2P (AAAI'2019)</a></summary>
+
+```latex
 @inproceedings{ruan2019devil,
     title={Devil in the details: Towards accurate single and multiple human parsing},
     author={Ruan, Tao and Liu, Ting and Huang, Zilong and Wei, Yunchao and Wei, Shikui and Zhao, Yao},
@@ -8,8 +16,9 @@
     pages={4814--4821},
     year={2019}
 }
-All the reported models here are available at https://pan.baidu.com/s/1gD-NJJWOtaHCtB0qHE79rA (code is s757).
 ```
+
+</details>
 
 
 # Results
@@ -45,3 +54,8 @@ All the reported models here are available at https://pan.baidu.com/s/1gD-NJJWOt
 | R-50-D16  | 473x473    | LR/POLICY/BS/EPOCH: 0.01/poly/32/150 | train/val       | 77.62% | [model](https://github.com/SegmentationBLWX/modelstore/releases/download/ssseg_ce2p/ce2p_resnet50os16_atr_train.pth) &#124; [log](https://github.com/SegmentationBLWX/modelstore/releases/download/ssseg_ce2p/ce2p_resnet50os16_atr_train.log) |
 | R-101-D8  | 473x473    | LR/POLICY/BS/EPOCH: 0.01/poly/32/150 | train/val       | 78.57% | [model](https://github.com/SegmentationBLWX/modelstore/releases/download/ssseg_ce2p/ce2p_resnet101os8_atr_train.pth) &#124; [log](https://github.com/SegmentationBLWX/modelstore/releases/download/ssseg_ce2p/ce2p_resnet101os8_atr_train.log) |
 | R-101-D16 | 473x473    | LR/POLICY/BS/EPOCH: 0.01/poly/32/150 | train/val       | 78.25% | [model](https://github.com/SegmentationBLWX/modelstore/releases/download/ssseg_ce2p/ce2p_resnet101os16_atr_train.pth) &#124; [log](https://github.com/SegmentationBLWX/modelstore/releases/download/ssseg_ce2p/ce2p_resnet101os16_atr_train.log) |
+
+
+# More
+You can also download the model weights from following sources:
+- BaiduNetdisk: https://pan.baidu.com/s/1gD-NJJWOtaHCtB0qHE79rA with access code **s757**

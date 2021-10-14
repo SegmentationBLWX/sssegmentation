@@ -1,5 +1,13 @@
 # Introduction
-```
+
+<a href="https://github.com/facebookresearch/video-nonlocal-net">Official Repo</a>
+
+<a href="https://github.com/SegmentationBLWX/sssegmentation/tree/main/ssseg/modules/models/nonlocalnet">Code Snippet</a>
+
+<details>
+<summary align="left"><a href="https://arxiv.org/pdf/1711.07971.pdf">NonLocal Net (CVPR'2018)</a></summary>
+
+```latex
 @inproceedings{wang2018non,
     title={Non-local neural networks},
     author={Wang, Xiaolong and Girshick, Ross and Gupta, Abhinav and He, Kaiming},
@@ -7,8 +15,9 @@
     pages={7794--7803},
     year={2018}
 }
-All the reported models here are available at https://pan.baidu.com/s/1gD-NJJWOtaHCtB0qHE79rA (code is s757).
 ```
+
+</details>
 
 
 # Results
@@ -36,3 +45,8 @@ All the reported models here are available at https://pan.baidu.com/s/1gD-NJJWOt
 | R-50-D16  | 512x1024   | LR/POLICY/BS/EPOCH: 0.01/poly/8/220  | train/val       | 77.18% | [model](https://github.com/SegmentationBLWX/modelstore/releases/download/ssseg_nonlocalnet/nonlocalnet_resnet50os16_cityscapes_train.pth) &#124; [log](https://github.com/SegmentationBLWX/modelstore/releases/download/ssseg_nonlocalnet/nonlocalnet_resnet50os16_cityscapes_train.log) |
 | R-101-D8  | 512x1024   | LR/POLICY/BS/EPOCH: 0.01/poly/8/220  | train/val       | 80.42% | [model](https://github.com/SegmentationBLWX/modelstore/releases/download/ssseg_nonlocalnet/nonlocalnet_resnet101os8_cityscapes_train.pth) &#124; [log](https://github.com/SegmentationBLWX/modelstore/releases/download/ssseg_nonlocalnet/nonlocalnet_resnet101os8_cityscapes_train.log) |
 | R-101-D16 | 512x1024   | LR/POLICY/BS/EPOCH: 0.01/poly/8/220  | train/val       | 78.48% | [model](https://github.com/SegmentationBLWX/modelstore/releases/download/ssseg_nonlocalnet/nonlocalnet_resnet101os16_cityscapes_train.pth) &#124; [log](https://github.com/SegmentationBLWX/modelstore/releases/download/ssseg_nonlocalnet/nonlocalnet_resnet101os16_cityscapes_train.log) |
+
+
+# More
+You can also download the model weights from following sources:
+- BaiduNetdisk: https://pan.baidu.com/s/1gD-NJJWOtaHCtB0qHE79rA with access code **s757**

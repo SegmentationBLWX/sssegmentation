@@ -12,17 +12,17 @@ https://sssegmentation.readthedocs.io/en/latest/
 <details open>
 <summary>Supported Backbones</summary>
 
-- [UNet](https://arxiv.org/pdf/1505.04597.pdf)
-- [CGNet](https://arxiv.org/pdf/1811.08201.pdf)
+- [UNet](./docs/performances/unet)
+- [CGNet](./docs/performances/cgnet)
 - [HRNet](https://arxiv.org/pdf/1908.07919.pdf)
 - [ResNet](https://arxiv.org/pdf/1512.03385.pdf)
-- [ResNeSt](https://arxiv.org/pdf/2004.08955.pdf)
-- [FastSCNN](https://arxiv.org/pdf/1902.04502.pdf)
-- [BiSeNetV1](https://arxiv.org/pdf/1808.00897.pdf)
-- [BiSeNetV2](https://arxiv.org/pdf/2004.02147.pdf)
-- [MobileNetV2](https://arxiv.org/pdf/1801.04381.pdf)
-- [MobileNetV3](https://arxiv.org/pdf/1905.02244.pdf)
-- [SwinTransformer](https://arxiv.org/pdf/2103.14030.pdf)
+- [ResNeSt](./docs/performances/resnest)
+- [FastSCNN](./docs/performances/fastscnn)
+- [BiSeNetV1](./docs/performances/bisenetv1)
+- [BiSeNetV2](./docs/performances/bisenetv2)
+- [MobileNetV2](./docs/performances/mobilenetv2)
+- [MobileNetV3](./docs/performances/mobilenetv3)
+- [SwinTransformer](./docs/performances/swin)
 - [VisionTransformer](https://arxiv.org/pdf/2010.11929.pdf)
 
 </details>
@@ -30,34 +30,34 @@ https://sssegmentation.readthedocs.io/en/latest/
 <details open>
 <summary>Supported Models</summary>
 
-- [FCN](https://arxiv.org/pdf/1411.4038.pdf)
-- [CE2P](https://arxiv.org/pdf/1809.05996.pdf)
-- [SETR](https://arxiv.org/pdf/2012.15840.pdf)
-- [ISNet](https://arxiv.org/pdf/2108.12382.pdf)
-- [ICNet](https://arxiv.org/pdf/1704.08545.pdf)
-- [CCNet](https://arxiv.org/pdf/1811.11721.pdf)
-- [DANet](https://arxiv.org/pdf/1809.02983.pdf)
-- [GCNet](https://arxiv.org/pdf/1904.11492.pdf)
-- [DMNet](https://openaccess.thecvf.com/content_ICCV_2019/papers/He_Dynamic_Multi-Scale_Filters_for_Semantic_Segmentation_ICCV_2019_paper.pdf)
-- [ISANet](https://arxiv.org/pdf/1907.12273.pdf)
-- [EncNet](https://arxiv.org/pdf/1803.08904.pdf)
-- [OCRNet](https://arxiv.org/pdf/1909.11065.pdf)
-- [DNLNet](https://arxiv.org/pdf/2006.06668.pdf)
-- [ANNNet](./docs/performance/annnet)
-- [EMANet](https://arxiv.org/pdf/1907.13426.pdf)
-- [PSPNet](https://arxiv.org/pdf/1612.01105.pdf)
-- [PSANet](https://openaccess.thecvf.com/content_ECCV_2018/papers/Hengshuang_Zhao_PSANet_Point-wise_Spatial_ECCV_2018_paper.pdf)
-- [APCNet](https://openaccess.thecvf.com/content_CVPR_2019/papers/He_Adaptive_Pyramid_Context_Network_for_Semantic_Segmentation_CVPR_2019_paper.pdf)
-- [FastFCN](https://arxiv.org/pdf/1903.11816.pdf)
-- [UPerNet](https://arxiv.org/pdf/1807.10221.pdf)
-- [PointRend](https://arxiv.org/pdf/1912.08193.pdf)
-- [Deeplabv3](https://arxiv.org/pdf/1706.05587.pdf)
-- [Segformer](https://arxiv.org/pdf/2105.15203.pdf)
-- [SemanticFPN](https://arxiv.org/pdf/1901.02446.pdf)
-- [NonLocalNet](https://arxiv.org/pdf/1711.07971.pdf)
-- [Deeplabv3Plus](https://arxiv.org/pdf/1802.02611.pdf)
-- [MemoryNet-MCIBI](https://arxiv.org/pdf/2108.11819.pdf)
-- [Mixed Precision (FP16) Training](https://arxiv.org/pdf/1710.03740.pdf)
+- [FCN](./docs/performances/fcn)
+- [CE2P](./docs/performances/ce2p)
+- [SETR](./docs/performances/setr)
+- [ISNet](./docs/performances/isnet)
+- [ICNet](./docs/performances/icnet)
+- [CCNet](./docs/performances/ccnet)
+- [DANet](./docs/performances/danet)
+- [GCNet](./docs/performances/gcnet)
+- [DMNet](./docs/performances/dmnet)
+- [ISANet](./docs/performances/isanet)
+- [EncNet](./docs/performances/encnet)
+- [OCRNet](./docs/performances/ocrnet)
+- [DNLNet](./docs/performances/dnlnet)
+- [ANNNet](./docs/performances/annnet)
+- [EMANet](./docs/performances/emanet)
+- [PSPNet](./docs/performances/pspnet)
+- [PSANet](./docs/performances/psanet)
+- [APCNet](./docs/performances/apcnet)
+- [FastFCN](./docs/performances/fastfcn)
+- [UPerNet](./docs/performances/upernet)
+- [PointRend](./docs/performances/pointrend)
+- [Deeplabv3](./docs/performances/deeplabv3)
+- [Segformer](./docs/performances/segformer)
+- [SemanticFPN](./docs/performances/semanticfpn)
+- [NonLocalNet](./docs/performances/nonlocalnet)
+- [Deeplabv3Plus](./docs/performances/deeplabv3plus)
+- [MemoryNet-MCIBI](./docs/performances/memorynet)
+- [Mixed Precision (FP16) Training](./docs/performances/fp16)
 
 </details>
 
@@ -97,19 +97,19 @@ If you use this framework in your research, please cite this project:
 }
 
 @inproceedings{jin2021isnet,
-  title={ISNet: Integrate Image-Level and Semantic-Level Context for Semantic Segmentation},
-  author={Jin, Zhenchao and Liu, Bin and Chu, Qi and Yu, Nenghai},
-  booktitle={Proceedings of the IEEE/CVF International Conference on Computer Vision},
-  pages={7189--7198},
-  year={2021}
+    title={ISNet: Integrate Image-Level and Semantic-Level Context for Semantic Segmentation},
+    author={Jin, Zhenchao and Liu, Bin and Chu, Qi and Yu, Nenghai},
+    booktitle={Proceedings of the IEEE/CVF International Conference on Computer Vision},
+    pages={7189--7198},
+    year={2021}
 }
 
 @inproceedings{jin2021mining,
-  title={Mining Contextual Information Beyond Image for Semantic Segmentation},
-  author={Jin, Zhenchao and Gong, Tao and Yu, Dongdong and Chu, Qi and Wang, Jian and Wang, Changhu and Shao, Jie},
-  booktitle={Proceedings of the IEEE/CVF International Conference on Computer Vision},
-  pages={7231--7241},
-  year={2021}
+    title={Mining Contextual Information Beyond Image for Semantic Segmentation},
+    author={Jin, Zhenchao and Gong, Tao and Yu, Dongdong and Chu, Qi and Wang, Jian and Wang, Changhu and Shao, Jie},
+    booktitle={Proceedings of the IEEE/CVF International Conference on Computer Vision},
+    pages={7231--7241},
+    year={2021}
 }
 ```
 

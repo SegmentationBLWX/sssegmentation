@@ -1,5 +1,13 @@
 # Introduction
-```
+
+<a href="https://github.com/facebookresearch/detectron2/tree/master/projects/PointRend">Official Repo</a>
+
+<a href="https://github.com/SegmentationBLWX/sssegmentation/tree/main/ssseg/modules/models/pointrend">Code Snippet</a>
+
+<details>
+<summary align="left"><a href="https://arxiv.org/pdf/1912.08193.pdf">PointRend (CVPR'2020)</a></summary>
+
+```latex
 @inproceedings{kirillov2020pointrend,
     title={Pointrend: Image segmentation as rendering},
     author={Kirillov, Alexander and Wu, Yuxin and He, Kaiming and Girshick, Ross},
@@ -7,8 +15,9 @@
     pages={9799--9808},
     year={2020}
 }
-All the reported models here are available at https://pan.baidu.com/s/1gD-NJJWOtaHCtB0qHE79rA (code is s757).
 ```
+
+</details>
 
 
 # Results
@@ -30,3 +39,8 @@ All the reported models here are available at https://pan.baidu.com/s/1gD-NJJWOt
 | :-:       | :-:        | :-:                                  | :-:             | :-:    | :-:                      |
 | R-50-D8   | 512x1024   | LR/POLICY/BS/EPOCH: 0.01/poly/8/220  | train/val       | 76.89% | [model](https://github.com/SegmentationBLWX/modelstore/releases/download/ssseg_pointrend/pointrend_resnet50os8_cityscapes_train.pth) &#124; [log](https://github.com/SegmentationBLWX/modelstore/releases/download/ssseg_pointrend/pointrend_resnet50os8_cityscapes_train.log) |
 | R-101-D8  | 512x1024   | LR/POLICY/BS/EPOCH: 0.01/poly/8/220  | train/val       | 78.80% | [model](https://github.com/SegmentationBLWX/modelstore/releases/download/ssseg_pointrend/pointrend_resnet101os8_cityscapes_train.pth) &#124; [log](https://github.com/SegmentationBLWX/modelstore/releases/download/ssseg_pointrend/pointrend_resnet101os8_cityscapes_train.log) |
+
+
+# More
+You can also download the model weights from following sources:
+- BaiduNetdisk: https://pan.baidu.com/s/1gD-NJJWOtaHCtB0qHE79rA with access code **s757**

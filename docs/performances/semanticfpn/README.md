@@ -1,5 +1,13 @@
 # Introduction
-```
+
+<a href="https://github.com/facebookresearch/detectron2">Official Repo</a>
+
+<a href="https://github.com/SegmentationBLWX/sssegmentation/tree/main/ssseg/modules/models/semanticfpn">Code Snippet</a>
+
+<details>
+<summary align="left"><a href="https://arxiv.org/pdf/1901.02446.pdf">Semantic FPN (CVPR'2019)</a></summary>
+
+```latex
 @article{Kirillov_2019,
     title={Panoptic Feature Pyramid Networks},
     ISBN={9781728132938},
@@ -11,8 +19,9 @@
     year={2019},
     month={Jun}
 }
-All the reported models here are available at https://pan.baidu.com/s/1gD-NJJWOtaHCtB0qHE79rA (code is s757).
 ```
+
+</details>
 
 
 # Results
@@ -34,3 +43,8 @@ All the reported models here are available at https://pan.baidu.com/s/1gD-NJJWOt
 | :-:       | :-:        | :-:                                  | :-:             | :-:    | :-:                      |
 | R-50      | 512x1024   | LR/POLICY/BS/EPOCH: 0.01/poly/8/220  | train/val       | 76.09% | [model](https://github.com/SegmentationBLWX/modelstore/releases/download/ssseg_semanticfpn/semanticfpn_resnet50_cityscapes_train.pth) &#124; [log](https://github.com/SegmentationBLWX/modelstore/releases/download/ssseg_semanticfpn/semanticfpn_resnet50_cityscapes_train.log) |
 | R-101     | 512x1024   | LR/POLICY/BS/EPOCH: 0.01/poly/8/220  | train/val       | 76.39% | [model](https://github.com/SegmentationBLWX/modelstore/releases/download/ssseg_semanticfpn/semanticfpn_resnet101_cityscapes_train.pth) &#124; [log](https://github.com/SegmentationBLWX/modelstore/releases/download/ssseg_semanticfpn/semanticfpn_resnet101_cityscapes_train.log) |
+
+
+# More
+You can also download the model weights from following sources:
+- BaiduNetdisk: https://pan.baidu.com/s/1gD-NJJWOtaHCtB0qHE79rA with access code **s757**

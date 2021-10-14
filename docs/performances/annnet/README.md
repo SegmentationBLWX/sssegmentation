@@ -1,5 +1,8 @@
 # Introduction
+
 <a href="https://github.com/MendelXu/ANN">Official Repo</a>
+
+<a href="https://github.com/SegmentationBLWX/sssegmentation/tree/main/ssseg/modules/models/annnet">Code Snippet</a>
 
 <details>
 <summary align="left"><a href="https://arxiv.org/pdf/1908.07678.pdf">ANN (ICCV'2019)</a></summary>
@@ -46,4 +49,4 @@
 
 # More
 You can also download the model weights from following sources:
-- BaiduNetdisk: https://pan.baidu.com/s/1gD-NJJWOtaHCtB0qHE79rA with access code s757
+- BaiduNetdisk: https://pan.baidu.com/s/1gD-NJJWOtaHCtB0qHE79rA with access code **s757**

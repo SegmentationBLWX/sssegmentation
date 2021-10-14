@@ -1,5 +1,13 @@
 # Introduction
-```
+
+<a href="https://github.com/hszhao/PSPNet">Official Repo</a>
+
+<a href="https://github.com/SegmentationBLWX/sssegmentation/tree/main/ssseg/modules/models/pspnet">Code Snippet</a>
+
+<details>
+<summary align="left"><a href="https://arxiv.org/pdf/1612.01105.pdf">PSPNet (CVPR'2017)</a></summary>
+
+```latex
 @inproceedings{zhao2017pyramid,
     title={Pyramid scene parsing network},
     author={Zhao, Hengshuang and Shi, Jianping and Qi, Xiaojuan and Wang, Xiaogang and Jia, Jiaya},
@@ -7,8 +15,9 @@
     pages={2881--2890},
     year={2017}
 }
-All the reported models here are available at https://pan.baidu.com/s/1gD-NJJWOtaHCtB0qHE79rA (code is s757).
 ```
+
+</details>
 
 
 # Results
@@ -36,3 +45,8 @@ All the reported models here are available at https://pan.baidu.com/s/1gD-NJJWOt
 | R-50-D16  | 512x1024   | LR/POLICY/BS/EPOCH: 0.01/poly/8/220  | train/val       | 77.13% | [model](https://github.com/SegmentationBLWX/modelstore/releases/download/ssseg_pspnet/pspnet_resnet50os16_cityscapes_train.pth) &#124; [log](https://github.com/SegmentationBLWX/modelstore/releases/download/ssseg_pspnet/pspnet_resnet50os16_cityscapes_train.log) |
 | R-101-D8  | 512x1024   | LR/POLICY/BS/EPOCH: 0.01/poly/8/220  | train/val       | 79.94% | [model](https://github.com/SegmentationBLWX/modelstore/releases/download/ssseg_pspnet/pspnet_resnet101os8_cityscapes_train.pth) &#124; [log](https://github.com/SegmentationBLWX/modelstore/releases/download/ssseg_pspnet/pspnet_resnet101os8_cityscapes_train.log) |
 | R-101-D16 | 512x1024   | LR/POLICY/BS/EPOCH: 0.01/poly/8/220  | train/val       | 77.43% | [model](https://github.com/SegmentationBLWX/modelstore/releases/download/ssseg_pspnet/pspnet_resnet101os16_cityscapes_train.pth) &#124; [log](https://github.com/SegmentationBLWX/modelstore/releases/download/ssseg_pspnet/pspnet_resnet101os16_cityscapes_train.log) |
+
+
+# More
+You can also download the model weights from following sources:
+- BaiduNetdisk: https://pan.baidu.com/s/1gD-NJJWOtaHCtB0qHE79rA with access code **s757**

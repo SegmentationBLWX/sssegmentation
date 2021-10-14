@@ -1,5 +1,13 @@
 # Introduction
-```
+
+<a href="https://github.com/hszhao/PSANet">Official Repo</a>
+
+<a href="https://github.com/SegmentationBLWX/sssegmentation/tree/main/ssseg/modules/models/psanet">Code Snippet</a>
+
+<details>
+<summary align="left"><a href="https://openaccess.thecvf.com/content_ECCV_2018/papers/Hengshuang_Zhao_PSANet_Point-wise_Spatial_ECCV_2018_paper.pdf">PSANet (ECCV'2018)</a></summary>
+
+```latex
 @inproceedings{zhao2018psanet,
     title={Psanet: Point-wise spatial attention network for scene parsing},
     author={Zhao, Hengshuang and Zhang, Yi and Liu, Shu and Shi, Jianping and Change Loy, Chen and Lin, Dahua and Jia, Jiaya},
@@ -7,8 +15,9 @@
     pages={267--283},
     year={2018}
 }
-All the reported models here are available at https://pan.baidu.com/s/1gD-NJJWOtaHCtB0qHE79rA (code is s757).
 ```
+
+</details>
 
 
 # Results
@@ -36,3 +45,8 @@ All the reported models here are available at https://pan.baidu.com/s/1gD-NJJWOt
 | R-50-D16  | 512x1024   | LR/POLICY/BS/EPOCH: 0.01/poly/8/220  | train/val       | 76.66% | [model](https://github.com/SegmentationBLWX/modelstore/releases/download/ssseg_psanet/psanet_resnet50os16_cityscapes_train.pth) &#124; [log](https://github.com/SegmentationBLWX/modelstore/releases/download/ssseg_psanet/psanet_resnet50os16_cityscapes_train.log) |
 | R-101-D8  | 512x1024   | LR/POLICY/BS/EPOCH: 0.01/poly/8/220  | train/val       | 79.65% | [model](https://github.com/SegmentationBLWX/modelstore/releases/download/ssseg_psanet/psanet_resnet101os8_cityscapes_train.pth) &#124; [log](https://github.com/SegmentationBLWX/modelstore/releases/download/ssseg_psanet/psanet_resnet101os8_cityscapes_train.log) |
 | R-101-D16 | 512x1024   | LR/POLICY/BS/EPOCH: 0.01/poly/8/220  | train/val       | 77.04% | [model](https://github.com/SegmentationBLWX/modelstore/releases/download/ssseg_psanet/psanet_resnet101os16_cityscapes_train.pth) &#124; [log](https://github.com/SegmentationBLWX/modelstore/releases/download/ssseg_psanet/psanet_resnet101os16_cityscapes_train.log) |
+
+
+# More
+You can also download the model weights from following sources:
+- BaiduNetdisk: https://pan.baidu.com/s/1gD-NJJWOtaHCtB0qHE79rA with access code **s757**
