@@ -1,5 +1,10 @@
 # Introduction
-```
+<a href="https://github.com/MendelXu/ANN">Official Repo</a>
+
+<details>
+<summary align="left"><a href="https://arxiv.org/pdf/1908.07678.pdf">ANN (ICCV'2019)</a></summary>
+
+```latex
 @inproceedings{zhu2019asymmetric,
     title={Asymmetric non-local neural networks for semantic segmentation},
     author={Zhu, Zhen and Xu, Mengde and Bai, Song and Huang, Tengteng and Bai, Xiang},
@@ -7,8 +12,9 @@
     pages={593--602},
     year={2019}
 }
-All the reported models here are available at https://pan.baidu.com/s/1gD-NJJWOtaHCtB0qHE79rA (code is s757).
 ```
+
+</details>
 
 
 # Results
@@ -36,3 +42,8 @@ All the reported models here are available at https://pan.baidu.com/s/1gD-NJJWOt
 | R-50-D16  | 512x1024   | LR/POLICY/BS/EPOCH: 0.01/poly/8/220  | train/val       | 76.20% | [model](https://github.com/SegmentationBLWX/modelstore/releases/download/ssseg_annnet/annnet_resnet50os16_cityscapes_train.pth) &#124; [log](https://github.com/SegmentationBLWX/modelstore/releases/download/ssseg_annnet/annnet_resnet50os16_cityscapes_train.log) |
 | R-101-D8  | 512x1024   | LR/POLICY/BS/EPOCH: 0.01/poly/8/220  | train/val       | 79.34% | [model](https://github.com/SegmentationBLWX/modelstore/releases/download/ssseg_annnet/annnet_resnet101os8_cityscapes_train.pth) &#124; [log](https://github.com/SegmentationBLWX/modelstore/releases/download/ssseg_annnet/annnet_resnet101os8_cityscapes_train.log) |
 | R-101-D16 | 512x1024   | LR/POLICY/BS/EPOCH: 0.01/poly/8/220  | train/val       | 78.10% | [model](https://github.com/SegmentationBLWX/modelstore/releases/download/ssseg_annnet/annnet_resnet101os16_cityscapes_train.pth) &#124; [log](https://github.com/SegmentationBLWX/modelstore/releases/download/ssseg_annnet/annnet_resnet101os16_cityscapes_train.log) |
+
+
+# More
+You can also download the model weights from following sources:
+- BaiduNetdisk: https://pan.baidu.com/s/1gD-NJJWOtaHCtB0qHE79rA with access code s757

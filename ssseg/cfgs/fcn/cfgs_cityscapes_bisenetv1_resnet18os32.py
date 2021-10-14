@@ -1,4 +1,4 @@
-'''define the config file for cityscapes and bisenetv1-resnet50os32'''
+'''define the config file for cityscapes and bisenetv1-resnet18os32'''
 import os
 from .base_cfg import *
 
@@ -66,11 +66,11 @@ MODEL_CFG.update(
             'series': 'bisenetv1',
             'pretrained': False,
             'selected_indices': (0, 1, 2),
-            'spatial_channels_list': (256, 256, 256, 512),
-            'context_channels_list': (512, 1024, 2048),
-            'out_channels': 1024,
+            'spatial_channels_list': (64, 64, 64, 128),
+            'context_channels_list': (128, 256, 512),
+            'out_channels': 256,
             'backbone_cfg': {
-                'type': 'resnet50',
+                'type': 'resnet18',
                 'series': 'resnet',
                 'pretrained': True,
                 'outstride': 32,
@@ -78,14 +78,14 @@ MODEL_CFG.update(
             },
         },
         'decoder': {
-            'in_channels': 1024, 
-            'out_channels': 1024, 
+            'in_channels': 256, 
+            'out_channels': 256, 
             'dropout': 0.1, 
             'num_convs': 1,
         },
         'auxiliary': [
-            {'in_channels': 512, 'out_channels': 256, 'dropout': 0.1, 'num_convs': 1},
-            {'in_channels': 512, 'out_channels': 256, 'dropout': 0.1, 'num_convs': 1},
+            {'in_channels': 128, 'out_channels': 64, 'dropout': 0.1, 'num_convs': 1},
+            {'in_channels': 128, 'out_channels': 64, 'dropout': 0.1, 'num_convs': 1},
         ],
     }
 )
@@ -95,14 +95,14 @@ INFERENCE_CFG = INFERENCE_CFG.copy()
 COMMON_CFG = COMMON_CFG.copy()
 COMMON_CFG['train'].update(
     {
-        'backupdir': 'fcn_bisenetv1_resnet50os32_cityscapes_train',
-        'logfilepath': 'fcn_bisenetv1_resnet50os32_cityscapes_train/train.log',
+        'backupdir': 'fcn_bisenetv1_resnet18os32_cityscapes_train',
+        'logfilepath': 'fcn_bisenetv1_resnet18os32_cityscapes_train/train.log',
     }
 )
 COMMON_CFG['test'].update(
     {
-        'backupdir': 'fcn_bisenetv1_resnet50os32_cityscapes_test',
-        'logfilepath': 'fcn_bisenetv1_resnet50os32_cityscapes_test/test.log',
-        'resultsavepath': 'fcn_bisenetv1_resnet50os32_cityscapes_test/fcn_bisenetv1_resnet50os32_cityscapes_results.pkl'
+        'backupdir': 'fcn_bisenetv1_resnet18os32_cityscapes_test',
+        'logfilepath': 'fcn_bisenetv1_resnet18os32_cityscapes_test/test.log',
+        'resultsavepath': 'fcn_bisenetv1_resnet18os32_cityscapes_test/fcn_bisenetv1_resnet18os32_cityscapes_results.pkl'
     }
 )

@@ -9,7 +9,9 @@ https://sssegmentation.readthedocs.io/en/latest/
 
 
 # Supported
-#### Supported Backbones
+<details open>
+<summary>Supported Backbones</summary>
+
 - [UNet](https://arxiv.org/pdf/1505.04597.pdf)
 - [CGNet](https://arxiv.org/pdf/1811.08201.pdf)
 - [HRNet](https://arxiv.org/pdf/1908.07919.pdf)
@@ -22,7 +24,12 @@ https://sssegmentation.readthedocs.io/en/latest/
 - [MobileNetV3](https://arxiv.org/pdf/1905.02244.pdf)
 - [SwinTransformer](https://arxiv.org/pdf/2103.14030.pdf)
 - [VisionTransformer](https://arxiv.org/pdf/2010.11929.pdf)
-#### Supported Models
+
+</details>
+
+<details open>
+<summary>Supported Models</summary>
+
 - [FCN](https://arxiv.org/pdf/1411.4038.pdf)
 - [CE2P](https://arxiv.org/pdf/1809.05996.pdf)
 - [SETR](https://arxiv.org/pdf/2012.15840.pdf)
@@ -36,7 +43,7 @@ https://sssegmentation.readthedocs.io/en/latest/
 - [EncNet](https://arxiv.org/pdf/1803.08904.pdf)
 - [OCRNet](https://arxiv.org/pdf/1909.11065.pdf)
 - [DNLNet](https://arxiv.org/pdf/2006.06668.pdf)
-- [ANNNet](https://arxiv.org/pdf/1908.07678.pdf)
+- [ANNNet](./docs/performance/annnet)
 - [EMANet](https://arxiv.org/pdf/1907.13426.pdf)
 - [PSPNet](https://arxiv.org/pdf/1612.01105.pdf)
 - [PSANet](https://openaccess.thecvf.com/content_ECCV_2018/papers/Hengshuang_Zhao_PSANet_Point-wise_Spatial_ECCV_2018_paper.pdf)
@@ -51,7 +58,12 @@ https://sssegmentation.readthedocs.io/en/latest/
 - [Deeplabv3Plus](https://arxiv.org/pdf/1802.02611.pdf)
 - [MemoryNet-MCIBI](https://arxiv.org/pdf/2108.11819.pdf)
 - [Mixed Precision (FP16) Training](https://arxiv.org/pdf/1710.03740.pdf)
-#### Supported Datasets
+
+</details>
+
+<details open>
+<summary>Supported Datasets</summary>
+
 - [LIP](http://sysu-hcp.net/lip/)
 - [ATR](http://sysu-hcp.net/lip/overview.php)
 - [HRF](https://www5.cs.fau.de/fileadmin/research/datasets/fundus-images/)
@@ -68,6 +80,8 @@ https://sssegmentation.readthedocs.io/en/latest/
 - [PASCAL VOC](http://host.robots.ox.ac.uk/pascal/VOC/)
 - [COCOStuff10k](https://cocodataset.org/#home)
 - [Pascal Context](https://cs.stanford.edu/~roozbeh/pascal-context/)
+
+</details>
 
 
 # Citation
