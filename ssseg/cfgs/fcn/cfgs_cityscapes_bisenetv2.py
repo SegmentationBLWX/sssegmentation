@@ -25,11 +25,6 @@ DATASET_CFG['test']['aug_opts'] = [
 ]
 # modify dataloader config
 DATALOADER_CFG = DATALOADER_CFG.copy()
-DATALOADER_CFG['train'].update(
-    {
-        'batch_size': 32,
-    }
-)
 # modify optimizer config
 OPTIMIZER_CFG = OPTIMIZER_CFG.copy()
 OPTIMIZER_CFG.update(
@@ -41,7 +36,7 @@ OPTIMIZER_CFG.update(
             'weight_decay': 5e-4,
             'min_lr': 1e-4,
         },
-        'max_epochs': 1720,
+        'max_epochs': 860,
         'policy': {
             'type': 'poly',
             'opts': {'power': 0.9, 'max_iters': None, 'num_iters': None, 'num_epochs': None},

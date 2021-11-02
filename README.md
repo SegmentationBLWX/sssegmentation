@@ -9,9 +9,8 @@ https://sssegmentation.readthedocs.io/en/latest/
 
 
 # Supported
-<details open>
-<summary>Supported Backbones</summary>
 
+#### Supported Backbones
 - [UNet](./docs/performances/unet)
 - [CGNet](./docs/performances/cgnet)
 - [HRNet](https://arxiv.org/pdf/1908.07919.pdf)
@@ -25,11 +24,7 @@ https://sssegmentation.readthedocs.io/en/latest/
 - [SwinTransformer](./docs/performances/swin)
 - [VisionTransformer](https://arxiv.org/pdf/2010.11929.pdf)
 
-</details>
-
-<details open>
-<summary>Supported Models</summary>
-
+#### Supported Models
 - [FCN](./docs/performances/fcn)
 - [CE2P](./docs/performances/ce2p)
 - [SETR](./docs/performances/setr)
@@ -59,11 +54,7 @@ https://sssegmentation.readthedocs.io/en/latest/
 - [MemoryNet-MCIBI](./docs/performances/memorynet)
 - [Mixed Precision (FP16) Training](./docs/performances/fp16)
 
-</details>
-
-<details open>
-<summary>Supported Datasets</summary>
-
+#### Supported Datasets
 - [LIP](http://sysu-hcp.net/lip/)
 - [ATR](http://sysu-hcp.net/lip/overview.php)
 - [HRF](https://www5.cs.fau.de/fileadmin/research/datasets/fundus-images/)
@@ -80,8 +71,6 @@ https://sssegmentation.readthedocs.io/en/latest/
 - [PASCAL VOC](http://host.robots.ox.ac.uk/pascal/VOC/)
 - [COCOStuff10k](https://cocodataset.org/#home)
 - [Pascal Context](https://cs.stanford.edu/~roozbeh/pascal-context/)
-
-</details>
 
 
 # Citation
