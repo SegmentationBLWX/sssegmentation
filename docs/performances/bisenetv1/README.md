@@ -25,8 +25,8 @@
 ## CityScapes
 | Model         | Backbone             | Crop Size  | Schedule                             | Train/Eval Set  | mIoU   | Download                 |
 | :-:           | :-:                  | :-:        | :-:                                  | :-:             | :-:    | :-:                      |
-| FCN           | BiSeNetV1, R-18-D32  | 1024x1024  | LR/POLICY/BS/EPOCH: 0.05/poly/16/860 | train/val       | 75.76% | [model]() &#124; [log]() |
-| FCN           | BiSeNetV1, R-50-D32  | 1024x1024  | LR/POLICY/BS/EPOCH: 0.05/poly/16/860 | train/val       | 77.58% | [model]() &#124; [log]() |
+| FCN           | BiSeNetV1, R-18-D32  | 1024x1024  | LR/POLICY/BS/EPOCH: 0.05/poly/16/860 | train/val       | 75.76% | [model](https://github.com/SegmentationBLWX/modelstore/releases/download/ssseg_bisenetv1/fcn_bisenetv1_resnet18os32_cityscapes_train.pth) &#124; [log](https://github.com/SegmentationBLWX/modelstore/releases/download/ssseg_bisenetv1/fcn_bisenetv1_resnet18os32_cityscapes_train.log) |
+| FCN           | BiSeNetV1, R-50-D32  | 1024x1024  | LR/POLICY/BS/EPOCH: 0.05/poly/16/860 | train/val       | 77.78% | [model](https://github.com/SegmentationBLWX/modelstore/releases/download/ssseg_bisenetv1/fcn_bisenetv1_resnet50os32_cityscapes_train.pth) &#124; [log](https://github.com/SegmentationBLWX/modelstore/releases/download/ssseg_bisenetv1/fcn_bisenetv1_resnet50os32_cityscapes_train.log) |
 
 
 # More
