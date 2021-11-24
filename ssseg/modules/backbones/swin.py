@@ -22,6 +22,7 @@ model_urls = {
     'swin_base_patch4_window7_224': 'https://github.com/SwinTransformer/storage/releases/download/v1.0.0/swin_base_patch4_window7_224.pth',
     'swin_base_patch4_window12_384_22k': 'https://github.com/SwinTransformer/storage/releases/download/v1.0.0/swin_base_patch4_window12_384_22k.pth',
     'swin_base_patch4_window7_224_22k': 'https://github.com/SwinTransformer/storage/releases/download/v1.0.0/swin_base_patch4_window7_224_22k.pth',
+    'swin_large_patch4_window12_384_22k': 'https://github.com/SwinTransformer/storage/releases/download/v1.0.0/swin_large_patch4_window12_384_22k.pth',
 }
 
 
@@ -616,6 +617,23 @@ def BuildSwinTransformer(swin_type='swin_tiny_patch4_window7_224', **kwargs):
             'mlp_ratio': 4,
             'depths': [2, 2, 18, 2],
             'num_heads': [4, 8, 16, 32],
+            'qkv_bias': True,
+            'qk_scale': None,
+            'patch_norm': True,
+            'drop_rate': 0.,
+            'attn_drop_rate': 0.,
+            'drop_path_rate': 0.3,
+            'use_abs_pos_embed': False,
+        },
+        'swin_large_patch4_window12_384_22k': {
+            'pretrain_img_size': 384,
+            'in_channels': 3,
+            'embed_dims': 192,
+            'patch_size': 4,
+            'window_size': 12,
+            'mlp_ratio': 4,
+            'depths': [2, 2, 18, 2],
+            'num_heads': [6, 12, 24, 48],
             'qkv_bias': True,
             'qk_scale': None,
             'patch_norm': True,
