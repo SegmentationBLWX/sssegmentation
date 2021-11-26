@@ -103,27 +103,25 @@ class Tester():
             pbar = tqdm(enumerate(dataloader))
             for batch_idx, samples in pbar:
                 pbar.set_description('Processing %s/%s in rank %s' % (batch_idx+1, len(dataloader), cmd_args.local_rank))
-                imageids, images_ori, widths, heights, gts = samples['id'], samples['image'], samples['width'], samples['height'], samples['groundtruth']
-                infer_tricks, outputs_list, use_probs_before_resize = inference_cfg['tricks'], [], inference_cfg['tricks']['use_probs_before_resize']
-                align_corners = model.align_corners if hasattr(model, 'align_corners') else model.module.align_corners
-                for scale_factor in infer_tricks['multiscale']:
-                    images = F.interpolate(images_ori, scale_factor=scale_factor, mode='bilinear', align_corners=align_corners)
-                    outputs = self.inference(model, images.type(FloatTensor), inference_cfg, dataset.num_classes, use_probs_before_resize)
-                    outputs_list.append(outputs)
-                    if infer_tricks['flip']:
-                        images_flip = torch.from_numpy(np.flip(images.cpu().numpy(), axis=3).copy())
-                        outputs_flip = self.inference(model, images_flip.type(FloatTensor), inference_cfg, dataset.num_classes, use_probs_before_resize)
-                        fix_ann_pairs = inference_cfg.get('fix_ann_pairs', None)
-                        if fix_ann_pairs is None:
-                            for aug_opt in self.cfg.DATASET_CFG['train']['aug_opts']:
-                                if 'RandomFlip' in aug_opt: fix_ann_pairs = aug_opt[-1].get('fix_ann_pairs', None)
-                        if fix_ann_pairs is not None:
-                            outputs_flip_clone = outputs_flip.data.clone()
-                            for (pair_a, pair_b) in fix_ann_pairs:
-                                outputs_flip[:, pair_a, :, :] = outputs_flip_clone[:, pair_b, :, :]
-                                outputs_flip[:, pair_b, :, :] = outputs_flip_clone[:, pair_a, :, :]
-                        outputs_flip = torch.from_numpy(np.flip(outputs_flip.cpu().numpy(), axis=3).copy()).type_as(outputs)
-                        outputs_list.append(outputs_flip)
+                imageids, images, widths, heights, gts = samples['id'], samples['image'], samples['width'], samples['height'], samples['groundtruth']
+                infer_tricks, align_corners = inference_cfg['tricks'], model.align_corners if hasattr(model, 'align_corners') else model.module.align_corners
+                cascade_cfg = infer_tricks.get('cascade', {'key_for_pre_output': 'memory_gather_logits', 'times': 1})
+                for idx in range(cascade_cfg['times']):
+                    forward_args = None
+                    if idx > 0: 
+                        outputs_list = [
+                            F.interpolate(outputs, size=outputs_list[-1].shape[2:], mode='bilinear', align_corners=align_corners) for outputs in outputs_list
+                        ]
+                        forward_args = {cascade_cfg['key_for_pre_output']: sum(outputs_list) / len(outputs_list)}
+                    outputs_list = self.auginference(
+                        model=model,
+                        images=images,
+                        inference_cfg=inference_cfg,
+                        num_classes=dataset.num_classes,
+                        FloatTensor=FloatTensor,
+                        align_corners=align_corners,
+                        forward_args=forward_args,
+                    )
                 for idx in range(len(outputs_list[0])):
                     output = [
                         F.interpolate(outputs[idx: idx+1], size=(heights[idx], widths[idx]), mode='bilinear', align_corners=align_corners) for outputs in outputs_list
@@ -134,12 +132,50 @@ class Tester():
                     gt = gts[idx].cpu().numpy().astype(np.int32)
                     gt[gt >= dataset.num_classes] = -1
                     all_gts.append(gt)
+    '''inference with augmentations'''
+    def auginference(self, model, images, inference_cfg, num_classes, FloatTensor, align_corners, forward_args=None):
+        infer_tricks, outputs_list = inference_cfg['tricks'], []
+        for scale_factor in infer_tricks['multiscale']:
+            images_scale = F.interpolate(images, scale_factor=scale_factor, mode='bilinear', align_corners=align_corners)
+            outputs = self.inference(
+                model=model, 
+                images=images_scale.type(FloatTensor), 
+                inference_cfg=inference_cfg, 
+                num_classes=num_classes, 
+                forward_args=forward_args,
+            )
+            outputs_list.append(outputs)
+            if infer_tricks['flip']:
+                images_flip = torch.from_numpy(np.flip(images_scale.cpu().numpy(), axis=3).copy())
+                outputs_flip = self.inference(
+                    model=model, 
+                    images=images_flip.type(FloatTensor), 
+                    inference_cfg=inference_cfg, 
+                    num_classes=num_classes, 
+                    forward_args=forward_args,
+                )
+                fix_ann_pairs = inference_cfg.get('fix_ann_pairs', None)
+                if fix_ann_pairs is None:
+                    for aug_opt in self.cfg.DATASET_CFG['train']['aug_opts']:
+                        if 'RandomFlip' in aug_opt: fix_ann_pairs = aug_opt[-1].get('fix_ann_pairs', None)
+                if fix_ann_pairs is not None:
+                    outputs_flip_clone = outputs_flip.data.clone()
+                    for (pair_a, pair_b) in fix_ann_pairs:
+                        outputs_flip[:, pair_a, :, :] = outputs_flip_clone[:, pair_b, :, :]
+                        outputs_flip[:, pair_b, :, :] = outputs_flip_clone[:, pair_a, :, :]
+                outputs_flip = torch.from_numpy(np.flip(outputs_flip.cpu().numpy(), axis=3).copy()).type_as(outputs)
+                outputs_list.append(outputs_flip)
+        return outputs_list
     '''inference'''
-    def inference(self, model, images, inference_cfg, num_classes, use_probs_before_resize=False):
+    def inference(self, model, images, inference_cfg, num_classes, forward_args=None):
         assert inference_cfg['mode'] in ['whole', 'slide']
+        use_probs_before_resize = inference_cfg['tricks']['use_probs_before_resize']
         if inference_cfg['mode'] == 'whole':
-            if use_probs_before_resize: outputs = F.softmax(model(images), dim=1)
-            else: outputs = model(images)
+            if forward_args is None:
+                outputs = model(images)
+            else:
+                outputs = model(images, **forward_args)
+            if use_probs_before_resize: outputs = F.softmax(outputs, dim=1)
         else:
             align_corners = model.align_corners if hasattr(model, 'align_corners') else model.module.align_corners
             opts = inference_cfg['opts']
@@ -156,10 +192,12 @@ class Tester():
                     x2, y2 = min(x1 + cropsize_w, image_w), min(y1 + cropsize_h, image_h)
                     x1, y1 = max(x2 - cropsize_w, 0), max(y2 - cropsize_h, 0)
                     crop_images = images[:, :, y1:y2, x1:x2]
-                    if use_probs_before_resize:
-                        outputs_crop = F.softmax(F.interpolate(model(crop_images), size=crop_images.size()[2:], mode='bilinear', align_corners=align_corners), dim=1)
+                    if forward_args is None:
+                        outputs_crop = model(crop_images)
                     else:
-                        outputs_crop = F.interpolate(model(crop_images), size=crop_images.size()[2:], mode='bilinear', align_corners=align_corners)
+                        outputs_crop = model(crop_images, **forward_args)
+                    outputs_crop = F.interpolate(outputs_crop, size=crop_images.size()[2:], mode='bilinear', align_corners=align_corners)
+                    if use_probs_before_resize: outputs_crop = F.softmax(outputs_crop, dim=1)
                     outputs += F.pad(outputs_crop, (int(x1), int(outputs.shape[3] - x2), int(y1), int(outputs.shape[2] - y2)))
                     count_mat[:, :, y1:y2, x1:x2] += 1
             assert (count_mat == 0).sum() == 0
