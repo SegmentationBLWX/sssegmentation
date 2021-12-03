@@ -8,6 +8,7 @@ import cv2
 import torch
 import numpy as np
 import scipy.io as sio
+from PIL import Image
 from .pipelines import *
 from chainercv.evaluations import eval_semantic_segmentation
 
@@ -39,7 +40,10 @@ class BaseDataset(torch.utils.data.Dataset):
         image = cv2.imread(imagepath)
         # read annotation
         if annpath.endswith('.png'):
-            segmentation = cv2.imread(annpath, cv2.IMREAD_GRAYSCALE) if with_ann else np.zeros((image.shape[0], image.shape[1]))
+            if self.dataset_cfg['type'] in ['vspw']:
+                segmentation = np.array(Image.open(annpath)) if with_ann else np.zeros((image.shape[0], image.shape[1]))
+            else:
+                segmentation = cv2.imread(annpath, cv2.IMREAD_GRAYSCALE) if with_ann else np.zeros((image.shape[0], image.shape[1]))
         elif annpath.endswith('.mat'):
             segmentation = sio.loadmat(annpath)
             if self.dataset_cfg['type'] in ['cocostuff10k']:

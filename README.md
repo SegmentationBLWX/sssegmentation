@@ -59,6 +59,7 @@ https://sssegmentation.readthedocs.io/en/latest/
 - [ATR](http://sysu-hcp.net/lip/overview.php)
 - [HRF](https://www5.cs.fau.de/fileadmin/research/datasets/fundus-images/)
 - [CIHP](http://sysu-hcp.net/lip/overview.php)
+- [VSPW](https://www.vspwdataset.com/)
 - [DRIVE](https://drive.grand-challenge.org/)
 - [STARE](http://cecas.clemson.edu/~ahoover/stare/)
 - [ADE20k](https://groups.csail.mit.edu/vision/datasets/ADE20K/)

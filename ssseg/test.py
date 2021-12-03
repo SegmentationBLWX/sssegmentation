@@ -143,7 +143,7 @@ class Tester():
                 inference_cfg=inference_cfg, 
                 num_classes=num_classes, 
                 forward_args=forward_args,
-            )
+            ).cpu()
             outputs_list.append(outputs)
             if infer_tricks['flip']:
                 images_flip = torch.from_numpy(np.flip(images_scale.cpu().numpy(), axis=3).copy())

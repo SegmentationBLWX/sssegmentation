@@ -1,6 +1,6 @@
 '''
 Function:
-    builder for building instanced dataset class for various datasets.
+    build the dataset
 Author:
     Zhenchao Jin
 '''
@@ -8,6 +8,7 @@ from .lip import LIPDataset
 from .atr import ATRDataset
 from .hrf import HRFDataset
 from .base import BaseDataset
+from .vspw import VSPWDataset
 from .cihp import CIHPDataset
 from .stare import STAREDataset
 from .drive import DRIVEDataset
@@ -33,6 +34,7 @@ def BuildDataset(mode, logger_handle, dataset_cfg, **kwargs):
         'atr': ATRDataset,
         'hrf': HRFDataset,
         'coco': COCODataset,
+        'vspw': VSPWDataset,
         'cihp': CIHPDataset,
         'mhpv1': MHPv1Dataset,
         'mhpv2': MHPv2Dataset,

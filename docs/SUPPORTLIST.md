@@ -38,6 +38,15 @@ You can visit http://sysu-hcp.net/lip/ to learn the details of CIHP dataset.
 - Official: http://sysu-hcp.net/lip/overview.php
 - Baidu Disk: https://pan.baidu.com/s/1TZbgxPnY0Als6LoiV80Xrw (access code: fn1i)
 
+#### VSPW
+(1) The official website.
+
+You can visit https://www.vspwdataset.com/ to learn the details of VSPW dataset.
+
+(2) The download url.
+- Official: https://www.vspwdataset.com/
+- Baidu Disk: https://pan.baidu.com/s/1TZbgxPnY0Als6LoiV80Xrw (access code: fn1i)
+
 #### DRIVE
 (1) The official website.
 
