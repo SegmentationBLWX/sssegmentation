@@ -28,7 +28,7 @@
 ## CityScapes
 | Model         | Backbone     | Crop Size  | Schedule                              | Train/Eval Set  | mIoU   | Download                 |
 | :-:           | :-:          | :-:        | :-:                                   | :-:             | :-:    | :-:                      |
-| FCN           | ERFNet       | 512x1024   | LR/POLICY/BS/EPOCH: 0.01/poly/16/860  | train/val       | 76.44% | [model]() &#124; [log]() |
+| FCN           | ERFNet       | 512x1024   | LR/POLICY/BS/EPOCH: 0.01/poly/16/860  | train/val       | 76.44% | [model](https://github.com/SegmentationBLWX/modelstore/releases/download/ssseg_erfnet/fcn_erfnet_cityscapes_train.pth) &#124; [log](https://github.com/SegmentationBLWX/modelstore/releases/download/ssseg_erfnet/fcn_erfnet_cityscapes_train.log) |
 
 
 # More
