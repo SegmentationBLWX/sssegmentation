@@ -162,15 +162,32 @@ You can visit https://cs.stanford.edu/~roozbeh/pascal-context/ to learn the deta
 
 You can download the [paper](https://arxiv.org/pdf/1505.04597.pdf) to learn the details of UNet.
 
+(2) The reported performance.
+
+Please refer to [UNet](https://github.com/SegmentationBLWX/sssegmentation/tree/main/docs/performances/unet) for details.
+
 #### CGNet
 (1) The related paper.
 
 You can download the [paper](https://arxiv.org/pdf/1811.08201.pdf) to learn the details of CGNet.
 
+(2) The reported performance.
+
+Please refer to [CGNet](https://github.com/SegmentationBLWX/sssegmentation/tree/main/docs/performances/cgnet) for details.
+
 #### HRNet
 (1) The related paper.
 
 You can download the [paper](https://arxiv.org/pdf/1908.07919.pdf) to learn the details of HRNet.
+
+#### ERFNet
+(1) The related paper.
+
+You can download the [paper](https://ieeexplore.ieee.org/document/8063438) to learn the details of ERFNet.
+
+(2) The reported performance.
+
+Please refer to [ERFNet](https://github.com/SegmentationBLWX/sssegmentation/tree/main/docs/performances/erfnet) for details.
 
 #### ResNet
 (1) The related paper.

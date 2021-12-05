@@ -14,6 +14,7 @@ https://sssegmentation.readthedocs.io/en/latest/
 - [UNet](./docs/performances/unet)
 - [CGNet](./docs/performances/cgnet)
 - [HRNet](https://arxiv.org/pdf/1908.07919.pdf)
+- [ERFNet](https://ieeexplore.ieee.org/document/8063438)
 - [ResNet](https://arxiv.org/pdf/1512.03385.pdf)
 - [ResNeSt](./docs/performances/resnest)
 - [FastSCNN](./docs/performances/fastscnn)

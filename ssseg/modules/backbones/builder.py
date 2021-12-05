@@ -7,6 +7,7 @@ Author:
 from .unet import BuildUNet
 from .cgnet import BuildCGNet
 from .hrnet import BuildHRNet
+from .erfnet import BuildERFNet
 from .resnet import BuildResNet
 from .resnest import BuildResNeSt
 from .fastscnn import BuildFastSCNN
@@ -24,6 +25,7 @@ def BuildBackbone(cfg, **kwargs):
         'unet': BuildUNet,
         'cgnet': BuildCGNet,
         'hrnet': BuildHRNet,
+        'erfnet': BuildERFNet,
         'resnet': BuildResNet,
         'resnest': BuildResNeSt,
         'fastscnn': BuildFastSCNN,
