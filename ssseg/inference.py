@@ -50,13 +50,13 @@ class Demo():
         use_cuda = torch.cuda.is_available()
         # initialize logger_handle
         logger_handle = Logger(common_cfg['logfilepath'])
-        # instanced dataset
-        dataset = BuildDataset(mode='TEST', logger_handle=logger_handle, dataset_cfg=copy.deepcopy(cfg.DATASET_CFG), get_basedataset=True)
-        palette = BuildPalette(dataset_type=cfg.DATASET_CFG['type'], num_classes=dataset.num_classes, logger_handle=logger_handle)
         # instanced model
         cfg.MODEL_CFG['backbone']['pretrained'] = False
         model = BuildModel(cfg=copy.deepcopy(cfg.MODEL_CFG), mode='TEST')
         if use_cuda: model = model.cuda()
+        # instanced dataset
+        dataset = BuildDataset(mode='TEST', logger_handle=logger_handle, dataset_cfg=copy.deepcopy(cfg.DATASET_CFG), get_basedataset=True)
+        palette = BuildPalette(dataset_type=cfg.DATASET_CFG['type'], num_classes=cfg.MODEL_CFG['num_classes'], logger_handle=logger_handle)
         # load checkpoints
         cmd_args.local_rank = 0
         checkpoints = loadcheckpoints(cmd_args.checkpointspath, logger_handle=logger_handle, cmd_args=cmd_args)
@@ -80,20 +80,29 @@ class Demo():
             imagepath = imagepaths[idx]
             if imagepath.split('.')[-1] not in ['jpg', 'jpeg', 'png']: continue
             pbar.set_description('Processing %s' % imagepath)
-            infer_tricks, output_list, use_probs_before_resize = inference_cfg['tricks'], [], inference_cfg['tricks']['use_probs_before_resize']
+            infer_tricks = inference_cfg['tricks']
+            cascade_cfg = infer_tricks.get('cascade', {'key_for_pre_output': 'memory_gather_logits', 'times': 1, 'forward_default_args': None})
             sample = dataset.read(imagepath, 'none.png', False)
             image = sample['image']
             sample = dataset.synctransform(sample, 'all')
-            image_tensor_ori = sample['image'].unsqueeze(0).type(FloatTensor)
-            for scale_factor in infer_tricks['multiscale']:
-                image_tensor = F.interpolate(image_tensor_ori, scale_factor=scale_factor, mode='bilinear', align_corners=model.align_corners)
-                output = self.inference(model, image_tensor.type(FloatTensor), inference_cfg, cfg.MODEL_CFG['num_classes'], use_probs_before_resize)
-                output_list.append(output)
-                if infer_tricks['flip']:
-                    image_tensor_flip = torch.from_numpy(np.flip(image_tensor.cpu().numpy(), axis=3).copy())
-                    output_flip = self.inference(model, image_tensor_flip.type(FloatTensor), inference_cfg, cfg.MODEL_CFG['num_classes'], use_probs_before_resize)
-                    output_flip = torch.from_numpy(np.flip(output_flip.cpu().numpy(), axis=3).copy()).type_as(output)
-                    output_list.append(output_flip)
+            image_tensor = sample['image'].unsqueeze(0).type(FloatTensor)
+            for idx in range(cascade_cfg['times']):
+                forward_args = None
+                if idx > 0: 
+                    output_list = [
+                        F.interpolate(outputs, size=output_list[-1].shape[2:], mode='bilinear', align_corners=model.align_corners) for outputs in output_list
+                    ]
+                    forward_args = {cascade_cfg['key_for_pre_output']: sum(output_list) / len(output_list)}
+                    if cascade_cfg['forward_default_args'] is not None: forward_args.update(cascade_cfg['forward_default_args'])
+                output_list = self.auginference(
+                    model=model,
+                    images=image_tensor,
+                    inference_cfg=inference_cfg,
+                    num_classes=cfg.MODEL_CFG['num_classes'],
+                    FloatTensor=FloatTensor,
+                    align_corners=model.align_corners,
+                    forward_args=forward_args,
+                )
             output_list = [
                 F.interpolate(output, size=(sample['height'], sample['width']), mode='bilinear', align_corners=model.align_corners) for output in output_list
             ]
@@ -108,12 +117,50 @@ class Demo():
                 cv2.imwrite(os.path.join(common_cfg['backupdir'], cmd_args.outputfilename + '_%d' % idx + '.png'), image)
             else:
                 cv2.imwrite(os.path.join(common_cfg['backupdir'], imagepath.split('/')[-1].split('.')[0] + '.png'), image)
+    '''inference with augmentations'''
+    def auginference(self, model, images, inference_cfg, num_classes, FloatTensor, align_corners, forward_args=None):
+        infer_tricks, output_list = inference_cfg['tricks'], []
+        for scale_factor in infer_tricks['multiscale']:
+            images_scale = F.interpolate(images, scale_factor=scale_factor, mode='bilinear', align_corners=align_corners)
+            outputs = self.inference(
+                model=model, 
+                images=images_scale.type(FloatTensor), 
+                inference_cfg=inference_cfg, 
+                num_classes=num_classes, 
+                forward_args=forward_args,
+            ).cpu()
+            output_list.append(outputs)
+            if infer_tricks['flip']:
+                images_flip = torch.from_numpy(np.flip(images_scale.cpu().numpy(), axis=3).copy())
+                outputs_flip = self.inference(
+                    model=model, 
+                    images=images_flip.type(FloatTensor), 
+                    inference_cfg=inference_cfg, 
+                    num_classes=num_classes, 
+                    forward_args=forward_args,
+                )
+                fix_ann_pairs = inference_cfg.get('fix_ann_pairs', None)
+                if fix_ann_pairs is None:
+                    for aug_opt in self.cfg.DATASET_CFG['train']['aug_opts']:
+                        if 'RandomFlip' in aug_opt: fix_ann_pairs = aug_opt[-1].get('fix_ann_pairs', None)
+                if fix_ann_pairs is not None:
+                    outputs_flip_clone = outputs_flip.data.clone()
+                    for (pair_a, pair_b) in fix_ann_pairs:
+                        outputs_flip[:, pair_a, :, :] = outputs_flip_clone[:, pair_b, :, :]
+                        outputs_flip[:, pair_b, :, :] = outputs_flip_clone[:, pair_a, :, :]
+                outputs_flip = torch.from_numpy(np.flip(outputs_flip.cpu().numpy(), axis=3).copy()).type_as(outputs)
+                output_list.append(outputs_flip)
+        return output_list
     '''inference'''
-    def inference(self, model, images, inference_cfg, num_classes, use_probs_before_resize=False):
+    def inference(self, model, images, inference_cfg, num_classes, forward_args=None):
         assert inference_cfg['mode'] in ['whole', 'slide']
+        use_probs_before_resize = inference_cfg['tricks']['use_probs_before_resize']
         if inference_cfg['mode'] == 'whole':
-            if use_probs_before_resize: outputs = F.softmax(model(images), dim=1)
-            else: outputs = model(images)
+            if forward_args is None:
+                outputs = model(images)
+            else:
+                outputs = model(images, **forward_args)
+            if use_probs_before_resize: outputs = F.softmax(outputs, dim=1)
         else:
             align_corners = model.align_corners if hasattr(model, 'align_corners') else model.module.align_corners
             opts = inference_cfg['opts']
@@ -130,10 +177,12 @@ class Demo():
                     x2, y2 = min(x1 + cropsize_w, image_w), min(y1 + cropsize_h, image_h)
                     x1, y1 = max(x2 - cropsize_w, 0), max(y2 - cropsize_h, 0)
                     crop_images = images[:, :, y1:y2, x1:x2]
-                    if use_probs_before_resize:
-                        outputs_crop = F.softmax(F.interpolate(model(crop_images), size=crop_images.size()[2:], mode='bilinear', align_corners=align_corners), dim=1)
+                    if forward_args is None:
+                        outputs_crop = model(crop_images)
                     else:
-                        outputs_crop = F.interpolate(model(crop_images), size=crop_images.size()[2:], mode='bilinear', align_corners=align_corners)
+                        outputs_crop = model(crop_images, **forward_args)
+                    outputs_crop = F.interpolate(outputs_crop, size=crop_images.size()[2:], mode='bilinear', align_corners=align_corners)
+                    if use_probs_before_resize: outputs_crop = F.softmax(outputs_crop, dim=1)
                     outputs += F.pad(outputs_crop, (int(x1), int(outputs.shape[3] - x2), int(y1), int(outputs.shape[2] - y2)))
                     count_mat[:, :, y1:y2, x1:x2] += 1
             assert (count_mat == 0).sum() == 0

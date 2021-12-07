@@ -105,7 +105,7 @@ class Tester():
                 pbar.set_description('Processing %s/%s in rank %s' % (batch_idx+1, len(dataloader), cmd_args.local_rank))
                 imageids, images, widths, heights, gts = samples['id'], samples['image'], samples['width'], samples['height'], samples['groundtruth']
                 infer_tricks, align_corners = inference_cfg['tricks'], model.align_corners if hasattr(model, 'align_corners') else model.module.align_corners
-                cascade_cfg = infer_tricks.get('cascade', {'key_for_pre_output': 'memory_gather_logits', 'times': 1})
+                cascade_cfg = infer_tricks.get('cascade', {'key_for_pre_output': 'memory_gather_logits', 'times': 1, 'forward_default_args': None})
                 for idx in range(cascade_cfg['times']):
                     forward_args = None
                     if idx > 0: 
@@ -113,6 +113,7 @@ class Tester():
                             F.interpolate(outputs, size=outputs_list[-1].shape[2:], mode='bilinear', align_corners=align_corners) for outputs in outputs_list
                         ]
                         forward_args = {cascade_cfg['key_for_pre_output']: sum(outputs_list) / len(outputs_list)}
+                        if cascade_cfg['forward_default_args'] is not None: forward_args.update(cascade_cfg['forward_default_args'])
                     outputs_list = self.auginference(
                         model=model,
                         images=images,
@@ -272,4 +273,5 @@ def main():
 
 '''debug'''
 if __name__ == '__main__':
-    main()
+    with torch.no_grad():
+        main()
