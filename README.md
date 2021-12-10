@@ -49,6 +49,7 @@ https://sssegmentation.readthedocs.io/en/latest/
 - [PointRend](./docs/performances/pointrend)
 - [Deeplabv3](./docs/performances/deeplabv3)
 - [Segformer](./docs/performances/segformer)
+- [MaskFormer](./docs/performances/maskformer)
 - [SemanticFPN](./docs/performances/semanticfpn)
 - [NonLocalNet](./docs/performances/nonlocalnet)
 - [Deeplabv3Plus](./docs/performances/deeplabv3plus)

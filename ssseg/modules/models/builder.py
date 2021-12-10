@@ -28,6 +28,7 @@ from .lrasppnet import LRASPPNet
 from .segformer import Segformer
 from .memorynet import MemoryNet
 from .setr import SETRUP, SETRMLA
+from .maskformer import MaskFormer
 from .semanticfpn import SemanticFPN
 from .nonlocalnet import NonLocalNet
 from .deeplabv3plus import Deeplabv3Plus
@@ -63,6 +64,7 @@ def BuildModel(cfg, mode, **kwargs):
         'pointrend': PointRend,
         'deeplabv3': Deeplabv3,
         'lrasppnet': LRASPPNet,
+        'maskformer': MaskFormer,
         'semanticfpn': SemanticFPN,
         'nonlocalnet': NonLocalNet,
         'deeplabv3plus': Deeplabv3Plus,

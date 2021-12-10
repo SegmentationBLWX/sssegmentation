@@ -471,6 +471,15 @@ You can download the [paper](https://arxiv.org/pdf/2105.15203.pdf) to learn the 
 
 Please refer to [Segformer](https://github.com/SegmentationBLWX/sssegmentation/tree/main/docs/performances/segformer) for details.
 
+#### MaskFormer
+(1) The related paper.
+
+You can download the [paper](https://arxiv.org/pdf/2107.06278.pdf) to learn the details of MaskFormer.
+
+(2) The reported performance.
+
+Please refer to [MaskFormer](https://github.com/SegmentationBLWX/sssegmentation/tree/main/docs/performances/maskformer) for details.
+
 #### SemanticFPN
 (1) The related paper.
 
