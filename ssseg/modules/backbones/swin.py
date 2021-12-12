@@ -10,7 +10,9 @@ import torch
 import torch.nn as nn
 import torch.nn.functional as F
 import torch.utils.model_zoo as model_zoo
+from collections import OrderedDict
 from .bricks import PatchEmbed as PatchEmbedBase
+from .bricks import PatchMerging as PatchMergingBase
 from .bricks import BuildNormalization, BuildActivation, BuildDropout, FFN
 
 
@@ -27,19 +29,9 @@ model_urls = {
 
 
 '''merge patch feature map'''
-class PatchMerging(nn.Module):
-    def __init__(self, in_channels, out_channels, stride=2, bias=False, norm_cfg=None):
-        super(PatchMerging, self).__init__()
-        self.in_channels = in_channels
-        self.out_channels = out_channels
-        self.stride = stride
-        self.sampler = nn.Unfold(kernel_size=stride, dilation=1, padding=0, stride=stride)
-        sample_dim = stride**2 * in_channels
-        if norm_cfg is not None:
-            self.norm = BuildNormalization(norm_cfg['type'], (sample_dim, norm_cfg['opts']))
-        else:
-            self.norm = None
-        self.reduction = nn.Linear(sample_dim, out_channels, bias=bias)
+class PatchMerging(PatchMergingBase):
+    def __init__(self, **kwargs):
+        super(PatchMerging, self).__init__(**kwargs)
     '''layers with zero weight decay'''
     def zerowdlayers(self):
         if self.norm is None: return {}
@@ -47,20 +39,6 @@ class PatchMerging(nn.Module):
     '''layers with non zero weight decay'''
     def nonzerowdlayers(self):
         return {'PatchMerging.reduction': self.reduction}
-    '''forward'''
-    def forward(self, x, hw_shape):
-        B, L, C = x.shape
-        H, W = hw_shape
-        assert L == H * W, 'input feature has wrong size'
-        x = x.view(B, H, W, C).permute([0, 3, 1, 2])
-        if (H % self.stride != 0) or (W % self.stride != 0):
-            x = F.pad(x, (0, W % self.stride, 0, H % self.stride))
-        x = self.sampler(x)
-        x = x.transpose(1, 2)
-        x = self.norm(x) if self.norm else x
-        x = self.reduction(x)
-        down_hw_shape = (H + 1) // 2, (W + 1) // 2
-        return x, down_hw_shape
 
 
 '''Image to Patch Embedding'''
@@ -117,9 +95,7 @@ class WindowMSA(nn.Module):
             nW = mask.shape[0]
             attn = attn.view(B // nW, nW, self.num_heads, N, N) + mask.unsqueeze(1).unsqueeze(0)
             attn = attn.view(-1, self.num_heads, N, N)
-            attn = self.softmax(attn)
-        else:
-            attn = self.softmax(attn)
+        attn = self.softmax(attn)
         attn = self.attn_drop(attn)
         x = (attn @ v).transpose(1, 2).reshape(B, N, C)
         x = self.proj(x)
@@ -343,6 +319,7 @@ class SwinTransformer(nn.Module):
             embed_dims=embed_dims,
             kernel_size=patch_size,
             stride=strides[0],
+            padding='corner',
             norm_cfg=norm_cfg if patch_norm else None,
         )
         if self.use_abs_pos_embed:
@@ -376,13 +353,12 @@ class SwinTransformer(nn.Module):
                 qk_scale=qk_scale,
                 drop_rate=drop_rate,
                 attn_drop_rate=attn_drop_rate,
-                drop_path_rate=dpr[:depths[i]],
+                drop_path_rate=dpr[sum(depths[:i]): sum(depths[:i+1])],
                 downsample=downsample,
                 act_cfg=act_cfg,
                 norm_cfg=norm_cfg
             )
             self.stages.append(stage)
-            dpr = dpr[depths[i]:]
             if downsample:
                 in_channels = downsample.out_channels
         self.num_features = [int(embed_dims * 2**i) for i in range(num_layers)]
@@ -392,8 +368,8 @@ class SwinTransformer(nn.Module):
             layer_name = f'norm{i}'
             self.add_module(layer_name, layer)
     '''initialize backbone'''
-    def initweights(self, swin_type='swin_tiny_patch4_window7_224', pretrained_style='official', pretrained_model_path=''):
-        assert pretrained_style in ['official', 'mmcls']
+    def initweights(self, swin_type='swin_tiny_patch4_window7_224', pretrained_model_path=''):
+        # load
         if pretrained_model_path:
             checkpoint = torch.load(pretrained_model_path, map_location='cpu')
         else:
@@ -404,8 +380,15 @@ class SwinTransformer(nn.Module):
             state_dict = checkpoint['model']
         else:
             state_dict = checkpoint
-        if pretrained_style == 'official':
-            state_dict = self.swinconvert(state_dict)
+        # be consistent
+        state_dict = self.swinconvert(state_dict)
+        state_dict_new = OrderedDict()
+        for k, v in state_dict.items():
+            if k.startswith('backbone.'):
+                state_dict_new[k[9:]] = v
+            else:
+                state_dict_new[k] = v
+        state_dict = state_dict_new
         # strip prefix of state_dict
         if list(state_dict.keys())[0].startswith('module.'):
             state_dict = {k[7:]: v for k, v in state_dict.items()}
@@ -434,7 +417,6 @@ class SwinTransformer(nn.Module):
     '''swin convert'''
     @staticmethod
     def swinconvert(ckpt):
-        from collections import OrderedDict
         new_ckpt = OrderedDict()
         def correctunfoldreductionorder(x):
             out_channel, in_channel = x.shape
@@ -503,8 +485,7 @@ class SwinTransformer(nn.Module):
         return layers
     '''forward'''
     def forward(self, x):
-        x = self.patch_embed(x)
-        hw_shape = (self.patch_embed.DH, self.patch_embed.DW)
+        x, hw_shape = self.patch_embed(x)
         if self.use_abs_pos_embed:
             x = x + self.absolute_pos_embed
         x = self.drop_after_pos(x)
@@ -651,7 +632,6 @@ def BuildSwinTransformer(swin_type='swin_tiny_patch4_window7_224', **kwargs):
         'norm_cfg': {'type': 'layernorm', 'opts': {}},
         'act_cfg': {'type': 'gelu', 'opts': {}},
         'pretrained': True,
-        'pretrained_style': 'official',
         'pretrained_model_path': '',
     }
     default_args.update(supported_swins[swin_type])
@@ -662,6 +642,6 @@ def BuildSwinTransformer(swin_type='swin_tiny_patch4_window7_224', **kwargs):
     model = SwinTransformer(**swin_args)
     # load weights of pretrained model
     if default_args['pretrained']:
-        model.initweights(swin_type, default_args['pretrained_style'], default_args['pretrained_model_path'])
+        model.initweights(swin_type, default_args['pretrained_model_path'])
     # return the model
     return model

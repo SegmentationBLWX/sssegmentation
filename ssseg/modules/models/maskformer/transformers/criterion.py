@@ -1,6 +1,6 @@
 '''
 Function:
-    MaskFormer criterion
+    Implementation of MaskFormer criterion
 Author:
     Zhenchao Jin
 '''

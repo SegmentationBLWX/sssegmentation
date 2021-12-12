@@ -26,7 +26,7 @@
 | :-:           | :-:         | :-:        | :-:                                  | :-:             | :-:    | :-:                      |
 | UperNet       | Swin-Tiny   | 512x512    | LR/POLICY/BS/EPOCH: 0.01/poly/16/130 | train/val       | 47.31% | [model](https://github.com/SegmentationBLWX/modelstore/releases/download/ssseg_maskformer/maskformer_swintiny_ade20k_train.pth) &#124; [log](https://github.com/SegmentationBLWX/modelstore/releases/download/ssseg_maskformer/maskformer_swintiny_ade20k_train.log) |
 | UperNet       | Swin-Small  | 512x512    | LR/POLICY/BS/EPOCH: 0.01/poly/16/130 | train/val       |        | [model]() &#124; [log]() |
-| UperNet       | Swin-Large  | 640x640    | LR/POLICY/BS/EPOCH: 0.01/poly/16/130 | train/val       |        | [model]() &#124; [log]() |
+| UperNet       | Swin-Large  | 640x640    | LR/POLICY/BS/EPOCH: 0.01/poly/16/130 | train/val       | 53.22% | [model](https://github.com/SegmentationBLWX/modelstore/releases/download/ssseg_maskformer/maskformer_swinbase_ade20k_train.pth) &#124; [log](https://github.com/SegmentationBLWX/modelstore/releases/download/ssseg_maskformer/maskformer_swinbase_ade20k_train.log) |
 
 
 # More

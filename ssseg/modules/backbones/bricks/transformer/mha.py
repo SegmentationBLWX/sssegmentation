@@ -17,17 +17,6 @@ class MultiheadAttention(nn.Module):
         self.num_heads = num_heads
         self.batch_first = batch_first
         self.attn = nn.MultiheadAttention(embed_dims, num_heads, attn_drop, **kwargs)
-        if self.batch_first:
-            def bnctonbc(forward):
-                def forwardwrapper(**kwargs):
-                    convert_keys = ('key', 'query', 'value')
-                    for key in kwargs.keys():
-                        if key in convert_keys:
-                            kwargs[key] = kwargs[key].transpose(0, 1)
-                    attn_output, attn_output_weights = forward(**kwargs)
-                    return attn_output.transpose(0, 1), attn_output_weights
-                return forwardwrapper
-            self.attn.forward = bnctonbc(self.attn.forward)
         self.proj_drop = nn.Dropout(proj_drop)
         self.dropout_layer = BuildDropout(dropout_cfg['type'], **dropout_cfg['opts']) if dropout_cfg else nn.Identity()
     '''forward'''
@@ -37,11 +26,13 @@ class MultiheadAttention(nn.Module):
         if identity is None: identity = query
         if key_pos is None:
             if query_pos is not None:
-                if query_pos.shape == key.shape:
-                    key_pos = query_pos
-        if query_pos is not None:
-            query = query + query_pos
-        if key_pos is not None:
-            key = key + key_pos
+                if query_pos.shape == key.shape: key_pos = query_pos
+        if query_pos is not None: query = query + query_pos
+        if key_pos is not None: key = key + key_pos
+        if self.batch_first:
+            query = query.transpose(0, 1)
+            key = key.transpose(0, 1)
+            value = value.transpose(0, 1)
         out = self.attn(query=query, key=key, value=value, attn_mask=attn_mask, key_padding_mask=key_padding_mask)[0]
+        if self.batch_first: out = out.transpose(0, 1)
         return identity + self.dropout_layer(self.proj_drop(out))

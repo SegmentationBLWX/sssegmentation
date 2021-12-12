@@ -99,7 +99,11 @@ class EfficientMultiheadAttention(MultiheadAttention):
         else:
             x_kv = x
         if identity is None: identity = x_q
-        out = self.attn(query=x_q, key=x_kv, value=x_kv, need_weights=False)[0]
+        if self.batch_first:
+            x_q = x_q.transpose(0, 1)
+            x_kv = x_kv.transpose(0, 1)
+        out = self.attn(query=x_q, key=x_kv, value=x_kv)[0]
+        if self.batch_first: out = out.transpose(0, 1)
         return identity + self.dropout_layer(self.proj_drop(out))
 
 
@@ -182,7 +186,6 @@ class MixVisionTransformer(nn.Module):
                 kernel_size=patch_sizes[i],
                 stride=strides[i],
                 padding=patch_sizes[i] // 2,
-                pad_to_patch_size=False,
                 norm_cfg=norm_cfg
             )
             layer = nn.ModuleList([TransformerEncoderLayer(
@@ -225,8 +228,7 @@ class MixVisionTransformer(nn.Module):
                     nonzwd_layers[f'{layer_idx}_{trans_idx}_{key}'] = value
         return nonzwd_layers
     '''init weights'''
-    def initweights(self, mit_type='', pretrained_style='official', pretrained_model_path=''):
-        assert pretrained_style in ['official', 'mmcls']
+    def initweights(self, mit_type='', pretrained_model_path=''):
         if pretrained_model_path:
             checkpoint = torch.load(pretrained_model_path, map_location='cpu')
         else:
@@ -237,8 +239,7 @@ class MixVisionTransformer(nn.Module):
             state_dict = checkpoint['model']
         else:
             state_dict = checkpoint
-        if pretrained_style == 'official':
-            state_dict = self.mitconvert(state_dict)
+        state_dict = self.mitconvert(state_dict)
         self.load_state_dict(state_dict, False)
     '''mit convert'''
     @staticmethod
@@ -288,8 +289,7 @@ class MixVisionTransformer(nn.Module):
     def forward(self, x):
         outs = []
         for i, layer in enumerate(self.layers):
-            x, H, W = layer[0](x), layer[0].DH, layer[0].DW
-            hw_shape = (H, W)
+            x, hw_shape = layer[0](x)
             for block in layer[1]: x = block(x, hw_shape)
             x = layer[2](x)
             x = nlctonchw(x, hw_shape)
@@ -389,7 +389,6 @@ def BuildMixVisionTransformer(mit_type='mit-b5', **kwargs):
         'norm_cfg': {'type': 'layernorm', 'opts': {'eps': 1e-6}},
         'act_cfg': {'type': 'gelu', 'opts': {}},
         'pretrained': True,
-        'pretrained_style': 'official',
         'pretrained_model_path': '',
     }
     default_args.update(supported_mits[mit_type])
@@ -400,6 +399,6 @@ def BuildMixVisionTransformer(mit_type='mit-b5', **kwargs):
     model = MixVisionTransformer(**mit_args)
     # load weights of pretrained model
     if default_args['pretrained']:
-        model.initweights(mit_type, default_args['pretrained_style'], default_args['pretrained_model_path'])
+        model.initweights(mit_type, default_args['pretrained_model_path'])
     # return the model
     return model

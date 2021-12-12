@@ -11,7 +11,7 @@ import torch.nn as nn
 import torch.nn.functional as F
 import torch.utils.model_zoo as model_zoo
 import torch.utils.checkpoint as checkpoint
-from .bricks import BuildNormalization, BuildActivation, MultiheadAttention, FFN, PatchEmbed
+from .bricks import BuildNormalization, BuildActivation, MultiheadAttention, PatchEmbed, FFN
 
 
 '''model urls'''
@@ -70,6 +70,7 @@ class VisionTransformer(nn.Module):
             embed_dims=embed_dims,
             kernel_size=patch_size,
             stride=patch_size,
+            padding='corner',
             norm_cfg=norm_cfg if patch_norm else None,
         )
         num_patches = (img_size[0] // patch_size) * (img_size[1] // patch_size)
@@ -90,27 +91,24 @@ class VisionTransformer(nn.Module):
         dpr = [x.item() for x in torch.linspace(0, drop_path_rate, num_layers)]
         self.layers = nn.ModuleList()
         for i in range(num_layers):
-            self.layers.append(
-                TransformerEncoderLayer(
-                    embed_dims=embed_dims,
-                    num_heads=num_heads,
-                    feedforward_channels=mlp_ratio * embed_dims,
-                    attn_drop_rate=attn_drop_rate,
-                    drop_rate=drop_rate,
-                    drop_path_rate=dpr[i],
-                    num_fcs=num_fcs,
-                    qkv_bias=qkv_bias,
-                    act_cfg=act_cfg,
-                    norm_cfg=norm_cfg,
-                    batch_first=True
-                )
-            )
+            self.layers.append(TransformerEncoderLayer(
+                embed_dims=embed_dims,
+                num_heads=num_heads,
+                feedforward_channels=mlp_ratio * embed_dims,
+                attn_drop_rate=attn_drop_rate,
+                drop_rate=drop_rate,
+                drop_path_rate=dpr[i],
+                num_fcs=num_fcs,
+                qkv_bias=qkv_bias,
+                act_cfg=act_cfg,
+                norm_cfg=norm_cfg,
+                batch_first=True
+            ))
         self.final_norm = final_norm
         if final_norm:
             self.ln1 = BuildNormalization(norm_cfg['type'], (embed_dims, norm_cfg['opts']))
     '''initialize backbone'''
-    def initweights(self, vit_type='jx_vit_large_p16_384', pretrained_style='timm', pretrained_model_path=''):
-        assert pretrained_style in ['timm', 'mmcls']
+    def initweights(self, vit_type='jx_vit_large_p16_384', pretrained_model_path=''):
         if pretrained_model_path:
             checkpoint = torch.load(pretrained_model_path, map_location='cpu')
         else:
@@ -121,8 +119,7 @@ class VisionTransformer(nn.Module):
             state_dict = checkpoint['model']
         else:
             state_dict = checkpoint
-        if pretrained_style == 'timm':
-            state_dict = self.vitconvert(state_dict)
+        state_dict = self.vitconvert(state_dict)
         if 'pos_embed' in state_dict.keys():
             if self.pos_embed.shape != state_dict['pos_embed'].shape:
                 h, w = self.img_size
@@ -187,12 +184,12 @@ class VisionTransformer(nn.Module):
     '''forward'''
     def forward(self, inputs):
         batch_size = inputs.shape[0]
-        x, hw_shape = self.patch_embed(inputs), (self.patch_embed.DH, self.patch_embed.DW)
+        x, hw_shape = self.patch_embed(inputs)
         # stole cls_tokens impl from Phil Wang, thanks
         cls_tokens = self.cls_token.expand(batch_size, -1, -1)
         x = torch.cat((cls_tokens, x), dim=1)
         x = self.posembeding(x, hw_shape, self.pos_embed)
-        # Remove class token for transformer encoder input
+        # remove class token for transformer encoder input
         if not self.with_cls_token:
             x = x[:, 1:]
         outs = []
@@ -205,13 +202,13 @@ class VisionTransformer(nn.Module):
                 if self.final_norm:
                     x = self.ln1(x)
             if i in self.out_indices:
-                # Remove class token and reshape token for decoder head
+                # remove class token and reshape token for decoder head
                 if self.with_cls_token:
                     out = x[:, 1:]
                 else:
                     out = x
                 B, _, C = out.shape
-                out = out.reshape(B, hw_shape[0], hw_shape[1], C).permute(0, 3, 1, 2)
+                out = out.reshape(B, hw_shape[0], hw_shape[1], C).permute(0, 3, 1, 2).contiguous()
                 if self.output_cls_token: out = [out, x[:, 0]]
                 outs.append(out)
         return tuple(outs)
@@ -248,7 +245,6 @@ def BuildVisionTransformer(vit_type='jx_vit_large_p16_384', **kwargs):
         'act_cfg': {'type': 'gelu', 'opts': {}},
         'interpolate_mode': 'bilinear',
         'pretrained': True,
-        'pretrained_style': 'timm',
         'pretrained_model_path': '',
         'use_checkpoint': False,
     }
@@ -260,6 +256,6 @@ def BuildVisionTransformer(vit_type='jx_vit_large_p16_384', **kwargs):
     model = VisionTransformer(**vit_args)
     # load weights of pretrained model
     if default_args['pretrained']:
-        model.initweights(vit_type, default_args['pretrained_style'], default_args['pretrained_model_path'])
+        model.initweights(vit_type, default_args['pretrained_model_path'])
     # return the model
     return model
