@@ -86,14 +86,14 @@ optional arguments:
 #### Bash
 You can apply the models as follows:
 ```sh
-sh scripts/inference.sh ${CFGFILEPATH} ${CHECKPOINTSPATH} [optional arguments]
+bash scripts/inference.sh ${CFGFILEPATH} ${CHECKPOINTSPATH} [optional arguments]
 ```
 Here is an example:
 ```sh
 # multi-images
-sh scripts/inference.sh ssseg/cfgs/deeplabv3plus/cfgs_voc_resnet101os8.py deeplabv3plus_resnet101os8_voc_train/epoch_60.pth --imagedir VOCImages
+bash scripts/inference.sh ssseg/cfgs/deeplabv3plus/cfgs_voc_resnet101os8.py deeplabv3plus_resnet101os8_voc_train/epoch_60.pth --imagedir VOCImages
 # single-image
-sh scripts/inference.sh ssseg/cfgs/deeplabv3plus/cfgs_voc_resnet101os8.py deeplabv3plus_resnet101os8_voc_train/epoch_60.pth --imagepath voctest.jpg
+bash scripts/inference.sh ssseg/cfgs/deeplabv3plus/cfgs_voc_resnet101os8.py deeplabv3plus_resnet101os8_voc_train/epoch_60.pth --imagepath voctest.jpg
 ```
 #### Python
 You can apply the models as follows:
