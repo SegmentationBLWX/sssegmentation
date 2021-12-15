@@ -5,15 +5,16 @@
 #### Bash
 You can train the models as follows:
 ```sh
-usage:
+# non-distributed training
 sh scripts/train.sh ${CFGFILEPATH} [optional arguments]
-or
+# distributed training
 sh scripts/distrain.sh ${NGPUS} ${CFGFILEPATH} [optional arguments]
 ```
 Here is an example:
 ```sh
+# non-distributed training
 sh scripts/train.sh ssseg/cfgs/deeplabv3plus/cfgs_voc_resnet101os8.py
-or
+# distributed training
 sh scripts/distrain.sh 4 ssseg/cfgs/deeplabv3plus/cfgs_voc_resnet101os8.py
 ```
 
@@ -44,15 +45,16 @@ optional arguments:
 #### Bash
 You can test the models as follows:
 ```sh
-usage:
+# non-distributed testing
 sh scripts/test.sh ${CFGFILEPATH} ${CHECKPOINTSPATH} [optional arguments]
-or
+# distributed testing
 sh scripts/distest.sh ${NGPUS} ${CFGFILEPATH} ${CHECKPOINTSPATH} [optional arguments]
 ```
 Here is an example:
 ```sh
+# non-distributed testing
 sh scripts/test.sh ssseg/cfgs/deeplabv3plus/cfgs_voc_resnet101os8.py deeplabv3plus_resnet101os8_voc_train/epoch_60.pth
-or
+# distributed testing
 sh scripts/distest.sh 4 ssseg/cfgs/deeplabv3plus/cfgs_voc_resnet101os8.py deeplabv3plus_resnet101os8_voc_train/epoch_60.pth
 ```
 
@@ -81,6 +83,18 @@ optional arguments:
 
 
 ## Inference
+#### Bash
+You can apply the models as follows:
+```sh
+sh scripts/inference.sh ${CFGFILEPATH} ${CHECKPOINTSPATH} [optional arguments]
+```
+Here is an example:
+```sh
+# multi-images
+sh scripts/inference.sh ssseg/cfgs/deeplabv3plus/cfgs_voc_resnet101os8.py deeplabv3plus_resnet101os8_voc_train/epoch_60.pth --imagedir VOCImages
+# single-image
+sh scripts/inference.sh ssseg/cfgs/deeplabv3plus/cfgs_voc_resnet101os8.py deeplabv3plus_resnet101os8_voc_train/epoch_60.pth --imagepath voctest.jpg
+```
 #### Python
 You can apply the models as follows:
 ```sh

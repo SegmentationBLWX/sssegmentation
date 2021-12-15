@@ -1,6 +1,6 @@
 '''
 Function:
-    build the backbone
+    Build the backbone network
 Author:
     Zhenchao Jin
 '''
@@ -17,6 +17,7 @@ from .mobilenet import BuildMobileNet
 from .swin import BuildSwinTransformer
 from .vit import BuildVisionTransformer
 from .mit import BuildMixVisionTransformer
+from .timmwrapper import BuildTIMMBackbone
 
 
 '''build the backbone'''
@@ -29,6 +30,7 @@ def BuildBackbone(cfg, **kwargs):
         'resnet': BuildResNet,
         'resnest': BuildResNeSt,
         'fastscnn': BuildFastSCNN,
+        'timm': BuildTIMMBackbone,
         'bisenetv1': BuildBiSeNetV1,
         'bisenetv2': BuildBiSeNetV2,
         'mobilenet': BuildMobileNet,
