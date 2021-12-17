@@ -1,6 +1,6 @@
 '''
 Funtion:
-    define the optimizer builder
+    Build the optimizer
 Author:
     Zhenchao Jin
 '''

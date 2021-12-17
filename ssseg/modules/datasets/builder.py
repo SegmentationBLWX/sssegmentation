@@ -1,6 +1,6 @@
 '''
 Function:
-    build the dataset
+    Build the dataset
 Author:
     Zhenchao Jin
 '''

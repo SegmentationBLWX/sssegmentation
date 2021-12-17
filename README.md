@@ -12,6 +12,7 @@ https://sssegmentation.readthedocs.io/en/latest/
 
 #### Supported Backbones
 - [UNet](./docs/performances/unet)
+- [Twins](./docs/performances/twins)
 - [CGNet](./docs/performances/cgnet)
 - [HRNet](https://arxiv.org/pdf/1908.07919.pdf)
 - [ERFNet](./docs/performances/erfnet)

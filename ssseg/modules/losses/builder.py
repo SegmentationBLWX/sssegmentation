@@ -1,6 +1,6 @@
 '''
 Function:
-    build the loss
+    Build the loss
 Author:
     Zhenchao Jin
 '''

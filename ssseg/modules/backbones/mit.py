@@ -13,12 +13,12 @@ from .bricks import BuildNormalization, BuildActivation, BuildDropout, nlctonchw
 
 '''model urls, the pretrained weights are stored in https://drive.google.com/drive/folders/1b7bwrInTW4VLEm27YawHOAMSMikga2Ia'''
 model_urls = {
-    'mit-b0': '',
-    'mit-b1': '',
-    'mit-b2': '',
-    'mit-b3': '',
-    'mit-b4': '',
-    'mit-b5': '',
+    'mit-b0': 'https://github.com/SegmentationBLWX/modelstore/releases/download/ssseg_segformer/mit_b0.pth',
+    'mit-b1': 'https://github.com/SegmentationBLWX/modelstore/releases/download/ssseg_segformer/mit_b1.pth',
+    'mit-b2': 'https://github.com/SegmentationBLWX/modelstore/releases/download/ssseg_segformer/mit_b2.pth',
+    'mit-b3': 'https://github.com/SegmentationBLWX/modelstore/releases/download/ssseg_segformer/mit_b3.pth',
+    'mit-b4': 'https://github.com/SegmentationBLWX/modelstore/releases/download/ssseg_segformer/mit_b4.pth',
+    'mit-b5': 'https://github.com/SegmentationBLWX/modelstore/releases/download/ssseg_segformer/mit_b5.pth',
 }
 
 

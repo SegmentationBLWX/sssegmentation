@@ -1,2 +1,2 @@
 '''initialize'''
-from .ohempixelsampler import OHEMPixelSampler
+from .builder import BuildPixelSampler

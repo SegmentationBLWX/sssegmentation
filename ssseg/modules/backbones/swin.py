@@ -206,32 +206,34 @@ class SwinBlock(nn.Module):
         super(SwinBlock, self).__init__()
         self.norm1 = BuildNormalization(norm_cfg['type'], (embed_dims, norm_cfg['opts']))
         self.attn = ShiftWindowMSA(
-            embed_dims=embed_dims,
-            num_heads=num_heads,
-            window_size=window_size,
-            shift_size=window_size // 2 if shift else 0,
-            qkv_bias=qkv_bias,
-            qk_scale=qk_scale,
-            attn_drop_rate=attn_drop_rate,
-            proj_drop_rate=drop_rate,
+            embed_dims=embed_dims, num_heads=num_heads, window_size=window_size, shift_size=window_size // 2 if shift else 0,
+            qkv_bias=qkv_bias, qk_scale=qk_scale, attn_drop_rate=attn_drop_rate, proj_drop_rate=drop_rate,
             dropout_cfg={'type': 'droppath', 'opts': {'drop_prob': drop_path_rate}},
         )
         self.norm2 = BuildNormalization(norm_cfg['type'], (embed_dims, norm_cfg['opts']))
         self.ffn = FFN(
-            embed_dims=embed_dims,
-            feedforward_channels=feedforward_channels,
-            num_fcs=2,
-            ffn_drop=drop_rate,
-            dropout_cfg={'type': 'droppath', 'opts': {'drop_prob': drop_path_rate}},
-            act_cfg=act_cfg,
-            add_identity=True,
+            embed_dims=embed_dims, feedforward_channels=feedforward_channels, num_fcs=2,
+            ffn_drop=drop_rate, dropout_cfg={'type': 'droppath', 'opts': {'drop_prob': drop_path_rate}},
+            act_cfg=act_cfg, add_identity=True,
         )
     '''layers with zero weight decay'''
     def zerowdlayers(self):
-        return {'SwinBlock.norm1': self.norm1, 'SwinBlock.norm2': self.norm2}
+        layers = {'SwinBlock.norm1': self.norm1, 'SwinBlock.norm2': self.norm2}
+        for key, value in self.attn.zerowdlayers().items():
+            if 'relative_position_bias_table' in key:
+                layers[f'SwinBlock.{key}'] = nn.ParameterList([value])
+            else:
+                layers[f'SwinBlock.{key}'] = value
+        return layers
     '''layers with non zero weight decay'''
     def nonzerowdlayers(self):
-        return {'SwinBlock.attn': self.attn, 'SwinBlock.ffn': self.ffn}
+        layers = {'SwinBlock.ffn': self.ffn}
+        for key, value in self.attn.nonzerowdlayers().items():
+            if 'relative_position_bias_table' in key:
+                layers[f'SwinBlock.{key}'] = nn.ParameterList([value])
+            else:
+                layers[f'SwinBlock.{key}'] = value
+        return layers
     '''forward'''
     def forward(self, x, hw_shape):
         identity = x
@@ -252,18 +254,9 @@ class SwinBlockSequence(nn.Module):
         self.blocks = nn.ModuleList()
         for i in range(depth):
             block = SwinBlock(
-                embed_dims=embed_dims,
-                num_heads=num_heads,
-                feedforward_channels=feedforward_channels,
-                window_size=window_size,
-                shift=False if i % 2 == 0 else True,
-                qkv_bias=qkv_bias,
-                qk_scale=qk_scale,
-                drop_rate=drop_rate,
-                attn_drop_rate=attn_drop_rate,
-                drop_path_rate=drop_path_rate[i],
-                act_cfg=act_cfg,
-                norm_cfg=norm_cfg,
+                embed_dims=embed_dims, num_heads=num_heads, feedforward_channels=feedforward_channels, window_size=window_size,
+                shift=False if i % 2 == 0 else True, qkv_bias=qkv_bias, qk_scale=qk_scale, drop_rate=drop_rate,
+                attn_drop_rate=attn_drop_rate, drop_path_rate=drop_path_rate[i], act_cfg=act_cfg, norm_cfg=norm_cfg,
             )
             self.blocks.append(block)
         self.downsample = downsample
@@ -344,19 +337,9 @@ class SwinTransformer(nn.Module):
             else:
                 downsample = None
             stage = SwinBlockSequence(
-                embed_dims=in_channels,
-                num_heads=num_heads[i],
-                feedforward_channels=mlp_ratio * in_channels,
-                depth=depths[i],
-                window_size=window_size,
-                qkv_bias=qkv_bias,
-                qk_scale=qk_scale,
-                drop_rate=drop_rate,
-                attn_drop_rate=attn_drop_rate,
-                drop_path_rate=dpr[sum(depths[:i]): sum(depths[:i+1])],
-                downsample=downsample,
-                act_cfg=act_cfg,
-                norm_cfg=norm_cfg
+                embed_dims=in_channels, num_heads=num_heads[i], feedforward_channels=mlp_ratio * in_channels, depth=depths[i],
+                window_size=window_size, qkv_bias=qkv_bias, qk_scale=qk_scale, drop_rate=drop_rate, attn_drop_rate=attn_drop_rate,
+                drop_path_rate=dpr[sum(depths[:i]): sum(depths[:i+1])], downsample=downsample, act_cfg=act_cfg, norm_cfg=norm_cfg
             )
             self.stages.append(stage)
             if downsample:

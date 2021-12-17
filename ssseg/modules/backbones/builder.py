@@ -5,6 +5,7 @@ Author:
     Zhenchao Jin
 '''
 from .unet import BuildUNet
+from .twins import BuildTwins
 from .cgnet import BuildCGNet
 from .hrnet import BuildHRNet
 from .erfnet import BuildERFNet
@@ -24,6 +25,7 @@ from .timmwrapper import BuildTIMMBackbone
 def BuildBackbone(cfg, **kwargs):
     supported_backbones = {
         'unet': BuildUNet,
+        'twins': BuildTwins,
         'cgnet': BuildCGNet,
         'hrnet': BuildHRNet,
         'erfnet': BuildERFNet,

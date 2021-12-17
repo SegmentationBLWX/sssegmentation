@@ -1,6 +1,6 @@
 '''
 Function:
-    builder for different models
+    Build the model
 Author:
     Zhenchao Jin
 '''

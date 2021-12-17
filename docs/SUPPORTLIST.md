@@ -166,6 +166,15 @@ You can download the [paper](https://arxiv.org/pdf/1505.04597.pdf) to learn the 
 
 Please refer to [UNet](https://github.com/SegmentationBLWX/sssegmentation/tree/main/docs/performances/unet) for details.
 
+#### Twins
+(1) The related paper.
+
+You can download the [paper](https://arxiv.org/pdf/2104.13840.pdf) to learn the details of Twins.
+
+(2) The reported performance.
+
+Please refer to [Twins](https://github.com/SegmentationBLWX/sssegmentation/tree/main/docs/performances/twins) for details.
+
 #### CGNet
 (1) The related paper.
 

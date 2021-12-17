@@ -1,6 +1,6 @@
 '''
 Function:
-    builder for parallel dataloader and parallel model
+    Build the parallel dataloader and parallel model
 Author:
     Zhenchao Jin
 '''

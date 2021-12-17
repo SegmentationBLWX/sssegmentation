@@ -94,7 +94,7 @@ class UPerNet(BaseModel):
         return predictions
     '''return all layers'''
     def alllayers(self):
-        if self.cfg['backbone']['series'] in ['swin']:
+        if self.cfg['backbone']['series'] in ['swin', 'twins']:
             all_layers = {
                 'ppm_net': self.ppm_net,
                 'lateral_convs': self.lateral_convs,
