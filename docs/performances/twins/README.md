@@ -28,7 +28,7 @@
 | UperNet       | SVT-B       | 512x512    | LR/POLICY/BS/EPOCH: 0.00006/poly/16/130 | train/val       |        | [model]() &#124; [log]() |
 | UperNet       | SVT-L       | 512x512    | LR/POLICY/BS/EPOCH: 0.00006/poly/16/130 | train/val       |        | [model]() &#124; [log]() |
 | UperNet       | PCPVT-S     | 512x512    | LR/POLICY/BS/EPOCH: 0.00006/poly/16/130 | train/val       |        | [model]() &#124; [log]() |
-| UperNet       | PCPVT-B     | 512x512    | LR/POLICY/BS/EPOCH: 0.00006/poly/16/130 | train/val       |        | [model]() &#124; [log]() |
+| UperNet       | PCPVT-B     | 512x512    | LR/POLICY/BS/EPOCH: 0.00006/poly/16/130 | train/val       | 48.06% | [model]() &#124; [log]() |
 | UperNet       | PCPVT-L     | 512x512    | LR/POLICY/BS/EPOCH: 0.00006/poly/16/130 | train/val       |        | [model]() &#124; [log]() |
 
 

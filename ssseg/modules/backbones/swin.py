@@ -217,7 +217,9 @@ class SwinBlock(nn.Module):
             act_cfg=act_cfg, add_identity=True,
         )
     '''layers with zero weight decay'''
-    def zerowdlayers(self):
+    def zerowdlayers(self, apply_wd_to_relative_position_bias_table=True):
+        # Note: our experiments find that do not set the weight decay of relative_position_bias_table as zero can achieve better segmentation performance
+        if apply_wd_to_relative_position_bias_table: return {'SwinBlock.norm1': self.norm1, 'SwinBlock.norm2': self.norm2}
         layers = {'SwinBlock.norm1': self.norm1, 'SwinBlock.norm2': self.norm2}
         for key, value in self.attn.zerowdlayers().items():
             if 'relative_position_bias_table' in key:
@@ -226,7 +228,9 @@ class SwinBlock(nn.Module):
                 layers[f'SwinBlock.{key}'] = value
         return layers
     '''layers with non zero weight decay'''
-    def nonzerowdlayers(self):
+    def nonzerowdlayers(self, apply_wd_to_relative_position_bias_table=True):
+        # Note: our experiments find that do not set the weight decay of relative_position_bias_table as zero can achieve better segmentation performance
+        if apply_wd_to_relative_position_bias_table: return {'SwinBlock.attn': self.attn, 'SwinBlock.ffn': self.ffn}
         layers = {'SwinBlock.ffn': self.ffn}
         for key, value in self.attn.nonzerowdlayers().items():
             if 'relative_position_bias_table' in key:

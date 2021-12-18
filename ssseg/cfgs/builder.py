@@ -1,6 +1,6 @@
 '''
 Function:
-    build config file
+    Build config file
 Author:
     Zhenchao Jin
 '''
