@@ -146,6 +146,15 @@ You can visit https://github.com/nightrome/cocostuff10k to learn the details of 
 - Official: https://github.com/nightrome/cocostuff10k
 - Baidu Disk: https://pan.baidu.com/s/1TZbgxPnY0Als6LoiV80Xrw (access code: fn1i)
 
+#### COCOStuff164k
+(1) The official website.
+
+You can visit https://github.com/nightrome/cocostuff to learn the details of COCOStuff164k dataset.
+
+(2) The download url.
+- Official: https://github.com/nightrome/cocostuff
+- Baidu Disk: https://pan.baidu.com/s/1TZbgxPnY0Als6LoiV80Xrw (access code: fn1i)
+
 #### Pascal Context
 (1) The official website.
 

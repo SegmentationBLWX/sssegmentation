@@ -73,7 +73,8 @@ https://sssegmentation.readthedocs.io/en/latest/
 - [Supervisely](https://supervise.ly/explore/projects/supervisely-person-dataset-23304/datasets)
 - [SBUShadow](https://www3.cs.stonybrook.edu/~cvl/projects/shadow_noisy_label/index.html)
 - [PASCAL VOC](http://host.robots.ox.ac.uk/pascal/VOC/)
-- [COCOStuff10k](https://cocodataset.org/#home)
+- [COCOStuff10k](https://github.com/nightrome/cocostuff10k)
+- [COCOStuff164k](https://github.com/nightrome/cocostuff)
 - [Pascal Context](https://cs.stanford.edu/~roozbeh/pascal-context/)
 
 
