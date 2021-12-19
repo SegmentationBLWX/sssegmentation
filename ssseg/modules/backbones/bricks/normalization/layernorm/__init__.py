@@ -1,2 +1,2 @@
 '''initialize'''
-from .layernorm import LayerNorm
+from torch.nn import LayerNorm

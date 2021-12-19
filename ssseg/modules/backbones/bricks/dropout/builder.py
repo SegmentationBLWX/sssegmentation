@@ -1,6 +1,6 @@
 '''
 Function:
-    build dropout
+    Build dropout
 Author:
     Zhenchao Jin
 '''
