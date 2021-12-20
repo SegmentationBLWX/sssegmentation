@@ -45,9 +45,9 @@ LOSSES_CFG = {
         'celoss': {'scale_factor': 1.0, 'opts': {'ignore_index': 255, 'reduction': 'mean'}}
     },
 }
-# modify model config
-MODEL_CFG = MODEL_CFG.copy()
-MODEL_CFG.update(
+# modify segmentor config
+SEGMENTOR_CFG = SEGMENTOR_CFG.copy()
+SEGMENTOR_CFG.update(
     {
         'num_classes': 150,
         'backbone': {
@@ -72,8 +72,8 @@ MODEL_CFG.update(
         ],
     }
 )
-MODEL_CFG['memory']['in_channels'] = 1024
-MODEL_CFG['memory']['context_within_image']['cfg']['dilations'] = [1, 6, 12, 18]
+SEGMENTOR_CFG['memory']['in_channels'] = 1024
+SEGMENTOR_CFG['memory']['context_within_image']['cfg']['dilations'] = [1, 6, 12, 18]
 # modify inference config
 INFERENCE_CFG = {
     'mode': 'slide',

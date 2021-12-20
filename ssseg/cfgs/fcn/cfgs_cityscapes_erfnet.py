@@ -34,9 +34,9 @@ OPTIMIZER_CFG.update({
 # modify losses config
 LOSSES_CFG = LOSSES_CFG.copy()
 LOSSES_CFG.pop('loss_aux')
-# modify model config
-MODEL_CFG = MODEL_CFG.copy()
-MODEL_CFG.update(
+# modify segmentor config
+SEGMENTOR_CFG = SEGMENTOR_CFG.copy()
+SEGMENTOR_CFG.update(
     {
         'num_classes': 19,
         'backbone': {

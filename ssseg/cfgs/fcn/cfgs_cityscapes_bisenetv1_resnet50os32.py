@@ -56,9 +56,9 @@ LOSSES_CFG = {
         'celoss': {'scale_factor': 1.0, 'opts': {'ignore_index': 255, 'reduction': 'mean'}}
     },
 }
-# modify model config
-MODEL_CFG = MODEL_CFG.copy()
-MODEL_CFG.update(
+# modify segmentor config
+SEGMENTOR_CFG = SEGMENTOR_CFG.copy()
+SEGMENTOR_CFG.update(
     {
         'num_classes': 19,
         'backbone': {

@@ -36,9 +36,9 @@ OPTIMIZER_CFG.update(
 # modify losses config
 LOSSES_CFG = LOSSES_CFG.copy()
 LOSSES_CFG.pop('loss_aux')
-# modify model config
-MODEL_CFG = MODEL_CFG.copy()
-MODEL_CFG.update(
+# modify segmentor config
+SEGMENTOR_CFG = SEGMENTOR_CFG.copy()
+SEGMENTOR_CFG.update(
     {
         'num_classes': 19,
         'backbone': {
@@ -50,10 +50,10 @@ MODEL_CFG.update(
         'auxiliary': None,
     }
 )
-MODEL_CFG['memory']['use_loss'] = False
-MODEL_CFG['memory']['downsample_backbone']['stride'] = 2
-MODEL_CFG['memory']['in_channels'] = sum([48, 96, 192, 384])
-MODEL_CFG['memory']['update_cfg']['momentum_cfg']['base_lr'] = 0.01 * 0.9
+SEGMENTOR_CFG['memory']['use_loss'] = False
+SEGMENTOR_CFG['memory']['downsample_backbone']['stride'] = 2
+SEGMENTOR_CFG['memory']['in_channels'] = sum([48, 96, 192, 384])
+SEGMENTOR_CFG['memory']['update_cfg']['momentum_cfg']['base_lr'] = 0.01 * 0.9
 # modify inference config
 INFERENCE_CFG = INFERENCE_CFG.copy()
 # modify common config

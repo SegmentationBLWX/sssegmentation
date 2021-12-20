@@ -61,8 +61,8 @@ OPTIMIZER_CFG = {
 }
 # config for losses
 LOSSES_CFG = {}
-# config for model
-MODEL_CFG = {
+# config for segmentor
+SEGMENTOR_CFG = {
     'type': 'maskformer',
     'num_classes': -1,
     'benchmark': True,

@@ -69,8 +69,8 @@ LOSSES_CFG = {
         'celoss': {'scale_factor': 1.0, 'opts': {'ignore_index': 255, 'reduction': 'mean'}}
     },
 }
-# config for model
-MODEL_CFG = {
+# config for segmentor
+SEGMENTOR_CFG = {
     'type': 'pointrend',
     'num_classes': -1,
     'benchmark': True,

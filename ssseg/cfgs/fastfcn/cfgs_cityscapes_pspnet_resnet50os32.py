@@ -39,8 +39,8 @@ OPTIMIZER_CFG.update(
 )
 # modify losses config
 LOSSES_CFG = LOSSES_CFG.copy()
-# modify model config
-MODEL_CFG = {
+# modify segmentor config
+SEGMENTOR_CFG = {
     'type': 'fastfcn',
     'segmentor': 'pspnet',
     'num_classes': 19,

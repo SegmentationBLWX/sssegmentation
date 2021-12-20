@@ -1,6 +1,6 @@
 '''
 Function:
-    Build the model
+    Build the segmentor
 Author:
     Zhenchao Jin
 '''
@@ -35,9 +35,9 @@ from .deeplabv3plus import Deeplabv3Plus
 from .fcn import FCN, DepthwiseSeparableFCN
 
 
-'''build model'''
-def BuildModel(cfg, mode, **kwargs):
-    supported_models = {
+'''build segmentor'''
+def BuildSegmentor(segmentor_cfg, mode, **kwargs):
+    supported_segmentors = {
         'fcn': FCN,
         'ce2p': CE2P,
         'icnet': ICNet,
@@ -70,6 +70,6 @@ def BuildModel(cfg, mode, **kwargs):
         'deeplabv3plus': Deeplabv3Plus,
         'depthwiseseparablefcn': DepthwiseSeparableFCN,
     }
-    model_type = cfg['type']
-    assert model_type in supported_models, 'unsupport model_type %s...' % model_type
-    return supported_models[model_type](cfg, mode=mode)
+    segmentor_type = segmentor_cfg['type']
+    assert segmentor_type in supported_segmentors, 'unsupport segmentor_type %s...' % segmentor_type
+    return supported_segmentors[segmentor_type](segmentor_cfg, mode=mode)

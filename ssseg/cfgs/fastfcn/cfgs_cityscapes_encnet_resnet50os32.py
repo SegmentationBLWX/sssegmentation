@@ -49,8 +49,8 @@ LOSSES_CFG = {
         'celoss': {'scale_factor': 1.0, 'opts': {'ignore_index': 255, 'reduction': 'mean'}}
     },
 }
-# modify model config
-MODEL_CFG = {
+# modify segmentor config
+SEGMENTOR_CFG = {
     'type': 'fastfcn',
     'segmentor': 'encnet',
     'num_classes': 19,

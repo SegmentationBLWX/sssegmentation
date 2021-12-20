@@ -1,6 +1,6 @@
 '''
 Function:
-    test the model
+    test the segmentor
 Author:
     Zhenchao Jin
 '''
@@ -41,24 +41,24 @@ class Tester():
         self.use_cuda = torch.cuda.is_available()
         # modify config for consistency
         if not self.use_cuda:
-            if self.cmd_args.local_rank == 0: self.logger_handle.warning('Cuda is not available, only cpu is used to test the model...')
-            self.cfg.MODEL_CFG['distributed']['is_on'] = False
+            if self.cmd_args.local_rank == 0: self.logger_handle.warning('Cuda is not available, only cpu is used to test the segmentor...')
+            self.cfg.SEGMENTOR_CFG['distributed']['is_on'] = False
             self.cfg.DATALOADER_CFG['test']['type'] = 'nondistributed'
-        if self.cfg.MODEL_CFG['distributed']['is_on']:
-            self.cfg.MODEL_CFG['is_multi_gpus'] = True
+        if self.cfg.SEGMENTOR_CFG['distributed']['is_on']:
+            self.cfg.SEGMENTOR_CFG['is_multi_gpus'] = True
             self.cfg.DATALOADER_CFG['test']['type'] = 'distributed'
             self.cfg.DATALOADER_CFG['test']['batch_size'] = self.cmd_args.nproc_per_node
         # init distributed testing if necessary
-        distributed_cfg = self.cfg.MODEL_CFG['distributed']
+        distributed_cfg = self.cfg.SEGMENTOR_CFG['distributed']
         if distributed_cfg['is_on']:
             dist.init_process_group(backend=distributed_cfg.get('backend', 'nccl'))
     '''start tester'''
     def start(self, all_preds, all_gts):
         cfg, logger_handle, use_cuda, cmd_args, cfg_file_path = self.cfg, self.logger_handle, self.use_cuda, self.cmd_args, self.cfg_file_path
-        distributed_cfg, common_cfg = self.cfg.MODEL_CFG['distributed'], self.cfg.COMMON_CFG['train']
+        distributed_cfg, common_cfg = self.cfg.SEGMENTOR_CFG['distributed'], self.cfg.COMMON_CFG['train']
         # instanced dataset and dataloader
         dataset = BuildDataset(mode='TEST', logger_handle=logger_handle, dataset_cfg=copy.deepcopy(cfg.DATASET_CFG))
-        assert dataset.num_classes == cfg.MODEL_CFG['num_classes'], 'parsed config file %s error...' % cfg_file_path
+        assert dataset.num_classes == cfg.SEGMENTOR_CFG['num_classes'], 'parsed config file %s error...' % cfg_file_path
         dataloader_cfg = copy.deepcopy(cfg.DATALOADER_CFG)
         if distributed_cfg['is_on']:
             batch_size, num_workers = dataloader_cfg['test']['batch_size'], dataloader_cfg['test']['num_workers']
@@ -68,43 +68,43 @@ class Tester():
             assert num_workers * self.ngpus_per_node == dataloader_cfg['test']['num_workers'], 'unsuitable num_workers...'
             dataloader_cfg['test'].update({'batch_size': batch_size, 'num_workers': num_workers})
         dataloader = BuildParallelDataloader(mode='TEST', dataset=dataset, cfg=copy.deepcopy(dataloader_cfg))
-        # instanced model
-        cfg.MODEL_CFG['backbone']['pretrained'] = False
-        model = BuildModel(cfg=copy.deepcopy(cfg.MODEL_CFG), mode='TEST')
+        # instanced segmentor
+        cfg.SEGMENTOR_CFG['backbone']['pretrained'] = False
+        segmentor = BuildSegmentor(segmentor_cfg=copy.deepcopy(cfg.SEGMENTOR_CFG), mode='TEST')
         if distributed_cfg['is_on']:
             torch.cuda.set_device(cmd_args.local_rank)
-            model.cuda(cmd_args.local_rank)
+            segmentor.cuda(cmd_args.local_rank)
         else:
-            if use_cuda: model = model.cuda()
+            if use_cuda: segmentor = segmentor.cuda()
         # load checkpoints
         checkpoints = loadcheckpoints(cmd_args.checkpointspath, logger_handle=logger_handle, cmd_args=cmd_args)
         try:
-            model.load_state_dict(checkpoints['model'])
+            segmentor.load_state_dict(checkpoints['model'])
         except Exception as e:
             logger_handle.warning(str(e) + '\n' + 'Try to load checkpoints by using strict=False...')
-            model.load_state_dict(checkpoints['model'], strict=False)
+            segmentor.load_state_dict(checkpoints['model'], strict=False)
         # parallel
-        if use_cuda and cfg.MODEL_CFG['is_multi_gpus']:
-            is_distributed_on = cfg.MODEL_CFG['distributed']['is_on']
-            model = BuildParallelModel(model, is_distributed_on, device_ids=[cmd_args.local_rank] if is_distributed_on else None)
+        if use_cuda and cfg.SEGMENTOR_CFG['is_multi_gpus']:
+            is_distributed_on = cfg.SEGMENTOR_CFG['distributed']['is_on']
+            segmentor = BuildParallelModel(segmentor, is_distributed_on, device_ids=[cmd_args.local_rank] if is_distributed_on else None)
         # print information
         if cmd_args.local_rank == 0:
             logger_handle.info('Dataset: %s-%s, Number of images: %s' % (cfg.DATASET_CFG['type'], cfg.DATASET_CFG['test']['set'], len(dataset)))
-            logger_handle.info('Model: %s, Backbone: %s-%s' % (cfg.MODEL_CFG['type'], cfg.MODEL_CFG['backbone']['series'], cfg.MODEL_CFG['backbone']['type']))
+            logger_handle.info('Segmentor: %s, Backbone: %s-%s' % (cfg.SEGMENTOR_CFG['type'], cfg.SEGMENTOR_CFG['backbone']['series'], cfg.SEGMENTOR_CFG['backbone']['type']))
             logger_handle.info('Resume from: %s' % cmd_args.checkpointspath)
             logger_handle.info('Config file path: %s' % cfg_file_path)
         # set eval
-        model.eval()
+        segmentor.eval()
         # start to test
         FloatTensor = torch.cuda.FloatTensor if use_cuda else torch.FloatTensor
         inference_cfg = copy.deepcopy(cfg.INFERENCE_CFG)
         with torch.no_grad():
-            if cfg.MODEL_CFG['distributed']['is_on']: dataloader.sampler.set_epoch(0)
+            if cfg.SEGMENTOR_CFG['distributed']['is_on']: dataloader.sampler.set_epoch(0)
             pbar = tqdm(enumerate(dataloader))
             for batch_idx, samples in pbar:
                 pbar.set_description('Processing %s/%s in rank %s' % (batch_idx+1, len(dataloader), cmd_args.local_rank))
                 imageids, images, widths, heights, gts = samples['id'], samples['image'], samples['width'], samples['height'], samples['groundtruth']
-                infer_tricks, align_corners = inference_cfg['tricks'], model.align_corners if hasattr(model, 'align_corners') else model.module.align_corners
+                infer_tricks, align_corners = inference_cfg['tricks'], segmentor.align_corners if hasattr(segmentor, 'align_corners') else segmentor.module.align_corners
                 cascade_cfg = infer_tricks.get('cascade', {'key_for_pre_output': 'memory_gather_logits', 'times': 1, 'forward_default_args': None})
                 for idx in range(cascade_cfg['times']):
                     forward_args = None
@@ -115,7 +115,7 @@ class Tester():
                         forward_args = {cascade_cfg['key_for_pre_output']: sum(outputs_list) / len(outputs_list)}
                         if cascade_cfg['forward_default_args'] is not None: forward_args.update(cascade_cfg['forward_default_args'])
                     outputs_list = self.auginference(
-                        model=model,
+                        segmentor=segmentor,
                         images=images,
                         inference_cfg=inference_cfg,
                         num_classes=dataset.num_classes,
@@ -134,12 +134,12 @@ class Tester():
                     gt[gt >= dataset.num_classes] = -1
                     all_gts.append(gt)
     '''inference with augmentations'''
-    def auginference(self, model, images, inference_cfg, num_classes, FloatTensor, align_corners, forward_args=None):
+    def auginference(self, segmentor, images, inference_cfg, num_classes, FloatTensor, align_corners, forward_args=None):
         infer_tricks, outputs_list = inference_cfg['tricks'], []
         for scale_factor in infer_tricks['multiscale']:
             images_scale = F.interpolate(images, scale_factor=scale_factor, mode='bilinear', align_corners=align_corners)
             outputs = self.inference(
-                model=model, 
+                segmentor=segmentor, 
                 images=images_scale.type(FloatTensor), 
                 inference_cfg=inference_cfg, 
                 num_classes=num_classes, 
@@ -149,7 +149,7 @@ class Tester():
             if infer_tricks['flip']:
                 images_flip = torch.from_numpy(np.flip(images_scale.cpu().numpy(), axis=3).copy())
                 outputs_flip = self.inference(
-                    model=model, 
+                    segmentor=segmentor, 
                     images=images_flip.type(FloatTensor), 
                     inference_cfg=inference_cfg, 
                     num_classes=num_classes, 
@@ -168,17 +168,17 @@ class Tester():
                 outputs_list.append(outputs_flip)
         return outputs_list
     '''inference'''
-    def inference(self, model, images, inference_cfg, num_classes, forward_args=None):
+    def inference(self, segmentor, images, inference_cfg, num_classes, forward_args=None):
         assert inference_cfg['mode'] in ['whole', 'slide']
         use_probs_before_resize = inference_cfg['tricks']['use_probs_before_resize']
         if inference_cfg['mode'] == 'whole':
             if forward_args is None:
-                outputs = model(images)
+                outputs = segmentor(images)
             else:
-                outputs = model(images, **forward_args)
+                outputs = segmentor(images, **forward_args)
             if use_probs_before_resize: outputs = F.softmax(outputs, dim=1)
         else:
-            align_corners = model.align_corners if hasattr(model, 'align_corners') else model.module.align_corners
+            align_corners = segmentor.align_corners if hasattr(segmentor, 'align_corners') else segmentor.module.align_corners
             opts = inference_cfg['opts']
             stride_h, stride_w = opts['stride']
             cropsize_h, cropsize_w = opts['cropsize']
@@ -194,9 +194,9 @@ class Tester():
                     x1, y1 = max(x2 - cropsize_w, 0), max(y2 - cropsize_h, 0)
                     crop_images = images[:, :, y1:y2, x1:x2]
                     if forward_args is None:
-                        outputs_crop = model(crop_images)
+                        outputs_crop = segmentor(crop_images)
                     else:
-                        outputs_crop = model(crop_images, **forward_args)
+                        outputs_crop = segmentor(crop_images, **forward_args)
                     outputs_crop = F.interpolate(outputs_crop, size=crop_images.size()[2:], mode='bilinear', align_corners=align_corners)
                     if use_probs_before_resize: outputs_crop = F.softmax(outputs_crop, dim=1)
                     outputs += F.pad(outputs_crop, (int(x1), int(outputs.shape[3] - x2), int(y1), int(outputs.shape[2] - y2)))
@@ -218,7 +218,7 @@ def main():
     logger_handle = Logger(common_cfg['logfilepath'])
     # number of gpus, for distribued testing, only support a process for a GPU
     ngpus_per_node = torch.cuda.device_count()
-    if (ngpus_per_node != args.nproc_per_node) and cfg.MODEL_CFG['distributed']['is_on']:
+    if (ngpus_per_node != args.nproc_per_node) and cfg.SEGMENTOR_CFG['distributed']['is_on']:
         if args.local_rank == 0: logger_handle.warning('ngpus_per_node is not equal to nproc_per_node, force ngpus_per_node = nproc_per_node by default...')
         ngpus_per_node = args.nproc_per_node
     # instanced Tester
@@ -226,7 +226,7 @@ def main():
     client = Tester(cfg=cfg, ngpus_per_node=ngpus_per_node, logger_handle=logger_handle, cmd_args=args, cfg_file_path=cfg_file_path)
     client.start(all_preds, all_gts)
     # save results and evaluate
-    if cfg.MODEL_CFG['distributed']['is_on']:
+    if cfg.SEGMENTOR_CFG['distributed']['is_on']:
         backupdir = common_cfg['backupdir']
         filename = common_cfg['resultsavepath'].split('/')[-1].split('.')[0] + f'_{args.local_rank}.' + common_cfg['resultsavepath'].split('.')[-1]
         with open(os.path.join(backupdir, filename), 'wb') as fp:
@@ -263,7 +263,7 @@ def main():
                 predictions=all_preds, 
                 groundtruths=all_gts, 
                 metric_list=cfg.INFERENCE_CFG.get('metric_list', ['iou', 'miou']),
-                num_classes=cfg.MODEL_CFG['num_classes'],
+                num_classes=cfg.SEGMENTOR_CFG['num_classes'],
                 ignore_index=-1,
             )
             logger_handle.info(result)
