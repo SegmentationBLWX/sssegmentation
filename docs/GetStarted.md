@@ -1,4 +1,5 @@
-# Installation
+# Get Started
+
 
 ## Prerequisites
 - Linux or macOS (Windows is in experimental support)
@@ -31,8 +32,13 @@ pip install torch==1.8.0+cu111 torchvision==0.9.0+cu111 torchaudio==0.8.0 -f htt
 pip install torch==1.8.0 torchvision==0.9.0 torchaudio==0.8.0
 ```
 
-(3) Build some apis, e.g., coco api.
+(3) Build some apis, e.g., coco api (if you don't use coco dataset, this operation is unnecessary).
 ```sh
 cd ssseg/libs
 sh make.sh
+```
+
+(4) Install sssegmentation (this operation is also optional).
+```sh
+pip install -e .
 ```

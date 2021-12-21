@@ -1,11 +1,18 @@
+<div align="center">
+  <img src="dcos/logo.png" width="600"/>
+</div>
+<br />
+
+[![license](https://img.shields.io/github/license/SegmentationBLWX/sssegmentation.svg)](https://github.com/SegmentationBLWX/sssegmentation/blob/master/LICENSE)
+[![issue resolution](https://isitmaintained.com/badge/resolution/SegmentationBLWX/sssegmentation.svg)](https://github.com/SegmentationBLWX/sssegmentation/issues)
+[![open issues](https://isitmaintained.com/badge/open/SegmentationBLWX/sssegmentation.svg)](https://github.com/SegmentationBLWX/sssegmentation/issues)
+
+Documents: https://sssegmentation.readthedocs.io/en/latest/
+
+
 # Introduction
 SSSegmentation is an open source strongly supervised semantic segmentation toolbox based on PyTorch.
 You can star this repository to keep track of the project if it's helpful for you, thank you for your support.
-
-
-# Documents
-#### In English
-https://sssegmentation.readthedocs.io/en/latest/
 
 
 # Supported

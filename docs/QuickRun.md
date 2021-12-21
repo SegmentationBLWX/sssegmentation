@@ -1,7 +1,7 @@
-# Quick Start
+# Quick Run
 
 
-## Train
+## Train a model
 #### Bash
 You can train the models as follows:
 ```sh
@@ -41,7 +41,7 @@ optional arguments:
 ```
 
 
-## Test
+## Test performance of pretrained models
 #### Bash
 You can test the models as follows:
 ```sh
@@ -82,7 +82,7 @@ optional arguments:
 ```
 
 
-## Inference
+## Inference with pretrained models
 #### Bash
 You can apply the models as follows:
 ```sh

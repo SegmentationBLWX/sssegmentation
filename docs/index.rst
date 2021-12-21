@@ -9,6 +9,8 @@ Welcome to sssegmentation’s documentation!
 .. toctree::
 	:maxdepth: 2
 	
-	INSTALLATION.md
-	SUPPORTLIST.md
-	QUICKSTART.md
+	GetStarted.md
+	DatasetPreparation.md
+	ModelZoo.md
+	QuickRun.md
+	Tutorials.md
