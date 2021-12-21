@@ -1,5 +1,5 @@
 <div align="center">
-  <img src="dcos/logo.png" width="600"/>
+  <img src="./resources/logo.png" width="600"/>
 </div>
 <br />
 
