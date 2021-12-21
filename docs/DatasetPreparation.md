@@ -3,7 +3,7 @@
 
 ## Supported datasets
 
-:::{note}
+:::{note}  
 Since some of the datasets have been pre-processed for easier io reading (e.g., add imageids in train.txt/val.txt/test.txt), 
 it is recommended to download the dataset from Baidu Disk rather than official website.
 :::
