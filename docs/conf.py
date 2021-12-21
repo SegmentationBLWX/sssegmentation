@@ -10,11 +10,10 @@
 # add these directories to sys.path here. If the directory is relative to the
 # documentation root, use os.path.abspath to make it absolute, like shown here.
 #
-import os
-import sys
-import pytorch_sphinx_theme
+# import os
+# import sys
+# sys.path.insert(0, os.path.abspath('.'))
 
-sys.path.insert(0, os.path.abspath('../../'))
 
 # -- Project information -----------------------------------------------------
 
@@ -29,13 +28,12 @@ release = '1.0.0'
 # extensions coming with Sphinx (named 'sphinx.ext.*') or your custom
 # ones.
 extensions = [
-    'sphinx.ext.autodoc', 'sphinx.ext.napoleon', 'sphinx.ext.viewcode',
-    'sphinx_markdown_tables', 'sphinx_copybutton', 'myst_parser'
+	'sphinx.ext.autodoc',
+    'sphinx.ext.napoleon',
+    'sphinx.ext.viewcode',
+    'recommonmark',
+    'sphinx_markdown_tables',
 ]
-
-# Ignore >>> when copying code
-copybutton_prompt_text = r'>>> |\.\.\. '
-copybutton_prompt_is_regexp = True
 
 # Add any paths that contain templates here, relative to this directory.
 templates_path = ['_templates']
@@ -62,30 +60,14 @@ exclude_patterns = ['_build', 'Thumbs.db', '.DS_Store']
 # The theme to use for HTML and HTML Help pages.  See the documentation for
 # a list of builtin themes.
 #
-# html_theme = 'sphinx_rtd_theme'
-html_theme = 'pytorch_sphinx_theme'
-html_theme_path = [pytorch_sphinx_theme.get_html_theme_path()]
-html_theme_options = {
-    'logo_url': 'https://sssegmentation.readthedocs.io/en/latest/index.html',
-    'menu': [
-        {
-            'name': 'Author',
-            'url': 'https://charlespikachu.github.io/',
-        },
-        {
-            'name': 'GitHub',
-            'url': 'https://github.com/SegmentationBLWX/sssegmentation',
-        },
-    ],
-    'menu_lang': 'en'
-}
+html_theme = 'sphinx_rtd_theme'
+# html_theme = 'pytorch_sphinx_theme'
+
 
 # Add any paths that contain custom static files (such as style sheets) here,
 # relative to this directory. They are copied after the builtin static files,
 # so a file named "default.css" will overwrite the builtin "default.css".
 html_static_path = ['_static']
-html_css_files = ['css/readthedocs.css']
-myst_enable_extensions = ['colon_fence']
 
 # For multi language
 # locale_dirs = ['locale/']
