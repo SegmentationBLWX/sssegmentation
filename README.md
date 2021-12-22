@@ -16,7 +16,7 @@ SSSegmentation is an open source strongly supervised semantic segmentation toolb
 You can star this repository to keep track of the project if it's helpful for you, thank you for your support.
 
 
-## Major features
+## Major Features
 
 - **Unified Benchmark**
 
@@ -26,16 +26,16 @@ You can star this repository to keep track of the project if it's helpful for yo
 
   We decompose the semantic segmentation framework into different components and one can easily construct a customized semantic segmentation framework by combining different modules.
  
-- **Support of multiple methods out of box**
+- **Support of Multiple Methods Out of Box**
 
   The toolbox directly supports popular and contemporary semantic segmentation frameworks, *e.g.* ISNet, DeepLabV3, PSPNet, MCIBI, etc.
  
-- **High performance**
+- **High Performance**
 
   The segmentation performance is better than or comparable to other codebases.
 
 
-## Benchmark and model zoo
+## Benchmark and Model Zoo
 
 #### Supported Backbones
 - [UNet](./docs/performances/unet)
