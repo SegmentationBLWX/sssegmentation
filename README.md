@@ -3,6 +3,7 @@
 </div>
 <br />
 
+[![docs](https://img.shields.io/badge/docs-latest-blue)](https://sssegmentation.readthedocs.io/en/latest/)
 [![license](https://img.shields.io/github/license/SegmentationBLWX/sssegmentation.svg)](https://github.com/SegmentationBLWX/sssegmentation/blob/master/LICENSE)
 [![issue resolution](https://isitmaintained.com/badge/resolution/SegmentationBLWX/sssegmentation.svg)](https://github.com/SegmentationBLWX/sssegmentation/issues)
 [![open issues](https://isitmaintained.com/badge/open/SegmentationBLWX/sssegmentation.svg)](https://github.com/SegmentationBLWX/sssegmentation/issues)
@@ -15,7 +16,26 @@ SSSegmentation is an open source strongly supervised semantic segmentation toolb
 You can star this repository to keep track of the project if it's helpful for you, thank you for your support.
 
 
-# Supported
+# Major features
+
+- **Unified Benchmark**
+
+  We provide a unified benchmark toolbox for various semantic segmentation methods.
+
+- **Modular Design**
+
+  We decompose the semantic segmentation framework into different components and one can easily construct a customized semantic segmentation framework by combining different modules.
+ 
+- **Support of multiple methods out of box**
+
+  The toolbox directly supports popular and contemporary semantic segmentation frameworks, *e.g.* ISNet, DeepLabV3, PSPNet, MCIBI, etc.
+ 
+- **High performance**
+
+  The segmentation performance is better than or comparable to other codebases.
+
+
+## Benchmark and model zoo
 
 #### Supported Backbones
 - [UNet](./docs/performances/unet)
@@ -33,7 +53,7 @@ You can star this repository to keep track of the project if it's helpful for yo
 - [SwinTransformer](./docs/performances/swin)
 - [VisionTransformer](https://arxiv.org/pdf/2010.11929.pdf)
 
-#### Supported Models
+#### Supported Segmentors
 - [FCN](./docs/performances/fcn)
 - [CE2P](./docs/performances/ce2p)
 - [SETR](./docs/performances/setr)
