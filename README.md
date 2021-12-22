@@ -11,12 +11,12 @@
 Documents: https://sssegmentation.readthedocs.io/en/latest/
 
 
-# Introduction
+## Introduction
 SSSegmentation is an open source strongly supervised semantic segmentation toolbox based on PyTorch.
 You can star this repository to keep track of the project if it's helpful for you, thank you for your support.
 
 
-# Major features
+## Major features
 
 - **Unified Benchmark**
 
@@ -105,7 +105,7 @@ You can star this repository to keep track of the project if it's helpful for yo
 - [Pascal Context](https://cs.stanford.edu/~roozbeh/pascal-context/)
 
 
-# Citation
+## Citation
 If you use this framework in your research, please cite this project:
 ```
 @misc{ssseg2020,
@@ -135,6 +135,6 @@ If you use this framework in your research, please cite this project:
 ```
 
 
-# References
+## References
 - [MMCV](https://github.com/open-mmlab/mmcv)
 - [MMSegmentation](https://github.com/open-mmlab/mmsegmentation)
