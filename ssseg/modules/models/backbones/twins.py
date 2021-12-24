@@ -202,10 +202,10 @@ class ConditionalPositionEncoding(nn.Module):
         return x
     '''layers with zero weight decay'''
     def zerowdlayers(self):
-        return {'ConditionalPositionEncoding.proj': self.proj}
+        return {}
     '''layers with non zero weight decay'''
     def nonzerowdlayers(self):
-        return {}
+        return {'ConditionalPositionEncoding.proj': self.proj}
 
 
 '''Twins-PCPVT'''

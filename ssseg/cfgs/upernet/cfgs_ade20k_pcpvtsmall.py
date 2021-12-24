@@ -47,20 +47,20 @@ SEGMENTOR_CFG.update(
         },
         'ppm': {
             'in_channels': 512,
-            'out_channels': 512,
+            'out_channels': 1024,
             'pool_scales': [1, 2, 3, 6],
         },
         'lateral': {
             'in_channels_list': [64, 128, 320],
-            'out_channels': 512,
+            'out_channels': 1024,
         },
         'fpn': {
-            'in_channels_list': [512, 512, 512],
-            'out_channels': 512,
+            'in_channels_list': [1024, 1024, 1024],
+            'out_channels': 1024,
         },
         'decoder': {
-            'in_channels': 2048,
-            'out_channels': 512,
+            'in_channels': 4096,
+            'out_channels': 1024,
             'dropout': 0.1,
         },
         'auxiliary': {
