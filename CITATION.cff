@@ -5,4 +5,4 @@ authors:
 title: "SSSegmentation: An Open Source Strongly Supervised Semantic Segmentation Toolbox Based on PyTorch"
 date-released: 2020-10-23
 url: "https://github.com/SegmentationBLWX/sssegmentation"
-license: MIT License
+license: Apache-2.0
