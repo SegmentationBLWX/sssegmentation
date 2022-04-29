@@ -32,7 +32,7 @@ You can star this repository to keep track of the project if it's helpful for yo
  
 - **Support of Multiple Methods Out of Box**
 
-  The toolbox directly supports popular and contemporary semantic segmentation frameworks, *e.g.* ISNet, DeepLabV3, PSPNet, MCIBI, etc.
+  The toolbox directly supports popular and contemporary semantic segmentation frameworks, *e.g.*, ISNet, DeepLabV3, PSPNet, MCIBI, etc.
  
 - **High Performance**
 
