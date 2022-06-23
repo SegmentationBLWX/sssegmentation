@@ -1,12 +1,12 @@
 '''
 Function:
-    load the LIP dataset
+    Load the LIP dataset
 Author:
     Zhenchao Jin
 '''
 import os
 import pandas as pd
-from .base import *
+from .base import BaseDataset
 
 
 '''LIP dataset'''
@@ -18,8 +18,8 @@ class LIPDataset(BaseDataset):
         'leftArm', 'rightArm', 'leftLeg', 'rightLeg', 'leftShoe', 'rightShoe'
     ]
     assert num_classes == len(classnames)
-    def __init__(self, mode, logger_handle, dataset_cfg, **kwargs):
-        super(LIPDataset, self).__init__(mode, logger_handle, dataset_cfg, **kwargs)
+    def __init__(self, mode, logger_handle, dataset_cfg):
+        super(LIPDataset, self).__init__(mode, logger_handle, dataset_cfg)
         # obtain the dirs
         rootdir = dataset_cfg['rootdir']
         setmap_dict = {'train': 'train', 'val': 'val', 'test': 'testing'}

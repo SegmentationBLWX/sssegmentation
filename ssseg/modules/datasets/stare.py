@@ -1,12 +1,12 @@
 '''
 Function:
-    load the stare dataset
+    Load the stare dataset
 Author:
     Zhenchao Jin
 '''
 import os
 import pandas as pd
-from .base import *
+from .base import BaseDataset
 
 
 '''stare dataset'''
@@ -14,8 +14,8 @@ class STAREDataset(BaseDataset):
     num_classes = 2
     classnames = ['__background__', 'vessel']
     assert num_classes == len(classnames)
-    def __init__(self, mode, logger_handle, dataset_cfg, **kwargs):
-        super(STAREDataset, self).__init__(mode, logger_handle, dataset_cfg, **kwargs)
+    def __init__(self, mode, logger_handle, dataset_cfg):
+        super(STAREDataset, self).__init__(mode, logger_handle, dataset_cfg)
         self.repeat_times = dataset_cfg.get('repeat_times', 1)
         # obtain the dirs
         setmap_dict = {'train': 'training', 'val': 'validation'}

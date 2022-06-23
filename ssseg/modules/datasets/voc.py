@@ -1,12 +1,12 @@
 '''
 Function:
-    load the voc dataset
+    Load the voc dataset
 Author:
     Zhenchao Jin
 '''
 import os
 import pandas as pd
-from .base import *
+from .base import BaseDataset
 
 
 '''voc dataset'''
@@ -18,8 +18,8 @@ class VOCDataset(BaseDataset):
         'motorbike', 'person', 'pottedplant', 'sheep', 'sofa', 'train', 'tvmonitor'
     ]
     assert num_classes == len(classnames)
-    def __init__(self, mode, logger_handle, dataset_cfg, **kwargs):
-        super(VOCDataset, self).__init__(mode, logger_handle, dataset_cfg, **kwargs)
+    def __init__(self, mode, logger_handle, dataset_cfg):
+        super(VOCDataset, self).__init__(mode, logger_handle, dataset_cfg)
         # obtain the dirs
         rootdir = dataset_cfg['rootdir']
         self.image_dir = os.path.join(rootdir, 'JPEGImages')
@@ -60,8 +60,8 @@ class PascalContextDataset(BaseDataset):
         'track', 'train', 'tree', 'truck', 'tvmonitor', 'wall', 'water', 'window', 'wood'
     ]
     assert num_classes == len(classnames)
-    def __init__(self, mode, logger_handle, dataset_cfg, **kwargs):
-        super(PascalContextDataset, self).__init__(mode, logger_handle, dataset_cfg, **kwargs)
+    def __init__(self, mode, logger_handle, dataset_cfg):
+        super(PascalContextDataset, self).__init__(mode, logger_handle, dataset_cfg)
         # obtain the dirs
         rootdir = dataset_cfg['rootdir']
         self.image_dir = os.path.join(rootdir, 'JPEGImages')
@@ -103,8 +103,8 @@ class PascalContext59Dataset(BaseDataset):
     clsid2label = {0: 255}
     for i in range(1, num_classes+1): clsid2label[i] = i - 1
     assert num_classes == len(classnames)
-    def __init__(self, mode, logger_handle, dataset_cfg, **kwargs):
-        super(PascalContext59Dataset, self).__init__(mode, logger_handle, dataset_cfg, **kwargs)
+    def __init__(self, mode, logger_handle, dataset_cfg):
+        super(PascalContext59Dataset, self).__init__(mode, logger_handle, dataset_cfg)
         # obtain the dirs
         rootdir = dataset_cfg['rootdir']
         self.image_dir = os.path.join(rootdir, 'JPEGImages')

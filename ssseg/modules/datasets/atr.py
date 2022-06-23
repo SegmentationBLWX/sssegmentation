@@ -1,12 +1,12 @@
 '''
 Function:
-    load the ATR dataset
+    Load the ATR dataset
 Author:
     Zhenchao Jin
 '''
 import os
 import pandas as pd
-from .base import *
+from .base import BaseDataset
 
 
 '''ATR dataset'''
@@ -18,8 +18,8 @@ class ATRDataset(BaseDataset):
         'leftLeg', 'rightLeg', 'leftHand', 'rightHand', 'bags', 'scarf'
     ]
     assert num_classes == len(classnames)
-    def __init__(self, mode, logger_handle, dataset_cfg, **kwargs):
-        super(ATRDataset, self).__init__(mode, logger_handle, dataset_cfg, **kwargs)
+    def __init__(self, mode, logger_handle, dataset_cfg):
+        super(ATRDataset, self).__init__(mode, logger_handle, dataset_cfg)
         # obtain the dirs
         rootdir = dataset_cfg['rootdir']
         self.image_dir = os.path.join(rootdir, 'JPEGImages')

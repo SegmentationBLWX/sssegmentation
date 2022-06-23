@@ -9,13 +9,13 @@ import torch
 import numpy as np
 import scipy.io as sio
 from PIL import Image
-from .pipelines import *
 from chainercv.evaluations import eval_semantic_segmentation
+from .pipelines import Evaluation, Resize, RandomCrop, RandomFlip, PhotoMetricDistortion, RandomRotation, Padding, ToTensor, Normalize, Compose
 
 
 '''define the base dataset class'''
 class BaseDataset(torch.utils.data.Dataset):
-    def __init__(self, mode, logger_handle, dataset_cfg, **kwargs):
+    def __init__(self, mode, logger_handle, dataset_cfg):
         assert mode in ['TRAIN', 'TEST']
         self.mode = mode
         self.logger_handle = logger_handle
@@ -29,12 +29,12 @@ class BaseDataset(torch.utils.data.Dataset):
         raise NotImplementedError('not be implemented')
     '''sync transform'''
     def synctransform(self, sample, transform_type):
-        assert hasattr(self, 'transforms') and self.transforms, 'undefined transforms...'
+        assert hasattr(self, 'transforms') and self.transforms, 'undefined transforms'
         assert transform_type in ['all', 'only_totensor_normalize_pad', 'without_totensor_normalize_pad']
         sample = self.transforms(sample, transform_type)
         return sample
     '''read sample'''
-    def read(self, imagepath, annpath, with_ann=True, **kwargs):
+    def read(self, imagepath, annpath, with_ann=True):
         assert self.mode in ['TRAIN', 'TEST']
         # read image
         image = cv2.imread(imagepath)
@@ -49,7 +49,7 @@ class BaseDataset(torch.utils.data.Dataset):
             if self.dataset_cfg['type'] in ['cocostuff10k']:
                 segmentation = segmentation['S']
         else:
-            raise NotImplementedError('Unsupport data type of %s...' % annpath.split('.')[-1])
+            raise NotImplementedError('Unsupport data type of %s' % annpath.split('.')[-1])
         if with_ann and hasattr(self, 'clsid2label'):
             for key, value in self.clsid2label.items():
                 segmentation[segmentation == key] = value
@@ -81,12 +81,12 @@ class BaseDataset(torch.utils.data.Dataset):
         }
         for aug_opt in aug_opts:
             key, value = aug_opt
-            assert key in supported_transforms, 'unsupport transform %s...' % key
+            assert key in supported_transforms, 'unsupport transform %s' % key
             transforms.append(supported_transforms[key](**value))
         # return the transforms
         return transforms
     '''evaluate the predictions'''
-    def evaluate(self, predictions, groundtruths, metric_list=['iou', 'miou'], num_classes=None, ignore_index=-1, **kwargs):
+    def evaluate(self, predictions, groundtruths, metric_list=['iou', 'miou'], num_classes=None, ignore_index=-1, nan_to_num=None, beta=1.0):
         eval_client = None
         result = eval_semantic_segmentation(predictions, groundtruths)
         result_selected = {}
@@ -95,8 +95,8 @@ class BaseDataset(torch.utils.data.Dataset):
                 result_selected[metric] = result[metric]
             else:
                 if eval_client is None:
-                    eval_client = Evaluation(predictions, groundtruths, num_classes, ignore_index, **kwargs)
-                assert metric in eval_client.all_metric_results, 'unsupport %s as the metric...' % metric
+                    eval_client = Evaluation(predictions, groundtruths, num_classes, ignore_index, nan_to_num, beta)
+                assert metric in eval_client.all_metric_results, 'unsupport %s as the metric' % metric
                 result_selected[metric] = eval_client.all_metric_results[metric]
         if 'iou' in result_selected:
             iou_list = result_selected['iou']

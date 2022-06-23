@@ -1,12 +1,12 @@
 '''
 Function:
-    load the supervisely dataset
+    Load the supervisely dataset
 Author:
     Zhenchao Jin
 '''
 import os
 import pandas as pd
-from .base import *
+from .base import BaseDataset
 
 
 '''supervisely dataset'''
@@ -14,8 +14,8 @@ class SuperviselyDataset(BaseDataset):
     num_classes = 2
     classnames = ['__background__', 'person']
     assert num_classes == len(classnames)
-    def __init__(self, mode, logger_handle, dataset_cfg, **kwargs):
-        super(SuperviselyDataset, self).__init__(mode, logger_handle, dataset_cfg, **kwargs)
+    def __init__(self, mode, logger_handle, dataset_cfg):
+        super(SuperviselyDataset, self).__init__(mode, logger_handle, dataset_cfg)
         # obtain the dirs
         rootdir = dataset_cfg['rootdir']
         self.image_dir = os.path.join(rootdir, 'Images', dataset_cfg['set'])

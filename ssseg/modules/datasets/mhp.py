@@ -1,13 +1,13 @@
 '''
 Function:
-    load the MHPv1 and MHPv2 dataset
+    Load the MHPv1 and MHPv2 dataset
 Author:
     Zhenchao Jin
 '''
 import os
 import glob
 import pandas as pd
-from .base import *
+from .base import BaseDataset
 
 
 '''MHPv1 dataset'''
@@ -19,8 +19,8 @@ class MHPv1Dataset(BaseDataset):
         'left arm', 'right arm', 'bag', 'scarf', 'torso skin'
     ]
     assert num_classes == len(classnames)
-    def __init__(self, mode, logger_handle, dataset_cfg, **kwargs):
-        super(MHPv1Dataset, self).__init__(mode, logger_handle, dataset_cfg, **kwargs)
+    def __init__(self, mode, logger_handle, dataset_cfg):
+        super(MHPv1Dataset, self).__init__(mode, logger_handle, dataset_cfg)
         # obtain the dirs
         rootdir = dataset_cfg['rootdir']
         self.image_dir = os.path.join(rootdir, 'images')
@@ -69,8 +69,8 @@ class MHPv2Dataset(BaseDataset):
         'other-upper-body-clothes', 'other-lower-body-clothes'
     ]
     assert num_classes == len(classnames)
-    def __init__(self, mode, logger_handle, dataset_cfg, **kwargs):
-        super(MHPv2Dataset, self).__init__(mode, logger_handle, dataset_cfg, **kwargs)
+    def __init__(self, mode, logger_handle, dataset_cfg):
+        super(MHPv2Dataset, self).__init__(mode, logger_handle, dataset_cfg)
         # obtain the dirs
         rootdir = dataset_cfg['rootdir']
         self.image_dir = os.path.join(rootdir, dataset_cfg['set'], 'images')

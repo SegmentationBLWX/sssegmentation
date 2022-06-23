@@ -1,6 +1,6 @@
 '''
 Function:
-    define some evaluation metric
+    Define some evaluation metric
 Author:
     Zhenchao Jin
 '''
@@ -11,7 +11,7 @@ from collections import OrderedDict
 
 '''evaluation metric'''
 class Evaluation():
-    def __init__(self, predictions, groundtruths, num_classes, ignore_index=-1, **kwargs):
+    def __init__(self, predictions, groundtruths, num_classes, ignore_index=-1, nan_to_num=None, beta=1.0):
         total_area_intersect, total_area_union, total_area_pred_label, total_area_label = self.totalintersectandunion(
             results=predictions,
             gt_seg_maps=groundtruths,
@@ -23,8 +23,8 @@ class Evaluation():
             total_area_union=total_area_union, 
             total_area_pred_label=total_area_pred_label, 
             total_area_label=total_area_label, 
-            nan_to_num=kwargs.get('nan_to_num', None), 
-            beta=kwargs.get('beta', 1),
+            nan_to_num=nan_to_num, 
+            beta=beta,
         )
     '''calculate total intersection and union'''
     @staticmethod

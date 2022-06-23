@@ -1,12 +1,12 @@
 '''
 Function:
-    load the ADE20k dataset
+    Load the ADE20k dataset
 Author:
     Zhenchao Jin
 '''
 import os
 import pandas as pd
-from .base import *
+from .base import BaseDataset
 
 
 '''ADE20k dataset'''
@@ -38,8 +38,8 @@ class ADE20kDataset(BaseDataset):
     clsid2label = {0: 255}
     for i in range(1, num_classes+1): clsid2label[i] = i - 1
     assert num_classes == len(classnames)
-    def __init__(self, mode, logger_handle, dataset_cfg, **kwargs):
-        super(ADE20kDataset, self).__init__(mode, logger_handle, dataset_cfg, **kwargs)
+    def __init__(self, mode, logger_handle, dataset_cfg):
+        super(ADE20kDataset, self).__init__(mode, logger_handle, dataset_cfg)
         # obtain the dirs
         rootdir = dataset_cfg['rootdir']
         setmap_dict = {'train': 'training', 'val': 'validation', 'test': 'testing'}

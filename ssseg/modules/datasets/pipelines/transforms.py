@@ -1,6 +1,6 @@
 '''
 Function:
-    define the transforms for data augmentations
+    Define the transforms for data augmentations
 Author:
     Zhenchao Jin
 '''
@@ -12,14 +12,14 @@ import torch.nn.functional as F
 
 '''resize image'''
 class Resize(object):
-    def __init__(self, output_size, scale_range=(0.5, 2.0), **kwargs):
+    def __init__(self, output_size, scale_range=(0.5, 2.0), img_interpolation='bilinear', seg_interpolation='nearest', keep_ratio=True):
         # set attribute
         self.output_size = output_size
         if isinstance(output_size, int): self.output_size = (output_size, output_size)
         self.scale_range = scale_range
-        self.img_interpolation = kwargs.get('img_interpolation', 'bilinear')
-        self.seg_interpolation = kwargs.get('seg_interpolation', 'nearest')
-        self.keep_ratio = kwargs.get('keep_ratio', True)
+        self.img_interpolation = img_interpolation
+        self.seg_interpolation = seg_interpolation
+        self.keep_ratio = keep_ratio
         # interpolation to cv2 interpolation
         self.interpolation_dict = {
             'nearest': cv2.INTER_NEAREST,
@@ -57,11 +57,11 @@ class Resize(object):
 
 '''random crop image'''
 class RandomCrop(object):
-    def __init__(self, crop_size, **kwargs):
+    def __init__(self, crop_size, ignore_index=255, one_category_max_ratio=0.75):
         self.crop_size = crop_size
         if isinstance(crop_size, int): self.crop_size = (crop_size, crop_size)
-        self.ignore_index = kwargs.get('ignore_index', 255)
-        self.one_category_max_ratio = kwargs.get('one_category_max_ratio', 0.75)
+        self.ignore_index = ignore_index
+        self.one_category_max_ratio = one_category_max_ratio
     '''call'''
     def __call__(self, sample):
         # avoid the cropped image is filled by only one category
@@ -86,7 +86,7 @@ class RandomCrop(object):
 
 '''random flip image'''
 class RandomFlip(object):
-    def __init__(self, flip_prob, fix_ann_pairs=None, **kwargs):
+    def __init__(self, flip_prob, fix_ann_pairs=None):
         self.flip_prob = flip_prob
         self.fix_ann_pairs = fix_ann_pairs
     '''call'''
@@ -106,11 +106,11 @@ class RandomFlip(object):
 
 '''photo metric distortion'''
 class PhotoMetricDistortion(object):
-    def __init__(self, **kwargs):
-        self.brightness_delta = kwargs.get('brightness_delta', 32)
-        self.contrast_lower, self.contrast_upper = kwargs.get('contrast_range', (0.5, 1.5))
-        self.saturation_lower, self.saturation_upper = kwargs.get('saturation_range', (0.5, 1.5))
-        self.hue_delta = kwargs.get('hue_delta', 18)
+    def __init__(self, brightness_delta=32, contrast_range=(0.5, 1.5), saturation_range=(0.5, 1.5), hue_delta=18):
+        self.brightness_delta = brightness_delta
+        self.contrast_lower, self.contrast_upper = contrast_range
+        self.saturation_lower, self.saturation_upper = saturation_range
+        self.hue_delta = hue_delta
     '''call'''
     def __call__(self, sample):
         image = sample['image'].copy()
@@ -159,14 +159,14 @@ class PhotoMetricDistortion(object):
 
 '''random rotate image'''
 class RandomRotation(object):
-    def __init__(self, **kwargs):
+    def __init__(self, angle_upper=30, rotation_prob=0.5, img_fill_value=0.0, seg_fill_value=255, img_interpolation='bicubic', seg_interpolation='nearest'):
         # set attributes
-        self.angle_upper = kwargs.get('angle_upper', 30)
-        self.rotation_prob = kwargs.get('rotation_prob', 0.5)
-        self.img_fill_value = kwargs.get('img_fill_value', 0)
-        self.seg_fill_value = kwargs.get('seg_fill_value', 255)
-        self.img_interpolation = kwargs.get('img_interpolation', 'bicubic')
-        self.seg_interpolation = kwargs.get('seg_interpolation', 'nearest')
+        self.angle_upper = angle_upper
+        self.rotation_prob = rotation_prob
+        self.img_fill_value = img_fill_value
+        self.seg_fill_value = seg_fill_value
+        self.img_interpolation = img_interpolation
+        self.seg_interpolation = seg_interpolation
         # interpolation to cv2 interpolation
         self.interpolation_dict = {
             'nearest': cv2.INTER_NEAREST,
@@ -190,14 +190,14 @@ class RandomRotation(object):
 
 '''pad image'''
 class Padding(object):
-    def __init__(self, output_size, data_type='numpy', **kwargs):
+    def __init__(self, output_size, data_type='numpy', img_fill_value=0, seg_fill_value=255, output_size_auto_adaptive=True):
         self.output_size = output_size
         if isinstance(output_size, int): self.output_size = (output_size, output_size)
-        assert data_type in ['numpy', 'tensor'], 'unsupport data type %s...' % data_type
+        assert data_type in ['numpy', 'tensor'], 'unsupport data type %s' % data_type
         self.data_type = data_type
-        self.img_fill_value = kwargs.get('img_fill_value', 0)
-        self.seg_fill_value = kwargs.get('seg_fill_value', 255)
-        self.output_size_auto_adaptive = kwargs.get('output_size_auto_adaptive', True)
+        self.img_fill_value = img_fill_value
+        self.seg_fill_value = seg_fill_value
+        self.output_size_auto_adaptive = output_size_auto_adaptive
     '''call'''
     def __call__(self, sample):
         output_size = self.output_size[0], self.output_size[1]
@@ -248,10 +248,10 @@ class ToTensor(object):
 
 '''normalize the input image'''
 class Normalize(object):
-    def __init__(self, mean, std, **kwargs):
+    def __init__(self, mean, std, to_rgb=True):
         self.mean = np.array(mean)
         self.std = np.array(std)
-        self.to_rgb = kwargs.get('to_rgb', True)
+        self.to_rgb = to_rgb
     '''call'''
     def __call__(self, sample):
         for key in sample.keys():
@@ -268,7 +268,7 @@ class Normalize(object):
 
 '''wrap the transforms'''
 class Compose(object):
-    def __init__(self, transforms, **kwargs):
+    def __init__(self, transforms):
         self.transforms = transforms
     '''call'''
     def __call__(self, sample, transform_type):
@@ -284,5 +284,5 @@ class Compose(object):
                 if not (isinstance(transform, ToTensor) or isinstance(transform, Normalize) or isinstance(transform, Padding)):
                     sample = transform(sample)
         else:
-            raise ValueError('Unsupport transform_type %s...' % transform_type)
+            raise ValueError('Unsupport transform_type %s' % transform_type)
         return sample

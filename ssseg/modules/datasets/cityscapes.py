@@ -1,13 +1,13 @@
 '''
 Function:
-    load the CityScapes dataset
+    Load the CityScapes dataset
 Author:
     Zhenchao Jin
 '''
 import os
 import pandas as pd
-from .base import *
 from PIL import Image
+from .base import BaseDataset
 
 
 '''CityScapes dataset'''
@@ -26,8 +26,8 @@ class CityScapesDataset(BaseDataset):
         31: 16, 32: 17, 33: 18
     }
     assert num_classes == len(classnames)
-    def __init__(self, mode, logger_handle, dataset_cfg, **kwargs):
-        super(CityScapesDataset, self).__init__(mode, logger_handle, dataset_cfg, **kwargs)
+    def __init__(self, mode, logger_handle, dataset_cfg):
+        super(CityScapesDataset, self).__init__(mode, logger_handle, dataset_cfg)
         # obtain the dirs
         rootdir = dataset_cfg['rootdir']
         self.image_dir = os.path.join(rootdir, 'leftImg8bit', dataset_cfg['set'])

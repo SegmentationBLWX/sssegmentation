@@ -23,7 +23,7 @@ from .voc import VOCDataset, PascalContextDataset, PascalContext59Dataset
 
 
 '''build dataset'''
-def BuildDataset(mode, logger_handle, dataset_cfg, **kwargs):
+def BuildDataset(mode, logger_handle, dataset_cfg, get_basedataset=False):
     cfg = dataset_cfg[mode.lower()].copy()
     if 'train' in dataset_cfg: dataset_cfg.pop('train')
     if 'test' in dataset_cfg: dataset_cfg.pop('test')
@@ -50,7 +50,8 @@ def BuildDataset(mode, logger_handle, dataset_cfg, **kwargs):
         'pascalcontext': PascalContextDataset,
         'pascalcontext59': PascalContext59Dataset,
     }
-    assert dataset_cfg['type'] in supported_datasets, 'unsupport dataset type %s...' % dataset_cfg['type']
-    if kwargs.get('get_basedataset', False): return BaseDataset(mode=mode, logger_handle=logger_handle, dataset_cfg=dataset_cfg, **kwargs)
-    dataset = supported_datasets[dataset_cfg['type']](mode=mode, logger_handle=logger_handle, dataset_cfg=dataset_cfg, **kwargs)
+    assert dataset_cfg['type'] in supported_datasets, 'unsupport dataset type %s' % dataset_cfg['type']
+    if get_basedataset: 
+        return BaseDataset(mode=mode, logger_handle=logger_handle, dataset_cfg=dataset_cfg)
+    dataset = supported_datasets[dataset_cfg['type']](mode=mode, logger_handle=logger_handle, dataset_cfg=dataset_cfg)
     return dataset

@@ -1,12 +1,12 @@
 '''
 Function:
-    load the VSPW dataset
+    Load the VSPW dataset
 Author:
     Zhenchao Jin
 '''
 import os
 import random
-from .base import *
+from .base import BaseDataset
 
 
 '''VSPW dataset'''
@@ -30,8 +30,8 @@ class VSPWDataset(BaseDataset):
     clsid2label = {0: 255, 254: 255}
     for i in range(1, num_classes+1): clsid2label[i] = i - 1
     assert num_classes == len(classnames)
-    def __init__(self, mode, logger_handle, dataset_cfg, **kwargs):
-        super(VSPWDataset, self).__init__(mode, logger_handle, dataset_cfg, **kwargs)
+    def __init__(self, mode, logger_handle, dataset_cfg):
+        super(VSPWDataset, self).__init__(mode, logger_handle, dataset_cfg)
         # obtain the dirs
         rootdir = dataset_cfg['rootdir']
         self.image_dir = os.path.join(rootdir, 'data')

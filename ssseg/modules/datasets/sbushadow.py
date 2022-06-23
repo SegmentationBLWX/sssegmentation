@@ -1,19 +1,19 @@
 '''
 Function:
-    load the sbu-shadow dataset
+    Load the sbu-shadow dataset
 Author:
     Zhenchao Jin
 '''
 import os
-from .base import *
+from .base import BaseDataset
 
 
 '''sbu-shadow dataset'''
 class SBUShadowDataset(BaseDataset):
     num_classes = 2
     classnames = ['__backgroud__', 'shadow']
-    def __init__(self, mode, logger_handle, dataset_cfg, **kwargs):
-        super(SBUShadowDataset, self).__init__(mode, logger_handle, dataset_cfg, **kwargs)
+    def __init__(self, mode, logger_handle, dataset_cfg):
+        super(SBUShadowDataset, self).__init__(mode, logger_handle, dataset_cfg)
         # obtain the dirs
         setmap_dict = {'train': 'SBUTrain4KRecoveredSmall', 'val': 'SBU-Test'}
         rootdir = dataset_cfg['rootdir']

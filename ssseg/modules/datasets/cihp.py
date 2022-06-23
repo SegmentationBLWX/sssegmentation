@@ -1,12 +1,12 @@
 '''
 Function:
-    load the CIHP dataset
+    Load the CIHP dataset
 Author:
     Zhenchao Jin
 '''
 import os
 import pandas as pd
-from .base import *
+from .base import BaseDataset
 
 
 '''CIHP dataset'''
@@ -18,8 +18,8 @@ class CIHPDataset(BaseDataset):
         'leftArm', 'rightArm', 'leftLeg', 'rightLeg', 'leftShoe', 'rightShoe'
     ]
     assert num_classes == len(classnames)
-    def __init__(self, mode, logger_handle, dataset_cfg, **kwargs):
-        super(CIHPDataset, self).__init__(mode, logger_handle, dataset_cfg, **kwargs)
+    def __init__(self, mode, logger_handle, dataset_cfg):
+        super(CIHPDataset, self).__init__(mode, logger_handle, dataset_cfg)
         # obtain the dirs
         rootdir = dataset_cfg['rootdir']
         setmap_dict = {'train': 'Training', 'val': 'Validation', 'test': 'Testing'}
