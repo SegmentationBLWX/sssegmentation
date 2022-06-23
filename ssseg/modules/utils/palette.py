@@ -1,14 +1,10 @@
 '''
 Function:
-    color map for visualizing the segmentation mask
+    Color map for visualizing the segmentation mask
 Author:
     Zhenchao Jin
 '''
 import os
-
-
-'''define all'''
-__all__ = ['BuildPalette']
 
 
 '''lip palette'''
@@ -141,8 +137,8 @@ def GeneratePalette(num_classes):
 
 
 '''build palette'''
-def BuildPalette(dataset_type, num_classes=2, logger_handle=None, **kwargs):
+def BuildPalette(dataset_type, num_classes=2, logger_handle=None):
     if dataset_type not in supported_palettes:
-        logger_handle.warning('Unsupport dataset type %s, try to generate the palette according to the number of classes...' % dataset_type)
+        logger_handle.warning('Unsupport dataset type %s, try to generate the palette according to the number of classes' % dataset_type)
         return GeneratePalette(num_classes)
     return supported_palettes[dataset_type]

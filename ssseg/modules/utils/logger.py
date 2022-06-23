@@ -1,6 +1,6 @@
 '''
 Function:
-    define the logging function
+    Define the logging function
 Author:
     Zhenchao Jin
 '''
@@ -14,20 +14,25 @@ class Logger():
             level=logging.INFO,
             format='%(asctime)s %(levelname)-8s %(message)s',
             datefmt='%Y-%m-%d %H:%M:%S',
-            handlers=[logging.FileHandler(logfilepath), logging.StreamHandler()]
+            handlers=[logging.FileHandler(logfilepath, encoding='utf-8'), logging.StreamHandler()]
         )
+    '''log'''
     @staticmethod
     def log(level, message):
         logging.log(level, message)
+    '''debug'''
     @staticmethod
     def debug(message):
         Logger.log(logging.DEBUG, message)
+    '''info'''
     @staticmethod
     def info(message):
         Logger.log(logging.INFO, message)
+    '''warning'''
     @staticmethod
     def warning(message):
         Logger.log(logging.WARNING, message)
+    '''error'''
     @staticmethod
     def error(message):
         Logger.log(logging.ERROR, message)
