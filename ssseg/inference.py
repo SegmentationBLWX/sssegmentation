@@ -13,7 +13,7 @@ import argparse
 import numpy as np
 import torch.nn.functional as F
 from tqdm import tqdm
-from cfgs import BuildConfig
+from configs import BuildConfig
 from modules import (
     BuildDataset, BuildDistributedDataloader, BuildDistributedModel, BuildOptimizer, adjustLearningRate, clipGradients,
     BuildLoss, BuildBackbone, BuildSegmentor, BuildPixelSampler, Logger, setRandomSeed, BuildPalette, checkdir, loadcheckpoints, savecheckpoints

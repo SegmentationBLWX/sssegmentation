@@ -150,7 +150,7 @@ class Trainer():
                     'model': segmentor.module.state_dict(),
                     'optimizer': optimizer.state_dict()
                 }
-                savepath = os.path.join(cfg.COMMON_CFG['save_interval_epochs'], 'epoch_%s.pth' % epoch)
+                savepath = os.path.join(cfg.COMMON_CFG['work_dir'], 'epoch_%s.pth' % epoch)
                 if cmd_args.local_rank == 0: savecheckpoints(state_dict, savepath, logger_handle, cmd_args=cmd_args)
             # --eval checkpoints
             if (epoch % cfg.COMMON_CFG['eval_interval_epochs'] == 0) or (epoch == end_epoch):

@@ -16,7 +16,7 @@ import torch.nn as nn
 import torch.nn.functional as F
 import torch.distributed as dist
 from tqdm import tqdm
-from cfgs import BuildConfig
+from configs import BuildConfig
 from modules import (
     BuildDataset, BuildDistributedDataloader, BuildDistributedModel, BuildOptimizer, adjustLearningRate, clipGradients,
     BuildLoss, BuildBackbone, BuildSegmentor, BuildPixelSampler, Logger, setRandomSeed, BuildPalette, checkdir, loadcheckpoints, savecheckpoints
