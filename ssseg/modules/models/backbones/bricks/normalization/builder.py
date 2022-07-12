@@ -24,7 +24,7 @@ def BuildNormalization(norm_cfg, only_get_all_supported=False):
     }
     if only_get_all_supported: 
         return list(supported_normalizations.values())
-    selected_norm_func = supported_normalizations(norm_cfg['type'])
+    selected_norm_func = supported_normalizations[norm_cfg['type']]
     norm_cfg = copy.deepcopy(norm_cfg)
     norm_cfg.pop('type')
     placeholder = norm_cfg.pop('placeholder')
