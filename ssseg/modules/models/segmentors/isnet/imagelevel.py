@@ -8,14 +8,14 @@ import torch
 import torch.nn as nn
 import torch.nn.functional as F
 from ..base import SelfAttentionBlock
-from ...backbones import BuildActivation, BuildNormalization
+from ...backbones import BuildActivation, BuildNormalization, constructnormcfg
 
 
-'''image-level context module'''
+'''ImageLevelContext'''
 class ImageLevelContext(nn.Module):
-    def __init__(self, feats_channels, transform_channels, concat_input=False, **kwargs):
+    def __init__(self, feats_channels, transform_channels, concat_input=False, align_corners=False, norm_cfg=None, act_cfg=None):
         super(ImageLevelContext, self).__init__()
-        norm_cfg, act_cfg, self.align_corners = kwargs['norm_cfg'], kwargs['act_cfg'], kwargs['align_corners']
+        self.align_corners = align_corners
         self.global_avgpool = nn.AdaptiveAvgPool2d((1, 1))
         self.correlate_net = SelfAttentionBlock(
             key_in_channels=feats_channels * 2,
@@ -37,8 +37,8 @@ class ImageLevelContext(nn.Module):
         if concat_input:
             self.bottleneck = nn.Sequential(
                 nn.Conv2d(feats_channels * 2, feats_channels, kernel_size=3, stride=1, padding=1, bias=False),
-                BuildNormalization(norm_cfg['type'], (feats_channels, norm_cfg['opts'])),
-                BuildActivation(act_cfg['type'], **act_cfg['opts']),
+                BuildNormalization(constructnormcfg(placeholder=feats_channels, norm_cfg=norm_cfg)),
+                BuildActivation(act_cfg),
             )
     '''forward'''
     def forward(self, x):

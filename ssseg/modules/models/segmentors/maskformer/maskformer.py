@@ -11,14 +11,14 @@ import torch.nn.functional as F
 import torch.distributed as dist
 from ..base import BaseModel
 from ..pspnet import PyramidPoolingModule
-from ...backbones import BuildActivation, BuildNormalization
+from ...backbones import BuildActivation, BuildNormalization, constructnormcfg
 from .transformers import Predictor, SetCriterion, Transformer, HungarianMatcher
 
 
 '''MaskFormer'''
 class MaskFormer(BaseModel):
-    def __init__(self, cfg, **kwargs):
-        super(MaskFormer, self).__init__(cfg, **kwargs)
+    def __init__(self, cfg, mode):
+        super(MaskFormer, self).__init__(cfg, mode)
         align_corners, norm_cfg, act_cfg = self.align_corners, self.norm_cfg, self.act_cfg
         # build pyramid pooling module
         ppm_cfg = {
@@ -39,8 +39,8 @@ class MaskFormer(BaseModel):
             self.lateral_convs.append(
                 nn.Sequential(
                     nn.Conv2d(in_channels, lateral_cfg['out_channels'], kernel_size=1, stride=1, padding=0, bias=False),
-                    BuildNormalization(norm_cfg['type'], (lateral_cfg['out_channels'], norm_cfg['opts'])),
-                    BuildActivation(act_cfg_copy['type'], **act_cfg_copy['opts']),
+                    BuildNormalization(constructnormcfg(placeholder=lateral_cfg['out_channels'], norm_cfg=norm_cfg)),
+                    BuildActivation(act_cfg_copy),
                 )
             )
         # build fpn convs
@@ -50,8 +50,8 @@ class MaskFormer(BaseModel):
             self.fpn_convs.append(
                 nn.Sequential(
                     nn.Conv2d(in_channels, fpn_cfg['out_channels'], kernel_size=3, stride=1, padding=1, bias=False),
-                    BuildNormalization(norm_cfg['type'], (fpn_cfg['out_channels'], norm_cfg['opts'])),
-                    BuildActivation(act_cfg_copy['type'], **act_cfg_copy['opts']),
+                    BuildNormalization(constructnormcfg(placeholder=fpn_cfg['out_channels'], norm_cfg=norm_cfg)),
+                    BuildActivation(act_cfg_copy),
                 )
             )
         # build decoder

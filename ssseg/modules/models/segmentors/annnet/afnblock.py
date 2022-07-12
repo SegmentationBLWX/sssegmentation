@@ -8,14 +8,13 @@ import torch
 import torch.nn as nn
 from .ppm import PPMConcat
 from ..base import SelfAttentionBlock
-from ...backbones import BuildActivation, BuildNormalization
+from ...backbones import BuildNormalization, constructnormcfg
 
 
 '''Asymmetric Fusion Non-local Block (AFNB)'''
 class AFNBlock(nn.Module):
-    def __init__(self, low_in_channels, high_in_channels, transform_channels, out_channels, query_scales, key_pool_scales, **kwargs):
+    def __init__(self, low_in_channels, high_in_channels, transform_channels, out_channels, query_scales, key_pool_scales, norm_cfg=None, act_cfg=None):
         super(AFNBlock, self).__init__()
-        norm_cfg, act_cfg = kwargs['norm_cfg'], kwargs['act_cfg']
         self.stages = nn.ModuleList()
         for query_scale in query_scales:
             key_psp = PPMConcat(key_pool_scales)
@@ -42,7 +41,7 @@ class AFNBlock(nn.Module):
             ))
         self.bottleneck = nn.Sequential(
             nn.Conv2d(out_channels+high_in_channels, out_channels, kernel_size=1, stride=1, padding=0, bias=False),
-            BuildNormalization(norm_cfg['type'], (out_channels, norm_cfg['opts'])),
+            BuildNormalization(constructnormcfg(placeholder=out_channels, norm_cfg=norm_cfg)),
         )
     '''forward'''
     def forward(self, low_feats, high_feats):

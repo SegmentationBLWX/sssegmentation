@@ -9,7 +9,7 @@ import torch.nn as nn
 from ..nonlocalnet import NonLocal2d
 
 
-'''Disentangled Non-Local Block'''
+'''DisentangledNonLocal2d'''
 class DisentangledNonLocal2d(NonLocal2d):
     def __init__(self, *arg, temperature, **kwargs):
         super(DisentangledNonLocal2d, self).__init__(*arg, **kwargs)

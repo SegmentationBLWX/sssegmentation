@@ -9,7 +9,7 @@ import pandas as pd
 from .base import BaseDataset
 
 
-'''supervisely dataset'''
+'''SuperviselyDataset'''
 class SuperviselyDataset(BaseDataset):
     num_classes = 2
     classnames = ['__background__', 'person']

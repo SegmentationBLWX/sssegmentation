@@ -1,13 +1,13 @@
 '''
 Function:
-    define the accuracy
+    Define the accuracy
 Author:
     Zhenchao Jin
 '''
 import torch
 
 
-'''calculate accuracy'''
+'''calculateaccuracy'''
 def calculateaccuracy(prediction, target, topk=1, thresh=None):
     assert isinstance(topk, (int, tuple))
     if isinstance(topk, int):

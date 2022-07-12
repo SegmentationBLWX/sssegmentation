@@ -1,6 +1,6 @@
 '''
 Function:
-    Implementation of MemoryNet - Mining Contextual Information Beyond Image for Semantic Segmentation
+    Implementation of "Mining Contextual Information Beyond Image for Semantic Segmentation"
 Author:
     Zhenchao Jin
 '''
@@ -13,27 +13,29 @@ from ..base import BaseModel
 from ..deeplabv3 import ASPP
 from .memory import FeaturesMemory
 from ..pspnet import PyramidPoolingModule
-from ...backbones import BuildActivation, BuildNormalization
+from ...backbones import BuildActivation, BuildNormalization, constructnormcfg
 
 
 '''MemoryNet'''
 class MemoryNet(BaseModel):
-    def __init__(self, cfg, **kwargs):
-        super(MemoryNet, self).__init__(cfg, **kwargs)
+    def __init__(self, cfg, mode):
+        super(MemoryNet, self).__init__(cfg, mode)
         align_corners, norm_cfg, act_cfg = self.align_corners, self.norm_cfg, self.act_cfg
         # build norm layer
         if 'normlayer' in cfg:
             self.norm_layers = nn.ModuleList()
             for in_channels in cfg['normlayer']['in_channels_list']:
-                norm_layer = BuildNormalization(cfg['normlayer']['type'], (in_channels, cfg['normlayer']['opts']))
+                norm_cfg_copy = cfg['normlayer'].copy()
+                norm_cfg_copy.pop('in_channels_list')
+                norm_layer = BuildNormalization(constructnormcfg(placeholder=in_channels, norm_cfg=norm_cfg_copy)),
                 self.norm_layers.append(norm_layer)
         # build memory
         memory_cfg = cfg['memory']
         if memory_cfg['downsample_backbone']['stride'] > 1:
             self.downsample_backbone = nn.Sequential(
                 nn.Conv2d(memory_cfg['in_channels'], memory_cfg['in_channels'], **memory_cfg['downsample_backbone']),
-                BuildNormalization(norm_cfg['type'], (memory_cfg['in_channels'], norm_cfg['opts'])),
-                BuildActivation(act_cfg['type'], **act_cfg['opts']),
+                BuildNormalization(constructnormcfg(placeholder=memory_cfg['in_channels'], norm_cfg=norm_cfg)),
+                BuildActivation(act_cfg),
             )
         context_within_image_cfg = memory_cfg['context_within_image']
         if context_within_image_cfg['is_on']:
@@ -52,8 +54,8 @@ class MemoryNet(BaseModel):
             self.context_within_image_module = supported_context_modules[context_within_image_cfg['type']](**cwi_cfg)
         self.bottleneck = nn.Sequential(
             nn.Conv2d(memory_cfg['in_channels'], memory_cfg['feats_channels'], kernel_size=3, stride=1, padding=1, bias=False),
-            BuildNormalization(norm_cfg['type'], (memory_cfg['feats_channels'], norm_cfg['opts'])),
-            BuildActivation(act_cfg['type'], **act_cfg['opts']),
+            BuildNormalization(constructnormcfg(placeholder=memory_cfg['feats_channels'], norm_cfg=norm_cfg)),
+            BuildActivation(act_cfg),
         )
         self.memory_module = FeaturesMemory(
             num_classes=cfg['num_classes'], 
@@ -70,16 +72,16 @@ class MemoryNet(BaseModel):
         decoder_cfg = cfg['decoder']['stage1']
         self.decoder_stage1 = nn.Sequential(
             nn.Conv2d(decoder_cfg['in_channels'], decoder_cfg['out_channels'], kernel_size=1, stride=1, padding=0, bias=False),
-            BuildNormalization(norm_cfg['type'], (decoder_cfg['out_channels'], norm_cfg['opts'])),
-            BuildActivation(act_cfg['type'], **act_cfg['opts']),
+            BuildNormalization(constructnormcfg(placeholder=decoder_cfg['out_channels'], norm_cfg=norm_cfg)),
+            BuildActivation(act_cfg),
             nn.Dropout2d(decoder_cfg['dropout']),
             nn.Conv2d(decoder_cfg['out_channels'], cfg['num_classes'], kernel_size=1, stride=1, padding=0),
         )
         decoder_cfg = cfg['decoder']['stage2']
         self.decoder_stage2 = nn.Sequential(
             nn.Conv2d(decoder_cfg['in_channels'], decoder_cfg['out_channels'], kernel_size=1, stride=1, padding=0, bias=False),
-            BuildNormalization(norm_cfg['type'], (decoder_cfg['out_channels'], norm_cfg['opts'])),
-            BuildActivation(act_cfg['type'], **act_cfg['opts']),
+            BuildNormalization(constructnormcfg(placeholder=decoder_cfg['out_channels'], norm_cfg=norm_cfg)),
+            BuildActivation(act_cfg),
             nn.Dropout2d(decoder_cfg['dropout']),
             nn.Conv2d(decoder_cfg['out_channels'], cfg['num_classes'], kernel_size=1, stride=1, padding=0)
         )

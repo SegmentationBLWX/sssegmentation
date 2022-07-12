@@ -8,14 +8,13 @@ import torch
 import torch.nn as nn
 import torch.nn.functional as F
 from ..base import SelfAttentionBlock
-from ...backbones import BuildActivation, BuildNormalization
+from ...backbones import BuildActivation, BuildNormalization, constructnormcfg
 
 
-'''semantic-level context module'''
+'''SemanticLevelContext'''
 class SemanticLevelContext(nn.Module):
-    def __init__(self, feats_channels, transform_channels, concat_input=False, **kwargs):
+    def __init__(self, feats_channels, transform_channels, concat_input=False, norm_cfg=None, act_cfg=None):
         super(SemanticLevelContext, self).__init__()
-        norm_cfg, act_cfg = kwargs['norm_cfg'], kwargs['act_cfg']
         self.correlate_net = SelfAttentionBlock(
             key_in_channels=feats_channels,
             query_in_channels=feats_channels,
@@ -36,8 +35,8 @@ class SemanticLevelContext(nn.Module):
         if concat_input:
             self.bottleneck = nn.Sequential(
                 nn.Conv2d(feats_channels * 2, feats_channels, kernel_size=3, stride=1, padding=1, bias=False),
-                BuildNormalization(norm_cfg['type'], (feats_channels, norm_cfg['opts'])),
-                BuildActivation(act_cfg['type'], **act_cfg['opts']),
+                BuildNormalization(constructnormcfg(placeholder=feats_channels, norm_cfg=norm_cfg)),
+                BuildActivation(act_cfg),
             )
     '''forward'''
     def forward(self, x, preds, feats_il):

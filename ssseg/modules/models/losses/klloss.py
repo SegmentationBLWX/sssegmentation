@@ -1,6 +1,6 @@
 '''
 Function:
-    define the Kullback-Leibler divergence loss measure
+    Define the Kullback-Leibler divergence loss measure
 Author:
     Zhenchao Jin
 '''
@@ -9,28 +9,23 @@ import torch.nn as nn
 import torch.nn.functional as F
 
 
-'''define all'''
-__all__ = ['KLDivLoss']
-
-
 '''
 Function:
-    Kullback-Leibler divergence loss
+    KLDivLoss
 Arguments:
     --prediction: prediction of the network
     --target: ground truth
     --scale_factor: scale the loss for loss balance
     --lowest_loss_value: added inspired by ICML2020, "Do We Need Zero Training Loss After Achieving Zero Training Error", https://arxiv.org/pdf/2002.08709.pdf
 '''
-def KLDivLoss(prediction, target, scale_factor=1.0, **kwargs):
+def KLDivLoss(prediction, target, scale_factor=1.0, temperature=1, reduction='mean', log_target=False, lowest_loss_value=None):
     assert prediction.size() == target.size()
     # parse
-    temperature = kwargs.get('temperature', 1)
     src_distribution = nn.LogSoftmax(dim=1)(prediction / temperature)
     tgt_distribution = nn.Softmax(dim=1)(target / temperature)
     kl_args = {
-        'reduction': kwargs.get('reduction', 'mean'),
-        'log_target': kwargs.get('log_target', False),
+        'reduction': reduction,
+        'log_target': log_target,
     }
     try: nn.KLDivLoss(log_target=False)
     except: kl_args.pop('log_target')
@@ -39,7 +34,6 @@ def KLDivLoss(prediction, target, scale_factor=1.0, **kwargs):
     # scale the loss
     loss = loss * scale_factor
     # return the final loss
-    lowest_loss_value = kwargs.get('lowest_loss_value', None)
     if lowest_loss_value:
         return torch.abs(loss - lowest_loss_value) + lowest_loss_value
     return loss

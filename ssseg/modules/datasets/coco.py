@@ -11,7 +11,7 @@ from tqdm import tqdm
 from .base import BaseDataset
 
 
-'''coco dataset pretraining for VOC'''
+'''COCODataset'''
 class COCODataset(BaseDataset):
     num_classes = 21
     classnames = [
@@ -84,7 +84,7 @@ class COCODataset(BaseDataset):
         return segmentation
 
 
-'''coco stuff 10k dataset'''
+'''COCOStuff10kDataset'''
 class COCOStuff10kDataset(BaseDataset):
     num_classes = 182
     classnames = [
@@ -139,7 +139,7 @@ class COCOStuff10kDataset(BaseDataset):
         return len(self.imageids)
 
 
-'''coco stuff dataset'''
+'''COCOStuffDataset'''
 class COCOStuffDataset(BaseDataset):
     num_classes = 182
     classnames = [

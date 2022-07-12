@@ -10,20 +10,20 @@ import torch.nn as nn
 import torch.nn.functional as F
 from .ema import EMAModule
 from ..base import BaseModel
-from ...backbones import BuildActivation, BuildNormalization
+from ...backbones import BuildActivation, BuildNormalization, constructnormcfg
 
 
 '''EMANet'''
 class EMANet(BaseModel):
-    def __init__(self, cfg, **kwargs):
-        super(EMANet, self).__init__(cfg, **kwargs)
+    def __init__(self, cfg, mode):
+        super(EMANet, self).__init__(cfg, mode)
         align_corners, norm_cfg, act_cfg = self.align_corners, self.norm_cfg, self.act_cfg
         # build the EMA module
         ema_cfg = cfg['ema']
         self.ema_in_conv = nn.Sequential(
             nn.Conv2d(ema_cfg['in_channels'], ema_cfg['ema_channels'], kernel_size=3, stride=1, padding=1, bias=False),
-            BuildNormalization(norm_cfg['type'], (ema_cfg['ema_channels'], norm_cfg['opts'])),
-            BuildActivation(act_cfg['type'], **act_cfg['opts']),
+            BuildNormalization(constructnormcfg(placeholder=ema_cfg['ema_channels'], norm_cfg=norm_cfg)),
+            BuildActivation(act_cfg),
         )
         self.ema_mid_conv = nn.Conv2d(ema_cfg['ema_channels'], ema_cfg['ema_channels'], kernel_size=1, stride=1, padding=0)
         for param in self.ema_mid_conv.parameters():
@@ -36,19 +36,19 @@ class EMANet(BaseModel):
         )
         self.ema_out_conv = nn.Sequential(
             nn.Conv2d(ema_cfg['ema_channels'], ema_cfg['ema_channels'], kernel_size=1, stride=1, padding=0, bias=False),
-            BuildNormalization(norm_cfg['type'], (ema_cfg['ema_channels'], norm_cfg['opts'])),
+            BuildNormalization(constructnormcfg(placeholder=ema_cfg['ema_channels'], norm_cfg=norm_cfg)),
         )
         self.bottleneck = nn.Sequential(
             nn.Conv2d(ema_cfg['ema_channels'], ema_cfg['ema_channels'], kernel_size=3, stride=1, padding=1, bias=False),
-            BuildNormalization(norm_cfg['type'], (ema_cfg['ema_channels'], norm_cfg['opts'])),
-            BuildActivation(act_cfg['type'], **act_cfg['opts']),
+            BuildNormalization(constructnormcfg(placeholder=ema_cfg['ema_channels'], norm_cfg=norm_cfg)),
+            BuildActivation(act_cfg),
         )
         # build decoder
         decoder_cfg = cfg['decoder']
         self.decoder = nn.Sequential(
             nn.Conv2d(decoder_cfg['in_channels'], decoder_cfg['out_channels'], kernel_size=3, stride=1, padding=1, bias=False),
-            BuildNormalization(norm_cfg['type'], (decoder_cfg['out_channels'], norm_cfg['opts'])),
-            BuildActivation(act_cfg['type'], **act_cfg['opts']),
+            BuildNormalization(constructnormcfg(placeholder=decoder_cfg['out_channels'], norm_cfg=norm_cfg)),
+            BuildActivation(act_cfg),
             nn.Dropout2d(decoder_cfg['dropout']),
             nn.Conv2d(decoder_cfg['out_channels'], cfg['num_classes'], kernel_size=1, stride=1, padding=0)
         )

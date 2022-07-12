@@ -7,22 +7,21 @@ Author:
 import torch
 import torch.nn as nn
 import torch.nn.functional as F
-from ...backbones import BuildActivation, DepthwiseSeparableConv2d, BuildNormalization
+from ...backbones import BuildActivation, DepthwiseSeparableConv2d, BuildNormalization, constructnormcfg
 
 
-'''Depthwise Separable ASPP'''
+'''DepthwiseSeparableASPP'''
 class DepthwiseSeparableASPP(nn.Module):
-    def __init__(self, in_channels, out_channels, dilations, **kwargs):
+    def __init__(self, in_channels, out_channels, dilations, align_corners=False, norm_cfg=None, act_cfg=None):
         super(DepthwiseSeparableASPP, self).__init__()
-        align_corners, norm_cfg, act_cfg = kwargs['align_corners'], kwargs['norm_cfg'], kwargs['act_cfg']
         self.align_corners = align_corners
         self.parallel_branches = nn.ModuleList()
         for idx, dilation in enumerate(dilations):
             if dilation == 1:
                 branch = nn.Sequential(
                     nn.Conv2d(in_channels, out_channels, kernel_size=1, stride=1, padding=0, dilation=dilation, bias=False),
-                    BuildNormalization(norm_cfg['type'], (out_channels, norm_cfg['opts'])),
-                    BuildActivation(act_cfg['type'], **act_cfg['opts'])
+                    BuildNormalization(constructnormcfg(placeholder=out_channels, norm_cfg=norm_cfg)),
+                    BuildActivation(act_cfg),
                 )
             else:
                 branch = DepthwiseSeparableConv2d(in_channels, out_channels, kernel_size=3, stride=1, padding=dilation, dilation=dilation, bias=False, norm_cfg=norm_cfg, act_cfg=act_cfg)
@@ -30,13 +29,13 @@ class DepthwiseSeparableASPP(nn.Module):
         self.global_branch = nn.Sequential(
             nn.AdaptiveAvgPool2d((1, 1)),
             nn.Conv2d(in_channels, out_channels, kernel_size=1, stride=1, padding=0, bias=False),
-            BuildNormalization(norm_cfg['type'], (out_channels, norm_cfg['opts'])),
-            BuildActivation(act_cfg['type'], **act_cfg['opts'])
+            BuildNormalization(constructnormcfg(placeholder=out_channels, norm_cfg=norm_cfg)),
+            BuildActivation(act_cfg),
         )
         self.bottleneck = nn.Sequential(
             nn.Conv2d(out_channels * (len(dilations) + 1), out_channels, kernel_size=3, stride=1, padding=1, bias=False),
-            BuildNormalization(norm_cfg['type'], (out_channels, norm_cfg['opts'])),
-            BuildActivation(act_cfg['type'], **act_cfg['opts'])
+            BuildNormalization(constructnormcfg(placeholder=out_channels, norm_cfg=norm_cfg)),
+            BuildActivation(act_cfg),
         )
         self.in_channels = in_channels
         self.out_channels = out_channels

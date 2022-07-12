@@ -9,7 +9,7 @@ import random
 import numpy as np
 
 
-'''set random seed'''
+'''setRandomSeed'''
 def setRandomSeed(seed):
     random.seed(seed)
     np.random.seed(seed)

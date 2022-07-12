@@ -1,6 +1,6 @@
 '''
 Function:
-    setup sssegmentation
+    Setup sssegmentation
 Author:
     Zhenchao Jin
 '''

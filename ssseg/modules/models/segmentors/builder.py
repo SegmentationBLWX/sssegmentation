@@ -4,6 +4,7 @@ Function:
 Author:
     Zhenchao Jin
 '''
+import copy
 from .ce2p import CE2P
 from .icnet import ICNet
 from .isnet import ISNet
@@ -35,8 +36,8 @@ from .deeplabv3plus import Deeplabv3Plus
 from .fcn import FCN, DepthwiseSeparableFCN
 
 
-'''build segmentor'''
-def BuildSegmentor(segmentor_cfg, mode, **kwargs):
+'''BuildSegmentor'''
+def BuildSegmentor(segmentor_cfg, mode):
     supported_segmentors = {
         'fcn': FCN,
         'ce2p': CE2P,
@@ -70,6 +71,7 @@ def BuildSegmentor(segmentor_cfg, mode, **kwargs):
         'deeplabv3plus': Deeplabv3Plus,
         'depthwiseseparablefcn': DepthwiseSeparableFCN,
     }
-    segmentor_type = segmentor_cfg['type']
-    assert segmentor_type in supported_segmentors, 'unsupport segmentor_type %s...' % segmentor_type
-    return supported_segmentors[segmentor_type](segmentor_cfg, mode=mode)
+    selected_segmentor = supported_segmentors[segmentor_cfg['type']]
+    segmentor_cfg = copy.deepcopy(segmentor_cfg)
+    segmentor_cfg.pop('type')
+    return selected_segmentor(segmentor_cfg, mode=mode)

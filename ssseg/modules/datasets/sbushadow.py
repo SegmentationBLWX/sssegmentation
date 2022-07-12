@@ -8,7 +8,7 @@ import os
 from .base import BaseDataset
 
 
-'''sbu-shadow dataset'''
+'''SBUShadowDataset'''
 class SBUShadowDataset(BaseDataset):
     num_classes = 2
     classnames = ['__backgroud__', 'shadow']

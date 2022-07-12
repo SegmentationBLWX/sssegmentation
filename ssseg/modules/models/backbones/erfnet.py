@@ -9,7 +9,7 @@ import torch
 import torch.nn as nn
 import torch.nn.functional as F
 import torch.utils.model_zoo as model_zoo
-from .bricks import BuildNormalization, BuildActivation
+from .bricks import BuildNormalization, BuildActivation, constructnormcfg
 
 
 '''model urls'''
@@ -23,8 +23,8 @@ class DownsamplerBlock(nn.Module):
         self.norm_cfg, self.act_cfg = norm_cfg, act_cfg
         self.conv = nn.Conv2d(in_channels, out_channels - in_channels, kernel_size=3, stride=2, padding=1, bias=False)
         self.pool = nn.MaxPool2d(kernel_size=2, stride=2)
-        self.bn = BuildNormalization(norm_cfg['type'], (out_channels, norm_cfg['opts']))
-        self.act = BuildActivation(act_cfg['type'], **act_cfg['opts'])
+        self.bn = BuildNormalization(constructnormcfg(placeholder=out_channels, norm_cfg=norm_cfg))
+        self.act = BuildActivation(act_cfg)
     '''forward'''
     def forward(self, x):
         conv_out, pool_out = self.conv(x), self.pool(x)
@@ -40,7 +40,7 @@ class NonBottleneck1d(nn.Module):
     def __init__(self, channels, drop_rate=0, dilation=1, num_conv_layer=2, norm_cfg=None, act_cfg=None):
         super(NonBottleneck1d, self).__init__()
         self.norm_cfg, self.act_cfg = norm_cfg, act_cfg
-        self.act = BuildActivation(act_cfg['type'], **act_cfg['opts'])
+        self.act = BuildActivation(act_cfg)
         self.convs_layers = nn.ModuleList()
         for conv_layer in range(num_conv_layer):
             first_conv_padding = (1, 0) if conv_layer == 0 else (dilation, 0)
@@ -50,7 +50,7 @@ class NonBottleneck1d(nn.Module):
             self.convs_layers.append(nn.Conv2d(channels, channels, kernel_size=(3, 1), stride=1, padding=first_conv_padding, bias=True, dilation=first_conv_dilation))
             self.convs_layers.append(self.act)
             self.convs_layers.append(nn.Conv2d(channels, channels, kernel_size=(1, 3), stride=1, padding=second_conv_padding, bias=True, dilation=second_conv_dilation))
-            self.convs_layers.append(BuildNormalization(norm_cfg['type'], (channels, norm_cfg['opts'])))
+            self.convs_layers.append(BuildNormalization(constructnormcfg(placeholder=channels, norm_cfg=norm_cfg)))
             if conv_layer == 0: self.convs_layers.append(self.act)
             else: self.convs_layers.append(nn.Dropout(p=drop_rate))
     '''forward'''
@@ -68,8 +68,8 @@ class UpsamplerBlock(nn.Module):
         super(UpsamplerBlock, self).__init__()
         self.norm_cfg, self.act_cfg = norm_cfg, act_cfg
         self.conv = nn.ConvTranspose2d(in_channels, out_channels, kernel_size=3, stride=2, padding=1, output_padding=1, bias=True)
-        self.bn = BuildNormalization(norm_cfg['type'], (out_channels, norm_cfg['opts']))
-        self.act = BuildActivation(act_cfg['type'], **act_cfg['opts'])
+        self.bn = BuildNormalization(constructnormcfg(placeholder=out_channels, norm_cfg=norm_cfg))
+        self.act = BuildActivation(act_cfg)
     '''forward'''
     def forward(self, x):
         output = self.conv(x)
@@ -82,7 +82,7 @@ class UpsamplerBlock(nn.Module):
 class ERFNet(nn.Module):
     def __init__(self, in_channels=3, enc_downsample_channels=(16, 64, 128), enc_stage_non_bottlenecks=(5, 8), enc_non_bottleneck_dilations=(2, 4, 8, 16),
                  enc_non_bottleneck_channels=(64, 128), dec_upsample_channels=(64, 16), dec_stages_non_bottleneck=(2, 2), dec_non_bottleneck_channels=(64, 16),
-                 dropout_ratio=0.1, norm_cfg=None, act_cfg=None, **kwargs):
+                 dropout_ratio=0.1, norm_cfg=None, act_cfg=None):
         super(ERFNet, self).__init__()
         # check arguments
         assert len(enc_downsample_channels) == len(dec_upsample_channels) + 1
@@ -130,12 +130,12 @@ class ERFNet(nn.Module):
         return [x]
 
 
-'''build erfnet'''
-def BuildERFNet(erfnet_type=None, **kwargs):
+'''BuildERFNet'''
+def BuildERFNet(erfnet_cfg):
     # assert whether support
-    assert erfnet_type is None
-    # parse args
-    default_args = {
+    erfnet_type = erfnet_cfg.pop('type')
+    # parse cfg
+    default_cfg = {
         'in_channels': 3, 
         'enc_downsample_channels': (16, 64, 128),
         'enc_stage_non_bottlenecks': (5, 8),
@@ -146,26 +146,33 @@ def BuildERFNet(erfnet_type=None, **kwargs):
         'dec_non_bottleneck_channels': (64, 16),
         'dropout_ratio': 0.1,
         'norm_cfg': None, 
-        'act_cfg': {'type': 'prelu', 'opts': {}},
+        'act_cfg': {'type': 'prelu'},
         'pretrained': False,
         'pretrained_model_path': '',
     }
-    for key, value in kwargs.items():
-        if key in default_args: default_args.update({key: value})
-    # obtain args for instanced erfnet
-    erfnet_args = default_args.copy()
+    for key, value in erfnet_cfg.items():
+        if key in default_cfg: 
+            default_cfg.update({key: value})
+    # obtain erfnet_cfg
+    erfnet_cfg = default_cfg.copy()
+    pretrained = erfnet_cfg.pop('pretrained')
+    pretrained_model_path = erfnet_cfg.pop('pretrained_model_path')
     # obtain the instanced erfnet
-    model = ERFNet(**erfnet_args)
+    model = ERFNet(**erfnet_cfg)
     # load weights of pretrained model
-    if default_args['pretrained'] and os.path.exists(default_args['pretrained_model_path']):
-        checkpoint = torch.load(default_args['pretrained_model_path'])
-        if 'state_dict' in checkpoint: state_dict = checkpoint['state_dict']
-        else: state_dict = checkpoint
+    if pretrained and os.path.exists(pretrained_model_path):
+        checkpoint = torch.load(pretrained_model_path)
+        if 'state_dict' in checkpoint: 
+            state_dict = checkpoint['state_dict']
+        else: 
+            state_dict = checkpoint
         model.load_state_dict(state_dict, strict=False)
-    elif default_args['pretrained']:
+    elif pretrained:
         checkpoint = model_zoo.load_url(model_urls[erfnet_type])
-        if 'state_dict' in checkpoint: state_dict = checkpoint['state_dict']
-        else: state_dict = checkpoint
+        if 'state_dict' in checkpoint: 
+            state_dict = checkpoint['state_dict']
+        else: 
+            state_dict = checkpoint
         model.load_state_dict(state_dict, strict=False)
     # return the model
     return model

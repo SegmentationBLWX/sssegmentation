@@ -10,7 +10,7 @@ import pandas as pd
 from .base import BaseDataset
 
 
-'''MHPv1 dataset'''
+'''MHPv1Dataset'''
 class MHPv1Dataset(BaseDataset):
     num_classes = 19
     classnames = [
@@ -55,7 +55,7 @@ class MHPv1Dataset(BaseDataset):
         return len(self.imageids)
 
 
-'''MHPv2 dataset'''
+'''MHPv2Dataset'''
 class MHPv2Dataset(BaseDataset):
     num_classes = 59
     classnames = [

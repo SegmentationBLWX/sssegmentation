@@ -8,7 +8,7 @@ import os
 import torch
 import torch.nn as nn
 import torch.utils.model_zoo as model_zoo
-from .bricks import BuildNormalization, BuildActivation
+from .bricks import BuildNormalization, BuildActivation, constructnormcfg
 
 
 '''model urls'''
@@ -25,8 +25,8 @@ class BasicConvBlock(nn.Module):
             s, d, p = stride if i == 0 else 1, 1 if i == 0 else dilation, 1 if i == 0 else dilation
             conv = nn.Sequential(
                 nn.Conv2d(in_c, out_c, kernel_size=3, stride=s, padding=p, dilation=d, bias=False),
-                BuildNormalization(norm_cfg['type'], (out_c, norm_cfg['opts'])),
-                BuildActivation(act_cfg['type'], **act_cfg['opts']),
+                BuildNormalization(constructnormcfg(placeholder=out_c, norm_cfg=norm_cfg)),
+                BuildActivation(act_cfg),
             )
             convs.append(conv)
         self.convs = nn.Sequential(*convs)
@@ -43,8 +43,8 @@ class DeconvModule(nn.Module):
         assert (kernel_size - scale_factor >= 0) and (kernel_size - scale_factor) % 2 == 0
         self.deconv_upsamping = nn.Sequential(
             nn.ConvTranspose2d(in_channels, out_channels, kernel_size=kernel_size, stride=scale_factor, padding=(kernel_size - scale_factor) // 2),
-            BuildNormalization(norm_cfg['type'], (out_channels, norm_cfg['opts'])),
-            BuildActivation(act_cfg['type'], **act_cfg['opts']),
+            BuildNormalization(constructnormcfg(placeholder=out_channels, norm_cfg=norm_cfg)),
+            BuildActivation(act_cfg),
         )
     '''forward'''
     def forward(self, x):
@@ -59,8 +59,8 @@ class InterpConv(nn.Module):
         super(InterpConv, self).__init__()
         conv = nn.Sequential(
             nn.Conv2d(in_channels, out_channels, kernel_size=kernel_size, stride=stride, padding=padding, bias=False),
-            BuildNormalization(norm_cfg['type'], (out_channels, norm_cfg['opts'])),
-            BuildActivation(act_cfg['type'], **act_cfg['opts']),
+            BuildNormalization(constructnormcfg(placeholder=out_channels, norm_cfg=norm_cfg)),
+            BuildActivation(act_cfg),
         )
         upsample = nn.Upsample(**upsample_cfg)
         if conv_first:
@@ -92,7 +92,7 @@ class UpConvBlock(nn.Module):
             act_cfg=act_cfg
         )
         if upsample_type is not None:
-            assert upsample_type in supported_upsamples, 'unsupport upsample_type %s...' % upsample_type
+            assert upsample_type in supported_upsamples, 'unsupport upsample_type %s' % upsample_type
             self.upsample = supported_upsamples[upsample_type](
                 in_channels=in_channels,
                 out_channels=skip_channels,
@@ -102,8 +102,8 @@ class UpConvBlock(nn.Module):
         else:
             self.upsample = nn.Sequential(
                 nn.Conv2d(in_channels, skip_channels, kernel_size=1, stride=1, padding=0, bias=False),
-                BuildNormalization(norm_cfg['type'], (skip_channels, norm_cfg['opts'])),
-                BuildActivation(act_cfg['type'], **act_cfg['opts']),
+                BuildNormalization(constructnormcfg(placeholder=skip_channels, norm_cfg=norm_cfg)),
+                BuildActivation(act_cfg),
             )
     '''forward'''
     def forward(self, skip, x):
@@ -116,7 +116,7 @@ class UpConvBlock(nn.Module):
 '''UNet backbone'''
 class UNet(nn.Module):
     def __init__(self, in_channels=3, base_channels=64, num_stages=5, strides=(1, 1, 1, 1, 1), enc_num_convs=(2, 2, 2, 2, 2), dec_num_convs=(2, 2, 2, 2),
-                 downsamples=(True, True, True, True), enc_dilations=(1, 1, 1, 1, 1), dec_dilations=(1, 1, 1, 1), norm_cfg=None, act_cfg=None, upsample_type='InterpConv', **kwargs):
+                 downsamples=(True, True, True, True), enc_dilations=(1, 1, 1, 1, 1), dec_dilations=(1, 1, 1, 1), norm_cfg=None, act_cfg=None, upsample_type='InterpConv'):
         super(UNet, self).__init__()
         assert (len(strides) == num_stages) and (len(enc_num_convs) == num_stages) \
             and (len(dec_num_convs) == (num_stages - 1)) and (len(downsamples) == (num_stages - 1)) \
@@ -184,12 +184,12 @@ class UNet(nn.Module):
         assert (h % whole_downsample_rate == 0) and (w % whole_downsample_rate == 0)
 
 
-'''build unet'''
-def BuildUNet(unet_type=None, **kwargs):
+'''BuildUNet'''
+def BuildUNet(unet_cfg):
     # assert whether support
-    assert unet_type is None
-    # parse args
-    default_args = {
+    unet_type = unet_cfg.pop('type')
+    # parse cfg
+    default_cfg = {
         'in_channels': 3,
         'base_channels': 64,
         'num_stages': 5,
@@ -200,27 +200,34 @@ def BuildUNet(unet_type=None, **kwargs):
         'enc_dilations': (1, 1, 1, 1, 1),
         'dec_dilations': (1, 1, 1, 1),
         'norm_cfg': None,
-        'act_cfg': {'type': 'relu', 'opts': {'inplace': True}},
+        'act_cfg': {'type': 'relu', 'inplace': True},
         'upsample_type': 'InterpConv',
         'pretrained': False,
         'pretrained_model_path': '',
     }
-    for key, value in kwargs.items():
-        if key in default_args: default_args.update({key: value})
-    # obtain args for instanced unet
-    unet_args = default_args.copy()
+    for key, value in unet_cfg.items():
+        if key in default_cfg: 
+            default_cfg.update({key: value})
+    # obtain unet_cfg
+    unet_cfg = default_cfg.copy()
+    pretrained = unet_cfg.pop('pretrained')
+    pretrained_model_path = unet_cfg.pop('pretrained_model_path')
     # obtain the instanced unet
-    model = UNet(**unet_args)
+    model = UNet(**unet_cfg)
     # load weights of pretrained model
-    if default_args['pretrained'] and os.path.exists(default_args['pretrained_model_path']):
-        checkpoint = torch.load(default_args['pretrained_model_path'])
-        if 'state_dict' in checkpoint: state_dict = checkpoint['state_dict']
-        else: state_dict = checkpoint
+    if pretrained and os.path.exists(pretrained_model_path):
+        checkpoint = torch.load(pretrained_model_path)
+        if 'state_dict' in checkpoint: 
+            state_dict = checkpoint['state_dict']
+        else: 
+            state_dict = checkpoint
         model.load_state_dict(state_dict, strict=False)
-    elif default_args['pretrained']:
+    elif pretrained:
         checkpoint = model_zoo.load_url(model_urls[unet_type])
-        if 'state_dict' in checkpoint: state_dict = checkpoint['state_dict']
-        else: state_dict = checkpoint
+        if 'state_dict' in checkpoint: 
+            state_dict = checkpoint['state_dict']
+        else: 
+            state_dict = checkpoint
         model.load_state_dict(state_dict, strict=False)
     # return the model
     return model

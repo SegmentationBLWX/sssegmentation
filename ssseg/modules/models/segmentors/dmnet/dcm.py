@@ -7,28 +7,27 @@ Author:
 import torch
 import torch.nn as nn
 import torch.nn.functional as F
-from ...backbones import BuildActivation, BuildNormalization
+from ...backbones import BuildActivation, BuildNormalization, constructnormcfg
 
 
-'''Dynamic Convolutional Module'''
+'''DynamicConvolutionalModule'''
 class DynamicConvolutionalModule(nn.Module):
-    def __init__(self, filter_size, is_fusion, in_channels, out_channels, **kwargs):
+    def __init__(self, filter_size, is_fusion, in_channels, out_channels, norm_cfg=None, act_cfg=None):
         super(DynamicConvolutionalModule, self).__init__()
-        norm_cfg, act_cfg = kwargs['norm_cfg'], kwargs['act_cfg']
         self.filter_size, self.is_fusion = filter_size, is_fusion
         self.filter_gen_conv = nn.Conv2d(in_channels, out_channels, kernel_size=1, stride=1, padding=0)
         self.input_redu_conv = nn.Sequential(
             nn.Conv2d(in_channels, out_channels, kernel_size=1, stride=1, padding=0, bias=False),
-            BuildNormalization(norm_cfg['type'], (out_channels, norm_cfg['opts'])),
-            BuildActivation(act_cfg['type'], **act_cfg['opts']),
+            BuildNormalization(constructnormcfg(placeholder=out_channels, norm_cfg=norm_cfg)),
+            BuildActivation(act_cfg),
         )
-        self.norm = BuildNormalization(norm_cfg['type'], (out_channels, norm_cfg['opts']))
-        self.activate = BuildActivation(act_cfg['type'], **act_cfg['opts'])
+        self.norm = BuildNormalization(constructnormcfg(placeholder=out_channels, norm_cfg=norm_cfg))
+        self.activate = BuildActivation(act_cfg)
         if is_fusion:
             self.fusion_conv = nn.Sequential(
                 nn.Conv2d(out_channels, out_channels, kernel_size=1, stride=1, padding=0, bias=False),
-                BuildNormalization(norm_cfg['type'], (out_channels, norm_cfg['opts'])),
-                BuildActivation(act_cfg['type'], **act_cfg['opts']),
+                BuildNormalization(constructnormcfg(placeholder=out_channels, norm_cfg=norm_cfg)),
+                BuildActivation(act_cfg),
             )
     '''forward'''
     def forward(self, x):

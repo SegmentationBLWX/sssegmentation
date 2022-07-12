@@ -10,7 +10,7 @@ from PIL import Image
 from .base import BaseDataset
 
 
-'''CityScapes dataset'''
+'''CityScapesDataset'''
 class CityScapesDataset(BaseDataset):
     num_classes = 19
     classnames = [

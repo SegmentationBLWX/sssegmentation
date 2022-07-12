@@ -13,7 +13,7 @@ import torch.utils.model_zoo as model_zoo
 from collections import OrderedDict
 from .bricks import PatchEmbed as PatchEmbedBase
 from .bricks import PatchMerging as PatchMergingBase
-from .bricks import BuildNormalization, BuildActivation, BuildDropout, FFN
+from .bricks import BuildNormalization, BuildDropout, FFN, constructnormcfg
 
 
 '''model urls'''
@@ -125,7 +125,7 @@ class ShiftWindowMSA(nn.Module):
             attn_drop_rate=attn_drop_rate,
             proj_drop_rate=proj_drop_rate,
         )
-        self.drop = BuildDropout(dropout_cfg['type'], **dropout_cfg['opts'])
+        self.drop = BuildDropout(dropout_cfg)
     '''layers with zero weight decay'''
     def zerowdlayers(self):
         return self.w_msa.zerowdlayers()
@@ -204,16 +204,16 @@ class ShiftWindowMSA(nn.Module):
 class SwinBlock(nn.Module):
     def __init__(self, embed_dims, num_heads, feedforward_channels, window_size=7, shift=False, qkv_bias=True, qk_scale=None, drop_rate=0., attn_drop_rate=0., drop_path_rate=0., act_cfg=None, norm_cfg=None):
         super(SwinBlock, self).__init__()
-        self.norm1 = BuildNormalization(norm_cfg['type'], (embed_dims, norm_cfg['opts']))
+        self.norm1 = BuildNormalization(constructnormcfg(placeholder=embed_dims, norm_cfg=norm_cfg))
         self.attn = ShiftWindowMSA(
             embed_dims=embed_dims, num_heads=num_heads, window_size=window_size, shift_size=window_size // 2 if shift else 0,
             qkv_bias=qkv_bias, qk_scale=qk_scale, attn_drop_rate=attn_drop_rate, proj_drop_rate=drop_rate,
-            dropout_cfg={'type': 'droppath', 'opts': {'drop_prob': drop_path_rate}},
+            dropout_cfg={'type': 'droppath', 'drop_prob': drop_path_rate},
         )
-        self.norm2 = BuildNormalization(norm_cfg['type'], (embed_dims, norm_cfg['opts']))
+        self.norm2 = BuildNormalization(constructnormcfg(placeholder=embed_dims, norm_cfg=norm_cfg))
         self.ffn = FFN(
             embed_dims=embed_dims, feedforward_channels=feedforward_channels, num_fcs=2,
-            ffn_drop=drop_rate, dropout_cfg={'type': 'droppath', 'opts': {'drop_prob': drop_path_rate}},
+            ffn_drop=drop_rate, dropout_cfg={'type': 'droppath', 'drop_prob': drop_path_rate},
             act_cfg=act_cfg, add_identity=True,
         )
     '''layers with zero weight decay'''
@@ -303,7 +303,7 @@ class SwinBlockSequence(nn.Module):
 class SwinTransformer(nn.Module):
     def __init__(self, pretrain_img_size=224, in_channels=3, embed_dims=96, patch_size=4, window_size=7, mlp_ratio=4, depths=(2, 2, 6, 2), num_heads=(3, 6, 12, 24),
                  strides=(4, 2, 2, 2), out_indices=(0, 1, 2, 3), qkv_bias=True, qk_scale=None, patch_norm=True, drop_rate=0., attn_drop_rate=0., drop_path_rate=0.1,
-                 use_abs_pos_embed=False, act_cfg=None, norm_cfg=None, **kwargs):
+                 use_abs_pos_embed=False, act_cfg=None, norm_cfg=None):
         super(SwinTransformer, self).__init__()
         if isinstance(pretrain_img_size, int):
             pretrain_img_size = (pretrain_img_size, pretrain_img_size)
@@ -351,7 +351,7 @@ class SwinTransformer(nn.Module):
         self.num_features = [int(embed_dims * 2**i) for i in range(num_layers)]
         # add a norm layer for each output
         for i in out_indices:
-            layer = BuildNormalization(norm_cfg['type'], (self.num_features[i], norm_cfg['opts']))
+            layer = BuildNormalization(constructnormcfg(placeholder=self.num_features[i], norm_cfg=norm_cfg))
             layer_name = f'norm{i}'
             self.add_module(layer_name, layer)
     '''initialize backbone'''
@@ -487,148 +487,69 @@ class SwinTransformer(nn.Module):
         return outs
 
 
-'''build swin transformer'''
-def BuildSwinTransformer(swin_type='swin_tiny_patch4_window7_224', **kwargs):
+'''BuildSwinTransformer'''
+def BuildSwinTransformer(swin_cfg):
     # assert whether support
+    swin_type = swin_cfg.pop('type')
     supported_swins = {
         'swin_tiny_patch4_window7_224': {
-            'pretrain_img_size': 224,
-            'in_channels': 3,
-            'embed_dims': 96,
-            'patch_size': 4,
-            'window_size': 7,
-            'mlp_ratio': 4,
-            'depths': [2, 2, 6, 2],
-            'num_heads': [3, 6, 12, 24],
-            'qkv_bias': True,
-            'qk_scale': None,
-            'patch_norm': True,
-            'drop_rate': 0.,
-            'attn_drop_rate': 0.,
-            'drop_path_rate': 0.3,
-            'use_abs_pos_embed': False,
+            'pretrain_img_size': 224, 'in_channels': 3, 'embed_dims': 96, 'patch_size': 4, 'window_size': 7, 'mlp_ratio': 4, 
+            'depths': [2, 2, 6, 2], 'num_heads': [3, 6, 12, 24], 'qkv_bias': True, 'qk_scale': None, 'patch_norm': True, 
+            'drop_rate': 0., 'attn_drop_rate': 0., 'drop_path_rate': 0.3, 'use_abs_pos_embed': False,
         },
         'swin_small_patch4_window7_224': {
-            'pretrain_img_size': 224,
-            'in_channels': 3,
-            'embed_dims': 96,
-            'patch_size': 4,
-            'window_size': 7,
-            'mlp_ratio': 4,
-            'depths': [2, 2, 18, 2],
-            'num_heads': [3, 6, 12, 24],
-            'qkv_bias': True,
-            'qk_scale': None,
-            'patch_norm': True,
-            'drop_rate': 0.,
-            'attn_drop_rate': 0.,
-            'drop_path_rate': 0.3,
-            'use_abs_pos_embed': False,
+            'pretrain_img_size': 224, 'in_channels': 3, 'embed_dims': 96, 'patch_size': 4, 'window_size': 7, 'mlp_ratio': 4,
+            'depths': [2, 2, 18, 2], 'num_heads': [3, 6, 12, 24], 'qkv_bias': True, 'qk_scale': None, 'patch_norm': True,
+            'drop_rate': 0., 'attn_drop_rate': 0., 'drop_path_rate': 0.3, 'use_abs_pos_embed': False,
         },
         'swin_base_patch4_window12_384': {
-            'pretrain_img_size': 384,
-            'in_channels': 3,
-            'embed_dims': 128,
-            'patch_size': 4,
-            'window_size': 12,
-            'mlp_ratio': 4,
-            'depths': [2, 2, 18, 2],
-            'num_heads': [4, 8, 16, 32],
-            'qkv_bias': True,
-            'qk_scale': None,
-            'patch_norm': True,
-            'drop_rate': 0.,
-            'attn_drop_rate': 0.,
-            'drop_path_rate': 0.3,
-            'use_abs_pos_embed': False,
+            'pretrain_img_size': 384, 'in_channels': 3, 'embed_dims': 128, 'patch_size': 4, 'window_size': 12, 'mlp_ratio': 4,
+            'depths': [2, 2, 18, 2], 'num_heads': [4, 8, 16, 32], 'qkv_bias': True, 'qk_scale': None, 'patch_norm': True,
+            'drop_rate': 0., 'attn_drop_rate': 0., 'drop_path_rate': 0.3, 'use_abs_pos_embed': False,
         },
         'swin_base_patch4_window7_224': {
-            'pretrain_img_size': 224,
-            'in_channels': 3,
-            'embed_dims': 128,
-            'patch_size': 4,
-            'window_size': 7,
-            'mlp_ratio': 4,
-            'depths': [2, 2, 18, 2],
-            'num_heads': [4, 8, 16, 32],
-            'qkv_bias': True,
-            'qk_scale': None,
-            'patch_norm': True,
-            'drop_rate': 0.,
-            'attn_drop_rate': 0.,
-            'drop_path_rate': 0.3,
-            'use_abs_pos_embed': False,
+            'pretrain_img_size': 224, 'in_channels': 3, 'embed_dims': 128, 'patch_size': 4, 'window_size': 7, 'mlp_ratio': 4,
+            'depths': [2, 2, 18, 2], 'num_heads': [4, 8, 16, 32], 'qkv_bias': True, 'qk_scale': None, 'patch_norm': True,
+            'drop_rate': 0., 'attn_drop_rate': 0., 'drop_path_rate': 0.3, 'use_abs_pos_embed': False,
         },
         'swin_base_patch4_window12_384_22k': {
-            'pretrain_img_size': 384,
-            'in_channels': 3,
-            'embed_dims': 128,
-            'patch_size': 4,
-            'window_size': 12,
-            'mlp_ratio': 4,
-            'depths': [2, 2, 18, 2],
-            'num_heads': [4, 8, 16, 32],
-            'qkv_bias': True,
-            'qk_scale': None,
-            'patch_norm': True,
-            'drop_rate': 0.,
-            'attn_drop_rate': 0.,
-            'drop_path_rate': 0.3,
-            'use_abs_pos_embed': False,
+            'pretrain_img_size': 384, 'in_channels': 3, 'embed_dims': 128, 'patch_size': 4, 'window_size': 12, 'mlp_ratio': 4,
+            'depths': [2, 2, 18, 2], 'num_heads': [4, 8, 16, 32], 'qkv_bias': True, 'qk_scale': None, 'patch_norm': True,
+            'drop_rate': 0., 'attn_drop_rate': 0., 'drop_path_rate': 0.3, 'use_abs_pos_embed': False,
         },
         'swin_base_patch4_window7_224_22k': {
-            'pretrain_img_size': 224,
-            'in_channels': 3,
-            'embed_dims': 128,
-            'patch_size': 4,
-            'window_size': 7,
-            'mlp_ratio': 4,
-            'depths': [2, 2, 18, 2],
-            'num_heads': [4, 8, 16, 32],
-            'qkv_bias': True,
-            'qk_scale': None,
-            'patch_norm': True,
-            'drop_rate': 0.,
-            'attn_drop_rate': 0.,
-            'drop_path_rate': 0.3,
-            'use_abs_pos_embed': False,
+            'pretrain_img_size': 224, 'in_channels': 3, 'embed_dims': 128, 'patch_size': 4, 'window_size': 7, 'mlp_ratio': 4,
+            'depths': [2, 2, 18, 2], 'num_heads': [4, 8, 16, 32], 'qkv_bias': True, 'qk_scale': None, 'patch_norm': True,
+            'drop_rate': 0., 'attn_drop_rate': 0., 'drop_path_rate': 0.3, 'use_abs_pos_embed': False,
         },
         'swin_large_patch4_window12_384_22k': {
-            'pretrain_img_size': 384,
-            'in_channels': 3,
-            'embed_dims': 192,
-            'patch_size': 4,
-            'window_size': 12,
-            'mlp_ratio': 4,
-            'depths': [2, 2, 18, 2],
-            'num_heads': [6, 12, 24, 48],
-            'qkv_bias': True,
-            'qk_scale': None,
-            'patch_norm': True,
-            'drop_rate': 0.,
-            'attn_drop_rate': 0.,
-            'drop_path_rate': 0.3,
-            'use_abs_pos_embed': False,
+            'pretrain_img_size': 384, 'in_channels': 3, 'embed_dims': 192, 'patch_size': 4, 'window_size': 12, 'mlp_ratio': 4,
+            'depths': [2, 2, 18, 2], 'num_heads': [6, 12, 24, 48], 'qkv_bias': True, 'qk_scale': None, 'patch_norm': True,
+            'drop_rate': 0., 'attn_drop_rate': 0., 'drop_path_rate': 0.3, 'use_abs_pos_embed': False,
         },
     }
-    assert swin_type in supported_swins, 'unsupport the swin_type %s...' % swin_type
-    # parse args
-    default_args = {
+    assert swin_type in supported_swins, 'unsupport the swin_type %s' % swin_type
+    # parse cfg
+    default_cfg = {
         'strides': (4, 2, 2, 2),
         'out_indices': (0, 1, 2, 3),
-        'norm_cfg': {'type': 'layernorm', 'opts': {}},
-        'act_cfg': {'type': 'gelu', 'opts': {}},
+        'norm_cfg': {'type': 'layernorm'},
+        'act_cfg': {'type': 'gelu'},
         'pretrained': True,
         'pretrained_model_path': '',
     }
-    default_args.update(supported_swins[swin_type])
-    for key, value in kwargs.items():
-        if key in default_args: default_args.update({key: value})
+    default_cfg.update(supported_swins[swin_type])
+    for key, value in swin_cfg.items():
+        if key in default_cfg: 
+            default_cfg.update({key: value})
+    # obtain swin_cfg
+    swin_cfg = default_cfg.copy()
+    pretrained = swin_cfg.pop('pretrained')
+    pretrained_model_path = swin_cfg.pop('pretrained_model_path')
     # obtain the instanced swin
-    swin_args = default_args.copy()
-    model = SwinTransformer(**swin_args)
+    model = SwinTransformer(**swin_cfg)
     # load weights of pretrained model
-    if default_args['pretrained']:
-        model.initweights(swin_type, default_args['pretrained_model_path'])
+    if pretrained:
+        model.initweights(swin_type, pretrained_model_path)
     # return the model
     return model

@@ -1,6 +1,6 @@
 '''
 Function:
-    feed-forward networks (FFNs) with identity connection
+    Define feed-forward networks (FFNs) with identity connection
 Author:
     Zhenchao Jin
 '''
@@ -10,16 +10,16 @@ from ..dropout import BuildDropout
 from ..activation import BuildActivation
 
 
-'''feed-forward networks (FFNs) with identity connection'''
+'''FFN'''
 class FFN(nn.Module):
-    def __init__(self, embed_dims=256, feedforward_channels=1024, num_fcs=2, act_cfg=None, ffn_drop=0., dropout_cfg=None, add_identity=True, **kwargs):
+    def __init__(self, embed_dims=256, feedforward_channels=1024, num_fcs=2, act_cfg=None, ffn_drop=0., dropout_cfg=None, add_identity=True):
         super(FFN, self).__init__()
         assert num_fcs >= 2, f'num_fcs should be no less than 2. got {num_fcs}.'
         self.embed_dims = embed_dims
         self.feedforward_channels = feedforward_channels
         self.num_fcs = num_fcs
         self.act_cfg = act_cfg
-        self.activate = BuildActivation(act_cfg['type'], **act_cfg['opts'])
+        self.activate = BuildActivation(act_cfg)
         layers = []
         in_channels = embed_dims
         for _ in range(num_fcs - 1):
@@ -33,7 +33,7 @@ class FFN(nn.Module):
         layers.append(nn.Dropout(ffn_drop))
         self.layers = nn.Sequential(*layers)
         if dropout_cfg:
-            self.dropout_layer = BuildDropout(dropout_cfg['type'], **dropout_cfg['opts'])
+            self.dropout_layer = BuildDropout(dropout_cfg)
         else:
             self.dropout_layer = torch.nn.Identity()
         self.add_identity = add_identity

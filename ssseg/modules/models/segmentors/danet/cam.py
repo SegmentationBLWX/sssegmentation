@@ -11,7 +11,7 @@ from ...backbones import Scale
 from ..base import SelfAttentionBlock
 
 
-'''Channel Attention Module'''
+'''ChannelAttentionModule'''
 class ChannelAttentionModule(nn.Module):
     def __init__(self):
         super(ChannelAttentionModule, self).__init__()

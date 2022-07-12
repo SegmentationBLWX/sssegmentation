@@ -9,7 +9,7 @@ import torch.nn as nn
 import torch.nn.functional as F
 
 
-'''Encoding Layer'''
+'''Encoding'''
 class Encoding(nn.Module):
     def __init__(self, channels, num_codes):
         super(Encoding, self).__init__()

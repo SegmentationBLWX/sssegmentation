@@ -1,6 +1,6 @@
 '''
 Function:
-    define the dynamic conv2d
+    Define the dynamic conv2d
 Author:
     Zhenchao Jin
 '''
@@ -8,10 +8,10 @@ import torch
 import torch.nn as nn
 import torch.nn.functional as F
 from ..activation import BuildActivation
-from ..normalization import BuildNormalization
+from ..normalization import BuildNormalization, constructnormcfg
 
 
-'''Attention 2d'''
+'''Attention2d'''
 class Attention2d(nn.Module):
     def __init__(self, in_channels, out_channels, temperature):
         super(Attention2d, self).__init__()
@@ -33,7 +33,7 @@ class Attention2d(nn.Module):
         return F.softmax(x / self.temperature, 1)
 
 
-'''Dynamic Convolution: Attention over Convolution Kernels'''
+'''DynamicConv2d'''
 class DynamicConv2d(nn.Module):
     def __init__(self, in_channels, out_channels, kernel_size=1, stride=1, padding=0, dilation=1, groups=1, bias=True, K=4, temperature=34, norm_cfg=None, act_cfg=None):
         super(DynamicConv2d, self).__init__()
@@ -57,9 +57,9 @@ class DynamicConv2d(nn.Module):
         if bias:
             self.bias = nn.Parameter(torch.randn(K, out_channels))
         if norm_cfg is not None: 
-            self.norm = BuildNormalization(norm_cfg['type'], (out_channels, norm_cfg['opts']))
+            self.norm = BuildNormalization(constructnormcfg(placeholder=out_channels, norm_cfg=norm_cfg))
         if act_cfg is not None: 
-            self.activation = BuildActivation(act_cfg['type'], **act_cfg['opts'])
+            self.activation = BuildActivation(act_cfg)
     '''update'''
     def update(self):
         self.attention.update()

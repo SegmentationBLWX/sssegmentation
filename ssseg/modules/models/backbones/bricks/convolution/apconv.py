@@ -1,6 +1,6 @@
 '''
 Function:
-    define Adptive Padding Conv Module
+    Define Adptive Padding Conv Module
 Author:
     Zhenchao Jin
 '''
@@ -8,9 +8,10 @@ import math
 import torch
 import torch.nn as nn
 import torch.nn.functional as F
+from ..normalization import BuildNormalization, constructnormcfg
 
 
-'''Adptive Padding Conv Module'''
+'''AdptivePaddingConv2d'''
 class AdptivePaddingConv2d(nn.Conv2d):
     def __init__(self, in_channels, out_channels, kernel_size, stride=1, padding=0, dilation=1, groups=1, bias=True, norm_cfg=None, act_cfg=None):
         super(AdptivePaddingConv2d, self).__init__(
@@ -24,9 +25,9 @@ class AdptivePaddingConv2d(nn.Conv2d):
             bias=bias
         )
         if norm_cfg is not None: 
-            self.norm = BuildNormalization(norm_cfg['type'], (out_channels, norm_cfg['opts']))
+            self.norm = BuildNormalization(constructnormcfg(placeholder=out_channels, norm_cfg=norm_cfg))
         if act_cfg is not None: 
-            self.activation = BuildActivation(act_cfg['type'], **act_cfg['opts'])
+            self.activation = BuildActivation(act_cfg)
     '''forward'''
     def forward(self, x):
         img_h, img_w = x.size()[-2:]

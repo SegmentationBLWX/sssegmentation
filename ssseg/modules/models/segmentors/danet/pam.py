@@ -10,7 +10,7 @@ from ...backbones import Scale
 from ..base import SelfAttentionBlock
 
 
-'''Position Attention Module'''
+'''PositionAttentionModule'''
 class PositionAttentionModule(SelfAttentionBlock):
     def __init__(self, in_channels, transform_channels):
         super(PositionAttentionModule, self).__init__(

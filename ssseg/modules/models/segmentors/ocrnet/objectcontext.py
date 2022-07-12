@@ -8,13 +8,13 @@ import torch
 import torch.nn as nn
 import torch.nn.functional as F
 from ..base import SelfAttentionBlock
-from ...backbones import BuildActivation, BuildNormalization
+from ...backbones import BuildActivation, BuildNormalization, constructnormcfg
 
 
-'''object context block'''
+'''ObjectContextBlock'''
 class ObjectContextBlock(SelfAttentionBlock):
-    def __init__(self, in_channels, transform_channels, scale, **kwargs):
-        self.align_corners, norm_cfg, act_cfg = kwargs['align_corners'], kwargs['norm_cfg'], kwargs['act_cfg']
+    def __init__(self, in_channels, transform_channels, scale, align_corners=False, norm_cfg=None, act_cfg=None):
+        self.align_corners = align_corners
         if scale > 1:
             query_downsample = nn.MaxPool2d(kernel_size=scale)
         else:
@@ -38,8 +38,8 @@ class ObjectContextBlock(SelfAttentionBlock):
         )
         self.bottleneck = nn.Sequential(
             nn.Conv2d(in_channels*2, in_channels, kernel_size=3, stride=1, padding=1, bias=False),
-            BuildNormalization(norm_cfg['type'], (in_channels, norm_cfg['opts'])),
-            BuildActivation(act_cfg['type'], **act_cfg['opts']),
+            BuildNormalization(constructnormcfg(placeholder=in_channels, norm_cfg=norm_cfg)),
+            BuildActivation(act_cfg),
         )
     '''forward'''
     def forward(self, query_feats, key_feats):

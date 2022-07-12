@@ -12,7 +12,7 @@ import torch.utils.model_zoo as model_zoo
 from collections import OrderedDict
 from .mit import EfficientMultiheadAttention
 from .bricks import PatchEmbed as PatchEmbedBase
-from .bricks import BuildNormalization, BuildActivation, FFN, BuildDropout
+from .bricks import BuildNormalization, FFN, BuildDropout, constructnormcfg
 
 
 '''model urls'''
@@ -60,18 +60,18 @@ class GlobalSubsampledAttention(EfficientMultiheadAttention):
 class GSAEncoderLayer(nn.Module):
     def __init__(self, embed_dims, num_heads, feedforward_channels, drop_rate=0., attn_drop_rate=0., drop_path_rate=0., num_fcs=2, qkv_bias=True, act_cfg=None, norm_cfg=None, sr_ratio=1., dropout_cfg=None):
         super(GSAEncoderLayer, self).__init__()
-        if dropout_cfg is None: dropout_cfg = {'type': 'droppath', 'opts': {'drop_prob': drop_path_rate}}
-        self.norm1 = BuildNormalization(norm_cfg['type'], (embed_dims, norm_cfg['opts']))
+        if dropout_cfg is None: dropout_cfg = {'type': 'droppath', 'drop_prob': drop_path_rate}
+        self.norm1 = BuildNormalization(constructnormcfg(placeholder=embed_dims, norm_cfg=norm_cfg))
         self.attn = GlobalSubsampledAttention(
             embed_dims=embed_dims, num_heads=num_heads, attn_drop=attn_drop_rate, proj_drop=drop_rate, 
             dropout_cfg=dropout_cfg, qkv_bias=qkv_bias, norm_cfg=norm_cfg, sr_ratio=sr_ratio
         )
-        self.norm2 = BuildNormalization(norm_cfg['type'], (embed_dims, norm_cfg['opts']))
+        self.norm2 = BuildNormalization(constructnormcfg(placeholder=embed_dims, norm_cfg=norm_cfg))
         self.ffn = FFN(
             embed_dims=embed_dims, feedforward_channels=feedforward_channels, num_fcs=num_fcs, ffn_drop=drop_rate,
             dropout_cfg=dropout_cfg, act_cfg=act_cfg, add_identity=False,
         )
-        self.drop_path = BuildDropout(dropout_cfg['type'], **dropout_cfg['opts']) if (dropout_cfg and (drop_path_rate > 0.)) else nn.Identity()
+        self.drop_path = BuildDropout(dropout_cfg) if (dropout_cfg and (drop_path_rate > 0.)) else nn.Identity()
     '''forward'''
     def forward(self, x, hw_shape):
         x = x + self.drop_path(self.attn(self.norm1(x), hw_shape, identity=0.))
@@ -156,15 +156,15 @@ class LocallyGroupedSelfAttention(nn.Module):
 class LSAEncoderLayer(nn.Module):
     def __init__(self, embed_dims, num_heads, feedforward_channels, drop_rate=0., attn_drop_rate=0., drop_path_rate=0., num_fcs=2, qkv_bias=True, qk_scale=None, act_cfg=None, norm_cfg=None, window_size=1, dropout_cfg=None):
         super(LSAEncoderLayer, self).__init__()
-        if dropout_cfg is None: dropout_cfg = {'type': 'droppath', 'opts': {'drop_prob': drop_path_rate}}
-        self.norm1 = BuildNormalization(norm_cfg['type'], (embed_dims, norm_cfg['opts']))
+        if dropout_cfg is None: dropout_cfg = {'type': 'droppath', 'drop_prob': drop_path_rate}
+        self.norm1 = BuildNormalization(constructnormcfg(placeholder=embed_dims, norm_cfg=norm_cfg))
         self.attn = LocallyGroupedSelfAttention(embed_dims, num_heads, qkv_bias, qk_scale, attn_drop_rate, drop_rate, window_size)
-        self.norm2 = BuildNormalization(norm_cfg['type'], (embed_dims, norm_cfg['opts']))
+        self.norm2 = BuildNormalization(constructnormcfg(placeholder=embed_dims, norm_cfg=norm_cfg))
         self.ffn = FFN(
             embed_dims=embed_dims, feedforward_channels=feedforward_channels, num_fcs=num_fcs, ffn_drop=drop_rate,
             dropout_cfg=dropout_cfg, act_cfg=act_cfg, add_identity=False,
         )
-        self.drop_path = BuildDropout(dropout_cfg['type'], **dropout_cfg['opts']) if (dropout_cfg and (drop_path_rate > 0.)) else nn.Identity()
+        self.drop_path = BuildDropout(dropout_cfg) if (dropout_cfg and (drop_path_rate > 0.)) else nn.Identity()
     '''forward'''
     def forward(self, x, hw_shape):
         x = x + self.drop_path(self.attn(self.norm1(x), hw_shape))
@@ -212,7 +212,7 @@ class ConditionalPositionEncoding(nn.Module):
 class PCPVT(nn.Module):
     def __init__(self, in_channels=3, embed_dims=[64, 128, 256, 512], patch_sizes=[4, 2, 2, 2], strides=[4, 2, 2, 2], num_heads=[1, 2, 4, 8], mlp_ratios=[4, 4, 4, 4],
                  out_indices=(0, 1, 2, 3), qkv_bias=False, drop_rate=0., attn_drop_rate=0., drop_path_rate=0., depths=[3, 4, 6, 3], sr_ratios=[8, 4, 2, 1],
-                 norm_after_stage=False, norm_cfg=None, act_cfg=None, **kwargs):
+                 norm_after_stage=False, norm_cfg=None, act_cfg=None):
         super(PCPVT, self).__init__()
         # set attributes
         self.depths = depths
@@ -245,7 +245,8 @@ class PCPVT(nn.Module):
         # norm
         if self.norm_after_stage:
             self.norm_list = nn.ModuleList()
-            for dim in embed_dims: self.norm_list.append(BuildNormalization(norm_cfg['type'], (dim, norm_cfg['opts'])))
+            for dim in embed_dims: 
+                self.norm_list.append(BuildNormalization(constructnormcfg(placeholder=dim, norm_cfg=norm_cfg)))
     '''forward'''
     def forward(self, x):
         outputs, b = list(), x.shape[0]
@@ -355,11 +356,11 @@ class PCPVT(nn.Module):
 class SVT(PCPVT):
     def __init__(self, in_channels=3, embed_dims=[64, 128, 256], patch_sizes=[4, 2, 2, 2], strides=[4, 2, 2, 2], num_heads=[1, 2, 4], mlp_ratios=[4, 4, 4],
                  out_indices=(0, 1, 2, 3), qkv_bias=False, drop_rate=0., attn_drop_rate=0., drop_path_rate=0.2, depths=[4, 4, 4], sr_ratios=[4, 2, 1],
-                 windiow_sizes=[7, 7, 7], norm_after_stage=True, norm_cfg=None, act_cfg=None, **kwargs):
+                 windiow_sizes=[7, 7, 7], norm_after_stage=True, norm_cfg=None, act_cfg=None):
         super(SVT, self).__init__(
             in_channels=in_channels, embed_dims=embed_dims, patch_sizes=patch_sizes, strides=strides, num_heads=num_heads, mlp_ratios=mlp_ratios,
             out_indices=out_indices, qkv_bias=qkv_bias, drop_rate=drop_rate, attn_drop_rate=attn_drop_rate, drop_path_rate=drop_path_rate,
-            depths=depths, sr_ratios=sr_ratios, norm_after_stage=norm_after_stage, norm_cfg=norm_cfg, act_cfg=act_cfg, **kwargs
+            depths=depths, sr_ratios=sr_ratios, norm_after_stage=norm_after_stage, norm_cfg=norm_cfg, act_cfg=act_cfg
         )
         # transformer encoder, stochastic depth decay rule
         dpr = [x.item() for x in torch.linspace(0, drop_path_rate, sum(depths))]
@@ -373,33 +374,38 @@ class SVT(PCPVT):
                     )
 
 
-'''build twins'''
-def BuildTwins(twins_type='pcpvt_small', **kwargs):
+'''BuildTwins'''
+def BuildTwins(twins_cfg):
     # assert whether support
+    twins_type = twins_cfg.pop('type')
     supported_twins = {
-        'pcpvt_small': PCPVT,
-        'pcpvt_base': PCPVT,
-        'pcpvt_large': PCPVT,
-        'svt_small': SVT,
-        'svt_base': SVT,
-        'svt_large': SVT,
+        'pcpvt_small': [
+            PCPVT, {'depths': [3, 4, 6, 3], 'drop_path_rate': 0.2},
+        ],
+        'pcpvt_base': [
+            PCPVT, {'depths': [3, 4, 18, 3], 'drop_path_rate': 0.3},
+        ],
+        'pcpvt_large': [
+            PCPVT, {'depths': [3, 8, 27, 3], 'drop_path_rate': 0.3},
+        ],
+        'svt_small': [
+            SVT, {'embed_dims': [64, 128, 256, 512], 'num_heads': [2, 4, 8, 16], 'mlp_ratios': [4, 4, 4, 4], 'depths': [2, 2, 10, 4], 'windiow_sizes': [7, 7, 7, 7], 'norm_after_stage': True, 'drop_path_rate': 0.2},
+        ],
+        'svt_base': [
+            SVT, {'embed_dims': [96, 192, 384, 768], 'num_heads': [3, 6, 12, 24], 'mlp_ratios': [4, 4, 4, 4], 'depths': [2, 2, 18, 2], 'windiow_sizes': [7, 7, 7, 7], 'norm_after_stage': True, 'drop_path_rate': 0.2},
+        ],
+        'svt_large': [
+            SVT, {'embed_dims': [128, 256, 512, 1024], 'num_heads': [4, 8, 16, 32], 'mlp_ratios': [4, 4, 4, 4], 'depths': [2, 2, 18, 2], 'windiow_sizes': [7, 7, 7, 7], 'norm_after_stage': True, 'drop_path_rate': 0.3},
+        ],
     }
-    supported_twins_args = {
-        'pcpvt_small': {'depths': [3, 4, 6, 3], 'drop_path_rate': 0.2},
-        'pcpvt_base': {'depths': [3, 4, 18, 3], 'drop_path_rate': 0.3},
-        'pcpvt_large': {'depths': [3, 8, 27, 3], 'drop_path_rate': 0.3},
-        'svt_small': {'embed_dims': [64, 128, 256, 512], 'num_heads': [2, 4, 8, 16], 'mlp_ratios': [4, 4, 4, 4], 'depths': [2, 2, 10, 4], 'windiow_sizes': [7, 7, 7, 7], 'norm_after_stage': True, 'drop_path_rate': 0.2},
-        'svt_base': {'embed_dims': [96, 192, 384, 768], 'num_heads': [3, 6, 12, 24], 'mlp_ratios': [4, 4, 4, 4], 'depths': [2, 2, 18, 2], 'windiow_sizes': [7, 7, 7, 7], 'norm_after_stage': True, 'drop_path_rate': 0.2},
-        'svt_large': {'embed_dims': [128, 256, 512, 1024], 'num_heads': [4, 8, 16, 32], 'mlp_ratios': [4, 4, 4, 4], 'depths': [2, 2, 18, 2], 'windiow_sizes': [7, 7, 7, 7], 'norm_after_stage': True, 'drop_path_rate': 0.3},
-    }
-    assert twins_type in supported_twins, 'unspport the twins_type %s...' % twins_type
-    # parse args
-    default_args = {
+    assert twins_type in supported_twins, 'unspport the twins_type %s' % twins_type
+    # parse cfg
+    default_cfg = {
         'pretrained': True,
         'pretrained_model_path': '',
     }
     if twins_type.startswith('pcpvt'):
-        default_args.update({
+        default_cfg.update({
             'in_channels': 3,
             'embed_dims': [64, 128, 320, 512],
             'patch_sizes': [4, 2, 2, 2],
@@ -411,12 +417,12 @@ def BuildTwins(twins_type='pcpvt_small', **kwargs):
             'drop_rate': 0.0,
             'attn_drop_rate': 0.0,
             'sr_ratios': [8, 4, 2, 1],
-            'norm_cfg': {'type': 'layernorm', 'opts': {}},
-            'act_cfg': {'type': 'gelu', 'opts': {}},
+            'norm_cfg': {'type': 'layernorm'},
+            'act_cfg': {'type': 'gelu'},
             'norm_after_stage': False
         })
     else:
-        default_args.update({
+        default_cfg.update({
             'in_channels': 3,
             'patch_sizes': [4, 2, 2, 2],
             'strides': [4, 2, 2, 2],
@@ -425,17 +431,21 @@ def BuildTwins(twins_type='pcpvt_small', **kwargs):
             'drop_rate': 0.0,
             'attn_drop_rate': 0.0,
             'sr_ratios': [8, 4, 2, 1],
-            'norm_cfg': {'type': 'layernorm', 'opts': {}},
-            'act_cfg': {'type': 'gelu', 'opts': {}},
+            'norm_cfg': {'type': 'layernorm'},
+            'act_cfg': {'type': 'gelu'},
         })
-    default_args.update(supported_twins_args[twins_type])
-    for key, value in kwargs.items():
-        if key in default_args: default_args.update({key: value})
+    default_cfg.update(supported_twins[twins_type][1])
+    for key, value in twins_cfg.items():
+        if key in default_cfg: 
+            default_cfg.update({key: value})
+    # obtain twins_cfg
+    twins_cfg = default_cfg.copy()
+    pretrained = twins_cfg.pop('pretrained')
+    pretrained_model_path = twins_cfg.pop('pretrained_model_path')
     # obtain the instanced twins
-    twins_args = default_args.copy()
-    model = supported_twins[twins_type](**twins_args)
+    model = supported_twins[twins_type](**twins_cfg)
     # load weights of pretrained model
-    if default_args['pretrained']:
-        model.initweights(twins_type, default_args['pretrained_model_path'])
+    if pretrained:
+        model.initweights(twins_type, pretrained_model_path)
     # return the model
     return model

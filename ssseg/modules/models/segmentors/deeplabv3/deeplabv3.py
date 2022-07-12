@@ -9,13 +9,12 @@ import torch
 import torch.nn as nn
 from .aspp import ASPP
 from ..base import BaseModel
-from ...backbones import BuildActivation, BuildNormalization
 
 
 '''Deeplabv3'''
 class Deeplabv3(BaseModel):
-    def __init__(self, cfg, **kwargs):
-        super(Deeplabv3, self).__init__(cfg, **kwargs)
+    def __init__(self, cfg, mode):
+        super(Deeplabv3, self).__init__(cfg, mode)
         align_corners, norm_cfg, act_cfg = self.align_corners, self.norm_cfg, self.act_cfg
         # build aspp net
         aspp_cfg = {

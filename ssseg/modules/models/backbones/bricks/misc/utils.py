@@ -1,13 +1,13 @@
 '''
 Function:
-    define some utils
+    Define some utils
 Author:
     Zhenchao Jin
 '''
 import torch
 
 
-'''make divisible'''
+'''makedivisible'''
 def makedivisible(value, divisor, min_value=None, min_ratio=0.9):
     if min_value is None: min_value = divisor
     new_value = max(min_value, int(value + divisor / 2) // divisor * divisor)

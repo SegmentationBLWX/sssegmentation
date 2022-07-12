@@ -1,6 +1,6 @@
 '''
 Function:
-    base class for loadding dataset
+    Base class for loadding dataset
 Author:
     Zhenchao Jin
 '''
@@ -13,7 +13,7 @@ from chainercv.evaluations import eval_semantic_segmentation
 from .pipelines import Evaluation, Resize, RandomCrop, RandomFlip, PhotoMetricDistortion, RandomRotation, Padding, ToTensor, Normalize, Compose
 
 
-'''define the base dataset class'''
+'''BaseDataset'''
 class BaseDataset(torch.utils.data.Dataset):
     def __init__(self, mode, logger_handle, dataset_cfg):
         assert mode in ['TRAIN', 'TEST']

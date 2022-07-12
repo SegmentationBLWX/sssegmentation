@@ -9,7 +9,7 @@ import pandas as pd
 from .base import BaseDataset
 
 
-'''voc dataset'''
+'''VOCDataset'''
 class VOCDataset(BaseDataset):
     num_classes = 21
     classnames = [
@@ -49,7 +49,7 @@ class VOCDataset(BaseDataset):
         return len(self.imageids)
 
  
-'''pascal context dataset'''
+'''PascalContextDataset'''
 class PascalContextDataset(BaseDataset):
     num_classes = 60
     classnames = [
@@ -90,7 +90,7 @@ class PascalContextDataset(BaseDataset):
         return len(self.imageids)
 
 
-'''pascal context 59 dataset'''
+'''PascalContext59Dataset'''
 class PascalContext59Dataset(BaseDataset):
     num_classes = 59
     classnames = [

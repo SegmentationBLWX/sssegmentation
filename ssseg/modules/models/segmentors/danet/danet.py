@@ -11,26 +11,26 @@ import torch.nn.functional as F
 from ..base import BaseModel
 from .cam import ChannelAttentionModule
 from .pam import PositionAttentionModule
-from ...backbones import BuildActivation, BuildNormalization
+from ...backbones import BuildActivation, BuildNormalization, constructnormcfg
 
 
 '''DANet'''
 class DANet(BaseModel):
-    def __init__(self, cfg, **kwargs):
-        super(DANet, self).__init__(cfg, **kwargs)
+    def __init__(self, cfg, mode):
+        super(DANet, self).__init__(cfg, mode)
         align_corners, norm_cfg, act_cfg = self.align_corners, self.norm_cfg, self.act_cfg
         # build pam and pam decoder
         pam_cfg = cfg['pam']
         self.pam_in_conv = nn.Sequential(
             nn.Conv2d(pam_cfg['in_channels'], pam_cfg['out_channels'], kernel_size=3, stride=1, padding=1, bias=False),
-            BuildNormalization(norm_cfg['type'], (pam_cfg['out_channels'], norm_cfg['opts'])),
-            BuildActivation(act_cfg['type'], **act_cfg['opts']),
+            BuildNormalization(constructnormcfg(placeholder=pam_cfg['out_channels'], norm_cfg=norm_cfg)),
+            BuildActivation(act_cfg),
         )
         self.pam_net = PositionAttentionModule(pam_cfg['out_channels'], pam_cfg['transform_channels'])
         self.pam_out_conv = nn.Sequential(
             nn.Conv2d(pam_cfg['out_channels'], pam_cfg['out_channels'], kernel_size=3, stride=1, padding=1, bias=False),
-            BuildNormalization(norm_cfg['type'], (pam_cfg['out_channels'], norm_cfg['opts'])),
-            BuildActivation(act_cfg['type'], **act_cfg['opts']),
+            BuildNormalization(constructnormcfg(placeholder=pam_cfg['out_channels'], norm_cfg=norm_cfg)),
+            BuildActivation(act_cfg),
         )
         decoder_cfg = cfg['decoder']['pam']
         self.decoder_pam = nn.Sequential(
@@ -41,14 +41,14 @@ class DANet(BaseModel):
         cam_cfg = cfg['cam']
         self.cam_in_conv = nn.Sequential(
             nn.Conv2d(cam_cfg['in_channels'], cam_cfg['out_channels'], kernel_size=3, stride=1, padding=1, bias=False),
-            BuildNormalization(norm_cfg['type'], (cam_cfg['out_channels'], norm_cfg['opts'])),
-            BuildActivation(act_cfg['type'], **act_cfg['opts']),
+            BuildNormalization(constructnormcfg(placeholder=cam_cfg['out_channels'], norm_cfg=norm_cfg)),
+            BuildActivation(act_cfg),
         )
         self.cam_net = ChannelAttentionModule()
         self.cam_out_conv = nn.Sequential(
             nn.Conv2d(cam_cfg['out_channels'], cam_cfg['out_channels'], kernel_size=3, stride=1, padding=1, bias=False),
-            BuildNormalization(norm_cfg['type'], (cam_cfg['out_channels'], norm_cfg['opts'])),
-            BuildActivation(act_cfg['type'], **act_cfg['opts']),
+            BuildNormalization(constructnormcfg(placeholder=cam_cfg['out_channels'], norm_cfg=norm_cfg)),
+            BuildActivation(act_cfg),
         )
         decoder_cfg = cfg['decoder']['cam']
         self.decoder_cam = nn.Sequential(

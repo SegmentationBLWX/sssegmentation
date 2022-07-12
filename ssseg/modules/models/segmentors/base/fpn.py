@@ -7,14 +7,13 @@ Author:
 import torch
 import torch.nn as nn
 import torch.nn.functional as F
-from ...backbones import BuildActivation, BuildNormalization
+from ...backbones import BuildActivation, BuildNormalization, constructnormcfg
 
 
 '''Feature Pyramid Network'''
 class FPN(nn.Module):
-    def __init__(self, in_channels_list, out_channels, upsample_cfg=dict(mode='nearest'), **kwargs):
+    def __init__(self, in_channels_list, out_channels, upsample_cfg=dict(mode='nearest'), norm_cfg=None, act_cfg=None):
         super(FPN, self).__init__()
-        norm_cfg, act_cfg = kwargs['norm_cfg'], kwargs['act_cfg']
         self.in_channels_list = in_channels_list
         self.upsample_cfg = upsample_cfg
         self.lateral_convs = nn.ModuleList()
@@ -23,13 +22,13 @@ class FPN(nn.Module):
         for i in range(0, len(in_channels_list)):
             l_conv = nn.Sequential(
                 nn.Conv2d(in_channels_list[i], out_channels, kernel_size=1, stride=1, padding=0, bias=False),
-                BuildNormalization(norm_cfg['type'], (out_channels, norm_cfg['opts'])),
-                BuildActivation(act_cfg['type'], **act_cfg['opts']),
+                BuildNormalization(constructnormcfg(placeholder=out_channels, norm_cfg=norm_cfg)),
+                BuildActivation(act_cfg),
             )
             fpn_conv = nn.Sequential(
                 nn.Conv2d(out_channels, out_channels, kernel_size=3, stride=1, padding=1, bias=False),
-                BuildNormalization(norm_cfg['type'], (out_channels, norm_cfg['opts'])),
-                BuildActivation(act_cfg['type'], **act_cfg['opts']),
+                BuildNormalization(constructnormcfg(placeholder=out_channels, norm_cfg=norm_cfg)),
+                BuildActivation(act_cfg),
             )
             self.lateral_convs.append(l_conv)
             self.fpn_convs.append(fpn_conv)

@@ -1,2 +1,3 @@
 '''initialize'''
-from .builder import BuildParallelModel, BuildParallelDataloader
+from .model import BuildDistributedModel
+from .dataloader import BuildDistributedDataloader

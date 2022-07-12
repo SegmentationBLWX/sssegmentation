@@ -10,15 +10,15 @@ import torch.nn as nn
 import torch.nn.functional as F
 import torch.distributed as dist
 from ...losses import BuildLoss
-from ...backbones import BuildBackbone, BuildActivation, BuildNormalization
+from ...backbones import BuildBackbone, BuildActivation, BuildNormalization, constructnormcfg
 
 
-'''base model'''
+'''BaseModel'''
 class BaseModel(nn.Module):
-    def __init__(self, cfg, **kwargs):
+    def __init__(self, cfg, mode):
         super(BaseModel, self).__init__()
         self.cfg = cfg
-        self.mode = kwargs.get('mode')
+        self.mode = mode
         assert self.mode in ['TRAIN', 'TEST']
         # parse align_corners, normalization layer and activation layer cfg
         self.align_corners, self.norm_cfg, self.act_cfg = cfg['align_corners'], cfg['norm_cfg'], cfg['act_cfg']
@@ -86,8 +86,8 @@ class BaseModel(nn.Module):
                 else:
                     dec += [nn.Conv2d(aux_cfg['out_channels'], aux_cfg['out_channels'], kernel_size=3, stride=1, padding=1, bias=False),]
                 dec += [
-                    BuildNormalization(norm_cfg['type'], (aux_cfg['out_channels'], norm_cfg['opts'])),
-                    BuildActivation(act_cfg['type'], **act_cfg['opts'])
+                    BuildNormalization(constructnormcfg(placeholder=aux_cfg['out_channels'], norm_cfg=norm_cfg)),
+                    BuildActivation(act_cfg)
                 ]
                 if 'upsample' in aux_cfg:
                     dec += [nn.Upsample(**aux_cfg['upsample'])]
@@ -115,7 +115,7 @@ class BaseModel(nn.Module):
             weight_pos_edge, weight_neg_edge = num_neg_edge / (num_pos_edge + num_neg_edge), num_pos_edge / (num_pos_edge + num_neg_edge)
             cls_weight_edge = torch.Tensor([weight_neg_edge, weight_pos_edge]).type_as(target_edge)
         # calculate loss according to losses_cfg
-        assert len(predictions) == len(losses_cfg), 'length of losses_cfg should be equal to predictions...'
+        assert len(predictions) == len(losses_cfg), 'length of losses_cfg should be equal to predictions'
         losses_log_dict = {}
         for loss_name, loss_cfg in losses_cfg.items():
             if targets_keys_dict is None:

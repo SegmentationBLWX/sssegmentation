@@ -10,18 +10,20 @@ import torch.nn as nn
 import torch.nn.functional as F
 from .mla import MLANeck
 from ..base import BaseModel
-from ...backbones import BuildActivation, BuildNormalization
+from ...backbones import BuildActivation, BuildNormalization, constructnormcfg
 
 
 '''Naive upsampling head and Progressive upsampling head of SETR'''
 class SETRUP(BaseModel):
-    def __init__(self, cfg, **kwargs):
-        super(SETRUP, self).__init__(cfg, **kwargs)
+    def __init__(self, cfg, mode):
+        super(SETRUP, self).__init__(cfg, mode)
         align_corners, norm_cfg, act_cfg = self.align_corners, self.norm_cfg, self.act_cfg
         # build norm layer
         self.norm_layers = nn.ModuleList()
         for in_channels in cfg['normlayer']['in_channels_list']:
-            norm_layer = BuildNormalization(cfg['normlayer']['type'], (in_channels, cfg['normlayer']['opts']))
+            norm_cfg_copy = cfg['normlayer'].copy()
+            norm_cfg_copy.pop('in_channels_list')
+            norm_layer = BuildNormalization(constructnormcfg(placeholder=in_channels, norm_cfg=norm_cfg_copy))
             self.norm_layers.append(norm_layer)
         # build decoder
         self.decoder = self.builddecoder(cfg['decoder'])
@@ -75,8 +77,8 @@ class SETRUP(BaseModel):
                 layers.append(nn.Conv2d(decoder_cfg['in_channels'], decoder_cfg['out_channels'], kernel_size=kernel_size, stride=1, padding=int(kernel_size - 1) // 2, bias=False))
             else:
                 layers.append(nn.Conv2d(decoder_cfg['out_channels'], decoder_cfg['out_channels'], kernel_size=kernel_size, stride=1, padding=int(kernel_size - 1) // 2, bias=False))
-            layers.append(BuildNormalization(norm_cfg['type'], (decoder_cfg['out_channels'], norm_cfg['opts'])))
-            layers.append(BuildActivation(act_cfg['type'], **act_cfg['opts']))
+            layers.append(BuildNormalization(constructnormcfg(placeholder=decoder_cfg['out_channels'], norm_cfg=norm_cfg)))
+            layers.append(BuildActivation(act_cfg))
             layers.append(nn.Upsample(scale_factor=decoder_cfg['scale_factor'], mode='bilinear', align_corners=align_corners))
         layers.append(nn.Dropout2d(decoder_cfg['dropout']))
         layers.append(nn.Conv2d(decoder_cfg['out_channels'], num_classes, kernel_size=1, stride=1, padding=0))
@@ -93,13 +95,15 @@ class SETRUP(BaseModel):
 
 '''Multi level feature aggretation head of SETR'''
 class SETRMLA(BaseModel):
-    def __init__(self, cfg, **kwargs):
-        super(SETRMLA, self).__init__(cfg, **kwargs)
+    def __init__(self, cfg, mode):
+        super(SETRMLA, self).__init__(cfg, mode)
         align_corners, norm_cfg, act_cfg = self.align_corners, self.norm_cfg, self.act_cfg
         # build mla neck
         norm_layers = nn.ModuleList()
         for in_channels in cfg['normlayer']['in_channels_list']:
-            norm_layer = BuildNormalization(cfg['normlayer']['type'], (in_channels, cfg['normlayer']['opts']))
+            norm_cfg_copy = cfg['normlayer'].copy()
+            norm_cfg_copy.pop('in_channels_list')
+            norm_layer = BuildNormalization(constructnormcfg(placeholder=in_channels, norm_cfg=norm_cfg_copy))
             norm_layers.append(norm_layer)
         mla_cfg = cfg['mla']
         self.mla_neck = MLANeck(
@@ -116,11 +120,11 @@ class SETRMLA(BaseModel):
         for i in range(len(decoder_cfg['in_channels_list'])):
             self.up_convs.append(nn.Sequential(
                 nn.Conv2d(decoder_cfg['in_channels_list'][i], decoder_cfg['mla_channels'], kernel_size=3, stride=1, padding=1, bias=False),
-                BuildNormalization(norm_cfg['type'], (decoder_cfg['mla_channels'], norm_cfg['opts'])),
-                BuildActivation(act_cfg['type'], **act_cfg['opts']),
+                BuildNormalization(constructnormcfg(placeholder=decoder_cfg['mla_channels'], norm_cfg=norm_cfg)),
+                BuildActivation(act_cfg),
                 nn.Conv2d(decoder_cfg['mla_channels'], decoder_cfg['mla_channels'], kernel_size=3, stride=1, padding=1, bias=False),
-                BuildNormalization(norm_cfg['type'], (decoder_cfg['mla_channels'], norm_cfg['opts'])),
-                BuildActivation(act_cfg['type'], **act_cfg['opts']),
+                BuildNormalization(constructnormcfg(placeholder=decoder_cfg['mla_channels'], norm_cfg=norm_cfg)),
+                BuildActivation(act_cfg),
                 nn.Upsample(scale_factor=decoder_cfg['scale_factor'], mode='bilinear', align_corners=align_corners)
             ))
         self.decoder = nn.Sequential(
@@ -173,8 +177,8 @@ class SETRMLA(BaseModel):
                 layers.append(nn.Conv2d(decoder_cfg['in_channels'], decoder_cfg['out_channels'], kernel_size=kernel_size, stride=1, padding=int(kernel_size - 1) // 2, bias=False))
             else:
                 layers.append(nn.Conv2d(decoder_cfg['out_channels'], decoder_cfg['out_channels'], kernel_size=kernel_size, stride=1, padding=int(kernel_size - 1) // 2, bias=False))
-            layers.append(BuildNormalization(norm_cfg['type'], (decoder_cfg['out_channels'], norm_cfg['opts'])))
-            layers.append(BuildActivation(act_cfg['type'], **act_cfg['opts']))
+            layers.append(BuildNormalization(constructnormcfg(placeholder=decoder_cfg['out_channels'], norm_cfg=norm_cfg)))
+            layers.append(BuildActivation(act_cfg))
             layers.append(nn.Upsample(scale_factor=decoder_cfg['scale_factor'], mode='bilinear', align_corners=align_corners))
         layers.append(nn.Dropout2d(decoder_cfg['dropout']))
         layers.append(nn.Conv2d(decoder_cfg['out_channels'], num_classes, kernel_size=1, stride=1, padding=0))

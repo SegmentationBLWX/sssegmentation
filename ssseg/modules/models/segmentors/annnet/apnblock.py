@@ -8,14 +8,13 @@ import torch
 import torch.nn as nn
 from .ppm import PPMConcat
 from ..base import SelfAttentionBlock
-from ...backbones import BuildActivation, BuildNormalization
+from ...backbones import BuildActivation, BuildNormalization, constructnormcfg
 
 
 '''Asymmetric Pyramid Non-local Block (APNB)'''
 class APNBlock(nn.Module):
-    def __init__(self, in_channels, transform_channels, out_channels, query_scales, key_pool_scales, **kwargs):
+    def __init__(self, in_channels, transform_channels, out_channels, query_scales, key_pool_scales, norm_cfg=None, act_cfg=None):
         super(APNBlock, self).__init__()
-        norm_cfg, act_cfg = kwargs['norm_cfg'], kwargs['act_cfg']
         self.stages = nn.ModuleList()
         for query_scale in query_scales:
             key_psp = PPMConcat(key_pool_scales)
@@ -42,8 +41,8 @@ class APNBlock(nn.Module):
             ))
         self.bottleneck = nn.Sequential(
             nn.Conv2d(2 * in_channels, out_channels, kernel_size=1, stride=1, padding=0, bias=False),
-            BuildNormalization(norm_cfg['type'], (out_channels, norm_cfg['opts'])),
-            BuildActivation(act_cfg['type'], **act_cfg['opts']),
+            BuildNormalization(constructnormcfg(placeholder=out_channels, norm_cfg=norm_cfg)),
+            BuildActivation(act_cfg),
         )
     '''forward'''
     def forward(self, feats):

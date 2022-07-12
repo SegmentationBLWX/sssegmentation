@@ -45,7 +45,7 @@ class PositionEmbeddingSine(nn.Module):
         return pos
 
 
-'''multi-layer perceptron'''
+'''MLP'''
 class MLP(nn.Module):
     def __init__(self, input_dim, hidden_dim, output_dim, num_layers):
         super(MLP, self).__init__()

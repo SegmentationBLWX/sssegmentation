@@ -7,27 +7,26 @@ Author:
 import torch
 import torch.nn as nn
 import torch.nn.functional as F
-from ...backbones import BuildActivation, BuildNormalization
+from ...backbones import BuildActivation, BuildNormalization, constructnormcfg
 
 
-'''Pyramid Pooling Module'''
+'''PyramidPoolingModule'''
 class PyramidPoolingModule(nn.Module):
-    def __init__(self, in_channels, out_channels, pool_scales, **kwargs):
+    def __init__(self, in_channels, out_channels, pool_scales, align_corners=False, norm_cfg=None, act_cfg=None):
         super(PyramidPoolingModule, self).__init__()
-        align_corners, norm_cfg, act_cfg = kwargs['align_corners'], kwargs['norm_cfg'], kwargs['act_cfg']
         self.align_corners = align_corners
         self.branches = nn.ModuleList()
         for pool_scale in pool_scales:
             self.branches.append(nn.Sequential(
                 nn.AdaptiveAvgPool2d(output_size=pool_scale),
                 nn.Conv2d(in_channels, out_channels, kernel_size=1, stride=1, padding=0, bias=False),
-                BuildNormalization(norm_cfg['type'], (out_channels, norm_cfg['opts'])),
-                BuildActivation(act_cfg['type'], **act_cfg['opts'])
+                BuildNormalization(constructnormcfg(placeholder=out_channels, norm_cfg=norm_cfg)),
+                BuildActivation(act_cfg)
             ))
         self.bottleneck = nn.Sequential(
             nn.Conv2d(in_channels + out_channels * len(pool_scales), out_channels, kernel_size=3, stride=1, padding=1, bias=False),
-            BuildNormalization(norm_cfg['type'], (out_channels, norm_cfg['opts'])),
-            BuildActivation(act_cfg['type'], **act_cfg['opts'])
+            BuildNormalization(constructnormcfg(placeholder=out_channels, norm_cfg=norm_cfg)),
+            BuildActivation(act_cfg)
         )
         self.in_channels = in_channels
         self.out_channels = out_channels

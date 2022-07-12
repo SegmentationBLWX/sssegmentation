@@ -8,7 +8,7 @@ import torch
 import torch.nn as nn
 
 
-'''A learnable scale parameter'''
+'''Scale'''
 class Scale(nn.Module):
     def __init__(self, scale=1.0):
         super(Scale, self).__init__()

@@ -11,13 +11,13 @@ import torch.nn.functional as F
 from ..base import BaseModel
 from .objectcontext import ObjectContextBlock
 from .spatialgather import SpatialGatherModule
-from ...backbones import BuildActivation, BuildNormalization
+from ...backbones import BuildActivation, BuildNormalization, constructnormcfg
 
 
 '''OCRNet'''
 class OCRNet(BaseModel):
-    def __init__(self, cfg, **kwargs):
-        super(OCRNet, self).__init__(cfg, **kwargs)
+    def __init__(self, cfg, mode):
+        super(OCRNet, self).__init__(cfg, mode)
         align_corners, norm_cfg, act_cfg = self.align_corners, self.norm_cfg, self.act_cfg
         # build auxiliary decoder
         assert (cfg['auxiliary'] is not None) and isinstance(cfg['auxiliary'], dict), 'auxiliary must be given and only support dict type'
@@ -26,8 +26,8 @@ class OCRNet(BaseModel):
         bottleneck_cfg = cfg['bottleneck']
         self.bottleneck = nn.Sequential(
             nn.Conv2d(bottleneck_cfg['in_channels'], bottleneck_cfg['out_channels'], kernel_size=3, stride=1, padding=1, bias=False),
-            BuildNormalization(norm_cfg['type'], (bottleneck_cfg['out_channels'], norm_cfg['opts'])),
-            BuildActivation(act_cfg['type'], **act_cfg['opts']),
+            BuildNormalization(constructnormcfg(placeholder=bottleneck_cfg['out_channels'], norm_cfg=norm_cfg)),
+            BuildActivation(act_cfg),
         )
         # build spatial gather module
         spatialgather_cfg = {

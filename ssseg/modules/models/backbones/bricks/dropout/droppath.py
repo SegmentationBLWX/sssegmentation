@@ -1,6 +1,6 @@
 '''
 Function:
-    drop path
+    Define drop path
 Author:
     Zhenchao Jin
 '''
@@ -8,7 +8,7 @@ import torch
 import torch.nn as nn
 
 
-'''drop path'''
+'''DropPath'''
 class DropPath(nn.Module):
     def __init__(self, drop_prob=0.):
         super(DropPath, self).__init__()

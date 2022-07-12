@@ -8,7 +8,7 @@ import os
 import torch
 
 
-'''check dir'''
+'''checkdir'''
 def checkdir(dirname):
     if not os.path.exists(dirname):
         try: os.mkdir(dirname)
@@ -17,7 +17,7 @@ def checkdir(dirname):
     return True
 
 
-'''load checkpoints'''
+'''loadcheckpoints'''
 def loadcheckpoints(checkpointspath, logger_handle=None, cmd_args=None, map_to_cpu=True):
     if logger_handle is not None and (cmd_args is None or cmd_args.local_rank == 0):
         logger_handle.info('Loading checkpoints from %s' % checkpointspath)
@@ -26,7 +26,7 @@ def loadcheckpoints(checkpointspath, logger_handle=None, cmd_args=None, map_to_c
     return checkpoints
 
 
-'''save checkpoints'''
+'''savecheckpoints'''
 def savecheckpoints(state_dict, savepath, logger_handle=None, cmd_args=None):
     if logger_handle is not None and (cmd_args is None or cmd_args.local_rank == 0):
         logger_handle.info('Saving state_dict in %s' % savepath)

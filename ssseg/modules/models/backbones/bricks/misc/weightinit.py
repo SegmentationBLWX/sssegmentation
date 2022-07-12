@@ -1,6 +1,6 @@
 '''
 Function:
-    weight initialize
+    Define weight initialize
 Author:
     Zhenchao Jin
 '''
@@ -9,7 +9,7 @@ import torch
 import warnings
 
 
-'''reference: https://people.sc.fsu.edu/~jburkardt/presentations/truncated_normal.pdf'''
+'''Reference: https://people.sc.fsu.edu/~jburkardt/presentations/truncated_normal.pdf'''
 def _no_grad_trunc_normal_(tensor, mean, std, a, b):
     '''computes standard normal cumulative distribution function'''
     def norm_cdf(x):

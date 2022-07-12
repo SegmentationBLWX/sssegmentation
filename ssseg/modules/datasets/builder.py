@@ -22,7 +22,7 @@ from .coco import COCODataset, COCOStuffDataset, COCOStuff10kDataset
 from .voc import VOCDataset, PascalContextDataset, PascalContext59Dataset
 
 
-'''build dataset'''
+'''BuildDataset'''
 def BuildDataset(mode, logger_handle, dataset_cfg, get_basedataset=False):
     cfg = dataset_cfg[mode.lower()].copy()
     if 'train' in dataset_cfg: dataset_cfg.pop('train')

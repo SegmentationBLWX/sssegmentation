@@ -9,7 +9,7 @@ import pandas as pd
 from .base import BaseDataset
 
 
-'''drive dataset'''
+'''DRIVEDataset'''
 class DRIVEDataset(BaseDataset):
     num_classes = 2
     classnames = ['__background__', 'vessel']

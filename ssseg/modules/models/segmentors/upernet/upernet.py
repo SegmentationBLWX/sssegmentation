@@ -10,13 +10,13 @@ import torch.nn as nn
 import torch.nn.functional as F
 from ..base import BaseModel
 from ..pspnet import PyramidPoolingModule
-from ...backbones import BuildActivation, BuildNormalization
+from ...backbones import BuildActivation, BuildNormalization, constructnormcfg
 
 
 '''UPerNet'''
 class UPerNet(BaseModel):
-    def __init__(self, cfg, **kwargs):
-        super(UPerNet, self).__init__(cfg, **kwargs)
+    def __init__(self, cfg, mode):
+        super(UPerNet, self).__init__(cfg, mode)
         align_corners, norm_cfg, act_cfg = self.align_corners, self.norm_cfg, self.act_cfg
         # build pyramid pooling module
         ppm_cfg = {
@@ -36,8 +36,8 @@ class UPerNet(BaseModel):
         for in_channels in lateral_cfg['in_channels_list']:
             self.lateral_convs.append(nn.Sequential(
                 nn.Conv2d(in_channels, lateral_cfg['out_channels'], kernel_size=1, stride=1, padding=0, bias=False),
-                BuildNormalization(norm_cfg['type'], (lateral_cfg['out_channels'], norm_cfg['opts'])),
-                BuildActivation(act_cfg_copy['type'], **act_cfg_copy['opts']),
+                BuildNormalization(constructnormcfg(placeholder=lateral_cfg['out_channels'], norm_cfg=norm_cfg)),
+                BuildActivation(act_cfg_copy),
             ))
         # build fpn convs
         fpn_cfg = cfg['fpn']
@@ -45,15 +45,15 @@ class UPerNet(BaseModel):
         for in_channels in fpn_cfg['in_channels_list']:
             self.fpn_convs.append(nn.Sequential(
                 nn.Conv2d(in_channels, fpn_cfg['out_channels'], kernel_size=3, stride=1, padding=1, bias=False),
-                BuildNormalization(norm_cfg['type'], (fpn_cfg['out_channels'], norm_cfg['opts'])),
-                BuildActivation(act_cfg_copy['type'], **act_cfg_copy['opts']),
+                BuildNormalization(constructnormcfg(placeholder=fpn_cfg['out_channels'], norm_cfg=norm_cfg)),
+                BuildActivation(act_cfg_copy),
             ))
         # build decoder
         decoder_cfg = cfg['decoder']
         self.decoder = nn.Sequential(
             nn.Conv2d(decoder_cfg['in_channels'], decoder_cfg['out_channels'], kernel_size=3, stride=1, padding=1, bias=False),
-            BuildNormalization(norm_cfg['type'], (decoder_cfg['out_channels'], norm_cfg['opts'])),
-            BuildActivation(act_cfg['type'], **act_cfg['opts']),
+            BuildNormalization(constructnormcfg(placeholder=decoder_cfg['out_channels'], norm_cfg=norm_cfg)),
+            BuildActivation(act_cfg),
             nn.Dropout2d(decoder_cfg['dropout']),
             nn.Conv2d(decoder_cfg['out_channels'], cfg['num_classes'], kernel_size=1, stride=1, padding=0)
         )

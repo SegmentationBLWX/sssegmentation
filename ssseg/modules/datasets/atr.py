@@ -9,7 +9,7 @@ import pandas as pd
 from .base import BaseDataset
 
 
-'''ATR dataset'''
+'''ATRDataset'''
 class ATRDataset(BaseDataset):
     num_classes = 18
     classnames = [

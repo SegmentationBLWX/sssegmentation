@@ -8,13 +8,13 @@ import copy
 import torch
 import torch.nn as nn
 from ..base import BaseModel
-from ...backbones import BuildActivation, BuildNormalization, DepthwiseSeparableConv2d
+from ...backbones import BuildActivation, BuildNormalization, DepthwiseSeparableConv2d, constructnormcfg
 
 
 '''FCN'''
 class FCN(BaseModel):
-    def __init__(self, cfg, **kwargs):
-        super(FCN, self).__init__(cfg, **kwargs)
+    def __init__(self, cfg, mode):
+        super(FCN, self).__init__(cfg, mode)
         align_corners, norm_cfg, act_cfg = self.align_corners, self.norm_cfg, self.act_cfg
         # build decoder
         decoder_cfg = cfg['decoder']
@@ -24,8 +24,8 @@ class FCN(BaseModel):
                 conv = nn.Conv2d(decoder_cfg['in_channels'], decoder_cfg['out_channels'], kernel_size=3, stride=1, padding=1, bias=False)
             else:
                 conv = nn.Conv2d(decoder_cfg['out_channels'], decoder_cfg['out_channels'], kernel_size=3, stride=1, padding=1, bias=False)
-            norm = BuildNormalization(norm_cfg['type'], (decoder_cfg['out_channels'], norm_cfg['opts']))
-            act = BuildActivation(act_cfg['type'], **act_cfg['opts'])
+            norm = BuildNormalization(constructnormcfg(placeholder=decoder_cfg['out_channels'], norm_cfg=norm_cfg))
+            act = BuildActivation(act_cfg)
             convs += [conv, norm, act]
         convs.append(nn.Dropout2d(decoder_cfg['dropout']))
         if decoder_cfg.get('num_convs', 2) > 0:
@@ -68,8 +68,8 @@ class FCN(BaseModel):
 
 '''DepthwiseSeparableFCN'''
 class DepthwiseSeparableFCN(BaseModel):
-    def __init__(self, cfg, **kwargs):
-        super(DepthwiseSeparableFCN, self).__init__(cfg, **kwargs)
+    def __init__(self, cfg, mode):
+        super(DepthwiseSeparableFCN, self).__init__(cfg, mode)
         align_corners, norm_cfg, act_cfg = self.align_corners, self.norm_cfg, self.act_cfg
         # build decoder
         decoder_cfg = cfg['decoder']

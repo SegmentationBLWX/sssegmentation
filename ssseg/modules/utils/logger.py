@@ -7,9 +7,9 @@ Author:
 import logging
 
 
-'''log function.'''
+'''Logger'''
 class Logger():
-    def __init__(self, logfilepath, **kwargs):
+    def __init__(self, logfilepath):
         logging.basicConfig(
             level=logging.INFO,
             format='%(asctime)s %(levelname)-8s %(message)s',

@@ -9,13 +9,12 @@ import torch
 import torch.nn as nn
 from ..base import BaseModel
 from .ppm import PyramidPoolingModule
-from ...backbones import BuildActivation, BuildNormalization
 
 
 '''PSPNet'''
 class PSPNet(BaseModel):
-    def __init__(self, cfg, **kwargs):
-        super(PSPNet, self).__init__(cfg, **kwargs)
+    def __init__(self, cfg, mode):
+        super(PSPNet, self).__init__(cfg, mode)
         align_corners, norm_cfg, act_cfg = self.align_corners, self.norm_cfg, self.act_cfg
         # build pyramid pooling module
         ppm_cfg = {

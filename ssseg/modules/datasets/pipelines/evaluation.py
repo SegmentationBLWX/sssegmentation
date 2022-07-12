@@ -9,7 +9,7 @@ import numpy as np
 from collections import OrderedDict
 
 
-'''evaluation metric'''
+'''Evaluation'''
 class Evaluation():
     def __init__(self, predictions, groundtruths, num_classes, ignore_index=-1, nan_to_num=None, beta=1.0):
         total_area_intersect, total_area_union, total_area_pred_label, total_area_label = self.totalintersectandunion(

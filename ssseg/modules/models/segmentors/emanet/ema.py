@@ -11,11 +11,11 @@ import torch.nn.functional as F
 import torch.distributed as dist
 
 
-'''Expectation Maximization Attention Module'''
+'''EMAModule'''
 class EMAModule(nn.Module):
-    def __init__(self, channels, num_bases, num_stages, momentum, **kwargs):
+    def __init__(self, channels, num_bases, num_stages, momentum):
         super(EMAModule, self).__init__()
-        assert num_stages >= 1, 'num_stages must be at least 1...'
+        assert num_stages >= 1, 'num_stages must be at least 1'
         self.num_bases = num_bases
         self.num_stages = num_stages
         self.momentum = momentum

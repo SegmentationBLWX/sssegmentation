@@ -6,19 +6,18 @@ Author:
 '''
 import torch
 import torch.nn as nn
-from ...backbones import BuildActivation, BuildNormalization
+from ...backbones import BuildActivation, BuildNormalization, constructnormcfg
 
 
-'''context block'''
+'''ContextBlock'''
 class ContextBlock(nn.Module):
-    def __init__(self, in_channels, ratio, pooling_type='att', fusion_types=('channel_add', ), **kwargs):
+    def __init__(self, in_channels, ratio, pooling_type='att', fusion_types=('channel_add', ), norm_cfg=None, act_cfg=None):
         super(ContextBlock, self).__init__()
         assert pooling_type in ['avg', 'att']
         assert isinstance(fusion_types, (list, tuple))
         valid_fusion_types = ['channel_add', 'channel_mul']
         assert all([f in valid_fusion_types for f in fusion_types])
         assert len(fusion_types) > 0, 'at least one fusion should be used'
-        norm_cfg, act_cfg = kwargs['norm_cfg'], kwargs['act_cfg']
         self.in_channels = in_channels
         self.ratio = ratio
         self.planes = int(in_channels * ratio)
@@ -32,8 +31,8 @@ class ContextBlock(nn.Module):
         if 'channel_add' in fusion_types:
             self.channel_add_conv = nn.Sequential(
                 nn.Conv2d(self.in_channels, self.planes, kernel_size=1, stride=1, padding=0),
-                BuildNormalization(norm_cfg['type'], ([self.planes, 1, 1], norm_cfg['opts'])),
-                BuildActivation(act_cfg['type'], **act_cfg['opts']),
+                BuildNormalization(constructnormcfg(placeholder=[self.planes, 1, 1], norm_cfg=norm_cfg)),
+                BuildActivation(act_cfg),
                 nn.Conv2d(self.planes, self.in_channels, kernel_size=1, stride=1, padding=0)
             )
         else:
@@ -41,8 +40,8 @@ class ContextBlock(nn.Module):
         if 'channel_mul' in fusion_types:
             self.channel_mul_conv = nn.Sequential(
                 nn.Conv2d(self.in_channels, self.planes, kernel_size=1, stride=1, padding=0),
-                BuildNormalization(norm_cfg['type'], ([self.planes, 1, 1], norm_cfg['opts'])),
-                BuildActivation(act_cfg['type'], **act_cfg['opts']),
+                BuildNormalization(constructnormcfg(placeholder=[self.planes, 1, 1], norm_cfg=norm_cfg)),
+                BuildActivation(act_cfg),
                 nn.Conv2d(self.planes, self.in_channels, kernel_size=1, stride=1, padding=0)
             )
         else:

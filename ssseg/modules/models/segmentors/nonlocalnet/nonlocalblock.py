@@ -7,15 +7,14 @@ Author:
 import torch
 import torch.nn as nn
 from abc import ABCMeta
-from ...backbones import BuildActivation, BuildNormalization
+from ...backbones import BuildActivation, BuildNormalization, constructnormcfg
 
 
-'''basic non-local module'''
+'''_NonLocalNd'''
 class _NonLocalNd(nn.Module, metaclass=ABCMeta):
-    def __init__(self, in_channels, reduction=2, use_scale=True, mode='embeddedgaussian', **kwargs):
+    def __init__(self, in_channels, reduction=2, use_scale=True, mode='embeddedgaussian', norm_cfg=None, act_cfg=None):
         super(_NonLocalNd, self).__init__()
         assert mode in ['gaussian', 'embeddedgaussian', 'dotproduct', 'concatenation']
-        norm_cfg, act_cfg = kwargs['norm_cfg'], kwargs['act_cfg']
         self.in_channels = in_channels
         self.reduction = reduction
         self.use_scale = use_scale
@@ -26,7 +25,7 @@ class _NonLocalNd(nn.Module, metaclass=ABCMeta):
         )
         self.conv_out = nn.Sequential(
             nn.Conv2d(self.inter_channels, self.in_channels, kernel_size=1, stride=1, padding=0, bias=False),
-            BuildNormalization(norm_cfg['type'], (self.in_channels, norm_cfg['opts'])),
+            BuildNormalization(constructnormcfg(placeholder=self.in_channels, norm_cfg=norm_cfg)),
         )
         if self.mode != 'gaussian':
             self.theta = nn.Sequential(
@@ -38,7 +37,7 @@ class _NonLocalNd(nn.Module, metaclass=ABCMeta):
         if self.mode == 'concatenation':
             self.concat_project = nn.Sequential(
                 nn.Conv2d(self.inter_channels * 2, 1, kernel_size=1, stride=1, padding=0, bias=False),
-                BuildActivation(act_cfg['type'], **act_cfg['opts']),
+                BuildActivation(act_cfg),
             )
     '''gaussian'''
     def gaussian(self, theta_x, phi_x):
@@ -96,7 +95,7 @@ class _NonLocalNd(nn.Module, metaclass=ABCMeta):
         return output
     
 
-'''1D Non-local module'''
+'''NonLocal1d'''
 class NonLocal1d(_NonLocalNd):
     def __init__(self, in_channels, sub_sample=False, **kwargs):
         super(NonLocal1d, self).__init__(in_channels, **kwargs)
@@ -110,7 +109,7 @@ class NonLocal1d(_NonLocalNd):
                 self.phi = max_pool_layer
 
 
-'''2D Non-local module'''
+'''NonLocal2d'''
 class NonLocal2d(_NonLocalNd):
     def __init__(self, in_channels, sub_sample=False, **kwargs):
         super(NonLocal2d, self).__init__(in_channels, **kwargs)
@@ -124,10 +123,10 @@ class NonLocal2d(_NonLocalNd):
                 self.phi = max_pool_layer
 
 
-'''3D Non-local module'''
+'''NonLocal3d'''
 class NonLocal3d(_NonLocalNd):
     def __init__(self, in_channels, sub_sample=False, **kwargs):
-        super(NonLocal3d, self).__init__(in_channels, conv_cfg=conv_cfg, **kwargs)
+        super(NonLocal3d, self).__init__(in_channels, **kwargs)
         self.sub_sample = sub_sample
         if sub_sample:
             max_pool_layer = nn.MaxPool3d(kernel_size=(1, 2, 2))

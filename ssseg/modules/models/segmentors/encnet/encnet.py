@@ -10,21 +10,21 @@ import torch.nn as nn
 import torch.nn.functional as F
 from ..base import BaseModel
 from .contextencoding import ContextEncoding
-from ...backbones import BuildActivation, BuildNormalization
+from ...backbones import BuildActivation, BuildNormalization, constructnormcfg
 
 
 '''ENCNet'''
 class ENCNet(BaseModel):
-    def __init__(self, cfg, **kwargs):
-        super(ENCNet, self).__init__(cfg, **kwargs)
+    def __init__(self, cfg, mode):
+        super(ENCNet, self).__init__(cfg, mode)
         align_corners, norm_cfg, act_cfg = self.align_corners, self.norm_cfg, self.act_cfg
         # build encoding
         # --base structurs
         encoding_cfg = cfg['encoding']
         self.bottleneck = nn.Sequential(
             nn.Conv2d(encoding_cfg['in_channels_list'][-1], encoding_cfg['out_channels'], kernel_size=3, stride=1, padding=1, bias=False),
-            BuildNormalization(norm_cfg['type'], (encoding_cfg['out_channels'], norm_cfg['opts'])),
-            BuildActivation(act_cfg['type'], **act_cfg['opts']),
+            BuildNormalization(constructnormcfg(placeholder=encoding_cfg['out_channels'], norm_cfg=norm_cfg)),
+            BuildActivation(act_cfg),
         )
         self.enc_module = ContextEncoding(
             in_channels=encoding_cfg['out_channels'],
@@ -39,13 +39,13 @@ class ENCNet(BaseModel):
             for in_channels in encoding_cfg['in_channels_list'][:-1]:
                 self.lateral_convs.append(
                     nn.Conv2d(in_channels, encoding_cfg['out_channels'], kernel_size=1, stride=1, padding=0),
-                    BuildNormalization(norm_cfg['type'], (encoding_cfg['out_channels'], norm_cfg['opts'])),
-                    BuildActivation(act_cfg['type'], **act_cfg['opts']),
+                    BuildNormalization(constructnormcfg(placeholder=encoding_cfg['out_channels'], norm_cfg=norm_cfg)),
+                    BuildActivation(act_cfg),
                 )
             self.fusion = nn.Sequential(
                 nn.Conv2d(len(encoding_cfg['in_channels_list']) * encoding_cfg['out_channels'], encoding_cfg['out_channels'], kernel_size=3, stride=1, padding=1),
-                BuildNormalization(norm_cfg['type'], (encoding_cfg['out_channels'], norm_cfg['opts'])),
-                BuildActivation(act_cfg['type'], **act_cfg['opts']),
+                BuildNormalization(constructnormcfg(placeholder=encoding_cfg['out_channels'], norm_cfg=norm_cfg)),
+                BuildActivation(act_cfg),
             )
         if extra_cfg['use_se_loss']:
             self.se_layer = nn.Linear(encoding_cfg['out_channels'], cfg['num_classes'])

@@ -13,7 +13,7 @@ model_urls = {}
 
 '''TIMMBackbone'''
 class TIMMBackbone(nn.Module):
-    def __init__(self, model_name, features_only=True, pretrained=True, pretrained_model_path='', in_channels=3, **kwargs):
+    def __init__(self, model_name, features_only=True, pretrained=True, pretrained_model_path='', in_channels=3, extra_args={}):
         super(TIMMBackbone, self).__init__()
         import timm
         self.timm_model = timm.create_model(
@@ -22,7 +22,7 @@ class TIMMBackbone(nn.Module):
             pretrained=pretrained,
             in_chans=in_channels,
             checkpoint_path=pretrained_model_path,
-            **kwargs['extra_args'],
+            **extra_args,
         )
         self.timm_model.global_pool = None
         self.timm_model.fc = None
@@ -33,12 +33,12 @@ class TIMMBackbone(nn.Module):
         return features
 
 
-'''build TIMMBackbone'''
-def BuildTIMMBackbone(timm_type=None, **kwargs):
+'''BuildTIMMBackbone'''
+def BuildTIMMBackbone(timm_cfg):
     # assert whether support
-    assert timm_type is None
-    # parse args
-    default_args = {
+    timm_type = timm_cfg.pop('type')
+    # parse cfg
+    default_cfg = {
         'model_name': None,
         'features_only': True,
         'pretrained': True,
@@ -46,10 +46,12 @@ def BuildTIMMBackbone(timm_type=None, **kwargs):
         'in_channels': 3,
         'extra_args': {},
     }
-    for key, value in kwargs.items():
-        if key in default_args: default_args.update({key: value})
+    for key, value in timm_cfg.items():
+        if key in default_cfg: 
+            default_cfg.update({key: value})
+    # obtain timm_cfg
+    timm_cfg = default_cfg.copy()
     # obtain the instanced timm
-    timm_args = default_args.copy()
-    model = TIMMBackbone(**timm_args)
+    model = TIMMBackbone(**timm_cfg)
     # return the model
     return model

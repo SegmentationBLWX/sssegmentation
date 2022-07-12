@@ -1,6 +1,6 @@
 '''
 Function:
-    define the Hard Swish Module
+    Define the Hard Swish Module
 Author:
     Zhenchao Jin
 '''
@@ -8,7 +8,7 @@ import torch
 import torch.nn as nn
 
 
-'''Hard Swish Module'''
+'''HardSwish'''
 class HardSwish(nn.Module):
     def __init__(self, inplace=False):
         super(HardSwish, self).__init__()

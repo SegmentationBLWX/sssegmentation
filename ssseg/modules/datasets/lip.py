@@ -9,7 +9,7 @@ import pandas as pd
 from .base import BaseDataset
 
 
-'''LIP dataset'''
+'''LIPDataset'''
 class LIPDataset(BaseDataset):
     num_classes = 20
     classnames = [

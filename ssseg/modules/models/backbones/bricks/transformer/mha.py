@@ -9,7 +9,7 @@ import torch.nn as nn
 from ..dropout import BuildDropout
 
 
-'''Multi-head Attention'''
+'''MultiheadAttention'''
 class MultiheadAttention(nn.Module):
     def __init__(self, embed_dims, num_heads, attn_drop=0., proj_drop=0., dropout_cfg=None, batch_first=False, **kwargs):
         super(MultiheadAttention, self).__init__()
@@ -18,9 +18,9 @@ class MultiheadAttention(nn.Module):
         self.batch_first = batch_first
         self.attn = nn.MultiheadAttention(embed_dims, num_heads, attn_drop, **kwargs)
         self.proj_drop = nn.Dropout(proj_drop)
-        self.dropout_layer = BuildDropout(dropout_cfg['type'], **dropout_cfg['opts']) if dropout_cfg else nn.Identity()
+        self.dropout_layer = BuildDropout(dropout_cfg) if dropout_cfg else nn.Identity()
     '''forward'''
-    def forward(self, query, key=None, value=None, identity=None, query_pos=None, key_pos=None, attn_mask=None, key_padding_mask=None, **kwargs):
+    def forward(self, query, key=None, value=None, identity=None, query_pos=None, key_pos=None, attn_mask=None, key_padding_mask=None):
         if key is None: key = query
         if value is None: value = key
         if identity is None: identity = query

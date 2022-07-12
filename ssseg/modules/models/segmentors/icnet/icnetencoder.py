@@ -9,13 +9,13 @@ import torch
 import torch.nn as nn
 import torch.nn.functional as F
 from ..pspnet import PyramidPoolingModule
-from ...backbones import BuildNormalization, BuildActivation, BuildBackbone
+from ...backbones import BuildNormalization, BuildActivation, BuildBackbone, constructnormcfg
 
 
 '''ICNet-Encoder'''
 class ICNetEncoder(nn.Module):
     def __init__(self, backbone_cfg=None, in_channels=3, layer_channels_list=(512, 2048), light_branch_middle_channels=32, psp_out_channels=512, 
-                 out_channels_list=(64, 256, 256), pool_scales=(1, 2, 3, 6), norm_cfg=None, act_cfg=None, align_corners=False, **kwargs):
+                 out_channels_list=(64, 256, 256), pool_scales=(1, 2, 3, 6), norm_cfg=None, act_cfg=None, align_corners=False):
         super(ICNetEncoder, self).__init__()
         self.align_corners = align_corners
         assert (backbone_cfg is not None) and isinstance(backbone_cfg, dict)
@@ -33,24 +33,24 @@ class ICNetEncoder(nn.Module):
         )
         self.conv_sub1 = nn.Sequential(
             nn.Conv2d(in_channels, light_branch_middle_channels, kernel_size=3, stride=2, padding=1, bias=False),
-            BuildNormalization(norm_cfg['type'], (light_branch_middle_channels, norm_cfg['opts'])),
-            BuildActivation(act_cfg['type'], **act_cfg['opts']),
+            BuildNormalization(constructnormcfg(placeholder=light_branch_middle_channels, norm_cfg=norm_cfg)),
+            BuildActivation(act_cfg),
             nn.Conv2d(light_branch_middle_channels, light_branch_middle_channels, kernel_size=3, stride=2, padding=1, bias=False),
-            BuildNormalization(norm_cfg['type'], (light_branch_middle_channels, norm_cfg['opts'])),
-            BuildActivation(act_cfg['type'], **act_cfg['opts']),
+            BuildNormalization(constructnormcfg(placeholder=light_branch_middle_channels, norm_cfg=norm_cfg)),
+            BuildActivation(act_cfg),
             nn.Conv2d(light_branch_middle_channels, out_channels_list[0], kernel_size=3, stride=2, padding=1, bias=False),
-            BuildNormalization(norm_cfg['type'], (out_channels_list[0], norm_cfg['opts'])),
-            BuildActivation(act_cfg['type'], **act_cfg['opts']),
+            BuildNormalization(constructnormcfg(placeholder=out_channels_list[0], norm_cfg=norm_cfg)),
+            BuildActivation(act_cfg),
         )
         self.conv_sub2 = nn.Sequential(
             nn.Conv2d(layer_channels_list[0], out_channels_list[1], kernel_size=1, stride=1, padding=0, bias=False),
-            BuildNormalization(norm_cfg['type'], (out_channels_list[1], norm_cfg['opts'])),
-            BuildActivation(act_cfg['type'], **act_cfg['opts']),
+            BuildNormalization(constructnormcfg(placeholder=out_channels_list[1], norm_cfg=norm_cfg)),
+            BuildActivation(act_cfg),
         )
         self.conv_sub4 = nn.Sequential(
             nn.Conv2d(psp_out_channels, out_channels_list[2], kernel_size=1, stride=1, padding=0, bias=False),
-            BuildNormalization(norm_cfg['type'], (out_channels_list[2], norm_cfg['opts'])),
-            BuildActivation(act_cfg['type'], **act_cfg['opts']),
+            BuildNormalization(constructnormcfg(placeholder=out_channels_list[2], norm_cfg=norm_cfg)),
+            BuildActivation(act_cfg),
         )
     '''forward'''
     def forward(self, x):

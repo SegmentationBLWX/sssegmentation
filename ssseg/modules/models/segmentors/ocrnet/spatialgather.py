@@ -9,9 +9,9 @@ import torch.nn as nn
 import torch.nn.functional as F
 
 
-'''spatial gather module'''
+'''SpatialGatherModule'''
 class SpatialGatherModule(nn.Module):
-    def __init__(self, scale=1, **kwargs):
+    def __init__(self, scale=1):
         super(SpatialGatherModule, self).__init__()
         self.scale = scale
     '''forward'''

@@ -10,13 +10,13 @@ import numpy as np
 import torch.nn as nn
 import torch.nn.functional as F
 from ..base import FPN, BaseModel
-from ...backbones import BuildActivation, BuildNormalization
+from ...backbones import BuildActivation, BuildNormalization, constructnormcfg
 
 
 '''SemanticFPN'''
 class SemanticFPN(BaseModel):
-    def __init__(self, cfg, **kwargs):
-        super(SemanticFPN, self).__init__(cfg, **kwargs)
+    def __init__(self, cfg, mode):
+        super(SemanticFPN, self).__init__(cfg, mode)
         align_corners, norm_cfg, act_cfg = self.align_corners, self.norm_cfg, self.act_cfg
         # build fpn
         fpn_cfg = cfg['fpn']
@@ -34,8 +34,8 @@ class SemanticFPN(BaseModel):
             for k in range(head_length):
                 scale_head.append(nn.Sequential(
                     nn.Conv2d(fpn_cfg['out_channels'] if k == 0 else fpn_cfg['scale_head_channels'], fpn_cfg['scale_head_channels'], kernel_size=3, stride=1, padding=1, bias=False),
-                    BuildNormalization(norm_cfg['type'], (fpn_cfg['scale_head_channels'], norm_cfg['opts'])),
-                    BuildActivation(act_cfg['type'], **act_cfg['opts']),
+                    BuildNormalization(constructnormcfg(placeholder=fpn_cfg['scale_head_channels'], norm_cfg=norm_cfg)),
+                    BuildActivation(act_cfg),
                 ))
                 if feature_stride_list[i] != feature_stride_list[0]:
                     scale_head.append(

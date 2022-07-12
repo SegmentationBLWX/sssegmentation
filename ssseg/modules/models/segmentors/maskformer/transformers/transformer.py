@@ -8,7 +8,7 @@ import copy
 import torch
 import torch.nn as nn
 import torch.nn.functional as F
-from ....backbones import BuildActivation, BuildNormalization
+from ....backbones import BuildActivation, BuildNormalization, constructnormcfg
 
 
 '''TransformerEncoderLayer'''
@@ -25,10 +25,10 @@ class TransformerEncoderLayer(nn.Module):
         self.dropout1 = nn.Dropout(dropout)
         self.dropout2 = nn.Dropout(dropout)
         # norm
-        self.norm1 = BuildNormalization(norm_cfg['type'], (d_model, norm_cfg['opts']))
-        self.norm2 = BuildNormalization(norm_cfg['type'], (d_model, norm_cfg['opts']))
+        self.norm1 = BuildNormalization(constructnormcfg(placeholder=d_model, norm_cfg=norm_cfg))
+        self.norm2 = BuildNormalization(constructnormcfg(placeholder=d_model, norm_cfg=norm_cfg))
         # act
-        self.activation = BuildActivation(act_cfg['type'], **act_cfg['opts'])
+        self.activation = BuildActivation(act_cfg)
     '''with pos embed'''
     def withposembed(self, tensor, pos=None):
         return tensor if pos is None else tensor + pos
@@ -85,16 +85,16 @@ class TransformerDecoderLayer(nn.Module):
         self.linear1 = nn.Linear(d_model, dim_feedforward)
         self.linear2 = nn.Linear(dim_feedforward, d_model)
         # norm
-        self.norm1 = BuildNormalization(norm_cfg['type'], (d_model, norm_cfg['opts']))
-        self.norm2 = BuildNormalization(norm_cfg['type'], (d_model, norm_cfg['opts']))
-        self.norm3 = BuildNormalization(norm_cfg['type'], (d_model, norm_cfg['opts']))
+        self.norm1 = BuildNormalization(constructnormcfg(placeholder=d_model, norm_cfg=norm_cfg))
+        self.norm2 = BuildNormalization(constructnormcfg(placeholder=d_model, norm_cfg=norm_cfg))
+        self.norm3 = BuildNormalization(constructnormcfg(placeholder=d_model, norm_cfg=norm_cfg))
         # dropout
         self.dropout = nn.Dropout(dropout)
         self.dropout1 = nn.Dropout(dropout)
         self.dropout2 = nn.Dropout(dropout)
         self.dropout3 = nn.Dropout(dropout)
         # act
-        self.activation = BuildActivation(act_cfg['type'], **act_cfg['opts'])
+        self.activation = BuildActivation(act_cfg)
     '''with pos embed'''
     def withposembed(self, tensor, pos=None):
         return tensor if pos is None else tensor + pos
@@ -152,11 +152,11 @@ class Transformer(nn.Module):
         self.d_model = d_model
         # encoder
         encoder_layer = TransformerEncoderLayer(d_model, nhead, dim_feedforward, dropout, norm_cfg, act_cfg, norm_before)
-        encoder_norm = BuildNormalization(norm_cfg['type'], (d_model, norm_cfg['opts'])) if norm_before else None
+        encoder_norm = BuildNormalization(constructnormcfg(placeholder=d_model, norm_cfg=norm_cfg)) if norm_before else None
         self.encoder = TransformerEncoder(encoder_layer, num_encoder_layers, encoder_norm)
         # decoder
         decoder_layer = TransformerDecoderLayer(d_model, nhead, dim_feedforward, dropout, norm_cfg, act_cfg, norm_before)
-        decoder_norm = BuildNormalization(norm_cfg['type'], (d_model, norm_cfg['opts']))
+        decoder_norm = BuildNormalization(constructnormcfg(placeholder=d_model, norm_cfg=norm_cfg))
         self.decoder = TransformerDecoder(decoder_layer, num_decoder_layers, decoder_norm, return_intermediate=return_intermediate_dec)
         # reset parameters
         self.resetparameters()

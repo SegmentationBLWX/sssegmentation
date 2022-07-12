@@ -9,25 +9,24 @@ import torch
 import torch.nn as nn
 import torch.nn.functional as F
 from .encoding import Encoding
-from ...backbones import BuildActivation, BuildNormalization
+from ...backbones import BuildActivation, BuildNormalization, constructnormcfg
 
 
-'''Context Encoding Module'''
+'''ContextEncoding'''
 class ContextEncoding(nn.Module):
-    def __init__(self, in_channels, num_codes, **kwargs):
+    def __init__(self, in_channels, num_codes, norm_cfg=None, act_cfg=None):
         super(ContextEncoding, self).__init__()
-        norm_cfg, act_cfg = kwargs['norm_cfg'], kwargs['act_cfg']
         self.encoding_project = nn.Sequential(
             nn.Conv2d(in_channels, in_channels, kernel_size=1, stride=1, padding=0, bias=False),
-            BuildNormalization(norm_cfg['type'], (in_channels, norm_cfg['opts'])),
-            BuildActivation(act_cfg['type'], **act_cfg['opts']),
+            BuildNormalization(constructnormcfg(placeholder=in_channels, norm_cfg=norm_cfg)),
+            BuildActivation(act_cfg),
         )
         encoding_norm_cfg = copy.deepcopy(norm_cfg)
         encoding_norm_cfg['type'] = encoding_norm_cfg['type'].replace('2d', '1d')
         self.encoding = nn.Sequential(
             Encoding(channels=in_channels, num_codes=num_codes),
-            BuildNormalization(encoding_norm_cfg['type'], (num_codes, encoding_norm_cfg['opts'])),
-            BuildActivation('relu', **{'inplace': True})
+            BuildNormalization(constructnormcfg(placeholder=num_codes, norm_cfg=encoding_norm_cfg)),
+            BuildActivation(act_cfg),
         )
         self.fc = nn.Sequential(
             nn.Linear(in_channels, in_channels),

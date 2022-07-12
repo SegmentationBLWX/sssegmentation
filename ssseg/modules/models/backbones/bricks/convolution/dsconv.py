@@ -1,16 +1,16 @@
 '''
 Function:
-    define Depthwise Separable Convolution Module
+    Define Depthwise Separable Convolution Module
 Author:
     Zhenchao Jin
 '''
 import torch
 import torch.nn as nn
 from ..activation import BuildActivation
-from ..normalization import BuildNormalization
+from ..normalization import BuildNormalization, constructnormcfg
 
 
-'''Depthwise Separable Conv2d'''
+'''DepthwiseSeparableConv2d'''
 class DepthwiseSeparableConv2d(nn.Module):
     def __init__(self, in_channels, out_channels, kernel_size=3, stride=1, padding=1, dilation=1, bias=False, 
                  norm_cfg=None, act_cfg=None, dw_norm_cfg=None, dw_act_cfg=None, pw_norm_cfg=None, pw_act_cfg=None):
@@ -21,14 +21,14 @@ class DepthwiseSeparableConv2d(nn.Module):
         if pw_act_cfg is None: pw_act_cfg = act_cfg
         self.depthwise_conv = nn.Conv2d(in_channels, in_channels, kernel_size=kernel_size, stride=stride, padding=padding, dilation=dilation, groups=in_channels, bias=bias)
         if dw_norm_cfg is not None:
-            self.depthwise_bn = BuildNormalization(dw_norm_cfg['type'], (in_channels, dw_norm_cfg['opts']))
+            self.depthwise_bn = BuildNormalization(constructnormcfg(placeholder=in_channels, norm_cfg=dw_norm_cfg))
         if dw_act_cfg is not None:
-            self.depthwise_activate = BuildActivation(dw_act_cfg['type'], **dw_act_cfg['opts'])
+            self.depthwise_activate = BuildActivation(dw_act_cfg)
         self.pointwise_conv = nn.Conv2d(in_channels, out_channels, kernel_size=1, stride=1, padding=0, dilation=1, groups=1, bias=bias)
         if pw_norm_cfg is not None:
-            self.pointwise_bn = BuildNormalization(pw_norm_cfg['type'], (out_channels, pw_norm_cfg['opts']))
+            self.pointwise_bn = BuildNormalization(constructnormcfg(placeholder=out_channels, norm_cfg=pw_norm_cfg))
         if pw_act_cfg is not None:
-            self.pointwise_activate = BuildActivation(pw_act_cfg['type'], **pw_act_cfg['opts'])
+            self.pointwise_activate = BuildActivation(pw_act_cfg)
     '''forward'''
     def forward(self, x):
         x = self.depthwise_conv(x)

@@ -10,7 +10,7 @@ import numpy as np
 import torch.nn.functional as F
 
 
-'''resize image'''
+'''Resize'''
 class Resize(object):
     def __init__(self, output_size, scale_range=(0.5, 2.0), img_interpolation='bilinear', seg_interpolation='nearest', keep_ratio=True):
         # set attribute
@@ -55,7 +55,7 @@ class Resize(object):
         return sample
 
 
-'''random crop image'''
+'''RandomCrop'''
 class RandomCrop(object):
     def __init__(self, crop_size, ignore_index=255, one_category_max_ratio=0.75):
         self.crop_size = crop_size
@@ -84,7 +84,7 @@ class RandomCrop(object):
         return sample
 
 
-'''random flip image'''
+'''RandomFlip'''
 class RandomFlip(object):
     def __init__(self, flip_prob, fix_ann_pairs=None):
         self.flip_prob = flip_prob
@@ -104,7 +104,7 @@ class RandomFlip(object):
         return sample
 
 
-'''photo metric distortion'''
+'''PhotoMetricDistortion'''
 class PhotoMetricDistortion(object):
     def __init__(self, brightness_delta=32, contrast_range=(0.5, 1.5), saturation_range=(0.5, 1.5), hue_delta=18):
         self.brightness_delta = brightness_delta
@@ -157,7 +157,7 @@ class PhotoMetricDistortion(object):
         return image.astype(np.uint8)
 
 
-'''random rotate image'''
+'''RandomRotation'''
 class RandomRotation(object):
     def __init__(self, angle_upper=30, rotation_prob=0.5, img_fill_value=0.0, seg_fill_value=255, img_interpolation='bicubic', seg_interpolation='nearest'):
         # set attributes
@@ -188,7 +188,7 @@ class RandomRotation(object):
         return sample
 
 
-'''pad image'''
+'''Padding'''
 class Padding(object):
     def __init__(self, output_size, data_type='numpy', img_fill_value=0, seg_fill_value=255, output_size_auto_adaptive=True):
         self.output_size = output_size
@@ -234,7 +234,7 @@ class Padding(object):
         return sample
 
 
-'''np.array to torch.Tensor'''
+'''ToTensor'''
 class ToTensor(object):
     '''call'''
     def __call__(self, sample):
@@ -246,7 +246,7 @@ class ToTensor(object):
         return sample
 
 
-'''normalize the input image'''
+'''Normalize'''
 class Normalize(object):
     def __init__(self, mean, std, to_rgb=True):
         self.mean = np.array(mean)
@@ -266,7 +266,7 @@ class Normalize(object):
         return sample
 
 
-'''wrap the transforms'''
+'''Compose'''
 class Compose(object):
     def __init__(self, transforms):
         self.transforms = transforms

@@ -4,29 +4,30 @@ Function:
 Author:
     Zhenchao Jin
 '''
-from torch.nn import Identity
-from .groupnorm import GroupNorm
-from .layernorm import LayerNorm
-from .syncbatchnorm import SyncBatchNorm
-from .batchnorm import BatchNorm1d, BatchNorm2d, BatchNorm3d
-from .instancenorm import InstanceNorm1d, InstanceNorm2d, InstanceNorm3d
+import copy
+import torch.nn as nn
 
 
-'''build normalization'''
-def BuildNormalization(norm_type='batchnorm2d', instanced_params=(0, {}), only_get_all_supported=False, **kwargs):
-    supported_dict = {
-        'identity': Identity,
-        'layernorm': LayerNorm,
-        'groupnorm': GroupNorm,
-        'batchnorm1d': BatchNorm1d,
-        'batchnorm2d': BatchNorm2d,
-        'batchnorm3d': BatchNorm3d,
-        'syncbatchnorm': SyncBatchNorm,
-        'instancenorm1d': InstanceNorm1d,
-        'instancenorm2d': InstanceNorm2d,
-        'instancenorm3d': InstanceNorm3d,
+'''BuildNormalization'''
+def BuildNormalization(norm_cfg, only_get_all_supported=False):
+    supported_normalizations = {
+        'identity': [nn.Identity, None],
+        'layernorm': [nn.LayerNorm, 'normalized_shape'],
+        'groupnorm': [nn.GroupNorm, 'num_channels'],
+        'batchnorm1d': [nn.BatchNorm1d, 'num_features'],
+        'batchnorm2d': [nn.BatchNorm2d, 'num_features'],
+        'batchnorm3d': [nn.BatchNorm3d, 'num_features'],
+        'syncbatchnorm': [nn.SyncBatchNorm, 'num_features'],
+        'instancenorm1d': [nn.InstanceNorm1d, 'num_features'],
+        'instancenorm2d': [nn.InstanceNorm2d, 'num_features'],
+        'instancenorm3d': [nn.InstanceNorm3d, 'num_features'],
     }
-    if only_get_all_supported: return list(supported_dict.values())
-    assert norm_type in supported_dict, 'unsupport norm_type %s...' % norm_type
-    norm_layer = supported_dict[norm_type](instanced_params[0], **instanced_params[1])
-    return norm_layer
+    if only_get_all_supported: 
+        return list(supported_normalizations.values())
+    selected_norm_func = supported_normalizations(norm_cfg['type'])
+    norm_cfg = copy.deepcopy(norm_cfg)
+    norm_cfg.pop('type')
+    placeholder = norm_cfg.pop('placeholder')
+    if selected_norm_func[-1] is not None:
+        norm_cfg[selected_norm_func[1]] = placeholder
+    return selected_norm_func[0](**norm_cfg)

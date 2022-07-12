@@ -13,8 +13,11 @@ import argparse
 import numpy as np
 import torch.nn.functional as F
 from tqdm import tqdm
-from modules import *
 from cfgs import BuildConfig
+from modules import (
+    BuildDataset, BuildDistributedDataloader, BuildDistributedModel, BuildOptimizer, adjustLearningRate, clipGradients,
+    BuildLoss, BuildBackbone, BuildSegmentor, BuildPixelSampler, Logger, setRandomSeed, BuildPalette, checkdir, loadcheckpoints, savecheckpoints
+)
 warnings.filterwarnings('ignore')
 
 
@@ -30,32 +33,28 @@ def parseArgs():
     return args
 
 
-'''demo for segmentation'''
+'''Demo'''
 class Demo():
-    def __init__(self, **kwargs):
-        # set attribute
-        for key, value in kwargs.items(): setattr(self, key, value)
+    def __init__(self):
+        self.cmd_args = parseArgs()
+        self.cfg, self.cfg_file_path = BuildConfig(self.cmd_args.cfgfilepath)
+        assert self.cmd_args.imagepath or self.cmd_args.imagedir, 'imagepath or imagedir should be specified'
     '''start'''
     def start(self):
-        # parse arguments
-        cmd_args = parseArgs()
-        cfg, cfg_file_path = BuildConfig(cmd_args.cfgfilepath)
-        cfg.SEGMENTOR_CFG['distributed']['is_on'] = False
-        cfg.SEGMENTOR_CFG['is_multi_gpus'] = False
-        assert cmd_args.imagepath or cmd_args.imagedir, 'imagepath or imagedir should be specified...'
-        # check backup dir
-        common_cfg = cfg.COMMON_CFG['test']
-        checkdir(common_cfg['backupdir'])
+        cmd_args, cfg, cfg_file_path = self.cmd_args, self.cfg, self.cfg_file_path
+        # check work dir
+        checkdir(cfg.COMMON_CFG['work_dir'])
         # cuda detect
         use_cuda = torch.cuda.is_available()
         # initialize logger_handle
-        logger_handle = Logger(common_cfg['logfilepath'])
-        # instanced segmentor
+        logger_handle = Logger(cfg.COMMON_CFG['logfilepath'])
+        # build segmentor
         cfg.SEGMENTOR_CFG['backbone']['pretrained'] = False
         segmentor = BuildSegmentor(segmentor_cfg=copy.deepcopy(cfg.SEGMENTOR_CFG), mode='TEST')
         if use_cuda: segmentor = segmentor.cuda()
-        # instanced dataset
+        # build dataset
         dataset = BuildDataset(mode='TEST', logger_handle=logger_handle, dataset_cfg=copy.deepcopy(cfg.DATASET_CFG), get_basedataset=True)
+        # build palette
         palette = BuildPalette(dataset_type=cfg.DATASET_CFG['type'], num_classes=cfg.SEGMENTOR_CFG['num_classes'], logger_handle=logger_handle)
         # load checkpoints
         cmd_args.local_rank = 0
@@ -63,7 +62,7 @@ class Demo():
         try:
             segmentor.load_state_dict(checkpoints['model'])
         except Exception as e:
-            logger_handle.warning(str(e) + '\n' + 'Try to load checkpoints by using strict=False...')
+            logger_handle.warning(str(e) + '\n' + 'Try to load checkpoints by using strict=False')
             segmentor.load_state_dict(checkpoints['model'], strict=False)
         # set eval
         segmentor.eval()
@@ -78,7 +77,8 @@ class Demo():
         pbar = tqdm(range(len(imagepaths)))
         for idx in pbar:
             imagepath = imagepaths[idx]
-            if imagepath.split('.')[-1] not in ['jpg', 'jpeg', 'png']: continue
+            if imagepath.split('.')[-1] not in ['jpg', 'jpeg', 'png']: 
+                continue
             pbar.set_description('Processing %s' % imagepath)
             infer_tricks = inference_cfg['tricks']
             cascade_cfg = infer_tricks.get('cascade', {'key_for_pre_output': 'memory_gather_logits', 'times': 1, 'forward_default_args': None})
@@ -93,7 +93,8 @@ class Demo():
                         F.interpolate(outputs, size=output_list[-1].shape[2:], mode='bilinear', align_corners=segmentor.align_corners) for outputs in output_list
                     ]
                     forward_args = {cascade_cfg['key_for_pre_output']: sum(output_list) / len(output_list)}
-                    if cascade_cfg['forward_default_args'] is not None: forward_args.update(cascade_cfg['forward_default_args'])
+                    if cascade_cfg['forward_default_args'] is not None: 
+                        forward_args.update(cascade_cfg['forward_default_args'])
                 output_list = self.auginference(
                     segmentor=segmentor,
                     images=image_tensor,
@@ -114,12 +115,12 @@ class Demo():
             image = image * 0.5 + mask * 0.5
             image = image.astype(np.uint8)
             if cmd_args.outputfilename:
-                cv2.imwrite(os.path.join(common_cfg['backupdir'], cmd_args.outputfilename + '_%d' % idx + '.png'), image)
+                cv2.imwrite(os.path.join(cfg.COMMON_CFG['work_dir'], cmd_args.outputfilename + '_%d' % idx + '.png'), image)
             else:
-                cv2.imwrite(os.path.join(common_cfg['backupdir'], imagepath.split('/')[-1].split('.')[0] + '.png'), image)
+                cv2.imwrite(os.path.join(cfg.COMMON_CFG['work_dir'], imagepath.split('/')[-1].split('.')[0] + '.png'), image)
     '''inference with augmentations'''
     def auginference(self, segmentor, images, inference_cfg, num_classes, FloatTensor, align_corners, forward_args=None):
-        infer_tricks, output_list = inference_cfg['tricks'], []
+        infer_tricks, outputs_list = inference_cfg['tricks'], []
         for scale_factor in infer_tricks['multiscale']:
             images_scale = F.interpolate(images, scale_factor=scale_factor, mode='bilinear', align_corners=align_corners)
             outputs = self.inference(
@@ -129,7 +130,7 @@ class Demo():
                 num_classes=num_classes, 
                 forward_args=forward_args,
             ).cpu()
-            output_list.append(outputs)
+            outputs_list.append(outputs)
             if infer_tricks['flip']:
                 images_flip = torch.from_numpy(np.flip(images_scale.cpu().numpy(), axis=3).copy())
                 outputs_flip = self.inference(
@@ -142,15 +143,16 @@ class Demo():
                 fix_ann_pairs = inference_cfg.get('fix_ann_pairs', None)
                 if fix_ann_pairs is None:
                     for aug_opt in self.cfg.DATASET_CFG['train']['aug_opts']:
-                        if 'RandomFlip' in aug_opt: fix_ann_pairs = aug_opt[-1].get('fix_ann_pairs', None)
+                        if 'RandomFlip' in aug_opt: 
+                            fix_ann_pairs = aug_opt[-1].get('fix_ann_pairs', None)
                 if fix_ann_pairs is not None:
                     outputs_flip_clone = outputs_flip.data.clone()
                     for (pair_a, pair_b) in fix_ann_pairs:
                         outputs_flip[:, pair_a, :, :] = outputs_flip_clone[:, pair_b, :, :]
                         outputs_flip[:, pair_b, :, :] = outputs_flip_clone[:, pair_a, :, :]
                 outputs_flip = torch.from_numpy(np.flip(outputs_flip.cpu().numpy(), axis=3).copy()).type_as(outputs)
-                output_list.append(outputs_flip)
-        return output_list
+                outputs_list.append(outputs_flip)
+        return outputs_list
     '''inference'''
     def inference(self, segmentor, images, inference_cfg, num_classes, forward_args=None):
         assert inference_cfg['mode'] in ['whole', 'slide']
@@ -160,9 +162,10 @@ class Demo():
                 outputs = segmentor(images)
             else:
                 outputs = segmentor(images, **forward_args)
-            if use_probs_before_resize: outputs = F.softmax(outputs, dim=1)
+            if use_probs_before_resize: 
+                outputs = F.softmax(outputs, dim=1)
         else:
-            align_corners = segmentor.align_corners if hasattr(segmentor, 'align_corners') else segmentor.module.align_corners
+            align_corners = segmentor.module.align_corners
             opts = inference_cfg['opts']
             stride_h, stride_w = opts['stride']
             cropsize_h, cropsize_w = opts['cropsize']
@@ -182,7 +185,8 @@ class Demo():
                     else:
                         outputs_crop = segmentor(crop_images, **forward_args)
                     outputs_crop = F.interpolate(outputs_crop, size=crop_images.size()[2:], mode='bilinear', align_corners=align_corners)
-                    if use_probs_before_resize: outputs_crop = F.softmax(outputs_crop, dim=1)
+                    if use_probs_before_resize: 
+                        outputs_crop = F.softmax(outputs_crop, dim=1)
                     outputs += F.pad(outputs_crop, (int(x1), int(outputs.shape[3] - x2), int(y1), int(outputs.shape[2] - y2)))
                     count_mat[:, :, y1:y2, x1:x2] += 1
             assert (count_mat == 0).sum() == 0

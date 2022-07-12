@@ -11,8 +11,8 @@ from .focalloss import SigmoidFocalLoss
 from .celoss import CrossEntropyLoss, BinaryCrossEntropyLoss
 
 
-'''build loss'''
-def BuildLoss(loss_type, **kwargs):
+'''BuildLoss'''
+def BuildLoss(loss_type):
     supported_losses = {
         'diceloss': DiceLoss,
         'kldivloss': KLDivLoss,
@@ -21,5 +21,4 @@ def BuildLoss(loss_type, **kwargs):
         'sigmoidfocalloss': SigmoidFocalLoss,
         'binaryceloss': BinaryCrossEntropyLoss,
     }
-    assert loss_type in supported_losses, 'unsupport loss type %s...' % loss_type
     return supported_losses[loss_type]

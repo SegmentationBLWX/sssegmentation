@@ -9,7 +9,7 @@ import pandas as pd
 from .base import BaseDataset
 
 
-'''ADE20k dataset'''
+'''ADE20kDataset'''
 class ADE20kDataset(BaseDataset):
     num_classes = 150
     classnames = [

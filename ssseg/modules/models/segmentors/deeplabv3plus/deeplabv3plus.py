@@ -10,13 +10,13 @@ import torch.nn as nn
 import torch.nn.functional as F
 from ..base import BaseModel
 from .aspp import DepthwiseSeparableASPP
-from ...backbones import BuildActivation, BuildNormalization, DepthwiseSeparableConv2d
+from ...backbones import BuildActivation, BuildNormalization, DepthwiseSeparableConv2d, constructnormcfg
 
 
 '''Deeplabv3plus'''
 class Deeplabv3Plus(BaseModel):
-    def __init__(self, cfg, **kwargs):
-        super(Deeplabv3Plus, self).__init__(cfg, **kwargs)
+    def __init__(self, cfg, mode):
+        super(Deeplabv3Plus, self).__init__(cfg, mode)
         align_corners, norm_cfg, act_cfg = self.align_corners, self.norm_cfg, self.act_cfg
         # build aspp net
         aspp_cfg = {
@@ -32,8 +32,8 @@ class Deeplabv3Plus(BaseModel):
         shortcut_cfg = cfg['shortcut']
         self.shortcut = nn.Sequential(
             nn.Conv2d(shortcut_cfg['in_channels'], shortcut_cfg['out_channels'], kernel_size=1, stride=1, padding=0, bias=False),
-            BuildNormalization(norm_cfg['type'], (shortcut_cfg['out_channels'], norm_cfg['opts'])),
-            BuildActivation(act_cfg['type'], **act_cfg['opts'])
+            BuildNormalization(constructnormcfg(placeholder=shortcut_cfg['out_channels'], norm_cfg=norm_cfg)),
+            BuildActivation(act_cfg),
         )
         # build decoder
         decoder_cfg = cfg['decoder']

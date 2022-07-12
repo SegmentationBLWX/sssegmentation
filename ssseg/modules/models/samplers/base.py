@@ -1,6 +1,6 @@
 '''
 Function:
-    base pixel sampler
+    Base pixel sampler
 Author:
     Zhenchao Jin
 '''
@@ -8,9 +8,9 @@ import torch
 import torch.nn as nn
 
 
-'''base pixel sampler'''
+'''BasePixelSampler'''
 class BasePixelSampler(nn.Module):
-    def __init__(self, **kwargs):
+    def __init__(self):
         pass
     '''placeholder for sample function'''
     def sample(self, seg_logit, seg_label):

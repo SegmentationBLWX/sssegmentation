@@ -9,17 +9,16 @@ import torch.nn as nn
 import torch.nn.functional as F
 import torch.distributed as dist
 from ..base import SelfAttentionBlock
-from ...backbones import BuildActivation, BuildNormalization
+from ...backbones import BuildActivation, BuildNormalization, constructnormcfg
 
 
-'''features memory'''
+'''FeaturesMemory'''
 class FeaturesMemory(nn.Module):
-    def __init__(self, num_classes, feats_channels, transform_channels, out_channels, 
-                 use_context_within_image=True, num_feats_per_cls=1, use_hard_aggregate=False, **kwargs):
+    def __init__(self, num_classes, feats_channels, transform_channels, out_channels, use_context_within_image=True, 
+                 num_feats_per_cls=1, use_hard_aggregate=False, norm_cfg=None, act_cfg=None):
         super(FeaturesMemory, self).__init__()
         assert num_feats_per_cls > 0, 'num_feats_per_cls should be larger than 0'
         # set attributes
-        norm_cfg, act_cfg = kwargs['norm_cfg'], kwargs['act_cfg']
         self.num_classes = num_classes
         self.feats_channels = feats_channels
         self.transform_channels = transform_channels
@@ -53,8 +52,8 @@ class FeaturesMemory(nn.Module):
                 self.self_attentions.append(self_attention)
             self.fuse_memory_conv = nn.Sequential(
                 nn.Conv2d(feats_channels * self.num_feats_per_cls, feats_channels, kernel_size=1, stride=1, padding=0, bias=False),
-                BuildNormalization(norm_cfg['type'], (feats_channels, norm_cfg['opts'])),
-                BuildActivation(act_cfg['type'], **act_cfg['opts']),
+                BuildNormalization(constructnormcfg(placeholder=feats_channels, norm_cfg=norm_cfg)),
+                BuildActivation(act_cfg),
             )
         else:
             self.self_attention = SelfAttentionBlock(
@@ -77,8 +76,8 @@ class FeaturesMemory(nn.Module):
         # whether need to fuse the contextual information within the input image
         self.bottleneck = nn.Sequential(
             nn.Conv2d(feats_channels * 2, out_channels, kernel_size=3, stride=1, padding=1, bias=False),
-            BuildNormalization(norm_cfg['type'], (out_channels, norm_cfg['opts'])),
-            BuildActivation(act_cfg['type'], **act_cfg['opts']),
+            BuildNormalization(constructnormcfg(placeholder=out_channels, norm_cfg=norm_cfg)),
+            BuildActivation(act_cfg),
         )
         if use_context_within_image:
             self.self_attention_ms = SelfAttentionBlock(
@@ -100,8 +99,8 @@ class FeaturesMemory(nn.Module):
             )
             self.bottleneck_ms = nn.Sequential(
                 nn.Conv2d(feats_channels * 2, out_channels, kernel_size=3, stride=1, padding=1, bias=False),
-                BuildNormalization(norm_cfg['type'], (out_channels, norm_cfg['opts'])),
-                BuildActivation(act_cfg['type'], **act_cfg['opts']),
+                BuildNormalization(constructnormcfg(placeholder=out_channels, norm_cfg=norm_cfg)),
+                BuildActivation(act_cfg),
             )
     '''forward'''
     def forward(self, feats, preds=None, feats_ms=None):

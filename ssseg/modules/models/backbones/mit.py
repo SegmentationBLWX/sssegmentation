@@ -8,7 +8,7 @@ import math
 import torch
 import torch.nn as nn
 from .bricks import PatchEmbed as PatchEmbedBase
-from .bricks import BuildNormalization, BuildActivation, BuildDropout, nlctonchw, nchwtonlc, MultiheadAttention
+from .bricks import BuildNormalization, BuildActivation, BuildDropout, nlctonchw, nchwtonlc, MultiheadAttention, constructnormcfg
 
 
 '''model urls, the pretrained weights are stored in https://drive.google.com/drive/folders/1b7bwrInTW4VLEm27YawHOAMSMikga2Ia'''
@@ -47,13 +47,13 @@ class MixFFN(nn.Module):
         self.layers = nn.Sequential(
             nn.Conv2d(embed_dims, feedforward_channels, kernel_size=1, stride=1, padding=0),
             nn.Conv2d(feedforward_channels, feedforward_channels, kernel_size=3, stride=1, padding=1, groups=feedforward_channels),
-            BuildActivation(act_cfg['type'], **act_cfg['opts']),
+            BuildActivation(act_cfg),
             nn.Dropout(ffn_drop),
             nn.Conv2d(feedforward_channels, embed_dims, kernel_size=1, stride=1, padding=0),
             nn.Dropout(ffn_drop),
         )
         # define dropout layer
-        self.dropout_layer = BuildDropout(dropout_cfg['type'], **dropout_cfg['opts']) if dropout_cfg else torch.nn.Identity()
+        self.dropout_layer = BuildDropout(dropout_cfg) if dropout_cfg else torch.nn.Identity()
     '''layers with zero weight decay'''
     def zerowdlayers(self):
         return {}
@@ -76,7 +76,7 @@ class EfficientMultiheadAttention(MultiheadAttention):
         self.sr_ratio = sr_ratio
         if sr_ratio > 1:
             self.sr = nn.Conv2d(embed_dims, embed_dims, kernel_size=sr_ratio, stride=sr_ratio, padding=0)
-            self.norm = BuildNormalization(norm_cfg['type'], (embed_dims, norm_cfg['opts']))
+            self.norm = BuildNormalization(constructnormcfg(placeholder=embed_dims, norm_cfg=norm_cfg))
     '''layers with zero weight decay'''
     def zerowdlayers(self):
         if hasattr(self, 'norm'):
@@ -112,24 +112,24 @@ class TransformerEncoderLayer(nn.Module):
     def __init__(self, embed_dims, num_heads, feedforward_channels, drop_rate=0., attn_drop_rate=0., 
                  drop_path_rate=0., qkv_bias=True, act_cfg=None, norm_cfg=None, batch_first=True, sr_ratio=1):
         super(TransformerEncoderLayer, self).__init__()
-        self.norm1 = BuildNormalization(norm_cfg['type'], (embed_dims, norm_cfg['opts']))
+        self.norm1 = BuildNormalization(constructnormcfg(placeholder=embed_dims, norm_cfg=norm_cfg))
         self.attn = EfficientMultiheadAttention(
             embed_dims=embed_dims,
             num_heads=num_heads,
             attn_drop=attn_drop_rate,
             proj_drop=drop_rate,
-            dropout_cfg={'type': 'droppath', 'opts': {'drop_prob': drop_path_rate}},
+            dropout_cfg={'type': 'droppath', 'drop_prob': drop_path_rate},
             batch_first=batch_first,
             qkv_bias=qkv_bias,
             norm_cfg=norm_cfg,
             sr_ratio=sr_ratio
         )
-        self.norm2 = BuildNormalization(norm_cfg['type'], (embed_dims, norm_cfg['opts']))
+        self.norm2 = BuildNormalization(constructnormcfg(placeholder=embed_dims, norm_cfg=norm_cfg))
         self.ffn = MixFFN(
             embed_dims=embed_dims,
             feedforward_channels=feedforward_channels,
             ffn_drop=drop_rate,
-            dropout_cfg={'type': 'droppath', 'opts': {'drop_prob': drop_path_rate}},
+            dropout_cfg={'type': 'droppath', 'drop_prob': drop_path_rate},
             act_cfg=act_cfg
         )
     '''layers with zero weight decay'''
@@ -161,7 +161,7 @@ class TransformerEncoderLayer(nn.Module):
 '''MixVisionTransformer'''
 class MixVisionTransformer(nn.Module):
     def __init__(self, in_channels=3, embed_dims=64, num_stages=4, num_layers=[3, 4, 6, 3], num_heads=[1, 2, 4, 8], patch_sizes=[7, 3, 3, 3], strides=[4, 2, 2, 2],
-                 sr_ratios=[8, 4, 2, 1], out_indices=(0, 1, 2, 3), mlp_ratio=4, qkv_bias=True, drop_rate=0., attn_drop_rate=0., drop_path_rate=0., act_cfg=None, norm_cfg=None, **kwargs):
+                 sr_ratios=[8, 4, 2, 1], out_indices=(0, 1, 2, 3), mlp_ratio=4, qkv_bias=True, drop_rate=0., attn_drop_rate=0., drop_path_rate=0., act_cfg=None, norm_cfg=None):
         super(MixVisionTransformer, self).__init__()
         # assert
         assert num_stages == len(num_layers) == len(num_heads) == len(patch_sizes) == len(strides) == len(sr_ratios)
@@ -201,7 +201,7 @@ class MixVisionTransformer(nn.Module):
                 sr_ratio=sr_ratios[i]) for idx in range(num_layer)
             ])
             in_channels = embed_dims_i
-            norm = BuildNormalization(norm_cfg['type'], (embed_dims_i, norm_cfg['opts']))
+            norm = BuildNormalization(constructnormcfg(placeholder=embed_dims_i, norm_cfg=norm_cfg))
             self.layers.append(nn.ModuleList([patch_embed, layer, norm]))
             cur += num_layer
     '''layers with zero weight decay'''
@@ -297,108 +297,59 @@ class MixVisionTransformer(nn.Module):
         return outs
 
 
-'''build mix vision transformer'''
-def BuildMixVisionTransformer(mit_type='mit-b5', **kwargs):
+'''BuildMixVisionTransformer'''
+def BuildMixVisionTransformer(mit_cfg):
     # assert whether support
+    mit_type = mit_cfg.pop('type')
     supported_mits = {
         'mit-b0': {
-            'embed_dims': 32,
-            'num_stages': 4,
-            'num_layers': [2, 2, 2, 2],
-            'num_heads': [1, 2, 5, 8],
-            'patch_sizes': [7, 3, 3, 3],
-            'sr_ratios': [8, 4, 2, 1],
-            'mlp_ratio': 4,
-            'qkv_bias': True,
-            'drop_rate': 0.0,
-            'attn_drop_rate': 0.0,
-            'drop_path_rate': 0.1,
+            'embed_dims': 32, 'num_stages': 4, 'num_layers': [2, 2, 2, 2], 'num_heads': [1, 2, 5, 8], 'patch_sizes': [7, 3, 3, 3],
+            'sr_ratios': [8, 4, 2, 1], 'mlp_ratio': 4, 'qkv_bias': True, 'drop_rate': 0.0, 'attn_drop_rate': 0.0, 'drop_path_rate': 0.1,
         },
         'mit-b1': {
-            'embed_dims': 64,
-            'num_stages': 4,
-            'num_layers': [2, 2, 2, 2],
-            'num_heads': [1, 2, 5, 8],
-            'patch_sizes': [7, 3, 3, 3],
-            'sr_ratios': [8, 4, 2, 1],
-            'mlp_ratio': 4,
-            'qkv_bias': True,
-            'drop_rate': 0.0,
-            'attn_drop_rate': 0.0,
-            'drop_path_rate': 0.1,
+            'embed_dims': 64, 'num_stages': 4, 'num_layers': [2, 2, 2, 2], 'num_heads': [1, 2, 5, 8], 'patch_sizes': [7, 3, 3, 3],
+            'sr_ratios': [8, 4, 2, 1], 'mlp_ratio': 4, 'qkv_bias': True, 'drop_rate': 0.0, 'attn_drop_rate': 0.0, 'drop_path_rate': 0.1,
         },
         'mit-b2': {
-            'embed_dims': 64,
-            'num_stages': 4,
-            'num_layers': [3, 4, 6, 3],
-            'num_heads': [1, 2, 5, 8],
-            'patch_sizes': [7, 3, 3, 3],
-            'sr_ratios': [8, 4, 2, 1],
-            'mlp_ratio': 4,
-            'qkv_bias': True,
-            'drop_rate': 0.0,
-            'attn_drop_rate': 0.0,
-            'drop_path_rate': 0.1,
+            'embed_dims': 64, 'num_stages': 4, 'num_layers': [3, 4, 6, 3], 'num_heads': [1, 2, 5, 8], 'patch_sizes': [7, 3, 3, 3],
+            'sr_ratios': [8, 4, 2, 1], 'mlp_ratio': 4, 'qkv_bias': True, 'drop_rate': 0.0, 'attn_drop_rate': 0.0, 'drop_path_rate': 0.1,
         },
         'mit-b3': {
-            'embed_dims': 64,
-            'num_stages': 4,
-            'num_layers': [3, 4, 18, 3],
-            'num_heads': [1, 2, 5, 8],
-            'patch_sizes': [7, 3, 3, 3],
-            'sr_ratios': [8, 4, 2, 1],
-            'mlp_ratio': 4,
-            'qkv_bias': True,
-            'drop_rate': 0.0,
-            'attn_drop_rate': 0.0,
-            'drop_path_rate': 0.1,
+            'embed_dims': 64, 'num_stages': 4, 'num_layers': [3, 4, 18, 3], 'num_heads': [1, 2, 5, 8], 'patch_sizes': [7, 3, 3, 3],
+            'sr_ratios': [8, 4, 2, 1], 'mlp_ratio': 4, 'qkv_bias': True, 'drop_rate': 0.0, 'attn_drop_rate': 0.0, 'drop_path_rate': 0.1,
         },
         'mit-b4': {
-            'embed_dims': 64,
-            'num_stages': 4,
-            'num_layers': [3, 8, 27, 3],
-            'num_heads': [1, 2, 5, 8],
-            'patch_sizes': [7, 3, 3, 3],
-            'sr_ratios': [8, 4, 2, 1],
-            'mlp_ratio': 4,
-            'qkv_bias': True,
-            'drop_rate': 0.0,
-            'attn_drop_rate': 0.0,
-            'drop_path_rate': 0.1,
+            'embed_dims': 64, 'num_stages': 4, 'num_layers': [3, 8, 27, 3], 'num_heads': [1, 2, 5, 8], 'patch_sizes': [7, 3, 3, 3],
+            'sr_ratios': [8, 4, 2, 1], 'mlp_ratio': 4, 'qkv_bias': True, 'drop_rate': 0.0, 'attn_drop_rate': 0.0, 'drop_path_rate': 0.1,
         },
         'mit-b5': {
-            'embed_dims': 64,
-            'num_stages': 4,
-            'num_layers': [3, 6, 40, 3],
-            'num_heads': [1, 2, 5, 8],
-            'patch_sizes': [7, 3, 3, 3],
-            'sr_ratios': [8, 4, 2, 1],
-            'mlp_ratio': 4,
-            'qkv_bias': True,
-            'drop_rate': 0.0,
-            'attn_drop_rate': 0.0,
-            'drop_path_rate': 0.1,
+            'embed_dims': 64, 'num_stages': 4, 'num_layers': [3, 6, 40, 3], 'num_heads': [1, 2, 5, 8], 'patch_sizes': [7, 3, 3, 3],
+            'sr_ratios': [8, 4, 2, 1], 'mlp_ratio': 4, 'qkv_bias': True, 'drop_rate': 0.0, 'attn_drop_rate': 0.0, 'drop_path_rate': 0.1,
         },
     }
-    assert mit_type in supported_mits, 'unspport the mit_type %s...' % mit_type
-    # parse args
-    default_args = {
+    assert mit_type in supported_mits, 'unspport the mit_type %s' % mit_type
+    # parse cfg
+    default_cfg = {
         'in_channels': 3,
         'strides': [4, 2, 2, 2],
         'out_indices': (0, 1, 2, 3),
-        'norm_cfg': {'type': 'layernorm', 'opts': {'eps': 1e-6}},
-        'act_cfg': {'type': 'gelu', 'opts': {}},
+        'norm_cfg': {'type': 'layernorm', 'eps': 1e-6},
+        'act_cfg': {'type': 'gelu'},
         'pretrained': True,
         'pretrained_model_path': '',
     }
-    default_args.update(supported_mits[mit_type])
-    for key, value in kwargs.items():
-        if key in default_args: default_args.update({key: value})
+    default_cfg.update(supported_mits[mit_type])
+    for key, value in mit_cfg.items():
+        if key in default_cfg: 
+            default_cfg.update({key: value})
+    # obtain mit_cfg
+    mit_cfg = default_cfg.copy()
+    pretrained = mit_cfg.pop('pretrained')
+    pretrained_model_path = mit_cfg.pop('pretrained_model_path')
     # obtain the instanced mit
-    mit_args = default_args.copy()
-    model = MixVisionTransformer(**mit_args)
+    model = MixVisionTransformer(**mit_cfg)
     # load weights of pretrained model
-    if default_args['pretrained']:
-        model.initweights(mit_type, default_args['pretrained_model_path'])
+    if pretrained:
+        model.initweights(mit_type, pretrained_model_path)
     # return the model
     return model

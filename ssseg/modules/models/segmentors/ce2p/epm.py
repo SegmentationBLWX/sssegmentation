@@ -7,21 +7,20 @@ Author:
 import torch
 import torch.nn as nn
 import torch.nn.functional as F
-from ...backbones import BuildActivation, BuildNormalization
+from ...backbones import BuildActivation, BuildNormalization, constructnormcfg
 
 
-'''edge perceiving module'''
+'''EdgePerceivingModule'''
 class EdgePerceivingModule(nn.Module):
-    def __init__(self, in_channels_list=[256, 512, 1024], hidden_channels=256, out_channels=2, **kwargs):
+    def __init__(self, in_channels_list=[256, 512, 1024], hidden_channels=256, out_channels=2, align_corners=False, norm_cfg=None, act_cfg=None):
         super(EdgePerceivingModule, self).__init__()
-        align_corners, norm_cfg, act_cfg = kwargs['align_corners'], kwargs['norm_cfg'], kwargs['act_cfg']
         self.align_corners = align_corners
         self.branches = nn.ModuleList()
         for in_channels in in_channels_list:
             self.branches.append(nn.Sequential(
                 nn.Conv2d(in_channels, hidden_channels, kernel_size=1, stride=1, padding=0, bias=False),
-                BuildNormalization(norm_cfg['type'], (hidden_channels, norm_cfg['opts'])),
-                BuildActivation(act_cfg['type'], **act_cfg['opts'])
+                BuildNormalization(constructnormcfg(placeholder=hidden_channels, norm_cfg=norm_cfg)),
+                BuildActivation(act_cfg),
             ))
         self.edge_conv = nn.Conv2d(hidden_channels, out_channels, kernel_size=3, stride=1, padding=1, bias=True)
         self.fuse_conv = nn.Conv2d(out_channels * len(in_channels_list), out_channels, kernel_size=1, stride=1, padding=0, bias=True)

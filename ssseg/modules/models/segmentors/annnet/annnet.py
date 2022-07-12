@@ -10,13 +10,13 @@ import torch.nn as nn
 from ..base import BaseModel
 from .afnblock import AFNBlock
 from .apnblock import APNBlock
-from ...backbones import BuildActivation, BuildNormalization
+from ...backbones import BuildActivation, BuildNormalization, constructnormcfg
 
 
 '''ANNNet'''
 class ANNNet(BaseModel):
-    def __init__(self, cfg, **kwargs):
-        super(ANNNet, self).__init__(cfg, **kwargs)
+    def __init__(self, cfg, mode):
+        super(ANNNet, self).__init__(cfg, mode)
         align_corners, norm_cfg, act_cfg = self.align_corners, self.norm_cfg, self.act_cfg
         # build AFNBlock
         afnblock_cfg = cfg['afnblock']
@@ -44,8 +44,8 @@ class ANNNet(BaseModel):
         # build bottleneck
         self.bottleneck = nn.Sequential(
             nn.Conv2d(afnblock_cfg['out_channels'], apnblock_cfg['in_channels'], kernel_size=3, stride=1, padding=1, bias=False),
-            BuildNormalization(norm_cfg['type'], (apnblock_cfg['in_channels'], norm_cfg['opts'])),
-            BuildActivation(act_cfg['type'], **act_cfg['opts']),
+            BuildNormalization(constructnormcfg(placeholder=apnblock_cfg['in_channels'], norm_cfg=norm_cfg)),
+            BuildActivation(act_cfg),
         )
         # build decoder
         decoder_cfg = cfg['decoder']

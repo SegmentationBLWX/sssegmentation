@@ -10,7 +10,7 @@ import torch.nn as nn
 import torch.nn.functional as F
 import torch.utils.model_zoo as model_zoo
 from .resnet import BasicBlock, Bottleneck
-from .bricks import BuildNormalization, BuildActivation
+from .bricks import BuildNormalization, BuildActivation, constructnormcfg
 
 
 '''model urls'''
@@ -25,7 +25,7 @@ model_urls = {
 
 '''HRModule'''
 class HRModule(nn.Module):
-    def __init__(self, num_branches, block, num_blocks, in_channels, num_channels, multiscale_output=True, norm_cfg=None, act_cfg=None, **kwargs):
+    def __init__(self, num_branches, block, num_blocks, in_channels, num_channels, multiscale_output=True, norm_cfg=None, act_cfg=None):
         super(HRModule, self).__init__()
         self.checkbranches(num_branches, num_blocks, in_channels, num_channels)
         self.in_channels = in_channels
@@ -33,7 +33,7 @@ class HRModule(nn.Module):
         self.multiscale_output = multiscale_output
         self.branches = self.makebranches(num_branches, block, num_blocks, num_channels, norm_cfg, act_cfg)
         self.fuse_layers = self.makefuselayers(norm_cfg, act_cfg)
-        self.relu = BuildActivation(act_cfg['type'], **act_cfg['opts'])
+        self.relu = BuildActivation(act_cfg)
     '''forward'''
     def forward(self, x):
         if self.num_branches == 1:
@@ -69,7 +69,7 @@ class HRModule(nn.Module):
         if stride != 1 or self.in_channels[branch_index] != num_channels[branch_index] * block.expansion:
             downsample = nn.Sequential(
                 nn.Conv2d(self.in_channels[branch_index], num_channels[branch_index] * block.expansion, kernel_size=1, stride=stride, padding=0, bias=False),
-                BuildNormalization(norm_cfg['type'], (num_channels[branch_index] * block.expansion, norm_cfg['opts'])),
+                BuildNormalization(constructnormcfg(placeholder=num_channels[branch_index] * block.expansion, norm_cfg=norm_cfg)),
             )
         layers = []
         layers.append(block(self.in_channels[branch_index], num_channels[branch_index], stride, downsample=downsample, norm_cfg=norm_cfg, act_cfg=act_cfg))
@@ -91,7 +91,7 @@ class HRModule(nn.Module):
                     fuse_layer.append(
                         nn.Sequential(
                             nn.Conv2d(in_channels[j], in_channels[i], kernel_size=1, stride=1, padding=0, bias=False),
-                            BuildNormalization(norm_cfg['type'], (in_channels[i], norm_cfg['opts'])),
+                            BuildNormalization(constructnormcfg(placeholder=in_channels[i], norm_cfg=norm_cfg)),
                             nn.Upsample(scale_factor=2**(j-i), mode='bilinear', align_corners=False)
                         )
                     )
@@ -104,15 +104,15 @@ class HRModule(nn.Module):
                             conv_downsamples.append(
                                 nn.Sequential(
                                     nn.Conv2d(in_channels[j], in_channels[i], kernel_size=3, stride=2, padding=1, bias=False),
-                                    BuildNormalization(norm_cfg['type'], (in_channels[i], norm_cfg['opts']))
+                                    BuildNormalization(constructnormcfg(placeholder=in_channels[i], norm_cfg=norm_cfg)),
                                 )
                             )
                         else:
                             conv_downsamples.append(
                                 nn.Sequential(
                                     nn.Conv2d(in_channels[j], in_channels[j], kernel_size=3, stride=2, padding=1, bias=False),
-                                    BuildNormalization(norm_cfg['type'], (in_channels[j], norm_cfg['opts'])),
-                                    BuildActivation(act_cfg['type'], **act_cfg['opts']),
+                                    BuildNormalization(constructnormcfg(placeholder=in_channels[j], norm_cfg=norm_cfg)),
+                                    BuildActivation(act_cfg),
                                 )
                             )
                     fuse_layer.append(nn.Sequential(*conv_downsamples))
@@ -123,14 +123,14 @@ class HRModule(nn.Module):
 '''HRNet'''
 class HRNet(nn.Module):
     blocks_dict = {'BASIC': BasicBlock, 'BOTTLENECK': Bottleneck}
-    def __init__(self, in_channels=3, stages_cfg=None, norm_cfg=None, act_cfg=None, **kwargs):
+    def __init__(self, in_channels=3, stages_cfg=None, norm_cfg=None, act_cfg=None):
         super(HRNet, self).__init__()
         # stem net
         self.conv1 = nn.Conv2d(in_channels, 64, kernel_size=3, stride=2, padding=1, bias=False)
-        self.bn1 = BuildNormalization(norm_cfg['type'], (64, norm_cfg['opts']))
+        self.bn1 = BuildNormalization(constructnormcfg(placeholder=64, norm_cfg=norm_cfg))
         self.conv2 = nn.Conv2d(64, 64, kernel_size=3, stride=2, padding=1, bias=False)
-        self.bn2 = BuildNormalization(norm_cfg['type'], (64, norm_cfg['opts']))
-        self.relu = BuildActivation(act_cfg['type'], **act_cfg['opts'])
+        self.bn2 = BuildNormalization(constructnormcfg(placeholder=64, norm_cfg=norm_cfg))
+        self.relu = BuildActivation(act_cfg)
         # stage1
         self.stage1_cfg = stages_cfg['stage1']
         num_channels = self.stage1_cfg['num_channels'][0]
@@ -217,7 +217,7 @@ class HRNet(nn.Module):
         if stride != 1 or inplanes != planes * block.expansion:
             downsample = nn.Sequential(
                 nn.Conv2d(inplanes, planes * block.expansion, kernel_size=1, stride=1, padding=0, bias=False),
-                BuildNormalization(norm_cfg['type'], (planes * block.expansion, norm_cfg['opts']))
+                BuildNormalization(constructnormcfg(placeholder=planes * block.expansion, norm_cfg=norm_cfg)),
             )
         layers = []
         layers.append(
@@ -237,11 +237,11 @@ class HRNet(nn.Module):
         for i in range(num_branches_cur):
             if i < num_branches_pre:
                 if num_channels_cur_layer[i] != num_channels_pre_layer[i]:
-                     transition_layers.append(
+                    transition_layers.append(
                         nn.Sequential(
                             nn.Conv2d(num_channels_pre_layer[i], num_channels_cur_layer[i], kernel_size=3, stride=1, padding=1, bias=False),
-                            BuildNormalization(norm_cfg['type'], (num_channels_cur_layer[i], norm_cfg['opts'])),
-                            BuildActivation(act_cfg['type'], **act_cfg['opts']),
+                            BuildNormalization(constructnormcfg(placeholder=num_channels_cur_layer[i], norm_cfg=norm_cfg)),
+                            BuildActivation(act_cfg),
                         )
                      )
                 else:
@@ -254,194 +254,83 @@ class HRNet(nn.Module):
                     conv_downsamples.append(
                         nn.Sequential(
                             nn.Conv2d(in_channels, out_channels, kernel_size=3, stride=2, padding=1, bias=False),
-                            BuildNormalization(norm_cfg['type'], (out_channels, norm_cfg['opts'])),
-                            BuildActivation(act_cfg['type'], **act_cfg['opts']),
+                            BuildNormalization(constructnormcfg(placeholder=out_channels, norm_cfg=norm_cfg)),
+                            BuildActivation(act_cfg),
                         )
                     )
                 transition_layers.append(nn.Sequential(*conv_downsamples))
         return nn.ModuleList(transition_layers)
 
 
-'''build hrnet'''
-def BuildHRNet(hrnet_type, **kwargs):
+'''BuildHRNet'''
+def BuildHRNet(hrnet_cfg):
     # assert whether support
+    hrnet_type = hrnet_cfg.pop('type')
     supported_hrnets = {
         'hrnetv2_w18_small': {
-            'stage1': {
-                'num_modules': 1,
-                'num_branches': 1,
-                'block': 'BOTTLENECK',
-                'num_blocks': (2,),
-                'num_channels': (64,),
-            },
-            'stage2': {
-                'num_modules': 1,
-                'num_branches': 2,
-                'block': 'BASIC',
-                'num_blocks': (2, 2),
-                'num_channels': (18, 36),
-            },
-            'stage3': {
-                'num_modules': 3,
-                'num_branches': 3,
-                'block': 'BASIC',
-                'num_blocks': (2, 2, 2),
-                'num_channels': (18, 36, 72),
-            },
-            'stage4': {
-                'num_modules': 2,
-                'num_branches': 4,
-                'block': 'BASIC',
-                'num_blocks': (2, 2, 2, 2),
-                'num_channels': (18, 36, 72, 144),
-            },
+            'stage1': {'num_modules': 1, 'num_branches': 1, 'block': 'BOTTLENECK', 'num_blocks': (2,), 'num_channels': (64,),},
+            'stage2': {'num_modules': 1, 'num_branches': 2, 'block': 'BASIC', 'num_blocks': (2, 2), 'num_channels': (18, 36),},
+            'stage3': {'num_modules': 3, 'num_branches': 3, 'block': 'BASIC', 'num_blocks': (2, 2, 2), 'num_channels': (18, 36, 72),},
+            'stage4': {'num_modules': 2, 'num_branches': 4, 'block': 'BASIC', 'num_blocks': (2, 2, 2, 2), 'num_channels': (18, 36, 72, 144),},
         },
         'hrnetv2_w18': {
-            'stage1': {
-                'num_modules': 1,
-                'num_branches': 1,
-                'block': 'BOTTLENECK',
-                'num_blocks': (4,),
-                'num_channels': (64,),
-            },
-            'stage2': {
-                'num_modules': 1,
-                'num_branches': 2,
-                'block': 'BASIC',
-                'num_blocks': (4, 4),
-                'num_channels': (18, 36),
-            },
-            'stage3': {
-                'num_modules': 4,
-                'num_branches': 3,
-                'block': 'BASIC',
-                'num_blocks': (4, 4, 4),
-                'num_channels': (18, 36, 72),
-            },
-            'stage4': {
-                'num_modules': 3,
-                'num_branches': 4,
-                'block': 'BASIC',
-                'num_blocks': (4, 4, 4, 4),
-                'num_channels': (18, 36, 72, 144),
-            },
+            'stage1': {'num_modules': 1, 'num_branches': 1, 'block': 'BOTTLENECK', 'num_blocks': (4,), 'num_channels': (64,),},
+            'stage2': {'num_modules': 1, 'num_branches': 2, 'block': 'BASIC', 'num_blocks': (4, 4), 'num_channels': (18, 36),},
+            'stage3': {'num_modules': 4, 'num_branches': 3, 'block': 'BASIC', 'num_blocks': (4, 4, 4), 'num_channels': (18, 36, 72),},
+            'stage4': {'num_modules': 3, 'num_branches': 4, 'block': 'BASIC', 'num_blocks': (4, 4, 4, 4), 'num_channels': (18, 36, 72, 144),},
         },
         'hrnetv2_w32': {
-            'stage1': {
-                'num_modules': 1,
-                'num_branches': 1,
-                'block': 'BOTTLENECK',
-                'num_blocks': (4,),
-                'num_channels': (64,),
-            },
-            'stage2': {
-                'num_modules': 1,
-                'num_branches': 2,
-                'block': 'BASIC',
-                'num_blocks': (4, 4),
-                'num_channels': (32, 64),
-            },
-            'stage3': {
-                'num_modules': 4,
-                'num_branches': 3,
-                'block': 'BASIC',
-                'num_blocks': (4, 4, 4),
-                'num_channels': (32, 64, 128),
-            },
-            'stage4': {
-                'num_modules': 3,
-                'num_branches': 4,
-                'block': 'BASIC',
-                'num_blocks': (4, 4, 4, 4),
-                'num_channels': (32, 64, 128, 256),
-            },
+            'stage1': {'num_modules': 1, 'num_branches': 1, 'block': 'BOTTLENECK', 'num_blocks': (4,), 'num_channels': (64,),},
+            'stage2': {'num_modules': 1, 'num_branches': 2, 'block': 'BASIC', 'num_blocks': (4, 4), 'num_channels': (32, 64),},
+            'stage3': {'num_modules': 4, 'num_branches': 3, 'block': 'BASIC', 'num_blocks': (4, 4, 4), 'num_channels': (32, 64, 128),},
+            'stage4': {'num_modules': 3, 'num_branches': 4, 'block': 'BASIC', 'num_blocks': (4, 4, 4, 4), 'num_channels': (32, 64, 128, 256),},
         },
         'hrnetv2_w40': {
-            'stage1': {
-                'num_modules': 1,
-                'num_branches': 1,
-                'block': 'BOTTLENECK',
-                'num_blocks': (4,),
-                'num_channels': (64,),
-            },
-            'stage2': {
-                'num_modules': 1,
-                'num_branches': 2,
-                'block': 'BASIC',
-                'num_blocks': (4, 4),
-                'num_channels': (40, 80),
-            },
-            'stage3': {
-                'num_modules': 4,
-                'num_branches': 3,
-                'block': 'BASIC',
-                'num_blocks': (4, 4, 4),
-                'num_channels': (40, 80, 160),
-            },
-            'stage4': {
-                'num_modules': 3,
-                'num_branches': 4,
-                'block': 'BASIC',
-                'num_blocks': (4, 4, 4, 4),
-                'num_channels': (40, 80, 160, 320),
-            },
+            'stage1': {'num_modules': 1, 'num_branches': 1, 'block': 'BOTTLENECK', 'num_blocks': (4,), 'num_channels': (64,),},
+            'stage2': {'num_modules': 1, 'num_branches': 2, 'block': 'BASIC', 'num_blocks': (4, 4), 'num_channels': (40, 80),},
+            'stage3': {'num_modules': 4, 'num_branches': 3, 'block': 'BASIC', 'num_blocks': (4, 4, 4), 'num_channels': (40, 80, 160),},
+            'stage4': {'num_modules': 3, 'num_branches': 4, 'block': 'BASIC', 'num_blocks': (4, 4, 4, 4), 'num_channels': (40, 80, 160, 320),},
         },
         'hrnetv2_w48': {
-            'stage1': {
-                'num_modules': 1,
-                'num_branches': 1,
-                'block': 'BOTTLENECK',
-                'num_blocks': (4,),
-                'num_channels': (64,),
-            },
-            'stage2': {
-                'num_modules': 1,
-                'num_branches': 2,
-                'block': 'BASIC',
-                'num_blocks': (4, 4),
-                'num_channels': (48, 96),
-            },
-            'stage3': {
-                'num_modules': 4,
-                'num_branches': 3,
-                'block': 'BASIC',
-                'num_blocks': (4, 4, 4),
-                'num_channels': (48, 96, 192),
-            },
-            'stage4': {
-                'num_modules': 3,
-                'num_branches': 4,
-                'block': 'BASIC',
-                'num_blocks': (4, 4, 4, 4),
-                'num_channels': (48, 96, 192, 384),
-            },
+            'stage1': {'num_modules': 1, 'num_branches': 1, 'block': 'BOTTLENECK', 'num_blocks': (4,), 'num_channels': (64,),},
+            'stage2': {'num_modules': 1, 'num_branches': 2, 'block': 'BASIC', 'num_blocks': (4, 4), 'num_channels': (48, 96),},
+            'stage3': {'num_modules': 4, 'num_branches': 3, 'block': 'BASIC', 'num_blocks': (4, 4, 4), 'num_channels': (48, 96, 192),},
+            'stage4': {'num_modules': 3, 'num_branches': 4, 'block': 'BASIC', 'num_blocks': (4, 4, 4, 4), 'num_channels': (48, 96, 192, 384),},
         },
     }
-    assert hrnet_type in supported_hrnets, 'unsupport the hrnet_type %s...' % hrnet_type
-    # parse args
-    default_args = {
+    assert hrnet_type in supported_hrnets, 'unsupport the hrnet_type %s' % hrnet_type
+    # parse cfg
+    default_cfg = {
         'norm_cfg': None,
         'in_channels': 3,
         'pretrained': True,
         'pretrained_model_path': '',
-        'act_cfg': {'type': 'relu', 'opts': {'inplace': True}},
+        'act_cfg': {'type': 'relu', 'inplace': True},
     }
-    for key, value in kwargs.items():
-        if key in default_args: default_args.update({key: value})
+    for key, value in hrnet_cfg.items():
+        if key in default_cfg: 
+            default_cfg.update({key: value})
+    # obtain hrnet_cfg
+    hrnet_cfg = default_cfg.copy()
+    hrnet_cfg['stages_cfg'] = supported_hrnets[hrnet_type]
+    pretrained = hrnet_cfg.pop('pretrained')
+    pretrained_model_path = hrnet_cfg.pop('pretrained_model_path')
     # obtain the instanced hrnet
-    hrnet_args = {'stages_cfg': supported_hrnets[hrnet_type]}
-    hrnet_args.update(default_args)
-    model = HRNet(**hrnet_args)
+    model = HRNet(**hrnet_cfg)
     # load weights of pretrained model
-    if default_args['pretrained'] and os.path.exists(default_args['pretrained_model_path']):
-        checkpoint = torch.load(default_args['pretrained_model_path'])
-        if 'state_dict' in checkpoint: state_dict = checkpoint['state_dict']
-        else: state_dict = checkpoint
+    if pretrained and os.path.exists(pretrained_model_path):
+        checkpoint = torch.load(pretrained_model_path)
+        if 'state_dict' in checkpoint: 
+            state_dict = checkpoint['state_dict']
+        else: 
+            state_dict = checkpoint
         model.load_state_dict(state_dict, strict=False)
-    elif default_args['pretrained']:
+    elif pretrained:
         checkpoint = model_zoo.load_url(model_urls[hrnet_type])
-        if 'state_dict' in checkpoint: state_dict = checkpoint['state_dict']
-        else: state_dict = checkpoint
+        if 'state_dict' in checkpoint: 
+            state_dict = checkpoint['state_dict']
+        else: 
+            state_dict = checkpoint
         model.load_state_dict(state_dict, strict=False)
     # return the model
     return model

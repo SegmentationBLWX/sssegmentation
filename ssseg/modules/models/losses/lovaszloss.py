@@ -1,6 +1,6 @@
 '''
 Function:
-    define the lovasz loss
+    Define the lovasz loss
 Author:
     Zhenchao Jin
 '''
@@ -8,11 +8,7 @@ import torch
 import torch.nn.functional as F
 
 
-'''define all'''
-__all__ = ['LovaszHingeLoss', 'LovaszSoftmaxLoss', 'LovaszLoss']
-
-
-'''computes gradient of the lovasz extension w.r.t sorted errors'''
+'''LovaszGrad: computes gradient of the lovasz extension w.r.t sorted errors'''
 def LovaszGrad(gt_sorted):
     p = len(gt_sorted)
     gts = gt_sorted.sum()
@@ -23,7 +19,7 @@ def LovaszGrad(gt_sorted):
     return jaccard
 
 
-'''flattens predictions in the batch (binary case), remove labels equal to ignore_index.'''
+'''FlattenBinaryLogits: flattens predictions in the batch (binary case), remove labels equal to ignore_index.'''
 def FlattenBinaryLogits(logits, labels, ignore_index=None):
     logits = logits.view(-1)
     labels = labels.view(-1)
@@ -34,7 +30,7 @@ def FlattenBinaryLogits(logits, labels, ignore_index=None):
     return vlogits, vlabels
 
 
-'''flattens predictions in the batch'''
+'''FlattenProbs: flattens predictions in the batch'''
 def FlattenProbs(probs, labels, ignore_index=None):
     if probs.dim() == 3:
         B, H, W = probs.size()
@@ -49,7 +45,7 @@ def FlattenProbs(probs, labels, ignore_index=None):
     return vprobs, vlabels
 
 
-'''binary lovasz hinge loss'''
+'''LovaszHingeFlat'''
 def LovaszHingeFlat(logits, labels):
     if len(labels) == 0: return logits.sum() * 0.
     signs = 2. * labels.float() - 1.
@@ -62,13 +58,13 @@ def LovaszHingeFlat(logits, labels):
     return loss
 
 
-'''binary lovasz hinge loss'''
-def LovaszHingeLoss(prediction, target, scale_factor=1.0, **kwargs):
+'''LovaszHingeLoss'''
+def LovaszHingeLoss(prediction, target, scale_factor=1.0, per_image=False, reduction='mean', ignore_index=255, lowest_loss_value=None):
     # calculate the loss
     lovasz_cfg = {
-        'per_image': kwargs.get('per_image', False),
-        'reduction': kwargs.get('reduction', 'mean'),
-        'ignore_index': kwargs.get('ignore_index', 255),
+        'per_image': per_image,
+        'reduction': reduction,
+        'ignore_index': ignore_index,
     }
     if lovasz_cfg['per_image']:
         loss = [
@@ -86,13 +82,12 @@ def LovaszHingeLoss(prediction, target, scale_factor=1.0, **kwargs):
     # scale the loss
     loss = loss * scale_factor
     # return the final loss
-    lowest_loss_value = kwargs.get('lowest_loss_value', None)
     if lowest_loss_value:
         return torch.abs(loss - lowest_loss_value) + lowest_loss_value
     return loss
 
 
-'''multi-class lovasz-softmax loss'''
+'''LovaszSoftmaxFlat'''
 def LovaszSoftmaxFlat(probs, labels, classes='present', class_weight=None):
     if probs.numel() == 0: return probs * 0.
     C = probs.size(1)
@@ -116,16 +111,16 @@ def LovaszSoftmaxFlat(probs, labels, classes='present', class_weight=None):
     return torch.stack(losses).mean()
 
 
-'''multi-class lovasz-softmax loss'''
-def LovaszSoftmaxLoss(prediction, target, scale_factor=1.0, **kwargs):
+'''LovaszSoftmaxLoss'''
+def LovaszSoftmaxLoss(prediction, target, scale_factor=1.0, per_image=False, classes='present', reduction='mean', ignore_index=255, class_weight=None, lowest_loss_value=None):
     # calculate the loss
     prediction = F.softmax(prediction, dim=1)
     lovasz_cfg = {
-        'per_image': kwargs.get('per_image', False),
-        'classes': kwargs.get('classes', 'present'),
-        'reduction': kwargs.get('reduction', 'mean'),
-        'ignore_index': kwargs.get('ignore_index', 255),
-        'class_weight': kwargs.get('class_weight', None),
+        'per_image': per_image,
+        'classes': classes,
+        'reduction': reduction,
+        'ignore_index': ignore_index,
+        'class_weight': class_weight,
     }
     if lovasz_cfg['per_image']:
         loss = [
@@ -143,17 +138,16 @@ def LovaszSoftmaxLoss(prediction, target, scale_factor=1.0, **kwargs):
     # scale the loss
     loss = loss * scale_factor
     # return the final loss
-    lowest_loss_value = kwargs.get('lowest_loss_value', None)
     if lowest_loss_value:
         return torch.abs(loss - lowest_loss_value) + lowest_loss_value
     return loss
 
 
-'''lovasz loss'''
+'''LovaszLoss'''
 def LovaszLoss(mode='multi_class', **kwargs):
     support_modes = {
         'binary': LovaszHingeLoss,
         'multi_class': LovaszSoftmaxLoss,
     }
-    assert mode in support_modes, 'unsupport mode %s...' % mode
+    assert mode in support_modes, 'unsupport mode %s' % mode
     return support_modes[mode](**kwargs)

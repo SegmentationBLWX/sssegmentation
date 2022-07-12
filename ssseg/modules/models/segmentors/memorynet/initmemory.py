@@ -1,6 +1,6 @@
 '''
 Function:
-    generate the initial memory by using the backbone network
+    Generate the initial memory by using the backbone network
 Author:
     Zhenchao Jin
 '''

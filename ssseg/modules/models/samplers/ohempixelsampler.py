@@ -9,9 +9,9 @@ import torch.nn.functional as F
 from .base import BasePixelSampler
 
 
-'''OHEM pixel sampler'''
+'''OHEMPixelSampler'''
 class OHEMPixelSampler(BasePixelSampler):
-    def __init__(self, loss_func=None, thresh=None, min_kept_per_image=100000, ignore_index=255, **kwargs):
+    def __init__(self, loss_func=None, thresh=None, min_kept_per_image=100000, ignore_index=255):
         super(OHEMPixelSampler, self).__init__()
         assert min_kept_per_image > 1
         # set attrs

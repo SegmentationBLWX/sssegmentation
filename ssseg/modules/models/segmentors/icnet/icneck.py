@@ -7,23 +7,23 @@ Author:
 import torch
 import torch.nn as nn
 import torch.nn.functional as F
-from ...backbones import BuildNormalization, BuildActivation
+from ...backbones import BuildNormalization, BuildActivation, constructnormcfg
 
 
-'''Cascade Feature Fusion Unit in ICNet'''
+'''CascadeFeatureFusion'''
 class CascadeFeatureFusion(nn.Module):
     def __init__(self, low_channels, high_channels, out_channels, norm_cfg=None, act_cfg=None, align_corners=False):
         super(CascadeFeatureFusion, self).__init__()
         self.align_corners = align_corners
         self.conv_low = nn.Sequential(
             nn.Conv2d(low_channels, out_channels, kernel_size=3, stride=1, padding=2, dilation=2, bias=False),
-            BuildNormalization(norm_cfg['type'], (out_channels, norm_cfg['opts'])),
-            BuildActivation(act_cfg['type'], **act_cfg['opts']),
+            BuildNormalization(constructnormcfg(placeholder=out_channels, norm_cfg=norm_cfg)),
+            BuildActivation(act_cfg),
         )
         self.conv_high = nn.Sequential(
             nn.Conv2d(high_channels, out_channels, kernel_size=1, stride=1, padding=0, bias=False),
-            BuildNormalization(norm_cfg['type'], (out_channels, norm_cfg['opts'])),
-            BuildActivation(act_cfg['type'], **act_cfg['opts']),
+            BuildNormalization(constructnormcfg(placeholder=out_channels, norm_cfg=norm_cfg)),
+            BuildActivation(act_cfg),
         )
     '''forward'''
     def forward(self, x_low, x_high):
@@ -34,7 +34,7 @@ class CascadeFeatureFusion(nn.Module):
         return x, x_low
 
 
-'''ICNeck in ICNet'''
+'''ICNeck'''
 class ICNeck(nn.Module):
     def __init__(self, in_channels_list=(64, 256, 256), out_channels=128, norm_cfg=None, act_cfg=None, align_corners=False):
         super(ICNeck, self).__init__()

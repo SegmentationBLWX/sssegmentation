@@ -8,7 +8,7 @@ import math
 import torch
 import torch.nn as nn
 import torch.nn.functional as F
-from ..normalization import BuildNormalization
+from ..normalization import BuildNormalization, constructnormcfg
 
 
 '''AdaptivePadding'''
@@ -47,7 +47,7 @@ class AdaptivePadding(nn.Module):
         return x
 
 
-'''Image to Patch Embedding'''
+'''PatchEmbed'''
 class PatchEmbed(nn.Module):
     def __init__(self, in_channels=3, embed_dims=768, kernel_size=16, stride=None, padding='corner', dilation=1, bias=True, norm_cfg=None, input_size=None):
         super(PatchEmbed, self).__init__()
@@ -67,7 +67,8 @@ class PatchEmbed(nn.Module):
         self.projection = nn.Conv2d(in_channels, embed_dims, kernel_size=kernel_size, stride=stride, padding=padding, bias=bias, dilation=dilation)
         # norm
         self.norm = None
-        if norm_cfg is not None: self.norm = BuildNormalization(norm_cfg['type'], (embed_dims, norm_cfg['opts']))
+        if norm_cfg is not None: 
+            self.norm = BuildNormalization(constructnormcfg(placeholder=embed_dims, norm_cfg=norm_cfg))
         # input size
         self.init_input_size = None
         self.init_out_size = None
@@ -93,7 +94,7 @@ class PatchEmbed(nn.Module):
         return x, out_size
 
 
-'''Merge Patch Feature Map'''
+'''PatchMerging'''
 class PatchMerging(nn.Module):
     def __init__(self, in_channels, out_channels, kernel_size=2, stride=None, padding='corner', dilation=1, bias=False, norm_cfg=None):
         super(PatchMerging, self).__init__()
@@ -116,7 +117,8 @@ class PatchMerging(nn.Module):
         # norm
         sample_dim = kernel_size[0] * kernel_size[1] * in_channels
         self.norm = None
-        if norm_cfg is not None: self.norm = BuildNormalization(norm_cfg['type'], (sample_dim, norm_cfg['opts']))
+        if norm_cfg is not None: 
+            self.norm = BuildNormalization(constructnormcfg(placeholder=sample_dim, norm_cfg=norm_cfg))
         # reduction
         self.reduction = nn.Linear(sample_dim, out_channels, bias=bias)
     '''forward'''

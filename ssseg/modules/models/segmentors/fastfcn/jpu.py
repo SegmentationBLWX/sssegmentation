@@ -8,13 +8,13 @@ import copy
 import torch
 import torch.nn as nn
 import torch.nn.functional as F
-from ...backbones import BuildActivation, BuildNormalization, DepthwiseSeparableConv2d
+from ...backbones import BuildActivation, BuildNormalization, DepthwiseSeparableConv2d, constructnormcfg
 
 
-'''Joint Pyramid Upsampling (JPU)'''
+'''JPU'''
 class JPU(nn.Module):
     def __init__(self, in_channels_list=(512, 1024, 2048), mid_channels=512, start_level=0, end_level=-1, dilations=(1, 2, 4, 8), 
-                 align_corners=False, norm_cfg=None, act_cfg=None, **kwargs):
+                 align_corners=False, norm_cfg=None, act_cfg=None):
         super(JPU, self).__init__()
         # set attrs
         self.in_channels_list = in_channels_list
@@ -34,8 +34,8 @@ class JPU(nn.Module):
         for i in range(self.start_level, self.backbone_end_level):
             conv_layer = nn.Sequential(
                 nn.Conv2d(self.in_channels_list[i], self.mid_channels, kernel_size=3, stride=1, padding=1, bias=False),
-                BuildNormalization(norm_cfg['type'], (self.mid_channels, norm_cfg['opts'])),
-                BuildActivation(act_cfg['type'], **act_cfg['opts']),
+                BuildNormalization(constructnormcfg(placeholder=self.mid_channels, norm_cfg=norm_cfg)),
+                BuildActivation(act_cfg),
             )
             self.conv_layers.append(conv_layer)
         for idx in range(len(dilations)):

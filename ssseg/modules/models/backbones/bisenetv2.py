@@ -9,7 +9,7 @@ import torch
 import torch.nn as nn
 import torch.nn.functional as F
 import torch.utils.model_zoo as model_zoo
-from .bricks import BuildNormalization, BuildActivation, DepthwiseSeparableConv2d
+from .bricks import BuildNormalization, BuildActivation, DepthwiseSeparableConv2d, constructnormcfg
 
 
 '''model urls'''
@@ -25,23 +25,23 @@ class DetailBranch(nn.Module):
             if i == 0:
                 detail_branch.append(nn.Sequential(
                     nn.Conv2d(in_channels, detail_channels[i], kernel_size=3, stride=2, padding=1, bias=False),
-                    BuildNormalization(norm_cfg['type'], (detail_channels[i], norm_cfg['opts'])),
-                    BuildActivation(act_cfg['type'], **act_cfg['opts']),
+                    BuildNormalization(constructnormcfg(placeholder=detail_channels[i], norm_cfg=norm_cfg)),
+                    BuildActivation(act_cfg),
                     nn.Conv2d(detail_channels[i], detail_channels[i], kernel_size=3, stride=1, padding=1, bias=False),
-                    BuildNormalization(norm_cfg['type'], (detail_channels[i], norm_cfg['opts'])),
-                    BuildActivation(act_cfg['type'], **act_cfg['opts']),
+                    BuildNormalization(constructnormcfg(placeholder=detail_channels[i], norm_cfg=norm_cfg)),
+                    BuildActivation(act_cfg),
                 ))
             else:
                 detail_branch.append(nn.Sequential(
                     nn.Conv2d(detail_channels[i - 1], detail_channels[i], kernel_size=3, stride=2, padding=1, bias=False),
-                    BuildNormalization(norm_cfg['type'], (detail_channels[i], norm_cfg['opts'])),
-                    BuildActivation(act_cfg['type'], **act_cfg['opts']),
+                    BuildNormalization(constructnormcfg(placeholder=detail_channels[i], norm_cfg=norm_cfg)),
+                    BuildActivation(act_cfg),
                     nn.Conv2d(detail_channels[i], detail_channels[i], kernel_size=3, stride=1, padding=1, bias=False),
-                    BuildNormalization(norm_cfg['type'], (detail_channels[i], norm_cfg['opts'])),
-                    BuildActivation(act_cfg['type'], **act_cfg['opts']),
+                    BuildNormalization(constructnormcfg(placeholder=detail_channels[i], norm_cfg=norm_cfg)),
+                    BuildActivation(act_cfg),
                     nn.Conv2d(detail_channels[i], detail_channels[i], kernel_size=3, stride=1, padding=1, bias=False),
-                    BuildNormalization(norm_cfg['type'], (detail_channels[i], norm_cfg['opts'])),
-                    BuildActivation(act_cfg['type'], **act_cfg['opts']),
+                    BuildNormalization(constructnormcfg(placeholder=detail_channels[i], norm_cfg=norm_cfg)),
+                    BuildActivation(act_cfg),
                 ))
         self.detail_branch = nn.ModuleList(detail_branch)
     '''forward'''
@@ -57,22 +57,22 @@ class StemBlock(nn.Module):
         super(StemBlock, self).__init__()
         self.conv_first = nn.Sequential(
             nn.Conv2d(in_channels, out_channels, kernel_size=3, stride=2, padding=1, bias=False),
-            BuildNormalization(norm_cfg['type'], (out_channels, norm_cfg['opts'])),
-            BuildActivation(act_cfg['type'], **act_cfg['opts']),
+            BuildNormalization(constructnormcfg(placeholder=out_channels, norm_cfg=norm_cfg)),
+            BuildActivation(act_cfg),
         )
         self.convs = nn.Sequential(
             nn.Conv2d(out_channels, out_channels // 2, kernel_size=1, stride=1, padding=0, bias=False),
-            BuildNormalization(norm_cfg['type'], (out_channels // 2, norm_cfg['opts'])),
-            BuildActivation(act_cfg['type'], **act_cfg['opts']),
+            BuildNormalization(constructnormcfg(placeholder=out_channels//2, norm_cfg=norm_cfg)),
+            BuildActivation(act_cfg),
             nn.Conv2d(out_channels // 2, out_channels, kernel_size=3, stride=2, padding=1, bias=False),
-            BuildNormalization(norm_cfg['type'], (out_channels, norm_cfg['opts'])),
-            BuildActivation(act_cfg['type'], **act_cfg['opts']),
+            BuildNormalization(constructnormcfg(placeholder=out_channels, norm_cfg=norm_cfg)),
+            BuildActivation(act_cfg),
         )
         self.pool = nn.MaxPool2d(kernel_size=3, stride=2, padding=1, ceil_mode=False)
         self.fuse_last = nn.Sequential(
             nn.Conv2d(out_channels * 2, out_channels, kernel_size=3, stride=1, padding=1, bias=False),
-            BuildNormalization(norm_cfg['type'], (out_channels, norm_cfg['opts'])),
-            BuildActivation(act_cfg['type'], **act_cfg['opts']),
+            BuildNormalization(constructnormcfg(placeholder=out_channels, norm_cfg=norm_cfg)),
+            BuildActivation(act_cfg),
         )
     '''forward'''
     def forward(self, x):
@@ -90,23 +90,23 @@ class GELayer(nn.Module):
         mid_channel = in_channels * exp_ratio
         self.conv1 = nn.Sequential(
             nn.Conv2d(in_channels, in_channels, kernel_size=3, stride=1, padding=1, bias=False),
-            BuildNormalization(norm_cfg['type'], (in_channels, norm_cfg['opts'])),
-            BuildActivation(act_cfg['type'], **act_cfg['opts']),
+            BuildNormalization(constructnormcfg(placeholder=in_channels, norm_cfg=norm_cfg)),
+            BuildActivation(act_cfg),
         )
         if stride == 1:
             self.dwconv = nn.Sequential(
                 nn.Conv2d(in_channels, mid_channel, kernel_size=3, stride=stride, padding=1, groups=in_channels, bias=False),
-                BuildNormalization(norm_cfg['type'], (mid_channel, norm_cfg['opts'])),
-                BuildActivation(act_cfg['type'], **act_cfg['opts']),
+                BuildNormalization(constructnormcfg(placeholder=mid_channel, norm_cfg=norm_cfg)),
+                BuildActivation(act_cfg),
             )
             self.shortcut = None
         else:
             self.dwconv = nn.Sequential(
                 nn.Conv2d(in_channels, mid_channel, kernel_size=3, stride=stride, padding=1, groups=in_channels, bias=False),
-                BuildNormalization(norm_cfg['type'], (mid_channel, norm_cfg['opts'])),
+                BuildNormalization(constructnormcfg(placeholder=mid_channel, norm_cfg=norm_cfg)),
                 nn.Conv2d(mid_channel, mid_channel, kernel_size=3, stride=1, padding=1, groups=mid_channel, bias=False),
-                BuildNormalization(norm_cfg['type'], (mid_channel, norm_cfg['opts'])),
-                BuildActivation(act_cfg['type'], **act_cfg['opts']),
+                BuildNormalization(constructnormcfg(placeholder=mid_channel, norm_cfg=norm_cfg)),
+                BuildActivation(act_cfg),
             )
             self.shortcut = nn.Sequential(DepthwiseSeparableConv2d(
                 in_channels=in_channels,
@@ -121,9 +121,9 @@ class GELayer(nn.Module):
             ))
         self.conv2 = nn.Sequential(
             nn.Conv2d(mid_channel, out_channels, kernel_size=1, stride=1, padding=0, bias=False),
-            BuildNormalization(norm_cfg['type'], (out_channels, norm_cfg['opts'])),
+            BuildNormalization(constructnormcfg(placeholder=out_channels, norm_cfg=norm_cfg)),
         )
-        self.act = BuildActivation(act_cfg['type'], **act_cfg['opts'])
+        self.act = BuildActivation(act_cfg)
     '''forward'''
     def forward(self, x):
         identity = x
@@ -149,17 +149,17 @@ class CEBlock(nn.Module):
         # define modules
         self.gap = nn.Sequential(
             nn.AdaptiveAvgPool2d((1, 1)),
-            BuildNormalization(norm_cfg['type'], (in_channels, norm_cfg['opts'])),
+            BuildNormalization(constructnormcfg(placeholder=in_channels, norm_cfg=norm_cfg)),
         )
         self.conv_gap = nn.Sequential(
             nn.Conv2d(in_channels, out_channels, kernel_size=1, stride=1, padding=0, bias=False),
-            BuildNormalization(norm_cfg['type'], (out_channels, norm_cfg['opts'])),
-            BuildActivation(act_cfg['type'], **act_cfg['opts']),
+            BuildNormalization(constructnormcfg(placeholder=out_channels, norm_cfg=norm_cfg)),
+            BuildActivation(act_cfg),
         )
         self.conv_last = nn.Sequential(
             nn.Conv2d(out_channels, out_channels, kernel_size=3, stride=1, padding=1, bias=False),
-            BuildNormalization(norm_cfg['type'], (out_channels, norm_cfg['opts'])),
-            BuildActivation(act_cfg['type'], **act_cfg['opts']),
+            BuildNormalization(constructnormcfg(placeholder=out_channels, norm_cfg=norm_cfg)),
+            BuildActivation(act_cfg),
         )
     '''forward'''
     def forward(self, x):
@@ -239,12 +239,12 @@ class BGALayer(nn.Module):
         ))
         self.detail_down = nn.Sequential(
             nn.Conv2d(out_channels, out_channels, kernel_size=3, stride=2, padding=1, bias=False),
-            BuildNormalization(norm_cfg['type'], (out_channels, norm_cfg['opts'])),
+            BuildNormalization(constructnormcfg(placeholder=out_channels, norm_cfg=norm_cfg)),
             nn.AvgPool2d(kernel_size=3, stride=2, padding=1, ceil_mode=False),
         )
         self.semantic_conv = nn.Sequential(
             nn.Conv2d(out_channels, out_channels, kernel_size=3, stride=1, padding=1, bias=False),
-            BuildNormalization(norm_cfg['type'], (out_channels, norm_cfg['opts'])),
+            BuildNormalization(constructnormcfg(placeholder=out_channels, norm_cfg=norm_cfg)),
         )
         self.semantic_dwconv = nn.Sequential(DepthwiseSeparableConv2d(
             in_channels=out_channels,
@@ -259,8 +259,8 @@ class BGALayer(nn.Module):
         ))
         self.conv = nn.Sequential(
             nn.Conv2d(out_channels, out_channels, kernel_size=3, stride=1, padding=1, bias=False),
-            BuildNormalization(norm_cfg['type'], (out_channels, norm_cfg['opts'])),
-            BuildActivation(act_cfg['type'], **act_cfg['opts']),
+            BuildNormalization(constructnormcfg(placeholder=out_channels, norm_cfg=norm_cfg)),
+            BuildActivation(act_cfg),
         )
     '''forward'''
     def forward(self, x_d, x_s):
@@ -283,7 +283,7 @@ class BGALayer(nn.Module):
 '''BiSeNetV2: Bilateral Network with Guided Aggregation for Real-time Semantic Segmentation'''
 class BiSeNetV2(nn.Module):
     def __init__(self, in_channels=3, detail_channels=(64, 64, 128), semantic_channels=(16, 32, 64, 128), semantic_expansion_ratio=6,
-                 bga_channels=128, out_indices=(0, 1, 2, 3, 4), align_corners=False, norm_cfg=None, act_cfg=None, **kwargs):
+                 bga_channels=128, out_indices=(0, 1, 2, 3, 4), align_corners=False, norm_cfg=None, act_cfg=None):
         super(BiSeNetV2, self).__init__()
         # set attrs
         self.in_channels = in_channels
@@ -309,12 +309,12 @@ class BiSeNetV2(nn.Module):
         return tuple(outs)
 
 
-'''build bisenetv2'''
-def BuildBiSeNetV2(bisenetv2_type=None, **kwargs):
+'''BuildBiSeNetV2'''
+def BuildBiSeNetV2(bisenetv2_cfg):
     # assert whether support
-    assert bisenetv2_type is None
-    # parse args
-    default_args = {
+    bisenetv2_type = bisenetv2_cfg.pop('type')
+    # parse cfg
+    default_cfg = {
         'in_channels': 3, 
         'detail_channels': (64, 64, 128), 
         'semantic_channels': (16, 32, 64, 128), 
@@ -323,26 +323,33 @@ def BuildBiSeNetV2(bisenetv2_type=None, **kwargs):
         'out_indices': (0, 1, 2, 3, 4), 
         'align_corners': False, 
         'norm_cfg': None, 
-        'act_cfg': {'type': 'relu', 'opts': {'inplace': True}},
+        'act_cfg': {'type': 'relu', 'inplace': True},
         'pretrained': False,
         'pretrained_model_path': '',
     }
-    for key, value in kwargs.items():
-        if key in default_args: default_args.update({key: value})
-    # obtain args for instanced bisenetv2
-    bisenetv2_args = default_args.copy()
+    for key, value in bisenetv2_cfg.items():
+        if key in default_cfg: 
+            default_cfg.update({key: value})
+    # obtain bisenetv2_cfg
+    bisenetv2_cfg = default_cfg.copy()
+    pretrained = bisenetv2_cfg.pop('pretrained')
+    pretrained_model_path = bisenetv2_cfg.pop('pretrained_model_path')
     # obtain the instanced bisenetv2
-    model = BiSeNetV2(**bisenetv2_args)
+    model = BiSeNetV2(**bisenetv2_cfg)
     # load weights of pretrained model
-    if default_args['pretrained'] and os.path.exists(default_args['pretrained_model_path']):
-        checkpoint = torch.load(default_args['pretrained_model_path'])
-        if 'state_dict' in checkpoint: state_dict = checkpoint['state_dict']
-        else: state_dict = checkpoint
+    if pretrained and os.path.exists(pretrained_model_path):
+        checkpoint = torch.load(pretrained_model_path)
+        if 'state_dict' in checkpoint: 
+            state_dict = checkpoint['state_dict']
+        else: 
+            state_dict = checkpoint
         model.load_state_dict(state_dict, strict=False)
-    elif default_args['pretrained']:
+    elif pretrained:
         checkpoint = model_zoo.load_url(model_urls[bisenetv2_type])
-        if 'state_dict' in checkpoint: state_dict = checkpoint['state_dict']
-        else: state_dict = checkpoint
+        if 'state_dict' in checkpoint: 
+            state_dict = checkpoint['state_dict']
+        else: 
+            state_dict = checkpoint
         model.load_state_dict(state_dict, strict=False)
     # return the model
     return model

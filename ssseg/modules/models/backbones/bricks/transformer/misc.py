@@ -1,6 +1,6 @@
 '''
 Function:
-    define some utils used in transformer backbones
+    Define some utils used in transformer backbones
 Author:
     Zhenchao Jin
 '''

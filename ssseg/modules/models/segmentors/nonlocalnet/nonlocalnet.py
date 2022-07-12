@@ -9,20 +9,20 @@ import torch
 import torch.nn as nn
 from ..base import BaseModel
 from .nonlocalblock import NonLocal2d
-from ...backbones import BuildActivation, BuildNormalization
+from ...backbones import BuildActivation, BuildNormalization, constructnormcfg
 
 
 '''NonLocalNet'''
 class NonLocalNet(BaseModel):
-    def __init__(self, cfg, **kwargs):
-        super(NonLocalNet, self).__init__(cfg, **kwargs)
+    def __init__(self, cfg, mode):
+        super(NonLocalNet, self).__init__(cfg, mode)
         align_corners, norm_cfg, act_cfg = self.align_corners, self.norm_cfg, self.act_cfg
         # build non-local block
         nl_cfg = cfg['nonlocal']
         self.conv_before_nl = nn.Sequential(
             nn.Conv2d(nl_cfg['in_channels'], nl_cfg['out_channels'], kernel_size=3, stride=1, padding=1, bias=False),
-            BuildNormalization(norm_cfg['type'], (nl_cfg['out_channels'], norm_cfg['opts'])),
-            BuildActivation(act_cfg['type'], **act_cfg['opts']),
+            BuildNormalization(constructnormcfg(placeholder=nl_cfg['out_channels'], norm_cfg=norm_cfg)),
+            BuildActivation(act_cfg),
         )
         self.nl_block = NonLocal2d(
             in_channels=nl_cfg['out_channels'],
@@ -34,15 +34,15 @@ class NonLocalNet(BaseModel):
         )
         self.conv_after_nl = nn.Sequential(
             nn.Conv2d(nl_cfg['out_channels'], nl_cfg['out_channels'], kernel_size=3, stride=1, padding=1, bias=False),
-            BuildNormalization(norm_cfg['type'], (nl_cfg['out_channels'], norm_cfg['opts'])),
-            BuildActivation(act_cfg['type'], **act_cfg['opts']),
+            BuildNormalization(constructnormcfg(placeholder=nl_cfg['out_channels'], norm_cfg=norm_cfg)),
+            BuildActivation(act_cfg),
         )
         # build decoder
         decoder_cfg = cfg['decoder']
         self.decoder = nn.Sequential(
             nn.Conv2d(decoder_cfg['in_channels'], decoder_cfg['out_channels'], kernel_size=3, stride=1, padding=1, bias=False),
-            BuildNormalization(norm_cfg['type'], (decoder_cfg['out_channels'], norm_cfg['opts'])),
-            BuildActivation(act_cfg['type'], **act_cfg['opts']),
+            BuildNormalization(constructnormcfg(placeholder=decoder_cfg['out_channels'], norm_cfg=norm_cfg)),
+            BuildActivation(act_cfg),
             nn.Dropout2d(decoder_cfg['dropout']),
             nn.Conv2d(decoder_cfg['out_channels'], cfg['num_classes'], kernel_size=1, stride=1, padding=0)
         )

@@ -9,7 +9,7 @@ import random
 from .base import BaseDataset
 
 
-'''VSPW dataset'''
+'''VSPWDataset'''
 class VSPWDataset(BaseDataset):
     num_classes = 124
     classnames = [

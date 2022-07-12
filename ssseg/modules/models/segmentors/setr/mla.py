@@ -6,10 +6,10 @@ Author:
 '''
 import torch
 import torch.nn as nn
-from ...backbones import *
+from ...backbones import BuildNormalization, BuildActivation, constructnormcfg
 
 
-'''mla module'''
+'''MLAModule'''
 class MLAModule(nn.Module):
     def __init__(self, in_channels_list=[1024, 1024, 1024, 1024], out_channels=256, norm_cfg=None, act_cfg=None):
         super(MLAModule, self).__init__()
@@ -17,15 +17,15 @@ class MLAModule(nn.Module):
         for i in range(len(in_channels_list)):
             self.channel_proj.append(nn.Sequential(
                 nn.Conv2d(in_channels_list[i], out_channels, kernel_size=1, stride=1, padding=0, bias=False),
-                BuildNormalization(norm_cfg['type'], (out_channels, norm_cfg['opts'])),
-                BuildActivation(act_cfg['type'], **act_cfg['opts']),
+                BuildNormalization(constructnormcfg(placeholder=out_channels, norm_cfg=norm_cfg)),
+                BuildActivation(act_cfg),
             ))
         self.feat_extract = nn.ModuleList()
         for i in range(len(in_channels_list)):
             self.feat_extract.append(nn.Sequential(
                 nn.Conv2d(out_channels, out_channels, kernel_size=3, stride=1, padding=1, bias=False),
-                BuildNormalization(norm_cfg['type'], (out_channels, norm_cfg['opts'])),
-                BuildActivation(act_cfg['type'], **act_cfg['opts']),
+                BuildNormalization(constructnormcfg(placeholder=out_channels, norm_cfg=norm_cfg)),
+                BuildActivation(act_cfg),
             ))
     '''forward'''
     def forward(self, inputs):
@@ -47,7 +47,7 @@ class MLAModule(nn.Module):
         return tuple(out_list)
 
 
-'''Multi-level Feature Aggregation'''
+'''MLANeck'''
 class MLANeck(nn.Module):
     def __init__(self, in_channels_list, out_channels, norm_layers, norm_cfg=None, act_cfg=None):
         super(MLANeck, self).__init__()

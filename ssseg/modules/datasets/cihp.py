@@ -9,7 +9,7 @@ import pandas as pd
 from .base import BaseDataset
 
 
-'''CIHP dataset'''
+'''CIHPDataset'''
 class CIHPDataset(BaseDataset):
     num_classes = 20
     classnames = [

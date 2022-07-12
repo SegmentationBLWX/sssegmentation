@@ -4,14 +4,15 @@ Function:
 Author:
     Zhenchao Jin
 '''
+import copy
 import torch
 import torch.nn as nn
 from .hardswish import HardSwish
 from .hardsigmoid import HardSigmoid 
 
 
-'''build activation functions'''
-def BuildActivation(activation_type, **kwargs):
+'''BuildActivation'''
+def BuildActivation(act_cfg):
     supported_activations = {
         'relu': nn.ReLU,
         'gelu': nn.GELU,
@@ -23,5 +24,7 @@ def BuildActivation(activation_type, **kwargs):
         'leakyrelu': nn.LeakyReLU,
         'hardsigmoid': HardSigmoid,
     }
-    assert activation_type in supported_activations, 'unsupport activation type %s...' % activation_type
-    return supported_activations[activation_type](**kwargs)
+    selected_act_func = supported_activations[act_cfg['type']]
+    act_cfg = copy.deepcopy(act_cfg)
+    act_cfg.pop('type')
+    return selected_act_func(**act_cfg)

@@ -4,6 +4,7 @@ Function:
 Author:
     Zhenchao Jin
 '''
+import copy
 from .unet import BuildUNet
 from .twins import BuildTwins
 from .cgnet import BuildCGNet
@@ -21,8 +22,8 @@ from .mit import BuildMixVisionTransformer
 from .timmwrapper import BuildTIMMBackbone
 
 
-'''build the backbone'''
-def BuildBackbone(cfg, **kwargs):
+'''BuildBackbone'''
+def BuildBackbone(backbone_cfg):
     supported_backbones = {
         'unet': BuildUNet,
         'twins': BuildTwins,
@@ -40,5 +41,7 @@ def BuildBackbone(cfg, **kwargs):
         'vit': BuildVisionTransformer,
         'mit': BuildMixVisionTransformer,
     }
-    assert cfg['series'] in supported_backbones, 'unsupport backbone type %s...' % cfg['type']
-    return supported_backbones[cfg['series']](cfg['type'], **cfg)
+    selected_backbone = supported_backbones[backbone_cfg['series']]
+    backbone_cfg = copy.deepcopy(backbone_cfg)
+    backbone_cfg.pop('series')
+    return selected_backbone(backbone_cfg)

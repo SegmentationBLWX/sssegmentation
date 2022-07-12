@@ -11,20 +11,20 @@ import torch.nn.functional as F
 from ..base import BaseModel
 from .imagelevel import ImageLevelContext
 from .semanticlevel import SemanticLevelContext
-from ...backbones import BuildActivation, BuildNormalization
+from ...backbones import BuildActivation, BuildNormalization, constructnormcfg
 
 
 '''ISNet'''
 class ISNet(BaseModel):
-    def __init__(self, cfg, **kwargs):
-        super(ISNet, self).__init__(cfg, **kwargs)
+    def __init__(self, cfg, mode):
+        super(ISNet, self).__init__(cfg, mode)
         align_corners, norm_cfg, act_cfg = self.align_corners, self.norm_cfg, self.act_cfg
         # build bottleneck
         bottleneck_cfg = cfg['bottleneck']
         self.bottleneck = nn.Sequential(
             nn.Conv2d(bottleneck_cfg['in_channels'], bottleneck_cfg['out_channels'], kernel_size=3, stride=1, padding=1, bias=False),
-            BuildNormalization(norm_cfg['type'], (bottleneck_cfg['out_channels'], norm_cfg['opts'])),
-            BuildActivation(act_cfg['type'], **act_cfg['opts']),
+            BuildNormalization(constructnormcfg(placeholder=bottleneck_cfg['out_channels'], norm_cfg=norm_cfg)),
+            BuildActivation(act_cfg),
         )
         # build image-level context module
         ilc_cfg = {
@@ -49,8 +49,8 @@ class ISNet(BaseModel):
         decoder_cfg = cfg['decoder']['stage1']
         self.decoder_stage1 = nn.Sequential(
             nn.Conv2d(decoder_cfg['in_channels'], decoder_cfg['out_channels'], kernel_size=1, stride=1, padding=0, bias=False),
-            BuildNormalization(norm_cfg['type'], (decoder_cfg['out_channels'], norm_cfg['opts'])),
-            BuildActivation(act_cfg['type'], **act_cfg['opts']),
+            BuildNormalization(constructnormcfg(placeholder=decoder_cfg['out_channels'], norm_cfg=norm_cfg)),
+            BuildActivation(act_cfg),
             nn.Dropout2d(decoder_cfg['dropout']),
             nn.Conv2d(decoder_cfg['out_channels'], cfg['num_classes'], kernel_size=1, stride=1, padding=0)
         )
@@ -58,13 +58,13 @@ class ISNet(BaseModel):
         if shortcut_cfg['is_on']:
             self.shortcut = nn.Sequential(
                 nn.Conv2d(shortcut_cfg['in_channels'], shortcut_cfg['out_channels'], kernel_size=1, stride=1, padding=0),
-                BuildNormalization(norm_cfg['type'], (shortcut_cfg['out_channels'], norm_cfg['opts'])),
-                BuildActivation(act_cfg['type'], **act_cfg['opts']),
+                BuildNormalization(constructnormcfg(placeholder=shortcut_cfg['out_channels'], norm_cfg=norm_cfg)),
+                BuildActivation(act_cfg),
             )
             self.decoder_stage2 = nn.Sequential(
                 nn.Conv2d(decoder_cfg['out_channels']+shortcut_cfg['out_channels'], decoder_cfg['out_channels'], kernel_size=1, stride=1, padding=0, bias=False),
-                BuildNormalization(norm_cfg['type'], (decoder_cfg['out_channels'], norm_cfg['opts'])),
-                BuildActivation(act_cfg['type'], **act_cfg['opts']),
+                BuildNormalization(constructnormcfg(placeholder=decoder_cfg['out_channels'], norm_cfg=norm_cfg)),
+                BuildActivation(act_cfg),
                 nn.Dropout2d(decoder_cfg['dropout']),
                 nn.Conv2d(decoder_cfg['out_channels'], cfg['num_classes'], kernel_size=1, stride=1, padding=0)
             )

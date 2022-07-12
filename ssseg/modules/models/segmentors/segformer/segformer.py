@@ -9,13 +9,13 @@ import torch
 import torch.nn as nn
 import torch.nn.functional as F
 from ..base import BaseModel
-from ...backbones import BuildActivation, BuildNormalization
+from ...backbones import BuildActivation, BuildNormalization, constructnormcfg
 
 
 '''Segformer'''
 class Segformer(BaseModel):
-    def __init__(self, cfg, **kwargs):
-        super(Segformer, self).__init__(cfg, **kwargs)
+    def __init__(self, cfg, mode):
+        super(Segformer, self).__init__(cfg, mode)
         align_corners, norm_cfg, act_cfg = self.align_corners, self.norm_cfg, self.act_cfg
         # build decoder
         decoder_cfg = cfg['decoder']
@@ -23,13 +23,13 @@ class Segformer(BaseModel):
         for in_channels in decoder_cfg['in_channels_list']:
             self.convs.append(nn.Sequential(
                 nn.Conv2d(in_channels, decoder_cfg['out_channels'], kernel_size=1, stride=1, padding=0, bias=False),
-                BuildNormalization(norm_cfg['type'], (decoder_cfg['out_channels'], norm_cfg['opts'])),
-                BuildActivation(act_cfg['type'], **act_cfg['opts']),
+                BuildNormalization(constructnormcfg(placeholder=decoder_cfg['out_channels'], norm_cfg=norm_cfg)),
+                BuildActivation(act_cfg),
             ))
         self.decoder = nn.Sequential(
             nn.Conv2d(decoder_cfg['out_channels'] * len(self.convs), decoder_cfg['out_channels'], kernel_size=1, stride=1, padding=0, bias=False),
-            BuildNormalization(norm_cfg['type'], (decoder_cfg['out_channels'], norm_cfg['opts'])),
-            BuildActivation(act_cfg['type'], **act_cfg['opts']),
+            BuildNormalization(constructnormcfg(placeholder=decoder_cfg['out_channels'], norm_cfg=norm_cfg)),
+            BuildActivation(act_cfg),
             nn.Dropout2d(decoder_cfg['dropout']),
             nn.Conv2d(decoder_cfg['out_channels'], cfg['num_classes'], kernel_size=1, stride=1, padding=0),
         )

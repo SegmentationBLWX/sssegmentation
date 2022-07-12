@@ -9,13 +9,13 @@ import torch
 import torch.nn as nn
 import torch.nn.functional as F
 from ..base import BaseModel
-from ...backbones import BuildActivation, BuildNormalization
+from ...backbones import BuildActivation, BuildNormalization, constructnormcfg
 
 
 '''LRASPPNet'''
 class LRASPPNet(BaseModel):
-    def __init__(self, cfg, **kwargs):
-        super(LRASPPNet, self).__init__(cfg, **kwargs)
+    def __init__(self, cfg, mode):
+        super(LRASPPNet, self).__init__(cfg, mode)
         align_corners, norm_cfg, act_cfg = self.align_corners, self.norm_cfg, self.act_cfg
         # build aspp
         aspp_cfg = cfg['aspp']
@@ -29,20 +29,20 @@ class LRASPPNet(BaseModel):
                 f'conv{idx}', 
                 nn.Sequential(
                     nn.Conv2d(aspp_cfg['out_channels'] + branch_channels, aspp_cfg['out_channels'], kernel_size=1, stride=1, padding=0, bias=False),
-                    BuildNormalization(norm_cfg['type'], (aspp_cfg['out_channels'], norm_cfg['opts'])),
-                    BuildActivation(act_cfg['type'], **act_cfg['opts']),
+                    BuildNormalization(constructnormcfg(placeholder=aspp_cfg['out_channels'], norm_cfg=norm_cfg)),
+                    BuildActivation(act_cfg),
                 )
             )
         self.aspp_conv = nn.Sequential(
             nn.Conv2d(aspp_cfg['in_channels_list'][-1], aspp_cfg['out_channels'], kernel_size=1, stride=1, padding=0, bias=False),
-            BuildNormalization(norm_cfg['type'], (aspp_cfg['out_channels'], norm_cfg['opts'])),
-            BuildActivation(act_cfg['type'], **act_cfg['opts']),
+            BuildNormalization(constructnormcfg(placeholder=aspp_cfg['out_channels'], norm_cfg=norm_cfg)),
+            BuildActivation(act_cfg),
         )
         self.image_pool = nn.Sequential(
             nn.AvgPool2d(kernel_size=49, stride=(16, 20)),
             nn.Conv2d(aspp_cfg['in_channels_list'][-1], aspp_cfg['out_channels'], kernel_size=1, stride=1, padding=0, bias=False),
-            BuildNormalization(norm_cfg['type'], (aspp_cfg['out_channels'], norm_cfg['opts'])),
-            BuildActivation('sigmoid', **{}),
+            BuildNormalization(constructnormcfg(placeholder=aspp_cfg['out_channels'], norm_cfg=norm_cfg)),
+            nn.Sigmoid(),
         )
         self.bottleneck = nn.Conv2d(aspp_cfg['out_channels'], aspp_cfg['out_channels'], kernel_size=1, stride=1, padding=0, bias=False)
         # build decoder

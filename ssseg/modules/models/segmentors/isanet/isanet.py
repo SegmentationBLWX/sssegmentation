@@ -11,12 +11,12 @@ import torch.nn as nn
 import torch.nn.functional as F
 from ..base import BaseModel
 from ..base import SelfAttentionBlock as _SelfAttentionBlock
-from ...backbones import BuildActivation, BuildNormalization
+from ...backbones import BuildActivation, BuildNormalization, constructnormcfg
 
 
-'''Self-Attention Module'''
+'''SelfAttentionBlock'''
 class SelfAttentionBlock(_SelfAttentionBlock):
-    def __init__(self, in_channels, feats_channels, norm_cfg, act_cfg, **kwargs):
+    def __init__(self, in_channels, feats_channels, norm_cfg, act_cfg):
         super(SelfAttentionBlock, self).__init__(
             key_in_channels=in_channels,
             query_in_channels=in_channels,
@@ -50,16 +50,16 @@ class SelfAttentionBlock(_SelfAttentionBlock):
 
 '''ISANet'''
 class ISANet(BaseModel):
-    def __init__(self, cfg, **kwargs):
-        super(ISANet, self).__init__(cfg, **kwargs)
+    def __init__(self, cfg, mode):
+        super(ISANet, self).__init__(cfg, mode)
         align_corners, norm_cfg, act_cfg = self.align_corners, self.norm_cfg, self.act_cfg
         # build isa module
         isa_cfg = cfg['isa']
         self.down_factor = isa_cfg['down_factor']
         self.in_conv = nn.Sequential(
             nn.Conv2d(isa_cfg['in_channels'], isa_cfg['feats_channels'], kernel_size=3, stride=1, padding=1, bias=False),
-            BuildNormalization(norm_cfg['type'], (isa_cfg['feats_channels'], norm_cfg['opts'])),
-            BuildActivation(act_cfg['type'], **act_cfg['opts']),
+            BuildNormalization(constructnormcfg(placeholder=isa_cfg['feats_channels'], norm_cfg=norm_cfg)),
+            BuildActivation(act_cfg),
         )
         self.global_relation = SelfAttentionBlock(
             in_channels=isa_cfg['feats_channels'],
@@ -75,8 +75,8 @@ class ISANet(BaseModel):
         )
         self.out_conv = nn.Sequential(
             nn.Conv2d(isa_cfg['feats_channels'] * 2, isa_cfg['feats_channels'], kernel_size=3, stride=1, padding=1, bias=False),
-            BuildNormalization(norm_cfg['type'], (isa_cfg['feats_channels'], norm_cfg['opts'])),
-            BuildActivation(act_cfg['type'], **act_cfg['opts']),
+            BuildNormalization(constructnormcfg(placeholder=isa_cfg['feats_channels'], norm_cfg=norm_cfg)),
+            BuildActivation(act_cfg),
         )
         # build decoder
         decoder_cfg = cfg['decoder']

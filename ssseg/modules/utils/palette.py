@@ -115,7 +115,7 @@ supported_palettes = {
 }
 
 
-'''auto generate the color map for visualizing the segmentation mask'''
+'''GeneratePalette'''
 def GeneratePalette(num_classes):
     palette = [0] * (num_classes * 3)
     for j in range(0, num_classes):
@@ -136,7 +136,7 @@ def GeneratePalette(num_classes):
     return palette
 
 
-'''build palette'''
+'''BuildPalette'''
 def BuildPalette(dataset_type, num_classes=2, logger_handle=None):
     if dataset_type not in supported_palettes:
         logger_handle.warning('Unsupport dataset type %s, try to generate the palette according to the number of classes' % dataset_type)

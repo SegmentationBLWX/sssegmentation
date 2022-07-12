@@ -9,7 +9,7 @@ import pandas as pd
 from .base import BaseDataset
 
 
-'''chasedb1 dataset'''
+'''ChaseDB1Dataset'''
 class ChaseDB1Dataset(BaseDataset):
     num_classes = 2
     classnames = ['__background__', 'vessel']
