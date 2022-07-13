@@ -1,4 +1,4 @@
-'''memorynet_resnet50os8_lip'''
+'''memorynet_deeplabv3_resnest101os8_lip'''
 import os
 from .base_cfg import *
 
@@ -27,12 +27,18 @@ DATASET_CFG['test']['aug_opts'] = [
 # modify dataloader config
 DATALOADER_CFG = DATALOADER_CFG.copy()
 DATALOADER_CFG['train'].update({
-    'batch_size': 32,
+    'batch_size': 40,
 })
 # modify optimizer config
 OPTIMIZER_CFG = OPTIMIZER_CFG.copy()
 OPTIMIZER_CFG.update({
-    'max_epochs': 150
+    'type': 'sgd',
+    'sgd': {
+        'learning_rate': 0.007,
+        'momentum': 0.9,
+        'weight_decay': 5e-4,
+    },
+    'max_epochs': 150,
 })
 # modify losses config
 LOSSES_CFG = LOSSES_CFG.copy()
@@ -40,21 +46,20 @@ LOSSES_CFG = LOSSES_CFG.copy()
 SEGMENTOR_CFG = SEGMENTOR_CFG.copy()
 SEGMENTOR_CFG.update({
     'num_classes': 20,
-    'act_cfg': {'type': 'leakyrelu', 'negative_slope': 0.01, 'inplace': True},
     'backbone': {
-        'type': 'resnet50',
-        'series': 'resnet',
+        'type': 'resnest101',
+        'series': 'resnest',
         'pretrained': True,
         'outstride': 8,
-        'use_stem': True,
         'selected_indices': (0, 1, 2, 3),
-    }
+    },
 })
 SEGMENTOR_CFG['memory']['use_loss'] = False
+SEGMENTOR_CFG['memory']['update_cfg']['momentum_cfg']['base_lr'] = 0.007
 # modify inference config
 INFERENCE_CFG = INFERENCE_CFG.copy()
 # modify common config
 COMMON_CFG = COMMON_CFG.copy()
-COMMON_CFG['work_dir'] = 'memorynet_resnet50os8_lip'
-COMMON_CFG['logfilepath'] = 'memorynet_resnet50os8_lip/memorynet_resnet50os8_lip.log'
-COMMON_CFG['resultsavepath'] = 'memorynet_resnet50os8_lip/memorynet_resnet50os8_lip_results.pkl'
+COMMON_CFG['work_dir'] = 'memorynet_deeplabv3_resnest101os8_lip'
+COMMON_CFG['logfilepath'] = 'memorynet_deeplabv3_resnest101os8_lip/memorynet_deeplabv3_resnest101os8_lip.log'
+COMMON_CFG['resultsavepath'] = 'memorynet_deeplabv3_resnest101os8_lip/memorynet_deeplabv3_resnest101os8_lip_results.pkl'

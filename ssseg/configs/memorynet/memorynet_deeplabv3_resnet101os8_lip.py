@@ -1,4 +1,4 @@
-'''memorynet_hrnetv2w48_lip'''
+'''memorynet_deeplabv3_resnet101os8_lip'''
 import os
 from .base_cfg import *
 
@@ -27,42 +27,26 @@ DATASET_CFG['test']['aug_opts'] = [
 # modify dataloader config
 DATALOADER_CFG = DATALOADER_CFG.copy()
 DATALOADER_CFG['train'].update({
-    'batch_size': 40,
+    'batch_size': 32,
 })
 # modify optimizer config
 OPTIMIZER_CFG = OPTIMIZER_CFG.copy()
 OPTIMIZER_CFG.update({
-    'type': 'sgd',
-    'sgd': {
-        'learning_rate': 0.007,
-        'momentum': 0.9,
-        'weight_decay': 5e-4,
-    },
-    'max_epochs': 150,
+    'max_epochs': 150
 })
 # modify losses config
 LOSSES_CFG = LOSSES_CFG.copy()
-LOSSES_CFG.pop('loss_aux')
 # modify segmentor config
 SEGMENTOR_CFG = SEGMENTOR_CFG.copy()
 SEGMENTOR_CFG.update({
     'num_classes': 20,
-    'backbone': {
-        'type': 'hrnetv2_w48',
-        'series': 'hrnet',
-        'pretrained': True,
-        'selected_indices': (0, 0, 0, 0),
-    },
-    'auxiliary': None,
+    'act_cfg': {'type': 'leakyrelu', 'negative_slope': 0.01, 'inplace': True},
 })
 SEGMENTOR_CFG['memory']['use_loss'] = False
-SEGMENTOR_CFG['memory']['downsample_backbone']['stride'] = 2
-SEGMENTOR_CFG['memory']['in_channels'] = sum([48, 96, 192, 384])
-SEGMENTOR_CFG['memory']['update_cfg']['momentum_cfg']['base_lr'] = 0.007
 # modify inference config
 INFERENCE_CFG = INFERENCE_CFG.copy()
 # modify common config
 COMMON_CFG = COMMON_CFG.copy()
-COMMON_CFG['work_dir'] = 'memorynet_hrnetv2w48_lip'
-COMMON_CFG['logfilepath'] = 'memorynet_hrnetv2w48_lip/memorynet_hrnetv2w48_lip.log'
-COMMON_CFG['resultsavepath'] = 'memorynet_hrnetv2w48_lip/memorynet_hrnetv2w48_lip_results.pkl'
+COMMON_CFG['work_dir'] = 'memorynet_deeplabv3_resnet101os8_lip'
+COMMON_CFG['logfilepath'] = 'memorynet_deeplabv3_resnet101os8_lip/memorynet_deeplabv3_resnet101os8_lip.log'
+COMMON_CFG['resultsavepath'] = 'memorynet_deeplabv3_resnet101os8_lip/memorynet_deeplabv3_resnet101os8_lip_results.pkl'
