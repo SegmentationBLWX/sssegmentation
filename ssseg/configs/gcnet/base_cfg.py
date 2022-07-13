@@ -81,7 +81,7 @@ SEGMENTOR_CFG = {
         'ratio': 0.25,
         'pooling_type': 'att',
         'fusion_types': ('channel_add', ),
-        'norm_cfg': {'type': 'layernorm', 'opts': {}},
+        'norm_cfg': {'type': 'layernorm'},
     },
     'decoder': {
         'in_channels': 2560,
