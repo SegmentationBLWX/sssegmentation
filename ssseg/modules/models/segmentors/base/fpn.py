@@ -18,7 +18,7 @@ class FPN(nn.Module):
         self.upsample_cfg = upsample_cfg
         self.lateral_convs = nn.ModuleList()
         self.fpn_convs = nn.ModuleList()
-        if 'inplace' in act_cfg['opts']: act_cfg['opts']['inplace'] = False
+        if 'inplace' in act_cfg: act_cfg['inplace'] = False
         for i in range(0, len(in_channels_list)):
             l_conv = nn.Sequential(
                 nn.Conv2d(in_channels_list[i], out_channels, kernel_size=1, stride=1, padding=0, bias=False),
