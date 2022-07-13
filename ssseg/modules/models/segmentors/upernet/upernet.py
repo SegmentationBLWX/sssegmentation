@@ -30,7 +30,7 @@ class UPerNet(BaseModel):
         self.ppm_net = PyramidPoolingModule(**ppm_cfg)
         # build lateral convs
         act_cfg_copy = copy.deepcopy(act_cfg)
-        if 'inplace' in act_cfg_copy['opts']: act_cfg_copy['opts']['inplace'] = False
+        if 'inplace' in act_cfg_copy: act_cfg_copy['inplace'] = False
         lateral_cfg = cfg['lateral']
         self.lateral_convs = nn.ModuleList()
         for in_channels in lateral_cfg['in_channels_list']:
