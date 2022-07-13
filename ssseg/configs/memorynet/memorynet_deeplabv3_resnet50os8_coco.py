@@ -1,4 +1,4 @@
-'''memorynet_resnet50os8_coco'''
+'''memorynet_deeplabv3_resnet50os8_coco'''
 import os
 from .base_cfg import *
 
@@ -36,6 +36,6 @@ SEGMENTOR_CFG['memory']['use_loss'] = False
 INFERENCE_CFG = INFERENCE_CFG.copy()
 # modify common config
 COMMON_CFG = COMMON_CFG.copy()
-COMMON_CFG['work_dir'] = 'memorynet_resnet50os8_coco'
-COMMON_CFG['logfilepath'] = 'memorynet_resnet50os8_coco/memorynet_resnet50os8_coco.log'
-COMMON_CFG['resultsavepath'] = 'memorynet_resnet50os8_coco/memorynet_resnet50os8_coco_results.pkl'
+COMMON_CFG['work_dir'] = 'memorynet_deeplabv3_resnet50os8_coco'
+COMMON_CFG['logfilepath'] = 'memorynet_deeplabv3_resnet50os8_coco/memorynet_deeplabv3_resnet50os8_coco.log'
+COMMON_CFG['resultsavepath'] = 'memorynet_deeplabv3_resnet50os8_coco/memorynet_deeplabv3_resnet50os8_coco_results.pkl'

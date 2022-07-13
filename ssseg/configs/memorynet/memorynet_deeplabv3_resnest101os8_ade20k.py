@@ -1,4 +1,4 @@
-'''memorynet_resnest101os8_ade20k'''
+'''memorynet_deeplabv3_resnest101os8_ade20k'''
 import os
 from .base_cfg import *
 
@@ -41,6 +41,6 @@ SEGMENTOR_CFG['memory']['update_cfg']['momentum_cfg']['base_lr'] = 0.004
 INFERENCE_CFG = INFERENCE_CFG.copy()
 # modify common config
 COMMON_CFG = COMMON_CFG.copy()
-COMMON_CFG['work_dir'] = 'memorynet_resnest101os8_ade20k'
-COMMON_CFG['logfilepath'] = 'memorynet_resnest101os8_ade20k/memorynet_resnest101os8_ade20k.log'
-COMMON_CFG['resultsavepath'] = 'memorynet_resnest101os8_ade20k/memorynet_resnest101os8_ade20k_results.pkl'
+COMMON_CFG['work_dir'] = 'memorynet_deeplabv3_resnest101os8_ade20k'
+COMMON_CFG['logfilepath'] = 'memorynet_deeplabv3_resnest101os8_ade20k/memorynet_deeplabv3_resnest101os8_ade20k.log'
+COMMON_CFG['resultsavepath'] = 'memorynet_deeplabv3_resnest101os8_ade20k/memorynet_deeplabv3_resnest101os8_ade20k_results.pkl'
