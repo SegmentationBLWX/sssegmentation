@@ -9,5 +9,5 @@ from .models import (
     BuildLoss, BuildBackbone, BuildSegmentor, BuildPixelSampler, BuildOptimizer, adjustLearningRate, clipGradients
 )
 from .utils import (
-    Logger, setRandomSeed, BuildPalette, checkdir, loadcheckpoints, savecheckpoints
+    Logger, setRandomSeed, BuildPalette, checkdir, loadcheckpoints, savecheckpoints, initslurm
 )
