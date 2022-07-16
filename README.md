@@ -16,6 +16,7 @@ Documents: https://sssegmentation.readthedocs.io/en/latest/
 
 
 ## Introduction
+
 SSSegmentation is an open source strongly supervised semantic segmentation toolbox based on PyTorch.
 You can star this repository to keep track of the project if it's helpful for you, thank you for your support.
 
@@ -42,6 +43,7 @@ You can star this repository to keep track of the project if it's helpful for yo
 ## Benchmark and Model Zoo
 
 #### Supported Backbones
+
 - [UNet](./docs/performances/unet)
 - [Twins](./docs/performances/twins)
 - [CGNet](./docs/performances/cgnet)
@@ -58,6 +60,7 @@ You can star this repository to keep track of the project if it's helpful for yo
 - [VisionTransformer](https://arxiv.org/pdf/2010.11929.pdf)
 
 #### Supported Segmentors
+
 - [FCN](./docs/performances/fcn)
 - [CE2P](./docs/performances/ce2p)
 - [SETR](./docs/performances/setr)
@@ -89,6 +92,7 @@ You can star this repository to keep track of the project if it's helpful for yo
 - [Mixed Precision (FP16) Training](./docs/performances/fp16)
 
 #### Supported Datasets
+
 - [LIP](http://sysu-hcp.net/lip/)
 - [ATR](http://sysu-hcp.net/lip/overview.php)
 - [HRF](https://www5.cs.fau.de/fileadmin/research/datasets/fundus-images/)
@@ -110,7 +114,9 @@ You can star this repository to keep track of the project if it's helpful for yo
 
 
 ## Citation
+
 If you use this framework in your research, please cite this project:
+
 ```
 @misc{ssseg2020,
     author = {Zhenchao Jin},
@@ -140,5 +146,6 @@ If you use this framework in your research, please cite this project:
 
 
 ## References
+
 - [MMCV](https://github.com/open-mmlab/mmcv)
 - [MMSegmentation](https://github.com/open-mmlab/mmsegmentation)

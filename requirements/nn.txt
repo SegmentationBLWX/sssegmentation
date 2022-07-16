@@ -1,3 +1,4 @@
 torch
+timm
 mmcv-full
 torchvision
