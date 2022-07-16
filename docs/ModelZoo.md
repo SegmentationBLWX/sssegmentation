@@ -2,384 +2,227 @@
 
 
 ## Common Settings
+
 - We use distributed training with 8 GPUs by default.
 - Our ResNet style backbone are based on ResNetV1c variant, where the 7x7 conv in the input stem is replaced with three 3x3 convs.
+- There are two inference modes in this framework.
+	- slide mode: In this mode, multiple patches will be cropped from input image, passed into network individually. The overlapping area will be merged by average.
+	- whole mode: In this mode, the whole imaged will be passed into network directly.
 
 
 ## Supported Backbones
-#### UNet
-(1) The related paper.
 
-You can download the [paper](https://arxiv.org/pdf/1505.04597.pdf) to learn the details of UNet.
+**1.UNet**
 
-(2) The reported performance.
+- Related Paper: [click](https://arxiv.org/pdf/1505.04597.pdf),
+- Reported Performance: [click](https://github.com/SegmentationBLWX/sssegmentation/tree/main/docs/performances/unet).
 
-Please refer to [UNet](https://github.com/SegmentationBLWX/sssegmentation/tree/main/docs/performances/unet) for details.
+**2.Twins**
 
-#### Twins
-(1) The related paper.
+- Related Paper: [click](https://arxiv.org/pdf/2104.13840.pdf),
+- Reported Performance: [click](https://github.com/SegmentationBLWX/sssegmentation/tree/main/docs/performances/twins).
 
-You can download the [paper](https://arxiv.org/pdf/2104.13840.pdf) to learn the details of Twins.
+**3.CGNet**
 
-(2) The reported performance.
+- Related Paper: [click](https://arxiv.org/pdf/1811.08201.pdf),
+- Reported Performance: [click](https://github.com/SegmentationBLWX/sssegmentation/tree/main/docs/performances/cgnet).
 
-Please refer to [Twins](https://github.com/SegmentationBLWX/sssegmentation/tree/main/docs/performances/twins) for details.
+**4.HRNet**
 
-#### CGNet
-(1) The related paper.
+- Related Paper: [click](https://arxiv.org/pdf/1908.07919.pdf).
 
-You can download the [paper](https://arxiv.org/pdf/1811.08201.pdf) to learn the details of CGNet.
+**5.ERFNet**
 
-(2) The reported performance.
+- Related Paper: [click](https://ieeexplore.ieee.org/document/8063438),
+- Reported Performance: [click](https://github.com/SegmentationBLWX/sssegmentation/tree/main/docs/performances/erfnet).
 
-Please refer to [CGNet](https://github.com/SegmentationBLWX/sssegmentation/tree/main/docs/performances/cgnet) for details.
+**6.ResNet**
 
-#### HRNet
-(1) The related paper.
+- Related Paper: [click](https://arxiv.org/pdf/1512.03385.pdf).
 
-You can download the [paper](https://arxiv.org/pdf/1908.07919.pdf) to learn the details of HRNet.
+**7.ResNeSt**
 
-#### ERFNet
-(1) The related paper.
+- Related Paper: [click](https://arxiv.org/pdf/2004.08955.pdf),
+- Reported Performance: [click](https://github.com/SegmentationBLWX/sssegmentation/tree/main/docs/performances/resnest).
 
-You can download the [paper](https://ieeexplore.ieee.org/document/8063438) to learn the details of ERFNet.
+**8.FastSCNN**
 
-(2) The reported performance.
+- Related Paper: [click](https://arxiv.org/pdf/1902.04502.pdf),
+- Reported Performance: [click](https://github.com/SegmentationBLWX/sssegmentation/tree/main/docs/performances/fastscnn).
 
-Please refer to [ERFNet](https://github.com/SegmentationBLWX/sssegmentation/tree/main/docs/performances/erfnet) for details.
+**9.BiSeNetV1**
 
-#### ResNet
-(1) The related paper.
+- Related Paper: [click](https://arxiv.org/pdf/1808.00897.pdf),
+- Reported Performance: [click](https://github.com/SegmentationBLWX/sssegmentation/tree/main/docs/performances/bisenetv1).
 
-You can download the [paper](https://arxiv.org/pdf/1512.03385.pdf) to learn the details of ResNet.
+**10.BiSeNetV2**
 
-#### ResNeSt
-(1) The related paper.
+- Related Paper: [click](https://arxiv.org/pdf/2004.02147.pdf),
+- Reported Performance: [click](https://github.com/SegmentationBLWX/sssegmentation/tree/main/docs/performances/bisenetv2).
 
-You can download the [paper](https://arxiv.org/pdf/2004.08955.pdf) to learn the details of ResNeSt.
+**11.MobileNetV2**
 
-(2) The reported performance.
+- Related Paper: [click](https://arxiv.org/pdf/1801.04381.pdf),
+- Reported Performance: [click](https://github.com/SegmentationBLWX/sssegmentation/tree/main/docs/performances/mobilenet).
 
-Please refer to [ResNeSt](https://github.com/SegmentationBLWX/sssegmentation/tree/main/docs/performances/resnest) for details.
+**12.MobileNetV3**
 
-#### FastSCNN
-(1) The related paper.
+- Related Paper: [click](https://arxiv.org/pdf/1905.02244.pdf),
+- Reported Performance: [click](https://github.com/SegmentationBLWX/sssegmentation/tree/main/docs/performances/mobilenet).
 
-You can download the [paper](https://arxiv.org/pdf/1902.04502.pdf) to learn the details of FastSCNN.
+**13.SwinTransformer**
 
-(2) The reported performance.
+- Related Paper: [click](https://arxiv.org/pdf/2103.14030.pdf),
+- Reported Performance: [click](https://github.com/SegmentationBLWX/sssegmentation/tree/main/docs/performances/swin).
 
-Please refer to [FastSCNN](https://github.com/SegmentationBLWX/sssegmentation/tree/main/docs/performances/fastscnn) for details.
+**14.VisionTransformer**
 
-#### BiSeNetV1
-(1) The related paper.
-
-You can download the [paper](https://arxiv.org/pdf/1808.00897.pdf) to learn the details of BiSeNetV1.
-
-(2) The reported performance.
-
-Please refer to [BiSeNetV1](https://github.com/SegmentationBLWX/sssegmentation/tree/main/docs/performances/bisenetv1) for details.
-
-#### BiSeNetV2
-(1) The related paper.
-
-You can download the [paper](https://arxiv.org/pdf/2004.02147.pdf) to learn the details of BiSeNetV2.
-
-(2) The reported performance.
-
-Please refer to [BiSeNetV2](https://github.com/SegmentationBLWX/sssegmentation/tree/main/docs/performances/bisenetv2) for details.
-
-#### MobileNetV2
-(1) The related paper.
-
-You can download the [paper](https://arxiv.org/pdf/1801.04381.pdf) to learn the details of MobileNetV2.
-
-(2) The reported performance.
-
-Please refer to [MobileNetV2](https://github.com/SegmentationBLWX/sssegmentation/tree/main/docs/performances/mobilenet) for details.
-
-#### MobileNetV3
-(1) The related paper.
-
-You can download the [paper](https://arxiv.org/pdf/1905.02244.pdf) to learn the details of MobileNetV3.
-
-(2) The reported performance.
-
-Please refer to [MobileNetV3](https://github.com/SegmentationBLWX/sssegmentation/tree/main/docs/performances/mobilenet) for details.
-
-#### SwinTransformer
-(1) The related paper.
-
-You can download the [paper](https://arxiv.org/pdf/2103.14030.pdf) to learn the details of SwinTransformer.
-
-(2) The reported performance.
-
-Please refer to [SwinTransformer](https://github.com/SegmentationBLWX/sssegmentation/tree/main/docs/performances/swin) for details.
-
-#### VisionTransformer
-(1) The related paper.
-
-You can download the [paper](https://arxiv.org/pdf/2010.11929.pdf) to learn the details of VisionTransformer.
+- Related Paper: [click](https://arxiv.org/pdf/2010.11929.pdf).
 
 
 ## Supported Segmentors
-#### FCN
-(1) The related paper.
 
-You can download the [paper](https://arxiv.org/pdf/1411.4038.pdf) to learn the details of FCN.
+**1.FCN**
 
-(2) The reported performance.
+- Related Paper: [click](https://arxiv.org/pdf/1411.4038.pdf),
+- Reported Performance: [click](https://github.com/SegmentationBLWX/sssegmentation/tree/main/docs/performances/fcn).
 
-Please refer to [FCN](https://github.com/SegmentationBLWX/sssegmentation/tree/main/docs/performances/fcn) for details.
+**2.CE2P**
 
-#### CE2P
-(1) The related paper.
+- Related Paper: [click](https://arxiv.org/pdf/1809.05996.pdf),
+- Reported Performance: [click](https://github.com/SegmentationBLWX/sssegmentation/tree/main/docs/performances/ce2p).
 
-You can download the [paper](https://arxiv.org/pdf/1809.05996.pdf) to learn the details of CE2P.
+**3.SETR**
 
-(2) The reported performance.
+- Related Paper: [click](https://arxiv.org/pdf/2012.15840.pdf),
+- Reported Performance: [click](https://github.com/SegmentationBLWX/sssegmentation/tree/main/docs/performances/setr).
 
-Please refer to [CE2P](https://github.com/SegmentationBLWX/sssegmentation/tree/main/docs/performances/ce2p) for details.
+**4.ISNet**
 
-#### SETR
-(1) The related paper.
+- Related Paper: [click](https://arxiv.org/pdf/2108.12382.pdf),
+- Reported Performance: [click](https://github.com/SegmentationBLWX/sssegmentation/tree/main/docs/performances/isnet).
 
-You can download the [paper](https://arxiv.org/pdf/2012.15840.pdf) to learn the details of SETR.
+**5.ICNet**
 
-(2) The reported performance.
+- Related Paper: [click](https://arxiv.org/pdf/1704.08545.pdf),
+- Reported Performance: [click](https://github.com/SegmentationBLWX/sssegmentation/tree/main/docs/performances/icnet).
 
-Please refer to [SETR](https://github.com/SegmentationBLWX/sssegmentation/tree/main/docs/performances/setr) for details.
+**6.CCNet**
 
-#### ISNet
-(1) The related paper.
+- Related Paper: [click](https://arxiv.org/pdf/1811.11721.pdf),
+- Reported Performance: [click](https://github.com/SegmentationBLWX/sssegmentation/tree/main/docs/performances/ccnet).
 
-You can download the [paper](https://arxiv.org/pdf/2108.12382.pdf) to learn the details of ISNet.
+**7.DANet**
 
-(2) The reported performance.
+- Related Paper: [click](https://arxiv.org/pdf/1809.02983.pdf),
+- Reported Performance: [click](https://github.com/SegmentationBLWX/sssegmentation/tree/main/docs/performances/danet).
 
-Please refer to [ISNet](https://github.com/SegmentationBLWX/sssegmentation/tree/main/docs/performances/isnet) for details.
+**8.GCNet**
 
-#### ICNet
-(1) The related paper.
+- Related Paper: [click](https://arxiv.org/pdf/1904.11492.pdf),
+- Reported Performance: [click](https://github.com/SegmentationBLWX/sssegmentation/tree/main/docs/performances/gcnet).
 
-You can download the [paper](https://arxiv.org/pdf/1704.08545.pdf) to learn the details of ICNet.
+**9.DMNet**
 
-(2) The reported performance.
+- Related Paper: [click](https://openaccess.thecvf.com/content_ICCV_2019/papers/He_Dynamic_Multi-Scale_Filters_for_Semantic_Segmentation_ICCV_2019_paper.pdf),
+- Reported Performance: [click](https://github.com/SegmentationBLWX/sssegmentation/tree/main/docs/performances/dmnet).
 
-Please refer to [ICNet](https://github.com/SegmentationBLWX/sssegmentation/tree/main/docs/performances/icnet) for details.
+**10.ISANet**
 
-#### CCNet
-(1) The related paper.
+- Related Paper: [click](https://arxiv.org/pdf/1907.12273.pdf),
+- Reported Performance: [click](https://github.com/SegmentationBLWX/sssegmentation/tree/main/docs/performances/isanet).
 
-You can download the [paper](https://arxiv.org/pdf/1811.11721.pdf) to learn the details of CCNet.
+**11.EncNet**
 
-(2) The reported performance.
+- Related Paper: [click](https://arxiv.org/pdf/1803.08904.pdf),
+- Reported Performance: [click](https://github.com/SegmentationBLWX/sssegmentation/tree/main/docs/performances/encnet).
 
-Please refer to [CCNet](https://github.com/SegmentationBLWX/sssegmentation/tree/main/docs/performances/ccnet) for details.
+**12.OCRNet**
 
-#### DANet
-(1) The related paper.
+- Related Paper: [click](https://arxiv.org/pdf/1909.11065.pdf),
+- Reported Performance: [click](https://github.com/SegmentationBLWX/sssegmentation/tree/main/docs/performances/ocrnet).
 
-You can download the [paper](https://arxiv.org/pdf/1809.02983.pdf) to learn the details of DANet.
+**13.DNLNet**
 
-(2) The reported performance.
+- Related Paper: [click](https://arxiv.org/pdf/2006.06668.pdf),
+- Reported Performance: [click](https://github.com/SegmentationBLWX/sssegmentation/tree/main/docs/performances/dnlnet).
 
-Please refer to [DANet](https://github.com/SegmentationBLWX/sssegmentation/tree/main/docs/performances/danet) for details.
+**14.ANNNet**
 
-#### GCNet
-(1) The related paper.
+- Related Paper: [click](https://arxiv.org/pdf/1908.07678.pdf),
+- Reported Performance: [click](https://github.com/SegmentationBLWX/sssegmentation/tree/main/docs/performances/annnet).
 
-You can download the [paper](https://arxiv.org/pdf/1904.11492.pdf) to learn the details of GCNet.
+**15.EMANet**
 
-(2) The reported performance.
+- Related Paper: [click](https://arxiv.org/pdf/1907.13426.pdf),
+- Reported Performance: [click](https://github.com/SegmentationBLWX/sssegmentation/tree/main/docs/performances/emanet).
 
-Please refer to [GCNet](https://github.com/SegmentationBLWX/sssegmentation/tree/main/docs/performances/gcnet) for details.
+**16.PSPNet**
 
-#### DMNet
-(1) The related paper.
+- Related Paper: [click](https://arxiv.org/pdf/1612.01105.pdf),
+- Reported Performance: [click](https://github.com/SegmentationBLWX/sssegmentation/tree/main/docs/performances/pspnet).
 
-You can download the [paper](https://openaccess.thecvf.com/content_ICCV_2019/papers/He_Dynamic_Multi-Scale_Filters_for_Semantic_Segmentation_ICCV_2019_paper.pdf) to learn the details of DMNet.
+**17.PSANet**
 
-(2) The reported performance.
+- Related Paper: [click](https://openaccess.thecvf.com/content_ECCV_2018/papers/Hengshuang_Zhao_PSANet_Point-wise_Spatial_ECCV_2018_paper.pdf),
+- Reported Performance: [click](https://github.com/SegmentationBLWX/sssegmentation/tree/main/docs/performances/psanet).
 
-Please refer to [DMNet](https://github.com/SegmentationBLWX/sssegmentation/tree/main/docs/performances/dmnet) for details.
+**18.APCNet**
 
-#### ISANet
-(1) The related paper.
+- Related Paper: [click](https://openaccess.thecvf.com/content_CVPR_2019/papers/He_Adaptive_Pyramid_Context_Network_for_Semantic_Segmentation_CVPR_2019_paper.pdf),
+- Reported Performance: [click](https://github.com/SegmentationBLWX/sssegmentation/tree/main/docs/performances/apcnet).
 
-You can download the [paper](https://arxiv.org/pdf/1907.12273.pdf) to learn the details of ISANet.
+**19.FastFCN**
 
-(2) The reported performance.
+- Related Paper: [click](https://arxiv.org/pdf/1903.11816.pdf),
+- Reported Performance: [click](https://github.com/SegmentationBLWX/sssegmentation/tree/main/docs/performances/fastfcn).
 
-Please refer to [ISANet](https://github.com/SegmentationBLWX/sssegmentation/tree/main/docs/performances/isanet) for details.
+**20.UPerNet**
 
-#### EncNet
-(1) The related paper.
+- Related Paper: [click](https://arxiv.org/pdf/1807.10221.pdf),
+- Reported Performance: [click](https://github.com/SegmentationBLWX/sssegmentation/tree/main/docs/performances/upernet).
 
-You can download the [paper](https://arxiv.org/pdf/1803.08904.pdf) to learn the details of EncNet.
+**21.PointRend**
 
-(2) The reported performance.
+- Related Paper: [click](https://arxiv.org/pdf/1912.08193.pdf),
+- Reported Performance: [click](https://github.com/SegmentationBLWX/sssegmentation/tree/main/docs/performances/pointrend).
 
-Please refer to [EncNet](https://github.com/SegmentationBLWX/sssegmentation/tree/main/docs/performances/encnet) for details.
+**22.Deeplabv3**
 
-#### OCRNet
-(1) The related paper.
+- Related Paper: [click](https://arxiv.org/pdf/1706.05587.pdf),
+- Reported Performance: [click](https://github.com/SegmentationBLWX/sssegmentation/tree/main/docs/performances/deeplabv3).
 
-You can download the [paper](https://arxiv.org/pdf/1909.11065.pdf) to learn the details of OCRNet.
+**23.Segformer**
 
-(2) The reported performance.
+- Related Paper: [click](https://arxiv.org/pdf/2105.15203.pdf),
+- Reported Performance: [click](https://github.com/SegmentationBLWX/sssegmentation/tree/main/docs/performances/segformer).
 
-Please refer to [OCRNet](https://github.com/SegmentationBLWX/sssegmentation/tree/main/docs/performances/ocrnet) for details.
+**24.MaskFormer**
 
-#### DNLNet
-(1) The related paper.
+- Related Paper: [click](https://arxiv.org/pdf/2107.06278.pdf),
+- Reported Performance: [click](https://github.com/SegmentationBLWX/sssegmentation/tree/main/docs/performances/maskformer).
 
-You can download the [paper](https://arxiv.org/pdf/2006.06668.pdf) to learn the details of DNLNet.
+**25.SemanticFPN**
 
-(2) The reported performance.
+- Related Paper: [click](https://arxiv.org/pdf/1901.02446.pdf),
+- Reported Performance: [click](https://github.com/SegmentationBLWX/sssegmentation/tree/main/docs/performances/semanticfpn).
 
-Please refer to [DNLNet](https://github.com/SegmentationBLWX/sssegmentation/tree/main/docs/performances/dnlnet) for details.
+**26.NonLocalNet**
 
-#### ANNNet
-(1) The related paper.
+- Related Paper: [click](https://arxiv.org/pdf/1711.07971.pdf),
+- Reported Performance: [click](https://github.com/SegmentationBLWX/sssegmentation/tree/main/docs/performances/nonlocalnet).
 
-You can download the [paper](https://arxiv.org/pdf/1908.07678.pdf) to learn the details of ANNNet.
+**27.Deeplabv3Plus**
 
-(2) The reported performance.
+- Related Paper: [click](https://arxiv.org/pdf/1802.02611.pdf),
+- Reported Performance: [click](https://github.com/SegmentationBLWX/sssegmentation/tree/main/docs/performances/deeplabv3plus).
 
-Please refer to [ANNNet](https://github.com/SegmentationBLWX/sssegmentation/tree/main/docs/performances/annnet) for details.
+**28.MemoryNet-MCIBI**
 
-#### EMANet
-(1) The related paper.
+- Related Paper: [click](https://arxiv.org/pdf/2108.11819.pdf),
+- Reported Performance: [click](https://github.com/SegmentationBLWX/sssegmentation/tree/main/docs/performances/memorynet).
 
-You can download the [paper](https://arxiv.org/pdf/1907.13426.pdf) to learn the details of EMANet.
+**29.Mixed Precision (FP16) Training**
 
-(2) The reported performance.
-
-Please refer to [EMANet](https://github.com/SegmentationBLWX/sssegmentation/tree/main/docs/performances/emanet) for details.
-
-#### PSPNet
-(1) The related paper.
-
-You can download the [paper](https://arxiv.org/pdf/1612.01105.pdf) to learn the details of PSPNet.
-
-(2) The reported performance.
-
-Please refer to [PSPNet](https://github.com/SegmentationBLWX/sssegmentation/tree/main/docs/performances/pspnet) for details.
-
-#### PSANet
-(1) The related paper.
-
-You can download the [paper](https://openaccess.thecvf.com/content_ECCV_2018/papers/Hengshuang_Zhao_PSANet_Point-wise_Spatial_ECCV_2018_paper.pdf) to learn the details of PSANet.
-
-(2) The reported performance.
-
-Please refer to [PSANet](https://github.com/SegmentationBLWX/sssegmentation/tree/main/docs/performances/psanet) for details.
-
-#### APCNet
-(1) The related paper.
-
-You can download the [paper](https://openaccess.thecvf.com/content_CVPR_2019/papers/He_Adaptive_Pyramid_Context_Network_for_Semantic_Segmentation_CVPR_2019_paper.pdf) to learn the details of APCNet.
-
-(2) The reported performance.
-
-Please refer to [APCNet](https://github.com/SegmentationBLWX/sssegmentation/tree/main/docs/performances/apcnet) for details.
-
-#### FastFCN
-(1) The related paper.
-
-You can download the [paper](https://arxiv.org/pdf/1903.11816.pdf) to learn the details of FastFCN.
-
-(2) The reported performance.
-
-Please refer to [FastFCN](https://github.com/SegmentationBLWX/sssegmentation/tree/main/docs/performances/fastfcn) for details.
-
-#### UPerNet
-(1) The related paper.
-
-You can download the [paper](https://arxiv.org/pdf/1807.10221.pdf) to learn the details of UPerNet.
-
-(2) The reported performance.
-
-Please refer to [UPerNet](https://github.com/SegmentationBLWX/sssegmentation/tree/main/docs/performances/upernet) for details.
-
-#### PointRend
-(1) The related paper.
-
-You can download the [paper](https://arxiv.org/pdf/1912.08193.pdf) to learn the details of PointRend.
-
-(2) The reported performance.
-
-Please refer to [PointRend](https://github.com/SegmentationBLWX/sssegmentation/tree/main/docs/performances/pointrend) for details.
-
-#### Deeplabv3
-(1) The related paper.
-
-You can download the [paper](https://arxiv.org/pdf/1706.05587.pdf) to learn the details of Deeplabv3.
-
-(2) The reported performance.
-
-Please refer to [Deeplabv3](https://github.com/SegmentationBLWX/sssegmentation/tree/main/docs/performances/deeplabv3) for details.
-
-#### Segformer
-(1) The related paper.
-
-You can download the [paper](https://arxiv.org/pdf/2105.15203.pdf) to learn the details of Segformer.
-
-(2) The reported performance.
-
-Please refer to [Segformer](https://github.com/SegmentationBLWX/sssegmentation/tree/main/docs/performances/segformer) for details.
-
-#### MaskFormer
-(1) The related paper.
-
-You can download the [paper](https://arxiv.org/pdf/2107.06278.pdf) to learn the details of MaskFormer.
-
-(2) The reported performance.
-
-Please refer to [MaskFormer](https://github.com/SegmentationBLWX/sssegmentation/tree/main/docs/performances/maskformer) for details.
-
-#### SemanticFPN
-(1) The related paper.
-
-You can download the [paper](https://arxiv.org/pdf/1901.02446.pdf) to learn the details of SemanticFPN.
-
-(2) The reported performance.
-
-Please refer to [SemanticFPN](https://github.com/SegmentationBLWX/sssegmentation/tree/main/docs/performances/semanticfpn) for details.
-
-#### NonLocalNet
-(1) The related paper.
-
-You can download the [paper](https://arxiv.org/pdf/1711.07971.pdf) to learn the details of NonLocalNet.
-
-(2) The reported performance.
-
-Please refer to [NonLocalNet](https://github.com/SegmentationBLWX/sssegmentation/tree/main/docs/performances/nonlocalnet) for details.
-
-#### Deeplabv3Plus
-(1) The related paper.
-
-You can download the [paper](https://arxiv.org/pdf/1802.02611.pdf) to learn the details of Deeplabv3Plus.
-
-(2) The reported performance.
-
-Please refer to [Deeplabv3Plus](https://github.com/SegmentationBLWX/sssegmentation/tree/main/docs/performances/deeplabv3plus) for details.
-
-#### MemoryNet-MCIBI
-(1) The related paper.
-
-You can download the [paper](https://arxiv.org/pdf/2108.11819.pdf) to learn the details of MemoryNet-MCIBI.
-
-(2) The reported performance.
-
-Please refer to [MemoryNet-MCIBI](https://github.com/SegmentationBLWX/sssegmentation/tree/main/docs/performances/memorynet) for details.
-
-#### Mixed Precision (FP16) Training
-(1) The related paper.
-
-You can download the [paper](https://arxiv.org/pdf/1710.03740.pdf) to learn the details of Mixed Precision (FP16) Training.
-
-(2) The reported performance.
-
-Please refer to [Mixed Precision (FP16) Training](https://github.com/SegmentationBLWX/sssegmentation/tree/main/docs/performances/fp16) for details.
+- Related Paper: [click](https://arxiv.org/pdf/1710.03740.pdf),
+- Reported Performance: [click](https://github.com/SegmentationBLWX/sssegmentation/tree/main/docs/performances/fp16).
