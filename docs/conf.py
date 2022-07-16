@@ -17,10 +17,10 @@
 
 # -- Project information -----------------------------------------------------
 
-project = 'sssegmentation'
-copyright = '2020-2021, Zhenchao Jin'
+project = 'SSSegmentation'
+copyright = '2020-2022, Zhenchao Jin'
 author = 'Zhenchao Jin'
-release = '1.0.0'
+release = '1.1.0'
 
 # -- General configuration ---------------------------------------------------
 
