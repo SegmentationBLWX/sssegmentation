@@ -1,119 +1,107 @@
 # Quick Run
 
 
-## Train a model
-#### Bash
-You can train the models as follows:
+## Train A Segmentor
+
+SSSegmentation only supports distributed training which uses DistributedDataParallel.
+
+All outputs (log files and checkpoints) will be saved to the working directory, which is specified by "work_dir" in the config file.
+
+#### Train on a single machine
+
+You can train the segmentors in a single machine as follows,
+
 ```sh
-# non-distributed training
-sh scripts/train.sh ${CFGFILEPATH} [optional arguments]
-# distributed training
-sh scripts/distrain.sh ${NGPUS} ${CFGFILEPATH} [optional arguments]
-```
-Here is an example:
-```sh
-# non-distributed training
-sh scripts/train.sh ssseg/cfgs/deeplabv3plus/cfgs_voc_resnet101os8.py
-# distributed training
-sh scripts/distrain.sh 4 ssseg/cfgs/deeplabv3plus/cfgs_voc_resnet101os8.py
+bash scripts/distrain.sh ${NGPUS} ${CFGFILEPATH} [optional arguments]
 ```
 
-#### Python
-You can train the models as follows:
+where "${NGPUS}" means the number of GPUS you want to use and "${CFGFILEPATH}" denotes for the config file path.
+For example, you can train a segmentor on a single machine with the following commands,
+
 ```sh
-usage: train.py [-h] [--local_rank LOCAL_RANK]
-                [--nproc_per_node NPROC_PER_NODE] --cfgfilepath CFGFILEPATH
-                [--checkpointspath CHECKPOINTSPATH]
-
-SSSegmentation is an open source strongly supervised semantic segmentation toolbox 
-based on PyTorch
-
-optional arguments:
-  -h, --help            show this help message and exit
-  --local_rank LOCAL_RANK
-                        node rank for distributed training
-  --nproc_per_node NPROC_PER_NODE
-                        number of process per node
-  --cfgfilepath CFGFILEPATH
-                        config file path you want to use
-  --checkpointspath CHECKPOINTSPATH
-                        checkpoints you want to resume from
+bash scripts/distrain.sh 4 ssseg/configs/annnet/annnet_resnet50os16_ade20k.py
 ```
 
+If you want to resume from the checkpoints, you can run as follows,
 
-## Test performance of pretrained models
-#### Bash
-You can test the models as follows:
 ```sh
-# non-distributed testing
-sh scripts/test.sh ${CFGFILEPATH} ${CHECKPOINTSPATH} [optional arguments]
-# distributed testing
-sh scripts/distest.sh ${NGPUS} ${CFGFILEPATH} ${CHECKPOINTSPATH} [optional arguments]
-```
-Here is an example:
-```sh
-# non-distributed testing
-sh scripts/test.sh ssseg/cfgs/deeplabv3plus/cfgs_voc_resnet101os8.py deeplabv3plus_resnet101os8_voc_train/epoch_60.pth
-# distributed testing
-sh scripts/distest.sh 4 ssseg/cfgs/deeplabv3plus/cfgs_voc_resnet101os8.py deeplabv3plus_resnet101os8_voc_train/epoch_60.pth
+bash scripts/distrain.sh 4 ssseg/configs/annnet/annnet_resnet50os16_ade20k.py --checkpointspath annnet_resnet50os16_ade20k/epoch_44.pth
 ```
 
-#### Python
-You can test the models as follows:
+#### Train with multiple machines
+
+Now, we only support training with multiple machines with Slurm.
+Slurm is a good job scheduling system for computing clusters.
+On a cluster managed by Slurm, you can use "slurmtrain.sh" to spawn training jobs.
+It supports both single-node and multi-node training.
+
+Specifically, you can train the segmentors with multiple machines as follows,
+
 ```sh
-usage: test.py [-h] [--local_rank LOCAL_RANK]
-               [--nproc_per_node NPROC_PER_NODE] --cfgfilepath CFGFILEPATH
-               [--evalmode EVALMODE] --checkpointspath CHECKPOINTSPATH
+bash scripts/slurmtrain.sh ${PARTITION} ${JOBNAME} ${NGPUS} ${CFGFILEPATH} [optional arguments]
+```
 
-SSSegmentation is an open source strongly supervised semantic segmentation toolbox 
-based on PyTorch
+Here is an example of using 16 GPUs to train PSPNet on the dev partition,
 
-optional arguments:
-  -h, --help            show this help message and exit
-  --local_rank LOCAL_RANK
-                        node rank for distributed testing
-  --nproc_per_node NPROC_PER_NODE
-                        number of process per node
-  --cfgfilepath CFGFILEPATH
-                        config file path you want to use
-  --evalmode EVALMODE   evaluate mode, support online and offline
-  --checkpointspath CHECKPOINTSPATH
-                        checkpoints you want to resume from
+```sh
+bash scripts/slurmtrain.sh dev pspnet 16 ssseg/configs/pspnet/pspnet_resnet101os8_ade20k.py
 ```
 
 
-## Inference with pretrained models
-#### Bash
-You can apply the models as follows:
+## Test A Segmentor
+
+We provide testing scripts to evaluate a whole dataset (Cityscapes, PASCAL VOC, ADE20k, etc.), and also some high-level apis for easier integration to other projects.
+
+#### Test on a single machine
+
+You can test the segmentors in a single machine as follows,
+
+```sh
+bash scripts/distest.sh ${NGPUS} ${CFGFILEPATH} ${CHECKPOINTSPATH} [optional arguments]
+```
+
+For example, you can test a segmentor on a single machine with the following commands,
+
+```sh
+bash scripts/distest.sh 4 ssseg/configs/annnet/annnet_resnet50os16_ade20k.py annnet_resnet50os16_ade20k/epoch_130.pth
+```
+
+#### Test with multiple machines
+
+Now, we only support testing with multiple machines with Slurm.
+Slurm is a good job scheduling system for computing clusters.
+On a cluster managed by Slurm, you can use "slurmtest.sh" to spawn testing jobs.
+It supports both single-node and multi-node testing.
+
+Specifically, you can test the segmentors with multiple machines as follows,
+
+```sh
+bash scripts/slurmtest.sh ${PARTITION} ${JOBNAME} ${NGPUS} ${CFGFILEPATH} ${CHECKPOINTSPATH} [optional arguments]
+```
+
+Here is an example of using 16 GPUs to test PSPNet on the dev partition,
+
+```sh
+bash scripts/slurmtest.sh dev pspnet 16 ssseg/configs/pspnet/pspnet_resnet101os8_ade20k.py pspnet_resnet101os8_ade20k/epoch_130.pth
+```
+
+
+## Inference A Segmentor
+
+You can apply the segmentor as follows:
+
 ```sh
 bash scripts/inference.sh ${CFGFILEPATH} ${CHECKPOINTSPATH} [optional arguments]
 ```
-Here is an example:
+
+For example, if you want to inference one image, the command can be,
+
 ```sh
-# multi-images
-bash scripts/inference.sh ssseg/cfgs/deeplabv3plus/cfgs_voc_resnet101os8.py deeplabv3plus_resnet101os8_voc_train/epoch_60.pth --imagedir VOCImages
-# single-image
-bash scripts/inference.sh ssseg/cfgs/deeplabv3plus/cfgs_voc_resnet101os8.py deeplabv3plus_resnet101os8_voc_train/epoch_60.pth --imagepath voctest.jpg
+bash scripts/inference.sh ssseg/configs/pspnet/pspnet_resnet101os8_ade20k.py pspnet_resnet101os8_ade20k/epoch_130.pth --imagepath dog.jpg
 ```
-#### Python
-You can apply the models as follows:
+
+If you want to inference the images in one directory, the command can be,
+
 ```sh
-usage: inference.py [-h] [--imagedir IMAGEDIR] [--imagepath IMAGEPATH]
-               [--outputfilename OUTPUTFILENAME] --cfgfilepath CFGFILEPATH
-               --checkpointspath CHECKPOINTSPATH
-
-SSSegmentation is an open source strongly supervised semantic segmentation toolbox 
-based on PyTorch
-
-optional arguments:
-  -h, --help            show this help message and exit
-  --imagedir IMAGEDIR   images dir for testing multi images
-  --imagepath IMAGEPATH
-                        imagepath for testing single image
-  --outputfilename OUTPUTFILENAME
-                        name to save output image(s)
-  --cfgfilepath CFGFILEPATH
-                        config file path you want to use
-  --checkpointspath CHECKPOINTSPATH
-                        checkpoints you want to resume from
+bash scripts/inference.sh ssseg/configs/pspnet/pspnet_resnet101os8_ade20k.py pspnet_resnet101os8_ade20k/epoch_130.pth --imagedir dogs
 ```
