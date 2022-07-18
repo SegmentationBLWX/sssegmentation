@@ -10,7 +10,7 @@ NNODES=${NNODES:-1}
 NODERANK=${NODERANK:-0}
 MASTERADDR=${MASTERADDR:-"127.0.0.1"}
 
-python3 -m torch.distributed.launch \
+python -m torch.distributed.launch \
     --nnodes=$NNODES \
     --node_rank=$NODERANK \
     --master_addr=$MASTERADDR \

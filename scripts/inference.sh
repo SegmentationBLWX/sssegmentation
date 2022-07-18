@@ -6,6 +6,6 @@ cd ..
 CFGFILEPATH=$1
 CHECKPOINTSPATH=$2
 
-python3 ssseg/inference.py \
-    --cfgfilepath $CFGFILEPATH 
+python ssseg/inference.py \
+    --cfgfilepath $CFGFILEPATH \
     --checkpointspath $CHECKPOINTSPATH ${@:3}
