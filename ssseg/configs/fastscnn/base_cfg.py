@@ -53,13 +53,13 @@ OPTIMIZER_CFG = {
 # config for losses
 LOSSES_CFG = {
     'loss_aux1': {
-        'binaryceloss': {'scale_factor': 0.4, 'opts': {'ignore_index': 255, 'reduction': 'mean'}}
+        'binaryceloss': {'scale_factor': 0.4, 'ignore_index': 255, 'reduction': 'mean'}
     },
     'loss_aux2': {
-        'binaryceloss': {'scale_factor': 0.4, 'opts': {'ignore_index': 255, 'reduction': 'mean'}}
+        'binaryceloss': {'scale_factor': 0.4, 'ignore_index': 255, 'reduction': 'mean'}
     },
     'loss_cls': {
-        'binaryceloss': {'scale_factor': 1.0, 'opts': {'ignore_index': 255, 'reduction': 'mean'}}
+        'binaryceloss': {'scale_factor': 1.0, 'ignore_index': 255, 'reduction': 'mean'}
     },
 }
 # config for segmentor

@@ -54,7 +54,7 @@ OPTIMIZER_CFG = {
 # config for losses
 LOSSES_CFG = {
     'loss_cls': {
-        'celoss': {'scale_factor': 1.0, 'opts': {'ignore_index': 255, 'reduction': 'mean'}}
+        'celoss': {'scale_factor': 1.0, 'ignore_index': 255, 'reduction': 'mean'}
     },
 }
 # config for segmentor

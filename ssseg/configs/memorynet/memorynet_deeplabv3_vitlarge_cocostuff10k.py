@@ -31,19 +31,19 @@ OPTIMIZER_CFG = {
 # modify losses config
 LOSSES_CFG = {
     'loss_aux1': {
-        'celoss': {'scale_factor': 0.4, 'opts': {'ignore_index': 255, 'reduction': 'mean'}}
+        'celoss': {'scale_factor': 0.4, 'ignore_index': 255, 'reduction': 'mean'}
     },
     'loss_aux2': {
-        'celoss': {'scale_factor': 0.4, 'opts': {'ignore_index': 255, 'reduction': 'mean'}}
+        'celoss': {'scale_factor': 0.4, 'ignore_index': 255, 'reduction': 'mean'}
     },
     'loss_aux3': {
-        'celoss': {'scale_factor': 0.4, 'opts': {'ignore_index': 255, 'reduction': 'mean'}}
+        'celoss': {'scale_factor': 0.4, 'ignore_index': 255, 'reduction': 'mean'}
     },
     'loss_cls_stage1': {
-        'celoss': {'scale_factor': 0.4, 'opts': {'ignore_index': 255, 'reduction': 'mean'}}
+        'celoss': {'scale_factor': 0.4, 'ignore_index': 255, 'reduction': 'mean'}
     },
     'loss_cls_stage2': {
-        'celoss': {'scale_factor': 1.0, 'opts': {'ignore_index': 255, 'reduction': 'mean'}}
+        'celoss': {'scale_factor': 1.0, 'ignore_index': 255, 'reduction': 'mean'}
     },
 }
 # modify segmentor config

@@ -52,13 +52,13 @@ OPTIMIZER_CFG = {
 # config for losses
 LOSSES_CFG = {
     'loss_aux': {
-        'celoss': {'scale_factor': 0.4, 'opts': {'ignore_index': 255, 'reduction': 'mean'}}
+        'celoss': {'scale_factor': 0.4, 'ignore_index': 255, 'reduction': 'mean'}
     },
     'loss_cls_stage1': {
-        'celoss': {'scale_factor': 0.4, 'opts': {'ignore_index': 255, 'reduction': 'mean'}}
+        'celoss': {'scale_factor': 0.4, 'ignore_index': 255, 'reduction': 'mean'}
     },
     'loss_cls_stage2': {
-        'celoss': {'scale_factor': 1.0, 'opts': {'ignore_index': 255, 'reduction': 'mean'}}
+        'celoss': {'scale_factor': 1.0, 'ignore_index': 255, 'reduction': 'mean'}
     },
 }
 # config for segmentor
@@ -102,8 +102,7 @@ SEGMENTOR_CFG = {
         'use_loss': True,
         'loss_cfg': {
             'celoss': {
-                'scale_factor': 1.0, 
-                'opts': {'reduction': 'mean'}
+                'scale_factor': 1.0, 'reduction': 'mean'
             },
         },
         'update_cfg': {

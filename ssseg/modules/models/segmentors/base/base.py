@@ -47,7 +47,8 @@ class BaseModel(nn.Module):
                 predictions_aux = self.auxiliary_decoder(backbone_outputs[-1])
                 predictions_aux = F.interpolate(predictions_aux, size=img_size, mode='bilinear', align_corners=self.align_corners)
                 outputs_dict = {'loss_cls': predictions, 'loss_aux': predictions_aux}
-        if not compute_loss: return outputs_dict
+        if not compute_loss: 
+            return outputs_dict
         return self.calculatelosses(
             predictions=outputs_dict, 
             targets=targets, 
@@ -122,7 +123,8 @@ class BaseModel(nn.Module):
                 if 'edge' in loss_name:
                     loss_cfg = copy.deepcopy(loss_cfg)
                     loss_cfg_keys = loss_cfg.keys()
-                    for key in loss_cfg_keys: loss_cfg[key]['opts'].update({'weight': cls_weight_edge})
+                    for key in loss_cfg_keys: 
+                        loss_cfg[key].update({'weight': cls_weight_edge})
                     losses_log_dict[loss_name] = self.calculateloss(
                         prediction=predictions[loss_name],
                         target=target_edge,
@@ -181,8 +183,7 @@ class BaseModel(nn.Module):
             loss += BuildLoss(key)(
                 prediction=prediction_iter, 
                 target=target_iter, 
-                scale_factor=value['scale_factor'],
-                **value['opts']
+                **value
             )
         # return the loss
         return loss
