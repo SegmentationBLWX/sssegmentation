@@ -7,10 +7,14 @@ Author:
 import os
 import copy
 import torch
+import pickle
 import warnings
 import argparse
+import numpy as np
 import torch.nn as nn
+import torch.nn.functional as F
 import torch.distributed as dist
+from tqdm import tqdm
 from configs import BuildConfig
 from modules import (
     BuildDataset, BuildDistributedDataloader, BuildDistributedModel, BuildOptimizer, adjustLearningRate, clipGradients, initslurm,
@@ -155,7 +159,102 @@ class Trainer():
                 if cmd_args.local_rank == 0: savecheckpoints(state_dict, savepath, logger_handle, cmd_args=cmd_args)
             # --eval checkpoints
             if (epoch % cfg.COMMON_CFG['eval_interval_epochs'] == 0) or (epoch == end_epoch):
-                pass
+                self.evaluate(segmentor)
+    '''evaluate'''
+    def evaluate(self, segmentor):
+        cfg, ngpus_per_node, cmd_args, logger_handle = self.cfg, self.ngpus_per_node, self.cmd_args, self.logger_handle
+        # build dataset and dataloader
+        dataset = BuildDataset(mode='TEST', logger_handle=logger_handle, dataset_cfg=copy.deepcopy(cfg.DATASET_CFG))
+        dataloader_cfg = copy.deepcopy(cfg.DATALOADER_CFG)
+        batch_size, num_workers = ngpus_per_node, dataloader_cfg['test']['num_workers']
+        batch_size_per_node = batch_size // ngpus_per_node
+        num_workers_per_node = num_workers // ngpus_per_node
+        dataloader_cfg['test'].update({'batch_size': batch_size_per_node, 'num_workers': num_workers_per_node})
+        dataloader = BuildDistributedDataloader(dataset=dataset, dataloader_cfg=dataloader_cfg['test'])
+        # start to eval
+        segmentor.eval()
+        segmentor.module.mode = 'TEST'
+        inference_cfg, all_preds, all_gts = cfg.INFERENCE_CFG, [], []
+        align_corners = segmentor.module.align_corners
+        assert inference_cfg['mode'] in ['whole', 'slide']
+        use_probs_before_resize = inference_cfg['tricks']['use_probs_before_resize']
+        with torch.no_grad():
+            dataloader.sampler.set_epoch(0)
+            pbar = tqdm(enumerate(dataloader))
+            for batch_idx, samples in pbar:
+                pbar.set_description('Processing %s/%s in rank %s' % (batch_idx+1, len(dataloader), cmd_args.local_rank))
+                imageids, images, widths, heights, gts = samples['id'], samples['image'], samples['width'], samples['height'], samples['groundtruth']
+                if inference_cfg['mode'] == 'whole':
+                    outputs = segmentor(images)
+                    if use_probs_before_resize:
+                        outputs = F.softmax(outputs, dim=1)
+                else:
+                    opts = inference_cfg['opts']
+                    stride_h, stride_w = opts['stride']
+                    cropsize_h, cropsize_w = opts['cropsize']
+                    batch_size, _, image_h, image_w = images.size()
+                    num_grids_h = max(image_h - cropsize_h + stride_h - 1, 0) // stride_h + 1
+                    num_grids_w = max(image_w - cropsize_w + stride_w - 1, 0) // stride_w + 1
+                    outputs = images.new_zeros((batch_size, num_classes, image_h, image_w))
+                    count_mat = images.new_zeros((batch_size, 1, image_h, image_w))
+                    for h_idx in range(num_grids_h):
+                        for w_idx in range(num_grids_w):
+                            x1, y1 = w_idx * stride_w, h_idx * stride_h
+                            x2, y2 = min(x1 + cropsize_w, image_w), min(y1 + cropsize_h, image_h)
+                            x1, y1 = max(x2 - cropsize_w, 0), max(y2 - cropsize_h, 0)
+                            crop_images = images[:, :, y1:y2, x1:x2]
+                            outputs_crop = segmentor(crop_images)
+                            outputs_crop = F.interpolate(outputs_crop, size=crop_images.size()[2:], mode='bilinear', align_corners=align_corners)
+                            if use_probs_before_resize: 
+                                outputs_crop = F.softmax(outputs_crop, dim=1)
+                            outputs += F.pad(outputs_crop, (int(x1), int(outputs.shape[3] - x2), int(y1), int(outputs.shape[2] - y2)))
+                            count_mat[:, :, y1:y2, x1:x2] += 1
+                    assert (count_mat == 0).sum() == 0
+                    outputs = outputs / count_mat
+                for idx in range(len(outputs)):
+                    output = F.interpolate(outputs[idx: idx+1], size=(heights[idx], widths[idx]), mode='bilinear', align_corners=align_corners)
+                    pred = (torch.argmax(output[0], dim=0)).cpu().numpy().astype(np.int32)
+                    all_preds.append([imageids[idx], pred])
+                    gt = gts[idx].cpu().numpy().astype(np.int32)
+                    gt[gt >= dataset.num_classes] = -1
+                    all_gts.append(gt)
+        # collect eval results and calculate the metric
+        filename = cfg.COMMON_CFG['resultsavepath'].split('/')[-1].split('.')[0] + f'_{cmd_args.local_rank}.' + cfg.COMMON_CFG['resultsavepath'].split('.')[-1]
+        with open(os.path.join(cfg.COMMON_CFG['work_dir'], filename), 'wb') as fp:
+            pickle.dump([all_preds, all_gts], fp)
+        rank = torch.tensor([cmd_args.local_rank], device='cuda')
+        rank_list = [rank.clone() for _ in range(ngpus_per_node)]
+        dist.all_gather(rank_list, rank)
+        logger_handle.info('Rank %s finished' % int(rank.item()))
+        if cmd_args.local_rank == 0:
+            all_preds_gather, all_gts_gather = [], []
+            for rank in rank_list:
+                rank = str(int(rank.item()))
+                filename = cfg.COMMON_CFG['resultsavepath'].split('/')[-1].split('.')[0] + f'_{rank}.' + cfg.COMMON_CFG['resultsavepath'].split('.')[-1]
+                fp = open(os.path.join(cfg.COMMON_CFG['work_dir'], filename), 'rb')
+                all_preds, all_gts = pickle.load(fp)
+                all_preds_gather += all_preds
+                all_gts_gather += all_gts
+            all_preds, all_gts = all_preds_gather, all_gts_gather
+            all_preds_filtered, all_gts_filtered, all_ids = [], [], []
+            for idx, pred in enumerate(all_preds):
+                if pred[0] in all_ids: 
+                    continue
+                all_ids.append(pred[0])
+                all_preds_filtered.append(pred[1])
+                all_gts_filtered.append(all_gts[idx])
+            all_preds, all_gts = all_preds_filtered, all_gts_filtered
+            logger_handle.info('All Finished, all_preds: %s, all_gts: %s' % (len(all_preds), len(all_gts)))
+            result = dataset.evaluate(
+                predictions=all_preds, 
+                groundtruths=all_gts, 
+                metric_list=cfg.INFERENCE_CFG.get('metric_list', ['iou', 'miou']),
+                num_classes=cfg.SEGMENTOR_CFG['num_classes'],
+                ignore_index=-1,
+            )
+            logger_handle.info(result)
+        segmentor.train()
+        segmentor.module.mode = 'TRAIN'
 
 
 '''main'''

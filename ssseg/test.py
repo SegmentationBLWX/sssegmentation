@@ -172,7 +172,7 @@ class Tester():
                 outputs = segmentor(images)
             else:
                 outputs = segmentor(images, **forward_args)
-            if use_probs_before_resize: 
+            if use_probs_before_resize:
                 outputs = F.softmax(outputs, dim=1)
         else:
             align_corners = segmentor.module.align_corners
