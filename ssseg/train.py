@@ -195,7 +195,7 @@ class Trainer():
                     batch_size, _, image_h, image_w = images.size()
                     num_grids_h = max(image_h - cropsize_h + stride_h - 1, 0) // stride_h + 1
                     num_grids_w = max(image_w - cropsize_w + stride_w - 1, 0) // stride_w + 1
-                    outputs = images.new_zeros((batch_size, num_classes, image_h, image_w))
+                    outputs = images.new_zeros((batch_size, cfg.SEGMENTOR_CFG['num_classes'], image_h, image_w))
                     count_mat = images.new_zeros((batch_size, 1, image_h, image_w))
                     for h_idx in range(num_grids_h):
                         for w_idx in range(num_grids_w):
