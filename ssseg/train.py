@@ -176,14 +176,15 @@ class Trainer():
         segmentor.module.mode = 'TEST'
         inference_cfg, all_preds, all_gts = cfg.INFERENCE_CFG, [], []
         align_corners = segmentor.module.align_corners
-        assert inference_cfg['mode'] in ['whole', 'slide']
+        FloatTensor = torch.cuda.FloatTensor
         use_probs_before_resize = inference_cfg['tricks']['use_probs_before_resize']
+        assert inference_cfg['mode'] in ['whole', 'slide']
         with torch.no_grad():
             dataloader.sampler.set_epoch(0)
             pbar = tqdm(enumerate(dataloader))
             for batch_idx, samples in pbar:
                 pbar.set_description('Processing %s/%s in rank %s' % (batch_idx+1, len(dataloader), cmd_args.local_rank))
-                imageids, images, widths, heights, gts = samples['id'], samples['image'], samples['width'], samples['height'], samples['groundtruth']
+                imageids, images, widths, heights, gts = samples['id'], samples['image'].type(FloatTensor), samples['width'], samples['height'], samples['groundtruth']
                 if inference_cfg['mode'] == 'whole':
                     outputs = segmentor(images)
                     if use_probs_before_resize:
