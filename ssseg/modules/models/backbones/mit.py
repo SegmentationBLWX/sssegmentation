@@ -7,6 +7,7 @@ Author:
 import math
 import torch
 import torch.nn as nn
+import torch.utils.model_zoo as model_zoo
 import torch.utils.checkpoint as checkpoint
 from .bricks import PatchEmbed as PatchEmbedBase
 from .bricks import BuildNormalization, BuildActivation, BuildDropout, nlctonchw, nchwtonlc, MultiheadAttention, constructnormcfg
@@ -133,6 +134,7 @@ class TransformerEncoderLayer(nn.Module):
             dropout_cfg={'type': 'droppath', 'drop_prob': drop_path_rate},
             act_cfg=act_cfg
         )
+        self.use_checkpoint = use_checkpoint
     '''layers with zero weight decay'''
     def zerowdlayers(self):
         layers = {

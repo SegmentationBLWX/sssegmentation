@@ -445,7 +445,7 @@ def BuildTwins(twins_cfg):
     pretrained = twins_cfg.pop('pretrained')
     pretrained_model_path = twins_cfg.pop('pretrained_model_path')
     # obtain the instanced twins
-    model = supported_twins[twins_type](**twins_cfg)
+    model = supported_twins[twins_type][0](**twins_cfg)
     # load weights of pretrained model
     if pretrained:
         model.initweights(twins_type, pretrained_model_path)
