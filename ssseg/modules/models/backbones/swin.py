@@ -10,6 +10,7 @@ import torch
 import torch.nn as nn
 import torch.nn.functional as F
 import torch.utils.model_zoo as model_zoo
+import torch.utils.checkpoint as checkpoint
 from collections import OrderedDict
 from .bricks import PatchEmbed as PatchEmbedBase
 from .bricks import PatchMerging as PatchMergingBase
@@ -28,7 +29,7 @@ model_urls = {
 }
 
 
-'''merge patch feature map'''
+'''PatchMerging'''
 class PatchMerging(PatchMergingBase):
     def __init__(self, **kwargs):
         super(PatchMerging, self).__init__(**kwargs)
@@ -41,7 +42,7 @@ class PatchMerging(PatchMergingBase):
         return {'PatchMerging.reduction': self.reduction}
 
 
-'''Image to Patch Embedding'''
+'''PatchEmbed'''
 class PatchEmbed(PatchEmbedBase):
     def __init__(self, **kwargs):
         super(PatchEmbed, self).__init__(**kwargs)
@@ -54,7 +55,7 @@ class PatchEmbed(PatchEmbedBase):
         return {'PatchEmbed.projection': self.projection}
 
 
-'''Window based multi-head self-attention (W-MSA) module with relative position bias'''
+'''WindowMSA'''
 class WindowMSA(nn.Module):
     def __init__(self, embed_dims, num_heads, window_size, qkv_bias=True, qk_scale=None, attn_drop_rate=0., proj_drop_rate=0.):
         super(WindowMSA, self).__init__()
@@ -88,7 +89,9 @@ class WindowMSA(nn.Module):
         q, k, v = qkv[0], qkv[1], qkv[2]
         q = q * self.scale
         attn = (q @ k.transpose(-2, -1))
-        relative_position_bias = self.relative_position_bias_table[self.relative_position_index.view(-1)].view(self.window_size[0] * self.window_size[1], self.window_size[0] * self.window_size[1], -1)
+        relative_position_bias = self.relative_position_bias_table[
+            self.relative_position_index.view(-1)
+        ].view(self.window_size[0] * self.window_size[1], self.window_size[0] * self.window_size[1], -1)
         relative_position_bias = relative_position_bias.permute(2, 0, 1).contiguous()
         attn = attn + relative_position_bias.unsqueeze(0)
         if mask is not None:
@@ -109,7 +112,7 @@ class WindowMSA(nn.Module):
         return (seq1[:, None] + seq2[None, :]).reshape(1, -1)
 
 
-'''Shift Window Multihead Self-Attention Module'''
+'''ShiftWindowMSA'''
 class ShiftWindowMSA(nn.Module):
     def __init__(self, embed_dims, num_heads, window_size, shift_size=0, qkv_bias=True, qk_scale=None, attn_drop_rate=0, proj_drop_rate=0, dropout_cfg=None):
         super(ShiftWindowMSA, self).__init__()
@@ -128,10 +131,18 @@ class ShiftWindowMSA(nn.Module):
         self.drop = BuildDropout(dropout_cfg)
     '''layers with zero weight decay'''
     def zerowdlayers(self):
-        return self.w_msa.zerowdlayers()
+        tmp_layers = self.w_msa.zerowdlayers()
+        layers = dict()
+        for key, value in tmp_layers.items():
+            layers[f'ShiftWindowMSA.{key}'] = value
+        return layers
     '''layers with non zero weight decay'''
     def nonzerowdlayers(self):
-        return self.w_msa.nonzerowdlayers()
+        tmp_layers = self.w_msa.nonzerowdlayers()
+        layers = dict()
+        for key, value in tmp_layers.items():
+            layers[f'ShiftWindowMSA.{key}'] = value
+        return layers
     '''forward'''
     def forward(self, query, hw_shape):
         B, L, C = query.shape
@@ -200,10 +211,12 @@ class ShiftWindowMSA(nn.Module):
         return windows
 
 
-'''swin block'''
+'''SwinBlock'''
 class SwinBlock(nn.Module):
-    def __init__(self, embed_dims, num_heads, feedforward_channels, window_size=7, shift=False, qkv_bias=True, qk_scale=None, drop_rate=0., attn_drop_rate=0., drop_path_rate=0., act_cfg=None, norm_cfg=None):
+    def __init__(self, embed_dims, num_heads, feedforward_channels, window_size=7, shift=False, qkv_bias=True, qk_scale=None, drop_rate=0., 
+                 attn_drop_rate=0., drop_path_rate=0., act_cfg=None, norm_cfg=None, use_checkpoint=False):
         super(SwinBlock, self).__init__()
+        self.use_checkpoint = use_checkpoint
         self.norm1 = BuildNormalization(constructnormcfg(placeholder=embed_dims, norm_cfg=norm_cfg))
         self.attn = ShiftWindowMSA(
             embed_dims=embed_dims, num_heads=num_heads, window_size=window_size, shift_size=window_size // 2 if shift else 0,
@@ -240,27 +253,34 @@ class SwinBlock(nn.Module):
         return layers
     '''forward'''
     def forward(self, x, hw_shape):
-        identity = x
-        x = self.norm1(x)
-        x = self.attn(x, hw_shape)
-        x = x + identity
-        identity = x
-        x = self.norm2(x)
-        x = self.ffn(x, identity=identity)
+        def _forward(x):
+            identity = x
+            x = self.norm1(x)
+            x = self.attn(x, hw_shape)
+            x = x + identity
+            identity = x
+            x = self.norm2(x)
+            x = self.ffn(x, identity=identity)
+            return x
+        if self.use_checkpoint and x.requires_grad:
+            x = checkpoint.checkpoint(_forward, x)
+        else:
+            x = _forward(x)
         return x
 
 
-'''Implements one stage in Swin Transformer'''
+'''SwinBlockSequence'''
 class SwinBlockSequence(nn.Module):
-    def __init__(self, embed_dims, num_heads, feedforward_channels, depth, window_size=7, qkv_bias=True, qk_scale=None, drop_rate=0., attn_drop_rate=0., drop_path_rate=0., downsample=None, act_cfg=None, norm_cfg=None):
+    def __init__(self, embed_dims, num_heads, feedforward_channels, depth, window_size=7, qkv_bias=True, qk_scale=None, drop_rate=0., attn_drop_rate=0., 
+                 drop_path_rate=0., downsample=None, act_cfg=None, norm_cfg=None, use_checkpoint=False):
         super(SwinBlockSequence, self).__init__()
-        drop_path_rate = drop_path_rate if isinstance(drop_path_rate, list) else [copy.deepcopy(drop_path_rate) for _ in range(depth)]
+        drop_path_rates = drop_path_rate if isinstance(drop_path_rate, list) else [copy.deepcopy(drop_path_rate) for _ in range(depth)]
         self.blocks = nn.ModuleList()
         for i in range(depth):
             block = SwinBlock(
                 embed_dims=embed_dims, num_heads=num_heads, feedforward_channels=feedforward_channels, window_size=window_size,
                 shift=False if i % 2 == 0 else True, qkv_bias=qkv_bias, qk_scale=qk_scale, drop_rate=drop_rate,
-                attn_drop_rate=attn_drop_rate, drop_path_rate=drop_path_rate[i], act_cfg=act_cfg, norm_cfg=norm_cfg,
+                attn_drop_rate=attn_drop_rate, drop_path_rate=drop_path_rates[i], act_cfg=act_cfg, norm_cfg=norm_cfg, use_checkpoint=use_checkpoint
             )
             self.blocks.append(block)
         self.downsample = downsample
@@ -271,10 +291,14 @@ class SwinBlockSequence(nn.Module):
             tmp_layers = block.zerowdlayers()
             new_tmp_layers = {}
             for key, value in tmp_layers.items():
-                new_tmp_layers[f"{layer_idx}_{key}"] = value
+                new_tmp_layers[f"SwinBlockSequence.{layer_idx}_{key}"] = value
             layers.update(new_tmp_layers)
         if self.downsample is not None:
-            layers.update(self.downsample.zerowdlayers())
+            tmp_layers = self.downsample.zerowdlayers()
+            new_tmp_layers = {}
+            for key, value in tmp_layers.items():
+                new_tmp_layers[f"SwinBlockSequence.{key}"] = value
+            layers.update(new_tmp_layers)
         return layers
     '''layers with non zero weight decay'''
     def nonzerowdlayers(self):
@@ -283,10 +307,14 @@ class SwinBlockSequence(nn.Module):
             tmp_layers = block.nonzerowdlayers()
             new_tmp_layers = {}
             for key, value in tmp_layers.items():
-                new_tmp_layers[f"{layer_idx}_{key}"] = value
+                new_tmp_layers[f"SwinBlockSequence.{layer_idx}_{key}"] = value
             layers.update(new_tmp_layers)
         if self.downsample is not None:
-            layers.update(self.downsample.nonzerowdlayers())
+            tmp_layers = self.downsample.nonzerowdlayers()
+            new_tmp_layers = {}
+            for key, value in tmp_layers.items():
+                new_tmp_layers[f"SwinBlockSequence.{key}"] = value
+            layers.update(new_tmp_layers)
         return layers
     '''forward'''
     def forward(self, x, hw_shape):
@@ -299,11 +327,11 @@ class SwinBlockSequence(nn.Module):
             return x, hw_shape, x, hw_shape
 
 
-'''Swin Transformer'''
+'''SwinTransformer'''
 class SwinTransformer(nn.Module):
     def __init__(self, pretrain_img_size=224, in_channels=3, embed_dims=96, patch_size=4, window_size=7, mlp_ratio=4, depths=(2, 2, 6, 2), num_heads=(3, 6, 12, 24),
                  strides=(4, 2, 2, 2), out_indices=(0, 1, 2, 3), qkv_bias=True, qk_scale=None, patch_norm=True, drop_rate=0., attn_drop_rate=0., drop_path_rate=0.1,
-                 use_abs_pos_embed=False, act_cfg=None, norm_cfg=None):
+                 use_abs_pos_embed=False, act_cfg=None, norm_cfg=None, use_checkpoint=False):
         super(SwinTransformer, self).__init__()
         if isinstance(pretrain_img_size, int):
             pretrain_img_size = (pretrain_img_size, pretrain_img_size)
@@ -341,9 +369,10 @@ class SwinTransformer(nn.Module):
             else:
                 downsample = None
             stage = SwinBlockSequence(
-                embed_dims=in_channels, num_heads=num_heads[i], feedforward_channels=mlp_ratio * in_channels, depth=depths[i],
+                embed_dims=in_channels, num_heads=num_heads[i], feedforward_channels=int(mlp_ratio * in_channels), depth=depths[i],
                 window_size=window_size, qkv_bias=qkv_bias, qk_scale=qk_scale, drop_rate=drop_rate, attn_drop_rate=attn_drop_rate,
-                drop_path_rate=dpr[sum(depths[:i]): sum(depths[:i+1])], downsample=downsample, act_cfg=act_cfg, norm_cfg=norm_cfg
+                drop_path_rate=dpr[sum(depths[:i]): sum(depths[:i+1])], downsample=downsample, act_cfg=act_cfg, norm_cfg=norm_cfg,
+                use_checkpoint=use_checkpoint,
             )
             self.stages.append(stage)
             if downsample:
@@ -393,14 +422,13 @@ class SwinTransformer(nn.Module):
             table_current = self.state_dict()[table_key]
             L1, nH1 = table_pretrained.size()
             L2, nH2 = table_current.size()
-            if not (nH1 != nH2):
-                if L1 != L2:
-                    S1 = int(L1**0.5)
-                    S2 = int(L2**0.5)
-                    table_pretrained_resized = F.interpolate(table_pretrained.permute(1, 0).reshape(1, nH1, S1, S1), size=(S2, S2), mode='bicubic')
-                    state_dict[table_key] = table_pretrained_resized.view(nH2, L2).permute(1, 0).contiguous()
+            if (nH1 == nH2) and (L1 != L2):
+                S1 = int(L1**0.5)
+                S2 = int(L2**0.5)
+                table_pretrained_resized = F.interpolate(table_pretrained.permute(1, 0).reshape(1, nH1, S1, S1), size=(S2, S2), mode='bicubic')
+                state_dict[table_key] = table_pretrained_resized.view(nH2, L2).permute(1, 0).contiguous()
         # load state_dict
-        self.load_state_dict(state_dict, False)
+        self.load_state_dict(state_dict, strict=False)
     '''swin convert'''
     @staticmethod
     def swinconvert(ckpt):
@@ -448,13 +476,17 @@ class SwinTransformer(nn.Module):
     def zerowdlayers(self):
         layers = {}
         if hasattr(self, 'absolute_pos_embed'):
-            layers['absolute_pos_embed'] = self.absolute_pos_embed
-        layers.update(self.patch_embed.zerowdlayers())
+            layers['SwinTransformer.absolute_pos_embed'] = self.absolute_pos_embed
+        tmp_layers = self.patch_embed.zerowdlayers()
+        new_tmp_layers = {}
+        for key, value in tmp_layers.items():
+            new_tmp_layers[f'SwinTransformer.{key}'] = value
+        layers.update(new_tmp_layers)
         for layer_idx, stage in enumerate(self.stages):
             tmp_layers = stage.zerowdlayers()
             new_tmp_layers = {}
             for key, value in tmp_layers.items():
-                new_tmp_layers[f"{layer_idx}_{key}"] = value
+                new_tmp_layers[f"SwinTransformer.{layer_idx}_{key}"] = value
             layers.update(new_tmp_layers)
         for idx in self.out_indices:
             layers[f'SwinTransformer.norm{idx}'] = getattr(self, f'norm{idx}')
@@ -462,12 +494,16 @@ class SwinTransformer(nn.Module):
     '''layers non zero weight decay'''
     def nonzerowdlayers(self):
         layers = {}
-        layers.update(self.patch_embed.nonzerowdlayers())
+        tmp_layers = self.patch_embed.nonzerowdlayers()
+        new_tmp_layers = {}
+        for key, value in tmp_layers.items():
+            new_tmp_layers[f'SwinTransformer.{key}'] = value
+        layers.update(new_tmp_layers)
         for layer_idx, stage in enumerate(self.stages):
             tmp_layers = stage.nonzerowdlayers()
             new_tmp_layers = {}
             for key, value in tmp_layers.items():
-                new_tmp_layers[f"{layer_idx}_{key}"] = value
+                new_tmp_layers[f"SwinTransformer.{layer_idx}_{key}"] = value
             layers.update(new_tmp_layers)
         return layers
     '''forward'''
@@ -537,6 +573,7 @@ def BuildSwinTransformer(swin_cfg):
         'act_cfg': {'type': 'gelu'},
         'pretrained': True,
         'pretrained_model_path': '',
+        'use_checkpoint': False,
     }
     default_cfg.update(supported_swins[swin_type])
     for key, value in swin_cfg.items():

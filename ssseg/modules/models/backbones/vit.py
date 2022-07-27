@@ -20,37 +20,47 @@ model_urls = {
 }
 
 
-'''Implements one encoder layer in Vision Transformer'''
+'''TransformerEncoderLayer'''
 class TransformerEncoderLayer(nn.Module):
-    def __init__(self, embed_dims, num_heads, feedforward_channels, drop_rate=0., attn_drop_rate=0., drop_path_rate=0., num_fcs=2, qkv_bias=True, act_cfg=None, norm_cfg=None, batch_first=True):
+    def __init__(self, embed_dims, num_heads, feedforward_channels, drop_rate=0., attn_drop_rate=0., drop_path_rate=0., num_fcs=2, 
+                 qkv_bias=True, act_cfg=None, norm_cfg=None, batch_first=True, attn_cfg=dict(), ffn_cfg=dict(), use_checkpoint=False):
         super(TransformerEncoderLayer, self).__init__()
         self.ln1 = BuildNormalization(constructnormcfg(placeholder=embed_dims, norm_cfg=norm_cfg))
-        self.attn = MultiheadAttention(
+        attn_cfg.update(dict(
             embed_dims=embed_dims,
             num_heads=num_heads,
             attn_drop=attn_drop_rate,
             proj_drop=drop_rate,
             dropout_cfg={'type': 'droppath', 'drop_prob': drop_path_rate},
             batch_first=batch_first,
-            bias=qkv_bias
-        )
+            bias=qkv_bias,
+        ))
+        self.attn = MultiheadAttention(**attn_cfg)
         self.ln2 = BuildNormalization(constructnormcfg(placeholder=embed_dims, norm_cfg=norm_cfg))
-        self.ffn = FFN(
+        ffn_cfg.update(dict(
             embed_dims=embed_dims,
             feedforward_channels=feedforward_channels,
             num_fcs=num_fcs,
             ffn_drop=drop_rate,
             dropout_cfg={'type': 'droppath', 'drop_prob': drop_path_rate},
-            act_cfg=act_cfg
-        )
+            act_cfg=act_cfg,
+        ))
+        self.ffn = FFN(**ffn_cfg)
+        self.use_checkpoint = use_checkpoint
     '''forward'''
     def forward(self, x):
-        x = self.attn(self.ln1(x), identity=x)
-        x = self.ffn(self.ln2(x), identity=x)
+        def _forward(x):
+            x = self.attn(self.ln1(x), identity=x)
+            x = self.ffn(self.ln2(x), identity=x)
+            return x
+        if self.use_checkpoint and x.requires_grad:
+            x = checkpoint.checkpoint(_forward, x)
+        else:
+            x = _forward(x)
         return x
 
 
-'''Vision Transformer'''
+'''VisionTransformer'''
 class VisionTransformer(nn.Module):
     def __init__(self, img_size=224, patch_size=16, in_channels=3, embed_dims=768, num_layers=12, num_heads=12, mlp_ratio=4, out_indices=-1, qkv_bias=True,
                  drop_rate=0., attn_drop_rate=0., drop_path_rate=0., with_cls_token=True, output_cls_token=False, norm_cfg=None, act_cfg=None, 
@@ -102,7 +112,8 @@ class VisionTransformer(nn.Module):
                 qkv_bias=qkv_bias,
                 act_cfg=act_cfg,
                 norm_cfg=norm_cfg,
-                batch_first=True
+                batch_first=True,
+                use_checkpoint=use_checkpoint,
             ))
         self.final_norm = final_norm
         if final_norm:
@@ -130,7 +141,7 @@ class VisionTransformer(nn.Module):
                     (pos_size, pos_size), 
                     self.interpolate_mode
                 )
-        self.load_state_dict(state_dict, False)
+        self.load_state_dict(state_dict, strict=False)
     '''vit convert'''
     @staticmethod
     def vitconvert(ckpt):
@@ -173,11 +184,10 @@ class VisionTransformer(nn.Module):
     def resizeposembed(pos_embed, input_shpae, pos_shape, mode):
         assert pos_embed.ndim == 3, 'shape of pos_embed must be [B, L, C]'
         pos_h, pos_w = pos_shape
-        cls_token_weight = pos_embed[:, 0]
+        cls_token_weight = pos_embed[:, 0:1]
         pos_embed_weight = pos_embed[:, (-1 * pos_h * pos_w):]
         pos_embed_weight = pos_embed_weight.reshape(1, pos_h, pos_w, pos_embed.shape[2]).permute(0, 3, 1, 2)
         pos_embed_weight = F.interpolate(pos_embed_weight, size=input_shpae, align_corners=False, mode=mode)
-        cls_token_weight = cls_token_weight.unsqueeze(1)
         pos_embed_weight = torch.flatten(pos_embed_weight, 2).transpose(1, 2)
         pos_embed = torch.cat((cls_token_weight, pos_embed_weight), dim=1)
         return pos_embed
@@ -194,10 +204,7 @@ class VisionTransformer(nn.Module):
             x = x[:, 1:]
         outs = []
         for i, layer in enumerate(self.layers):
-            if self.use_checkpoint:
-                x = checkpoint.checkpoint(layer, x)
-            else:
-                x = layer(x)
+            x = layer(x)
             if i == len(self.layers) - 1:
                 if self.final_norm:
                     x = self.ln1(x)

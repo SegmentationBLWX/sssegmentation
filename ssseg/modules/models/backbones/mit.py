@@ -7,6 +7,7 @@ Author:
 import math
 import torch
 import torch.nn as nn
+import torch.utils.checkpoint as checkpoint
 from .bricks import PatchEmbed as PatchEmbedBase
 from .bricks import BuildNormalization, BuildActivation, BuildDropout, nlctonchw, nchwtonlc, MultiheadAttention, constructnormcfg
 
@@ -22,7 +23,7 @@ model_urls = {
 }
 
 
-'''Image to Patch Embedding'''
+'''PatchEmbed'''
 class PatchEmbed(PatchEmbedBase):
     def __init__(self, **kwargs):
         super(PatchEmbed, self).__init__(**kwargs)
@@ -45,11 +46,11 @@ class MixFFN(nn.Module):
         self.feedforward_channels = feedforward_channels
         # define layers
         self.layers = nn.Sequential(
-            nn.Conv2d(embed_dims, feedforward_channels, kernel_size=1, stride=1, padding=0),
-            nn.Conv2d(feedforward_channels, feedforward_channels, kernel_size=3, stride=1, padding=1, groups=feedforward_channels),
+            nn.Conv2d(embed_dims, feedforward_channels, kernel_size=1, stride=1, padding=0, bias=True),
+            nn.Conv2d(feedforward_channels, feedforward_channels, kernel_size=3, stride=1, padding=1, bias=True, groups=feedforward_channels),
             BuildActivation(act_cfg),
             nn.Dropout(ffn_drop),
-            nn.Conv2d(feedforward_channels, embed_dims, kernel_size=1, stride=1, padding=0),
+            nn.Conv2d(feedforward_channels, embed_dims, kernel_size=1, stride=1, padding=0, bias=True),
             nn.Dropout(ffn_drop),
         )
         # define dropout layer
@@ -69,7 +70,7 @@ class MixFFN(nn.Module):
         return identity + self.dropout_layer(out)
 
 
-'''Efficient Multi-head Attention'''
+'''EfficientMultiheadAttention'''
 class EfficientMultiheadAttention(MultiheadAttention):
     def __init__(self, embed_dims, num_heads, attn_drop=0., proj_drop=0., dropout_cfg=None, batch_first=True, qkv_bias=False, norm_cfg=None, sr_ratio=1):
         super(EfficientMultiheadAttention, self).__init__(embed_dims, num_heads, attn_drop, proj_drop, dropout_cfg=dropout_cfg, batch_first=batch_first, bias=qkv_bias)
@@ -107,10 +108,10 @@ class EfficientMultiheadAttention(MultiheadAttention):
         return identity + self.dropout_layer(self.proj_drop(out))
 
 
-'''Transformer Encoder Layer'''
+'''TransformerEncoderLayer'''
 class TransformerEncoderLayer(nn.Module):
-    def __init__(self, embed_dims, num_heads, feedforward_channels, drop_rate=0., attn_drop_rate=0., 
-                 drop_path_rate=0., qkv_bias=True, act_cfg=None, norm_cfg=None, batch_first=True, sr_ratio=1):
+    def __init__(self, embed_dims, num_heads, feedforward_channels, drop_rate=0., attn_drop_rate=0., drop_path_rate=0., 
+                 qkv_bias=True, act_cfg=None, norm_cfg=None, batch_first=True, sr_ratio=1, use_checkpoint=False):
         super(TransformerEncoderLayer, self).__init__()
         self.norm1 = BuildNormalization(constructnormcfg(placeholder=embed_dims, norm_cfg=norm_cfg))
         self.attn = EfficientMultiheadAttention(
@@ -153,15 +154,22 @@ class TransformerEncoderLayer(nn.Module):
         return layers
     '''forward'''
     def forward(self, x, hw_shape):
-        x = self.attn(self.norm1(x), hw_shape, identity=x)
-        x = self.ffn(self.norm2(x), hw_shape, identity=x)
+        def _forward(x):
+            x = self.attn(self.norm1(x), hw_shape, identity=x)
+            x = self.ffn(self.norm2(x), hw_shape, identity=x)
+            return x
+        if self.use_checkpoint and x.requires_grad:
+            x = checkpoint.checkpoint(_forward, x)
+        else:
+            x = _forward(x)
         return x
 
 
 '''MixVisionTransformer'''
 class MixVisionTransformer(nn.Module):
     def __init__(self, in_channels=3, embed_dims=64, num_stages=4, num_layers=[3, 4, 6, 3], num_heads=[1, 2, 4, 8], patch_sizes=[7, 3, 3, 3], strides=[4, 2, 2, 2],
-                 sr_ratios=[8, 4, 2, 1], out_indices=(0, 1, 2, 3), mlp_ratio=4, qkv_bias=True, drop_rate=0., attn_drop_rate=0., drop_path_rate=0., act_cfg=None, norm_cfg=None):
+                 sr_ratios=[8, 4, 2, 1], out_indices=(0, 1, 2, 3), mlp_ratio=4, qkv_bias=True, drop_rate=0., attn_drop_rate=0., drop_path_rate=0., 
+                 act_cfg=None, norm_cfg=None, use_checkpoint=False):
         super(MixVisionTransformer, self).__init__()
         # assert
         assert num_stages == len(num_layers) == len(num_heads) == len(patch_sizes) == len(strides) == len(sr_ratios)
@@ -175,6 +183,7 @@ class MixVisionTransformer(nn.Module):
         self.strides = strides
         self.sr_ratios = sr_ratios
         self.out_indices = out_indices
+        self.use_checkpoint = use_checkpoint
         # transformer encoder
         dpr = [x.item() for x in torch.linspace(0, drop_path_rate, sum(num_layers))]
         cur, self.layers = 0, nn.ModuleList()
@@ -198,6 +207,7 @@ class MixVisionTransformer(nn.Module):
                 qkv_bias=qkv_bias,
                 act_cfg=act_cfg,
                 norm_cfg=norm_cfg,
+                use_checkpoint=use_checkpoint,
                 sr_ratio=sr_ratios[i]) for idx in range(num_layer)
             ])
             in_channels = embed_dims_i
@@ -210,11 +220,11 @@ class MixVisionTransformer(nn.Module):
         for layer_idx, layer in enumerate(self.layers):
             assert len(layer) == 3
             for key, value in layer[0].zerowdlayers().items():
-                zwd_layers[f'{layer_idx}_{key}'] = value
+                zwd_layers[f'MixVisionTransformer.{layer_idx}_{key}'] = value
             for trans_idx, trans in enumerate(layer[1]):
                 for key, value in trans.zerowdlayers().items():
-                    zwd_layers[f'{layer_idx}_{trans_idx}_{key}'] = value
-            zwd_layers[f'{layer_idx}_norm'] = layer[2]
+                    zwd_layers[f'MixVisionTransformer.{layer_idx}_{trans_idx}_{key}'] = value
+            zwd_layers[f'MixVisionTransformer.{layer_idx}_norm'] = layer[2]
         return zwd_layers
     '''layers with non zero weight decay'''
     def nonzerowdlayers(self):
@@ -222,10 +232,10 @@ class MixVisionTransformer(nn.Module):
         for layer_idx, layer in enumerate(self.layers):
             assert len(layer) == 3
             for key, value in layer[0].nonzerowdlayers().items():
-                nonzwd_layers[f'{layer_idx}_{key}'] = value
+                nonzwd_layers[f'MixVisionTransformer.{layer_idx}_{key}'] = value
             for trans_idx, trans in enumerate(layer[1]):
                 for key, value in trans.nonzerowdlayers().items():
-                    nonzwd_layers[f'{layer_idx}_{trans_idx}_{key}'] = value
+                    nonzwd_layers[f'MixVisionTransformer.{layer_idx}_{trans_idx}_{key}'] = value
         return nonzwd_layers
     '''init weights'''
     def initweights(self, mit_type='', pretrained_model_path=''):
@@ -240,7 +250,7 @@ class MixVisionTransformer(nn.Module):
         else:
             state_dict = checkpoint
         state_dict = self.mitconvert(state_dict)
-        self.load_state_dict(state_dict, False)
+        self.load_state_dict(state_dict, strict=False)
     '''mit convert'''
     @staticmethod
     def mitconvert(ckpt):
@@ -337,6 +347,7 @@ def BuildMixVisionTransformer(mit_cfg):
         'act_cfg': {'type': 'gelu'},
         'pretrained': True,
         'pretrained_model_path': '',
+        'use_checkpoint': False,
     }
     default_cfg.update(supported_mits[mit_type])
     for key, value in mit_cfg.items():

@@ -26,7 +26,7 @@ model_urls = {
 }
 
 
-'''Image to Patch Embedding'''
+'''PatchEmbed'''
 class PatchEmbed(PatchEmbedBase):
     def __init__(self, **kwargs):
         super(PatchEmbed, self).__init__(**kwargs)
@@ -39,7 +39,7 @@ class PatchEmbed(PatchEmbedBase):
         return {'PatchEmbed.projection': self.projection}
 
 
-'''Global Sub-sampled Attention (Spatial Reduction Attention)'''
+'''GlobalSubsampledAttention'''
 class GlobalSubsampledAttention(EfficientMultiheadAttention):
     def __init__(self, embed_dims, num_heads, attn_drop=0., proj_drop=0., dropout_cfg=None, batch_first=True, qkv_bias=True, norm_cfg=None, sr_ratio=1):
         super(GlobalSubsampledAttention, self).__init__(embed_dims, num_heads, attn_drop, proj_drop, dropout_cfg, batch_first, qkv_bias, norm_cfg, sr_ratio)
@@ -56,9 +56,10 @@ class GlobalSubsampledAttention(EfficientMultiheadAttention):
         return layers
 
 
-'''Implements one encoder layer with GSA'''
+'''GSAEncoderLayer'''
 class GSAEncoderLayer(nn.Module):
-    def __init__(self, embed_dims, num_heads, feedforward_channels, drop_rate=0., attn_drop_rate=0., drop_path_rate=0., num_fcs=2, qkv_bias=True, act_cfg=None, norm_cfg=None, sr_ratio=1., dropout_cfg=None):
+    def __init__(self, embed_dims, num_heads, feedforward_channels, drop_rate=0., attn_drop_rate=0., drop_path_rate=0., num_fcs=2, 
+                 qkv_bias=True, act_cfg=None, norm_cfg=None, sr_ratio=1., dropout_cfg=None):
         super(GSAEncoderLayer, self).__init__()
         if dropout_cfg is None: dropout_cfg = {'type': 'droppath', 'drop_prob': drop_path_rate}
         self.norm1 = BuildNormalization(constructnormcfg(placeholder=embed_dims, norm_cfg=norm_cfg))
@@ -91,7 +92,7 @@ class GSAEncoderLayer(nn.Module):
         return layers
 
 
-'''Locally-grouped Self Attention (LSA) module'''
+'''LocallyGroupedSelfAttention'''
 class LocallyGroupedSelfAttention(nn.Module):
     def __init__(self, embed_dims, num_heads=8, qkv_bias=False, qk_scale=None, attn_drop_rate=0., proj_drop_rate=0., window_size=1):
         super(LocallyGroupedSelfAttention, self).__init__()
@@ -152,9 +153,10 @@ class LocallyGroupedSelfAttention(nn.Module):
         return {'LocallyGroupedSelfAttention.qkv': self.qkv, 'LocallyGroupedSelfAttention.proj': self.proj}
 
 
-'''Implements one encoder layer in Twins-SVT'''
+'''LSAEncoderLayer'''
 class LSAEncoderLayer(nn.Module):
-    def __init__(self, embed_dims, num_heads, feedforward_channels, drop_rate=0., attn_drop_rate=0., drop_path_rate=0., num_fcs=2, qkv_bias=True, qk_scale=None, act_cfg=None, norm_cfg=None, window_size=1, dropout_cfg=None):
+    def __init__(self, embed_dims, num_heads, feedforward_channels, drop_rate=0., attn_drop_rate=0., drop_path_rate=0., 
+                 num_fcs=2, qkv_bias=True, qk_scale=None, act_cfg=None, norm_cfg=None, window_size=1, dropout_cfg=None):
         super(LSAEncoderLayer, self).__init__()
         if dropout_cfg is None: dropout_cfg = {'type': 'droppath', 'drop_prob': drop_path_rate}
         self.norm1 = BuildNormalization(constructnormcfg(placeholder=embed_dims, norm_cfg=norm_cfg))
@@ -313,7 +315,7 @@ class PCPVT(nn.Module):
         # be consistent
         state_dict = self.twinsconvert(twins_type, state_dict)
         # load state_dict
-        self.load_state_dict(state_dict, False)
+        self.load_state_dict(state_dict, strict=False)
     '''twins convert'''
     @staticmethod
     def twinsconvert(twins_type, ckpt):
