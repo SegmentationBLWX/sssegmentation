@@ -27,7 +27,9 @@ DATASET_CFG['test']['aug_opts'] = [
 DATALOADER_CFG = DATALOADER_CFG.copy()
 # modify optimizer config
 OPTIMIZER_CFG = OPTIMIZER_CFG.copy()
-OPTIMIZER_CFG.update({
+# modify scheduler config
+SCHEDULER_CFG = SCHEDULER_CFG.copy()
+SCHEDULER_CFG.update({
     'max_epochs': 440
 })
 # modify losses config
