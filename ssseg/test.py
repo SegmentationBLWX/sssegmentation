@@ -18,7 +18,7 @@ import torch.distributed as dist
 from tqdm import tqdm
 from configs import BuildConfig
 from modules import (
-    BuildDataset, BuildDistributedDataloader, BuildDistributedModel, BuildOptimizer, adjustLearningRate, clipGradients, initslurm,
+    BuildDataset, BuildDistributedDataloader, BuildDistributedModel, BuildOptimizer, BuildScheduler, initslurm,
     BuildLoss, BuildBackbone, BuildSegmentor, BuildPixelSampler, Logger, setRandomSeed, BuildPalette, checkdir, loadcheckpoints, savecheckpoints
 )
 warnings.filterwarnings('ignore')
@@ -82,6 +82,7 @@ class Tester():
             logger_handle.info(f'DATASET_CFG: \n{cfg.DATASET_CFG}')
             logger_handle.info(f'DATALOADER_CFG: \n{cfg.DATALOADER_CFG}')
             logger_handle.info(f'OPTIMIZER_CFG: \n{cfg.OPTIMIZER_CFG}')
+            logger_handle.info(f'SCHEDULER_CFG: \n{cfg.SCHEDULER_CFG}')
             logger_handle.info(f'LOSSES_CFG: \n{cfg.LOSSES_CFG}')
             logger_handle.info(f'SEGMENTOR_CFG: \n{cfg.SEGMENTOR_CFG}')
             logger_handle.info(f'INFERENCE_CFG: \n{cfg.INFERENCE_CFG}')

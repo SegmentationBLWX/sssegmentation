@@ -17,7 +17,7 @@ import torch.distributed as dist
 from tqdm import tqdm
 from configs import BuildConfig
 from modules import (
-    BuildDataset, BuildDistributedDataloader, BuildDistributedModel, BuildOptimizer, adjustLearningRate, clipGradients, initslurm,
+    BuildDataset, BuildDistributedDataloader, BuildDistributedModel, BuildOptimizer, BuildScheduler, initslurm,
     BuildLoss, BuildBackbone, BuildSegmentor, BuildPixelSampler, Logger, setRandomSeed, BuildPalette, checkdir, loadcheckpoints, savecheckpoints
 )
 warnings.filterwarnings('ignore')
@@ -66,9 +66,7 @@ class Trainer():
         torch.backends.cudnn.benchmark = cfg.SEGMENTOR_CFG['benchmark']
         # build optimizer
         optimizer_cfg = copy.deepcopy(cfg.OPTIMIZER_CFG)
-        learning_rate = optimizer_cfg[optimizer_cfg['type']]['learning_rate']
         optimizer = BuildOptimizer(segmentor, optimizer_cfg)
-        start_epoch, end_epoch = 1, optimizer_cfg['max_epochs']
         # build fp16
         fp16_cfg = self.cfg.SEGMENTOR_CFG.get('fp16', {'is_on': False, 'opts': {'opt_level': 'O1'}})
         if fp16_cfg['is_on']:
@@ -77,6 +75,15 @@ class Trainer():
             for m in segmentor.modules():
                 if hasattr(m, 'fp16_enabled'):
                     m.fp16_enabled = True
+        # build scheduler
+        scheduler_cfg = copy.deepcopy(cfg.SCHEDULER_CFG)
+        scheduler_cfg.update({
+            'lr': cfg.OPTIMIZER_CFG['lr'],
+            'iters_per_epoch': len(dataloader),
+            'params_rules': cfg.OPTIMIZER_CFG['params_rules'],
+        })
+        scheduler = BuildScheduler(optimizer=optimizer, scheduler_cfg=scheduler_cfg)
+        start_epoch, end_epoch = 1, scheduler_cfg['max_epochs']
         # load checkpoints
         if cmd_args.checkpointspath and os.path.exists(cmd_args.checkpointspath):
             checkpoints = loadcheckpoints(cmd_args.checkpointspath, logger_handle=logger_handle, cmd_args=cmd_args)
@@ -89,9 +96,9 @@ class Trainer():
                 optimizer.load_state_dict(checkpoints['optimizer'])
             if 'epoch' in checkpoints: 
                 start_epoch = checkpoints['epoch'] + 1
+                scheduler.setstate({'cur_epoch': checkpoints['epoch'], 'cur_iter': checkpoints['epoch'] * len(dataloader)})
         else:
             cmd_args.checkpointspath = ''
-        num_iters, max_iters = (start_epoch - 1) * len(dataloader), end_epoch * len(dataloader)
         # parallel segmentor
         segmentor = BuildDistributedModel(segmentor, {'device_ids': [cmd_args.local_rank]})
         # print config
@@ -100,27 +107,21 @@ class Trainer():
             logger_handle.info(f'DATASET_CFG: \n{cfg.DATASET_CFG}')
             logger_handle.info(f'DATALOADER_CFG: \n{cfg.DATALOADER_CFG}')
             logger_handle.info(f'OPTIMIZER_CFG: \n{cfg.OPTIMIZER_CFG}')
+            logger_handle.info(f'SCHEDULER_CFG: \n{cfg.SCHEDULER_CFG}')
             logger_handle.info(f'LOSSES_CFG: \n{cfg.LOSSES_CFG}')
             logger_handle.info(f'SEGMENTOR_CFG: \n{cfg.SEGMENTOR_CFG}')
             logger_handle.info(f'INFERENCE_CFG: \n{cfg.INFERENCE_CFG}')
             logger_handle.info(f'COMMON_CFG: \n{cfg.COMMON_CFG}')
             logger_handle.info(f'Resume from: {cmd_args.checkpointspath}')
         # start to train the segmentor
-        FloatTensor = torch.cuda.FloatTensor
-        losses_log_dict_memory = {}
+        FloatTensor, losses_log_dict_memory = torch.cuda.FloatTensor, {}
         for epoch in range(start_epoch, end_epoch+1):
             # --set train
             segmentor.train()
             dataloader.sampler.set_epoch(epoch)
-            # --adjust lr if necessary
-            if optimizer_cfg['adjust_period'] == 'epoch':
-                optimizer_cfg['policy']['opts'].update({'num_iters': num_iters, 'max_iters': max_iters, 'num_epochs': epoch})
-                learning_rate = adjustLearningRate(optimizer, copy.deepcopy(optimizer_cfg))
             # --train epoch
             for batch_idx, samples in enumerate(dataloader):
-                if optimizer_cfg['adjust_period'] == 'iteration':
-                    optimizer_cfg['policy']['opts'].update({'num_iters': num_iters, 'max_iters': max_iters, 'num_epochs': epoch})
-                    learning_rate = adjustLearningRate(optimizer, optimizer_cfg)
+                learning_rate = scheduler.updatelr()
                 images, targets = samples['image'].type(FloatTensor), {'segmentation': samples['segmentation'].type(FloatTensor), 'edge': samples['edge'].type(FloatTensor)}
                 optimizer.zero_grad()
                 if cfg.SEGMENTOR_CFG['type'] in ['memorynet', 'memorynetv2']:
@@ -137,9 +138,8 @@ class Trainer():
                         scaled_loss.backward()
                 else:
                     loss.backward()
-                optimizer.step()
-                num_iters += 1
-                if (cmd_args.local_rank == 0) and (num_iters % cfg.COMMON_CFG['log_interval_iterations'] == 0):
+                scheduler.step()
+                if (cmd_args.local_rank == 0) and (scheduler.cur_iter % cfg.COMMON_CFG['log_interval_iterations'] == 0):
                     loss_log = ''
                     for key, value in losses_log_dict_memory.items():
                         loss_log += '%s %.4f, ' % (key, sum(value) / len(value))
@@ -148,15 +148,14 @@ class Trainer():
                         f'[Epoch]: {epoch}/{end_epoch}, [Batch]: {batch_idx+1}/{len(dataloader)}, [Segmentor]: {cfg.SEGMENTOR_CFG["type"]}-{cfg.SEGMENTOR_CFG["backbone"]["type"]}, '
                         f'[DATASET]: {cfg.DATASET_CFG["type"]}, [LEARNING_RATE]: {learning_rate}\n\t[LOSS]: {loss_log}'
                     )
+            scheduler.cur_epoch = epoch
             # --save checkpoints
             if (epoch % cfg.COMMON_CFG['save_interval_epochs'] == 0) or (epoch == end_epoch):
-                state_dict = {
-                    'epoch': epoch,
-                    'model': segmentor.module.state_dict(),
-                    'optimizer': optimizer.state_dict()
-                }
+                state_dict = scheduler.state()
+                state_dict['model'] = segmentor.module.state_dict()
                 savepath = os.path.join(cfg.COMMON_CFG['work_dir'], 'epoch_%s.pth' % epoch)
-                if cmd_args.local_rank == 0: savecheckpoints(state_dict, savepath, logger_handle, cmd_args=cmd_args)
+                if cmd_args.local_rank == 0:
+                    savecheckpoints(state_dict, savepath, logger_handle, cmd_args=cmd_args)
             # --eval checkpoints
             if (epoch % cfg.COMMON_CFG['eval_interval_epochs'] == 0) or (epoch == end_epoch):
                 self.evaluate(segmentor)
