@@ -38,7 +38,7 @@ SCHEDULER_CFG = SCHEDULER_CFG.copy()
 SCHEDULER_CFG.update({
     'max_epochs': 860,
     'min_lr': 1e-4,
-    'warmup': {'type': 'linear', 'ratio': 0.1, 'iters': 1000},
+    'warmup_cfg': {'type': 'linear', 'ratio': 0.1, 'iters': 1000},
 })
 # modify losses config
 LOSSES_CFG = {

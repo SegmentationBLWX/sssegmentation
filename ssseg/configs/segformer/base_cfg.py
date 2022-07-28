@@ -47,7 +47,7 @@ SCHEDULER_CFG = {
     'max_epochs': 0,
     'power': 1.0,
     'min_lr': 0.0,
-    'warmup': {'type': 'linear', 'ratio': 1e-6, 'iters': 1500},
+    'warmup_cfg': {'type': 'linear', 'ratio': 1e-6, 'iters': 1500},
 }
 # config for losses
 LOSSES_CFG = {

@@ -46,7 +46,7 @@ SCHEDULER_CFG = {
     'type': 'poly',
     'max_epochs': 0,
     'power': 0.9,
-    'warmup': {'type': 'linear', 'ratio': 0.1, 'iters': 200},
+    'warmup_cfg': {'type': 'linear', 'ratio': 0.1, 'iters': 200},
 }
 # config for losses
 LOSSES_CFG = {

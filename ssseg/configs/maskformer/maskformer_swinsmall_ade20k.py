@@ -26,7 +26,7 @@ SCHEDULER_CFG.update({
     'max_epochs': 130,
     'min_lr': 0.0,
     'power': 1.0,
-    'warmup': {'type': 'linear', 'ratio': 1e-6, 'iters': 1500},
+    'warmup_cfg': {'type': 'linear', 'ratio': 1e-6, 'iters': 1500},
 })
 # modify losses config
 LOSSES_CFG = LOSSES_CFG.copy()
