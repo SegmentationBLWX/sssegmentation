@@ -29,19 +29,18 @@ DATALOADER_CFG = DATALOADER_CFG.copy()
 OPTIMIZER_CFG = OPTIMIZER_CFG.copy()
 OPTIMIZER_CFG.update({
     'type': 'adamw',
-    'adamw': {
-        'learning_rate': 0.00006,
-        'betas': (0.9, 0.999),
-        'weight_decay': 0.01,
-        'min_lr': 0.0,
-    },
-    'max_epochs': 130,
+    'lr': 0.00006,
+    'betas': (0.9, 0.999),
+    'weight_decay': 0.01,
     'params_rules': {'backbone_net_zerowd': (1.0, 0.0), 'others': (1.0, 1.0)},
-    'policy': {
-        'type': 'poly',
-        'opts': {'power': 1.0, 'max_iters': None, 'num_iters': None, 'num_epochs': None},
-        'warmup': {'type': 'linear', 'ratio': 1e-6, 'iters': 1500}
-    },
+})
+# modify scheduler config
+SCHEDULER_CFG = SCHEDULER_CFG.copy()
+SCHEDULER_CFG.update({
+    'max_epochs': 130,
+    'min_lr': 0.0,
+    'power': 1.0,
+    'warmup': {'type': 'linear', 'ratio': 1e-6, 'iters': 1500},
 })
 # modify losses config
 LOSSES_CFG = LOSSES_CFG.copy()
