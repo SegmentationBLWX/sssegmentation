@@ -36,20 +36,18 @@ DATALOADER_CFG = {
 # config for optimizer
 OPTIMIZER_CFG = {
     'type': 'adamw',
-    'adamw': {
-        'learning_rate': 0.00006,
-        'betas': (0.9, 0.999),
-        'weight_decay': 0.01,
-        'min_lr': 0.0,
-    },
-    'max_epochs': 0,
+    'lr': 0.00006,
+    'betas': (0.9, 0.999),
+    'weight_decay': 0.01,
     'params_rules': {'backbone_net_zerowd': (1.0, 0.0), 'backbone_net_nonzerowd': (1.0, 1.0), 'others': (10.0, 1.0)},
-    'policy': {
-        'type': 'poly',
-        'opts': {'power': 1.0, 'max_iters': None, 'num_iters': None, 'num_epochs': None},
-        'warmup': {'type': 'linear', 'ratio': 1e-6, 'iters': 1500},
-    },
-    'adjust_period': ['iteration', 'epoch'][0],
+}
+# config for scheduler
+SCHEDULER_CFG = {
+    'type': 'poly',
+    'max_epochs': 0,
+    'power': 1.0,
+    'min_lr': 0.0,
+    'warmup': {'type': 'linear', 'ratio': 1e-6, 'iters': 1500},
 }
 # config for losses
 LOSSES_CFG = {

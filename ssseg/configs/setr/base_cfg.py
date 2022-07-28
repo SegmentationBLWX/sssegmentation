@@ -36,18 +36,16 @@ DATALOADER_CFG = {
 # config for optimizer
 OPTIMIZER_CFG = {
     'type': 'sgd',
-    'sgd': {
-        'learning_rate': 0.01,
-        'momentum': 0.9,
-        'weight_decay': 0.0,
-    },
-    'max_epochs': 0,
+    'lr': 0.01,
+    'momentum': 0.9,
+    'weight_decay': 0.0,
     'params_rules': {'backbone_net': 0.1, 'others': 1.0},
-    'policy': {
-        'type': 'poly',
-        'opts': {'power': 0.9, 'max_iters': None, 'num_iters': None, 'num_epochs': None}
-    },
-    'adjust_period': ['iteration', 'epoch'][0],
+}
+# config for scheduler
+SCHEDULER_CFG = {
+    'type': 'poly',
+    'max_epochs': 0,
+    'power': 0.9,
 }
 # config for losses
 LOSSES_CFG = {
