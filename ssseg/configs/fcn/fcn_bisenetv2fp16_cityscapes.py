@@ -29,18 +29,16 @@ DATALOADER_CFG = DATALOADER_CFG.copy()
 OPTIMIZER_CFG = OPTIMIZER_CFG.copy()
 OPTIMIZER_CFG.update({
     'type': 'sgd',
-    'sgd': {
-        'learning_rate': 0.05,
-        'momentum': 0.9,
-        'weight_decay': 5e-4,
-        'min_lr': 1e-4,
-    },
+    'lr': 0.05,
+    'momentum': 0.9,
+    'weight_decay': 5e-4,
+})
+# modify scheduler config
+SCHEDULER_CFG = SCHEDULER_CFG.copy()
+SCHEDULER_CFG.update({
     'max_epochs': 860,
-    'policy': {
-        'type': 'poly',
-        'opts': {'power': 0.9, 'max_iters': None, 'num_iters': None, 'num_epochs': None},
-        'warmup': {'type': 'linear', 'ratio': 0.1, 'iters': 1000},
-    },
+    'min_lr': 1e-4,
+    'warmup': {'type': 'linear', 'ratio': 0.1, 'iters': 1000},
 })
 # modify losses config
 LOSSES_CFG = {
