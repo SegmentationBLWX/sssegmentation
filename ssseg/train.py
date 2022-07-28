@@ -94,9 +94,10 @@ class Trainer():
                 segmentor.load_state_dict(checkpoints['model'], strict=False)
             if 'optimizer' in checkpoints: 
                 optimizer.load_state_dict(checkpoints['optimizer'])
-            if 'epoch' in checkpoints: 
-                start_epoch = checkpoints['epoch'] + 1
-                scheduler.setstate({'cur_epoch': checkpoints['epoch'], 'cur_iter': checkpoints['epoch'] * len(dataloader)})
+            if 'cur_epoch' in checkpoints: 
+                start_epoch = checkpoints['cur_epoch'] + 1
+                scheduler.setstate({'cur_epoch': checkpoints['cur_epoch'], 'cur_iter': checkpoints['cur_iter']})
+                assert checkpoints['cur_iter'] == len(dataloader) * checkpoints['cur_epoch']
         else:
             cmd_args.checkpointspath = ''
         # parallel segmentor

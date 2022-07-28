@@ -37,7 +37,7 @@ def BuildOptimizer(model, optimizer_cfg):
             if key == 'others': continue
             params.append({
                 'params': all_layers[key].parameters() if not filter_params else filter(lambda p: p.requires_grad, all_layers[key].parameters()), 
-                'lr': optimizer_cfg['learning_rate'] * value[0], 
+                'lr': optimizer_cfg['lr'] * value[0], 
                 'name': key,
                 'weight_decay': optimizer_cfg['weight_decay'] * value[1],
             })
@@ -48,7 +48,7 @@ def BuildOptimizer(model, optimizer_cfg):
         value = (params_rules['others'], params_rules['others']) if not isinstance(params_rules['others'], tuple) else params_rules['others']
         params.append({
             'params': others.parameters() if not filter_params else filter(lambda p: p.requires_grad, others.parameters()), 
-            'lr': optimizer_cfg['learning_rate'] * value[0], 
+            'lr': optimizer_cfg['lr'] * value[0], 
             'name': 'others',
             'weight_decay': optimizer_cfg['weight_decay'] * value[1],
         })
