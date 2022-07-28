@@ -4,7 +4,6 @@ Function:
 Author:
     Zhenchao Jin
 '''
-import copy
 import torch
 import numpy as np
 import torch.nn as nn
@@ -102,7 +101,7 @@ class PointRend(BaseModel):
                 predictions={'loss_cls': predictions, 'loss_aux': predictions_aux}, 
                 targets=targets,
                 losses_cfg=losses_cfg,
-                targets_keys_dict={'loss_cls': 'point_labels', 'loss_aux': 'segmentation'}
+                map_preds_to_tgts_dict={'loss_cls': 'point_labels', 'loss_aux': 'segmentation'}
             )
         # if mode is TEST
         refined_seg_logits = predictions_aux.clone()

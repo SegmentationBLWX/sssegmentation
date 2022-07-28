@@ -4,7 +4,6 @@ Function:
 Author:
     Zhenchao Jin
 '''
-import copy
 import torch
 import torch.nn as nn
 from ..base import BaseModel

@@ -107,7 +107,7 @@ class BaseModel(nn.Module):
             if type(module) in BuildNormalization(only_get_all_supported=True):
                 module.eval()
     '''calculate the losses'''
-    def calculatelosses(self, predictions, targets, losses_cfg, targets_keys_dict=None):
+    def calculatelosses(self, predictions, targets, losses_cfg, map_preds_to_tgts_dict=None):
         # parse targets
         target_seg = targets['segmentation']
         if 'edge' in targets:
@@ -119,27 +119,21 @@ class BaseModel(nn.Module):
         assert len(predictions) == len(losses_cfg), 'length of losses_cfg should be equal to predictions'
         losses_log_dict = {}
         for loss_name, loss_cfg in losses_cfg.items():
-            if targets_keys_dict is None:
-                if 'edge' in loss_name:
-                    loss_cfg = copy.deepcopy(loss_cfg)
-                    loss_cfg_keys = loss_cfg.keys()
-                    for key in loss_cfg_keys: 
-                        loss_cfg[key].update({'weight': cls_weight_edge})
-                    losses_log_dict[loss_name] = self.calculateloss(
-                        prediction=predictions[loss_name],
-                        target=target_edge,
-                        loss_cfg=loss_cfg,
-                    )
-                else:
-                    losses_log_dict[loss_name] = self.calculateloss(
-                        prediction=predictions[loss_name],
-                        target=target_seg,
-                        loss_cfg=loss_cfg,
-                    )
+            if 'edge' in loss_name:
+                loss_cfg = copy.deepcopy(loss_cfg)
+                loss_cfg_keys = loss_cfg.keys()
+                for key in loss_cfg_keys:
+                    loss_cfg[key].update({'weight': cls_weight_edge})
+            if map_preds_to_tgts_dict is None:
+                losses_log_dict[loss_name] = self.calculateloss(
+                    prediction=predictions[loss_name],
+                    target=target_edge if 'edge' in loss_name else target_seg,
+                    loss_cfg=loss_cfg,
+                )
             else:
                 losses_log_dict[loss_name] = self.calculateloss(
                     prediction=predictions[loss_name],
-                    target=targets[targets_keys_dict[loss_name]],
+                    target=targets[map_preds_to_tgts_dict[loss_name]],
                     loss_cfg=loss_cfg,
                 )
         loss = 0
