@@ -13,7 +13,9 @@ DATASET_CFG.update({
 DATALOADER_CFG = DATALOADER_CFG.copy()
 # modify optimizer config
 OPTIMIZER_CFG = OPTIMIZER_CFG.copy()
-OPTIMIZER_CFG.update({
+# modify scheduler config
+SCHEDULER_CFG = SCHEDULER_CFG.copy()
+SCHEDULER_CFG.update({
     'max_epochs': 130
 })
 # modify losses config
