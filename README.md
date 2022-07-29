@@ -51,6 +51,7 @@ You can star this repository to keep track of the project if it's helpful for yo
 - [ERFNet](./docs/performances/erfnet)
 - [ResNet](https://arxiv.org/pdf/1512.03385.pdf)
 - [ResNeSt](./docs/performances/resnest)
+- [ConvNeXt](./docs/performances/convnext)
 - [FastSCNN](./docs/performances/fastscnn)
 - [BiSeNetV1](./docs/performances/bisenetv1)
 - [BiSeNetV2](./docs/performances/bisenetv2)

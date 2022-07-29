@@ -7,6 +7,7 @@ Author:
 import copy
 import torch.nn as nn
 import torch.optim as optim
+from .paramsconstructor import DefaultParamsConstructor, LayerDecayParamsConstructor
 
 
 '''BuildOptimizer'''
@@ -27,31 +28,12 @@ def BuildOptimizer(model, optimizer_cfg):
     if 'filter_params' in optimizer_cfg:
         filter_params = optimizer_cfg.pop('filter_params')
     # obtain params
-    if not params_rules:
-        params = model.parameters() if not filter_params else filter(lambda p: p.requires_grad, model.parameters())
-    else:
-        params, all_layers = [], model.alllayers()
-        assert 'others' not in all_layers, 'potential bug in model.alllayers'
-        for key, value in params_rules.items():
-            if not isinstance(value, tuple): value = (value, value)
-            if key == 'others': continue
-            params.append({
-                'params': all_layers[key].parameters() if not filter_params else filter(lambda p: p.requires_grad, all_layers[key].parameters()), 
-                'lr': optimizer_cfg['lr'] * value[0], 
-                'name': key,
-                'weight_decay': optimizer_cfg['weight_decay'] * value[1],
-            })
-        others = []
-        for key, layer in all_layers.items():
-            if key not in params_rules: others.append(layer)
-        others = nn.Sequential(*others)
-        value = (params_rules['others'], params_rules['others']) if not isinstance(params_rules['others'], tuple) else params_rules['others']
-        params.append({
-            'params': others.parameters() if not filter_params else filter(lambda p: p.requires_grad, others.parameters()), 
-            'lr': optimizer_cfg['lr'] * value[0], 
-            'name': 'others',
-            'weight_decay': optimizer_cfg['weight_decay'] * value[1],
-        })
-    optimizer_cfg['params'] = params
+    supported_constructors = {
+        'default': DefaultParamsConstructor,
+        'layerdecay': LayerDecayParamsConstructor,
+    }
+    constructor_type = params_rules.get('type', 'default')
+    params_constructor = supported_constructors[constructor_type](params_rules=params_rules, filter_params=filter_params, optimizer_cfg=optimizer_cfg)
+    optimizer_cfg['params'] = params_constructor(model=model)
     # return
     return supported_optimizers[optimizer_type](**optimizer_cfg)

@@ -13,6 +13,7 @@ from .erfnet import BuildERFNet
 from .resnet import BuildResNet
 from .resnest import BuildResNeSt
 from .fastscnn import BuildFastSCNN
+from .convnext import BuildConvNeXt
 from .bisenetv1 import BuildBiSeNetV1
 from .bisenetv2 import BuildBiSeNetV2
 from .mobilenet import BuildMobileNet
@@ -33,6 +34,7 @@ def BuildBackbone(backbone_cfg):
         'resnet': BuildResNet,
         'resnest': BuildResNeSt,
         'fastscnn': BuildFastSCNN,
+        'convnext': BuildConvNeXt,
         'timm': BuildTIMMBackbone,
         'bisenetv1': BuildBiSeNetV1,
         'bisenetv2': BuildBiSeNetV2,
