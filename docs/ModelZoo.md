@@ -79,6 +79,11 @@
 
 - Related Paper: [click](https://arxiv.org/pdf/2010.11929.pdf).
 
+**15.ConvNeXt**
+
+- Related Paper: [click](https://arxiv.org/pdf/2201.03545.pdf),
+- Reported Performance: [click](https://github.com/SegmentationBLWX/sssegmentation/tree/main/docs/performances/convnext).
+
 
 ## Supported Segmentors
 

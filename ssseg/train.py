@@ -68,10 +68,12 @@ class Trainer():
         optimizer_cfg = copy.deepcopy(cfg.OPTIMIZER_CFG)
         optimizer = BuildOptimizer(segmentor, optimizer_cfg)
         # build fp16
-        fp16_cfg = self.cfg.SEGMENTOR_CFG.get('fp16', {'is_on': False, 'opts': {'opt_level': 'O1'}})
-        if fp16_cfg['is_on']:
+        fp16_cfg = self.cfg.SEGMENTOR_CFG.get('fp16_cfg', {'type': None})
+        fp16_type = fp16_cfg.pop('type')
+        assert fp16_type in [None, 'apex']
+        if fp16_type is not None:
             import apex
-            segmentor, optimizer = apex.amp.initialize(segmentor, optimizer, **fp16_cfg['opts'])
+            segmentor, optimizer = apex.amp.initialize(segmentor, optimizer, **fp16_cfg)
             for m in segmentor.modules():
                 if hasattr(m, 'fp16_enabled'):
                     m.fp16_enabled = True
@@ -98,6 +100,8 @@ class Trainer():
                 start_epoch = checkpoints['cur_epoch'] + 1
                 scheduler.setstate({'cur_epoch': checkpoints['cur_epoch'], 'cur_iter': checkpoints['cur_iter']})
                 assert checkpoints['cur_iter'] == len(dataloader) * checkpoints['cur_epoch']
+            if 'amp' in checkpoints and fp16_type is not None:
+                apex.amp.load_state_dict(checkpoints['amp'])
         else:
             cmd_args.checkpointspath = ''
         # parallel segmentor
@@ -134,7 +138,7 @@ class Trainer():
                         losses_log_dict_memory[key].append(value)
                     else: 
                         losses_log_dict_memory[key] = [value]
-                if fp16_cfg['is_on']:
+                if fp16_type is not None:
                     with apex.amp.scale_loss(loss, optimizer) as scaled_loss:
                         scaled_loss.backward()
                 else:
@@ -154,6 +158,8 @@ class Trainer():
             if (epoch % cfg.COMMON_CFG['save_interval_epochs'] == 0) or (epoch == end_epoch):
                 state_dict = scheduler.state()
                 state_dict['model'] = segmentor.module.state_dict()
+                if fp16_type is not None:
+                    state_dict['amp'] = apex.amp.state_dict()
                 savepath = os.path.join(cfg.COMMON_CFG['work_dir'], 'epoch_%s.pth' % epoch)
                 if cmd_args.local_rank == 0:
                     savecheckpoints(state_dict, savepath, logger_handle, cmd_args=cmd_args)

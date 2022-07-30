@@ -62,7 +62,7 @@ LOSSES_CFG = {
 SEGMENTOR_CFG = SEGMENTOR_CFG.copy()
 SEGMENTOR_CFG.update({
     'num_classes': 19,
-    'fp16': {'is_on': True, 'opts': {'opt_level': 'O1'}},
+    'fp16_cfg': {'type': 'apex', 'opt_level': 'O1'},
     'backbone': {
         'type': None,
         'series': 'bisenetv2',
