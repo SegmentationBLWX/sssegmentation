@@ -74,7 +74,7 @@ class UPerNet(BaseModel):
         lateral_outputs.append(ppm_out)
         for i in range(len(lateral_outputs) - 1, 0, -1):
             prev_shape = lateral_outputs[i - 1].shape[2:]
-            lateral_outputs[i - 1] += F.interpolate(lateral_outputs[i], size=prev_shape, mode='bilinear', align_corners=self.align_corners)
+            lateral_outputs[i - 1] = lateral_outputs[i - 1] + F.interpolate(lateral_outputs[i], size=prev_shape, mode='bilinear', align_corners=self.align_corners)
         fpn_outputs = [self.fpn_convs[i](lateral_outputs[i]) for i in range(len(lateral_outputs) - 1)]
         fpn_outputs.append(lateral_outputs[-1])
         fpn_outputs = [F.interpolate(out, size=fpn_outputs[0].size()[2:], mode='bilinear', align_corners=self.align_corners) for out in fpn_outputs]

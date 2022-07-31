@@ -65,7 +65,6 @@ SEGMENTOR_CFG = {
     'backend': 'nccl',
     'norm_cfg': {'type': 'syncbatchnorm'},
     'act_cfg': {'type': 'relu', 'inplace': True},
-    'fp16_cfg': {'type': 'apex', 'opt_level': 'O1'},
     'backbone': {
         'type': 'convnext_base',
         'series': 'convnext',

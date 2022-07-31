@@ -1,4 +1,4 @@
-'''upernet_convnextsmallfp16_ade20k'''
+'''upernet_convnextbase_ade20k'''
 import os
 from .base_cfg import *
 
@@ -28,35 +28,21 @@ SEGMENTOR_CFG = SEGMENTOR_CFG.copy()
 SEGMENTOR_CFG.update({
     'num_classes': 150,
     'backbone': {
-        'type': 'convnext_small',
+        'type': 'convnext_base',
         'series': 'convnext',
-        'arch': 'small',
+        'arch': 'base',
         'pretrained': True,
-        'drop_path_rate': 0.3,
+        'drop_path_rate': 0.4,
         'layer_scale_init_value': 1.0,
         'gap_before_final_norm': False,
         'selected_indices': (0, 1, 2, 3),
         'norm_cfg': {'type': 'layernorm2d', 'eps': 1e-6},
     },
-    'ppm': {
-        'in_channels': 768,
-        'out_channels': 512,
-        'pool_scales': [1, 2, 3, 6],
-    },
-    'lateral': {
-        'in_channels_list': [96, 192, 384],
-        'out_channels': 512,
-    },
-    'auxiliary': {
-        'in_channels': 384,
-        'out_channels': 512,
-        'dropout': 0.1,
-    }
 })
 # modify inference config
 INFERENCE_CFG = INFERENCE_CFG.copy()
 # modify common config
 COMMON_CFG = COMMON_CFG.copy()
-COMMON_CFG['work_dir'] = 'upernet_convnextsmallfp16_ade20k'
-COMMON_CFG['logfilepath'] = 'upernet_convnextsmallfp16_ade20k/upernet_convnextsmallfp16_ade20k.log'
-COMMON_CFG['resultsavepath'] = 'upernet_convnextsmallfp16_ade20k/upernet_convnextsmallfp16_ade20k_results.pkl'
+COMMON_CFG['work_dir'] = 'upernet_convnextbase_ade20k'
+COMMON_CFG['logfilepath'] = 'upernet_convnextbase_ade20k/upernet_convnextbase_ade20k.log'
+COMMON_CFG['resultsavepath'] = 'upernet_convnextbase_ade20k/upernet_convnextbase_ade20k_results.pkl'
