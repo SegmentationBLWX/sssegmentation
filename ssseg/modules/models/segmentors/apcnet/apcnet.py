@@ -7,13 +7,13 @@ Author:
 import copy
 import torch
 import torch.nn as nn
-from ..base import BaseModel
+from ..base import BaseSegmentor
 from .acm import AdaptiveContextModule
 from ...backbones import BuildActivation, BuildNormalization, constructnormcfg
 
 
 '''APCNet'''
-class APCNet(BaseModel):
+class APCNet(BaseSegmentor):
     def __init__(self, cfg, mode):
         super(APCNet, self).__init__(cfg, mode)
         align_corners, norm_cfg, act_cfg = self.align_corners, self.norm_cfg, self.act_cfg

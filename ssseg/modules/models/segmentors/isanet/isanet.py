@@ -9,7 +9,7 @@ import math
 import torch
 import torch.nn as nn
 import torch.nn.functional as F
-from ..base import BaseModel
+from ..base import BaseSegmentor
 from ..base import SelfAttentionBlock as _SelfAttentionBlock
 from ...backbones import BuildActivation, BuildNormalization, constructnormcfg
 
@@ -49,7 +49,7 @@ class SelfAttentionBlock(_SelfAttentionBlock):
 
 
 '''ISANet'''
-class ISANet(BaseModel):
+class ISANet(BaseSegmentor):
     def __init__(self, cfg, mode):
         super(ISANet, self).__init__(cfg, mode)
         align_corners, norm_cfg, act_cfg = self.align_corners, self.norm_cfg, self.act_cfg

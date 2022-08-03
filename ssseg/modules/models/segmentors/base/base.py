@@ -1,6 +1,6 @@
 '''
 Function:
-    Base model for all supported models
+    Base segmentor for all supported segmentors
 Author:
     Zhenchao Jin
 '''
@@ -13,10 +13,10 @@ from ...losses import BuildLoss
 from ...backbones import BuildBackbone, BuildActivation, BuildNormalization, constructnormcfg
 
 
-'''BaseModel'''
-class BaseModel(nn.Module):
+'''BaseSegmentor'''
+class BaseSegmentor(nn.Module):
     def __init__(self, cfg, mode):
-        super(BaseModel, self).__init__()
+        super(BaseSegmentor, self).__init__()
         self.cfg = cfg
         self.mode = mode
         assert self.mode in ['TRAIN', 'TEST']

@@ -8,13 +8,13 @@ import torch
 import numpy as np
 import torch.nn as nn
 import torch.nn.functional as F
-from ..base import FPN, BaseModel
+from ..base import FPN, BaseSegmentor
 from mmcv.ops import point_sample as PointSample
 from ...backbones import BuildActivation, BuildNormalization, constructnormcfg
 
 
 '''PointRend'''
-class PointRend(BaseModel):
+class PointRend(BaseSegmentor):
     def __init__(self, cfg, mode):
         super(PointRend, self).__init__(cfg, mode)
         align_corners, norm_cfg, act_cfg = self.align_corners, self.norm_cfg, self.act_cfg

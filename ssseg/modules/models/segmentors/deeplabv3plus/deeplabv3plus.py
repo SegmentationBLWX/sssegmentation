@@ -8,13 +8,13 @@ import copy
 import torch
 import torch.nn as nn
 import torch.nn.functional as F
-from ..base import BaseModel
+from ..base import BaseSegmentor
 from .aspp import DepthwiseSeparableASPP
 from ...backbones import BuildActivation, BuildNormalization, DepthwiseSeparableConv2d, constructnormcfg
 
 
 '''Deeplabv3plus'''
-class Deeplabv3Plus(BaseModel):
+class Deeplabv3Plus(BaseSegmentor):
     def __init__(self, cfg, mode):
         super(Deeplabv3Plus, self).__init__(cfg, mode)
         align_corners, norm_cfg, act_cfg = self.align_corners, self.norm_cfg, self.act_cfg

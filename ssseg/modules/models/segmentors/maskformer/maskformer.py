@@ -9,14 +9,14 @@ import torch
 import torch.nn as nn
 import torch.nn.functional as F
 import torch.distributed as dist
-from ..base import BaseModel
+from ..base import BaseSegmentor
 from ..pspnet import PyramidPoolingModule
 from ...backbones import BuildActivation, BuildNormalization, constructnormcfg
 from .transformers import Predictor, SetCriterion, Transformer, HungarianMatcher
 
 
 '''MaskFormer'''
-class MaskFormer(BaseModel):
+class MaskFormer(BaseSegmentor):
     def __init__(self, cfg, mode):
         super(MaskFormer, self).__init__(cfg, mode)
         align_corners, norm_cfg, act_cfg = self.align_corners, self.norm_cfg, self.act_cfg

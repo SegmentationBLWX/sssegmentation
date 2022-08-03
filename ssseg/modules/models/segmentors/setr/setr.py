@@ -8,12 +8,12 @@ import torch
 import torch.nn as nn
 import torch.nn.functional as F
 from .mla import MLANeck
-from ..base import BaseModel
+from ..base import BaseSegmentor
 from ...backbones import BuildActivation, BuildNormalization, constructnormcfg
 
 
 '''Naive upsampling head and Progressive upsampling head of SETR'''
-class SETRUP(BaseModel):
+class SETRUP(BaseSegmentor):
     def __init__(self, cfg, mode):
         super(SETRUP, self).__init__(cfg, mode)
         align_corners, norm_cfg, act_cfg = self.align_corners, self.norm_cfg, self.act_cfg
@@ -93,7 +93,7 @@ class SETRUP(BaseModel):
 
 
 '''Multi level feature aggretation head of SETR'''
-class SETRMLA(BaseModel):
+class SETRMLA(BaseSegmentor):
     def __init__(self, cfg, mode):
         super(SETRMLA, self).__init__(cfg, mode)
         align_corners, norm_cfg, act_cfg = self.align_corners, self.norm_cfg, self.act_cfg

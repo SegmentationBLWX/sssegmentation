@@ -6,12 +6,12 @@ Author:
 '''
 import torch
 import torch.nn as nn
-from ..base import BaseModel
+from ..base import BaseSegmentor
 from ...backbones import BuildActivation, BuildNormalization, DepthwiseSeparableConv2d, constructnormcfg
 
 
 '''FCN'''
-class FCN(BaseModel):
+class FCN(BaseSegmentor):
     def __init__(self, cfg, mode):
         super(FCN, self).__init__(cfg, mode)
         align_corners, norm_cfg, act_cfg = self.align_corners, self.norm_cfg, self.act_cfg
@@ -66,7 +66,7 @@ class FCN(BaseModel):
 
 
 '''DepthwiseSeparableFCN'''
-class DepthwiseSeparableFCN(BaseModel):
+class DepthwiseSeparableFCN(BaseSegmentor):
     def __init__(self, cfg, mode):
         super(DepthwiseSeparableFCN, self).__init__(cfg, mode)
         align_corners, norm_cfg, act_cfg = self.align_corners, self.norm_cfg, self.act_cfg

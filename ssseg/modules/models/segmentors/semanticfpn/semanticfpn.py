@@ -8,12 +8,12 @@ import torch
 import numpy as np
 import torch.nn as nn
 import torch.nn.functional as F
-from ..base import FPN, BaseModel
+from ..base import FPN, BaseSegmentor
 from ...backbones import BuildActivation, BuildNormalization, constructnormcfg
 
 
 '''SemanticFPN'''
-class SemanticFPN(BaseModel):
+class SemanticFPN(BaseSegmentor):
     def __init__(self, cfg, mode):
         super(SemanticFPN, self).__init__(cfg, mode)
         align_corners, norm_cfg, act_cfg = self.align_corners, self.norm_cfg, self.act_cfg

@@ -8,11 +8,11 @@ import copy
 import torch
 import torch.nn as nn
 from .aspp import ASPP
-from ..base import BaseModel
+from ..base import BaseSegmentor
 
 
 '''Deeplabv3'''
-class Deeplabv3(BaseModel):
+class Deeplabv3(BaseSegmentor):
     def __init__(self, cfg, mode):
         super(Deeplabv3, self).__init__(cfg, mode)
         align_corners, norm_cfg, act_cfg = self.align_corners, self.norm_cfg, self.act_cfg

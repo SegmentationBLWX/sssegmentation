@@ -8,14 +8,14 @@ import copy
 import torch
 import torch.nn as nn
 import torch.nn.functional as F
-from ..base import BaseModel
+from ..base import BaseSegmentor
 from .objectcontext import ObjectContextBlock
 from .spatialgather import SpatialGatherModule
 from ...backbones import BuildActivation, BuildNormalization, constructnormcfg
 
 
 '''OCRNet'''
-class OCRNet(BaseModel):
+class OCRNet(BaseSegmentor):
     def __init__(self, cfg, mode):
         super(OCRNet, self).__init__(cfg, mode)
         align_corners, norm_cfg, act_cfg = self.align_corners, self.norm_cfg, self.act_cfg

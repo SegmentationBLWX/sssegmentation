@@ -7,13 +7,13 @@ Author:
 import copy
 import torch
 import torch.nn as nn
-from ..base import BaseModel
+from ..base import BaseSegmentor
 from .contextblock import ContextBlock
 from ...backbones import BuildActivation, BuildNormalization, constructnormcfg
 
 
 '''GCNet'''
-class GCNet(BaseModel):
+class GCNet(BaseSegmentor):
     def __init__(self, cfg, mode):
         super(GCNet, self).__init__(cfg, mode)
         align_corners, norm_cfg, act_cfg = self.align_corners, self.norm_cfg, self.act_cfg

@@ -8,12 +8,12 @@ import torch
 import torch.nn as nn
 import torch.nn.functional as F
 from .ema import EMAModule
-from ..base import BaseModel
+from ..base import BaseSegmentor
 from ...backbones import BuildActivation, BuildNormalization, constructnormcfg
 
 
 '''EMANet'''
-class EMANet(BaseModel):
+class EMANet(BaseSegmentor):
     def __init__(self, cfg, mode):
         super(EMANet, self).__init__(cfg, mode)
         align_corners, norm_cfg, act_cfg = self.align_corners, self.norm_cfg, self.act_cfg

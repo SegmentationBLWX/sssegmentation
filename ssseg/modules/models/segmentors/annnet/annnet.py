@@ -7,14 +7,14 @@ Author:
 import copy
 import torch
 import torch.nn as nn
-from ..base import BaseModel
 from .afnblock import AFNBlock
 from .apnblock import APNBlock
+from ..base import BaseSegmentor
 from ...backbones import BuildActivation, BuildNormalization, constructnormcfg
 
 
 '''ANNNet'''
-class ANNNet(BaseModel):
+class ANNNet(BaseSegmentor):
     def __init__(self, cfg, mode):
         super(ANNNet, self).__init__(cfg, mode)
         align_corners, norm_cfg, act_cfg = self.align_corners, self.norm_cfg, self.act_cfg

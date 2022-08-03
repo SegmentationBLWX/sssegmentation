@@ -6,13 +6,13 @@ Author:
 '''
 import torch
 import torch.nn as nn
-from ..base import BaseModel
+from ..base import BaseSegmentor
 from .dcm import DynamicConvolutionalModule
 from ...backbones import BuildActivation, BuildNormalization, constructnormcfg
 
 
 '''DMNet'''
-class DMNet(BaseModel):
+class DMNet(BaseSegmentor):
     def __init__(self, cfg, mode):
         super(DMNet, self).__init__(cfg, mode)
         align_corners, norm_cfg, act_cfg = self.align_corners, self.norm_cfg, self.act_cfg

@@ -91,21 +91,17 @@ class SelfAttentionBlock(nn.Module):
     '''build project'''
     def buildproject(self, in_channels, out_channels, num_convs, use_norm, norm_cfg, act_cfg):
         if use_norm:
-            convs = [
-                nn.Sequential(
-                    nn.Conv2d(in_channels, out_channels, kernel_size=1, stride=1, padding=0, bias=False),
+            convs = [nn.Sequential(
+                nn.Conv2d(in_channels, out_channels, kernel_size=1, stride=1, padding=0, bias=False),
+                BuildNormalization(constructnormcfg(placeholder=out_channels, norm_cfg=norm_cfg)),
+                BuildActivation(act_cfg),
+            )]
+            for _ in range(num_convs - 1):
+                convs.append(nn.Sequential(
+                    nn.Conv2d(out_channels, out_channels, kernel_size=1, stride=1, padding=0, bias=False),
                     BuildNormalization(constructnormcfg(placeholder=out_channels, norm_cfg=norm_cfg)),
                     BuildActivation(act_cfg),
-                )
-            ]
-            for _ in range(num_convs - 1):
-                convs.append(
-                    nn.Sequential(
-                        nn.Conv2d(out_channels, out_channels, kernel_size=1, stride=1, padding=0, bias=False),
-                        BuildNormalization(constructnormcfg(placeholder=out_channels, norm_cfg=norm_cfg)),
-                        BuildActivation(act_cfg),
-                    )
-                )
+                ))
         else:
             convs = [nn.Conv2d(in_channels, out_channels, kernel_size=1, stride=1, padding=0, bias=False)]
             for _ in range(num_convs - 1):

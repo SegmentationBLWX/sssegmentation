@@ -9,15 +9,15 @@ import torch
 import torch.nn as nn
 import torch.nn.functional as F
 import torch.distributed as dist
-from ..base import BaseModel
 from ..deeplabv3 import ASPP
+from ..base import BaseSegmentor
 from .memory import FeaturesMemory
 from ..pspnet import PyramidPoolingModule
 from ...backbones import BuildActivation, BuildNormalization, constructnormcfg
 
 
 '''MemoryNet'''
-class MemoryNet(BaseModel):
+class MemoryNet(BaseSegmentor):
     def __init__(self, cfg, mode):
         super(MemoryNet, self).__init__(cfg, mode)
         align_corners, norm_cfg, act_cfg = self.align_corners, self.norm_cfg, self.act_cfg
