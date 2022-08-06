@@ -18,6 +18,11 @@ class UPerNet(BaseSegmentor):
     def __init__(self, cfg, mode):
         super(UPerNet, self).__init__(cfg, mode)
         align_corners, norm_cfg, act_cfg = self.align_corners, self.norm_cfg, self.act_cfg
+        # build feature2pyramid
+        if 'feature2pyramid' in cfg:
+            from ..base import Feature2Pyramid
+            cfg['feature2pyramid']['norm_cfg'] = norm_cfg.copy()
+            self.feats_to_pyramid_net = Feature2Pyramid(**cfg['feature2pyramid'])
         # build pyramid pooling module
         ppm_cfg = {
             'in_channels': cfg['ppm']['in_channels'],
@@ -66,6 +71,8 @@ class UPerNet(BaseSegmentor):
         img_size = x.size(2), x.size(3)
         # feed to backbone network
         backbone_outputs = self.transforminputs(self.backbone_net(x), selected_indices=self.cfg['backbone'].get('selected_indices'))
+        # feed to feats_to_pyramid_net
+        if hasattr(self, 'feats_to_pyramid_net'): backbone_outputs = self.feats_to_pyramid_net(backbone_outputs)
         # feed to pyramid pooling module
         ppm_out = self.ppm_net(backbone_outputs[-1])
         # apply fpn
@@ -102,6 +109,8 @@ class UPerNet(BaseSegmentor):
             }
             if hasattr(self, 'auxiliary_decoder'):
                 all_layers['auxiliary_decoder'] = self.auxiliary_decoder
+            if hasattr(self, 'feats_to_pyramid_net'):
+                all_layers['feats_to_pyramid_net'] = self.feats_to_pyramid_net
             tmp_layers = []
             for key, value in self.backbone_net.zerowdlayers().items():
                 tmp_layers.append(value)
@@ -120,4 +129,6 @@ class UPerNet(BaseSegmentor):
             }
             if hasattr(self, 'auxiliary_decoder'):
                 all_layers['auxiliary_decoder'] = self.auxiliary_decoder
+            if hasattr(self, 'feats_to_pyramid_net'):
+                all_layers['feats_to_pyramid_net'] = self.feats_to_pyramid_net
         return all_layers

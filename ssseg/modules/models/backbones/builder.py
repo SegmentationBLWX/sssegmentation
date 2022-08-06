@@ -6,6 +6,7 @@ Author:
 '''
 import copy
 from .unet import BuildUNet
+from .beit import BuildBEiT
 from .twins import BuildTwins
 from .cgnet import BuildCGNet
 from .hrnet import BuildHRNet
@@ -27,6 +28,7 @@ from .timmwrapper import BuildTIMMBackbone
 def BuildBackbone(backbone_cfg):
     supported_backbones = {
         'unet': BuildUNet,
+        'beit': BuildBEiT,
         'twins': BuildTwins,
         'cgnet': BuildCGNet,
         'hrnet': BuildHRNet,

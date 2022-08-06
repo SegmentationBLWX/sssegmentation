@@ -45,6 +45,7 @@ You can star this repository to keep track of the project if it's helpful for yo
 #### Supported Backbones
 
 - [UNet](./docs/performances/unet)
+- [BEiT](./docs/performances/beit)
 - [Twins](./docs/performances/twins)
 - [CGNet](./docs/performances/cgnet)
 - [HRNet](https://arxiv.org/pdf/1908.07919.pdf)
