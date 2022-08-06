@@ -2,7 +2,7 @@
 
 <a href="https://github.com/wutianyiRosun/CGNet">Official Repo</a>
 
-<a href="https://github.com/SegmentationBLWX/sssegmentation/tree/main/ssseg/modules/backbones">Code Snippet</a>
+<a href="https://github.com/SegmentationBLWX/sssegmentation/blob/main/ssseg/modules/models/backbones/cgnet.py">Code Snippet</a>
 
 <details>
 <summary align="left"><a href="https://arxiv.org/pdf/1811.08201.pdf">CGNet (TIP'2020)</a></summary>

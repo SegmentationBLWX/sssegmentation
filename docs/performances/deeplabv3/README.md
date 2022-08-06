@@ -2,7 +2,7 @@
 
 <a href="https://github.com/tensorflow/models/tree/master/research/deeplab">Official Repo</a>
 
-<a href="https://github.com/SegmentationBLWX/sssegmentation/tree/main/ssseg/modules/models/deeplabv3">Code Snippet</a>
+<a href="https://github.com/SegmentationBLWX/sssegmentation/blob/main/ssseg/modules/models/segmentors/deeplabv3/deeplabv3.py">Code Snippet</a>
 
 <details>
 <summary align="left"><a href="https://arxiv.org/pdf/1706.05587.pdf">DeepLabV3 (ArXiv'2017)</a></summary>

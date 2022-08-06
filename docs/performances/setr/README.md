@@ -2,7 +2,7 @@
 
 <a href="https://github.com/fudan-zvg/SETR">Official Repo</a>
 
-<a href="https://github.com/SegmentationBLWX/sssegmentation/tree/main/ssseg/modules/models/setr">Code Snippet</a>
+<a href="https://github.com/SegmentationBLWX/sssegmentation/blob/main/ssseg/modules/models/segmentors/setr/setr.py">Code Snippet</a>
 
 <details>
 <summary align="left"><a href="https://arxiv.org/pdf/2012.15840.pdf">SETR (CVPR'2021)</a></summary>

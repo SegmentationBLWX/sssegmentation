@@ -2,7 +2,7 @@
 
 <a href="https://github.com/facebookresearch/video-nonlocal-net">Official Repo</a>
 
-<a href="https://github.com/SegmentationBLWX/sssegmentation/tree/main/ssseg/modules/models/nonlocalnet">Code Snippet</a>
+<a href="https://github.com/SegmentationBLWX/sssegmentation/blob/main/ssseg/modules/models/segmentors/nonlocalnet/nonlocalnet.py">Code Snippet</a>
 
 <details>
 <summary align="left"><a href="https://arxiv.org/pdf/1711.07971.pdf">NonLocal Net (CVPR'2018)</a></summary>

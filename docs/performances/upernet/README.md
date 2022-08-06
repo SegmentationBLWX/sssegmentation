@@ -2,7 +2,7 @@
 
 <a href="https://github.com/CSAILVision/unifiedparsing">Official Repo</a>
 
-<a href="https://github.com/SegmentationBLWX/sssegmentation/tree/main/ssseg/modules/models/upernet">Code Snippet</a>
+<a href="https://github.com/SegmentationBLWX/sssegmentation/blob/main/ssseg/modules/models/segmentors/upernet/upernet.py">Code Snippet</a>
 
 <details>
 <summary align="left"><a href="https://arxiv.org/pdf/1807.10221.pdf">UPerNet (ECCV'2018)</a></summary>

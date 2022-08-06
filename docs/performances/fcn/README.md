@@ -2,7 +2,7 @@
 
 <a href="https://github.com/BVLC/caffe/wiki/Model-Zoo#fcn">Official Repo</a>
 
-<a href="https://github.com/SegmentationBLWX/sssegmentation/tree/main/ssseg/modules/models/fcn">Code Snippet</a>
+<a href="https://github.com/SegmentationBLWX/sssegmentation/blob/main/ssseg/modules/models/segmentors/fcn/fcn.py">Code Snippet</a>
 
 <details>
 <summary align="left"><a href="https://arxiv.org/pdf/1411.4038.pdf">FCN (CVPR'2015/TPAMI'2017)</a></summary>

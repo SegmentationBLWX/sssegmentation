@@ -2,7 +2,7 @@
 
 <a href="https://github.com/facebookresearch/ConvNeXt">Official Repo</a>
 
-<a href="https://github.com/SegmentationBLWX/sssegmentation/tree/main/ssseg/modules/backbones">Code Snippet</a>
+<a href="https://github.com/SegmentationBLWX/sssegmentation/blob/main/ssseg/modules/models/backbones/convnext.py">Code Snippet</a>
 
 <details>
 <summary align="left"><a href="https://arxiv.org/pdf/2201.03545.pdf">ConvNeXt (CVPR'2022)</a></summary>

@@ -2,7 +2,7 @@
 
 <a href="https://github.com/Meituan-AutoML/Twins">Official Repo</a>
 
-<a href="https://github.com/SegmentationBLWX/sssegmentation/tree/main/ssseg/modules/backbones">Code Snippet</a>
+<a href="https://github.com/SegmentationBLWX/sssegmentation/blob/main/ssseg/modules/models/backbones/twins.py">Code Snippet</a>
 
 <details>
 <summary align="left"><a href="https://arxiv.org/pdf/2104.13840.pdf">Twins (NeurIPS'2021)</a></summary>

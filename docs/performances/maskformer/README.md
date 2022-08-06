@@ -2,7 +2,7 @@
 
 <a href="https://github.com/facebookresearch/MaskFormer">Official Repo</a>
 
-<a href="https://github.com/SegmentationBLWX/sssegmentation/tree/main/ssseg/modules/models/maskformer">Code Snippet</a>
+<a href="https://github.com/SegmentationBLWX/sssegmentation/blob/main/ssseg/modules/models/segmentors/maskformer/maskformer.py">Code Snippet</a>
 
 <details>
 <summary align="left"><a href="https://arxiv.org/pdf/2107.06278.pdf">MaskFormer (NeurIPS'2021)</a></summary>

@@ -2,7 +2,7 @@
 
 <a href="https://github.com/zhanghang1989/ResNeSt">Official Repo</a>
 
-<a href="https://github.com/SegmentationBLWX/sssegmentation/tree/main/ssseg/modules/backbones">Code Snippet</a>
+<a href="https://github.com/SegmentationBLWX/sssegmentation/blob/main/ssseg/modules/models/backbones/resnest.py">Code Snippet</a>
 
 <details>
 <summary align="left"><a href="https://arxiv.org/pdf/2004.08955.pdf">ResNeSt (ArXiv'2020)</a></summary>

@@ -2,7 +2,7 @@
 
 <a href="https://github.com/liutinglt/CE2P">Official Repo</a>
 
-<a href="https://github.com/SegmentationBLWX/sssegmentation/tree/main/ssseg/modules/models/ce2p">Code Snippet</a>
+<a href="https://github.com/SegmentationBLWX/sssegmentation/blob/main/ssseg/modules/models/segmentors/ce2p/ce2p.py">Code Snippet</a>
 
 <details>
 <summary align="left"><a href="https://arxiv.org/pdf/1809.05996.pdf">CE2P (AAAI'2019)</a></summary>

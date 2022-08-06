@@ -2,7 +2,7 @@
 
 <a href="https://github.com/hszhao/PSANet">Official Repo</a>
 
-<a href="https://github.com/SegmentationBLWX/sssegmentation/tree/main/ssseg/modules/models/psanet">Code Snippet</a>
+<a href="https://github.com/SegmentationBLWX/sssegmentation/blob/main/ssseg/modules/models/segmentors/psanet/psanet.py">Code Snippet</a>
 
 <details>
 <summary align="left"><a href="https://openaccess.thecvf.com/content_ECCV_2018/papers/Hengshuang_Zhao_PSANet_Point-wise_Spatial_ECCV_2018_paper.pdf">PSANet (ECCV'2018)</a></summary>

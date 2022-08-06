@@ -2,7 +2,7 @@
 
 <a href="https://github.com/microsoft/Swin-Transformer">Official Repo</a>
 
-<a href="https://github.com/SegmentationBLWX/sssegmentation/tree/main/ssseg/modules/backbones">Code Snippet</a>
+<a href="https://github.com/SegmentationBLWX/sssegmentation/blob/main/ssseg/modules/models/backbones/swin.py">Code Snippet</a>
 
 <details>
 <summary align="left"><a href="https://arxiv.org/pdf/2103.14030.pdf">Swin Transformer (ICCV'2021)</a></summary>

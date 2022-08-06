@@ -2,7 +2,7 @@
 
 <a href="https://github.com/NVlabs/SegFormer">Official Repo</a>
 
-<a href="https://github.com/SegmentationBLWX/sssegmentation/tree/main/ssseg/modules/models/segformer">Code Snippet</a>
+<a href="https://github.com/SegmentationBLWX/sssegmentation/blob/main/ssseg/modules/models/segmentors/segformer/segformer.py">Code Snippet</a>
 
 <details>
 <summary align="left"><a href="https://arxiv.org/pdf/2105.15203.pdf">SegFormer (ArXiv'2021)</a></summary>

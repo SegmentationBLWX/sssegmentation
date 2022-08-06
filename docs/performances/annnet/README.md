@@ -2,7 +2,7 @@
 
 <a href="https://github.com/MendelXu/ANN">Official Repo</a>
 
-<a href="https://github.com/SegmentationBLWX/sssegmentation/tree/main/ssseg/modules/models/annnet">Code Snippet</a>
+<a href="https://github.com/SegmentationBLWX/sssegmentation/blob/main/ssseg/modules/models/segmentors/annnet/annnet.py">Code Snippet</a>
 
 <details>
 <summary align="left"><a href="https://arxiv.org/pdf/1908.07678.pdf">ANN (ICCV'2019)</a></summary>

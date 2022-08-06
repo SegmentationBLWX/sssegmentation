@@ -2,7 +2,7 @@
 
 <a href="https://github.com/speedinghzl/CCNet">Official Repo</a>
 
-<a href="https://github.com/SegmentationBLWX/sssegmentation/tree/main/ssseg/modules/models/ccnet">Code Snippet</a>
+<a href="https://github.com/SegmentationBLWX/sssegmentation/blob/main/ssseg/modules/models/segmentors/ccnet/ccnet.py">Code Snippet</a>
 
 <details>
 <summary align="left"><a href="https://arxiv.org/pdf/1811.11721.pdf">CCNet (ICCV'2019)</a></summary>

@@ -2,7 +2,7 @@
 
 <a href="https://github.com/SegmentationBLWX/sssegmentation">Official Repo</a>
 
-<a href="https://github.com/SegmentationBLWX/sssegmentation/tree/main/ssseg/modules/models/isnet">Code Snippet</a>
+<a href="https://github.com/SegmentationBLWX/sssegmentation/blob/main/ssseg/modules/models/segmentors/isnet/isnet.py">Code Snippet</a>
 
 <details>
 <summary align="left"><a href="https://arxiv.org/pdf/2108.12382.pdf">ISNet (ICCV'2021)</a></summary>

@@ -2,7 +2,7 @@
 
 <a href="https://github.com/tensorflow/models/tree/master/research/deeplab">Official Repo</a>
 
-<a href="https://github.com/SegmentationBLWX/sssegmentation/tree/main/ssseg/modules/backbones">Code Snippet</a>
+<a href="https://github.com/SegmentationBLWX/sssegmentation/blob/main/ssseg/modules/models/backbones/mobilenet.py">Code Snippet</a>
 
 <details>
 <summary align="left"><a href="https://arxiv.org/pdf/1801.04381.pdf">MobileNetV2 (CVPR'2018)</a></summary>

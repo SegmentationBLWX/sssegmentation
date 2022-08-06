@@ -2,7 +2,7 @@
 
 <a href="https://github.com/ycszen/TorchSeg/tree/master/model/bisenet">Official Repo</a>
 
-<a href="https://github.com/SegmentationBLWX/sssegmentation/tree/main/ssseg/modules/backbones">Code Snippet</a>
+<a href="https://github.com/SegmentationBLWX/sssegmentation/blob/main/ssseg/modules/models/backbones/bisenetv1.py">Code Snippet</a>
 
 <details>
 <summary align="left"><a href="https://arxiv.org/pdf/1808.00897.pdf">BiSeNetV1 (ECCV'2018)</a></summary>

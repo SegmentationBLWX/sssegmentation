@@ -2,7 +2,7 @@
 
 <a href="http://lmb.informatik.uni-freiburg.de/people/ronneber/u-net">Official Repo</a>
 
-<a href="https://github.com/SegmentationBLWX/sssegmentation/tree/main/ssseg/modules/backbones">Code Snippet</a>
+<a href="https://github.com/SegmentationBLWX/sssegmentation/blob/main/ssseg/modules/models/backbones/unet.py">Code Snippet</a>
 
 <details>
 <summary align="left"><a href="https://arxiv.org/pdf/1505.04597.pdf">UNet (MICCAI'2016/Nat. Methods'2019)</a></summary>

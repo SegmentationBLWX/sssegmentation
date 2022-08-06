@@ -2,7 +2,7 @@
 
 <a href="https://github.com/junfu1115/DANet/">Official Repo</a>
 
-<a href="https://github.com/SegmentationBLWX/sssegmentation/tree/main/ssseg/modules/models/danet">Code Snippet</a>
+<a href="https://github.com/SegmentationBLWX/sssegmentation/blob/main/ssseg/modules/models/segmentors/danet/danet.py">Code Snippet</a>
 
 <details>
 <summary align="left"><a href="https://arxiv.org/pdf/1809.02983.pdf">DANet (CVPR'2019)</a></summary>

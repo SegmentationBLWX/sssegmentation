@@ -2,7 +2,7 @@
 
 <a href="https://github.com/Eromera/erfnet_pytorch">Official Repo</a>
 
-<a href="https://github.com/SegmentationBLWX/sssegmentation/tree/main/ssseg/modules/backbones">Code Snippet</a>
+<a href="https://github.com/SegmentationBLWX/sssegmentation/blob/main/ssseg/modules/models/backbones/erfnet.py">Code Snippet</a>
 
 <details>
 <summary align="left"><a href="https://ieeexplore.ieee.org/document/8063438">ERFNet (T-ITS'2017)</a></summary>

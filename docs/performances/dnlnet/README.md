@@ -2,7 +2,7 @@
 
 <a href="https://github.com/yinmh17/DNL-Semantic-Segmentation">Official Repo</a>
 
-<a href="https://github.com/SegmentationBLWX/sssegmentation/tree/main/ssseg/modules/models/dnlnet">Code Snippet</a>
+<a href="https://github.com/SegmentationBLWX/sssegmentation/blob/main/ssseg/modules/models/segmentors/dnlnet/dnlnet.py">Code Snippet</a>
 
 <details>
 <summary align="left"><a href="https://arxiv.org/pdf/2006.06668.pdf">DNLNet (ECCV'2020)</a></summary>

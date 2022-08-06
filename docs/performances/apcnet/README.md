@@ -2,7 +2,7 @@
 
 <a href="https://github.com/Junjun2016/APCNet">Official Repo</a>
 
-<a href="https://github.com/SegmentationBLWX/sssegmentation/tree/main/ssseg/modules/models/apcnet">Code Snippet</a>
+<a href="https://github.com/SegmentationBLWX/sssegmentation/blob/main/ssseg/modules/models/segmentors/apcnet/apcnet.py">Code Snippet</a>
 
 <details>
 <summary align="left"><a href="https://openaccess.thecvf.com/content_CVPR_2019/papers/He_Adaptive_Pyramid_Context_Network_for_Semantic_Segmentation_CVPR_2019_paper.pdf">APCNet (CVPR'2019)</a></summary>

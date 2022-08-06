@@ -2,7 +2,7 @@
 
 <a href="https://github.com/facebookresearch/detectron2">Official Repo</a>
 
-<a href="https://github.com/SegmentationBLWX/sssegmentation/tree/main/ssseg/modules/models/semanticfpn">Code Snippet</a>
+<a href="https://github.com/SegmentationBLWX/sssegmentation/blob/main/ssseg/modules/models/segmentors/semanticfpn/semanticfpn.py">Code Snippet</a>
 
 <details>
 <summary align="left"><a href="https://arxiv.org/pdf/1901.02446.pdf">Semantic FPN (CVPR'2019)</a></summary>

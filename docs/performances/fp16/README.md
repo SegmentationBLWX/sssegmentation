@@ -2,7 +2,7 @@
 
 <a href="https://github.com/baidu-research/DeepBench">Official Repo</a>
 
-<a href="https://github.com/SegmentationBLWX/sssegmentation/tree/main/ssseg">Code Snippet</a>
+<a href="https://github.com/SegmentationBLWX/sssegmentation/blob/main/ssseg/train.py">Code Snippet</a>
 
 <details>
 <summary align="left"><a href="https://arxiv.org/pdf/1710.03740.pdf">Mixed Precision (FP16) Training (ArXiv'2017)</a></summary>

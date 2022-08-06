@@ -2,7 +2,7 @@
 
 <a href="https://github.com/hszhao/PSPNet">Official Repo</a>
 
-<a href="https://github.com/SegmentationBLWX/sssegmentation/tree/main/ssseg/modules/models/pspnet">Code Snippet</a>
+<a href="https://github.com/SegmentationBLWX/sssegmentation/blob/main/ssseg/modules/models/segmentors/pspnet/pspnet.py">Code Snippet</a>
 
 <details>
 <summary align="left"><a href="https://arxiv.org/pdf/1612.01105.pdf">PSPNet (CVPR'2017)</a></summary>

@@ -2,7 +2,7 @@
 
 <a href="https://github.com/facebookresearch/detectron2/tree/master/projects/PointRend">Official Repo</a>
 
-<a href="https://github.com/SegmentationBLWX/sssegmentation/tree/main/ssseg/modules/models/pointrend">Code Snippet</a>
+<a href="https://github.com/SegmentationBLWX/sssegmentation/blob/main/ssseg/modules/models/segmentors/pointrend/pointrend.py">Code Snippet</a>
 
 <details>
 <summary align="left"><a href="https://arxiv.org/pdf/1912.08193.pdf">PointRend (CVPR'2020)</a></summary>

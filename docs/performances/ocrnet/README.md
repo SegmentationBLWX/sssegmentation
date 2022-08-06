@@ -2,7 +2,7 @@
 
 <a href="https://github.com/openseg-group/OCNet.pytorch">Official Repo</a>
 
-<a href="https://github.com/SegmentationBLWX/sssegmentation/tree/main/ssseg/modules/models/ocrnet">Code Snippet</a>
+<a href="https://github.com/SegmentationBLWX/sssegmentation/blob/main/ssseg/modules/models/segmentors/ocrnet/ocrnet.py">Code Snippet</a>
 
 <details>
 <summary align="left"><a href="https://arxiv.org/pdf/1909.11065.pdf">OCRNet (ECCV'2020)</a></summary>

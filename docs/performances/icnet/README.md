@@ -2,7 +2,7 @@
 
 <a href="https://github.com/hszhao/ICNet">Official Repo</a>
 
-<a href="https://github.com/SegmentationBLWX/sssegmentation/tree/main/ssseg/modules/models/icnet">Code Snippet</a>
+<a href="https://github.com/SegmentationBLWX/sssegmentation/blob/main/ssseg/modules/models/segmentors/icnet/icnet.py">Code Snippet</a>
 
 <details>
 <summary align="left"><a href="https://arxiv.org/pdf/1704.08545.pdf">ICNet (ECCV'2018)</a></summary>
