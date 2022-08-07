@@ -49,8 +49,8 @@ class ENCNet(BaseSegmentor):
             self.se_layer = nn.Linear(head_cfg['feats_channels'], cfg['num_classes'])
         # build decoder
         self.decoder = nn.Sequential(
-            nn.Dropout2d(decoder_cfg['dropout']),
-            nn.Conv2d(decoder_cfg['feats_channels'], cfg['num_classes'], kernel_size=1, stride=1, padding=0)
+            nn.Dropout2d(head_cfg['dropout']),
+            nn.Conv2d(head_cfg['feats_channels'], cfg['num_classes'], kernel_size=1, stride=1, padding=0)
         )
         # build auxiliary decoder
         self.setauxiliarydecoder(cfg['auxiliary'])

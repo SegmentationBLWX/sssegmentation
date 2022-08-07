@@ -73,19 +73,15 @@ SEGMENTOR_CFG = {
         'use_stem': True,
         'selected_indices': (2, 3),
     },
-    'psa': {
+    'head': {
         'in_channels': 2048,
-        'out_channels': 512,
+        'feats_channels': 512,
         'type': 'bi-direction',
         'mask_size': (97, 97),
         'compact': False,
         'shrink_factor': 2,
         'normalization_factor': 1.0,
         'psa_softmax': True,
-    },
-    'decoder': {
-        'in_channels': 4096,
-        'out_channels': 512,
         'dropout': 0.1,
     },
     'auxiliary': {

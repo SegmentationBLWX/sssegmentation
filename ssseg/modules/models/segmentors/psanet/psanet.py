@@ -16,55 +16,53 @@ from ...backbones import BuildActivation, BuildNormalization, constructnormcfg
 class PSANet(BaseSegmentor):
     def __init__(self, cfg, mode):
         super(PSANet, self).__init__(cfg, mode)
-        align_corners, norm_cfg, act_cfg = self.align_corners, self.norm_cfg, self.act_cfg
+        align_corners, norm_cfg, act_cfg, head_cfg = self.align_corners, self.norm_cfg, self.act_cfg, cfg['head']
         # build psa
-        psa_cfg = cfg['psa']
-        assert psa_cfg['type'] in ['collect', 'distribute', 'bi-direction']
-        mask_h, mask_w = psa_cfg['mask_size']
-        if 'normalization_factor' not in psa_cfg:
-            psa_cfg['normalization_factor'] = mask_h * mask_w
+        assert head_cfg['type'] in ['collect', 'distribute', 'bi-direction']
+        mask_h, mask_w = head_cfg['mask_size']
+        if 'normalization_factor' not in head_cfg:
+            head_cfg['normalization_factor'] = mask_h * mask_w
         self.reduce = nn.Sequential(
-            nn.Conv2d(psa_cfg['in_channels'], psa_cfg['out_channels'], kernel_size=1, stride=1, padding=0, bias=False),
-            BuildNormalization(constructnormcfg(placeholder=psa_cfg['out_channels'], norm_cfg=norm_cfg)),
+            nn.Conv2d(head_cfg['in_channels'], head_cfg['feats_channels'], kernel_size=1, stride=1, padding=0, bias=False),
+            BuildNormalization(constructnormcfg(placeholder=head_cfg['feats_channels'], norm_cfg=norm_cfg)),
             BuildActivation(act_cfg),
         )
         self.attention = nn.Sequential(
-            nn.Conv2d(psa_cfg['out_channels'], psa_cfg['out_channels'], kernel_size=1, stride=1, padding=0, bias=False),
-            BuildNormalization(constructnormcfg(placeholder=psa_cfg['out_channels'], norm_cfg=norm_cfg)),
+            nn.Conv2d(head_cfg['feats_channels'], head_cfg['feats_channels'], kernel_size=1, stride=1, padding=0, bias=False),
+            BuildNormalization(constructnormcfg(placeholder=head_cfg['feats_channels'], norm_cfg=norm_cfg)),
             BuildActivation(act_cfg),
-            nn.Conv2d(psa_cfg['out_channels'], mask_h * mask_w, kernel_size=1, stride=1, padding=0, bias=False),
+            nn.Conv2d(head_cfg['feats_channels'], mask_h * mask_w, kernel_size=1, stride=1, padding=0, bias=False),
         )
-        if psa_cfg['type'] == 'bi-direction':
+        if head_cfg['type'] == 'bi-direction':
             self.reduce_p = nn.Sequential(
-                nn.Conv2d(psa_cfg['in_channels'], psa_cfg['out_channels'], kernel_size=1, stride=1, padding=0, bias=False),
-                BuildNormalization(constructnormcfg(placeholder=psa_cfg['out_channels'], norm_cfg=norm_cfg)),
+                nn.Conv2d(head_cfg['in_channels'], head_cfg['feats_channels'], kernel_size=1, stride=1, padding=0, bias=False),
+                BuildNormalization(constructnormcfg(placeholder=head_cfg['feats_channels'], norm_cfg=norm_cfg)),
                 BuildActivation(act_cfg),
             )
             self.attention_p = nn.Sequential(
-                nn.Conv2d(psa_cfg['out_channels'], psa_cfg['out_channels'], kernel_size=1, stride=1, padding=0, bias=False),
-                BuildNormalization(constructnormcfg(placeholder=psa_cfg['out_channels'], norm_cfg=norm_cfg)),
+                nn.Conv2d(head_cfg['feats_channels'], head_cfg['feats_channels'], kernel_size=1, stride=1, padding=0, bias=False),
+                BuildNormalization(constructnormcfg(placeholder=head_cfg['feats_channels'], norm_cfg=norm_cfg)),
                 BuildActivation(act_cfg),
-                nn.Conv2d(psa_cfg['out_channels'], mask_h * mask_w, kernel_size=1, stride=1, padding=0, bias=False),
+                nn.Conv2d(head_cfg['feats_channels'], mask_h * mask_w, kernel_size=1, stride=1, padding=0, bias=False),
             )
-            if not psa_cfg['compact']:
-                self.psamask_collect = PSAMask('collect', psa_cfg['mask_size'])
-                self.psamask_distribute = PSAMask('distribute', psa_cfg['mask_size'])
+            if not head_cfg['compact']:
+                self.psamask_collect = PSAMask('collect', head_cfg['mask_size'])
+                self.psamask_distribute = PSAMask('distribute', head_cfg['mask_size'])
         else:
-            if not psa_cfg['compact']:
-                self.psamask = PSAMask(psa_cfg['type'], psa_cfg['mask_size'])
+            if not head_cfg['compact']:
+                self.psamask = PSAMask(head_cfg['type'], head_cfg['mask_size'])
         self.proj = nn.Sequential(
-            nn.Conv2d(psa_cfg['out_channels'] * (2 if psa_cfg['type'] == 'bi-direction' else 1), psa_cfg['in_channels'], kernel_size=1, stride=1, padding=1, bias=False),
-            BuildNormalization(constructnormcfg(placeholder=psa_cfg['in_channels'], norm_cfg=norm_cfg)),
+            nn.Conv2d(head_cfg['feats_channels'] * (2 if head_cfg['type'] == 'bi-direction' else 1), head_cfg['in_channels'], kernel_size=1, stride=1, padding=1, bias=False),
+            BuildNormalization(constructnormcfg(placeholder=head_cfg['in_channels'], norm_cfg=norm_cfg)),
             BuildActivation(act_cfg),
         )
         # build decoder
-        decoder_cfg = cfg['decoder']
         self.decoder = nn.Sequential(
-            nn.Conv2d(decoder_cfg['in_channels'], decoder_cfg['out_channels'], kernel_size=3, stride=1, padding=1, bias=False),
-            BuildNormalization(constructnormcfg(placeholder=decoder_cfg['out_channels'], norm_cfg=norm_cfg)),
+            nn.Conv2d(head_cfg['in_channels'] * 2, head_cfg['feats_channels'], kernel_size=3, stride=1, padding=1, bias=False),
+            BuildNormalization(constructnormcfg(placeholder=head_cfg['feats_channels'], norm_cfg=norm_cfg)),
             BuildActivation(act_cfg),
-            nn.Dropout2d(decoder_cfg['dropout']),
-            nn.Conv2d(decoder_cfg['out_channels'], cfg['num_classes'], kernel_size=1, stride=1, padding=0)
+            nn.Dropout2d(head_cfg['dropout']),
+            nn.Conv2d(head_cfg['feats_channels'], cfg['num_classes'], kernel_size=1, stride=1, padding=0)
         )
         # build auxiliary decoder
         self.setauxiliarydecoder(cfg['auxiliary'])
