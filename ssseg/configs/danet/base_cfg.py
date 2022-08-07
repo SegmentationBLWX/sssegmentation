@@ -79,28 +79,11 @@ SEGMENTOR_CFG = {
         'use_stem': True,
         'selected_indices': (2, 3),
     },
-    'pam': {
+    'head': {
         'in_channels': 2048,
-        'out_channels': 512,
-        'transform_channels': 64
-    },
-    'cam': {
-        'in_channels': 2048,
-        'out_channels': 512,
-    },
-    'decoder': {
-        'pam': {
-            'in_channels': 512,
-            'dropout': 0.1,
-        },
-        'cam': {
-            'in_channels': 512,
-            'dropout': 0.1,
-        },
-        'pamcam': {
-            'in_channels': 512,
-            'dropout': 0.1,
-        },
+        'feats_channels': 512,
+        'transform_channels': 64,
+        'dropout': 0.1,
     },
     'auxiliary': {
         'in_channels': 1024,
