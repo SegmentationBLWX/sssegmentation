@@ -73,7 +73,7 @@ SEGMENTOR_CFG = {
         'use_stem': True,
         'selected_indices': (2, 3),
     },
-    'decoder': {
+    'head': {
         'in_channels': 2048,
         'pool_scales': (1, 2, 3, 6),
         'feats_channels': 512,

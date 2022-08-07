@@ -73,14 +73,10 @@ SEGMENTOR_CFG = {
         'use_stem': True,
         'selected_indices': (2, 3),
     },
-    'cca': {
-        'num_recurrence': 2,
+    'head': {
         'in_channels': 2048,
-        'out_channels': 512,
-    },
-    'decoder': {
-        'in_channels': 2560,
-        'out_channels': 512,
+        'feats_channels': 512,
+        'num_recurrence': 2,
         'dropout': 0.1,
     },
     'auxiliary': {
