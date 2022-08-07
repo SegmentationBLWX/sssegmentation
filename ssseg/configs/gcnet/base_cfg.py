@@ -73,17 +73,13 @@ SEGMENTOR_CFG = {
         'use_stem': True,
         'selected_indices': (2, 3),
     },
-    'contextblock': {
+    'head': {
         'in_channels': 2048,
-        'out_channels': 512,
+        'feats_channels': 512,
         'ratio': 0.25,
         'pooling_type': 'att',
         'fusion_types': ('channel_add', ),
         'norm_cfg': {'type': 'layernorm'},
-    },
-    'decoder': {
-        'in_channels': 2560,
-        'out_channels': 512,
         'dropout': 0.1,
     },
     'auxiliary': {

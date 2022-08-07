@@ -16,35 +16,33 @@ from ...backbones import BuildActivation, BuildNormalization, constructnormcfg
 class GCNet(BaseSegmentor):
     def __init__(self, cfg, mode):
         super(GCNet, self).__init__(cfg, mode)
-        align_corners, norm_cfg, act_cfg = self.align_corners, self.norm_cfg, self.act_cfg
+        align_corners, norm_cfg, act_cfg, head_cfg = self.align_corners, self.norm_cfg, self.act_cfg, cfg['head']
         # build context block
-        cb_cfg = cfg['contextblock']
         self.conv_before_cb = nn.Sequential(
-            nn.Conv2d(cb_cfg['in_channels'], cb_cfg['out_channels'], kernel_size=3, stride=1, padding=1, bias=False),
-            BuildNormalization(constructnormcfg(placeholder=cb_cfg['out_channels'], norm_cfg=norm_cfg)),
+            nn.Conv2d(head_cfg['in_channels'], head_cfg['feats_channels'], kernel_size=3, stride=1, padding=1, bias=False),
+            BuildNormalization(constructnormcfg(placeholder=head_cfg['feats_channels'], norm_cfg=norm_cfg)),
             BuildActivation(act_cfg),
         )
         self.contextblock_net = ContextBlock(
-            in_channels=cb_cfg['out_channels'],
-            ratio=cb_cfg['ratio'],
-            pooling_type=cb_cfg['pooling_type'],
-            fusion_types=cb_cfg['fusion_types'],
-            norm_cfg=cb_cfg.get('norm_cfg', copy.deepcopy(norm_cfg)),
-            act_cfg=cb_cfg.get('act_cfg', copy.deepcopy(act_cfg)),
+            in_channels=head_cfg['feats_channels'],
+            ratio=head_cfg['ratio'],
+            pooling_type=head_cfg['pooling_type'],
+            fusion_types=head_cfg['fusion_types'],
+            norm_cfg=head_cfg.get('norm_cfg', copy.deepcopy(norm_cfg)),
+            act_cfg=head_cfg.get('act_cfg', copy.deepcopy(act_cfg)),
         )
         self.conv_after_cb = nn.Sequential(
-            nn.Conv2d(cb_cfg['out_channels'], cb_cfg['out_channels'], kernel_size=3, stride=1, padding=1, bias=False),
-            BuildNormalization(constructnormcfg(placeholder=cb_cfg['out_channels'], norm_cfg=norm_cfg)),
+            nn.Conv2d(head_cfg['feats_channels'], head_cfg['feats_channels'], kernel_size=3, stride=1, padding=1, bias=False),
+            BuildNormalization(constructnormcfg(placeholder=head_cfg['feats_channels'], norm_cfg=norm_cfg)),
             BuildActivation(act_cfg),
         )
         # build decoder
-        decoder_cfg = cfg['decoder']
         self.decoder = nn.Sequential(
-            nn.Conv2d(decoder_cfg['in_channels'], decoder_cfg['out_channels'], kernel_size=3, stride=1, padding=1, bias=False),
-            BuildNormalization(constructnormcfg(placeholder=decoder_cfg['out_channels'], norm_cfg=norm_cfg)),
+            nn.Conv2d(head_cfg['in_channels'] + head_cfg['feats_channels'], head_cfg['feats_channels'], kernel_size=3, stride=1, padding=1, bias=False),
+            BuildNormalization(constructnormcfg(placeholder=head_cfg['feats_channels'], norm_cfg=norm_cfg)),
             BuildActivation(act_cfg),
-            nn.Dropout2d(decoder_cfg['dropout']),
-            nn.Conv2d(decoder_cfg['out_channels'], cfg['num_classes'], kernel_size=1, stride=1, padding=0)
+            nn.Dropout2d(head_cfg['dropout']),
+            nn.Conv2d(head_cfg['feats_channels'], cfg['num_classes'], kernel_size=1, stride=1, padding=0)
         )
         # build auxiliary decoder
         self.setauxiliarydecoder(cfg['auxiliary'])

@@ -20,7 +20,7 @@ class SemanticFPN(BaseSegmentor):
         # build fpn
         self.fpn_neck = FPN(
             in_channels_list=head_cfg['in_channels_list'],
-            out_channels=head_cfg['out_channels'],
+            out_channels=head_cfg['feats_channels'],
             upsample_cfg=head_cfg['upsample_cfg'],
             norm_cfg=norm_cfg,
             act_cfg=act_cfg,
@@ -31,7 +31,7 @@ class SemanticFPN(BaseSegmentor):
             scale_head = []
             for k in range(head_length):
                 scale_head.append(nn.Sequential(
-                    nn.Conv2d(head_cfg['out_channels'] if k == 0 else head_cfg['scale_head_channels'], head_cfg['scale_head_channels'], kernel_size=3, stride=1, padding=1, bias=False),
+                    nn.Conv2d(head_cfg['feats_channels'] if k == 0 else head_cfg['scale_head_channels'], head_cfg['scale_head_channels'], kernel_size=3, stride=1, padding=1, bias=False),
                     BuildNormalization(constructnormcfg(placeholder=head_cfg['scale_head_channels'], norm_cfg=norm_cfg)),
                     BuildActivation(act_cfg),
                 ))

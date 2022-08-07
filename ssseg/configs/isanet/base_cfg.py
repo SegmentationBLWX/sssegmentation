@@ -73,14 +73,11 @@ SEGMENTOR_CFG = {
         'use_stem': True,
         'selected_indices': (2, 3),
     },
-    'isa': {
+    'head': {
         'down_factor': (8, 8),
         'in_channels': 2048,
         'feats_channels': 512,
         'isa_channels': 256,
-    },
-    'decoder': {
-        'in_channels': 512,
         'dropout': 0.1,
     },
     'auxiliary': {

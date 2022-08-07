@@ -52,37 +52,35 @@ class SelfAttentionBlock(_SelfAttentionBlock):
 class ISANet(BaseSegmentor):
     def __init__(self, cfg, mode):
         super(ISANet, self).__init__(cfg, mode)
-        align_corners, norm_cfg, act_cfg = self.align_corners, self.norm_cfg, self.act_cfg
+        align_corners, norm_cfg, act_cfg, head_cfg = self.align_corners, self.norm_cfg, self.act_cfg, cfg['head']
         # build isa module
-        isa_cfg = cfg['isa']
-        self.down_factor = isa_cfg['down_factor']
+        self.down_factor = head_cfg['down_factor']
         self.in_conv = nn.Sequential(
-            nn.Conv2d(isa_cfg['in_channels'], isa_cfg['feats_channels'], kernel_size=3, stride=1, padding=1, bias=False),
-            BuildNormalization(constructnormcfg(placeholder=isa_cfg['feats_channels'], norm_cfg=norm_cfg)),
+            nn.Conv2d(head_cfg['in_channels'], head_cfg['feats_channels'], kernel_size=3, stride=1, padding=1, bias=False),
+            BuildNormalization(constructnormcfg(placeholder=head_cfg['feats_channels'], norm_cfg=norm_cfg)),
             BuildActivation(act_cfg),
         )
         self.global_relation = SelfAttentionBlock(
-            in_channels=isa_cfg['feats_channels'],
-            feats_channels=isa_cfg['isa_channels'],
+            in_channels=head_cfg['feats_channels'],
+            feats_channels=head_cfg['isa_channels'],
             norm_cfg=copy.deepcopy(norm_cfg),
             act_cfg=copy.deepcopy(act_cfg)
         )
         self.local_relation = SelfAttentionBlock(
-            in_channels=isa_cfg['feats_channels'],
-            feats_channels=isa_cfg['isa_channels'],
+            in_channels=head_cfg['feats_channels'],
+            feats_channels=head_cfg['isa_channels'],
             norm_cfg=copy.deepcopy(norm_cfg),
             act_cfg=copy.deepcopy(act_cfg)
         )
         self.out_conv = nn.Sequential(
-            nn.Conv2d(isa_cfg['feats_channels'] * 2, isa_cfg['feats_channels'], kernel_size=3, stride=1, padding=1, bias=False),
-            BuildNormalization(constructnormcfg(placeholder=isa_cfg['feats_channels'], norm_cfg=norm_cfg)),
+            nn.Conv2d(head_cfg['feats_channels'] * 2, head_cfg['feats_channels'], kernel_size=3, stride=1, padding=1, bias=False),
+            BuildNormalization(constructnormcfg(placeholder=head_cfg['feats_channels'], norm_cfg=norm_cfg)),
             BuildActivation(act_cfg),
         )
         # build decoder
-        decoder_cfg = cfg['decoder']
         self.decoder = nn.Sequential(
-            nn.Dropout2d(decoder_cfg['dropout']),
-            nn.Conv2d(decoder_cfg['in_channels'], cfg['num_classes'], kernel_size=1, stride=1, padding=0)
+            nn.Dropout2d(head_cfg['dropout']),
+            nn.Conv2d(head_cfg['feats_channels'], cfg['num_classes'], kernel_size=1, stride=1, padding=0)
         )
         # build auxiliary decoder
         self.setauxiliarydecoder(cfg['auxiliary'])
