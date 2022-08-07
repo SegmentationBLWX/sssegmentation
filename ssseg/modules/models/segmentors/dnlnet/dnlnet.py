@@ -16,36 +16,34 @@ from ...backbones import BuildActivation, BuildNormalization, constructnormcfg
 class DNLNet(BaseSegmentor):
     def __init__(self, cfg, mode):
         super(DNLNet, self).__init__(cfg, mode)
-        align_corners, norm_cfg, act_cfg = self.align_corners, self.norm_cfg, self.act_cfg
+        align_corners, norm_cfg, act_cfg, head_cfg = self.align_corners, self.norm_cfg, self.act_cfg, cfg['head']
         # build disentangled non-local block
-        dnl_cfg = cfg['dnl']
         self.conv_before_dnl = nn.Sequential(
-            nn.Conv2d(dnl_cfg['in_channels'], dnl_cfg['out_channels'], kernel_size=3, stride=1, padding=1, bias=False),
-            BuildNormalization(constructnormcfg(placeholder=dnl_cfg['out_channels'], norm_cfg=norm_cfg)),
+            nn.Conv2d(head_cfg['in_channels'], head_cfg['feats_channels'], kernel_size=3, stride=1, padding=1, bias=False),
+            BuildNormalization(constructnormcfg(placeholder=head_cfg['feats_channels'], norm_cfg=norm_cfg)),
             BuildActivation(act_cfg),
         )
         self.dnl_block = DisentangledNonLocal2d(
-            in_channels=dnl_cfg['out_channels'],
-            reduction=dnl_cfg['reduction'],
-            use_scale=dnl_cfg['use_scale'],
-            mode=dnl_cfg['mode'],
-            temperature=dnl_cfg['temperature'],
+            in_channels=head_cfg['feats_channels'],
+            reduction=head_cfg['reduction'],
+            use_scale=head_cfg['use_scale'],
+            mode=head_cfg['mode'],
+            temperature=head_cfg['temperature'],
             norm_cfg=copy.deepcopy(norm_cfg),
             act_cfg=copy.deepcopy(act_cfg),
         )
         self.conv_after_dnl = nn.Sequential(
-            nn.Conv2d(dnl_cfg['out_channels'], dnl_cfg['out_channels'], kernel_size=3, stride=1, padding=1, bias=False),
-            BuildNormalization(constructnormcfg(placeholder=dnl_cfg['out_channels'], norm_cfg=norm_cfg)),
+            nn.Conv2d(head_cfg['feats_channels'], head_cfg['feats_channels'], kernel_size=3, stride=1, padding=1, bias=False),
+            BuildNormalization(constructnormcfg(placeholder=head_cfg['feats_channels'], norm_cfg=norm_cfg)),
             BuildActivation(act_cfg),
         )
         # build decoder
-        decoder_cfg = cfg['decoder']
         self.decoder = nn.Sequential(
-            nn.Conv2d(decoder_cfg['in_channels'], decoder_cfg['out_channels'], kernel_size=3, stride=1, padding=1, bias=False),
-            BuildNormalization(constructnormcfg(placeholder=decoder_cfg['out_channels'], norm_cfg=norm_cfg)),
+            nn.Conv2d(head_cfg['feats_channels'] + head_cfg['in_channels'], head_cfg['feats_channels'], kernel_size=3, stride=1, padding=1, bias=False),
+            BuildNormalization(constructnormcfg(placeholder=head_cfg['feats_channels'], norm_cfg=norm_cfg)),
             BuildActivation(act_cfg),
-            nn.Dropout2d(decoder_cfg['dropout']),
-            nn.Conv2d(decoder_cfg['out_channels'], cfg['num_classes'], kernel_size=1, stride=1, padding=0)
+            nn.Dropout2d(head_cfg['dropout']),
+            nn.Conv2d(head_cfg['feats_channels'], cfg['num_classes'], kernel_size=1, stride=1, padding=0)
         )
         # build auxiliary decoder
         self.setauxiliarydecoder(cfg['auxiliary'])

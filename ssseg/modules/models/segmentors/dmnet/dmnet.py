@@ -15,27 +15,25 @@ from ...backbones import BuildActivation, BuildNormalization, constructnormcfg
 class DMNet(BaseSegmentor):
     def __init__(self, cfg, mode):
         super(DMNet, self).__init__(cfg, mode)
-        align_corners, norm_cfg, act_cfg = self.align_corners, self.norm_cfg, self.act_cfg
+        align_corners, norm_cfg, act_cfg, head_cfg = self.align_corners, self.norm_cfg, self.act_cfg, cfg['head']
         # build dcm
-        dcm_cfg = cfg['dcm']
         self.dcm_modules = nn.ModuleList()
-        for filter_size in dcm_cfg['filter_sizes']:
+        for filter_size in head_cfg['filter_sizes']:
             self.dcm_modules.append(DynamicConvolutionalModule(
                 filter_size=filter_size,
-                is_fusion=dcm_cfg['is_fusion'],
-                in_channels=dcm_cfg['in_channels'],
-                out_channels=dcm_cfg['out_channels'],
+                is_fusion=head_cfg['is_fusion'],
+                in_channels=head_cfg['in_channels'],
+                out_channels=head_cfg['feats_channels'],
                 norm_cfg=norm_cfg,
                 act_cfg=act_cfg,
             ))
         # build decoder
-        decoder_cfg = cfg['decoder']
         self.decoder = nn.Sequential(
-            nn.Conv2d(decoder_cfg['in_channels'], decoder_cfg['out_channels'], kernel_size=3, stride=1, padding=1, bias=False),
-            BuildNormalization(constructnormcfg(placeholder=decoder_cfg['out_channels'], norm_cfg=norm_cfg)),
+            nn.Conv2d(head_cfg['feats_channels'] * len(head_cfg['filter_sizes']) + head_cfg['in_channels'], head_cfg['feats_channels'], kernel_size=3, stride=1, padding=1, bias=False),
+            BuildNormalization(constructnormcfg(placeholder=head_cfg['feats_channels'], norm_cfg=norm_cfg)),
             BuildActivation(act_cfg),
-            nn.Dropout2d(decoder_cfg['dropout']),
-            nn.Conv2d(decoder_cfg['out_channels'], cfg['num_classes'], kernel_size=1, stride=1, padding=0)
+            nn.Dropout2d(head_cfg['dropout']),
+            nn.Conv2d(head_cfg['feats_channels'], cfg['num_classes'], kernel_size=1, stride=1, padding=0)
         )
         # build auxiliary decoder
         self.setauxiliarydecoder(cfg['auxiliary'])

@@ -73,17 +73,13 @@ SEGMENTOR_CFG = {
         'use_stem': True,
         'selected_indices': (2, 3),
     },
-    'dnl': {
+    'head': {
         'in_channels': 2048,
-        'out_channels': 512,
+        'feats_channels': 512,
         'use_scale': True,
         'mode': 'embeddedgaussian',
         'reduction': 2,
         'temperature': 0.05,
-    },
-    'decoder': {
-        'in_channels': 2560,
-        'out_channels': 512,
         'dropout': 0.1,
     },
     'auxiliary': {

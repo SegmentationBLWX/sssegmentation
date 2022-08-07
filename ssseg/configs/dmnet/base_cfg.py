@@ -73,15 +73,11 @@ SEGMENTOR_CFG = {
         'use_stem': True,
         'selected_indices': (2, 3),
     },
-    'dcm': {
+    'head': {
         'in_channels': 2048,
-        'out_channels': 512,
+        'feats_channels': 512,
         'filter_sizes': (1, 3, 5, 7),
-        'is_fusion': False
-    },
-    'decoder': {
-        'in_channels': 4096,
-        'out_channels': 512,
+        'is_fusion': False,
         'dropout': 0.1,
     },
     'auxiliary': {
