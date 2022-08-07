@@ -19,12 +19,12 @@ from .transformers import Predictor, SetCriterion, Transformer, HungarianMatcher
 class MaskFormer(BaseSegmentor):
     def __init__(self, cfg, mode):
         super(MaskFormer, self).__init__(cfg, mode)
-        align_corners, norm_cfg, act_cfg = self.align_corners, self.norm_cfg, self.act_cfg
+        align_corners, norm_cfg, act_cfg, head_cfg = self.align_corners, self.norm_cfg, self.act_cfg, cfg['head']
         # build pyramid pooling module
         ppm_cfg = {
-            'in_channels': cfg['ppm']['in_channels'],
-            'out_channels': cfg['ppm']['out_channels'],
-            'pool_scales': cfg['ppm']['pool_scales'],
+            'in_channels': head_cfg['in_channels_list'][-1],
+            'out_channels': head_cfg['feats_channels'],
+            'pool_scales': head_cfg['pool_scales'],
             'align_corners': align_corners,
             'norm_cfg': copy.deepcopy(norm_cfg),
             'act_cfg': copy.deepcopy(act_cfg),
@@ -33,38 +33,33 @@ class MaskFormer(BaseSegmentor):
         # build lateral convs
         act_cfg_copy = copy.deepcopy(act_cfg)
         if 'inplace' in act_cfg_copy: act_cfg_copy['inplace'] = False
-        lateral_cfg = cfg['lateral']
         self.lateral_convs = nn.ModuleList()
-        for in_channels in lateral_cfg['in_channels_list']:
-            self.lateral_convs.append(
-                nn.Sequential(
-                    nn.Conv2d(in_channels, lateral_cfg['out_channels'], kernel_size=1, stride=1, padding=0, bias=False),
-                    BuildNormalization(constructnormcfg(placeholder=lateral_cfg['out_channels'], norm_cfg=norm_cfg)),
-                    BuildActivation(act_cfg_copy),
-                )
-            )
+        for in_channels in head_cfg['in_channels_list'][:-1]:
+            self.lateral_convs.append(nn.Sequential(
+                nn.Conv2d(in_channels, head_cfg['feats_channels'], kernel_size=1, stride=1, padding=0, bias=False),
+                BuildNormalization(constructnormcfg(placeholder=head_cfg['feats_channels'], norm_cfg=norm_cfg)),
+                BuildActivation(act_cfg_copy),
+            ))
         # build fpn convs
-        fpn_cfg = cfg['fpn']
         self.fpn_convs = nn.ModuleList()
-        for in_channels in fpn_cfg['in_channels_list']:
-            self.fpn_convs.append(
-                nn.Sequential(
-                    nn.Conv2d(in_channels, fpn_cfg['out_channels'], kernel_size=3, stride=1, padding=1, bias=False),
-                    BuildNormalization(constructnormcfg(placeholder=fpn_cfg['out_channels'], norm_cfg=norm_cfg)),
-                    BuildActivation(act_cfg_copy),
-                )
-            )
+        for in_channels in [head_cfg['feats_channels'], ] * (len(self.lateral_convs) + 1):
+            self.fpn_convs.append(nn.Sequential(
+                nn.Conv2d(in_channels, head_cfg['feats_channels'], kernel_size=3, stride=1, padding=1, bias=False),
+                BuildNormalization(constructnormcfg(placeholder=head_cfg['feats_channels'], norm_cfg=norm_cfg)),
+                BuildActivation(act_cfg_copy),
+            ))
         # build decoder
-        decoder_cfg = cfg['decoder']['mask']
         self.decoder_mask = nn.Sequential(
-            nn.Conv2d(decoder_cfg['in_channels'], decoder_cfg['out_channels'], kernel_size=3, stride=1, padding=1)
+            nn.Conv2d(head_cfg['feats_channels'], head_cfg['mask_feats_channels'], kernel_size=3, stride=1, padding=1)
         )
-        cfg['decoder']['predictor']['num_classes'] = cfg['num_classes']
-        self.decoder_predictor = Predictor(**cfg['decoder']['predictor'])
-        matcher = HungarianMatcher(**cfg['decoder']['matcher'])
-        weight_dict = {'loss_ce': cfg['decoder']['matcher']['cost_class'], 'loss_mask': cfg['decoder']['matcher']['cost_mask'], 'loss_dice': cfg['decoder']['matcher']['cost_dice']}
-        if cfg['decoder']['predictor']['deep_supervision']:
-            dec_layers = cfg['decoder']['predictor']['dec_layers']
+        head_cfg['predictor']['num_classes'] = cfg['num_classes']
+        head_cfg['predictor']['mask_dim'] = head_cfg['mask_feats_channels']
+        head_cfg['predictor']['in_channels'] = head_cfg['in_channels_list'][-1]
+        self.decoder_predictor = Predictor(**head_cfg['predictor'])
+        matcher = HungarianMatcher(**head_cfg['matcher'])
+        weight_dict = {'loss_ce': head_cfg['matcher']['cost_class'], 'loss_mask': head_cfg['matcher']['cost_mask'], 'loss_dice': head_cfg['matcher']['cost_dice']}
+        if head_cfg['predictor']['deep_supervision']:
+            dec_layers = head_cfg['predictor']['dec_layers']
             aux_weight_dict = {}
             for i in range(dec_layers - 1):
                 aux_weight_dict.update({k + f'_{i}': v for k, v in weight_dict.items()})

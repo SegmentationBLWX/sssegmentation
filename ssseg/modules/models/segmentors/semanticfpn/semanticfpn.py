@@ -55,7 +55,7 @@ class SemanticFPN(BaseSegmentor):
         # feed to fpn
         fpn_outs = self.fpn_neck(list(backbone_outputs))
         feats = self.scale_heads[0](fpn_outs[0])
-        for i in range(1, len(self.cfg['fpn']['feature_stride_list'])):
+        for i in range(1, len(self.cfg['head']['feature_stride_list'])):
             feats = feats + F.interpolate(self.scale_heads[i](fpn_outs[i]), size=feats.shape[2:], mode='bilinear', align_corners=self.align_corners)
         # feed to decoder
         predictions = self.decoder(feats)
