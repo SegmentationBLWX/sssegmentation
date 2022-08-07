@@ -73,23 +73,12 @@ SEGMENTOR_CFG = {
         'use_stem': True,
         'selected_indices': (2, 3),
     },
-    'afnblock': {
-        'low_in_channels': 1024,
-        'high_in_channels': 2048,
-        'transform_channels': 256,
-        'out_channels': 2048,
-        'query_scales': (1, ),
-        'key_pool_scales': (1, 3, 6, 8),
-    },
-    'apnblock': {
-        'in_channels': 512,
-        'transform_channels': 256,
-        'out_channels': 512,
-        'query_scales': (1, ),
-        'key_pool_scales': (1, 3, 6, 8),
-    },
     'decoder': {
-        'in_channels': 512,
+        'in_channels_list': [1024, 2048],
+        'transform_channels': 256,
+        'query_scales': (1, ),
+        'feats_channels': 512,
+        'key_pool_scales': (1, 3, 6, 8),
         'dropout': 0.1,
     },
     'auxiliary': {

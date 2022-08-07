@@ -17,41 +17,38 @@ from ...backbones import BuildActivation, BuildNormalization, constructnormcfg
 class ANNNet(BaseSegmentor):
     def __init__(self, cfg, mode):
         super(ANNNet, self).__init__(cfg, mode)
-        align_corners, norm_cfg, act_cfg = self.align_corners, self.norm_cfg, self.act_cfg
+        align_corners, norm_cfg, act_cfg, decoder_cfg = self.align_corners, self.norm_cfg, self.act_cfg, cfg['decoder']
         # build AFNBlock
-        afnblock_cfg = cfg['afnblock']
         self.afn_block = AFNBlock(
-            low_in_channels=afnblock_cfg['low_in_channels'],
-            high_in_channels=afnblock_cfg['high_in_channels'], 
-            transform_channels=afnblock_cfg['transform_channels'], 
-            out_channels=afnblock_cfg['out_channels'], 
-            query_scales=afnblock_cfg['query_scales'], 
-            key_pool_scales=afnblock_cfg['key_pool_scales'],
+            low_in_channels=decoder_cfg['in_channels_list'][0],
+            high_in_channels=decoder_cfg['in_channels_list'][1], 
+            transform_channels=decoder_cfg['transform_channels'], 
+            out_channels=decoder_cfg['in_channels_list'][1], 
+            query_scales=decoder_cfg['query_scales'], 
+            key_pool_scales=decoder_cfg['key_pool_scales'],
             norm_cfg=copy.deepcopy(norm_cfg),
             act_cfg=copy.deepcopy(act_cfg),
         )
         # build APNBlock
-        apnblock_cfg = cfg['apnblock']
         self.apn_block = APNBlock(
-            in_channels=apnblock_cfg['in_channels'], 
-            transform_channels=apnblock_cfg['transform_channels'], 
-            out_channels=apnblock_cfg['out_channels'], 
-            query_scales=apnblock_cfg['query_scales'], 
-            key_pool_scales=apnblock_cfg['key_pool_scales'],
+            in_channels=decoder_cfg['feats_channels'], 
+            transform_channels=decoder_cfg['transform_channels'], 
+            out_channels=decoder_cfg['feats_channels'], 
+            query_scales=decoder_cfg['query_scales'], 
+            key_pool_scales=decoder_cfg['key_pool_scales'],
             norm_cfg=copy.deepcopy(norm_cfg),
             act_cfg=copy.deepcopy(act_cfg),
         )
         # build bottleneck
         self.bottleneck = nn.Sequential(
-            nn.Conv2d(afnblock_cfg['out_channels'], apnblock_cfg['in_channels'], kernel_size=3, stride=1, padding=1, bias=False),
-            BuildNormalization(constructnormcfg(placeholder=apnblock_cfg['in_channels'], norm_cfg=norm_cfg)),
+            nn.Conv2d(decoder_cfg['in_channels_list'][1], decoder_cfg['feats_channels'], kernel_size=3, stride=1, padding=1, bias=False),
+            BuildNormalization(constructnormcfg(placeholder=decoder_cfg['feats_channels'], norm_cfg=norm_cfg)),
             BuildActivation(act_cfg),
         )
         # build decoder
-        decoder_cfg = cfg['decoder']
         self.decoder = nn.Sequential(
             nn.Dropout2d(decoder_cfg['dropout']),
-            nn.Conv2d(decoder_cfg['in_channels'], cfg['num_classes'], kernel_size=1, stride=1, padding=0)
+            nn.Conv2d(decoder_cfg['feats_channels'], cfg['num_classes'], kernel_size=1, stride=1, padding=0)
         )
         # build auxiliary decoder
         self.setauxiliarydecoder(cfg['auxiliary'])
