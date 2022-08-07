@@ -42,7 +42,7 @@ class MaskFormer(BaseSegmentor):
             ))
         # build fpn convs
         self.fpn_convs = nn.ModuleList()
-        for in_channels in [head_cfg['feats_channels'], ] * (len(self.lateral_convs) + 1):
+        for in_channels in [head_cfg['feats_channels'], ] * len(self.lateral_convs):
             self.fpn_convs.append(nn.Sequential(
                 nn.Conv2d(in_channels, head_cfg['feats_channels'], kernel_size=3, stride=1, padding=1, bias=False),
                 BuildNormalization(constructnormcfg(placeholder=head_cfg['feats_channels'], norm_cfg=norm_cfg)),
