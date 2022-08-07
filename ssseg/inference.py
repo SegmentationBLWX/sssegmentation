@@ -53,7 +53,9 @@ class Demo():
         segmentor = BuildSegmentor(segmentor_cfg=copy.deepcopy(cfg.SEGMENTOR_CFG), mode='TEST')
         if use_cuda: segmentor = segmentor.cuda()
         # build dataset
-        dataset = BuildDataset(mode='TEST', logger_handle=logger_handle, dataset_cfg=copy.deepcopy(cfg.DATASET_CFG), get_basedataset=True)
+        dataset_cfg = copy.deepcopy(cfg.DATASET_CFG)
+        dataset_cfg['type'] = 'base'
+        dataset = BuildDataset(mode='TEST', logger_handle=logger_handle, dataset_cfg=copy.deepcopy(cfg.DATASET_CFG))
         # build palette
         palette = BuildPalette(dataset_type=cfg.DATASET_CFG['type'], num_classes=cfg.SEGMENTOR_CFG['num_classes'], logger_handle=logger_handle)
         # load checkpoints

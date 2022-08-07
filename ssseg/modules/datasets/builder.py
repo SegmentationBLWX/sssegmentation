@@ -23,16 +23,14 @@ from .voc import VOCDataset, PascalContextDataset, PascalContext59Dataset
 
 
 '''BuildDataset'''
-def BuildDataset(mode, logger_handle, dataset_cfg, get_basedataset=False):
-    cfg = dataset_cfg[mode.lower()].copy()
-    if 'train' in dataset_cfg: dataset_cfg.pop('train')
-    if 'test' in dataset_cfg: dataset_cfg.pop('test')
-    dataset_cfg.update(cfg)
+def BuildDataset(mode, logger_handle, dataset_cfg):
+    # supported datasets
     supported_datasets = {
         'voc': VOCDataset,
         'lip': LIPDataset,
         'atr': ATRDataset,
         'hrf': HRFDataset,
+        'base': BaseDataset,
         'coco': COCODataset,
         'vspw': VSPWDataset,
         'cihp': CIHPDataset,
@@ -50,8 +48,12 @@ def BuildDataset(mode, logger_handle, dataset_cfg, get_basedataset=False):
         'pascalcontext': PascalContextDataset,
         'pascalcontext59': PascalContext59Dataset,
     }
+    # parse
+    cfg = dataset_cfg[mode.lower()].copy()
+    if 'train' in dataset_cfg: dataset_cfg.pop('train')
+    if 'test' in dataset_cfg: dataset_cfg.pop('test')
+    dataset_cfg.update(cfg)
     assert dataset_cfg['type'] in supported_datasets, 'unsupport dataset type %s' % dataset_cfg['type']
-    if get_basedataset: 
-        return BaseDataset(mode=mode, logger_handle=logger_handle, dataset_cfg=dataset_cfg)
+    # return
     dataset = supported_datasets[dataset_cfg['type']](mode=mode, logger_handle=logger_handle, dataset_cfg=dataset_cfg)
     return dataset
