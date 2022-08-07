@@ -35,11 +35,11 @@ DATALOADER_CFG = {
 }
 # config for optimizer
 OPTIMIZER_CFG = {
-    'type': 'sgd',
-    'lr': 0.01,
-    'momentum': 0.9,
-    'weight_decay': 5e-4,
-    'params_rules': {},
+    'type': 'adamw',
+    'lr': 0.00006,
+    'betas': (0.9, 0.999),
+    'weight_decay': 0.01,
+    'params_rules': {'backbone_net_zerowd': (1.0, 0.0), 'others': (1.0, 1.0)},
 }
 # config for scheduler
 SCHEDULER_CFG = {
@@ -59,15 +59,14 @@ SEGMENTOR_CFG = {
     'norm_cfg': {'type': 'syncbatchnorm'},
     'act_cfg': {'type': 'relu', 'inplace': True},
     'backbone': {
-        'type': 'resnet101',
-        'series': 'resnet',
+        'type': 'swin_base_patch4_window12_384_22k',
+        'series': 'swin',
         'pretrained': True,
-        'outstride': 8,
-        'use_stem': True,
         'selected_indices': (0, 1, 2, 3),
+        'norm_cfg': {'type': 'layernorm'},
     },
     'head': {
-        'in_channels_list': [256, 512, 1024, 2048],
+        'in_channels_list': [128, 256, 512, 1024],
         'feats_channels': 512,
         'pool_scales': [1, 2, 3, 6],
         'mask_feats_channels': 256,

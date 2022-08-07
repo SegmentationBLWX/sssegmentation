@@ -27,13 +27,6 @@ DATASET_CFG['test']['aug_opts'] = [
 DATALOADER_CFG = DATALOADER_CFG.copy()
 # modify optimizer config
 OPTIMIZER_CFG = OPTIMIZER_CFG.copy()
-OPTIMIZER_CFG.update({
-    'type': 'adamw',
-    'lr': 0.00006,
-    'betas': (0.9, 0.999),
-    'weight_decay': 0.01,
-    'params_rules': {'backbone_net_zerowd': (1.0, 0.0), 'others': (1.0, 1.0)},
-})
 # modify scheduler config
 SCHEDULER_CFG = SCHEDULER_CFG.copy()
 SCHEDULER_CFG.update({
@@ -48,15 +41,7 @@ LOSSES_CFG = LOSSES_CFG.copy()
 SEGMENTOR_CFG = SEGMENTOR_CFG.copy()
 SEGMENTOR_CFG.update({
     'num_classes': 150,
-    'backbone': {
-        'type': 'swin_base_patch4_window12_384_22k',
-        'series': 'swin',
-        'pretrained': True,
-        'selected_indices': (0, 1, 2, 3),
-        'norm_cfg': {'type': 'layernorm'},
-    },
 })
-SEGMENTOR_CFG['head']['in_channels_list'] = [128, 256, 512, 1024]
 # modify inference config
 INFERENCE_CFG = INFERENCE_CFG.copy()
 # modify common config

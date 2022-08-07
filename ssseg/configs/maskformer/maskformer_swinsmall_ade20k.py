@@ -13,13 +13,6 @@ DATASET_CFG.update({
 DATALOADER_CFG = DATALOADER_CFG.copy()
 # modify optimizer config
 OPTIMIZER_CFG = OPTIMIZER_CFG.copy()
-OPTIMIZER_CFG.update({
-    'type': 'adamw',
-    'lr': 0.00006,
-    'betas': (0.9, 0.999),
-    'weight_decay': 0.01,
-    'params_rules': {'backbone_net_zerowd': (1.0, 0.0), 'others': (1.0, 1.0)},
-})
 # modify scheduler config
 SCHEDULER_CFG = SCHEDULER_CFG.copy()
 SCHEDULER_CFG.update({

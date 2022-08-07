@@ -35,21 +35,14 @@ SEGMENTOR_CFG.update({
         'pretrained': True,
         'selected_indices': (0, 1, 2, 3),
     },
-    'normlayer': {
-        'in_channels_list': [1024, 1024, 1024, 1024],
-        'type': 'layernorm', 
-        'eps': 1e-6,
-    },
-    'mla': {
+    'head': {
         'in_channels_list': (1024, 1024, 1024, 1024),
-        'out_channels': 256,
-    },
-    'decoder': {
-        'in_channels_list': (256, 256, 256, 256),
-        'mla_channels': 128,
-        'out_channels': 512,
+        'mla_feats_channels': 256,
+        'mla_up_channels': 128,
+        'feats_channels': 512,
         'scale_factor': 4,
         'dropout': 0,
+        'norm_cfg': {'type': 'layernorm', 'eps': 1e-6},
     },
     'auxiliary': [
         {'in_channels': 256, 'out_channels': 256, 'dropout': 0, 'num_convs': 2, 'scale_factor': 4, 'kernel_size': 3},

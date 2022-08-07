@@ -80,18 +80,14 @@ SEGMENTOR_CFG = {
         'pretrained': True,
         'selected_indices': (0, 1, 2, 3),
     },
-    'normlayer': {
+    'head': {
         'in_channels_list': [1024, 1024, 1024, 1024],
-        'type': 'layernorm', 
-        'eps': 1e-6,
-    },
-    'decoder': {
-        'in_channels': 1024,
-        'out_channels': 256,
+        'feats_channels': 256,
         'dropout': 0,
         'num_convs': 4,
         'scale_factor': 2,
         'kernel_size': 3,
+        'norm_cfg': {'type': 'layernorm', 'eps': 1e-6},
     },
     'auxiliary': [
         {'in_channels': 1024, 'out_channels': 256, 'dropout': 0, 'num_convs': 1, 'scale_factor': 4, 'kernel_size': 3},

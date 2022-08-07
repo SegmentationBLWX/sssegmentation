@@ -16,16 +16,22 @@ from ...backbones import BuildActivation, BuildNormalization, constructnormcfg
 class SETRUP(BaseSegmentor):
     def __init__(self, cfg, mode):
         super(SETRUP, self).__init__(cfg, mode)
-        align_corners, norm_cfg, act_cfg = self.align_corners, self.norm_cfg, self.act_cfg
+        align_corners, norm_cfg, act_cfg, head_cfg = self.align_corners, self.norm_cfg, self.act_cfg, cfg['head']
         # build norm layer
         self.norm_layers = nn.ModuleList()
-        for in_channels in cfg['normlayer']['in_channels_list']:
-            norm_cfg_copy = cfg['normlayer'].copy()
-            norm_cfg_copy.pop('in_channels_list')
+        for in_channels in head_cfg['in_channels_list']:
+            norm_cfg_copy = head_cfg['norm_cfg'].copy()
             norm_layer = BuildNormalization(constructnormcfg(placeholder=in_channels, norm_cfg=norm_cfg_copy))
             self.norm_layers.append(norm_layer)
         # build decoder
-        self.decoder = self.builddecoder(cfg['decoder'])
+        self.decoder = self.builddecoder({
+            'in_channels': head_cfg['in_channels_list'][-1],
+            'out_channels': head_cfg['feats_channels'],
+            'kernel_size': head_cfg['kernel_size'],
+            'scale_factor': head_cfg['scale_factor'],
+            'dropout': head_cfg['dropout'],
+            'num_convs': head_cfg['num_convs'],
+        })
         # build auxiliary decoder
         auxiliary_cfg_list = cfg['auxiliary']
         assert isinstance(auxiliary_cfg_list, (tuple, list))
@@ -96,39 +102,36 @@ class SETRUP(BaseSegmentor):
 class SETRMLA(BaseSegmentor):
     def __init__(self, cfg, mode):
         super(SETRMLA, self).__init__(cfg, mode)
-        align_corners, norm_cfg, act_cfg = self.align_corners, self.norm_cfg, self.act_cfg
+        align_corners, norm_cfg, act_cfg, head_cfg = self.align_corners, self.norm_cfg, self.act_cfg, cfg['head']
         # build mla neck
         norm_layers = nn.ModuleList()
-        for in_channels in cfg['normlayer']['in_channels_list']:
-            norm_cfg_copy = cfg['normlayer'].copy()
-            norm_cfg_copy.pop('in_channels_list')
+        for in_channels in head_cfg['in_channels_list']:
+            norm_cfg_copy = head_cfg['norm_cfg'].copy()
             norm_layer = BuildNormalization(constructnormcfg(placeholder=in_channels, norm_cfg=norm_cfg_copy))
             norm_layers.append(norm_layer)
-        mla_cfg = cfg['mla']
         self.mla_neck = MLANeck(
-            in_channels_list=mla_cfg['in_channels_list'], 
-            out_channels=mla_cfg['out_channels'], 
+            in_channels_list=head_cfg['in_channels_list'], 
+            out_channels=head_cfg['mla_feats_channels'], 
             norm_layers=norm_layers, 
             norm_cfg=norm_cfg, 
             act_cfg=act_cfg,
         )
         # build upsample convs and decoder
-        decoder_cfg = cfg['decoder']
-        assert decoder_cfg['mla_channels'] * len(decoder_cfg['in_channels_list']) == decoder_cfg['out_channels']
+        assert head_cfg['mla_up_channels'] * len(head_cfg['in_channels_list']) == head_cfg['feats_channels']
         self.up_convs = nn.ModuleList()
-        for i in range(len(decoder_cfg['in_channels_list'])):
+        for i in range(len(head_cfg['in_channels_list'])):
             self.up_convs.append(nn.Sequential(
-                nn.Conv2d(decoder_cfg['in_channels_list'][i], decoder_cfg['mla_channels'], kernel_size=3, stride=1, padding=1, bias=False),
-                BuildNormalization(constructnormcfg(placeholder=decoder_cfg['mla_channels'], norm_cfg=norm_cfg)),
+                nn.Conv2d(head_cfg['mla_feats_channels'], head_cfg['mla_up_channels'], kernel_size=3, stride=1, padding=1, bias=False),
+                BuildNormalization(constructnormcfg(placeholder=head_cfg['mla_up_channels'], norm_cfg=norm_cfg)),
                 BuildActivation(act_cfg),
-                nn.Conv2d(decoder_cfg['mla_channels'], decoder_cfg['mla_channels'], kernel_size=3, stride=1, padding=1, bias=False),
-                BuildNormalization(constructnormcfg(placeholder=decoder_cfg['mla_channels'], norm_cfg=norm_cfg)),
+                nn.Conv2d(head_cfg['mla_up_channels'], head_cfg['mla_up_channels'], kernel_size=3, stride=1, padding=1, bias=False),
+                BuildNormalization(constructnormcfg(placeholder=head_cfg['mla_up_channels'], norm_cfg=norm_cfg)),
                 BuildActivation(act_cfg),
-                nn.Upsample(scale_factor=decoder_cfg['scale_factor'], mode='bilinear', align_corners=align_corners)
+                nn.Upsample(scale_factor=head_cfg['scale_factor'], mode='bilinear', align_corners=align_corners)
             ))
         self.decoder = nn.Sequential(
-            nn.Dropout2d(decoder_cfg['dropout']),
-            nn.Conv2d(decoder_cfg['out_channels'], cfg['num_classes'], kernel_size=1, stride=1, padding=0),
+            nn.Dropout2d(head_cfg['dropout']),
+            nn.Conv2d(head_cfg['feats_channels'], cfg['num_classes'], kernel_size=1, stride=1, padding=0),
         )
         # build auxiliary decoder
         auxiliary_cfg_list = cfg['auxiliary']
