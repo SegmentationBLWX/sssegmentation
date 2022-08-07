@@ -20,8 +20,8 @@ class PSANet(BaseSegmentor):
         # build psa
         assert head_cfg['type'] in ['collect', 'distribute', 'bi-direction']
         mask_h, mask_w = head_cfg['mask_size']
-        if 'normalization_factor' not in head_cfg:
-            head_cfg['normalization_factor'] = mask_h * mask_w
+        if 'normalization_factor' not in self.cfg['head']:
+            self.cfg['head']['normalization_factor'] = mask_h * mask_w
         self.reduce = nn.Sequential(
             nn.Conv2d(head_cfg['in_channels'], head_cfg['feats_channels'], kernel_size=1, stride=1, padding=0, bias=False),
             BuildNormalization(constructnormcfg(placeholder=head_cfg['feats_channels'], norm_cfg=norm_cfg)),
@@ -75,8 +75,8 @@ class PSANet(BaseSegmentor):
         backbone_outputs = self.transforminputs(self.backbone_net(x), selected_indices=self.cfg['backbone'].get('selected_indices'))
         # feed to psa
         identity = backbone_outputs[-1]
-        shrink_factor, align_corners = self.cfg['psa']['shrink_factor'], self.align_corners
-        if self.cfg['psa']['type'] in ['collect', 'distribute']:
+        shrink_factor, align_corners = self.cfg['head']['shrink_factor'], self.align_corners
+        if self.cfg['head']['type'] in ['collect', 'distribute']:
             out = self.reduce(backbone_outputs[-1])
             n, c, h, w = out.size()
             if shrink_factor != 1:
@@ -90,14 +90,14 @@ class PSANet(BaseSegmentor):
                     align_corners = False
                 out = F.interpolate(out, size=(h, w), mode='bilinear', align_corners=align_corners)
             y = self.attention(out)
-            if self.cfg['psa']['compact']:
-                if self.cfg['psa']['type'] == 'collect':
+            if self.cfg['head']['compact']:
+                if self.cfg['head']['type'] == 'collect':
                     y = y.view(n, h * w, h * w).transpose(1, 2).view(n, h * w, h, w)
             else:
                 y = self.psamask(y)
-            if self.cfg['psa']['psa_softmax']:
+            if self.cfg['head']['psa_softmax']:
                 y = F.softmax(y, dim=1)
-            out = torch.bmm(out.view(n, c, h * w), y.view(n, h * w, h * w)).view(n, c, h, w) * (1.0 / self.cfg['psa']['normalization_factor'])
+            out = torch.bmm(out.view(n, c, h * w), y.view(n, h * w, h * w)).view(n, c, h, w) * (1.0 / self.cfg['head']['normalization_factor'])
         else:
             x_col = self.reduce(backbone_outputs[-1])
             x_dis = self.reduce_p(backbone_outputs[-1])
@@ -115,16 +115,16 @@ class PSANet(BaseSegmentor):
                 x_dis = F.interpolate(x_dis, size=(h, w), mode='bilinear', align_corners=align_corners)
             y_col = self.attention(x_col)
             y_dis = self.attention_p(x_dis)
-            if self.cfg['psa']['compact']:
+            if self.cfg['head']['compact']:
                 y_dis = y_dis.view(n, h * w, h * w).transpose(1, 2).view(n, h * w, h, w)
             else:
                 y_col = self.psamask_collect(y_col)
                 y_dis = self.psamask_distribute(y_dis)
-            if self.cfg['psa']['psa_softmax']:
+            if self.cfg['head']['psa_softmax']:
                 y_col = F.softmax(y_col, dim=1)
                 y_dis = F.softmax(y_dis, dim=1)
-            x_col = torch.bmm(x_col.view(n, c, h * w), y_col.view(n, h * w, h * w)).view(n, c, h, w) * (1.0 / self.cfg['psa']['normalization_factor'])
-            x_dis = torch.bmm(x_dis.view(n, c, h * w), y_dis.view(n, h * w, h * w)).view(n, c, h, w) * (1.0 / self.cfg['psa']['normalization_factor'])
+            x_col = torch.bmm(x_col.view(n, c, h * w), y_col.view(n, h * w, h * w)).view(n, c, h, w) * (1.0 / self.cfg['head']['normalization_factor'])
+            x_dis = torch.bmm(x_dis.view(n, c, h * w), y_dis.view(n, h * w, h * w)).view(n, c, h, w) * (1.0 / self.cfg['head']['normalization_factor'])
             out = torch.cat([x_col, x_dis], 1)
         feats = self.proj(out)
         feats = F.interpolate(feats, size=identity.shape[2:], mode='bilinear', align_corners=align_corners)

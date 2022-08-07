@@ -70,15 +70,12 @@ SEGMENTOR_CFG = {
         'use_stem': True,
         'selected_indices': (0, 1, 2, 3),
     },
-    'fpn': {
+    'head': {
         'in_channels_list': [256, 512, 1024, 2048],
-        'out_channels': 256,
+        'feats_channels': 256,
         'upsample_cfg': {'mode': 'nearest'},
         'feature_stride_list': [4, 8, 16, 32],
         'scale_head_channels': 128,
-    },
-    'decoder': {
-        'in_channels': 128,
         'dropout': 0.1,
     },
 }
