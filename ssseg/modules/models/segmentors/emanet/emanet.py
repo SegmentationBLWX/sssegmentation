@@ -16,40 +16,38 @@ from ...backbones import BuildActivation, BuildNormalization, constructnormcfg
 class EMANet(BaseSegmentor):
     def __init__(self, cfg, mode):
         super(EMANet, self).__init__(cfg, mode)
-        align_corners, norm_cfg, act_cfg = self.align_corners, self.norm_cfg, self.act_cfg
+        align_corners, norm_cfg, act_cfg, head_cfg = self.align_corners, self.norm_cfg, self.act_cfg, cfg['head']
         # build the EMA module
-        ema_cfg = cfg['ema']
         self.ema_in_conv = nn.Sequential(
-            nn.Conv2d(ema_cfg['in_channels'], ema_cfg['ema_channels'], kernel_size=3, stride=1, padding=1, bias=False),
-            BuildNormalization(constructnormcfg(placeholder=ema_cfg['ema_channels'], norm_cfg=norm_cfg)),
+            nn.Conv2d(head_cfg['in_channels'], head_cfg['feats_channels'], kernel_size=3, stride=1, padding=1, bias=False),
+            BuildNormalization(constructnormcfg(placeholder=head_cfg['feats_channels'], norm_cfg=norm_cfg)),
             BuildActivation(act_cfg),
         )
-        self.ema_mid_conv = nn.Conv2d(ema_cfg['ema_channels'], ema_cfg['ema_channels'], kernel_size=1, stride=1, padding=0)
+        self.ema_mid_conv = nn.Conv2d(head_cfg['feats_channels'], head_cfg['feats_channels'], kernel_size=1, stride=1, padding=0)
         for param in self.ema_mid_conv.parameters():
             param.requires_grad = False
         self.ema_module = EMAModule(
-            channels=ema_cfg['ema_channels'],
-            num_bases=ema_cfg['num_bases'],
-            num_stages=ema_cfg['num_stages'],
-            momentum=ema_cfg['momentum']
+            channels=head_cfg['feats_channels'],
+            num_bases=head_cfg['num_bases'],
+            num_stages=head_cfg['num_stages'],
+            momentum=head_cfg['momentum']
         )
         self.ema_out_conv = nn.Sequential(
-            nn.Conv2d(ema_cfg['ema_channels'], ema_cfg['ema_channels'], kernel_size=1, stride=1, padding=0, bias=False),
-            BuildNormalization(constructnormcfg(placeholder=ema_cfg['ema_channels'], norm_cfg=norm_cfg)),
+            nn.Conv2d(head_cfg['feats_channels'], head_cfg['feats_channels'], kernel_size=1, stride=1, padding=0, bias=False),
+            BuildNormalization(constructnormcfg(placeholder=head_cfg['feats_channels'], norm_cfg=norm_cfg)),
         )
         self.bottleneck = nn.Sequential(
-            nn.Conv2d(ema_cfg['ema_channels'], ema_cfg['ema_channels'], kernel_size=3, stride=1, padding=1, bias=False),
-            BuildNormalization(constructnormcfg(placeholder=ema_cfg['ema_channels'], norm_cfg=norm_cfg)),
+            nn.Conv2d(head_cfg['feats_channels'], head_cfg['feats_channels'], kernel_size=3, stride=1, padding=1, bias=False),
+            BuildNormalization(constructnormcfg(placeholder=head_cfg['feats_channels'], norm_cfg=norm_cfg)),
             BuildActivation(act_cfg),
         )
         # build decoder
-        decoder_cfg = cfg['decoder']
         self.decoder = nn.Sequential(
-            nn.Conv2d(decoder_cfg['in_channels'], decoder_cfg['out_channels'], kernel_size=3, stride=1, padding=1, bias=False),
-            BuildNormalization(constructnormcfg(placeholder=decoder_cfg['out_channels'], norm_cfg=norm_cfg)),
+            nn.Conv2d(head_cfg['feats_channels'] + head_cfg['in_channels'], head_cfg['feats_channels'], kernel_size=3, stride=1, padding=1, bias=False),
+            BuildNormalization(constructnormcfg(placeholder=head_cfg['feats_channels'], norm_cfg=norm_cfg)),
             BuildActivation(act_cfg),
-            nn.Dropout2d(decoder_cfg['dropout']),
-            nn.Conv2d(decoder_cfg['out_channels'], cfg['num_classes'], kernel_size=1, stride=1, padding=0)
+            nn.Dropout2d(head_cfg['dropout']),
+            nn.Conv2d(head_cfg['feats_channels'], cfg['num_classes'], kernel_size=1, stride=1, padding=0)
         )
         # build auxiliary decoder
         self.setauxiliarydecoder(cfg['auxiliary'])

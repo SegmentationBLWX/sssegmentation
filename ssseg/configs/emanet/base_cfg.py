@@ -74,16 +74,12 @@ SEGMENTOR_CFG = {
         'use_stem': True,
         'selected_indices': (2, 3),
     },
-    'ema': {
+    'head': {
         'in_channels': 2048,
-        'ema_channels': 512,
+        'feats_channels': 512,
         'momentum': 0.1,
         'num_stages': 3,
         'num_bases': 64,
-    },
-    'decoder': {
-        'in_channels': 2560,
-        'out_channels': 512,
         'dropout': 0.1,
     },
     'auxiliary': {

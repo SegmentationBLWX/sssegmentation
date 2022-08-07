@@ -76,17 +76,14 @@ SEGMENTOR_CFG = {
         'use_stem': True,
         'selected_indices': (1, 2, 3),
     },
-    'encoding': {
+    'head': {
         'in_channels_list': [512, 1024, 2048],
-        'out_channels': 512,
+        'feats_channels': 512,
         'num_codes': 32,
         'extra': {
             'use_se_loss': True,
             'add_lateral': False,
-        }
-    },
-    'decoder': {
-        'in_channels': 512,
+        },
         'dropout': 0.1,
     },
     'auxiliary': {
