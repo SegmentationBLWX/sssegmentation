@@ -1,4 +1,4 @@
-'''upernet_beitbase_ade20k'''
+'''upernet_beitlarge_ade20k'''
 import os
 from .base_cfg import *
 
@@ -57,6 +57,6 @@ SEGMENTOR_CFG.update({
 INFERENCE_CFG = INFERENCE_CFG.copy()
 # modify common config
 COMMON_CFG = COMMON_CFG.copy()
-COMMON_CFG['work_dir'] = 'upernet_beitbase_ade20k'
-COMMON_CFG['logfilepath'] = 'upernet_beitbase_ade20k/upernet_beitbase_ade20k.log'
-COMMON_CFG['resultsavepath'] = 'upernet_beitbase_ade20k/upernet_beitbase_ade20k_results.pkl'
+COMMON_CFG['work_dir'] = 'upernet_beitlarge_ade20k'
+COMMON_CFG['logfilepath'] = 'upernet_beitlarge_ade20k/upernet_beitlarge_ade20k.log'
+COMMON_CFG['resultsavepath'] = 'upernet_beitlarge_ade20k/upernet_beitlarge_ade20k_results.pkl'
