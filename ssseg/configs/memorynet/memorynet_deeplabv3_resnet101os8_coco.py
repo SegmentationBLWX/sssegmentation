@@ -25,7 +25,7 @@ SEGMENTOR_CFG = SEGMENTOR_CFG.copy()
 SEGMENTOR_CFG.update({
     'num_classes': 21,
 })
-SEGMENTOR_CFG['memory']['use_loss'] = False
+SEGMENTOR_CFG['head']['use_loss'] = False
 # modify inference config
 INFERENCE_CFG = INFERENCE_CFG.copy()
 # modify common config

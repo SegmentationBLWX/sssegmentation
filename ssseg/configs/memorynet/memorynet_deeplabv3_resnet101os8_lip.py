@@ -44,7 +44,7 @@ SEGMENTOR_CFG.update({
     'num_classes': 20,
     'act_cfg': {'type': 'leakyrelu', 'negative_slope': 0.01, 'inplace': True},
 })
-SEGMENTOR_CFG['memory']['use_loss'] = False
+SEGMENTOR_CFG['head']['use_loss'] = False
 # modify inference config
 INFERENCE_CFG = INFERENCE_CFG.copy()
 # modify common config

@@ -76,7 +76,7 @@ SEGMENTOR_CFG = {
         'use_stem': True,
         'selected_indices': (0, 1, 2, 3),
     },
-    'memory': {
+    'head': {
         'downsample_backbone': {
             'kernel_size': 3,
             'stride': 1,
@@ -111,19 +111,8 @@ SEGMENTOR_CFG = {
                 'base_lr': 0.01,
                 'adjust_by_learning_rate': True,
             }
-        }
-    },
-    'decoder': {
-        'stage1': {
-            'in_channels': 512,
-            'out_channels': 512,
-            'dropout': 0.1,
         },
-        'stage2': {
-            'in_channels': 512,
-            'out_channels': 512,
-            'dropout': 0.1,
-        },
+        'dropout': 0.1,
     },
     'auxiliary': {
         'in_channels': 1024,

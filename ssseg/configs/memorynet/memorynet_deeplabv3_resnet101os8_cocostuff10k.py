@@ -32,8 +32,8 @@ SEGMENTOR_CFG = SEGMENTOR_CFG.copy()
 SEGMENTOR_CFG.update({
     'num_classes': 182,
 })
-SEGMENTOR_CFG['memory']['use_loss'] = False
-SEGMENTOR_CFG['memory']['update_cfg']['momentum_cfg']['base_lr'] = 0.001 * 0.9
+SEGMENTOR_CFG['head']['use_loss'] = False
+SEGMENTOR_CFG['head']['update_cfg']['momentum_cfg']['base_lr'] = 0.001 * 0.9
 # modify inference config
 INFERENCE_CFG = INFERENCE_CFG.copy()
 # modify common config

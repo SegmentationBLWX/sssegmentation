@@ -39,8 +39,8 @@ SEGMENTOR_CFG.update({
     },
     'auxiliary': None,
 })
-SEGMENTOR_CFG['memory']['in_channels'] = sum([48, 96, 192, 384])
-SEGMENTOR_CFG['memory']['update_cfg']['momentum_cfg']['base_lr'] = 0.004
+SEGMENTOR_CFG['head']['in_channels'] = sum([48, 96, 192, 384])
+SEGMENTOR_CFG['head']['update_cfg']['momentum_cfg']['base_lr'] = 0.004
 # modify inference config
 INFERENCE_CFG = INFERENCE_CFG.copy()
 # modify common config

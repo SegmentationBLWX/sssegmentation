@@ -56,8 +56,8 @@ SEGMENTOR_CFG.update({
         'selected_indices': (0, 1, 2, 3),
     },
 })
-SEGMENTOR_CFG['memory']['use_loss'] = False
-SEGMENTOR_CFG['memory']['update_cfg']['momentum_cfg']['base_lr'] = 0.007
+SEGMENTOR_CFG['head']['use_loss'] = False
+SEGMENTOR_CFG['head']['update_cfg']['momentum_cfg']['base_lr'] = 0.007
 # modify inference config
 INFERENCE_CFG = INFERENCE_CFG.copy()
 # modify common config
