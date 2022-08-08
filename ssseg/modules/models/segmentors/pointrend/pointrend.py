@@ -17,24 +17,23 @@ from ...backbones import BuildActivation, BuildNormalization, constructnormcfg
 class PointRend(BaseSegmentor):
     def __init__(self, cfg, mode):
         super(PointRend, self).__init__(cfg, mode)
-        align_corners, norm_cfg, act_cfg = self.align_corners, self.norm_cfg, self.act_cfg
+        align_corners, norm_cfg, act_cfg, head_cfg = self.align_corners, self.norm_cfg, self.act_cfg, cfg['head']
         # build fpn
-        fpn_cfg = cfg['fpn']
         self.fpn_neck = FPN(
-            in_channels_list=fpn_cfg['in_channels_list'],
-            out_channels=fpn_cfg['out_channels'],
-            upsample_cfg=fpn_cfg['upsample_cfg'],
+            in_channels_list=head_cfg['fpn_in_channels_list'],
+            out_channels=head_cfg['feats_channels'],
+            upsample_cfg=head_cfg['upsample_cfg'],
             norm_cfg=norm_cfg,
             act_cfg=act_cfg,
         )
-        self.scale_heads, feature_stride_list = nn.ModuleList(), fpn_cfg['feature_stride_list']
+        self.scale_heads, feature_stride_list = nn.ModuleList(), head_cfg['feature_stride_list']
         for i in range(len(feature_stride_list)):
             head_length = max(1, int(np.log2(feature_stride_list[i]) - np.log2(feature_stride_list[0])))
             scale_head = []
             for k in range(head_length):
                 scale_head.append(nn.Sequential(
-                    nn.Conv2d(fpn_cfg['out_channels'] if k == 0 else fpn_cfg['scale_head_channels'], fpn_cfg['scale_head_channels'], kernel_size=3, stride=1, padding=1, bias=False),
-                    BuildNormalization(constructnormcfg(placeholder=fpn_cfg['scale_head_channels'], norm_cfg=norm_cfg)),
+                    nn.Conv2d(head_cfg['feats_channels'] if k == 0 else head_cfg['scale_head_channels'], head_cfg['scale_head_channels'], kernel_size=3, stride=1, padding=1, bias=False),
+                    BuildNormalization(constructnormcfg(placeholder=head_cfg['scale_head_channels'], norm_cfg=norm_cfg)),
                     BuildActivation(act_cfg),
                 ))
                 if feature_stride_list[i] != feature_stride_list[0]:
@@ -43,10 +42,9 @@ class PointRend(BaseSegmentor):
                     )
             self.scale_heads.append(nn.Sequential(*scale_head))
         # point rend
-        pointrend_cfg = cfg['pointrend']
-        self.num_fcs, self.coarse_pred_each_layer = pointrend_cfg['num_fcs'], pointrend_cfg['coarse_pred_each_layer']
-        fc_in_channels = sum(pointrend_cfg['in_channels_list']) + cfg['num_classes']
-        fc_channels = pointrend_cfg['feats_channels']
+        self.num_fcs, self.coarse_pred_each_layer = head_cfg['num_fcs'], head_cfg['coarse_pred_each_layer']
+        fc_in_channels = sum(head_cfg['pointrend_in_channels_list']) + cfg['num_classes']
+        fc_channels = head_cfg['feats_channels']
         self.fcs = nn.ModuleList()
         for k in range(self.num_fcs):
             fc = nn.Sequential(
@@ -58,9 +56,8 @@ class PointRend(BaseSegmentor):
             fc_in_channels = fc_channels
             fc_in_channels += cfg['num_classes'] if self.coarse_pred_each_layer else 0
         # build decoder
-        decoder_cfg = cfg['decoder']
         self.decoder = nn.Sequential(
-            nn.Dropout(decoder_cfg['dropout']),
+            nn.Dropout(head_cfg['dropout']),
             nn.Conv1d(fc_in_channels, cfg['num_classes'], kernel_size=1, stride=1, padding=0)
         )
         # build auxiliary decoder

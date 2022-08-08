@@ -74,22 +74,17 @@ SEGMENTOR_CFG = {
         'use_stem': True,
         'selected_indices': (0, 1, 2, 3),
     },
-    'fpn': {
-        'in_channels_list': [256, 512, 1024, 2048],
-        'out_channels': 256,
+    'head': {
+        'fpn_in_channels_list': [256, 512, 1024, 2048],
+        'pointrend_in_channels_list': [256],
+        'feats_channels': 256,
         'upsample_cfg': {'mode': 'nearest'},
         'feature_stride_list': [4, 8, 16, 32],
         'scale_head_channels': 128,
-    },
-    'pointrend': {
         'num_fcs': 3,
-        'in_channels_list': [256],
-        'feats_channels': 256,
         'coarse_pred_each_layer': True,
         'train': {'num_points': 2048, 'oversample_ratio': 3, 'importance_sample_ratio': 0.75},
         'test': {'subdivision_steps': 2, 'subdivision_num_points': 8196, 'scale_factor': 2},
-    },
-    'decoder': {
         'dropout': 0,
     },
     'auxiliary': {

@@ -32,9 +32,9 @@ SEGMENTOR_CFG.update({
         'selected_indices': (0, 1, 2, 3),
         'norm_cfg': {'type': 'layernorm', 'eps': 1e-6},
     },
-    'decoder': {
+    'head': {
         'in_channels_list': [64, 128, 320, 512],
-        'out_channels': 256,
+        'feats_channels': 256,
         'dropout': 0.1,
     },
 })

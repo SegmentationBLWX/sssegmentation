@@ -16,29 +16,31 @@ from ...backbones import BuildActivation, BuildNormalization, constructnormcfg
 class ICNet(BaseSegmentor):
     def __init__(self, cfg, mode):
         super(ICNet, self).__init__(cfg, mode)
-        align_corners, norm_cfg, act_cfg = self.align_corners, self.norm_cfg, self.act_cfg
+        align_corners, norm_cfg, act_cfg, head_cfg = self.align_corners, self.norm_cfg, self.act_cfg, cfg['head']
         # build encoder
         delattr(self, 'backbone_net')
-        encoder_cfg = cfg['encoder']
+        encoder_cfg = head_cfg['encoder']
         encoder_cfg.update({'backbone_cfg': cfg['backbone']})
         if 'act_cfg' not in encoder_cfg: encoder_cfg.update({'act_cfg': act_cfg})
         if 'norm_cfg' not in encoder_cfg: encoder_cfg.update({'norm_cfg': norm_cfg})
         if 'align_corners' not in encoder_cfg: encoder_cfg.update({'align_corners': align_corners})
         self.backbone_net = ICNetEncoder(**encoder_cfg)
         # build neck
-        neck_cfg = cfg['neck']
-        if 'act_cfg' not in neck_cfg: neck_cfg.update({'act_cfg': act_cfg})
-        if 'norm_cfg' not in neck_cfg: neck_cfg.update({'norm_cfg': norm_cfg})
-        if 'align_corners' not in neck_cfg: neck_cfg.update({'align_corners': align_corners})
+        neck_cfg = {
+            'in_channels_list': head_cfg['in_channels_list'],
+            'out_channels': head_cfg['feats_channels'],
+            'act_cfg': act_cfg.copy(),
+            'norm_cfg': norm_cfg.copy(),
+            'align_corners': align_corners,
+        }
         self.neck = ICNeck(**neck_cfg)
         # build decoder
-        decoder_cfg = cfg['decoder']
         self.decoder = nn.Sequential(
-            nn.Conv2d(decoder_cfg['in_channels'], decoder_cfg['out_channels'], kernel_size=3, stride=1, padding=1, bias=False),
-            BuildNormalization(constructnormcfg(placeholder=decoder_cfg['out_channels'], norm_cfg=norm_cfg)),
+            nn.Conv2d(head_cfg['feats_channels'], head_cfg['feats_channels'], kernel_size=3, stride=1, padding=1, bias=False),
+            BuildNormalization(constructnormcfg(placeholder=head_cfg['feats_channels'], norm_cfg=norm_cfg)),
             BuildActivation(act_cfg),
-            nn.Dropout2d(decoder_cfg['dropout']),
-            nn.Conv2d(decoder_cfg['out_channels'], cfg['num_classes'], kernel_size=1, stride=1, padding=0)
+            nn.Dropout2d(head_cfg['dropout']),
+            nn.Conv2d(head_cfg['feats_channels'], cfg['num_classes'], kernel_size=1, stride=1, padding=0)
         )
         # build auxiliary decoder
         self.setauxiliarydecoder(cfg['auxiliary'])

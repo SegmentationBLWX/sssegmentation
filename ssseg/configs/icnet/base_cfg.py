@@ -76,14 +76,10 @@ SEGMENTOR_CFG = {
         'use_stem': True,
         'selected_indices': (0, 1, 2),
     },
-    'encoder': {},
-    'neck': {
+    'head': {
+        'encoder': {},
         'in_channels_list': (64, 256, 256),
-        'out_channels': 128,
-    },
-    'decoder': {
-        'in_channels': 128,
-        'out_channels': 128,
+        'feats_channels': 128,
         'dropout': 0.1,
     },
     'auxiliary': [
