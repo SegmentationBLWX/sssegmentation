@@ -27,7 +27,7 @@ class MemoryNet(BaseSegmentor):
             for in_channels in head_cfg['norm_cfg']['in_channels_list']:
                 norm_cfg_copy = head_cfg['norm_cfg'].copy()
                 norm_cfg_copy.pop('in_channels_list')
-                norm_layer = BuildNormalization(constructnormcfg(placeholder=in_channels, norm_cfg=norm_cfg_copy)),
+                norm_layer = BuildNormalization(constructnormcfg(placeholder=in_channels, norm_cfg=norm_cfg_copy))
                 self.norm_layers.append(norm_layer)
         # build memory
         if head_cfg['downsample_backbone']['stride'] > 1:
