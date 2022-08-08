@@ -120,7 +120,7 @@ class ContextPath(nn.Module):
             'resnet': BuildResNet,
         }
         assert cfg['series'] in supported_backbones, 'unsupport backbone type %s' % cfg['type']
-        return supported_backbones[cfg['series']](cfg['type'], **cfg)
+        return supported_backbones[cfg['series']](cfg.pop('type'), **cfg)
 
 
 '''Feature Fusion Module to fuse low level output feature of Spatial Path and high level output feature of Context Path'''
