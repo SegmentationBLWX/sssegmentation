@@ -76,31 +76,15 @@ SEGMENTOR_CFG = {
         'use_stem': True,
         'selected_indices': (0, 1, 2, 3),
     },
-    'ppm': {
-        'in_channels': 2048,
-        'out_channels': 512,
+    'head': {
+        'in_channels_list': [256, 512, 1024, 2048],
+        'feats_channels': 512,
         'pool_scales': [1, 2, 3, 6],
-    },
-    'epm': {
-        'in_channels_list': [256, 512, 1024],
-        'hidden_channels': 256,
-        'out_channels': 2
-    },
-    'shortcut': {
-        'in_channels': 256,
-        'out_channels': 48,
-    },
-    'decoder':{ 
-        'stage1': {
-            'in_channels': 560,
-            'out_channels': 512,
-            'dropout': 0,
-        },
-        'stage2': {
-            'in_channels': 1280,
-            'out_channels': 512,
-            'dropout': 0.1
-        },
+        'epm_hidden_channels': 256,
+        'shortcut_feats_channels': 48,
+        'epm_out_channels': 2,
+        'dropout_stage1': 0,
+        'dropout_stage2': 0.1,
     },
 }
 # config for inference

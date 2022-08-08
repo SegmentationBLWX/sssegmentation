@@ -75,9 +75,9 @@ SEGMENTOR_CFG = {
         'pretrained': False,
         'selected_indices': (0, 1, 2),
     },
-    'decoder': {
+    'head': {
         'in_channels': 128,
-        'out_channels': 128,
+        'feats_channels': 128,
         'dropout': 0.1,
     },
     'auxiliary': [
