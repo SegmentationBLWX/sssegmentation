@@ -18,37 +18,34 @@ from ...backbones import BuildActivation, BuildNormalization, constructnormcfg
 class OCRNet(BaseSegmentor):
     def __init__(self, cfg, mode):
         super(OCRNet, self).__init__(cfg, mode)
-        align_corners, norm_cfg, act_cfg = self.align_corners, self.norm_cfg, self.act_cfg
+        align_corners, norm_cfg, act_cfg, head_cfg = self.align_corners, self.norm_cfg, self.act_cfg, cfg['head']
         # build auxiliary decoder
         assert (cfg['auxiliary'] is not None) and isinstance(cfg['auxiliary'], dict), 'auxiliary must be given and only support dict type'
         self.setauxiliarydecoder(cfg['auxiliary'])
         # build bottleneck
-        bottleneck_cfg = cfg['bottleneck']
         self.bottleneck = nn.Sequential(
-            nn.Conv2d(bottleneck_cfg['in_channels'], bottleneck_cfg['out_channels'], kernel_size=3, stride=1, padding=1, bias=False),
-            BuildNormalization(constructnormcfg(placeholder=bottleneck_cfg['out_channels'], norm_cfg=norm_cfg)),
+            nn.Conv2d(head_cfg['in_channels'], head_cfg['feats_channels'], kernel_size=3, stride=1, padding=1, bias=False),
+            BuildNormalization(constructnormcfg(placeholder=head_cfg['feats_channels'], norm_cfg=norm_cfg)),
             BuildActivation(act_cfg),
         )
         # build spatial gather module
         spatialgather_cfg = {
-            'scale': cfg['spatialgather']['scale']
+            'scale': head_cfg['scale']
         }
         self.spatial_gather_module = SpatialGatherModule(**spatialgather_cfg)
         # build object context block
-        ocb_cfg = cfg['objectcontext']
         self.object_context_block = ObjectContextBlock(
-            in_channels=ocb_cfg['in_channels'], 
-            transform_channels=ocb_cfg['transform_channels'], 
-            scale=ocb_cfg['scale'],
+            in_channels=head_cfg['feats_channels'], 
+            transform_channels=head_cfg['transform_channels'], 
+            scale=head_cfg['scale'],
             align_corners=align_corners,
             norm_cfg=copy.deepcopy(norm_cfg),
             act_cfg=copy.deepcopy(act_cfg),
         )
         # build decoder
-        decoder_cfg = cfg['decoder']
         self.decoder = nn.Sequential(
-            nn.Dropout2d(decoder_cfg['dropout']),
-            nn.Conv2d(decoder_cfg['in_channels'], cfg['num_classes'], kernel_size=1, stride=1, padding=0)
+            nn.Dropout2d(head_cfg['dropout']),
+            nn.Conv2d(head_cfg['feats_channels'], cfg['num_classes'], kernel_size=1, stride=1, padding=0)
         )
         # freeze normalization layer if necessary
         if cfg.get('is_freeze_norm', False): self.freezenormalization()

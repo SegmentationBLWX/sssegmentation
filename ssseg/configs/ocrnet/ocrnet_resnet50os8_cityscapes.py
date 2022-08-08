@@ -54,9 +54,12 @@ SEGMENTOR_CFG.update({
         'out_channels': 512,
         'dropout': 0,
     },
-    'bottleneck': {
+    'head': {
         'in_channels': 2048,
-        'out_channels': 512,
+        'feats_channels': 512,
+        'transform_channels': 256,
+        'scale': 1,
+        'dropout': 0,
     },
 })
 # modify inference config

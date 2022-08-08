@@ -76,20 +76,11 @@ SEGMENTOR_CFG = {
         'out_channels': 512,
         'dropout': 0,
     },
-    'bottleneck': {
+    'head': {
         'in_channels': sum([18, 36, 72, 144]),
-        'out_channels': 512,
-    },
-    'spatialgather': {
-        'scale': 1,
-    },
-    'objectcontext': {
-        'in_channels': 512,
+        'feats_channels': 512,
         'transform_channels': 256,
         'scale': 1,
-    },
-    'decoder': {
-        'in_channels': 512,
         'dropout': 0,
     },
 }
