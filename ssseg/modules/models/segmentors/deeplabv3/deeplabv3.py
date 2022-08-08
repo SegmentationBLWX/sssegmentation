@@ -15,22 +15,21 @@ from ..base import BaseSegmentor
 class Deeplabv3(BaseSegmentor):
     def __init__(self, cfg, mode):
         super(Deeplabv3, self).__init__(cfg, mode)
-        align_corners, norm_cfg, act_cfg = self.align_corners, self.norm_cfg, self.act_cfg
+        align_corners, norm_cfg, act_cfg, head_cfg = self.align_corners, self.norm_cfg, self.act_cfg, cfg['head']
         # build aspp net
         aspp_cfg = {
-            'in_channels': cfg['aspp']['in_channels'],
-            'out_channels': cfg['aspp']['out_channels'],
-            'dilations': cfg['aspp']['dilations'],
+            'in_channels': head_cfg['in_channels'],
+            'out_channels': head_cfg['feats_channels'],
+            'dilations': head_cfg['dilations'],
             'align_corners': align_corners,
             'norm_cfg': copy.deepcopy(norm_cfg),
             'act_cfg': copy.deepcopy(act_cfg),
         }
         self.aspp_net = ASPP(**aspp_cfg)
         # build decoder
-        decoder_cfg = cfg['decoder']
         self.decoder = nn.Sequential(
-            nn.Dropout2d(decoder_cfg['dropout']),
-            nn.Conv2d(decoder_cfg['in_channels'], cfg['num_classes'], kernel_size=1, stride=1, padding=0)
+            nn.Dropout2d(head_cfg['dropout']),
+            nn.Conv2d(head_cfg['feats_channels'], cfg['num_classes'], kernel_size=1, stride=1, padding=0)
         )
         # build auxiliary decoder
         self.setauxiliarydecoder(cfg['auxiliary'])

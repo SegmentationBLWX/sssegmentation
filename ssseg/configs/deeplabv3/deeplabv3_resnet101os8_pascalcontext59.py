@@ -52,10 +52,11 @@ SEGMENTOR_CFG.update({
         'use_stem': True,
         'selected_indices': (2, 3),
     },
-    'aspp': {
+    'head': {
         'in_channels': 2048,
-        'out_channels': 512,
+        'feats_channels': 512,
         'dilations': [1, 12, 24, 36],
+        'dropout': 0.1,
     },
 })
 # modify inference config

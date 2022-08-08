@@ -73,7 +73,7 @@ class PointRend(BaseSegmentor):
         # feed to fpn
         fpn_outs = self.fpn_neck(list(backbone_outputs))
         feats = self.scale_heads[0](fpn_outs[0])
-        for i in range(1, len(self.cfg['fpn']['feature_stride_list'])):
+        for i in range(1, len(self.cfg['head']['feature_stride_list'])):
             feats = feats + F.interpolate(self.scale_heads[i](fpn_outs[i]), size=feats.shape[2:], mode='bilinear', align_corners=self.align_corners)
         # feed to auxiliary decoder
         predictions_aux = self.auxiliary_decoder(feats)
@@ -81,7 +81,7 @@ class PointRend(BaseSegmentor):
         # if mode is TRAIN
         if self.mode == 'TRAIN':
             with torch.no_grad():
-                points = self.getpointstrain(predictions_aux, self.calculateuncertainty, cfg=self.cfg['pointrend']['train'])
+                points = self.getpointstrain(predictions_aux, self.calculateuncertainty, cfg=self.cfg['head']['train'])
             fine_grained_point_feats = self.getfinegrainedpointfeats([feats], points)
             coarse_point_feats = self.getcoarsepointfeats(predictions_aux, points)
             outputs = torch.cat([fine_grained_point_feats, coarse_point_feats], dim=1)
@@ -102,15 +102,15 @@ class PointRend(BaseSegmentor):
             )
         # if mode is TEST
         refined_seg_logits = predictions_aux.clone()
-        for _ in range(self.cfg['pointrend']['test']['subdivision_steps']):
+        for _ in range(self.cfg['head']['test']['subdivision_steps']):
             refined_seg_logits = F.interpolate(
                 input=refined_seg_logits, 
-                scale_factor=self.cfg['pointrend']['test']['scale_factor'],
+                scale_factor=self.cfg['head']['test']['scale_factor'],
                 mode='bilinear',
                 align_corners=self.align_corners
             )
             batch_size, channels, height, width = refined_seg_logits.shape
-            point_indices, points = self.getpointstest(refined_seg_logits, self.calculateuncertainty, cfg=self.cfg['pointrend']['test'])
+            point_indices, points = self.getpointstest(refined_seg_logits, self.calculateuncertainty, cfg=self.cfg['head']['test'])
             fine_grained_point_feats = self.getfinegrainedpointfeats([feats], points)
             coarse_point_feats = self.getcoarsepointfeats(predictions_aux, points)
             outputs = torch.cat([fine_grained_point_feats, coarse_point_feats], dim=1)

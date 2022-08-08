@@ -45,13 +45,10 @@ SEGMENTOR_CFG.update({
         'pretrained': False,
         'selected_indices': (3, 4),
     },
-    'aspp': {
+    'head': {
         'in_channels': 64,
-        'out_channels': 16,
+        'feats_channels': 16,
         'dilations': [1, 6, 12, 18],
-    },
-    'decoder': {
-        'in_channels': 16,
         'dropout': 0.1,
     },
     'auxiliary': {
