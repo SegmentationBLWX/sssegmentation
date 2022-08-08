@@ -58,7 +58,7 @@ class LRASPPNet(BaseSegmentor):
         # feed to aspp
         feats = self.aspp_conv(backbone_outputs[-1]) * F.interpolate(self.image_pool(backbone_outputs[-1]), size=backbone_outputs[-1].size()[2:], mode='bilinear', align_corners=self.align_corners)
         feats = self.bottleneck(feats)
-        for idx in range(len(self.cfg['aspp']['branch_channels_list']) - 1, -1, -1):
+        for idx in range(len(self.cfg['head']['branch_channels_list']) - 1, -1, -1):
             feats = F.interpolate(feats, size=backbone_outputs[idx].size()[2:], mode='bilinear', align_corners=self.align_corners)
             feats = torch.cat([feats, self.branch_convs[idx](backbone_outputs[idx])], dim=1)
             feats = self.branch_ups[idx](feats)
