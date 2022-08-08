@@ -53,6 +53,7 @@ class Tester():
     '''start tester'''
     def start(self, all_preds, all_gts):
         cfg, ngpus_per_node, logger_handle, cmd_args, cfg_file_path = self.cfg, self.ngpus_per_node, self.logger_handle, self.cmd_args, self.cfg_file_path
+        rank_id = int(os.environ['SLURM_PROCID']) if 'SLURM_PROCID' in os.environ else cmd_args.local_rank
         # build dataset and dataloader
         dataset = BuildDataset(mode='TEST', logger_handle=logger_handle, dataset_cfg=copy.deepcopy(cfg.DATASET_CFG))
         assert dataset.num_classes == cfg.SEGMENTOR_CFG['num_classes'], 'parsed config file %s error' % cfg_file_path
@@ -77,7 +78,7 @@ class Tester():
         # parallel
         segmentor = BuildDistributedModel(segmentor, {'device_ids': [cmd_args.local_rank]})
         # print information
-        if cmd_args.local_rank == 0:
+        if (cmd_args.local_rank == 0) and (int(os.environ.get('SLURM_PROCID', 0)) == 0):
             logger_handle.info(f'Config file path: {cfg_file_path}')
             logger_handle.info(f'DATASET_CFG: \n{cfg.DATASET_CFG}')
             logger_handle.info(f'DATALOADER_CFG: \n{cfg.DATALOADER_CFG}')
@@ -97,7 +98,7 @@ class Tester():
             dataloader.sampler.set_epoch(0)
             pbar = tqdm(enumerate(dataloader))
             for batch_idx, samples in pbar:
-                pbar.set_description('Processing %s/%s in rank %s' % (batch_idx+1, len(dataloader), cmd_args.local_rank))
+                pbar.set_description('Processing %s/%s in rank %s' % (batch_idx+1, len(dataloader), rank_id))
                 imageids, images, widths, heights, gts = samples['id'], samples['image'], samples['width'], samples['height'], samples['groundtruth']
                 infer_tricks, align_corners = inference_cfg['tricks'], segmentor.module.align_corners
                 cascade_cfg = infer_tricks.get('cascade', {'key_for_pre_output': 'memory_gather_logits', 'times': 1, 'forward_default_args': None})
@@ -217,7 +218,7 @@ def main():
     # number of gpus, for distribued testing, only support a process for a GPU
     ngpus_per_node = torch.cuda.device_count()
     if ngpus_per_node != args.nproc_per_node:
-        if args.local_rank == 0: 
+        if (args.local_rank == 0) and (int(os.environ.get('SLURM_PROCID', 0)) == 0):
             logger_handle.warning('ngpus_per_node is not equal to nproc_per_node, force ngpus_per_node = nproc_per_node by default')
         ngpus_per_node = args.nproc_per_node
     # instanced Tester
@@ -225,15 +226,16 @@ def main():
     client = Tester(cfg=cfg, ngpus_per_node=ngpus_per_node, logger_handle=logger_handle, cmd_args=args, cfg_file_path=cfg_file_path)
     client.start(all_preds, all_gts)
     # save results and evaluate
+    rank_id = int(os.environ['SLURM_PROCID']) if 'SLURM_PROCID' in os.environ else cmd_args.local_rank
     work_dir = cfg.COMMON_CFG['work_dir']
-    filename = cfg.COMMON_CFG['resultsavepath'].split('/')[-1].split('.')[0] + f'_{args.local_rank}.' + cfg.COMMON_CFG['resultsavepath'].split('.')[-1]
+    filename = cfg.COMMON_CFG['resultsavepath'].split('/')[-1].split('.')[0] + f'_{rank_id}.' + cfg.COMMON_CFG['resultsavepath'].split('.')[-1]
     with open(os.path.join(work_dir, filename), 'wb') as fp:
         pickle.dump([all_preds, all_gts], fp)
-    rank = torch.tensor([args.local_rank], device='cuda')
+    rank = torch.tensor([rank_id], device='cuda')
     rank_list = [rank.clone() for _ in range(args.nproc_per_node)]
     dist.all_gather(rank_list, rank)
     logger_handle.info('Rank %s finished' % int(rank.item()))
-    if args.local_rank == 0:
+    if (args.local_rank == 0) and (int(os.environ.get('SLURM_PROCID', 0)) == 0):
         all_preds_gather, all_gts_gather = [], []
         for rank in rank_list:
             rank = str(int(rank.item()))

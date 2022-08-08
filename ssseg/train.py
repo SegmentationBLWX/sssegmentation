@@ -107,7 +107,7 @@ class Trainer():
         # parallel segmentor
         segmentor = BuildDistributedModel(segmentor, {'device_ids': [cmd_args.local_rank]})
         # print config
-        if cmd_args.local_rank == 0:
+        if (cmd_args.local_rank == 0) and (int(os.environ.get('SLURM_PROCID', 0)) == 0):
             logger_handle.info(f'Config file path: {cfg_file_path}')
             logger_handle.info(f'DATASET_CFG: \n{cfg.DATASET_CFG}')
             logger_handle.info(f'DATALOADER_CFG: \n{cfg.DATALOADER_CFG}')
@@ -144,7 +144,7 @@ class Trainer():
                 else:
                     loss.backward()
                 scheduler.step()
-                if (cmd_args.local_rank == 0) and (scheduler.cur_iter % cfg.COMMON_CFG['log_interval_iterations'] == 0):
+                if (cmd_args.local_rank == 0) and (scheduler.cur_iter % cfg.COMMON_CFG['log_interval_iterations'] == 0) and (int(os.environ.get('SLURM_PROCID', 0)) == 0):
                     loss_log = ''
                     for key, value in losses_log_dict_memory.items():
                         loss_log += '%s %.4f, ' % (key, sum(value) / len(value))
@@ -161,7 +161,7 @@ class Trainer():
                 if fp16_type is not None:
                     state_dict['amp'] = apex.amp.state_dict()
                 savepath = os.path.join(cfg.COMMON_CFG['work_dir'], 'epoch_%s.pth' % epoch)
-                if cmd_args.local_rank == 0:
+                if (cmd_args.local_rank == 0) and (int(os.environ.get('SLURM_PROCID', 0)) == 0):
                     savecheckpoints(state_dict, savepath, logger_handle, cmd_args=cmd_args)
             # --eval checkpoints
             if (epoch % cfg.COMMON_CFG['eval_interval_epochs'] == 0) or (epoch == end_epoch):
@@ -169,6 +169,7 @@ class Trainer():
     '''evaluate'''
     def evaluate(self, segmentor):
         cfg, ngpus_per_node, cmd_args, logger_handle = self.cfg, self.ngpus_per_node, self.cmd_args, self.logger_handle
+        rank_id = int(os.environ['SLURM_PROCID']) if 'SLURM_PROCID' in os.environ else cmd_args.local_rank
         # build dataset and dataloader
         dataset = BuildDataset(mode='TEST', logger_handle=logger_handle, dataset_cfg=copy.deepcopy(cfg.DATASET_CFG))
         dataloader_cfg = copy.deepcopy(cfg.DATALOADER_CFG)
@@ -189,7 +190,7 @@ class Trainer():
             dataloader.sampler.set_epoch(0)
             pbar = tqdm(enumerate(dataloader))
             for batch_idx, samples in pbar:
-                pbar.set_description('Processing %s/%s in rank %s' % (batch_idx+1, len(dataloader), cmd_args.local_rank))
+                pbar.set_description('Processing %s/%s in rank %s' % (batch_idx+1, len(dataloader), rank_id))
                 imageids, images, widths, heights, gts = samples['id'], samples['image'].type(FloatTensor), samples['width'], samples['height'], samples['groundtruth']
                 if inference_cfg['mode'] == 'whole':
                     outputs = segmentor(images)
@@ -226,14 +227,14 @@ class Trainer():
                     gt[gt >= dataset.num_classes] = -1
                     all_gts.append(gt)
         # collect eval results and calculate the metric
-        filename = cfg.COMMON_CFG['resultsavepath'].split('/')[-1].split('.')[0] + f'_{cmd_args.local_rank}.' + cfg.COMMON_CFG['resultsavepath'].split('.')[-1]
+        filename = cfg.COMMON_CFG['resultsavepath'].split('/')[-1].split('.')[0] + f'_{rank_id}.' + cfg.COMMON_CFG['resultsavepath'].split('.')[-1]
         with open(os.path.join(cfg.COMMON_CFG['work_dir'], filename), 'wb') as fp:
             pickle.dump([all_preds, all_gts], fp)
-        rank = torch.tensor([cmd_args.local_rank], device='cuda')
+        rank = torch.tensor([rank_id], device='cuda')
         rank_list = [rank.clone() for _ in range(ngpus_per_node)]
         dist.all_gather(rank_list, rank)
         logger_handle.info('Rank %s finished' % int(rank.item()))
-        if cmd_args.local_rank == 0:
+        if rank_id == 0:
             all_preds_gather, all_gts_gather = [], []
             for rank in rank_list:
                 rank = str(int(rank.item()))
@@ -276,7 +277,7 @@ def main():
     # number of gpus, for distribued training, only support a process for a GPU
     ngpus_per_node = torch.cuda.device_count()
     if ngpus_per_node != args.nproc_per_node:
-        if args.local_rank == 0: 
+        if (args.local_rank == 0) and (int(os.environ.get('SLURM_PROCID', 0)) == 0): 
             logger_handle.warning('ngpus_per_node is not equal to nproc_per_node, force ngpus_per_node = nproc_per_node by default')
         ngpus_per_node = args.nproc_per_node
     # instanced Trainer
