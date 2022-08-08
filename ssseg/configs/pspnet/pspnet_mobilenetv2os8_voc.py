@@ -32,10 +32,11 @@ SEGMENTOR_CFG.update({
         'outstride': 8,
         'selected_indices': (2, 3),
     },
-    'ppm': {
+    'head': {
         'in_channels': 320,
-        'out_channels': 512,
+        'feats_channels': 512,
         'pool_scales': [1, 2, 3, 6],
+        'dropout': 0.1,
     },
     'auxiliary': {
         'in_channels': 96,
