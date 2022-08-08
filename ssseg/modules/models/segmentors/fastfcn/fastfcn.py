@@ -36,8 +36,6 @@ class FastFCN(nn.Module):
         self.segmentor.transforminputs = self.transforminputs
         # freeze normalization layer if necessary
         if cfg.get('is_freeze_norm', False): self.freezenormalization()
-        # layer names for training tricks
-        self.layer_names = self.segmentor.layer_names + ['jpu_neck']
     '''forward'''
     def forward(self, x, targets=None, losses_cfg=None, **kwargs):
         return self.segmentor(x, targets, losses_cfg, **kwargs)
@@ -53,3 +51,8 @@ class FastFCN(nn.Module):
             outs.append(x_list[idx])
         outs = self.jpu_neck(outs)
         return outs
+    '''return all layers with learnable parameters'''
+    def alllayers(self):
+        require_training_layers = self.segmentor.alllayers()
+        require_training_layers['jpu_neck'] = self.jpu_neck
+        return require_training_layers
