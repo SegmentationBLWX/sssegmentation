@@ -70,15 +70,12 @@ SEGMENTOR_CFG = {
         'arch_type': 'large',
         'selected_indices': (0, 1, 2),
     },
-    'aspp': {
+    'head': {
         'in_channels_list': [16, 24, 960],
         'branch_channels_list': [32, 64],
-        'out_channels': 128,
-    },
-    'decoder': {
-        'in_channels': 128,
+        'feats_channels': 128,
         'dropout': 0.1,
-    }
+    },
 }
 # config for inference
 INFERENCE_CFG = {

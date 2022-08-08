@@ -55,18 +55,15 @@ SEGMENTOR_CFG = {
         'use_stem': True,
         'selected_indices': (1, 2, 3),
     },
-    'jpu': {
-        'in_channels_list': (512, 1024, 2048),
-        'mid_channels': 512,
-        'dilations': (1, 2, 4, 8),
-    },
-    'aspp': {
+    'head': {
+        'jpu': {
+            'in_channels_list': (512, 1024, 2048),
+            'mid_channels': 512,
+            'dilations': (1, 2, 4, 8),
+        },
         'in_channels': 2048,
-        'out_channels': 512,
+        'feats_channels': 512,
         'dilations': [1, 12, 24, 36],
-    },
-    'decoder': {
-        'in_channels': 512,
         'dropout': 0.1,
     },
     'auxiliary': {

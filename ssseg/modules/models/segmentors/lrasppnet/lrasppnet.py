@@ -15,40 +15,38 @@ from ...backbones import BuildActivation, BuildNormalization, constructnormcfg
 class LRASPPNet(BaseSegmentor):
     def __init__(self, cfg, mode):
         super(LRASPPNet, self).__init__(cfg, mode)
-        align_corners, norm_cfg, act_cfg = self.align_corners, self.norm_cfg, self.act_cfg
+        align_corners, norm_cfg, act_cfg, head_cfg = self.align_corners, self.norm_cfg, self.act_cfg, cfg['head']
         # build aspp
-        aspp_cfg = cfg['aspp']
         self.branch_convs, self.branch_ups = nn.Sequential(), nn.Sequential()
-        for idx, branch_channels in enumerate(aspp_cfg['branch_channels_list']):
+        for idx, branch_channels in enumerate(head_cfg['branch_channels_list']):
             self.branch_convs.add_module(
                 f'conv{idx}', 
-                nn.Conv2d(aspp_cfg['in_channels_list'][idx], branch_channels, kernel_size=1, stride=1, padding=0, bias=False)
+                nn.Conv2d(head_cfg['in_channels_list'][idx], branch_channels, kernel_size=1, stride=1, padding=0, bias=False)
             )
             self.branch_ups.add_module(
                 f'conv{idx}', 
                 nn.Sequential(
-                    nn.Conv2d(aspp_cfg['out_channels'] + branch_channels, aspp_cfg['out_channels'], kernel_size=1, stride=1, padding=0, bias=False),
-                    BuildNormalization(constructnormcfg(placeholder=aspp_cfg['out_channels'], norm_cfg=norm_cfg)),
+                    nn.Conv2d(head_cfg['feats_channels'] + branch_channels, head_cfg['feats_channels'], kernel_size=1, stride=1, padding=0, bias=False),
+                    BuildNormalization(constructnormcfg(placeholder=head_cfg['feats_channels'], norm_cfg=norm_cfg)),
                     BuildActivation(act_cfg),
                 )
             )
         self.aspp_conv = nn.Sequential(
-            nn.Conv2d(aspp_cfg['in_channels_list'][-1], aspp_cfg['out_channels'], kernel_size=1, stride=1, padding=0, bias=False),
-            BuildNormalization(constructnormcfg(placeholder=aspp_cfg['out_channels'], norm_cfg=norm_cfg)),
+            nn.Conv2d(head_cfg['in_channels_list'][-1], head_cfg['feats_channels'], kernel_size=1, stride=1, padding=0, bias=False),
+            BuildNormalization(constructnormcfg(placeholder=head_cfg['feats_channels'], norm_cfg=norm_cfg)),
             BuildActivation(act_cfg),
         )
         self.image_pool = nn.Sequential(
             nn.AvgPool2d(kernel_size=49, stride=(16, 20)),
-            nn.Conv2d(aspp_cfg['in_channels_list'][-1], aspp_cfg['out_channels'], kernel_size=1, stride=1, padding=0, bias=False),
-            BuildNormalization(constructnormcfg(placeholder=aspp_cfg['out_channels'], norm_cfg=norm_cfg)),
+            nn.Conv2d(head_cfg['in_channels_list'][-1], head_cfg['feats_channels'], kernel_size=1, stride=1, padding=0, bias=False),
+            BuildNormalization(constructnormcfg(placeholder=head_cfg['feats_channels'], norm_cfg=norm_cfg)),
             nn.Sigmoid(),
         )
-        self.bottleneck = nn.Conv2d(aspp_cfg['out_channels'], aspp_cfg['out_channels'], kernel_size=1, stride=1, padding=0, bias=False)
+        self.bottleneck = nn.Conv2d(head_cfg['feats_channels'], head_cfg['feats_channels'], kernel_size=1, stride=1, padding=0, bias=False)
         # build decoder
-        decoder_cfg = cfg['decoder']
         self.decoder = nn.Sequential(
-            nn.Dropout2d(decoder_cfg['dropout']),
-            nn.Conv2d(decoder_cfg['in_channels'], cfg['num_classes'], kernel_size=1, stride=1, padding=0)
+            nn.Dropout2d(head_cfg['dropout']),
+            nn.Conv2d(head_cfg['feats_channels'], cfg['num_classes'], kernel_size=1, stride=1, padding=0)
         )
         # freeze normalization layer if necessary
         if cfg.get('is_freeze_norm', False): self.freezenormalization()

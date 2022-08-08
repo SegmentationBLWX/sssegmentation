@@ -47,10 +47,11 @@ SEGMENTOR_CFG.update({
         'out_indices': (0, 1, 12),
         'selected_indices': (0, 1, 2),
     },
-    'aspp': {
+    'head': {
         'in_channels_list': [16, 16, 576],
         'branch_channels_list': [32, 64],
-        'out_channels': 128,
+        'feats_channels': 128,
+        'dropout': 0.1,
     },
 })
 # modify inference config
