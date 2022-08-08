@@ -73,18 +73,11 @@ SEGMENTOR_CFG = {
         'use_stem': True,
         'selected_indices': (0, 1, 2, 3),
     },
-    'aspp': {
-        'in_channels': 2048,
-        'out_channels': 512,
+    'head': {
+        'in_channels': [256, 2048],
+        'feats_channels': 512,
+        'shortcut_channels': 48,
         'dilations': [1, 6, 12, 18],
-    },
-    'shortcut': {
-        'in_channels': 256,
-        'out_channels': 48,
-    },
-    'decoder': {
-        'in_channels': 560,
-        'out_channels': 512,
         'dropout': 0.1,
     },
     'auxiliary': {

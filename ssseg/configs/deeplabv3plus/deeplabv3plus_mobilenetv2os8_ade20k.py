@@ -31,14 +31,12 @@ SEGMENTOR_CFG.update({
         'outstride': 8,
         'selected_indices': (0, 1, 2, 3),
     },
-    'aspp': {
-        'in_channels': 320,
-        'out_channels': 512,
+    'head': {
+        'in_channels': [24, 320],
+        'feats_channels': 512,
+        'shortcut_channels': 48,
         'dilations': [1, 12, 24, 36],
-    },
-    'shortcut': {
-        'in_channels': 24,
-        'out_channels': 48,
+        'dropout': 0.1,
     },
     'auxiliary': {
         'in_channels': 96,
