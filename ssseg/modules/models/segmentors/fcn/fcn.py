@@ -14,23 +14,22 @@ from ...backbones import BuildActivation, BuildNormalization, DepthwiseSeparable
 class FCN(BaseSegmentor):
     def __init__(self, cfg, mode):
         super(FCN, self).__init__(cfg, mode)
-        align_corners, norm_cfg, act_cfg = self.align_corners, self.norm_cfg, self.act_cfg
+        align_corners, norm_cfg, act_cfg, head_cfg = self.align_corners, self.norm_cfg, self.act_cfg, cfg['head']
         # build decoder
-        decoder_cfg = cfg['decoder']
         convs = []
-        for idx in range(decoder_cfg.get('num_convs', 2)):
+        for idx in range(head_cfg.get('num_convs', 2)):
             if idx == 0:
-                conv = nn.Conv2d(decoder_cfg['in_channels'], decoder_cfg['out_channels'], kernel_size=3, stride=1, padding=1, bias=False)
+                conv = nn.Conv2d(head_cfg['in_channels'], head_cfg['feats_channels'], kernel_size=3, stride=1, padding=1, bias=False)
             else:
-                conv = nn.Conv2d(decoder_cfg['out_channels'], decoder_cfg['out_channels'], kernel_size=3, stride=1, padding=1, bias=False)
-            norm = BuildNormalization(constructnormcfg(placeholder=decoder_cfg['out_channels'], norm_cfg=norm_cfg))
+                conv = nn.Conv2d(head_cfg['feats_channels'], head_cfg['feats_channels'], kernel_size=3, stride=1, padding=1, bias=False)
+            norm = BuildNormalization(constructnormcfg(placeholder=head_cfg['feats_channels'], norm_cfg=norm_cfg))
             act = BuildActivation(act_cfg)
             convs += [conv, norm, act]
-        convs.append(nn.Dropout2d(decoder_cfg['dropout']))
-        if decoder_cfg.get('num_convs', 2) > 0:
-            convs.append(nn.Conv2d(decoder_cfg['out_channels'], cfg['num_classes'], kernel_size=1, stride=1, padding=0))
+        convs.append(nn.Dropout2d(head_cfg['dropout']))
+        if head_cfg.get('num_convs', 2) > 0:
+            convs.append(nn.Conv2d(head_cfg['feats_channels'], cfg['num_classes'], kernel_size=1, stride=1, padding=0))
         else:
-            convs.append(nn.Conv2d(decoder_cfg['in_channels'], cfg['num_classes'], kernel_size=1, stride=1, padding=0))
+            convs.append(nn.Conv2d(head_cfg['in_channels'], cfg['num_classes'], kernel_size=1, stride=1, padding=0))
         self.decoder = nn.Sequential(*convs)
         # build auxiliary decoder
         self.setauxiliarydecoder(cfg['auxiliary'])

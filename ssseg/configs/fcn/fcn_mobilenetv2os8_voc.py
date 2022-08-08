@@ -32,9 +32,9 @@ SEGMENTOR_CFG.update({
         'outstride': 8,
         'selected_indices': (2, 3),
     },
-    'decoder': {
+    'head': {
         'in_channels': 320,
-        'out_channels': 512,
+        'feats_channels': 512,
         'dropout': 0.1,
     },
     'auxiliary': {

@@ -39,7 +39,7 @@ class Deeplabv3Plus(BaseSegmentor):
             DepthwiseSeparableConv2d(head_cfg['feats_channels'] + head_cfg['shortcut_channels'], head_cfg['feats_channels'], kernel_size=3, stride=1, padding=1, bias=False, act_cfg=act_cfg, norm_cfg=norm_cfg),
             DepthwiseSeparableConv2d(head_cfg['feats_channels'], head_cfg['feats_channels'], kernel_size=3, stride=1, padding=1, bias=False, act_cfg=act_cfg, norm_cfg=norm_cfg),
             nn.Dropout2d(head_cfg['dropout']),
-            nn.Conv2d(head_cfg['out_channels'], cfg['num_classes'], kernel_size=1, stride=1, padding=0)
+            nn.Conv2d(head_cfg['feats_channels'], cfg['num_classes'], kernel_size=1, stride=1, padding=0)
         )
         # build auxiliary decoder
         self.setauxiliarydecoder(cfg['auxiliary'])

@@ -45,9 +45,9 @@ SEGMENTOR_CFG.update({
         'pretrained': False,
         'selected_indices': (0,),
     },
-    'decoder': {
+    'head': {
         'in_channels': 16,
-        'out_channels': 128,
+        'feats_channels': 128,
         'dropout': 0.1,
         'num_convs': 1,
     },

@@ -72,10 +72,10 @@ SEGMENTOR_CFG.update({
             'use_stem': True,
         },
     },
-    'decoder': {
-        'in_channels': 256, 
-        'out_channels': 256, 
-        'dropout': 0.1, 
+    'head': {
+        'in_channels': 256,
+        'feats_channels': 256,
+        'dropout': 0.1,
         'num_convs': 1,
     },
     'auxiliary': [
