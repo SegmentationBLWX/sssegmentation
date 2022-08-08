@@ -74,10 +74,8 @@ class BaseSegmentor(nn.Module):
         require_training_layers = {}
         for layer_name in self.layer_names:
             if hasattr(self, layer_name) and layer_name not in ['backbone_net']:
-                assert getattr(self, layer_name).requires_grad
                 require_training_layers[layer_name] = getattr(self, layer_name)
             elif hasattr(self, layer_name) and layer_name in ['backbone_net']:
-                assert getattr(self, layer_name).requires_grad
                 if hasattr(getattr(self, layer_name), 'nonzerowdlayers'):
                     assert hasattr(getattr(self, layer_name), 'zerowdlayers')
                     tmp_layers = []
