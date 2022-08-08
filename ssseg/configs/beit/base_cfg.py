@@ -74,26 +74,14 @@ SEGMENTOR_CFG = {
         'selected_indices': (0, 1, 2, 3),
         'norm_cfg': {'type': 'layernorm', 'eps': 1e-6},
     },
-    'feature2pyramid': {
-        'embed_dim': 768, 
-        'rescales': [4, 2, 1, 0.5],
-    },
-    'ppm': {
-        'in_channels': 768,
-        'out_channels': 512,
+    'head': {
+        'feature2pyramid': {
+            'embed_dim': 768, 
+            'rescales': [4, 2, 1, 0.5],
+        },
+        'in_channels_list': [768, 768, 768, 768],
+        'feats_channels': 512,
         'pool_scales': [1, 2, 3, 6],
-    },
-    'lateral': {
-        'in_channels_list': [768, 768, 768],
-        'out_channels': 512,
-    },
-    'fpn': {
-        'in_channels_list': [512, 512, 512],
-        'out_channels': 512,
-    },
-    'decoder': {
-        'in_channels': 2048,
-        'out_channels': 512,
         'dropout': 0.1,
     },
     'auxiliary': {

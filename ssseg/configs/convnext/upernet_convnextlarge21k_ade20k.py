@@ -56,14 +56,11 @@ SEGMENTOR_CFG.update({
         'selected_indices': (0, 1, 2, 3),
         'norm_cfg': {'type': 'layernorm2d', 'eps': 1e-6},
     },
-    'ppm': {
-        'in_channels': 1536,
-        'out_channels': 512,
+    'head': {
+        'in_channels_list': [192, 384, 768, 1536],
+        'feats_channels': 512,
         'pool_scales': [1, 2, 3, 6],
-    },
-    'lateral': {
-        'in_channels_list': [192, 384, 768],
-        'out_channels': 512,
+        'dropout': 0.1,
     },
     'auxiliary': {
         'in_channels': 768,

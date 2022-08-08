@@ -16,7 +16,7 @@ from ..deeplabv3 import Deeplabv3
 class FastFCN(nn.Module):
     def __init__(self, cfg, mode):
         super(FastFCN, self).__init__()
-        self.align_corners, self.norm_cfg, self.act_cfg = cfg['align_corners'], cfg['norm_cfg'], cfg['act_cfg']
+        self.align_corners, self.norm_cfg, self.act_cfg, head_cfg = cfg['align_corners'], cfg['norm_cfg'], cfg['act_cfg'], cfg['head']
         # build segmentor
         supported_models = {
             'fcn': FCN,
@@ -28,7 +28,7 @@ class FastFCN(nn.Module):
         assert model_type in supported_models, 'unsupport model_type %s' % model_type
         self.segmentor = supported_models[model_type](cfg, mode)
         # build jpu neck
-        jpu_cfg = cfg['jpu']
+        jpu_cfg = head_cfg['jpu']
         if 'act_cfg' not in jpu_cfg: jpu_cfg.update({'act_cfg': self.act_cfg})
         if 'norm_cfg' not in jpu_cfg: jpu_cfg.update({'norm_cfg': self.norm_cfg})
         if 'align_corners' not in jpu_cfg: jpu_cfg.update({'align_corners': self.align_corners})

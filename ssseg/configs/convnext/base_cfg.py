@@ -76,22 +76,10 @@ SEGMENTOR_CFG = {
         'selected_indices': (0, 1, 2, 3),
         'norm_cfg': {'type': 'layernorm2d', 'eps': 1e-6},
     },
-    'ppm': {
-        'in_channels': 1024,
-        'out_channels': 512,
+    'head': {
+        'in_channels_list': [128, 256, 512, 1024],
+        'feats_channels': 512,
         'pool_scales': [1, 2, 3, 6],
-    },
-    'lateral': {
-        'in_channels_list': [128, 256, 512],
-        'out_channels': 512,
-    },
-    'fpn': {
-        'in_channels_list': [512, 512, 512],
-        'out_channels': 512,
-    },
-    'decoder': {
-        'in_channels': 2048,
-        'out_channels': 512,
         'dropout': 0.1,
     },
     'auxiliary': {

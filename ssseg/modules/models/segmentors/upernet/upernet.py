@@ -17,17 +17,17 @@ from ...backbones import BuildActivation, BuildNormalization, constructnormcfg
 class UPerNet(BaseSegmentor):
     def __init__(self, cfg, mode):
         super(UPerNet, self).__init__(cfg, mode)
-        align_corners, norm_cfg, act_cfg = self.align_corners, self.norm_cfg, self.act_cfg
+        align_corners, norm_cfg, act_cfg, head_cfg = self.align_corners, self.norm_cfg, self.act_cfg, cfg['head']
         # build feature2pyramid
-        if 'feature2pyramid' in cfg:
+        if 'feature2pyramid' in head_cfg:
             from ..base import Feature2Pyramid
-            cfg['feature2pyramid']['norm_cfg'] = norm_cfg.copy()
-            self.feats_to_pyramid_net = Feature2Pyramid(**cfg['feature2pyramid'])
+            head_cfg['feature2pyramid']['norm_cfg'] = norm_cfg.copy()
+            self.feats_to_pyramid_net = Feature2Pyramid(**head_cfg['feature2pyramid'])
         # build pyramid pooling module
         ppm_cfg = {
-            'in_channels': cfg['ppm']['in_channels'],
-            'out_channels': cfg['ppm']['out_channels'],
-            'pool_scales': cfg['ppm']['pool_scales'],
+            'in_channels': head_cfg['in_channels_list'][-1],
+            'out_channels': head_cfg['feats_channels'],
+            'pool_scales': head_cfg['pool_scales'],
             'align_corners': align_corners,
             'norm_cfg': copy.deepcopy(norm_cfg),
             'act_cfg': copy.deepcopy(act_cfg),
@@ -36,31 +36,28 @@ class UPerNet(BaseSegmentor):
         # build lateral convs
         act_cfg_copy = copy.deepcopy(act_cfg)
         if 'inplace' in act_cfg_copy: act_cfg_copy['inplace'] = False
-        lateral_cfg = cfg['lateral']
         self.lateral_convs = nn.ModuleList()
-        for in_channels in lateral_cfg['in_channels_list']:
+        for in_channels in head_cfg['in_channels_list'][:-1]:
             self.lateral_convs.append(nn.Sequential(
-                nn.Conv2d(in_channels, lateral_cfg['out_channels'], kernel_size=1, stride=1, padding=0, bias=False),
-                BuildNormalization(constructnormcfg(placeholder=lateral_cfg['out_channels'], norm_cfg=norm_cfg)),
+                nn.Conv2d(in_channels, head_cfg['feats_channels'], kernel_size=1, stride=1, padding=0, bias=False),
+                BuildNormalization(constructnormcfg(placeholder=head_cfg['feats_channels'], norm_cfg=norm_cfg)),
                 BuildActivation(act_cfg_copy),
             ))
         # build fpn convs
-        fpn_cfg = cfg['fpn']
         self.fpn_convs = nn.ModuleList()
-        for in_channels in fpn_cfg['in_channels_list']:
+        for in_channels in [head_cfg['feats_channels'],] * len(self.lateral_convs):
             self.fpn_convs.append(nn.Sequential(
-                nn.Conv2d(in_channels, fpn_cfg['out_channels'], kernel_size=3, stride=1, padding=1, bias=False),
-                BuildNormalization(constructnormcfg(placeholder=fpn_cfg['out_channels'], norm_cfg=norm_cfg)),
+                nn.Conv2d(in_channels, head_cfg['feats_channels'], kernel_size=3, stride=1, padding=1, bias=False),
+                BuildNormalization(constructnormcfg(placeholder=head_cfg['feats_channels'], norm_cfg=norm_cfg)),
                 BuildActivation(act_cfg_copy),
             ))
         # build decoder
-        decoder_cfg = cfg['decoder']
         self.decoder = nn.Sequential(
-            nn.Conv2d(decoder_cfg['in_channels'], decoder_cfg['out_channels'], kernel_size=3, stride=1, padding=1, bias=False),
-            BuildNormalization(constructnormcfg(placeholder=decoder_cfg['out_channels'], norm_cfg=norm_cfg)),
+            nn.Conv2d(head_cfg['feats_channels'] * len(head_cfg['in_channels_list']), head_cfg['feats_channels'], kernel_size=3, stride=1, padding=1, bias=False),
+            BuildNormalization(constructnormcfg(placeholder=head_cfg['feats_channels'], norm_cfg=norm_cfg)),
             BuildActivation(act_cfg),
-            nn.Dropout2d(decoder_cfg['dropout']),
-            nn.Conv2d(decoder_cfg['out_channels'], cfg['num_classes'], kernel_size=1, stride=1, padding=0)
+            nn.Dropout2d(head_cfg['dropout']),
+            nn.Conv2d(head_cfg['feats_channels'], cfg['num_classes'], kernel_size=1, stride=1, padding=0)
         )
         # build auxiliary decoder
         self.setauxiliarydecoder(cfg['auxiliary'])

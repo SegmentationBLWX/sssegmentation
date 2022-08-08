@@ -40,22 +40,10 @@ SEGMENTOR_CFG.update({
         'selected_indices': (0, 1, 2, 3),
         'norm_cfg': {'type': 'layernorm'},
     },
-    'ppm': {
-        'in_channels': 512,
-        'out_channels': 1024,
+    'head': {
+        'in_channels_list': [64, 128, 320, 512],
+        'feats_channels': 1024,
         'pool_scales': [1, 2, 3, 6],
-    },
-    'lateral': {
-        'in_channels_list': [64, 128, 320],
-        'out_channels': 1024,
-    },
-    'fpn': {
-        'in_channels_list': [1024, 1024, 1024],
-        'out_channels': 1024,
-    },
-    'decoder': {
-        'in_channels': 4096,
-        'out_channels': 1024,
         'dropout': 0.1,
     },
     'auxiliary': {
