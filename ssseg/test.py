@@ -226,7 +226,7 @@ def main():
     client = Tester(cfg=cfg, ngpus_per_node=ngpus_per_node, logger_handle=logger_handle, cmd_args=args, cfg_file_path=cfg_file_path)
     client.start(all_preds, all_gts)
     # save results and evaluate
-    rank_id = int(os.environ['SLURM_PROCID']) if 'SLURM_PROCID' in os.environ else cmd_args.local_rank
+    rank_id = int(os.environ['SLURM_PROCID']) if 'SLURM_PROCID' in os.environ else args.local_rank
     work_dir = cfg.COMMON_CFG['work_dir']
     filename = cfg.COMMON_CFG['resultsavepath'].split('/')[-1].split('.')[0] + f'_{rank_id}.' + cfg.COMMON_CFG['resultsavepath'].split('.')[-1]
     with open(os.path.join(work_dir, filename), 'wb') as fp:
