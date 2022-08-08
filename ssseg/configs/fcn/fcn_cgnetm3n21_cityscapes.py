@@ -32,6 +32,7 @@ OPTIMIZER_CFG = {
     'lr': 0.001,
     'eps': 1e-08,
     'weight_decay': 5e-4,
+    'params_rules': {},
 }
 # modify scheduler config
 SCHEDULER_CFG = SCHEDULER_CFG.copy()
