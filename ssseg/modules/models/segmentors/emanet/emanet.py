@@ -53,6 +53,8 @@ class EMANet(BaseSegmentor):
         self.setauxiliarydecoder(cfg['auxiliary'])
         # freeze normalization layer if necessary
         if cfg.get('is_freeze_norm', False): self.freezenormalization()
+        # layer names for training tricks
+        self.layer_names = ['backbone_net', 'ema_in_conv', 'ema_module', 'ema_out_conv', 'bottleneck', 'decoder', 'auxiliary_decoder']
     '''forward'''
     def forward(self, x, targets=None, losses_cfg=None):
         img_size = x.size(2), x.size(3)
@@ -81,15 +83,3 @@ class EMANet(BaseSegmentor):
             )
             return loss, losses_log_dict
         return predictions
-    '''return all layers'''
-    def alllayers(self):
-        all_layers = {
-            'backbone_net': self.backbone_net,
-            'ema_in_conv': self.ema_in_conv,
-            'ema_out_conv': self.ema_out_conv,
-            'bottleneck': self.bottleneck,
-            'decoder': self.decoder,
-        }
-        if hasattr(self, 'auxiliary_decoder'):
-            all_layers['auxiliary_decoder'] = self.auxiliary_decoder
-        return all_layers

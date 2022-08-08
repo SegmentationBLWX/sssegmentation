@@ -41,6 +41,8 @@ class SETRUP(BaseSegmentor):
             self.auxiliary_decoders.append(decoder)
         # freeze normalization layer if necessary
         if cfg.get('is_freeze_norm', False): self.freezenormalization()
+        # layer names for training tricks
+        self.layer_names = ['backbone_net', 'decoder', 'norm_layers', 'auxiliary_decoders']
     '''forward'''
     def forward(self, x, targets=None, losses_cfg=None):
         img_size = x.size(2), x.size(3)
@@ -88,14 +90,6 @@ class SETRUP(BaseSegmentor):
         layers.append(nn.Dropout2d(decoder_cfg['dropout']))
         layers.append(nn.Conv2d(decoder_cfg['out_channels'], num_classes, kernel_size=1, stride=1, padding=0))
         return nn.Sequential(*layers)
-    '''return all layers'''
-    def alllayers(self):
-        return {
-            'backbone_net': self.backbone_net,
-            'norm_layers': self.norm_layers,
-            'decoder': self.decoder,
-            'auxiliary_decoders': self.auxiliary_decoders
-        }
 
 
 '''Multi level feature aggretation head of SETR'''
@@ -142,6 +136,8 @@ class SETRMLA(BaseSegmentor):
             self.auxiliary_decoders.append(decoder)
         # freeze normalization layer if necessary
         if cfg.get('is_freeze_norm', False): self.freezenormalization()
+        # layer names for training tricks
+        self.layer_names = ['backbone_net', 'decoder', 'mla_neck', 'auxiliary_decoders', 'up_convs']
     '''forward'''
     def forward(self, x, targets=None, losses_cfg=None):
         img_size = x.size(2), x.size(3)
@@ -185,12 +181,3 @@ class SETRMLA(BaseSegmentor):
         layers.append(nn.Dropout2d(decoder_cfg['dropout']))
         layers.append(nn.Conv2d(decoder_cfg['out_channels'], num_classes, kernel_size=1, stride=1, padding=0))
         return nn.Sequential(*layers)
-    '''return all layers'''
-    def alllayers(self):
-        return {
-            'backbone_net': self.backbone_net,
-            'mla_neck': self.mla_neck,
-            'up_convs': self.up_convs,
-            'decoder': self.decoder,
-            'auxiliary_decoders': self.auxiliary_decoders
-        }

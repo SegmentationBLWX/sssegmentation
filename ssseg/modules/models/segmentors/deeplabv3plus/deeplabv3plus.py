@@ -45,6 +45,8 @@ class Deeplabv3Plus(BaseSegmentor):
         self.setauxiliarydecoder(cfg['auxiliary'])
         # freeze normalization layer if necessary
         if cfg.get('is_freeze_norm', False): self.freezenormalization()
+        # layer names for training tricks
+        self.layer_names = ['backbone_net', 'aspp_net', 'shortcut', 'decoder', 'auxiliary_decoder']
     '''forward'''
     def forward(self, x, targets=None, losses_cfg=None):
         img_size = x.size(2), x.size(3)
@@ -69,14 +71,3 @@ class Deeplabv3Plus(BaseSegmentor):
             )
             return loss, losses_log_dict
         return predictions
-    '''return all layers'''
-    def alllayers(self):
-        all_layers = {
-            'backbone_net': self.backbone_net, 
-            'aspp_net': self.aspp_net, 
-            'shortcut': self.shortcut,
-            'decoder': self.decoder,
-        }
-        if hasattr(self, 'auxiliary_decoder'):
-            all_layers['auxiliary_decoder'] = self.auxiliary_decoder
-        return all_layers

@@ -56,6 +56,8 @@ class ENCNet(BaseSegmentor):
         self.setauxiliarydecoder(cfg['auxiliary'])
         # freeze normalization layer if necessary
         if cfg.get('is_freeze_norm', False): self.freezenormalization()
+        # layer names for training tricks
+        self.layer_names = ['backbone_net', 'bottleneck', 'enc_module', 'decoder', 'lateral_convs', 'fusion', 'se_layer', 'auxiliary_decoder']
     '''forward'''
     def forward(self, x, targets=None, losses_cfg=None):
         img_size = x.size(2), x.size(3)
@@ -91,19 +93,6 @@ class ENCNet(BaseSegmentor):
                 losses_cfg=losses_cfg
             )
         return predictions
-    '''return all layers'''
-    def alllayers(self):
-        all_layers = {
-            'backbone_net': self.backbone_net,
-            'bottleneck': self.bottleneck,
-            'enc_module': self.enc_module,
-            'decoder': self.decoder,
-        }
-        if hasattr(self, 'lateral_convs'): all_layers['lateral_convs'] = self.lateral_convs
-        if hasattr(self, 'fusion'): all_layers['fusion'] = self.fusion
-        if hasattr(self, 'se_layer'): all_layers['se_layer'] = self.se_layer
-        if hasattr(self, 'auxiliary_decoder'): all_layers['auxiliary_decoder'] = self.auxiliary_decoder
-        return all_layers
     '''convert to onehot labels'''
     def onehot(self, labels, num_classes):
         batch_size = labels.size(0)

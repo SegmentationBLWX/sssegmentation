@@ -40,6 +40,8 @@ class CCNet(BaseSegmentor):
         self.setauxiliarydecoder(cfg['auxiliary'])
         # freeze normalization layer if necessary
         if cfg.get('is_freeze_norm', False): self.freezenormalization()
+        # layer names for training tricks
+        self.layer_names = ['backbone_net', 'conv_before_cca', 'cca', 'conv_after_cca', 'decoder', 'auxiliary_decoder']
     '''forward'''
     def forward(self, x, targets=None, losses_cfg=None):
         img_size = x.size(2), x.size(3)
@@ -64,15 +66,3 @@ class CCNet(BaseSegmentor):
             )
             return loss, losses_log_dict
         return predictions
-    '''return all layers'''
-    def alllayers(self):
-        all_layers = {
-            'backbone_net': self.backbone_net,
-            'conv_before_cca': self.conv_before_cca,
-            'cca': self.cca,
-            'conv_after_cca': self.conv_before_cca,
-            'decoder': self.decoder,
-        }
-        if hasattr(self, 'auxiliary_decoder'):
-            all_layers['auxiliary_decoder'] = self.auxiliary_decoder
-        return all_layers

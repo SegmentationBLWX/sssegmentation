@@ -86,6 +86,11 @@ class MemoryNet(BaseSegmentor):
         self.setauxiliarydecoder(cfg['auxiliary'])
         # freeze normalization layer if necessary
         if cfg.get('is_freeze_norm', False): self.freezenormalization()
+        # layer names for training tricks
+        self.layer_names = [
+            'backbone_net', 'bottleneck', 'memory_module', 'decoder_stage1', 'decoder_stage2', 'norm_layers',
+            'downsample_backbone', 'context_within_image_module', 'auxiliary_decoder'
+        ]
     '''forward'''
     def forward(self, x, targets=None, losses_cfg=None, **kwargs):
         img_size = x.size(2), x.size(3)
@@ -160,17 +165,3 @@ class MemoryNet(BaseSegmentor):
         else:
             value = torch.Tensor([loss_memory.item()]).type_as(stored_memory)
         return loss_memory, value
-    '''return all layers'''
-    def alllayers(self):
-        all_layers = {
-            'backbone_net': self.backbone_net,
-            'bottleneck': self.bottleneck,
-            'memory_module': self.memory_module,
-            'decoder_stage1': self.decoder_stage1,
-            'decoder_stage2': self.decoder_stage2,
-        }
-        if hasattr(self, 'norm_layers'): all_layers.update({'norm_layers': self.norm_layers})
-        if hasattr(self, 'downsample_backbone'): all_layers.update({'downsample_backbone': self.downsample_backbone})
-        if hasattr(self, 'context_within_image_module'): all_layers.update({'context_within_image_module': self.context_within_image_module})
-        if hasattr(self, 'auxiliary_decoder'): all_layers.update({'auxiliary_decoder': self.auxiliary_decoder})
-        return all_layers

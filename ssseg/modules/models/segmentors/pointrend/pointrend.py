@@ -65,6 +65,8 @@ class PointRend(BaseSegmentor):
         self.setauxiliarydecoder(cfg['auxiliary'])
         # freeze normalization layer if necessary
         if cfg.get('is_freeze_norm', False): self.freezenormalization()
+        # layer names for training tricks
+        self.layer_names = ['backbone_net', 'fpn_neck', 'scale_heads', 'fcs', 'decoder', 'auxiliary_decoder']
     '''forward'''
     def forward(self, x, targets=None, losses_cfg=None):
         img_size = x.size(2), x.size(3)
@@ -178,13 +180,3 @@ class PointRend(BaseSegmentor):
         point_coords[:, :, 0] = w_step / 2.0 + (point_indices % width).float() * w_step
         point_coords[:, :, 1] = h_step / 2.0 + (point_indices // width).float() * h_step
         return point_indices, point_coords
-    '''return all layers'''
-    def alllayers(self):
-        return {
-            'backbone_net': self.backbone_net,
-            'fpn_neck': self.fpn_neck,
-            'scale_heads': self.scale_heads,
-            'fcs': self.fcs,
-            'decoder': self.decoder,
-            'auxiliary_decoder': self.auxiliary_decoder
-        }

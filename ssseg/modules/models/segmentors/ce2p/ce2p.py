@@ -69,6 +69,8 @@ class CE2P(BaseSegmentor):
         )
         # freeze normalization layer if necessary
         if cfg.get('is_freeze_norm', False): self.freezenormalization()
+        # layer names for training tricks
+        self.layer_names = ['backbone_net', 'ppm_net', 'edge_net', 'shortcut', 'decoder_stage1', 'decoder_stage2']
     '''forward'''
     def forward(self, x, targets=None, losses_cfg=None):
         img_size = x.size(2), x.size(3)
@@ -99,13 +101,3 @@ class CE2P(BaseSegmentor):
                 losses_cfg=losses_cfg
             )
         return preds_stage2
-    '''return all layers'''
-    def alllayers(self):
-        return {
-            'backbone_net': self.backbone_net,
-            'ppm_net': self.ppm_net,
-            'edge_net': self.edge_net,
-            'shortcut': self.shortcut,
-            'decoder_stage1': self.decoder_stage1,
-            'decoder_stage2': self.decoder_stage2,
-        }

@@ -63,6 +63,8 @@ class UPerNet(BaseSegmentor):
         self.setauxiliarydecoder(cfg['auxiliary'])
         # freeze normalization layer if necessary
         if cfg.get('is_freeze_norm', False): self.freezenormalization()
+        # layer names for training tricks
+        self.layer_names = ['backbone_net', 'ppm_net', 'lateral_convs', 'feats_to_pyramid_net', 'decoder', 'auxiliary_decoder']
     '''forward'''
     def forward(self, x, targets=None, losses_cfg=None):
         img_size = x.size(2), x.size(3)
@@ -96,36 +98,3 @@ class UPerNet(BaseSegmentor):
             )
             return loss, losses_log_dict
         return predictions
-    '''return all layers'''
-    def alllayers(self):
-        if self.cfg['backbone']['series'] in ['swin', 'twins']:
-            all_layers = {
-                'ppm_net': self.ppm_net,
-                'lateral_convs': self.lateral_convs,
-                'decoder': self.decoder,
-            }
-            if hasattr(self, 'auxiliary_decoder'):
-                all_layers['auxiliary_decoder'] = self.auxiliary_decoder
-            if hasattr(self, 'feats_to_pyramid_net'):
-                all_layers['feats_to_pyramid_net'] = self.feats_to_pyramid_net
-            tmp_layers = []
-            for key, value in self.backbone_net.zerowdlayers().items():
-                tmp_layers.append(value)
-            all_layers.update({'backbone_net_zerowd': nn.Sequential(*tmp_layers)})
-            tmp_layers = []
-            for key, value in self.backbone_net.nonzerowdlayers().items():
-                tmp_layers.append(value)
-            all_layers.update({'backbone_net_nonzerowd': nn.Sequential(*tmp_layers)})
-            return all_layers
-        else:
-            all_layers = {
-                'backbone_net': self.backbone_net,
-                'ppm_net': self.ppm_net,
-                'lateral_convs': self.lateral_convs,
-                'decoder': self.decoder,
-            }
-            if hasattr(self, 'auxiliary_decoder'):
-                all_layers['auxiliary_decoder'] = self.auxiliary_decoder
-            if hasattr(self, 'feats_to_pyramid_net'):
-                all_layers['feats_to_pyramid_net'] = self.feats_to_pyramid_net
-        return all_layers

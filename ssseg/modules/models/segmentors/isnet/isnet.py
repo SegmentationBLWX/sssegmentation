@@ -74,6 +74,8 @@ class ISNet(BaseSegmentor):
         self.setauxiliarydecoder(cfg['auxiliary'])
         # freeze normalization layer if necessary
         if cfg.get('is_freeze_norm', False): self.freezenormalization()
+        # layer names for training tricks
+        self.layer_names = ['backbone_net', 'bottleneck', 'ilc_net', 'slc_net', 'shortcut', 'decoder_stage1', 'decoder_stage2', 'auxiliary_decoder']
     '''forward'''
     def forward(self, x, targets=None, losses_cfg=None):
         img_size = x.size(2), x.size(3)
@@ -115,22 +117,3 @@ class ISNet(BaseSegmentor):
                 losses_cfg=losses_cfg
             )
         return preds_stage2
-    '''return all layers'''
-    def alllayers(self):
-        all_layers = {
-            'backbone_net': self.backbone_net,
-            'bottleneck': self.bottleneck,
-            'ilc_net': self.ilc_net,
-            'slc_net': self.slc_net,
-            'decoder_stage1': self.decoder_stage1,
-            'decoder_stage2': self.decoder_stage2,
-        }
-        if hasattr(self, 'shortcut'):
-            all_layers.update({
-                'shortcut': self.shortcut
-            })
-        if hasattr(self, 'auxiliary_decoder'):
-            all_layers.update({
-                'auxiliary_decoder': self.auxiliary_decoder
-            })
-        return all_layers

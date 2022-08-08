@@ -70,7 +70,29 @@ class BaseSegmentor(nn.Module):
         return outs
     '''return all layers with learnable parameters'''
     def alllayers(self):
-        raise NotImplementedError('not to be implemented')
+        assert len(self.layer_names) == len(set(self.layer_names))
+        require_training_layers = {}
+        for layer_name in self.layer_names:
+            if hasattr(self, layer_name) and layer_name not in ['backbone_net']:
+                assert getattr(self, layer_name).requires_grad
+                require_training_layers[layer_name] = getattr(self, layer_name)
+            elif hasattr(self, layer_name) and layer_name in ['backbone_net']:
+                assert getattr(self, layer_name).requires_grad
+                if hasattr(getattr(self, layer_name), 'nonzerowdlayers'):
+                    assert hasattr(getattr(self, layer_name), 'zerowdlayers')
+                    tmp_layers = []
+                    for key, value in getattr(self, layer_name).zerowdlayers().items():
+                        tmp_layers.append(value)
+                    require_training_layers.update({f'{layer_name}_zerowd': nn.Sequential(*tmp_layers)})
+                    tmp_layers = []
+                    for key, value in getattr(self, layer_name).nonzerowdlayers().items():
+                        tmp_layers.append(value)
+                    require_training_layers.update({f'{layer_name}_nonzerowd': nn.Sequential(*tmp_layers)})
+                else:
+                    require_training_layers[layer_name] = getattr(self, layer_name)
+            elif hasattr(self, layer_name):
+                raise NotImplementedError(f'layer name {layer_name} error')
+        return require_training_layers
     '''set auxiliary decoder as attribute'''
     def setauxiliarydecoder(self, auxiliary_cfg):
         norm_cfg, act_cfg, num_classes = self.norm_cfg.copy(), self.act_cfg.copy(), self.cfg['num_classes']

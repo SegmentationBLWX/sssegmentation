@@ -49,6 +49,8 @@ class OCRNet(BaseSegmentor):
         )
         # freeze normalization layer if necessary
         if cfg.get('is_freeze_norm', False): self.freezenormalization()
+        # layer names for training tricks
+        self.layer_names = ['backbone_net', 'bottleneck', 'spatial_gather_module', 'object_context_block', 'decoder', 'auxiliary_decoder']
     '''forward'''
     def forward(self, x, targets=None, losses_cfg=None):
         img_size = x.size(2), x.size(3)
@@ -73,13 +75,3 @@ class OCRNet(BaseSegmentor):
                 losses_cfg=losses_cfg
             )
         return predictions
-    '''return all layers'''
-    def alllayers(self):
-        return {
-            'backbone_net': self.backbone_net,
-            'auxiliary_decoder': self.auxiliary_decoder,
-            'bottleneck': self.bottleneck,
-            'spatial_gather_module': self.spatial_gather_module,
-            'object_context_block': self.object_context_block,
-            'decoder': self.decoder
-        }

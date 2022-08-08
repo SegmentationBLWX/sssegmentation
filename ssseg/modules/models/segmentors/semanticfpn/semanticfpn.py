@@ -47,6 +47,8 @@ class SemanticFPN(BaseSegmentor):
         )
         # freeze normalization layer if necessary
         if cfg.get('is_freeze_norm', False): self.freezenormalization()
+        # layer names for training tricks
+        self.layer_names = ['backbone_net', 'decoder', 'fpn_neck', 'scale_heads']
     '''forward'''
     def forward(self, x, targets=None, losses_cfg=None):
         img_size = x.size(2), x.size(3)
@@ -70,11 +72,3 @@ class SemanticFPN(BaseSegmentor):
             )
             return loss, losses_log_dict
         return predictions
-    '''return all layers'''
-    def alllayers(self):
-        return {
-            'backbone_net': self.backbone_net,
-            'fpn_neck': self.fpn_neck,
-            'scale_heads': self.scale_heads,
-            'decoder': self.decoder,
-        }

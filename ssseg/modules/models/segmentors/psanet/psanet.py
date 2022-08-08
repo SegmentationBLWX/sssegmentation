@@ -68,6 +68,11 @@ class PSANet(BaseSegmentor):
         self.setauxiliarydecoder(cfg['auxiliary'])
         # freeze normalization layer if necessary
         if cfg.get('is_freeze_norm', False): self.freezenormalization()
+        # layer names for training tricks
+        self.layer_names = [
+            'backbone_net', 'reduce', 'attention', 'proj', 'decoder', 'auxiliary_decoder', 'reduce_p',
+            'attention_p', 'psamask_collect', 'psamask_distribute', 'psamask',
+        ]
     '''forward'''
     def forward(self, x, targets=None, losses_cfg=None):
         img_size = x.size(2), x.size(3)
@@ -142,19 +147,3 @@ class PSANet(BaseSegmentor):
             )
             return loss, losses_log_dict
         return predictions
-    '''return all layers'''
-    def alllayers(self):
-        all_layers = {
-            'backbone_net': self.backbone_net,
-            'reduce': self.reduce,
-            'attention': self.attention,
-            'proj': self.proj,
-            'decoder': self.decoder,
-        }
-        if hasattr(self, 'reduce_p'): all_layers['reduce_p'] = self.reduce_p
-        if hasattr(self, 'attention_p'): all_layers['attention_p'] = self.attention_p
-        if hasattr(self, 'psamask_collect'): all_layers['psamask_collect'] = self.psamask_collect
-        if hasattr(self, 'psamask_distribute'): all_layers['psamask_distribute'] = self.psamask_distribute
-        if hasattr(self, 'psamask'): all_layers['psamask'] = self.psamask
-        if hasattr(self, 'auxiliary_decoder'): all_layers['auxiliary_decoder'] = self.auxiliary_decoder
-        return all_layers

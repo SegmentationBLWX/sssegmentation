@@ -50,6 +50,8 @@ class LRASPPNet(BaseSegmentor):
         )
         # freeze normalization layer if necessary
         if cfg.get('is_freeze_norm', False): self.freezenormalization()
+        # layer names for training tricks
+        self.layer_names = ['backbone_net', 'branch_convs', 'branch_ups', 'aspp_conv', 'image_pool', 'bottleneck', 'decoder']
     '''forward'''
     def forward(self, x, targets=None, losses_cfg=None):
         img_size = x.size(2), x.size(3)
@@ -75,14 +77,3 @@ class LRASPPNet(BaseSegmentor):
             )
             return loss, losses_log_dict
         return predictions
-    '''return all layers'''
-    def alllayers(self):
-        return {
-            'backbone_net': self.backbone_net,
-            'branch_convs': self.branch_convs,
-            'branch_ups': self.branch_ups,
-            'aspp_conv': self.aspp_conv,
-            'image_pool': self.image_pool,
-            'bottleneck': self.bottleneck,
-            'decoder': self.decoder,
-        }
