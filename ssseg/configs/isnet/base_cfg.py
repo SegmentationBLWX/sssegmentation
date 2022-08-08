@@ -76,36 +76,15 @@ SEGMENTOR_CFG = {
         'use_stem': True,
         'selected_indices': (0, 1, 2, 3),
     },
-    'bottleneck': {
+    'head': {
         'in_channels': 2048,
-        'out_channels': 512,
-    },
-    'imagelevel': {
         'feats_channels': 512,
         'transform_channels': 256,
         'concat_input': True,
-    },
-    'semanticlevel': {
-        'feats_channels': 512,
-        'transform_channels': 256,
-        'concat_input': True,
-    },
-    'shortcut': {
-        'is_on': False,
-        'in_channels': 256,
-        'out_channels': 48,
-    },
-    'decoder': {
-        'stage1': {
-            'in_channels': 512,
-            'out_channels': 512,
-            'dropout': 0.1,
+        'shortcut': {
+            'is_on': False, 'in_channels': 256, 'feats_channels': 48,
         },
-        'stage2': {
-            'in_channels': 560,
-            'out_channels': 512,
-            'dropout': 0.1,
-        },
+        'dropout': 0.1,
     },
     'auxiliary': {
         'in_channels': 1024,

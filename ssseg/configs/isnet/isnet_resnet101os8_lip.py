@@ -43,12 +43,8 @@ SEGMENTOR_CFG = SEGMENTOR_CFG.copy()
 SEGMENTOR_CFG.update({
     'num_classes': 20,
     'act_cfg': {'type': 'leakyrelu', 'negative_slope': 0.01, 'inplace': True},
-    'shortcut': {
-        'is_on': True,
-        'in_channels': 256,
-        'out_channels': 48,
-    },
 })
+SEGMENTOR_CFG['head']['shortcut']['is_on'] = True
 # modify inference config
 INFERENCE_CFG = INFERENCE_CFG.copy()
 # modify common config
