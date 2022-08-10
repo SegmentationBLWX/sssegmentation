@@ -17,7 +17,7 @@ Documents: https://sssegmentation.readthedocs.io/en/latest/
 
 ## Introduction
 
-SSSegmentation is an open source strongly supervised semantic segmentation toolbox based on PyTorch.
+SSSegmentation is an open source supervised semantic segmentation toolbox based on PyTorch.
 You can star this repository to keep track of the project if it's helpful for you, thank you for your support.
 
 
@@ -122,7 +122,7 @@ If you use this framework in your research, please cite this project:
 ```
 @misc{ssseg2020,
     author = {Zhenchao Jin},
-    title = {SSSegmentation: An Open Source Strongly Supervised Semantic Segmentation Toolbox Based on PyTorch},
+    title = {SSSegmentation: An Open Source Supervised Semantic Segmentation Toolbox Based on PyTorch},
     year = {2020},
     publisher = {GitHub},
     journal = {GitHub repository},

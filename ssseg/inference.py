@@ -23,7 +23,7 @@ warnings.filterwarnings('ignore')
 
 '''parse arguments in command line'''
 def parseArgs():
-    parser = argparse.ArgumentParser(description='SSSegmentation is an open source strongly supervised semantic segmentation toolbox based on PyTorch')
+    parser = argparse.ArgumentParser(description='SSSegmentation is an open source supervised semantic segmentation toolbox based on PyTorch')
     parser.add_argument('--imagedir', dest='imagedir', help='images dir for testing multi images', type=str)
     parser.add_argument('--imagepath', dest='imagepath', help='imagepath for testing single image', type=str)
     parser.add_argument('--outputfilename', dest='outputfilename', help='name to save output image(s)', type=str, default='')
