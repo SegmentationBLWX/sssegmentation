@@ -12,7 +12,7 @@ import torch.nn.functional as F
 
 '''Resize'''
 class Resize(object):
-    def __init__(self, output_size, scale_range=(0.5, 2.0), img_interpolation='bilinear', seg_interpolation='nearest', keep_ratio=True):
+    def __init__(self, output_size, scale_range=(0.5, 2.0), img_interpolation='bilinear', seg_interpolation='nearest', keep_ratio=True, min_size=None):
         # set attribute
         self.output_size = output_size
         if isinstance(output_size, int): self.output_size = (output_size, output_size)
@@ -20,6 +20,7 @@ class Resize(object):
         self.img_interpolation = img_interpolation
         self.seg_interpolation = seg_interpolation
         self.keep_ratio = keep_ratio
+        self.min_size = min_size
         # interpolation to cv2 interpolation
         self.interpolation_dict = {
             'nearest': cv2.INTER_NEAREST,
@@ -41,6 +42,9 @@ class Resize(object):
         if self.keep_ratio:
             scale_factor = min(max(output_size) / max(image.shape[:2]), min(output_size) / min(image.shape[:2]))
             dsize = int(image.shape[1] * scale_factor + 0.5), int(image.shape[0] * scale_factor + 0.5)
+            if self.min_size is not None and min(dsize) < self.min_size:
+                scale_factor = self.min_size / min(image.shape[:2])
+                dsize = int(image.shape[1] * scale_factor + 0.5), int(image.shape[0] * scale_factor + 0.5)
             image = cv2.resize(image, dsize=dsize, interpolation=self.interpolation_dict[self.img_interpolation])
             segmentation = cv2.resize(segmentation, dsize=dsize, interpolation=self.interpolation_dict[self.seg_interpolation])            
         else:
