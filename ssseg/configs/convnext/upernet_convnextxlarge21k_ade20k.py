@@ -58,7 +58,7 @@ SEGMENTOR_CFG.update({
     },
     'head': {
         'in_channels_list': [256, 512, 1024, 2048],
-        'feats_channels': 512,
+        'feats_channels': 1024,
         'pool_scales': [1, 2, 3, 6],
         'dropout': 0.1,
     },
@@ -75,7 +75,7 @@ INFERENCE_CFG = {
     'tricks': {
         'multiscale': [1],
         'flip': False,
-        'use_probs_before_resize': False
+        'use_probs_before_resize': True
     }
 }
 # modify common config
