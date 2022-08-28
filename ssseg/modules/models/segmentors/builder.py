@@ -30,6 +30,7 @@ from .segformer import Segformer
 from .memorynet import MemoryNet
 from .setr import SETRUP, SETRMLA
 from .maskformer import MaskFormer
+from .memorynetv2 import MemoryNetV2
 from .semanticfpn import SemanticFPN
 from .nonlocalnet import NonLocalNet
 from .deeplabv3plus import Deeplabv3Plus
@@ -66,6 +67,7 @@ def BuildSegmentor(segmentor_cfg, mode):
         'deeplabv3': Deeplabv3,
         'lrasppnet': LRASPPNet,
         'maskformer': MaskFormer,
+        'memorynetv2': MemoryNetV2,
         'semanticfpn': SemanticFPN,
         'nonlocalnet': NonLocalNet,
         'deeplabv3plus': Deeplabv3Plus,
