@@ -68,7 +68,7 @@ SEGMENTOR_CFG['head']['decoder'] = {
 }
 SEGMENTOR_CFG['head']['in_channels'] = 1536
 SEGMENTOR_CFG['head']['context_within_image']['is_on'] = True
-SEGMENTOR_CFG['head']['context_within_image']['use_self_attention'] = False
+SEGMENTOR_CFG['head']['context_within_image']['use_self_attention'] = True
 # modify inference config
 # --single-scale
 INFERENCE_CFG = {
