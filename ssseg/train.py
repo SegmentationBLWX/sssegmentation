@@ -105,7 +105,9 @@ class Trainer():
         else:
             cmd_args.checkpointspath = ''
         # parallel segmentor
-        segmentor = BuildDistributedModel(segmentor, {'device_ids': [cmd_args.local_rank]})
+        build_dist_model_cfg = self.cfg.SEGMENTOR_CFG.get('build_dist_model_cfg', {})
+        build_dist_model_cfg.update({'device_ids': [cmd_args.local_rank]})
+        segmentor = BuildDistributedModel(segmentor, build_dist_model_cfg)
         # print config
         if (cmd_args.local_rank == 0) and (int(os.environ.get('SLURM_PROCID', 0)) == 0):
             logger_handle.info(f'Config file path: {cfg_file_path}')
