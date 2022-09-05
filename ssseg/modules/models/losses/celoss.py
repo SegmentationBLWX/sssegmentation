@@ -5,6 +5,7 @@ Author:
     Zhenchao Jin
 '''
 import torch
+import torch.nn as nn
 import torch.nn.functional as F
 
 
@@ -17,14 +18,22 @@ Arguments:
     --scale_factor: scale the loss for loss balance
     --lowest_loss_value: added inspired by ICML2020, "Do We Need Zero Training Loss After Achieving Zero Training Error", https://arxiv.org/pdf/2002.08709.pdf
 '''
-def CrossEntropyLoss(prediction, target, scale_factor=1.0, weight=None, ignore_index=255, reduction='mean', lowest_loss_value=None):
+def CrossEntropyLoss(prediction, target, scale_factor=1.0, weight=None, ignore_index=255, reduction='mean', lowest_loss_value=None, weight_after_softmax=None, label_smoothing=None):
     # calculate the loss
     ce_args = {
         'weight': weight,
         'ignore_index': ignore_index,
         'reduction': reduction,
     }
-    loss = F.cross_entropy(prediction, target.long(), **ce_args)
+    if label_smoothing is not None:
+        assert weight_after_softmax is None
+        ce_args.update({'label_smoothing': label_smoothing})
+    if weight_after_softmax is None:
+        loss = F.cross_entropy(prediction, target.long(), **ce_args)
+    else:
+        probs = F.softmax(prediction, dim=1) * weight_after_softmax
+        probs = torch.log(probs)
+        loss = nn.NLLLoss(**ce_args)(probs, target.long())
     # scale the loss
     loss = loss * scale_factor
     # return the final loss
