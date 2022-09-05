@@ -188,7 +188,7 @@ class BaseSegmentor(nn.Module):
             if (key in ['binaryceloss']) and hasattr(self, 'onehot'):
                 prediction_iter = prediction_format
                 target_iter = self.onehot(target, self.cfg['num_classes'])
-            elif key in ['diceloss', 'lovaszloss', 'kldivloss', 'l1loss']:
+            elif key in ['diceloss', 'lovaszloss', 'kldivloss', 'l1loss', 'cosinesimilarityloss']:
                 prediction_iter = prediction
                 target_iter = target
             else:

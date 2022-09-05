@@ -9,6 +9,7 @@ from .klloss import KLDivLoss
 from .diceloss import DiceLoss
 from .lovaszloss import LovaszLoss
 from .focalloss import SigmoidFocalLoss
+from .cosinesimilarityloss import CosineSimilarityLoss
 from .celoss import CrossEntropyLoss, BinaryCrossEntropyLoss
 
 
@@ -22,5 +23,6 @@ def BuildLoss(loss_type):
         'celoss': CrossEntropyLoss,
         'sigmoidfocalloss': SigmoidFocalLoss,
         'binaryceloss': BinaryCrossEntropyLoss,
+        'cosinesimilarityloss': CosineSimilarityLoss,
     }
     return supported_losses[loss_type]
