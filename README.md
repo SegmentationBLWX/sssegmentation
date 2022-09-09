@@ -91,6 +91,7 @@ You can star this repository to keep track of the project if it's helpful for yo
 - [NonLocalNet](./docs/performances/nonlocalnet)
 - [Deeplabv3Plus](./docs/performances/deeplabv3plus)
 - [MemoryNet-MCIBI](./docs/performances/memorynet)
+- [MemoryNet-MCIBI++](./docs/performances/memorynetv2)
 - [Mixed Precision (FP16) Training](./docs/performances/fp16)
 
 #### Supported Datasets
