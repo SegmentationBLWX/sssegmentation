@@ -1,4 +1,4 @@
-# Introduction
+## Introduction
 
 <a href="https://github.com/facebookresearch/detectron2">Official Repo</a>
 
@@ -24,27 +24,27 @@
 </details>
 
 
-# Results
+## Results
 
-## PASCAL VOC
+#### PASCAL VOC
 | Backbone  | Crop Size  | Schedule                             | Train/Eval Set  | mIoU   | Download                                                                                                                                                                                                                                                                                                                                                                                                         |
 | :-:       | :-:        | :-:                                  | :-:             | :-:    | :-:                                                                                                                                                                                                                                                                                                                                                                                                              |
 | R-50      | 512x512    | LR/POLICY/BS/EPOCH: 0.01/poly/16/60  | trainaug/val    | 70.88% | [cfg](https://raw.githubusercontent.com/SegmentationBLWX/sssegmentation/main/ssseg/configs/semanticfpn/semanticfpn_resnet50_voc.py) &#124; [model](https://github.com/SegmentationBLWX/modelstore/releases/download/ssseg_semanticfpn/semanticfpn_resnet50_voc_train.pth) &#124; [log](https://github.com/SegmentationBLWX/modelstore/releases/download/ssseg_semanticfpn/semanticfpn_resnet50_voc_train.log)    |
 | R-101     | 512x512    | LR/POLICY/BS/EPOCH: 0.01/poly/16/60  | trainaug/val    | 72.51% | [cfg](https://raw.githubusercontent.com/SegmentationBLWX/sssegmentation/main/ssseg/configs/semanticfpn/semanticfpn_resnet101_voc.py) &#124; [model](https://github.com/SegmentationBLWX/modelstore/releases/download/ssseg_semanticfpn/semanticfpn_resnet101_voc_train.pth) &#124; [log](https://github.com/SegmentationBLWX/modelstore/releases/download/ssseg_semanticfpn/semanticfpn_resnet101_voc_train.log) |
 
-## ADE20k
+#### ADE20k
 | Backbone  | Crop Size  | Schedule                             | Train/Eval Set  | mIoU   | Download                                                                                                                                                                                                                                                                                                                                                                                                                  |
 | :-:       | :-:        | :-:                                  | :-:             | :-:    | :-:                                                                                                                                                                                                                                                                                                                                                                                                                       |
 | R-50      | 512x512    | LR/POLICY/BS/EPOCH: 0.01/poly/16/130 | train/val       | 38.16% | [cfg](https://raw.githubusercontent.com/SegmentationBLWX/sssegmentation/main/ssseg/configs/semanticfpn/semanticfpn_resnet50_ade20k.py) &#124; [model](https://github.com/SegmentationBLWX/modelstore/releases/download/ssseg_semanticfpn/semanticfpn_resnet50_ade20k_train.pth) &#124; [log](https://github.com/SegmentationBLWX/modelstore/releases/download/ssseg_semanticfpn/semanticfpn_resnet50_ade20k_train.log)    |
 | R-101     | 512x512    | LR/POLICY/BS/EPOCH: 0.01/poly/16/130 | train/val       | 39.85% | [cfg](https://raw.githubusercontent.com/SegmentationBLWX/sssegmentation/main/ssseg/configs/semanticfpn/semanticfpn_resnet101_ade20k.py) &#124; [model](https://github.com/SegmentationBLWX/modelstore/releases/download/ssseg_semanticfpn/semanticfpn_resnet101_ade20k_train.pth) &#124; [log](https://github.com/SegmentationBLWX/modelstore/releases/download/ssseg_semanticfpn/semanticfpn_resnet101_ade20k_train.log) |
 
-## CityScapes
+#### CityScapes
 | Backbone  | Crop Size  | Schedule                             | Train/Eval Set  | mIoU   | Download                                                                                                                                                                                                                                                                                                                                                                                                                              |
 | :-:       | :-:        | :-:                                  | :-:             | :-:    | :-:                                                                                                                                                                                                                                                                                                                                                                                                                                   |
 | R-50      | 512x1024   | LR/POLICY/BS/EPOCH: 0.01/poly/8/220  | train/val       | 76.09% | [cfg](https://raw.githubusercontent.com/SegmentationBLWX/sssegmentation/main/ssseg/configs/semanticfpn/semanticfpn_resnet50_cityscapes.py) &#124; [model](https://github.com/SegmentationBLWX/modelstore/releases/download/ssseg_semanticfpn/semanticfpn_resnet50_cityscapes_train.pth) &#124; [log](https://github.com/SegmentationBLWX/modelstore/releases/download/ssseg_semanticfpn/semanticfpn_resnet50_cityscapes_train.log)    |
 | R-101     | 512x1024   | LR/POLICY/BS/EPOCH: 0.01/poly/8/220  | train/val       | 76.39% | [cfg](https://raw.githubusercontent.com/SegmentationBLWX/sssegmentation/main/ssseg/configs/semanticfpn/semanticfpn_resnet101_cityscapes.py) &#124; [model](https://github.com/SegmentationBLWX/modelstore/releases/download/ssseg_semanticfpn/semanticfpn_resnet101_cityscapes_train.pth) &#124; [log](https://github.com/SegmentationBLWX/modelstore/releases/download/ssseg_semanticfpn/semanticfpn_resnet101_cityscapes_train.log) |
 
 
-# More
+## More
 You can also download the model weights from following sources:
 - BaiduNetdisk: https://pan.baidu.com/s/1gD-NJJWOtaHCtB0qHE79rA with access code **s757**

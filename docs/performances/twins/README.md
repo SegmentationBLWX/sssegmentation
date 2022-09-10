@@ -1,4 +1,4 @@
-# Introduction
+## Introduction
 
 <a href="https://github.com/Meituan-AutoML/Twins">Official Repo</a>
 
@@ -19,9 +19,9 @@
 </details>
 
 
-# Results
+## Results
 
-## ADE20k
+#### ADE20k
 | Segmentor     | Backbone    | Crop Size  | Schedule                                | Train/Eval Set  | mIoU   | Download                                                                                                                                                                                                                                                                                                                                                                                         |
 | :-:           | :-:         | :-:        | :-:                                     | :-:             | :-:    | :-:                                                                                                                                                                                                                                                                                                                                                                                              |
 | UperNet       | SVT-S       | 512x512    | LR/POLICY/BS/EPOCH: 0.00006/poly/16/130 | train/val       | 46.16% | [cfg](https://raw.githubusercontent.com/SegmentationBLWX/sssegmentation/main/ssseg/configs/upernet/upernet_svtsmall_ade20k.py) &#124; [model](https://github.com/SegmentationBLWX/modelstore/releases/download/ssseg_twins/upernet_svtsmall_ade20k_train.pth) &#124; [log](https://github.com/SegmentationBLWX/modelstore/releases/download/ssseg_twins/upernet_svtsmall_ade20k_train.log)       |
@@ -32,6 +32,6 @@
 | UperNet       | PCPVT-L     | 512x512    | LR/POLICY/BS/EPOCH: 0.00006/poly/16/130 | train/val       | 49.35% | [cfg](https://raw.githubusercontent.com/SegmentationBLWX/sssegmentation/main/ssseg/configs/upernet/upernet_pcpvtlarge_ade20k.py) &#124; [model](https://github.com/SegmentationBLWX/modelstore/releases/download/ssseg_twins/upernet_pcpvtlarge_ade20k_train.pth) &#124; [log](https://github.com/SegmentationBLWX/modelstore/releases/download/ssseg_twins/upernet_pcpvtlarge_ade20k_train.log) |
 
 
-# More
+## More
 You can also download the model weights from following sources:
 - BaiduNetdisk: https://pan.baidu.com/s/1gD-NJJWOtaHCtB0qHE79rA with access code **s757**

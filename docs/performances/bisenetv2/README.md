@@ -1,4 +1,4 @@
-# Introduction
+## Introduction
 
 <a href="https://github.com/ycszen/TorchSeg/tree/master/model/bisenet">Official Repo</a>
 
@@ -21,15 +21,15 @@
 </details>
 
 
-# Results
+## Results
 
-## CityScapes
+#### CityScapes
 | Segmentor     | Backbone        | Crop Size  | Schedule                             | Train/Eval Set  | mIoU   | Download                                                                                                                                                                                                                                                                                                                                                                                                      |
 | :-:           | :-:             | :-:        | :-:                                  | :-:             | :-:    | :-:                                                                                                                                                                                                                                                                                                                                                                                                           |
 | FCN           | BiSeNetV2       | 1024x1024  | LR/POLICY/BS/EPOCH: 0.05/poly/16/860 | train/val       | 74.62% | [cfg](https://raw.githubusercontent.com/SegmentationBLWX/sssegmentation/main/ssseg/configs/fcn/fcn_bisenetv2_cityscapes.py) &#124; [model](https://github.com/SegmentationBLWX/modelstore/releases/download/ssseg_bisenetv2/fcn_bisenetv2_cityscapes_train.pth) &#124; [log](https://github.com/SegmentationBLWX/modelstore/releases/download/ssseg_bisenetv2/fcn_bisenetv2_cityscapes_train.log)             |
 | FCN           | BiSeNetV2-FP16  | 1024x1024  | LR/POLICY/BS/EPOCH: 0.05/poly/16/860 | train/val       | 74.17% | [cfg](https://raw.githubusercontent.com/SegmentationBLWX/sssegmentation/main/ssseg/configs/fcn/fcn_bisenetv2fp16_cityscapes.py) &#124; [model](https://github.com/SegmentationBLWX/modelstore/releases/download/ssseg_bisenetv2/fcn_bisenetv2fp16_cityscapes_train.pth) &#124; [log](https://github.com/SegmentationBLWX/modelstore/releases/download/ssseg_bisenetv2/fcn_bisenetv2fp16_cityscapes_train.log) |
 
 
-# More
+## More
 You can also download the model weights from following sources:
 - BaiduNetdisk: https://pan.baidu.com/s/1gD-NJJWOtaHCtB0qHE79rA with access code **s757**

@@ -1,4 +1,4 @@
-# Introduction
+## Introduction
 
 <a href="https://github.com/facebookresearch/MaskFormer">Official Repo</a>
 
@@ -19,9 +19,9 @@
 </details>
 
 
-# Results
+## Results
 
-## ADE20k
+#### ADE20k
 | Segmentor     | Backbone    | Crop Size  | Schedule                                | Train/Eval Set  | mIoU   | Download                                                                                                                                                                                                                                                                                                                                                                                                         |
 | :-:           | :-:         | :-:        | :-:                                     | :-:             | :-:    | :-:                                                                                                                                                                                                                                                                                                                                                                                                              |
 | MaskFormer    | Swin-Tiny   | 512x512    | LR/POLICY/BS/EPOCH: 0.00006/poly/16/130 | train/val       | 47.31% | [cfg](https://raw.githubusercontent.com/SegmentationBLWX/sssegmentation/main/ssseg/configs/upernet/maskformer_swintiny_ade20k.py) &#124; [model](https://github.com/SegmentationBLWX/modelstore/releases/download/ssseg_maskformer/maskformer_swintiny_ade20k_train.pth) &#124; [log](https://github.com/SegmentationBLWX/modelstore/releases/download/ssseg_maskformer/maskformer_swintiny_ade20k_train.log)    |
@@ -29,6 +29,6 @@
 | MaskFormer    | Swin-Base   | 640x640    | LR/POLICY/BS/EPOCH: 0.00006/poly/16/130 | train/val       | 53.22% | [cfg](https://raw.githubusercontent.com/SegmentationBLWX/sssegmentation/main/ssseg/configs/upernet/maskformer_swinbase_ade20k.py) &#124; [model](https://github.com/SegmentationBLWX/modelstore/releases/download/ssseg_maskformer/maskformer_swinbase_ade20k_train.pth) &#124; [log](https://github.com/SegmentationBLWX/modelstore/releases/download/ssseg_maskformer/maskformer_swinbase_ade20k_train.log)    |
 
 
-# More
+## More
 You can also download the model weights from following sources:
 - BaiduNetdisk: https://pan.baidu.com/s/1gD-NJJWOtaHCtB0qHE79rA with access code **s757**

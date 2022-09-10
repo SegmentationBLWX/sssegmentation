@@ -1,4 +1,4 @@
-# Introduction
+## Introduction
 
 <a href="https://github.com/tensorflow/models/tree/master/research/deeplab">Official Repo</a>
 
@@ -37,9 +37,9 @@
 </details>
 
 
-# Results
+## Results
 
-## PASCAL VOC
+#### PASCAL VOC
 | Segmentor     | Backbone | Crop Size  | Schedule                             | Train/Eval Set  | mIoU   | Download                                                                                                                                                                                                                                                                                                                                                                                                                            |
 | :-:           | :-:      | :-:        | :-:                                  | :-:             | :-:    | :-:                                                                                                                                                                                                                                                                                                                                                                                                                                 |
 | FCN           | M-V2-D8  | 512x512    | LR/POLICY/BS/EPOCH: 0.01/poly/16/60  | trainaug/val    | 59.89% | [cfg](https://raw.githubusercontent.com/SegmentationBLWX/sssegmentation/main/ssseg/configs/fcn/fcn_mobilenetv2os8_voc.py) &#124; [model](https://github.com/SegmentationBLWX/modelstore/releases/download/ssseg_mobilenet/fcn_mobilenetv2os8_voc_train.pth) &#124; [log](https://github.com/SegmentationBLWX/modelstore/releases/download/ssseg_mobilenet/fcn_mobilenetv2os8_voc_train.log)                                         |
@@ -49,7 +49,7 @@
 | LRASPPNet     | M-V3S-D8 | 512x512    | LR/POLICY/BS/EPOCH: 0.01/poly/16/180 | trainaug/val    | 62.13% | [cfg](https://raw.githubusercontent.com/SegmentationBLWX/sssegmentation/main/ssseg/configs/lrasppnet/lrasppnet_mobilenetv3sos8_voc.py) &#124; [model](https://github.com/SegmentationBLWX/modelstore/releases/download/ssseg_mobilenet/lrasppnet_mobilenetv3sos8_voc_train.pth) &#124; [log](https://github.com/SegmentationBLWX/modelstore/releases/download/ssseg_mobilenet/lrasppnet_mobilenetv3sos8_voc_train.log)              |
 | LRASPPNet     | M-V3L-D8 | 512x512    | LR/POLICY/BS/EPOCH: 0.01/poly/16/180 | trainaug/val    | 67.90% | [cfg](https://raw.githubusercontent.com/SegmentationBLWX/sssegmentation/main/ssseg/configs/lrasppnet/lrasppnet_mobilenetv3los8_voc.py) &#124; [model](https://github.com/SegmentationBLWX/modelstore/releases/download/ssseg_mobilenet/lrasppnet_mobilenetv3los8_voc_train.pth) &#124; [log](https://github.com/SegmentationBLWX/modelstore/releases/download/ssseg_mobilenet/lrasppnet_mobilenetv3los8_voc_train.log)              |
 
-## ADE20k
+#### ADE20k
 | Segmentor     | Backbone | Crop Size  | Schedule                             | Train/Eval Set  | mIoU   | Download                                                                                                                                                                                                                                                                                                                                                                                                                                     |
 | :-:           | :-:      | :-:        | :-:                                  | :-:             | :-:    | :-:                                                                                                                                                                                                                                                                                                                                                                                                                                          |
 | FCN           | M-V2-D8  | 512x512    | LR/POLICY/BS/EPOCH: 0.01/poly/16/130 | train/val       | 30.85% | [cfg](https://raw.githubusercontent.com/SegmentationBLWX/sssegmentation/main/ssseg/configs/fcn/fcn_mobilenetv2os8_ade20k.py) &#124; [model](https://github.com/SegmentationBLWX/modelstore/releases/download/ssseg_mobilenet/fcn_mobilenetv2os8_ade20k_train.pth) &#124; [log](https://github.com/SegmentationBLWX/modelstore/releases/download/ssseg_mobilenet/fcn_mobilenetv2os8_ade20k_train.log)                                         |
@@ -59,7 +59,7 @@
 | LRASPPNet     | M-V3S-D8 | 512x512    | LR/POLICY/BS/EPOCH: 0.01/poly/16/390 | train/val       | 26.09% | [cfg](https://raw.githubusercontent.com/SegmentationBLWX/sssegmentation/main/ssseg/configs/lrasppnet/lrasppnet_mobilenetv3sos8_ade20k.py) &#124; [model](https://github.com/SegmentationBLWX/modelstore/releases/download/ssseg_mobilenet/lrasppnet_mobilenetv3sos8_ade20k_train.pth) &#124; [log](https://github.com/SegmentationBLWX/modelstore/releases/download/ssseg_mobilenet/lrasppnet_mobilenetv3sos8_ade20k_train.log)              |
 | LRASPPNet     | M-V3L-D8 | 512x512    | LR/POLICY/BS/EPOCH: 0.01/poly/16/390 | train/val       | 30.06% | [cfg](https://raw.githubusercontent.com/SegmentationBLWX/sssegmentation/main/ssseg/configs/lrasppnet/lrasppnet_mobilenetv3los8_ade20k.py) &#124; [model](https://github.com/SegmentationBLWX/modelstore/releases/download/ssseg_mobilenet/lrasppnet_mobilenetv3los8_ade20k_train.pth) &#124; [log](https://github.com/SegmentationBLWX/modelstore/releases/download/ssseg_mobilenet/lrasppnet_mobilenetv3los8_ade20k_train.log)              |
 
-## CityScapes
+#### CityScapes
 | Segmentor     | Backbone | Crop Size  | Schedule                             | Train/Eval Set  | mIoU   | Download                                                                                                                                                                                                                                                                                                                                                                                                                                                 |
 | :-:           | :-:      | :-:        | :-:                                  | :-:             | :-:    | :-:                                                                                                                                                                                                                                                                                                                                                                                                                                                      |
 | FCN           | M-V2-D8  | 512x1024   | LR/POLICY/BS/EPOCH: 0.01/poly/8/220  | train/val       | 70.77% | [cfg](https://raw.githubusercontent.com/SegmentationBLWX/sssegmentation/main/ssseg/configs/fcn/fcn_mobilenetv2os8_cityscapes.py) &#124; [model](https://github.com/SegmentationBLWX/modelstore/releases/download/ssseg_mobilenet/fcn_mobilenetv2os8_cityscapes_train.pth) &#124; [log](https://github.com/SegmentationBLWX/modelstore/releases/download/ssseg_mobilenet/fcn_mobilenetv2os8_cityscapes_train.log)                                         |
@@ -70,6 +70,6 @@
 | LRASPPNet     | M-V3L-D8 | 512x1024   | LR/POLICY/BS/EPOCH: 0.01/poly/16/660 | train/val       | 69.98% | [cfg](https://raw.githubusercontent.com/SegmentationBLWX/sssegmentation/main/ssseg/configs/lrasppnet/lrasppnet_mobilenetv3los8_cityscapes.py) &#124; [model](https://github.com/SegmentationBLWX/modelstore/releases/download/ssseg_mobilenet/lrasppnet_mobilenetv3los8_cityscapes_train.pth) &#124; [log](https://github.com/SegmentationBLWX/modelstore/releases/download/ssseg_mobilenet/lrasppnet_mobilenetv3los8_cityscapes_train.log)              |
 
 
-# More
+## More
 You can also download the model weights from following sources:
 - BaiduNetdisk: https://pan.baidu.com/s/1gD-NJJWOtaHCtB0qHE79rA with access code **s757**
