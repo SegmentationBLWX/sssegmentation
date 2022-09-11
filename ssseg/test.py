@@ -265,7 +265,7 @@ def main():
             )
             logger_handle.info(result)
         else:
-            dataset.formatresults(all_preds, all_ids)
+            dataset.formatresults(all_preds, all_ids, savedir=os.path.join(work_dir, 'results'))
 
 
 '''debug'''
