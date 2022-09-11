@@ -100,5 +100,9 @@
 
 
 ## More
+
 You can also download the model weights from following sources:
+
 - BaiduNetdisk: https://pan.baidu.com/s/1gD-NJJWOtaHCtB0qHE79rA with access code **s757**
+
+In addition, in this repo, all of models above are evaluated on A100 rather than V100 mentioned in our original paper, thus the performance here will be slightly different from the reported results in the original paper.
