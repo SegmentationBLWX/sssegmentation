@@ -145,6 +145,14 @@ If you use this framework in your research, please cite this project:
     pages={7231--7241},
     year={2021}
 }
+
+@article{jin2022mcibi++,
+    title={MCIBI++: Soft Mining Contextual Information Beyond Image for Semantic Segmentation},
+    author={Jin, Zhenchao and Yu, Dongdong and Yuan, Zehuan and Yu, Lequan},
+    journal={IEEE Transactions on Pattern Analysis and Machine Intelligence},
+    year={2022},
+    publisher={IEEE}
+}
 ```
 
 

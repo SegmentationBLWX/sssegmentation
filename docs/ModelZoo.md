@@ -227,7 +227,12 @@
 - Related Paper: [click](https://arxiv.org/pdf/2108.11819.pdf),
 - Reported Performance: [click](https://github.com/SegmentationBLWX/sssegmentation/tree/main/docs/performances/memorynet).
 
-**29.Mixed Precision (FP16) Training**
+**29.MemoryNetV2-MCIBI++**
+
+- Related Paper: [click](https://arxiv.org/pdf/2209.04471.pdf),
+- Reported Performance: [click](https://github.com/SegmentationBLWX/sssegmentation/tree/main/docs/performances/memorynetv2).
+
+**30.Mixed Precision (FP16) Training**
 
 - Related Paper: [click](https://arxiv.org/pdf/1710.03740.pdf),
 - Reported Performance: [click](https://github.com/SegmentationBLWX/sssegmentation/tree/main/docs/performances/fp16).
