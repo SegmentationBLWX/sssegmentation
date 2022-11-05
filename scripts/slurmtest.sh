@@ -27,4 +27,5 @@ srun -p ${PARTITION} \
     python -u ssseg/test.py \
         --nproc_per_node $NGPUS \
         --cfgfilepath $CFGFILEPATH \
-        --checkpointspath $CHECKPOINTSPATH ${PYARGS}
+        --checkpointspath $CHECKPOINTSPATH \
+        --slurm ${PYARGS}

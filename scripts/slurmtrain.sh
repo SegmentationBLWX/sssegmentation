@@ -25,4 +25,5 @@ srun -p ${PARTITION} \
     ${SRUNAGRS} \
     python -u ssseg/train.py \
         --nproc_per_node $NGPUS \
-        --cfgfilepath $CFGFILEPATH ${PYARGS}
+        --cfgfilepath $CFGFILEPATH \
+        --slurm ${PYARGS}

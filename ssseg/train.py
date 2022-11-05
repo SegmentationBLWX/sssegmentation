@@ -30,8 +30,9 @@ def parseArgs():
     parser.add_argument('--nproc_per_node', dest='nproc_per_node', help='number of process per node', default=8, type=int)
     parser.add_argument('--cfgfilepath', dest='cfgfilepath', help='config file path you want to use', type=str, required=True)
     parser.add_argument('--checkpointspath', dest='checkpointspath', help='checkpoints you want to resume from', default='', type=str)
+    parser.add_argument('--slurm', dest='slurm', help='please add --slurm if you are using slurm', default=False, action='store_true')
     args = parser.parse_args()
-    initslurm(args, '29000')
+    if args.slurm: initslurm(args, '29000')
     return args
 
 
@@ -131,7 +132,7 @@ class Trainer():
                 learning_rate = scheduler.updatelr()
                 images, targets = samples['image'].type(FloatTensor), {'segmentation': samples['segmentation'].type(FloatTensor), 'edge': samples['edge'].type(FloatTensor)}
                 optimizer.zero_grad()
-                if cfg.SEGMENTOR_CFG['type'] in ['memorynet', 'memorynetv2']:
+                if cfg.SEGMENTOR_CFG['type'] in ['memorynet', 'memorynetv2', 'attributenet']:
                     loss, losses_log_dict = segmentor(images, targets, cfg.LOSSES_CFG, learning_rate=learning_rate, epoch=epoch)
                 else:
                     loss, losses_log_dict = segmentor(images, targets, cfg.LOSSES_CFG)
