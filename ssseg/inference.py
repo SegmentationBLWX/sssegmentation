@@ -167,7 +167,7 @@ class Demo():
             if use_probs_before_resize: 
                 outputs = F.softmax(outputs, dim=1)
         else:
-            align_corners = segmentor.module.align_corners
+            align_corners = segmentor.align_corners
             opts = inference_cfg['opts']
             stride_h, stride_w = opts['stride']
             cropsize_h, cropsize_w = opts['cropsize']
