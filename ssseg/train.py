@@ -132,7 +132,7 @@ class Trainer():
                 learning_rate = scheduler.updatelr()
                 images, targets = samples['image'].type(FloatTensor), {'segmentation': samples['segmentation'].type(FloatTensor), 'edge': samples['edge'].type(FloatTensor)}
                 optimizer.zero_grad()
-                if cfg.SEGMENTOR_CFG['type'] in ['memorynet', 'memorynetv2', 'attributenet']:
+                if cfg.SEGMENTOR_CFG['type'] in ['memorynet', 'memorynetv2']:
                     loss, losses_log_dict = segmentor(images, targets, cfg.LOSSES_CFG, learning_rate=learning_rate, epoch=epoch)
                 else:
                     loss, losses_log_dict = segmentor(images, targets, cfg.LOSSES_CFG)
@@ -172,6 +172,7 @@ class Trainer():
     '''evaluate'''
     def evaluate(self, segmentor):
         cfg, ngpus_per_node, cmd_args, logger_handle = self.cfg, self.ngpus_per_node, self.cmd_args, self.logger_handle
+        # TODO: bug occurs if use --pyt bash
         rank_id = int(os.environ['SLURM_PROCID']) if 'SLURM_PROCID' in os.environ else cmd_args.local_rank
         # build dataset and dataloader
         dataset = BuildDataset(mode='TEST', logger_handle=logger_handle, dataset_cfg=copy.deepcopy(cfg.DATASET_CFG))
