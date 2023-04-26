@@ -1,16 +1,15 @@
 '''
 Function:
-    Implementation of DarkZurichDataset
+    Implementation of NighttimeDrivingDataset
 Author:
     Zhenchao Jin
 '''
 import os
-import pandas as pd
 from .base import BaseDataset
 
 
-'''DarkZurichDataset'''
-class DarkZurichDataset(BaseDataset):
+'''NighttimeDrivingDataset'''
+class NighttimeDrivingDataset(BaseDataset):
     num_classes = 19
     classnames = [
         'road', 'sidewalk', 'building', 'wall', 'fence', 'pole', 'traffic_light', 
@@ -19,21 +18,20 @@ class DarkZurichDataset(BaseDataset):
     ]
     assert num_classes == len(classnames)
     def __init__(self, mode, logger_handle, dataset_cfg):
-        super(DarkZurichDataset, self).__init__(mode, logger_handle, dataset_cfg)
-        assert dataset_cfg['set'] in ['val'], 'only support testing on DarkZurichDataset'
+        super(NighttimeDrivingDataset, self).__init__(mode, logger_handle, dataset_cfg)
+        assert dataset_cfg['set'] in ['val'], 'only support testing on NighttimeDrivingDataset'
         # obtain the dirs
         rootdir = dataset_cfg['rootdir']
-        self.image_dir = os.path.join(rootdir, 'rgb_anon/val/night/GOPR0356')
-        self.ann_dir = os.path.join(rootdir, 'gt/val/night/GOPR0356')
+        self.image_dir = os.path.join(rootdir, 'leftImg8bit/test/night')
+        self.ann_dir = os.path.join(rootdir, 'gtCoarse_daytime_trainvaltest/test/night')
         # obatin imageids
-        df = pd.read_csv(os.path.join(rootdir, 'lists_file_names/val_filenames.txt'), names=['imageids'])
-        self.imageids = df['imageids'].values
-        self.imageids = [str(_id) for _id in self.imageids]
+        self.imageids = os.listdir(self.ann_dir)
+        self.imageids = [_id.replace('_leftImg8bit.png', '') for _id in self.imageids]
     '''pull item'''
     def __getitem__(self, index):
         imageid = self.imageids[index].split('/')[-1]
-        imagepath = os.path.join(self.image_dir, f'{imageid}_rgb_anon.png')
-        annpath = os.path.join(self.ann_dir, f'{imageid}_gt_labelTrainIds.png')
+        imagepath = os.path.join(self.image_dir, f'{imageid}_leftImg8bit.png')
+        annpath = os.path.join(self.ann_dir, f'{imageid}_gtCoarse_labelTrainIds.png')
         sample = self.read(imagepath, annpath, self.dataset_cfg.get('with_ann', True))
         sample.update({'id': imageid})
         if self.mode == 'TRAIN':

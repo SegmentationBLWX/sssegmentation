@@ -115,6 +115,7 @@ You can star this repository to keep track of the project if it's helpful for yo
 - [COCOStuff10k](https://github.com/nightrome/cocostuff10k)
 - [COCOStuff164k](https://github.com/nightrome/cocostuff)
 - [Pascal Context](https://cs.stanford.edu/~roozbeh/pascal-context/)
+- [Nighttime Driving](http://data.vision.ee.ethz.ch/daid/NighttimeDriving/NighttimeDrivingTest.zip)
 
 
 ## Citation

@@ -19,6 +19,7 @@ from .cityscapes import CityScapesDataset
 from .darkzurich import DarkZurichDataset
 from .supervisely import SuperviselyDataset
 from .mhp import MHPv1Dataset, MHPv2Dataset
+from .nighttimedriving import NighttimeDrivingDataset
 from .coco import COCODataset, COCOStuffDataset, COCOStuff10kDataset
 from .voc import VOCDataset, PascalContextDataset, PascalContext59Dataset
 
@@ -49,6 +50,7 @@ def BuildDataset(mode, logger_handle, dataset_cfg):
         'cocostuff10k': COCOStuff10kDataset,
         'pascalcontext': PascalContextDataset,
         'pascalcontext59': PascalContext59Dataset,
+        'nighttimedriving': NighttimeDrivingDataset,
     }
     # parse
     cfg = dataset_cfg[mode.lower()].copy()
