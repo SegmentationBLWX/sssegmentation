@@ -1,6 +1,6 @@
 '''
 Function:
-    Define the Kullback-Leibler divergence loss measure
+    Implementation of KLDivLoss
 Author:
     Zhenchao Jin
 '''

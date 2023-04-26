@@ -1,6 +1,6 @@
 '''
 Function:
-    Build normalization
+    Implementation of BuildNormalization
 Author:
     Zhenchao Jin
 '''

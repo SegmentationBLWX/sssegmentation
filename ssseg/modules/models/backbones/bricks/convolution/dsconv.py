@@ -1,6 +1,6 @@
 '''
 Function:
-    Define Depthwise Separable Convolution Module
+    Implementation of DepthwiseSeparableConv2d
 Author:
     Zhenchao Jin
 '''

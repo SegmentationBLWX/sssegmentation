@@ -1,6 +1,6 @@
 '''
 Function:
-    Patch Embedding or Merging
+    Implementation of AdaptivePadding, PatchEmbed and PatchMerging
 Author:
     Zhenchao Jin
 '''

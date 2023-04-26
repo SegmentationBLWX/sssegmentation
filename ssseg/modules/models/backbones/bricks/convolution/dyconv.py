@@ -1,6 +1,6 @@
 '''
 Function:
-    Define the dynamic conv2d
+    Implementation of DynamicConv2d
 Author:
     Zhenchao Jin
 '''

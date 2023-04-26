@@ -1,6 +1,6 @@
 '''
 Function:
-    Define the l2norm
+    Implementation of L2Norm
 Author:
     Zhenchao Jin
 '''

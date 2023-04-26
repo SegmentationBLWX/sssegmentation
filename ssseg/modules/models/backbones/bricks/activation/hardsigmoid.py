@@ -1,6 +1,6 @@
 '''
 Function:
-    Define the Hard Sigmoid Module
+    Implementation of HardSigmoid
 Author:
     Zhenchao Jin
 '''

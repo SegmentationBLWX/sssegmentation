@@ -1,6 +1,6 @@
 '''
 Function:
-    A learnable scale parameter
+    Implementation of Scale
 Author:
     Zhenchao Jin
 '''

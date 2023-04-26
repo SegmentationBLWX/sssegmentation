@@ -1,6 +1,6 @@
 '''
 Function:
-    Define the dice loss
+    Implementation of DiceLoss
 Author:
     Zhenchao Jin
 '''

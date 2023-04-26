@@ -1,6 +1,6 @@
 '''
 Function:
-    Define the lovasz loss
+    Implementation of LovaszLoss
 Author:
     Zhenchao Jin
 '''

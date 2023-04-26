@@ -1,6 +1,6 @@
 '''
 Function:
-    Define weight initialize
+    Implementation of weight initialization methods
 Author:
     Zhenchao Jin
 '''

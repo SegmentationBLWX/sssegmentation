@@ -1,6 +1,6 @@
 '''
 Function:
-    Build the loss
+    Implementation of BuildLoss
 Author:
     Zhenchao Jin
 '''

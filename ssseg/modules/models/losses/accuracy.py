@@ -1,6 +1,6 @@
 '''
 Function:
-    Define the accuracy
+    Implementation of calculateaccuracy
 Author:
     Zhenchao Jin
 '''

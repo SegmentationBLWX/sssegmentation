@@ -1,6 +1,6 @@
 '''
 Function:
-    Define Adptive Padding Conv Module
+    Implementation of AdptivePaddingConv2d
 Author:
     Zhenchao Jin
 '''

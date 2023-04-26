@@ -1,6 +1,6 @@
 '''
 Function:
-    Define drop path
+    Implementation of DropPath
 Author:
     Zhenchao Jin
 '''

@@ -1,6 +1,6 @@
 '''
 Function:
-    Multi-head Attention Module
+    Implementation of MultiheadAttention
 Author:
     Zhenchao Jin
 '''

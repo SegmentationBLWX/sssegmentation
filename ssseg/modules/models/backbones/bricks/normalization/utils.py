@@ -1,6 +1,6 @@
 '''
 Function:
-    Define some utils for normalization
+    Implementation of some utils for normalization
 Author:
     Zhenchao Jin
 '''

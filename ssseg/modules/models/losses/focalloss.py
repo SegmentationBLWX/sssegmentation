@@ -1,6 +1,6 @@
 '''
 Function:
-    Define the focal loss
+    Implementation of SigmoidFocalLoss
 Author:
     Zhenchao Jin
 '''

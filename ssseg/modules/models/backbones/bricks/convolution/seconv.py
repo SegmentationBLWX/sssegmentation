@@ -1,6 +1,6 @@
 '''
 Function:
-    Define the Squeeze-and-Excitation Module
+    Implementation of SqueezeExcitationConv2d
 Author:
     Zhenchao Jin
 '''

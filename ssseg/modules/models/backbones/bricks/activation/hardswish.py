@@ -1,6 +1,6 @@
 '''
 Function:
-    Define the Hard Swish Module
+    Implementation of HardSwish
 Author:
     Zhenchao Jin
 '''

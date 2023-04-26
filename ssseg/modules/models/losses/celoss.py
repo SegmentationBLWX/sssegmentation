@@ -1,6 +1,6 @@
 '''
 Function:
-    Define the cross entropy loss
+    Implementation of CrossEntropyLoss and BinaryCrossEntropyLoss
 Author:
     Zhenchao Jin
 '''

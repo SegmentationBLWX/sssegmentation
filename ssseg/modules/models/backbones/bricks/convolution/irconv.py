@@ -1,6 +1,6 @@
 '''
 Function:
-    Define InvertedResidual Module
+    Implementation of InvertedResidual and InvertedResidualV3
 Author:
     Zhenchao Jin
 '''

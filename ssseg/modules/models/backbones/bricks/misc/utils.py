@@ -1,6 +1,6 @@
 '''
 Function:
-    Define some utils
+    Implementation of some utils
 Author:
     Zhenchao Jin
 '''

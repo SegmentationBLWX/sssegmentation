@@ -32,8 +32,8 @@ class DarkZurichDataset(BaseDataset):
     '''pull item'''
     def __getitem__(self, index):
         imageid = self.imageids[index].split('/')[-1]
-        imagepath = os.path.join(self.image_dir, f'{imageid}.png')
-        annpath = os.path.join(self.ann_dir, f'{imageid}.png')
+        imagepath = os.path.join(self.image_dir, f'{imageid}_rgb_anon.png')
+        annpath = os.path.join(self.ann_dir, f'{imageid}_gt_labelTrainIds.png')
         sample = self.read(imagepath, annpath, self.dataset_cfg.get('with_ann', True))
         sample.update({'id': imageid})
         if self.mode == 'TRAIN':

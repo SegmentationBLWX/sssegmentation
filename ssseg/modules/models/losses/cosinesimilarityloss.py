@@ -1,6 +1,6 @@
 '''
 Function:
-    Define the cosine similarity loss
+    Implementation of CosineSimilarityLoss
 Author:
     Zhenchao Jin
 '''

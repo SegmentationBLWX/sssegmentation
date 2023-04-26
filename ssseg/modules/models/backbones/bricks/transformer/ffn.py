@@ -1,6 +1,6 @@
 '''
 Function:
-    Define feed-forward networks (FFNs) with identity connection
+    Implementation of FFN
 Author:
     Zhenchao Jin
 '''

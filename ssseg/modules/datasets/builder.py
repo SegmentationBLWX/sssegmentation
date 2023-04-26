@@ -16,9 +16,9 @@ from .ade20k import ADE20kDataset
 from .chasedb1 import ChaseDB1Dataset
 from .sbushadow import SBUShadowDataset
 from .cityscapes import CityScapesDataset
+from .darkzurich import DarkZurichDataset
 from .supervisely import SuperviselyDataset
 from .mhp import MHPv1Dataset, MHPv2Dataset
-from .DarkZurichDataset import DarkZurichDataset
 from .coco import COCODataset, COCOStuffDataset, COCOStuff10kDataset
 from .voc import VOCDataset, PascalContextDataset, PascalContext59Dataset
 

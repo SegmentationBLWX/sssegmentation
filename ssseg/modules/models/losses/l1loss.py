@@ -1,6 +1,6 @@
 '''
 Function:
-    Define the l1 loss
+    Implementation of L1Loss
 Author:
     Zhenchao Jin
 '''

@@ -1,6 +1,6 @@
 '''
 Function:
-    Build activation functions
+    Implementation of BuildActivation
 Author:
     Zhenchao Jin
 '''
