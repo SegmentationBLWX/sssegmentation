@@ -25,7 +25,7 @@ class NighttimeDrivingDataset(BaseDataset):
         self.image_dir = os.path.join(rootdir, 'leftImg8bit/test/night')
         self.ann_dir = os.path.join(rootdir, 'gtCoarse_daytime_trainvaltest/test/night')
         # obatin imageids
-        self.imageids = os.listdir(self.ann_dir)
+        self.imageids = os.listdir(self.image_dir)
         self.imageids = [_id.replace('_leftImg8bit.png', '') for _id in self.imageids]
     '''pull item'''
     def __getitem__(self, index):

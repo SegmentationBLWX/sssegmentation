@@ -1,6 +1,6 @@
 '''
 Function:
-    Build the backbone network
+    Implementation of BuildBackbone
 Author:
     Zhenchao Jin
 '''
