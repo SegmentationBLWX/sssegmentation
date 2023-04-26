@@ -1,6 +1,6 @@
 '''
 Function:
-    Load the drive dataset
+    Implementation of DRIVEDataset
 Author:
     Zhenchao Jin
 '''

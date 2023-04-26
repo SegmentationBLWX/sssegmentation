@@ -1,6 +1,6 @@
 '''
 Function:
-    Load the voc dataset
+    Implementation of VOCDataset, PascalContextDataset and PascalContext59Dataset
 Author:
     Zhenchao Jin
 '''

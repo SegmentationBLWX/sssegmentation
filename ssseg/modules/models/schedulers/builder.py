@@ -1,6 +1,6 @@
 '''
 Funtion:
-    Build the scheduler
+    Implementation of BuildScheduler
 Author:
     Zhenchao Jin
 '''

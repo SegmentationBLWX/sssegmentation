@@ -1,6 +1,6 @@
 '''
-Funtion:
-    Build the optimizer
+Function:
+    Implementation of BuildOptimizer
 Author:
     Zhenchao Jin
 '''

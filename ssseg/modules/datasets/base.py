@@ -1,6 +1,6 @@
 '''
 Function:
-    Base class for loadding dataset
+    Implementation of BaseDataset
 Author:
     Zhenchao Jin
 '''

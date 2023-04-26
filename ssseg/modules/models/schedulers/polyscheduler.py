@@ -1,6 +1,6 @@
 '''
 Funtion:
-    Define the polyscheduler
+    Implementation of PolyScheduler
 Author:
     Zhenchao Jin
 '''

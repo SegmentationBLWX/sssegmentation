@@ -1,6 +1,6 @@
 '''
 Funtion:
-    Define the basescheduler
+    Implementation of BaseScheduler
 Author:
     Zhenchao Jin
 '''

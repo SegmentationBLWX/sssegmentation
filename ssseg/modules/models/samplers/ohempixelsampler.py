@@ -1,6 +1,6 @@
 '''
 Function:
-    OHEM pixel sampler
+    Implementation of OHEMPixelSampler
 Author:
     Zhenchao Jin
 '''

@@ -1,6 +1,6 @@
 '''
 Function:
-    Load the chasedb1 dataset
+    Implementation of ChaseDB1Dataset
 Author:
     Zhenchao Jin
 '''

@@ -1,6 +1,6 @@
 '''
 Function:
-    Build the dataset
+    Implementation of BuildDataset
 Author:
     Zhenchao Jin
 '''
@@ -18,6 +18,7 @@ from .sbushadow import SBUShadowDataset
 from .cityscapes import CityScapesDataset
 from .supervisely import SuperviselyDataset
 from .mhp import MHPv1Dataset, MHPv2Dataset
+from .DarkZurichDataset import DarkZurichDataset
 from .coco import COCODataset, COCOStuffDataset, COCOStuff10kDataset
 from .voc import VOCDataset, PascalContextDataset, PascalContext59Dataset
 
@@ -43,6 +44,7 @@ def BuildDataset(mode, logger_handle, dataset_cfg):
         'cocostuff': COCOStuffDataset,
         'sbushadow': SBUShadowDataset,
         'cityscapes': CityScapesDataset,
+        'darkzurich': DarkZurichDataset,
         'supervisely': SuperviselyDataset,
         'cocostuff10k': COCOStuff10kDataset,
         'pascalcontext': PascalContextDataset,

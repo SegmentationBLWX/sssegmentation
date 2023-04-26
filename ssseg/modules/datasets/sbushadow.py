@@ -1,6 +1,6 @@
 '''
 Function:
-    Load the sbu-shadow dataset
+    Implementation of SBUShadowDataset
 Author:
     Zhenchao Jin
 '''

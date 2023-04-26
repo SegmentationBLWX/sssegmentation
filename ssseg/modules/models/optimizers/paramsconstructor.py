@@ -1,6 +1,6 @@
 '''
 Function:
-    Define the params constructor
+    Implementation of DefaultParamsConstructor
 Author:
     Zhenchao Jin
 '''

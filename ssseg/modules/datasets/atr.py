@@ -1,6 +1,6 @@
 '''
 Function:
-    Load the ATR dataset
+    Implementation of ATRDataset
 Author:
     Zhenchao Jin
 '''

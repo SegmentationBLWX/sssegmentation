@@ -1,6 +1,6 @@
 '''
 Function:
-    Load the stare dataset
+    Implementation of STAREDataset
 Author:
     Zhenchao Jin
 '''

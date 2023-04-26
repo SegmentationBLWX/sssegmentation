@@ -1,6 +1,6 @@
 '''
 Function:
-    Color map for visualizing the segmentation mask
+    Implementation of BuildPalette
 Author:
     Zhenchao Jin
 '''

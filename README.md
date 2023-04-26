@@ -111,6 +111,7 @@ You can star this repository to keep track of the project if it's helpful for yo
 - [Supervisely](https://supervise.ly/explore/projects/supervisely-person-dataset-23304/datasets)
 - [SBUShadow](https://www3.cs.stonybrook.edu/~cvl/projects/shadow_noisy_label/index.html)
 - [PASCAL VOC](http://host.robots.ox.ac.uk/pascal/VOC/)
+- [Dark Zurich](https://data.vision.ee.ethz.ch/csakarid/shared/GCMA_UIoU/Dark_Zurich_val_anon.zip)
 - [COCOStuff10k](https://github.com/nightrome/cocostuff10k)
 - [COCOStuff164k](https://github.com/nightrome/cocostuff)
 - [Pascal Context](https://cs.stanford.edu/~roozbeh/pascal-context/)

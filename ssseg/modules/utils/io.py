@@ -1,6 +1,6 @@
 '''
 Function:
-    Some utils related with io
+    Implementation of IO related operations
 Author:
     Zhenchao Jin
 '''

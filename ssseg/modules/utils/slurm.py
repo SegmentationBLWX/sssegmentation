@@ -1,6 +1,6 @@
 '''
 Function:
-    Define some utils related slurm training
+    Implementation of SLURM related operations
 Author:
     Zhenchao Jin
 '''

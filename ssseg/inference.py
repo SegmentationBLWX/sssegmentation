@@ -1,6 +1,6 @@
 '''
 Function:
-    Visualize the segmentation results by using our segmentors
+    Implementation of Demo
 Author:
     Zhenchao Jin
 '''

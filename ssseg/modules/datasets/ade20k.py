@@ -1,6 +1,6 @@
 '''
 Function:
-    Load the ADE20k dataset
+    Implementation of ADE20kDataset
 Author:
     Zhenchao Jin
 '''

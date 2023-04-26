@@ -1,6 +1,6 @@
 '''
 Function:
-    Define some evaluation metric
+    Implementation of Evaluation
 Author:
     Zhenchao Jin
 '''

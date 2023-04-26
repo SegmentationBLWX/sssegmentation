@@ -1,6 +1,6 @@
 '''
 Function:
-    Load the VSPW dataset
+    Implementation of VSPWDataset
 Author:
     Zhenchao Jin
 '''

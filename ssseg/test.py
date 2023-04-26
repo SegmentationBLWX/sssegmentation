@@ -1,6 +1,6 @@
 '''
 Function:
-    Test the segmentor
+    Implementation of Tester
 Author:
     Zhenchao Jin
 '''

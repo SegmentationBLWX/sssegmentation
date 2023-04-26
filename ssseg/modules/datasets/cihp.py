@@ -1,6 +1,6 @@
 '''
 Function:
-    Load the CIHP dataset
+    Implementation of CIHPDataset
 Author:
     Zhenchao Jin
 '''

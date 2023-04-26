@@ -1,6 +1,6 @@
 '''
 Function:
-    Load the LIP dataset
+    Implementation of LIPDataset
 Author:
     Zhenchao Jin
 '''

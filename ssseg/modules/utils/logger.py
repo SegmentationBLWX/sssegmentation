@@ -1,6 +1,6 @@
 '''
 Function:
-    Define the logging function
+    Implementation of Logger
 Author:
     Zhenchao Jin
 '''

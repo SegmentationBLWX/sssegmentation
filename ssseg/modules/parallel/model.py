@@ -1,6 +1,6 @@
 '''
 Function:
-    Build distributed model
+    Implementation of BuildDistributedModel
 Author:
     Zhenchao Jin
 '''

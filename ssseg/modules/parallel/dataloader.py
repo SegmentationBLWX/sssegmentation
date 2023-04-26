@@ -1,6 +1,6 @@
 '''
 Function:
-    Build distributed dataloader
+    Implementation of BuildDistributedDataloader
 Author:
     Zhenchao Jin
 '''

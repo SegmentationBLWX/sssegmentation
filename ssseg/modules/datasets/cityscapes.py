@@ -1,6 +1,6 @@
 '''
 Function:
-    Load the CityScapes dataset
+    Implementation of CityScapesDataset
 Author:
     Zhenchao Jin
 '''

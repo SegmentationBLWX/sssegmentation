@@ -1,6 +1,6 @@
 '''
 Function:
-    Load the MHPv1 and MHPv2 dataset
+    Implementation of MHPv1Dataset and MHPv2Dataset
 Author:
     Zhenchao Jin
 '''

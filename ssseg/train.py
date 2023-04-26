@@ -1,6 +1,6 @@
 '''
 Function:
-    Train the segmentor
+    Implementation of Trainer
 Author:
     Zhenchao Jin
 '''

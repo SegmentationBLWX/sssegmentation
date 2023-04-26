@@ -1,6 +1,6 @@
 '''
 Function:
-    Load the hrf dataset
+    Implementation of HRFDataset
 Author:
     Zhenchao Jin
 '''

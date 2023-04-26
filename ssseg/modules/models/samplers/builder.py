@@ -1,6 +1,6 @@
 '''
 Function:
-    Build the pixel sampler
+    Implementation of BuildPixelSampler
 Author:
     Zhenchao Jin
 '''

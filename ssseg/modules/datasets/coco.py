@@ -1,6 +1,6 @@
 '''
 Function:
-    Load the coco dataset
+    Implementation of COCODataset, COCOStuff10kDataset and COCOStuffDataset
 Author:
     Zhenchao Jin
 '''

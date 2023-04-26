@@ -1,6 +1,6 @@
 '''
 Function:
-    Base pixel sampler
+    Implementation of BasePixelSampler
 Author:
     Zhenchao Jin
 '''
