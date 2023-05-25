@@ -195,7 +195,7 @@ class BaseSegmentor(nn.Module):
             else:
                 prediction_iter = prediction_format
                 target_iter = target.view(-1)
-            loss_cfg['type'] = key
-            loss += BuildLoss(loss_cfg)(prediction=prediction_iter, target=target_iter)
+            loss_cfg[key]['type'] = key
+            loss += BuildLoss(loss_cfg[key])(prediction=prediction_iter, target=target_iter)
         # return the loss
         return loss

@@ -34,7 +34,8 @@ def BuildConfig(cfg_file_path, tmp_cfg_dir='tmp_cfg'):
         try: os.mkdir(os.path.join(tmp_cfg_dir, segmentor_dir))
         except: pass
     # copy config file and the base config file
-    copy_tree(_base_cfg_dir, os.path.join(tmp_cfg_dir, '_base_'))
+    try: copy_tree(_base_cfg_dir, os.path.join(tmp_cfg_dir, '_base_'))
+    except: pass
     shutil.copyfile(cfg_file_path, os.path.join(tmp_cfg_dir, segmentor_dir, cfg_name + ext))
     shutil.copyfile(base_cfg_file_path, os.path.join(tmp_cfg_dir, segmentor_dir, 'base_cfg' + ext))
     time.sleep(0.5)
