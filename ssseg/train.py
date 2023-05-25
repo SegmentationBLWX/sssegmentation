@@ -77,12 +77,11 @@ class Trainer():
         # build scheduler
         scheduler_cfg = copy.deepcopy(cfg.SEGMENTOR_CFG['scheduler'])
         scheduler_cfg.update({
-            'optimizer': optimizer,
             'lr': cfg.SEGMENTOR_CFG['scheduler']['optimizer']['lr'],
             'iters_per_epoch': len(dataloader),
             'params_rules': cfg.SEGMENTOR_CFG['scheduler']['optimizer']['params_rules'],
         })
-        scheduler = BuildScheduler(scheduler_cfg=scheduler_cfg)
+        scheduler = BuildScheduler(optimizer=optimizer, scheduler_cfg=scheduler_cfg)
         start_epoch, end_epoch = 1, scheduler_cfg['max_epochs']
         # load ckpts
         if cmd_args.ckptspath and os.path.exists(cmd_args.ckptspath):

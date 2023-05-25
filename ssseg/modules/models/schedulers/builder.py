@@ -9,7 +9,7 @@ from .polyscheduler import PolyScheduler
 
 
 '''BuildScheduler'''
-def BuildScheduler(scheduler_cfg):
+def BuildScheduler(optimizer, scheduler_cfg):
     scheduler_cfg = copy.deepcopy(scheduler_cfg)
     # supported schedulers
     supported_schedulers = {
@@ -17,6 +17,7 @@ def BuildScheduler(scheduler_cfg):
     }
     # build scheduler
     scheduler_type = scheduler_cfg.pop('type')
-    scheduler = supported_schedulers[scheduler_type](**scheduler_cfg)
+    scheduler_cfg.pop('optimizer')
+    scheduler = supported_schedulers[scheduler_type](optimizer=optimizer, **scheduler_cfg)
     # return
     return scheduler
