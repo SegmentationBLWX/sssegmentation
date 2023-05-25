@@ -40,7 +40,7 @@ SEGMENTOR_CFG = {
     'scheduler': {
         'type': 'PolyScheduler', 'max_epochs': 0, 'power': 0.9, 'warmup_cfg': {'type': 'linear', 'ratio': 0.1, 'iters': 200},
         'optimizer': {
-            'type': 'sgd', 'lr': 0.01, 'momentum': 0.9, 'weight_decay': 5e-4, 'params_rules': {},
+            'type': 'SGD', 'lr': 0.01, 'momentum': 0.9, 'weight_decay': 5e-4, 'params_rules': {},
         }
     },
     'dataset': None,

@@ -42,7 +42,7 @@ SEGMENTOR_CFG = {
     'scheduler': {
         'type': 'PolyScheduler', 'max_epochs': 0, 'power': 0.9,
         'optimizer': {
-            'type': 'sgd', 'lr': 0.01, 'momentum': 0.9, 'weight_decay': 0.0, 'params_rules': {'backbone_net': 0.1, 'others': 1.0},
+            'type': 'SGD', 'lr': 0.01, 'momentum': 0.9, 'weight_decay': 0.0, 'params_rules': {'backbone_net': 0.1, 'others': 1.0},
         }
     },
     'dataset': None,

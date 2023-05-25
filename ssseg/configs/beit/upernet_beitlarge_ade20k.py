@@ -13,7 +13,7 @@ SEGMENTOR_CFG['dataloader'] = DATALOADER_CFG_BS16.copy()
 # modify scheduler config
 SEGMENTOR_CFG['scheduler']['max_epochs'] = 130
 SEGMENTOR_CFG['scheduler']['optimizer'] = {
-    'type': 'adamw', 'lr': 3e-5, 'betas': (0.9, 0.999), 'weight_decay': 0.05,
+    'type': 'AdamW', 'lr': 3e-5, 'betas': (0.9, 0.999), 'weight_decay': 0.05,
     'params_rules': {'type': 'layerdecay', 'num_layers': 24, 'decay_rate': 0.95, 'decay_type': 'layer_wise_vit'},
 }
 # modify other segmentor configs

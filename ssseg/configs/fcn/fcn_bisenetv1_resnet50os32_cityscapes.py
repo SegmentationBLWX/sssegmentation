@@ -15,7 +15,7 @@ SEGMENTOR_CFG['scheduler']['max_epochs'] = 860
 SEGMENTOR_CFG['scheduler']['min_lr'] = 1e-4
 SEGMENTOR_CFG['scheduler']['warmup_cfg'] = {'type': 'linear', 'ratio': 0.1, 'iters': 1000}
 SEGMENTOR_CFG['scheduler']['optimizer'] = {
-    'type': 'sgd', 'lr': 0.05, 'momentum': 0.9, 'weight_decay': 5e-4, 'params_rules': {},
+    'type': 'SGD', 'lr': 0.05, 'momentum': 0.9, 'weight_decay': 5e-4, 'params_rules': {},
 }
 # modify other segmentor configs
 SEGMENTOR_CFG['num_classes'] = 19

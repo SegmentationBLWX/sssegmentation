@@ -14,10 +14,10 @@ from .paramsconstructor import DefaultParamsConstructor, LayerDecayParamsConstru
 def BuildOptimizer(model, optimizer_cfg):
     # define the supported optimizers
     supported_optimizers = {
-        'sgd': optim.SGD,
-        'adam': optim.Adam,
-        'adamw': optim.AdamW,
-        'adadelta': optim.Adadelta,
+        'SGD': optim.SGD,
+        'Adam': optim.Adam,
+        'AdamW': optim.AdamW,
+        'Adadelta': optim.Adadelta,
     }
     # parse optimizer_cfg
     optimizer_cfg = copy.deepcopy(optimizer_cfg)
