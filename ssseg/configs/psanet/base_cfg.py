@@ -1,6 +1,6 @@
 '''SEGMENTOR_CFG for PSANet'''
 SEGMENTOR_CFG = {
-    'type': 'psanet',
+    'type': 'PSANet',
     'num_classes': -1,
     'benchmark': True,
     'align_corners': False,

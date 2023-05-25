@@ -11,7 +11,7 @@ import torch.nn.functional as F
 from ..base import BaseSegmentor
 from .epm import EdgePerceivingModule
 from ..pspnet import PyramidPoolingModule
-from ...backbones import BuildActivation, BuildNormalization, constructnormcfg
+from ...backbones import BuildActivation, BuildNormalization
 
 
 '''CE2P'''
@@ -42,16 +42,16 @@ class CE2P(BaseSegmentor):
         # build shortcut
         self.shortcut = nn.Sequential(
             nn.Conv2d(head_cfg['in_channels_list'][0], head_cfg['shortcut_feats_channels'], kernel_size=1, stride=1, padding=0, bias=False),
-            BuildNormalization(constructnormcfg(placeholder=head_cfg['shortcut_feats_channels'], norm_cfg=norm_cfg)),
+            BuildNormalization(placeholder=head_cfg['shortcut_feats_channels'], norm_cfg=norm_cfg),
             BuildActivation(act_cfg),
         )
         # build decoder stage1
         self.decoder_stage1 = nn.Sequential(
             nn.Conv2d(head_cfg['feats_channels'] + head_cfg['shortcut_feats_channels'], head_cfg['feats_channels'], kernel_size=1, stride=1, padding=0, bias=False),
-            BuildNormalization(constructnormcfg(placeholder=head_cfg['feats_channels'], norm_cfg=norm_cfg)),
+            BuildNormalization(placeholder=head_cfg['feats_channels'], norm_cfg=norm_cfg),
             BuildActivation(act_cfg),
             nn.Conv2d(head_cfg['feats_channels'], head_cfg['feats_channels'], kernel_size=1, stride=1, padding=0, bias=False),
-            BuildNormalization(constructnormcfg(placeholder=head_cfg['feats_channels'], norm_cfg=norm_cfg)),
+            BuildNormalization(placeholder=head_cfg['feats_channels'], norm_cfg=norm_cfg),
             BuildActivation(act_cfg),
             nn.Dropout2d(head_cfg['dropout_stage1']), 
             nn.Conv2d(head_cfg['feats_channels'], cfg['num_classes'], kernel_size=1, stride=1, padding=0)
@@ -59,10 +59,10 @@ class CE2P(BaseSegmentor):
         # build decoder stage1
         self.decoder_stage2 = nn.Sequential(
             nn.Conv2d(head_cfg['feats_channels'] + head_cfg['epm_hidden_channels'] * (len(head_cfg['in_channels_list']) - 1), head_cfg['feats_channels'], kernel_size=1, stride=1, padding=0, bias=False),
-            BuildNormalization(constructnormcfg(placeholder=head_cfg['feats_channels'], norm_cfg=norm_cfg)),
+            BuildNormalization(placeholder=head_cfg['feats_channels'], norm_cfg=norm_cfg),
             BuildActivation(act_cfg),
             nn.Conv2d(head_cfg['feats_channels'], head_cfg['feats_channels'], kernel_size=1, stride=1, padding=0, bias=False),
-            BuildNormalization(constructnormcfg(placeholder=head_cfg['feats_channels'], norm_cfg=norm_cfg)),
+            BuildNormalization(placeholder=head_cfg['feats_channels'], norm_cfg=norm_cfg),
             BuildActivation(act_cfg),
             nn.Dropout2d(head_cfg['dropout_stage2']), 
             nn.Conv2d(head_cfg['feats_channels'], cfg['num_classes'], kernel_size=1, stride=1, padding=0)

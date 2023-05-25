@@ -9,7 +9,7 @@ import numpy as np
 import torch.nn as nn
 import torch.nn.functional as F
 from ..base import FPN, BaseSegmentor
-from ...backbones import BuildActivation, BuildNormalization, constructnormcfg
+from ...backbones import BuildActivation, BuildNormalization
 
 
 '''SemanticFPN'''
@@ -32,7 +32,7 @@ class SemanticFPN(BaseSegmentor):
             for k in range(head_length):
                 scale_head.append(nn.Sequential(
                     nn.Conv2d(head_cfg['feats_channels'] if k == 0 else head_cfg['scale_head_channels'], head_cfg['scale_head_channels'], kernel_size=3, stride=1, padding=1, bias=False),
-                    BuildNormalization(constructnormcfg(placeholder=head_cfg['scale_head_channels'], norm_cfg=norm_cfg)),
+                    BuildNormalization(placeholder=head_cfg['scale_head_channels'], norm_cfg=norm_cfg),
                     BuildActivation(act_cfg),
                 ))
                 if feature_stride_list[i] != feature_stride_list[0]:

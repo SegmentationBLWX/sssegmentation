@@ -10,7 +10,7 @@ import torch.nn as nn
 import torch.nn.functional as F
 import torch.distributed as dist
 from ...losses import BuildLoss
-from ...backbones import BuildBackbone, BuildActivation, BuildNormalization, constructnormcfg
+from ...backbones import BuildBackbone, BuildActivation, BuildNormalization
 
 
 '''BaseSegmentor'''
@@ -107,7 +107,7 @@ class BaseSegmentor(nn.Module):
                 else:
                     dec += [nn.Conv2d(aux_cfg['out_channels'], aux_cfg['out_channels'], kernel_size=3, stride=1, padding=1, bias=False),]
                 dec += [
-                    BuildNormalization(constructnormcfg(placeholder=aux_cfg['out_channels'], norm_cfg=norm_cfg)),
+                    BuildNormalization(placeholder=aux_cfg['out_channels'], norm_cfg=norm_cfg),
                     BuildActivation(act_cfg)
                 ]
                 if 'upsample' in aux_cfg:
@@ -124,7 +124,8 @@ class BaseSegmentor(nn.Module):
     '''freeze normalization'''
     def freezenormalization(self):
         for module in self.modules():
-            if type(module) in BuildNormalization(only_get_all_supported=True):
+            if isinstance(module, nn.BatchNorm1d) or isinstance(module, nn.BatchNorm2d) or \
+               isinstance(module, nn.BatchNorm3d) or isinstance(module, SyncBatchNorm):
                 module.eval()
     '''calculate the losses'''
     def calculatelosses(self, predictions, targets, losses_cfg, map_preds_to_tgts_dict=None):

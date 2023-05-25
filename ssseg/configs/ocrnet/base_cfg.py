@@ -1,6 +1,6 @@
 '''SEGMENTOR_CFG for OCRNet'''
 SEGMENTOR_CFG = {
-    'type': 'ocrnet',
+    'type': 'OCRNet',
     'num_classes': -1,
     'benchmark': True,
     'align_corners': False,

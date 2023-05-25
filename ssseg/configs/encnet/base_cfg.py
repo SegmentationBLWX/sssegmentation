@@ -1,6 +1,6 @@
 '''SEGMENTOR_CFG for ENCNet'''
 SEGMENTOR_CFG = {
-    'type': 'encnet',
+    'type': 'ENCNet',
     'num_classes': -1,
     'benchmark': True,
     'align_corners': False,

@@ -3,7 +3,7 @@ SEGMENTOR_CFG = {
     'benchmark': True,
     'num_classes': -1,
     'align_corners': False,
-    'type': 'deeplabv3',
+    'type': 'Deeplabv3',
     'backend': 'nccl',
     'work_dir': 'ckpts',
     'logfilepath': '',

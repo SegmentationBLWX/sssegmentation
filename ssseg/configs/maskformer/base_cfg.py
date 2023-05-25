@@ -1,6 +1,6 @@
 '''SEGMENTOR_CFG for MaskFormer'''
 SEGMENTOR_CFG = {
-    'type': 'maskformer',
+    'type': 'MaskFormer',
     'num_classes': -1,
     'benchmark': True,
     'align_corners': False,

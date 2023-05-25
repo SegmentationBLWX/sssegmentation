@@ -7,7 +7,7 @@ Author:
 import torch
 import torch.nn as nn
 import torch.nn.functional as F
-from ...backbones import BuildActivation, BuildNormalization, constructnormcfg
+from ...backbones import BuildActivation, BuildNormalization
 
 
 '''DynamicConvolutionalModule'''
@@ -18,15 +18,15 @@ class DynamicConvolutionalModule(nn.Module):
         self.filter_gen_conv = nn.Conv2d(in_channels, out_channels, kernel_size=1, stride=1, padding=0)
         self.input_redu_conv = nn.Sequential(
             nn.Conv2d(in_channels, out_channels, kernel_size=1, stride=1, padding=0, bias=False),
-            BuildNormalization(constructnormcfg(placeholder=out_channels, norm_cfg=norm_cfg)),
+            BuildNormalization(placeholder=out_channels, norm_cfg=norm_cfg),
             BuildActivation(act_cfg),
         )
-        self.norm = BuildNormalization(constructnormcfg(placeholder=out_channels, norm_cfg=norm_cfg))
+        self.norm = BuildNormalization(placeholder=out_channels, norm_cfg=norm_cfg)
         self.activate = BuildActivation(act_cfg)
         if is_fusion:
             self.fusion_conv = nn.Sequential(
                 nn.Conv2d(out_channels, out_channels, kernel_size=1, stride=1, padding=0, bias=False),
-                BuildNormalization(constructnormcfg(placeholder=out_channels, norm_cfg=norm_cfg)),
+                BuildNormalization(placeholder=out_channels, norm_cfg=norm_cfg),
                 BuildActivation(act_cfg),
             )
     '''forward'''

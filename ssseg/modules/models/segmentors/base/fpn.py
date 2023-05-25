@@ -7,7 +7,7 @@ Author:
 import torch
 import torch.nn as nn
 import torch.nn.functional as F
-from ...backbones import BuildActivation, BuildNormalization, constructnormcfg
+from ...backbones import BuildActivation, BuildNormalization
 
 
 '''Feature Pyramid Network'''
@@ -22,12 +22,12 @@ class FPN(nn.Module):
         for i in range(0, len(in_channels_list)):
             l_conv = nn.Sequential(
                 nn.Conv2d(in_channels_list[i], out_channels, kernel_size=1, stride=1, padding=0, bias=False),
-                BuildNormalization(constructnormcfg(placeholder=out_channels, norm_cfg=norm_cfg)),
+                BuildNormalization(placeholder=out_channels, norm_cfg=norm_cfg),
                 BuildActivation(act_cfg),
             )
             fpn_conv = nn.Sequential(
                 nn.Conv2d(out_channels, out_channels, kernel_size=3, stride=1, padding=1, bias=False),
-                BuildNormalization(constructnormcfg(placeholder=out_channels, norm_cfg=norm_cfg)),
+                BuildNormalization(placeholder=out_channels, norm_cfg=norm_cfg),
                 BuildActivation(act_cfg),
             )
             self.lateral_convs.append(l_conv)

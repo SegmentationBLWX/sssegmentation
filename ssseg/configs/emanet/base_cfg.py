@@ -1,6 +1,6 @@
 '''SEGMENTOR_CFG for EMANet'''
 SEGMENTOR_CFG = {
-    'type': 'emanet',
+    'type': 'EMANet',
     'num_classes': -1,
     'benchmark': True,
     'align_corners': False,

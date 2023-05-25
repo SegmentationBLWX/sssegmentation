@@ -8,7 +8,7 @@ import torch
 import torch.nn as nn
 from .ppm import PPMConcat
 from ..base import SelfAttentionBlock
-from ...backbones import BuildNormalization, constructnormcfg
+from ...backbones import BuildNormalization
 
 
 '''Asymmetric Fusion Non-local Block (AFNB)'''
@@ -41,7 +41,7 @@ class AFNBlock(nn.Module):
             ))
         self.bottleneck = nn.Sequential(
             nn.Conv2d(out_channels+high_in_channels, out_channels, kernel_size=1, stride=1, padding=0, bias=False),
-            BuildNormalization(constructnormcfg(placeholder=out_channels, norm_cfg=norm_cfg)),
+            BuildNormalization(placeholder=out_channels, norm_cfg=norm_cfg),
         )
     '''forward'''
     def forward(self, low_feats, high_feats):

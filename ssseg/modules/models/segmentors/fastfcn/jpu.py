@@ -8,7 +8,7 @@ import copy
 import torch
 import torch.nn as nn
 import torch.nn.functional as F
-from ...backbones import BuildActivation, BuildNormalization, DepthwiseSeparableConv2d, constructnormcfg
+from ...backbones import BuildActivation, BuildNormalization, DepthwiseSeparableConv2d
 
 
 '''JPU'''
@@ -34,7 +34,7 @@ class JPU(nn.Module):
         for i in range(self.start_level, self.backbone_end_level):
             conv_layer = nn.Sequential(
                 nn.Conv2d(self.in_channels_list[i], self.mid_channels, kernel_size=3, stride=1, padding=1, bias=False),
-                BuildNormalization(constructnormcfg(placeholder=self.mid_channels, norm_cfg=norm_cfg)),
+                BuildNormalization(placeholder=self.mid_channels, norm_cfg=norm_cfg),
                 BuildActivation(act_cfg),
             )
             self.conv_layers.append(conv_layer)

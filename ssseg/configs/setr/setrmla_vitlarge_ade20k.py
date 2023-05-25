@@ -14,7 +14,7 @@ SEGMENTOR_CFG['dataloader'] = DATALOADER_CFG_BS16.copy()
 SEGMENTOR_CFG['scheduler']['max_epochs'] = 130
 # modify other segmentor configs
 SEGMENTOR_CFG.update({
-    'type': 'setrmla',
+    'type': 'SETRMLA',
     'num_classes': 150,
     'head': {
         'in_channels_list': (1024, 1024, 1024, 1024), 'mla_feats_channels': 256, 'mla_up_channels': 128,

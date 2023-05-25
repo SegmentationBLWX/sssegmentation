@@ -1,6 +1,6 @@
 '''SEGMENTOR_CFG for SETR'''
 SEGMENTOR_CFG = {
-    'type': 'setrup',
+    'type': 'SETRUP',
     'num_classes': -1,
     'benchmark': True,
     'align_corners': False,

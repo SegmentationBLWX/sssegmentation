@@ -1,8 +1,8 @@
-'''SEGMENTOR_CFG for NonlocalNet'''
+'''SEGMENTOR_CFG for NonLocalNet'''
 SEGMENTOR_CFG = {
     'num_classes': -1,
     'benchmark': True,
-    'type': 'nonlocalnet',
+    'type': 'NonLocalNet',
     'align_corners': False,
     'backend': 'nccl',
     'work_dir': 'ckpts',

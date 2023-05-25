@@ -1,6 +1,6 @@
 '''SEGMENTOR_CFG for MCIBI++'''
 SEGMENTOR_CFG = {
-    'type': 'memorynetv2',
+    'type': 'MemoryNetV2',
     'num_classes': -1,
     'benchmark': True,
     'align_corners': False,

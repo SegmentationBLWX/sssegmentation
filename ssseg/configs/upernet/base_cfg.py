@@ -1,6 +1,6 @@
-'''SEGMENTOR_CFG for UperNet'''
+'''SEGMENTOR_CFG for UPerNet'''
 SEGMENTOR_CFG = {
-    'type': 'upernet',
+    'type': 'UPerNet',
     'num_classes': -1,
     'benchmark': True,
     'align_corners': False,

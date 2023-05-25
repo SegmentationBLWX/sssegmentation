@@ -8,7 +8,7 @@ import torch
 import torch.nn as nn
 import torch.nn.functional as F
 from ..base import SelfAttentionBlock
-from ...backbones import BuildActivation, BuildNormalization, constructnormcfg
+from ...backbones import BuildActivation, BuildNormalization
 
 
 '''ObjectContextBlock'''
@@ -38,7 +38,7 @@ class ObjectContextBlock(SelfAttentionBlock):
         )
         self.bottleneck = nn.Sequential(
             nn.Conv2d(in_channels*2, in_channels, kernel_size=3, stride=1, padding=1, bias=False),
-            BuildNormalization(constructnormcfg(placeholder=in_channels, norm_cfg=norm_cfg)),
+            BuildNormalization(placeholder=in_channels, norm_cfg=norm_cfg),
             BuildActivation(act_cfg),
         )
     '''forward'''

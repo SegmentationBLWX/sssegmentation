@@ -6,7 +6,7 @@ Author:
 '''
 import torch
 import torch.nn as nn
-from ...backbones import BuildNormalization, BuildActivation, constructnormcfg
+from ...backbones import BuildNormalization, BuildActivation
 
 
 '''MLAModule'''
@@ -17,14 +17,14 @@ class MLAModule(nn.Module):
         for i in range(len(in_channels_list)):
             self.channel_proj.append(nn.Sequential(
                 nn.Conv2d(in_channels_list[i], out_channels, kernel_size=1, stride=1, padding=0, bias=False),
-                BuildNormalization(constructnormcfg(placeholder=out_channels, norm_cfg=norm_cfg)),
+                BuildNormalization(placeholder=out_channels, norm_cfg=norm_cfg),
                 BuildActivation(act_cfg),
             ))
         self.feat_extract = nn.ModuleList()
         for i in range(len(in_channels_list)):
             self.feat_extract.append(nn.Sequential(
                 nn.Conv2d(out_channels, out_channels, kernel_size=3, stride=1, padding=1, bias=False),
-                BuildNormalization(constructnormcfg(placeholder=out_channels, norm_cfg=norm_cfg)),
+                BuildNormalization(placeholder=out_channels, norm_cfg=norm_cfg),
                 BuildActivation(act_cfg),
             ))
     '''forward'''

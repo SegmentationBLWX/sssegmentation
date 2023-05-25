@@ -10,7 +10,7 @@ import torch.nn as nn
 from .afnblock import AFNBlock
 from .apnblock import APNBlock
 from ..base import BaseSegmentor
-from ...backbones import BuildActivation, BuildNormalization, constructnormcfg
+from ...backbones import BuildActivation, BuildNormalization
 
 
 '''ANNNet'''
@@ -42,7 +42,7 @@ class ANNNet(BaseSegmentor):
         # build bottleneck
         self.bottleneck = nn.Sequential(
             nn.Conv2d(head_cfg['in_channels_list'][1], head_cfg['feats_channels'], kernel_size=3, stride=1, padding=1, bias=False),
-            BuildNormalization(constructnormcfg(placeholder=head_cfg['feats_channels'], norm_cfg=norm_cfg)),
+            BuildNormalization(placeholder=head_cfg['feats_channels'], norm_cfg=norm_cfg),
             BuildActivation(act_cfg),
         )
         # build decoder

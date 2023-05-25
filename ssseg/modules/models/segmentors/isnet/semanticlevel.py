@@ -8,7 +8,7 @@ import torch
 import torch.nn as nn
 import torch.nn.functional as F
 from ..base import SelfAttentionBlock
-from ...backbones import BuildActivation, BuildNormalization, constructnormcfg
+from ...backbones import BuildActivation, BuildNormalization
 
 
 '''SemanticLevelContext'''
@@ -35,7 +35,7 @@ class SemanticLevelContext(nn.Module):
         if concat_input:
             self.bottleneck = nn.Sequential(
                 nn.Conv2d(feats_channels * 2, feats_channels, kernel_size=3, stride=1, padding=1, bias=False),
-                BuildNormalization(constructnormcfg(placeholder=feats_channels, norm_cfg=norm_cfg)),
+                BuildNormalization(placeholder=feats_channels, norm_cfg=norm_cfg),
                 BuildActivation(act_cfg),
             )
     '''forward'''

@@ -8,7 +8,7 @@ import copy
 import torch
 import torch.nn as nn
 import torch.nn.functional as F
-from ....backbones import BuildActivation, BuildNormalization, constructnormcfg
+from ....backbones import BuildActivation, BuildNormalization
 
 
 '''TransformerEncoderLayer'''
@@ -25,8 +25,8 @@ class TransformerEncoderLayer(nn.Module):
         self.dropout1 = nn.Dropout(dropout)
         self.dropout2 = nn.Dropout(dropout)
         # norm
-        self.norm1 = BuildNormalization(constructnormcfg(placeholder=d_model, norm_cfg=norm_cfg))
-        self.norm2 = BuildNormalization(constructnormcfg(placeholder=d_model, norm_cfg=norm_cfg))
+        self.norm1 = BuildNormalization(placeholder=d_model, norm_cfg=norm_cfg)
+        self.norm2 = BuildNormalization(placeholder=d_model, norm_cfg=norm_cfg)
         # act
         self.activation = BuildActivation(act_cfg)
     '''with pos embed'''
@@ -85,9 +85,9 @@ class TransformerDecoderLayer(nn.Module):
         self.linear1 = nn.Linear(d_model, dim_feedforward)
         self.linear2 = nn.Linear(dim_feedforward, d_model)
         # norm
-        self.norm1 = BuildNormalization(constructnormcfg(placeholder=d_model, norm_cfg=norm_cfg))
-        self.norm2 = BuildNormalization(constructnormcfg(placeholder=d_model, norm_cfg=norm_cfg))
-        self.norm3 = BuildNormalization(constructnormcfg(placeholder=d_model, norm_cfg=norm_cfg))
+        self.norm1 = BuildNormalization(placeholder=d_model, norm_cfg=norm_cfg)
+        self.norm2 = BuildNormalization(placeholder=d_model, norm_cfg=norm_cfg)
+        self.norm3 = BuildNormalization(placeholder=d_model, norm_cfg=norm_cfg)
         # dropout
         self.dropout = nn.Dropout(dropout)
         self.dropout1 = nn.Dropout(dropout)
@@ -152,11 +152,11 @@ class Transformer(nn.Module):
         self.d_model = d_model
         # encoder
         encoder_layer = TransformerEncoderLayer(d_model, nhead, dim_feedforward, dropout, norm_cfg, act_cfg, norm_before)
-        encoder_norm = BuildNormalization(constructnormcfg(placeholder=d_model, norm_cfg=norm_cfg)) if norm_before else None
+        encoder_norm = BuildNormalization(placeholder=d_model, norm_cfg=norm_cfg) if norm_before else None
         self.encoder = TransformerEncoder(encoder_layer, num_encoder_layers, encoder_norm)
         # decoder
         decoder_layer = TransformerDecoderLayer(d_model, nhead, dim_feedforward, dropout, norm_cfg, act_cfg, norm_before)
-        decoder_norm = BuildNormalization(constructnormcfg(placeholder=d_model, norm_cfg=norm_cfg))
+        decoder_norm = BuildNormalization(placeholder=d_model, norm_cfg=norm_cfg)
         self.decoder = TransformerDecoder(decoder_layer, num_decoder_layers, decoder_norm, return_intermediate=return_intermediate_dec)
         # reset parameters
         self.resetparameters()

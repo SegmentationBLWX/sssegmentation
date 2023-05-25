@@ -10,7 +10,7 @@ import torch.nn.functional as F
 from ..base import BaseSegmentor
 from .cam import ChannelAttentionModule
 from .pam import PositionAttentionModule
-from ...backbones import BuildActivation, BuildNormalization, constructnormcfg
+from ...backbones import BuildActivation, BuildNormalization
 
 
 '''DANet'''
@@ -21,13 +21,13 @@ class DANet(BaseSegmentor):
         # build pam and pam decoder
         self.pam_in_conv = nn.Sequential(
             nn.Conv2d(head_cfg['in_channels'], head_cfg['feats_channels'], kernel_size=3, stride=1, padding=1, bias=False),
-            BuildNormalization(constructnormcfg(placeholder=head_cfg['feats_channels'], norm_cfg=norm_cfg)),
+            BuildNormalization(placeholder=head_cfg['feats_channels'], norm_cfg=norm_cfg),
             BuildActivation(act_cfg),
         )
         self.pam_net = PositionAttentionModule(head_cfg['feats_channels'], head_cfg['transform_channels'])
         self.pam_out_conv = nn.Sequential(
             nn.Conv2d(head_cfg['feats_channels'], head_cfg['feats_channels'], kernel_size=3, stride=1, padding=1, bias=False),
-            BuildNormalization(constructnormcfg(placeholder=head_cfg['feats_channels'], norm_cfg=norm_cfg)),
+            BuildNormalization(placeholder=head_cfg['feats_channels'], norm_cfg=norm_cfg),
             BuildActivation(act_cfg),
         )
         self.decoder_pam = nn.Sequential(
@@ -37,13 +37,13 @@ class DANet(BaseSegmentor):
         # build cam and cam decoder
         self.cam_in_conv = nn.Sequential(
             nn.Conv2d(head_cfg['in_channels'], head_cfg['feats_channels'], kernel_size=3, stride=1, padding=1, bias=False),
-            BuildNormalization(constructnormcfg(placeholder=head_cfg['feats_channels'], norm_cfg=norm_cfg)),
+            BuildNormalization(placeholder=head_cfg['feats_channels'], norm_cfg=norm_cfg),
             BuildActivation(act_cfg),
         )
         self.cam_net = ChannelAttentionModule()
         self.cam_out_conv = nn.Sequential(
             nn.Conv2d(head_cfg['feats_channels'], head_cfg['feats_channels'], kernel_size=3, stride=1, padding=1, bias=False),
-            BuildNormalization(constructnormcfg(placeholder=head_cfg['feats_channels'], norm_cfg=norm_cfg)),
+            BuildNormalization(placeholder=head_cfg['feats_channels'], norm_cfg=norm_cfg),
             BuildActivation(act_cfg),
         )
         self.decoder_cam = nn.Sequential(

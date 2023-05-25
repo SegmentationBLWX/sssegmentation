@@ -1,6 +1,6 @@
 '''SEGMENTOR_CFG for APCNet'''
 SEGMENTOR_CFG = {
-    'type': 'apcnet',
+    'type': 'APCNet',
     'num_classes': -1,
     'benchmark': True,
     'align_corners': False,

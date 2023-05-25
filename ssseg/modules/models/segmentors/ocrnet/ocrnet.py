@@ -11,7 +11,7 @@ import torch.nn.functional as F
 from ..base import BaseSegmentor
 from .objectcontext import ObjectContextBlock
 from .spatialgather import SpatialGatherModule
-from ...backbones import BuildActivation, BuildNormalization, constructnormcfg
+from ...backbones import BuildActivation, BuildNormalization
 
 
 '''OCRNet'''
@@ -25,7 +25,7 @@ class OCRNet(BaseSegmentor):
         # build bottleneck
         self.bottleneck = nn.Sequential(
             nn.Conv2d(head_cfg['in_channels'], head_cfg['feats_channels'], kernel_size=3, stride=1, padding=1, bias=False),
-            BuildNormalization(constructnormcfg(placeholder=head_cfg['feats_channels'], norm_cfg=norm_cfg)),
+            BuildNormalization(placeholder=head_cfg['feats_channels'], norm_cfg=norm_cfg),
             BuildActivation(act_cfg),
         )
         # build spatial gather module

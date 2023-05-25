@@ -9,7 +9,7 @@ import torch.nn as nn
 import torch.nn.functional as F
 from .mla import MLANeck
 from ..base import BaseSegmentor
-from ...backbones import BuildActivation, BuildNormalization, constructnormcfg
+from ...backbones import BuildActivation, BuildNormalization
 
 
 '''Naive upsampling head and Progressive upsampling head of SETR'''
@@ -21,7 +21,7 @@ class SETRUP(BaseSegmentor):
         self.norm_layers = nn.ModuleList()
         for in_channels in head_cfg['in_channels_list']:
             norm_cfg_copy = head_cfg['norm_cfg'].copy()
-            norm_layer = BuildNormalization(constructnormcfg(placeholder=in_channels, norm_cfg=norm_cfg_copy))
+            norm_layer = BuildNormalization(placeholder=in_channels, norm_cfg=norm_cfg_copy)
             self.norm_layers.append(norm_layer)
         # build decoder
         self.decoder = self.builddecoder({
@@ -84,7 +84,7 @@ class SETRUP(BaseSegmentor):
                 layers.append(nn.Conv2d(decoder_cfg['in_channels'], decoder_cfg['out_channels'], kernel_size=kernel_size, stride=1, padding=int(kernel_size - 1) // 2, bias=False))
             else:
                 layers.append(nn.Conv2d(decoder_cfg['out_channels'], decoder_cfg['out_channels'], kernel_size=kernel_size, stride=1, padding=int(kernel_size - 1) // 2, bias=False))
-            layers.append(BuildNormalization(constructnormcfg(placeholder=decoder_cfg['out_channels'], norm_cfg=norm_cfg)))
+            layers.append(BuildNormalization(placeholder=decoder_cfg['out_channels'], norm_cfg=norm_cfg))
             layers.append(BuildActivation(act_cfg))
             layers.append(nn.Upsample(scale_factor=decoder_cfg['scale_factor'], mode='bilinear', align_corners=align_corners))
         layers.append(nn.Dropout2d(decoder_cfg['dropout']))
@@ -101,7 +101,7 @@ class SETRMLA(BaseSegmentor):
         norm_layers = nn.ModuleList()
         for in_channels in head_cfg['in_channels_list']:
             norm_cfg_copy = head_cfg['norm_cfg'].copy()
-            norm_layer = BuildNormalization(constructnormcfg(placeholder=in_channels, norm_cfg=norm_cfg_copy))
+            norm_layer = BuildNormalization(placeholder=in_channels, norm_cfg=norm_cfg_copy)
             norm_layers.append(norm_layer)
         self.mla_neck = MLANeck(
             in_channels_list=head_cfg['in_channels_list'], 
@@ -116,10 +116,10 @@ class SETRMLA(BaseSegmentor):
         for i in range(len(head_cfg['in_channels_list'])):
             self.up_convs.append(nn.Sequential(
                 nn.Conv2d(head_cfg['mla_feats_channels'], head_cfg['mla_up_channels'], kernel_size=3, stride=1, padding=1, bias=False),
-                BuildNormalization(constructnormcfg(placeholder=head_cfg['mla_up_channels'], norm_cfg=norm_cfg)),
+                BuildNormalization(placeholder=head_cfg['mla_up_channels'], norm_cfg=norm_cfg),
                 BuildActivation(act_cfg),
                 nn.Conv2d(head_cfg['mla_up_channels'], head_cfg['mla_up_channels'], kernel_size=3, stride=1, padding=1, bias=False),
-                BuildNormalization(constructnormcfg(placeholder=head_cfg['mla_up_channels'], norm_cfg=norm_cfg)),
+                BuildNormalization(placeholder=head_cfg['mla_up_channels'], norm_cfg=norm_cfg),
                 BuildActivation(act_cfg),
                 nn.Upsample(scale_factor=head_cfg['scale_factor'], mode='bilinear', align_corners=align_corners)
             ))
@@ -175,7 +175,7 @@ class SETRMLA(BaseSegmentor):
                 layers.append(nn.Conv2d(decoder_cfg['in_channels'], decoder_cfg['out_channels'], kernel_size=kernel_size, stride=1, padding=int(kernel_size - 1) // 2, bias=False))
             else:
                 layers.append(nn.Conv2d(decoder_cfg['out_channels'], decoder_cfg['out_channels'], kernel_size=kernel_size, stride=1, padding=int(kernel_size - 1) // 2, bias=False))
-            layers.append(BuildNormalization(constructnormcfg(placeholder=decoder_cfg['out_channels'], norm_cfg=norm_cfg)))
+            layers.append(BuildNormalization(placeholder=decoder_cfg['out_channels'], norm_cfg=norm_cfg))
             layers.append(BuildActivation(act_cfg))
             layers.append(nn.Upsample(scale_factor=decoder_cfg['scale_factor'], mode='bilinear', align_corners=align_corners))
         layers.append(nn.Dropout2d(decoder_cfg['dropout']))

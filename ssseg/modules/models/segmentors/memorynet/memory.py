@@ -9,7 +9,7 @@ import torch.nn as nn
 import torch.nn.functional as F
 import torch.distributed as dist
 from ..base import SelfAttentionBlock
-from ...backbones import BuildActivation, BuildNormalization, constructnormcfg
+from ...backbones import BuildActivation, BuildNormalization
 
 
 '''FeaturesMemory'''
@@ -52,7 +52,7 @@ class FeaturesMemory(nn.Module):
                 self.self_attentions.append(self_attention)
             self.fuse_memory_conv = nn.Sequential(
                 nn.Conv2d(feats_channels * self.num_feats_per_cls, feats_channels, kernel_size=1, stride=1, padding=0, bias=False),
-                BuildNormalization(constructnormcfg(placeholder=feats_channels, norm_cfg=norm_cfg)),
+                BuildNormalization(placeholder=feats_channels, norm_cfg=norm_cfg),
                 BuildActivation(act_cfg),
             )
         else:
@@ -76,7 +76,7 @@ class FeaturesMemory(nn.Module):
         # whether need to fuse the contextual information within the input image
         self.bottleneck = nn.Sequential(
             nn.Conv2d(feats_channels * 2, out_channels, kernel_size=3, stride=1, padding=1, bias=False),
-            BuildNormalization(constructnormcfg(placeholder=out_channels, norm_cfg=norm_cfg)),
+            BuildNormalization(placeholder=out_channels, norm_cfg=norm_cfg),
             BuildActivation(act_cfg),
         )
         if use_context_within_image:
@@ -99,7 +99,7 @@ class FeaturesMemory(nn.Module):
             )
             self.bottleneck_ms = nn.Sequential(
                 nn.Conv2d(feats_channels * 2, out_channels, kernel_size=3, stride=1, padding=1, bias=False),
-                BuildNormalization(constructnormcfg(placeholder=out_channels, norm_cfg=norm_cfg)),
+                BuildNormalization(placeholder=out_channels, norm_cfg=norm_cfg),
                 BuildActivation(act_cfg),
             )
     '''forward'''

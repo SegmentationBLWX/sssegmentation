@@ -9,7 +9,7 @@ import torch.nn as nn
 import torch.nn.functional as F
 from mmcv.ops import PSAMask
 from ..base import BaseSegmentor
-from ...backbones import BuildActivation, BuildNormalization, constructnormcfg
+from ...backbones import BuildActivation, BuildNormalization
 
 
 '''PSANet'''
@@ -24,24 +24,24 @@ class PSANet(BaseSegmentor):
             self.cfg['head']['normalization_factor'] = mask_h * mask_w
         self.reduce = nn.Sequential(
             nn.Conv2d(head_cfg['in_channels'], head_cfg['feats_channels'], kernel_size=1, stride=1, padding=0, bias=False),
-            BuildNormalization(constructnormcfg(placeholder=head_cfg['feats_channels'], norm_cfg=norm_cfg)),
+            BuildNormalization(placeholder=head_cfg['feats_channels'], norm_cfg=norm_cfg),
             BuildActivation(act_cfg),
         )
         self.attention = nn.Sequential(
             nn.Conv2d(head_cfg['feats_channels'], head_cfg['feats_channels'], kernel_size=1, stride=1, padding=0, bias=False),
-            BuildNormalization(constructnormcfg(placeholder=head_cfg['feats_channels'], norm_cfg=norm_cfg)),
+            BuildNormalization(placeholder=head_cfg['feats_channels'], norm_cfg=norm_cfg),
             BuildActivation(act_cfg),
             nn.Conv2d(head_cfg['feats_channels'], mask_h * mask_w, kernel_size=1, stride=1, padding=0, bias=False),
         )
         if head_cfg['type'] == 'bi-direction':
             self.reduce_p = nn.Sequential(
                 nn.Conv2d(head_cfg['in_channels'], head_cfg['feats_channels'], kernel_size=1, stride=1, padding=0, bias=False),
-                BuildNormalization(constructnormcfg(placeholder=head_cfg['feats_channels'], norm_cfg=norm_cfg)),
+                BuildNormalization(placeholder=head_cfg['feats_channels'], norm_cfg=norm_cfg),
                 BuildActivation(act_cfg),
             )
             self.attention_p = nn.Sequential(
                 nn.Conv2d(head_cfg['feats_channels'], head_cfg['feats_channels'], kernel_size=1, stride=1, padding=0, bias=False),
-                BuildNormalization(constructnormcfg(placeholder=head_cfg['feats_channels'], norm_cfg=norm_cfg)),
+                BuildNormalization(placeholder=head_cfg['feats_channels'], norm_cfg=norm_cfg),
                 BuildActivation(act_cfg),
                 nn.Conv2d(head_cfg['feats_channels'], mask_h * mask_w, kernel_size=1, stride=1, padding=0, bias=False),
             )
@@ -53,13 +53,13 @@ class PSANet(BaseSegmentor):
                 self.psamask = PSAMask(head_cfg['type'], head_cfg['mask_size'])
         self.proj = nn.Sequential(
             nn.Conv2d(head_cfg['feats_channels'] * (2 if head_cfg['type'] == 'bi-direction' else 1), head_cfg['in_channels'], kernel_size=1, stride=1, padding=1, bias=False),
-            BuildNormalization(constructnormcfg(placeholder=head_cfg['in_channels'], norm_cfg=norm_cfg)),
+            BuildNormalization(placeholder=head_cfg['in_channels'], norm_cfg=norm_cfg),
             BuildActivation(act_cfg),
         )
         # build decoder
         self.decoder = nn.Sequential(
             nn.Conv2d(head_cfg['in_channels'] * 2, head_cfg['feats_channels'], kernel_size=3, stride=1, padding=1, bias=False),
-            BuildNormalization(constructnormcfg(placeholder=head_cfg['feats_channels'], norm_cfg=norm_cfg)),
+            BuildNormalization(placeholder=head_cfg['feats_channels'], norm_cfg=norm_cfg),
             BuildActivation(act_cfg),
             nn.Dropout2d(head_cfg['dropout']),
             nn.Conv2d(head_cfg['feats_channels'], cfg['num_classes'], kernel_size=1, stride=1, padding=0)

@@ -1,6 +1,6 @@
 '''SEGMENTOR_CFG for PointRend'''
 SEGMENTOR_CFG = {
-    'type': 'pointrend',
+    'type': 'PointRend',
     'num_classes': -1,
     'benchmark': True,
     'align_corners': False,

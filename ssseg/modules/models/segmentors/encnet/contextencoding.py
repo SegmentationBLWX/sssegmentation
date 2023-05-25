@@ -9,7 +9,7 @@ import torch
 import torch.nn as nn
 import torch.nn.functional as F
 from .encoding import Encoding
-from ...backbones import BuildActivation, BuildNormalization, constructnormcfg
+from ...backbones import BuildActivation, BuildNormalization
 
 
 '''ContextEncoding'''
@@ -18,14 +18,14 @@ class ContextEncoding(nn.Module):
         super(ContextEncoding, self).__init__()
         self.encoding_project = nn.Sequential(
             nn.Conv2d(in_channels, in_channels, kernel_size=1, stride=1, padding=0, bias=False),
-            BuildNormalization(constructnormcfg(placeholder=in_channels, norm_cfg=norm_cfg)),
+            BuildNormalization(placeholder=in_channels, norm_cfg=norm_cfg),
             BuildActivation(act_cfg),
         )
         encoding_norm_cfg = copy.deepcopy(norm_cfg)
         encoding_norm_cfg['type'] = encoding_norm_cfg['type'].replace('2d', '1d')
         self.encoding = nn.Sequential(
             Encoding(channels=in_channels, num_codes=num_codes),
-            BuildNormalization(constructnormcfg(placeholder=num_codes, norm_cfg=encoding_norm_cfg)),
+            BuildNormalization(placeholder=num_codes, norm_cfg=encoding_norm_cfg),
             BuildActivation(act_cfg),
         )
         self.fc = nn.Sequential(

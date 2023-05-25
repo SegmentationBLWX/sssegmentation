@@ -1,6 +1,6 @@
 '''SEGMENTOR_CFG for GCNet'''
 SEGMENTOR_CFG = {
-    'type': 'gcnet',
+    'type': 'GCNet',
     'num_classes': -1,
     'benchmark': True,
     'align_corners': False,

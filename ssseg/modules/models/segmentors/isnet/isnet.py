@@ -11,7 +11,7 @@ import torch.nn.functional as F
 from ..base import BaseSegmentor
 from .imagelevel import ImageLevelContext
 from .semanticlevel import SemanticLevelContext
-from ...backbones import BuildActivation, BuildNormalization, constructnormcfg
+from ...backbones import BuildActivation, BuildNormalization
 
 
 '''ISNet'''
@@ -22,7 +22,7 @@ class ISNet(BaseSegmentor):
         # build bottleneck
         self.bottleneck = nn.Sequential(
             nn.Conv2d(head_cfg['in_channels'], head_cfg['feats_channels'], kernel_size=3, stride=1, padding=1, bias=False),
-            BuildNormalization(constructnormcfg(placeholder=head_cfg['feats_channels'], norm_cfg=norm_cfg)),
+            BuildNormalization(placeholder=head_cfg['feats_channels'], norm_cfg=norm_cfg),
             BuildActivation(act_cfg),
         )
         # build image-level context module
@@ -47,7 +47,7 @@ class ISNet(BaseSegmentor):
         # build decoder
         self.decoder_stage1 = nn.Sequential(
             nn.Conv2d(head_cfg['feats_channels'], head_cfg['feats_channels'], kernel_size=1, stride=1, padding=0, bias=False),
-            BuildNormalization(constructnormcfg(placeholder=head_cfg['feats_channels'], norm_cfg=norm_cfg)),
+            BuildNormalization(placeholder=head_cfg['feats_channels'], norm_cfg=norm_cfg),
             BuildActivation(act_cfg),
             nn.Dropout2d(head_cfg['dropout']),
             nn.Conv2d(head_cfg['feats_channels'], cfg['num_classes'], kernel_size=1, stride=1, padding=0)
@@ -55,12 +55,12 @@ class ISNet(BaseSegmentor):
         if head_cfg['shortcut']['is_on']:
             self.shortcut = nn.Sequential(
                 nn.Conv2d(head_cfg['shortcut']['in_channels'], head_cfg['shortcut']['feats_channels'], kernel_size=1, stride=1, padding=0),
-                BuildNormalization(constructnormcfg(placeholder=head_cfg['shortcut']['feats_channels'], norm_cfg=norm_cfg)),
+                BuildNormalization(placeholder=head_cfg['shortcut']['feats_channels'], norm_cfg=norm_cfg),
                 BuildActivation(act_cfg),
             )
             self.decoder_stage2 = nn.Sequential(
                 nn.Conv2d(head_cfg['feats_channels'] + head_cfg['shortcut']['feats_channels'], head_cfg['feats_channels'], kernel_size=1, stride=1, padding=0, bias=False),
-                BuildNormalization(constructnormcfg(placeholder=head_cfg['feats_channels'], norm_cfg=norm_cfg)),
+                BuildNormalization(placeholder=head_cfg['feats_channels'], norm_cfg=norm_cfg),
                 BuildActivation(act_cfg),
                 nn.Dropout2d(head_cfg['dropout']),
                 nn.Conv2d(head_cfg['feats_channels'], cfg['num_classes'], kernel_size=1, stride=1, padding=0)

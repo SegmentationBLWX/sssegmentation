@@ -10,7 +10,7 @@ import torch.nn as nn
 import torch.nn.functional as F
 from ..base import BaseSegmentor
 from .aspp import DepthwiseSeparableASPP
-from ...backbones import BuildActivation, BuildNormalization, DepthwiseSeparableConv2d, constructnormcfg
+from ...backbones import BuildActivation, BuildNormalization, DepthwiseSeparableConv2d
 
 
 '''Deeplabv3plus'''
@@ -31,7 +31,7 @@ class Deeplabv3Plus(BaseSegmentor):
         # build shortcut
         self.shortcut = nn.Sequential(
             nn.Conv2d(head_cfg['in_channels'][0], head_cfg['shortcut_channels'], kernel_size=1, stride=1, padding=0, bias=False),
-            BuildNormalization(constructnormcfg(placeholder=head_cfg['shortcut_channels'], norm_cfg=norm_cfg)),
+            BuildNormalization(placeholder=head_cfg['shortcut_channels'], norm_cfg=norm_cfg),
             BuildActivation(act_cfg),
         )
         # build decoder

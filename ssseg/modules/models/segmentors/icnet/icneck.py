@@ -7,7 +7,7 @@ Author:
 import torch
 import torch.nn as nn
 import torch.nn.functional as F
-from ...backbones import BuildNormalization, BuildActivation, constructnormcfg
+from ...backbones import BuildNormalization, BuildActivation
 
 
 '''CascadeFeatureFusion'''
@@ -17,12 +17,12 @@ class CascadeFeatureFusion(nn.Module):
         self.align_corners = align_corners
         self.conv_low = nn.Sequential(
             nn.Conv2d(low_channels, out_channels, kernel_size=3, stride=1, padding=2, dilation=2, bias=False),
-            BuildNormalization(constructnormcfg(placeholder=out_channels, norm_cfg=norm_cfg)),
+            BuildNormalization(placeholder=out_channels, norm_cfg=norm_cfg),
             BuildActivation(act_cfg),
         )
         self.conv_high = nn.Sequential(
             nn.Conv2d(high_channels, out_channels, kernel_size=1, stride=1, padding=0, bias=False),
-            BuildNormalization(constructnormcfg(placeholder=out_channels, norm_cfg=norm_cfg)),
+            BuildNormalization(placeholder=out_channels, norm_cfg=norm_cfg),
             BuildActivation(act_cfg),
         )
     '''forward'''

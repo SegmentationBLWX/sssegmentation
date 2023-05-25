@@ -1,6 +1,6 @@
 '''SEGMENTOR_CFG for DANet'''
 SEGMENTOR_CFG = {
-    'type': 'danet',
+    'type': 'DANet',
     'num_classes': -1,
     'benchmark': True,
     'align_corners': False,

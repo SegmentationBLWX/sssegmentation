@@ -1,6 +1,6 @@
-'''SEGMENTOR_CFG for SegFormer'''
+'''SEGMENTOR_CFG for Segformer'''
 SEGMENTOR_CFG = {
-    'type': 'segformer',
+    'type': 'Segformer',
     'num_classes': -1,
     'benchmark': True,
     'align_corners': False,

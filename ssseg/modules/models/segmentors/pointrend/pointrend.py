@@ -10,7 +10,7 @@ import torch.nn as nn
 import torch.nn.functional as F
 from ..base import FPN, BaseSegmentor
 from mmcv.ops import point_sample as PointSample
-from ...backbones import BuildActivation, BuildNormalization, constructnormcfg
+from ...backbones import BuildActivation, BuildNormalization
 
 
 '''PointRend'''
@@ -33,7 +33,7 @@ class PointRend(BaseSegmentor):
             for k in range(head_length):
                 scale_head.append(nn.Sequential(
                     nn.Conv2d(head_cfg['feats_channels'] if k == 0 else head_cfg['scale_head_channels'], head_cfg['scale_head_channels'], kernel_size=3, stride=1, padding=1, bias=False),
-                    BuildNormalization(constructnormcfg(placeholder=head_cfg['scale_head_channels'], norm_cfg=norm_cfg)),
+                    BuildNormalization(placeholder=head_cfg['scale_head_channels'], norm_cfg=norm_cfg),
                     BuildActivation(act_cfg),
                 ))
                 if feature_stride_list[i] != feature_stride_list[0]:
@@ -49,7 +49,7 @@ class PointRend(BaseSegmentor):
         for k in range(self.num_fcs):
             fc = nn.Sequential(
                 nn.Conv1d(fc_in_channels, fc_channels, kernel_size=1, stride=1, padding=0, bias=False),
-                BuildNormalization(constructnormcfg(placeholder=fc_channels, norm_cfg=norm_cfg)),
+                BuildNormalization(placeholder=fc_channels, norm_cfg=norm_cfg),
                 BuildActivation(act_cfg),
             )
             self.fcs.append(fc)

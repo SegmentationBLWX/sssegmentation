@@ -1,6 +1,6 @@
 '''SEGMENTOR_CFG for SemanticFPN'''
 SEGMENTOR_CFG = {
-    'type': 'semanticfpn',
+    'type': 'SemanticFPN',
     'num_classes': -1,
     'benchmark': True,
     'align_corners': False,

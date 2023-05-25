@@ -1,6 +1,6 @@
 '''SEGMENTOR_CFG for CCNet'''
 SEGMENTOR_CFG = {
-    'type': 'ccnet',
+    'type': 'CCNet',
     'num_classes': -1,
     'benchmark': True,
     'align_corners': False,

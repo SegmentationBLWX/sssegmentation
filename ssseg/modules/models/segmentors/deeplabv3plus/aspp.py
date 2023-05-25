@@ -7,7 +7,7 @@ Author:
 import torch
 import torch.nn as nn
 import torch.nn.functional as F
-from ...backbones import BuildActivation, DepthwiseSeparableConv2d, BuildNormalization, constructnormcfg
+from ...backbones import BuildActivation, DepthwiseSeparableConv2d, BuildNormalization
 
 
 '''DepthwiseSeparableASPP'''
@@ -20,7 +20,7 @@ class DepthwiseSeparableASPP(nn.Module):
             if dilation == 1:
                 branch = nn.Sequential(
                     nn.Conv2d(in_channels, out_channels, kernel_size=1, stride=1, padding=0, dilation=dilation, bias=False),
-                    BuildNormalization(constructnormcfg(placeholder=out_channels, norm_cfg=norm_cfg)),
+                    BuildNormalization(placeholder=out_channels, norm_cfg=norm_cfg),
                     BuildActivation(act_cfg),
                 )
             else:
@@ -29,12 +29,12 @@ class DepthwiseSeparableASPP(nn.Module):
         self.global_branch = nn.Sequential(
             nn.AdaptiveAvgPool2d((1, 1)),
             nn.Conv2d(in_channels, out_channels, kernel_size=1, stride=1, padding=0, bias=False),
-            BuildNormalization(constructnormcfg(placeholder=out_channels, norm_cfg=norm_cfg)),
+            BuildNormalization(placeholder=out_channels, norm_cfg=norm_cfg),
             BuildActivation(act_cfg),
         )
         self.bottleneck = nn.Sequential(
             nn.Conv2d(out_channels * (len(dilations) + 1), out_channels, kernel_size=3, stride=1, padding=1, bias=False),
-            BuildNormalization(constructnormcfg(placeholder=out_channels, norm_cfg=norm_cfg)),
+            BuildNormalization(placeholder=out_channels, norm_cfg=norm_cfg),
             BuildActivation(act_cfg),
         )
         self.in_channels = in_channels

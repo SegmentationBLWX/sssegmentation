@@ -10,7 +10,7 @@ import torch.nn as nn
 import torch.nn.functional as F
 from ..base import BaseSegmentor
 from ..pspnet import PyramidPoolingModule
-from ...backbones import BuildActivation, BuildNormalization, constructnormcfg
+from ...backbones import BuildActivation, BuildNormalization
 
 
 '''UPerNet'''
@@ -40,7 +40,7 @@ class UPerNet(BaseSegmentor):
         for in_channels in head_cfg['in_channels_list'][:-1]:
             self.lateral_convs.append(nn.Sequential(
                 nn.Conv2d(in_channels, head_cfg['feats_channels'], kernel_size=1, stride=1, padding=0, bias=False),
-                BuildNormalization(constructnormcfg(placeholder=head_cfg['feats_channels'], norm_cfg=norm_cfg)),
+                BuildNormalization(placeholder=head_cfg['feats_channels'], norm_cfg=norm_cfg),
                 BuildActivation(act_cfg_copy),
             ))
         # build fpn convs
@@ -48,13 +48,13 @@ class UPerNet(BaseSegmentor):
         for in_channels in [head_cfg['feats_channels'],] * len(self.lateral_convs):
             self.fpn_convs.append(nn.Sequential(
                 nn.Conv2d(in_channels, head_cfg['feats_channels'], kernel_size=3, stride=1, padding=1, bias=False),
-                BuildNormalization(constructnormcfg(placeholder=head_cfg['feats_channels'], norm_cfg=norm_cfg)),
+                BuildNormalization(placeholder=head_cfg['feats_channels'], norm_cfg=norm_cfg),
                 BuildActivation(act_cfg_copy),
             ))
         # build decoder
         self.decoder = nn.Sequential(
             nn.Conv2d(head_cfg['feats_channels'] * len(head_cfg['in_channels_list']), head_cfg['feats_channels'], kernel_size=3, stride=1, padding=1, bias=False),
-            BuildNormalization(constructnormcfg(placeholder=head_cfg['feats_channels'], norm_cfg=norm_cfg)),
+            BuildNormalization(placeholder=head_cfg['feats_channels'], norm_cfg=norm_cfg),
             BuildActivation(act_cfg),
             nn.Dropout2d(head_cfg['dropout']),
             nn.Conv2d(head_cfg['feats_channels'], cfg['num_classes'], kernel_size=1, stride=1, padding=0)

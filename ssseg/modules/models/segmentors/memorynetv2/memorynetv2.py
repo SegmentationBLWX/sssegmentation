@@ -13,7 +13,7 @@ from ..base import BaseSegmentor
 from ..base import SelfAttentionBlock
 from .memoryv2 import FeaturesMemoryV2
 from ..pspnet import PyramidPoolingModule
-from ...backbones import BuildActivation, BuildNormalization, constructnormcfg
+from ...backbones import BuildActivation, BuildNormalization
 
 
 '''MemoryNetV2'''
@@ -49,7 +49,7 @@ class MemoryNetV2(BaseSegmentor):
                 )
         self.bottleneck = nn.Sequential(
             nn.Conv2d(head_cfg['in_channels'], head_cfg['feats_channels'], kernel_size=3, stride=1, padding=1, bias=False),
-            BuildNormalization(constructnormcfg(placeholder=head_cfg['feats_channels'], norm_cfg=norm_cfg)),
+            BuildNormalization(placeholder=head_cfg['feats_channels'], norm_cfg=norm_cfg),
             BuildActivation(act_cfg),
         )
         self.memory_module = FeaturesMemoryV2(
@@ -71,14 +71,14 @@ class MemoryNetV2(BaseSegmentor):
             for in_channels in head_cfg['fpn']['in_channels_list'][:-1]:
                 self.lateral_convs.append(nn.Sequential(
                     nn.Conv2d(in_channels, head_cfg['fpn']['feats_channels'], kernel_size=1, stride=1, padding=0, bias=False),
-                    BuildNormalization(constructnormcfg(placeholder=head_cfg['fpn']['feats_channels'], norm_cfg=norm_cfg)),
+                    BuildNormalization(placeholder=head_cfg['fpn']['feats_channels'], norm_cfg=norm_cfg),
                     BuildActivation(act_cfg_copy),
                 ))
             self.fpn_convs = nn.ModuleList()
             for in_channels in [head_cfg['fpn']['feats_channels'],] * len(self.lateral_convs):
                 self.fpn_convs.append(nn.Sequential(
                     nn.Conv2d(in_channels, head_cfg['fpn']['out_channels'], kernel_size=3, stride=1, padding=1, bias=False),
-                    BuildNormalization(constructnormcfg(placeholder=head_cfg['fpn']['out_channels'], norm_cfg=norm_cfg)),
+                    BuildNormalization(placeholder=head_cfg['fpn']['out_channels'], norm_cfg=norm_cfg),
                     BuildActivation(act_cfg_copy),
                 ))
         # build decoder
@@ -87,7 +87,7 @@ class MemoryNetV2(BaseSegmentor):
             setattr(self, f'decoder_{key}', nn.Sequential())
             decoder = getattr(self, f'decoder_{key}')
             decoder.add_module('conv1', nn.Conv2d(value['in_channels'], value['out_channels'], kernel_size=value.get('kernel_size', 1), stride=1, padding=value.get('padding', 0), bias=False))
-            decoder.add_module('bn1', BuildNormalization(constructnormcfg(placeholder=value['out_channels'], norm_cfg=norm_cfg)))
+            decoder.add_module('bn1', BuildNormalization(placeholder=value['out_channels'], norm_cfg=norm_cfg))
             decoder.add_module('act1', BuildActivation(act_cfg))
             decoder.add_module('dropout', nn.Dropout2d(value['dropout']))
             decoder.add_module('conv2', nn.Conv2d(value['out_channels'], cfg['num_classes'], kernel_size=1, stride=1, padding=0))

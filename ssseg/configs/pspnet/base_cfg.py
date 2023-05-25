@@ -1,6 +1,6 @@
 '''SEGMENTOR_CFG for PSPNet'''
 SEGMENTOR_CFG = {
-    'type': 'pspnet',
+    'type': 'PSPNet',
     'num_classes': -1,
     'benchmark': True,
     'align_corners': False,

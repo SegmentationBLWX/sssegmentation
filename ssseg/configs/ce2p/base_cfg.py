@@ -1,6 +1,6 @@
 '''SEGMENTOR_CFG for CE2P'''
 SEGMENTOR_CFG = {
-    'type': 'ce2p',
+    'type': 'CE2P',
     'benchmark': True,
     'num_classes': -1,
     'align_corners': False,

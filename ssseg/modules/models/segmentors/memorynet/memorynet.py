@@ -13,7 +13,7 @@ from ..deeplabv3 import ASPP
 from ..base import BaseSegmentor
 from .memory import FeaturesMemory
 from ..pspnet import PyramidPoolingModule
-from ...backbones import BuildActivation, BuildNormalization, constructnormcfg
+from ...backbones import BuildActivation, BuildNormalization
 
 
 '''MemoryNet'''
@@ -27,13 +27,13 @@ class MemoryNet(BaseSegmentor):
             for in_channels in head_cfg['norm_cfg']['in_channels_list']:
                 norm_cfg_copy = head_cfg['norm_cfg'].copy()
                 norm_cfg_copy.pop('in_channels_list')
-                norm_layer = BuildNormalization(constructnormcfg(placeholder=in_channels, norm_cfg=norm_cfg_copy))
+                norm_layer = BuildNormalization(placeholder=in_channels, norm_cfg=norm_cfg_copy)
                 self.norm_layers.append(norm_layer)
         # build memory
         if head_cfg['downsample_backbone']['stride'] > 1:
             self.downsample_backbone = nn.Sequential(
                 nn.Conv2d(head_cfg['in_channels'], head_cfg['in_channels'], **head_cfg['downsample_backbone']),
-                BuildNormalization(constructnormcfg(placeholder=head_cfg['in_channels'], norm_cfg=norm_cfg)),
+                BuildNormalization(placeholder=head_cfg['in_channels'], norm_cfg=norm_cfg),
                 BuildActivation(act_cfg),
             )
         context_within_image_cfg = head_cfg['context_within_image']
@@ -53,7 +53,7 @@ class MemoryNet(BaseSegmentor):
             self.context_within_image_module = supported_context_modules[context_within_image_cfg['type']](**cwi_cfg)
         self.bottleneck = nn.Sequential(
             nn.Conv2d(head_cfg['in_channels'], head_cfg['feats_channels'], kernel_size=3, stride=1, padding=1, bias=False),
-            BuildNormalization(constructnormcfg(placeholder=head_cfg['feats_channels'], norm_cfg=norm_cfg)),
+            BuildNormalization(placeholder=head_cfg['feats_channels'], norm_cfg=norm_cfg),
             BuildActivation(act_cfg),
         )
         self.memory_module = FeaturesMemory(
@@ -70,14 +70,14 @@ class MemoryNet(BaseSegmentor):
         # build decoder
         self.decoder_stage1 = nn.Sequential(
             nn.Conv2d(head_cfg['feats_channels'], head_cfg['feats_channels'], kernel_size=1, stride=1, padding=0, bias=False),
-            BuildNormalization(constructnormcfg(placeholder=head_cfg['feats_channels'], norm_cfg=norm_cfg)),
+            BuildNormalization(placeholder=head_cfg['feats_channels'], norm_cfg=norm_cfg),
             BuildActivation(act_cfg),
             nn.Dropout2d(head_cfg['dropout']),
             nn.Conv2d(head_cfg['feats_channels'], cfg['num_classes'], kernel_size=1, stride=1, padding=0),
         )
         self.decoder_stage2 = nn.Sequential(
             nn.Conv2d(head_cfg['out_channels'], head_cfg['out_channels'], kernel_size=1, stride=1, padding=0, bias=False),
-            BuildNormalization(constructnormcfg(placeholder=head_cfg['out_channels'], norm_cfg=norm_cfg)),
+            BuildNormalization(placeholder=head_cfg['out_channels'], norm_cfg=norm_cfg),
             BuildActivation(act_cfg),
             nn.Dropout2d(head_cfg['dropout']),
             nn.Conv2d(head_cfg['out_channels'], cfg['num_classes'], kernel_size=1, stride=1, padding=0)

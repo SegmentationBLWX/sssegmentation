@@ -1,6 +1,6 @@
 '''SEGMENTOR_CFG for LRASPPNet'''
 SEGMENTOR_CFG = {
-    'type': 'lrasppnet',
+    'type': 'LRASPPNet',
     'num_classes': -1,
     'benchmark': True,
     'align_corners': False,

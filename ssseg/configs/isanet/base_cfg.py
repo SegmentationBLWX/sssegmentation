@@ -1,6 +1,6 @@
 '''SEGMENTOR_CFG for ISANet'''
 SEGMENTOR_CFG = {
-    'type': 'isanet',
+    'type': 'ISANet',
     'num_classes': -1,
     'benchmark': True,
     'align_corners': False,

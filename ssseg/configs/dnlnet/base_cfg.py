@@ -2,7 +2,7 @@
 SEGMENTOR_CFG = {
     'num_classes': -1,
     'benchmark': True,
-    'type': 'dnlnet',
+    'type': 'DNLNet',
     'align_corners': False,
     'backend': 'nccl',
     'work_dir': 'ckpts',

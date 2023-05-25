@@ -1,9 +1,9 @@
-'''SEGMENTOR_CFG for Deeplabv3plus'''
+'''SEGMENTOR_CFG for Deeplabv3Plus'''
 SEGMENTOR_CFG = {
     'benchmark': True,
     'num_classes': -1,
     'align_corners': False,
-    'type': 'deeplabv3plus',
+    'type': 'Deeplabv3Plus',
     'backend': 'nccl',
     'work_dir': 'ckpts',
     'logfilepath': '',

@@ -7,7 +7,7 @@ Author:
 import torch
 import torch.nn as nn
 from ..base import BaseSegmentor
-from ...backbones import BuildActivation, BuildNormalization, DepthwiseSeparableConv2d, constructnormcfg
+from ...backbones import BuildActivation, BuildNormalization, DepthwiseSeparableConv2d
 
 
 '''FCN'''
@@ -22,7 +22,7 @@ class FCN(BaseSegmentor):
                 conv = nn.Conv2d(head_cfg['in_channels'], head_cfg['feats_channels'], kernel_size=3, stride=1, padding=1, bias=False)
             else:
                 conv = nn.Conv2d(head_cfg['feats_channels'], head_cfg['feats_channels'], kernel_size=3, stride=1, padding=1, bias=False)
-            norm = BuildNormalization(constructnormcfg(placeholder=head_cfg['feats_channels'], norm_cfg=norm_cfg))
+            norm = BuildNormalization(placeholder=head_cfg['feats_channels'], norm_cfg=norm_cfg)
             act = BuildActivation(act_cfg)
             convs += [conv, norm, act]
         convs.append(nn.Dropout2d(head_cfg['dropout']))

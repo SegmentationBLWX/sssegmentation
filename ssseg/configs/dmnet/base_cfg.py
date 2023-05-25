@@ -1,6 +1,6 @@
 '''SEGMENTOR_CFG for DMNet'''
 SEGMENTOR_CFG = {
-    'type': 'dmnet',
+    'type': 'DMNet',
     'num_classes': -1,
     'benchmark': True,
     'align_corners': False,

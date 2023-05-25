@@ -9,7 +9,7 @@ import torch
 import torch.nn as nn
 import torch.nn.functional as F
 from ..pspnet import PyramidPoolingModule
-from ...backbones import BuildNormalization, BuildActivation, BuildBackbone, constructnormcfg
+from ...backbones import BuildNormalization, BuildActivation, BuildBackbone
 
 
 '''ICNet-Encoder'''
@@ -33,23 +33,23 @@ class ICNetEncoder(nn.Module):
         )
         self.conv_sub1 = nn.Sequential(
             nn.Conv2d(in_channels, light_branch_middle_channels, kernel_size=3, stride=2, padding=1, bias=False),
-            BuildNormalization(constructnormcfg(placeholder=light_branch_middle_channels, norm_cfg=norm_cfg)),
+            BuildNormalization(placeholder=light_branch_middle_channels, norm_cfg=norm_cfg),
             BuildActivation(act_cfg),
             nn.Conv2d(light_branch_middle_channels, light_branch_middle_channels, kernel_size=3, stride=2, padding=1, bias=False),
-            BuildNormalization(constructnormcfg(placeholder=light_branch_middle_channels, norm_cfg=norm_cfg)),
+            BuildNormalization(placeholder=light_branch_middle_channels, norm_cfg=norm_cfg),
             BuildActivation(act_cfg),
             nn.Conv2d(light_branch_middle_channels, out_channels_list[0], kernel_size=3, stride=2, padding=1, bias=False),
-            BuildNormalization(constructnormcfg(placeholder=out_channels_list[0], norm_cfg=norm_cfg)),
+            BuildNormalization(placeholder=out_channels_list[0], norm_cfg=norm_cfg),
             BuildActivation(act_cfg),
         )
         self.conv_sub2 = nn.Sequential(
             nn.Conv2d(layer_channels_list[0], out_channels_list[1], kernel_size=1, stride=1, padding=0, bias=False),
-            BuildNormalization(constructnormcfg(placeholder=out_channels_list[1], norm_cfg=norm_cfg)),
+            BuildNormalization(placeholder=out_channels_list[1], norm_cfg=norm_cfg),
             BuildActivation(act_cfg),
         )
         self.conv_sub4 = nn.Sequential(
             nn.Conv2d(psp_out_channels, out_channels_list[2], kernel_size=1, stride=1, padding=0, bias=False),
-            BuildNormalization(constructnormcfg(placeholder=out_channels_list[2], norm_cfg=norm_cfg)),
+            BuildNormalization(placeholder=out_channels_list[2], norm_cfg=norm_cfg),
             BuildActivation(act_cfg),
         )
     '''forward'''

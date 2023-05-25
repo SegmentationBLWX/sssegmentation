@@ -1,6 +1,6 @@
 '''SEGMENTOR_CFG for ANNNet'''
 SEGMENTOR_CFG = {
-    'type': 'annnet',
+    'type': 'ANNNet',
     'num_classes': -1,
     'benchmark': True,
     'align_corners': False,

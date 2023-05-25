@@ -1,6 +1,6 @@
 '''SEGMENTOR_CFG for FastSCNN'''
 SEGMENTOR_CFG = {
-    'type': 'depthwiseseparablefcn',
+    'type': 'DepthwiseSeparableFCN',
     'num_classes': -1,
     'benchmark': True,
     'align_corners': False,

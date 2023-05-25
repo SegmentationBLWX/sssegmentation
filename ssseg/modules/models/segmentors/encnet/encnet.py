@@ -9,7 +9,7 @@ import torch.nn as nn
 import torch.nn.functional as F
 from ..base import BaseSegmentor
 from .contextencoding import ContextEncoding
-from ...backbones import BuildActivation, BuildNormalization, constructnormcfg
+from ...backbones import BuildActivation, BuildNormalization
 
 
 '''ENCNet'''
@@ -21,7 +21,7 @@ class ENCNet(BaseSegmentor):
         # --base structurs
         self.bottleneck = nn.Sequential(
             nn.Conv2d(head_cfg['in_channels_list'][-1], head_cfg['feats_channels'], kernel_size=3, stride=1, padding=1, bias=False),
-            BuildNormalization(constructnormcfg(placeholder=head_cfg['feats_channels'], norm_cfg=norm_cfg)),
+            BuildNormalization(placeholder=head_cfg['feats_channels'], norm_cfg=norm_cfg),
             BuildActivation(act_cfg),
         )
         self.enc_module = ContextEncoding(
@@ -37,12 +37,12 @@ class ENCNet(BaseSegmentor):
             for in_channels in head_cfg['in_channels_list'][:-1]:
                 self.lateral_convs.append(
                     nn.Conv2d(in_channels, head_cfg['feats_channels'], kernel_size=1, stride=1, padding=0),
-                    BuildNormalization(constructnormcfg(placeholder=head_cfg['feats_channels'], norm_cfg=norm_cfg)),
+                    BuildNormalization(placeholder=head_cfg['feats_channels'], norm_cfg=norm_cfg),
                     BuildActivation(act_cfg),
                 )
             self.fusion = nn.Sequential(
                 nn.Conv2d(len(head_cfg['in_channels_list']) * head_cfg['feats_channels'], head_cfg['feats_channels'], kernel_size=3, stride=1, padding=1),
-                BuildNormalization(constructnormcfg(placeholder=head_cfg['feats_channels'], norm_cfg=norm_cfg)),
+                BuildNormalization(placeholder=head_cfg['feats_channels'], norm_cfg=norm_cfg),
                 BuildActivation(act_cfg),
             )
         if extra_cfg['use_se_loss']:

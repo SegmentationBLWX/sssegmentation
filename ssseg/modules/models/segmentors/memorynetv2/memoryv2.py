@@ -10,7 +10,7 @@ import torch.nn as nn
 import torch.nn.functional as F
 import torch.distributed as dist
 from ..base import SelfAttentionBlock
-from ...backbones import BuildActivation, BuildNormalization, constructnormcfg
+from ...backbones import BuildActivation, BuildNormalization
 
 
 '''FeaturesMemoryV2'''
@@ -28,7 +28,7 @@ class FeaturesMemoryV2(nn.Module):
         if downsample_before_sa:
             self.downsample_before_sa = nn.Sequential(
                 nn.Conv2d(feats_channels, feats_channels, kernel_size=3, stride=2, padding=1, bias=False),
-                BuildNormalization(constructnormcfg(placeholder=feats_channels, norm_cfg=norm_cfg)),
+                BuildNormalization(placeholder=feats_channels, norm_cfg=norm_cfg),
                 BuildActivation(act_cfg),
             )
         # init memory
@@ -56,7 +56,7 @@ class FeaturesMemoryV2(nn.Module):
         # bottleneck used to fuse feats and selected_memory
         self.bottleneck = nn.Sequential(
             nn.Conv2d(feats_channels * 2, out_channels, kernel_size=3, stride=1, padding=1, bias=False),
-            BuildNormalization(constructnormcfg(placeholder=out_channels, norm_cfg=norm_cfg)),
+            BuildNormalization(placeholder=out_channels, norm_cfg=norm_cfg),
             BuildActivation(act_cfg),
         )
     '''forward'''

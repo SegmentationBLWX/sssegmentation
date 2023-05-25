@@ -7,7 +7,7 @@ Author:
 import torch
 import torch.nn as nn
 from abc import ABCMeta
-from ...backbones import BuildActivation, BuildNormalization, constructnormcfg
+from ...backbones import BuildActivation, BuildNormalization
 
 
 '''_NonLocalNd'''
@@ -25,7 +25,7 @@ class _NonLocalNd(nn.Module, metaclass=ABCMeta):
         )
         self.conv_out = nn.Sequential(
             nn.Conv2d(self.inter_channels, self.in_channels, kernel_size=1, stride=1, padding=0, bias=False),
-            BuildNormalization(constructnormcfg(placeholder=self.in_channels, norm_cfg=norm_cfg)),
+            BuildNormalization(placeholder=self.in_channels, norm_cfg=norm_cfg),
         )
         if self.mode != 'gaussian':
             self.theta = nn.Sequential(

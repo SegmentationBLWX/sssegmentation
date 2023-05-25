@@ -1,6 +1,6 @@
 '''SEGMENTOR_CFG for ICNet'''
 SEGMENTOR_CFG = {
-    'type': 'icnet',
+    'type': 'ICNet',
     'num_classes': -1,
     'benchmark': True,
     'align_corners': False,

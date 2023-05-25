@@ -39,41 +39,19 @@ from .fcn import FCN, DepthwiseSeparableFCN
 
 '''BuildSegmentor'''
 def BuildSegmentor(segmentor_cfg, mode):
-    supported_segmentors = {
-        'fcn': FCN,
-        'ce2p': CE2P,
-        'icnet': ICNet,
-        'isnet': ISNet,
-        'ccnet': CCNet,
-        'danet': DANet,
-        'gcnet': GCNet,
-        'dmnet': DMNet,
-        'isanet': ISANet,
-        'encnet': ENCNet,
-        'apcnet': APCNet,
-        'emanet': EMANet,
-        'pspnet': PSPNet,
-        'psanet': PSANet,
-        'ocrnet': OCRNet,
-        'dnlnet': DNLNet,
-        'annnet': ANNNet,
-        'setrup': SETRUP,
-        'setrmla': SETRMLA,
-        'fastfcn': FastFCN,
-        'upernet': UPerNet,
-        'segformer': Segformer,
-        'memorynet': MemoryNet,
-        'pointrend': PointRend,
-        'deeplabv3': Deeplabv3,
-        'lrasppnet': LRASPPNet,
-        'maskformer': MaskFormer,
-        'memorynetv2': MemoryNetV2,
-        'semanticfpn': SemanticFPN,
-        'nonlocalnet': NonLocalNet,
-        'deeplabv3plus': Deeplabv3Plus,
-        'depthwiseseparablefcn': DepthwiseSeparableFCN,
-    }
-    selected_segmentor = supported_segmentors[segmentor_cfg['type']]
     segmentor_cfg = copy.deepcopy(segmentor_cfg)
-    segmentor_cfg.pop('type')
-    return selected_segmentor(segmentor_cfg, mode=mode)
+    # supported segmentors
+    supported_segmentors = {
+        'FCN': FCN, 'CE2P': CE2P, 'ICNet': ICNet, 'ISNet': ISNet, 'CCNet': CCNet, 'DANet': DANet,
+        'GCNet': GCNet, 'DMNet': DMNet, 'ISANet': ISANet, 'ENCNet': ENCNet, 'APCNet': APCNet,
+        'EMANet': EMANet, 'PSPNet': PSPNet, 'PSANet': PSANet, 'OCRNet': OCRNet, 'DNLNet': DNLNet,
+        'ANNNet': ANNNet, 'SETRUP': SETRUP, 'SETRMLA': SETRMLA, 'FastFCN': FastFCN, 'UPerNet': UPerNet,
+        'Segformer': Segformer, 'MemoryNet': MemoryNet, 'PointRend': PointRend, 'Deeplabv3': Deeplabv3,
+        'LRASPPNet': LRASPPNet, 'MaskFormer': MaskFormer, 'MemoryNetV2': MemoryNetV2, 'SemanticFPN': SemanticFPN,
+        'NonLocalNet': NonLocalNet, 'Deeplabv3Plus': Deeplabv3Plus, 'DepthwiseSeparableFCN': DepthwiseSeparableFCN,
+    }
+    # build segmentor
+    segmentor_type = segmentor_cfg.pop('type')
+    segmentor = supported_segmentors[segmentor_type](cfg=segmentor_cfg, mode=mode)
+    # return
+    return segmentor
