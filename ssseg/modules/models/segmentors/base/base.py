@@ -185,7 +185,7 @@ class BaseSegmentor(nn.Module):
         prediction_format = prediction_format.view(-1, prediction_format.size(-1))
         # calculate the loss
         loss = 0
-        for key, value in loss_cfg.items():
+        for key in list(loss_cfg.keys()):
             if (key in ['BinaryCrossEntropyLoss']) and hasattr(self, 'onehot'):
                 prediction_iter = prediction_format
                 target_iter = self.onehot(target, self.cfg['num_classes'])
@@ -195,6 +195,7 @@ class BaseSegmentor(nn.Module):
             else:
                 prediction_iter = prediction_format
                 target_iter = target.view(-1)
-            loss += BuildLoss(key)(**value)(prediction=prediction_iter, target=target_iter)
+            loss_cfg['type'] = key
+            loss += BuildLoss(loss_cfg)(prediction=prediction_iter, target=target_iter)
         # return the loss
         return loss
