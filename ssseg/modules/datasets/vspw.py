@@ -27,11 +27,12 @@ class VSPWDataset(BaseDataset):
         'blackboard', 'tissue', 'screen_or_television', 'computer', 'printer', 'Mobile_phone', 'keyboard', 'other_electronic_product', 'fruit', 
         'food', 'instrument', 'train'
     ]
+    palette = BaseDataset.randompalette(num_classes)
     clsid2label = {0: 255, 254: 255}
     for i in range(1, num_classes+1): clsid2label[i] = i - 1
-    assert num_classes == len(classnames)
+    assert num_classes == len(classnames) and num_classes == len(palette)
     def __init__(self, mode, logger_handle, dataset_cfg):
-        super(VSPWDataset, self).__init__(mode, logger_handle, dataset_cfg)
+        super(VSPWDataset, self).__init__(mode=mode, logger_handle=logger_handle, dataset_cfg=dataset_cfg)
         # obtain the dirs
         rootdir = dataset_cfg['rootdir']
         self.image_dir = os.path.join(rootdir, 'data')
@@ -46,31 +47,28 @@ class VSPWDataset(BaseDataset):
                 if mode == 'TRAIN':
                     self.imageids.append(dirname)
                 else:
-                    for imgname in os.listdir(os.path.join(self.image_dir, dirname, 'origin')):
-                        imageid = f'{dirname}/origin/{imgname}'
-                        annid = f'{dirname}/mask/{imgname.replace(".jpg", ".png")}'
+                    for imagename in os.listdir(os.path.join(self.image_dir, dirname, 'origin')):
+                        imageid = f'{dirname}/origin/{imagename}'
+                        annid = f'{dirname}/mask/{imagename.replace(".jpg", ".png")}'
                         self.imageids.append(imageid)
                         self.annids.append(annid)
-    '''pull item'''
+    '''getitem'''
     def __getitem__(self, index):
+        # imageid
+        imageid = self.imageids[index % len(self.imageids)]
+        # read sample_meta
         if self.mode == 'TRAIN':
-            imagedir = os.path.join(self.image_dir, self.imageids[index], 'origin')
-            imgname = random.choice(os.listdir(imagedir))
-            imagepath = os.path.join(imagedir, imgname)
-            annpath = os.path.join(self.ann_dir, self.imageids[index], f'mask/{imgname.replace(".jpg", ".png")}')
+            imagedir = os.path.join(self.image_dir, imageid, 'origin')
+            imagename = random.choice(os.listdir(imagedir))
+            imagepath = os.path.join(imagedir, imagename)
+            annpath = os.path.join(self.ann_dir, imageid, f'mask/{imagename.replace(".jpg", ".png")}')
         else:
-            imagepath = os.path.join(self.image_dir, self.imageids[index])
-            annpath = os.path.join(self.ann_dir, self.annids[index])
-        if self.dataset_cfg['set'] == 'test': self.dataset_cfg['with_ann'] = False
-        sample = self.read(imagepath, annpath, self.dataset_cfg.get('with_ann', True))
-        sample.update({'id': self.imageids[index]})
-        if self.mode == 'TRAIN':
-            sample = self.synctransform(sample, 'without_totensor_normalize_pad')
-            sample['edge'] = self.generateedge(sample['segmentation'].copy())
-            sample = self.synctransform(sample, 'only_totensor_normalize_pad')
-        else:
-            sample = self.synctransform(sample, 'all')
-        return sample
-    '''length'''
-    def __len__(self):
-        return len(self.imageids)
+            imagepath = os.path.join(self.image_dir, imageid)
+            annpath = os.path.join(self.ann_dir, self.annids[index % len(self.imageids)])
+        sample_meta = self.read(imagepath, annpath)
+        # add image id
+        sample_meta.update({'id': imageid})
+        # synctransforms
+        sample_meta = self.synctransforms(sample_meta)
+        # return
+        return sample_meta

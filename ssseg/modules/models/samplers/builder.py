@@ -10,10 +10,13 @@ from .ohempixelsampler import OHEMPixelSampler
 
 '''BuildPixelSampler'''
 def BuildPixelSampler(sampler_cfg):
-    supported_samplers = {
-        'ohem': OHEMPixelSampler,
-    }
-    selected_sampler = supported_samplers[sampler_cfg['type']]
     sampler_cfg = copy.deepcopy(sampler_cfg)
-    sampler_cfg.pop('type')
-    return selected_sampler(**sampler_cfg)
+    # supported samplers
+    supported_samplers = {
+        'OHEMPixelSampler': OHEMPixelSampler,
+    }
+    # build sampler
+    sampler_type = sampler_cfg.pop('type')
+    sampler = supported_samplers[sampler_type](**sampler_cfg)
+    # return
+    return sampler

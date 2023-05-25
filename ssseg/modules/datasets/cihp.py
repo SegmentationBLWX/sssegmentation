@@ -17,9 +17,14 @@ class CIHPDataset(BaseDataset):
         'coat', 'socks', 'pants', 'torsoSkin', 'scarf', 'skirt', 'face', 
         'leftArm', 'rightArm', 'leftLeg', 'rightLeg', 'leftShoe', 'rightShoe'
     ]
-    assert num_classes == len(classnames)
+    palette = [
+        (0, 0, 0), (128, 0, 0), (255, 0, 0), (0, 85, 0), (170, 0, 51), (255, 85, 0), (0, 0, 85),
+        (0, 119, 221), (85, 85, 0), (0, 85, 85), (85, 51, 0), (52, 86, 128), (0, 128, 0), (0, 0, 255), 
+        (51, 170, 221), (0, 255, 255), (85, 255, 170), (170, 255, 85), (255, 255, 0), (255, 170, 0)
+    ]
+    assert num_classes == len(classnames) and num_classes == len(palette)
     def __init__(self, mode, logger_handle, dataset_cfg):
-        super(CIHPDataset, self).__init__(mode, logger_handle, dataset_cfg)
+        super(CIHPDataset, self).__init__(mode=mode, logger_handle=logger_handle, dataset_cfg=dataset_cfg)
         # obtain the dirs
         rootdir = dataset_cfg['rootdir']
         setmap_dict = {'train': 'Training', 'val': 'Validation', 'test': 'Testing'}
@@ -29,20 +34,3 @@ class CIHPDataset(BaseDataset):
         df = pd.read_csv(os.path.join(rootdir, setmap_dict[dataset_cfg['set']], dataset_cfg['set']+'_id.txt'), names=['imageids'])
         self.imageids = df['imageids'].values
         self.imageids = [str(_id).zfill(7) for _id in self.imageids]
-    '''pull item'''
-    def __getitem__(self, index):
-        imageid = self.imageids[index]
-        imagepath = os.path.join(self.image_dir, imageid+'.jpg')
-        annpath = os.path.join(self.ann_dir, imageid+'.png')
-        sample = self.read(imagepath, annpath, self.dataset_cfg.get('with_ann', True))
-        sample.update({'id': imageid})
-        if self.mode == 'TRAIN':
-            sample = self.synctransform(sample, 'without_totensor_normalize_pad')
-            sample['edge'] = self.generateedge(sample['segmentation'].copy())
-            sample = self.synctransform(sample, 'only_totensor_normalize_pad')
-        else:
-            sample = self.synctransform(sample, 'all')
-        return sample
-    '''length'''
-    def __len__(self):
-        return len(self.imageids)

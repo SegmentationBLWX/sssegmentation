@@ -11,10 +11,10 @@ from collections import OrderedDict
 
 '''Evaluation'''
 class Evaluation():
-    def __init__(self, predictions, groundtruths, num_classes, ignore_index=-1, nan_to_num=None, beta=1.0):
+    def __init__(self, seg_preds, seg_targets, num_classes, ignore_index=-1, nan_to_num=None, beta=1.0):
         total_area_intersect, total_area_union, total_area_pred_label, total_area_label = self.totalintersectandunion(
-            results=predictions,
-            gt_seg_maps=groundtruths,
+            results=seg_preds,
+            gt_seg_maps=seg_targets,
             num_classes=num_classes,
             ignore_index=ignore_index
         )

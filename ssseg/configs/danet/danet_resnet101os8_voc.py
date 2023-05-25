@@ -1,35 +1,19 @@
 '''danet_resnet101os8_voc'''
-import os
-from .base_cfg import *
+import copy
+from .base_cfg import SEGMENTOR_CFG
+from .._base_ import DATASET_CFG_VOCAUG_512x512, DATALOADER_CFG_BS16
 
 
+# deepcopy
+SEGMENTOR_CFG = copy.deepcopy(SEGMENTOR_CFG)
 # modify dataset config
-DATASET_CFG = DATASET_CFG.copy()
-DATASET_CFG.update({
-    'type': 'voc',
-    'rootdir': os.path.join(os.getcwd(), 'VOCdevkit/VOC2012'),
-})
-DATASET_CFG['train']['set'] = 'trainaug'
+SEGMENTOR_CFG['dataset'] = DATASET_CFG_VOCAUG_512x512.copy()
 # modify dataloader config
-DATALOADER_CFG = DATALOADER_CFG.copy()
-# modify optimizer config
-OPTIMIZER_CFG = OPTIMIZER_CFG.copy()
+SEGMENTOR_CFG['dataloader'] = DATALOADER_CFG_BS16.copy()
 # modify scheduler config
-SCHEDULER_CFG = SCHEDULER_CFG.copy()
-SCHEDULER_CFG.update({
-    'max_epochs': 60,
-})
-# modify losses config
-LOSSES_CFG = LOSSES_CFG.copy()
-# modify segmentor config
-SEGMENTOR_CFG = SEGMENTOR_CFG.copy()
-SEGMENTOR_CFG.update({
-    'num_classes': 21,
-})
-# modify inference config
-INFERENCE_CFG = INFERENCE_CFG.copy()
-# modify common config
-COMMON_CFG = COMMON_CFG.copy()
-COMMON_CFG['work_dir'] = 'danet_resnet101os8_voc'
-COMMON_CFG['logfilepath'] = 'danet_resnet101os8_voc/danet_resnet101os8_voc.log'
-COMMON_CFG['resultsavepath'] = 'danet_resnet101os8_voc/danet_resnet101os8_voc_results.pkl'
+SEGMENTOR_CFG['scheduler']['max_epochs'] = 60
+# modify other segmentor configs
+SEGMENTOR_CFG['num_classes'] = 21
+SEGMENTOR_CFG['work_dir'] = 'danet_resnet101os8_voc'
+SEGMENTOR_CFG['logfilepath'] = 'danet_resnet101os8_voc/danet_resnet101os8_voc.log'
+SEGMENTOR_CFG['resultsavepath'] = 'danet_resnet101os8_voc/danet_resnet101os8_voc_results.pkl'

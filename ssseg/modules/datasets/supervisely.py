@@ -13,9 +13,10 @@ from .base import BaseDataset
 class SuperviselyDataset(BaseDataset):
     num_classes = 2
     classnames = ['__background__', 'person']
-    assert num_classes == len(classnames)
+    palette = [(0, 0, 0), (255, 0, 0)]
+    assert num_classes == len(classnames) and num_classes == len(palette)
     def __init__(self, mode, logger_handle, dataset_cfg):
-        super(SuperviselyDataset, self).__init__(mode, logger_handle, dataset_cfg)
+        super(SuperviselyDataset, self).__init__(mode=mode, logger_handle=logger_handle, dataset_cfg=dataset_cfg)
         # obtain the dirs
         rootdir = dataset_cfg['rootdir']
         self.image_dir = os.path.join(rootdir, 'Images', dataset_cfg['set'])
@@ -24,22 +25,18 @@ class SuperviselyDataset(BaseDataset):
         df = pd.read_csv(os.path.join(rootdir, dataset_cfg['set']+'.txt'), names=['imageids'])
         self.imageids = df['imageids'].values
         self.imageids = [str(_id) for _id in self.imageids]
-    '''pull item'''
+    '''getitem'''
     def __getitem__(self, index):
-        imageid = self.imageids[index]
-        imagepath = os.path.join(self.image_dir, imageid+'.jpg')
-        annpath = os.path.join(self.ann_dir, imageid+'.png')
-        sample = self.read(imagepath, annpath, self.dataset_cfg.get('with_ann', True))
-        sample.update({'id': imageid})
-        if self.mode == 'TRAIN':
-            sample['segmentation'][sample['segmentation'] == 255] = 1.
-            sample = self.synctransform(sample, 'without_totensor_normalize_pad')
-            sample['edge'] = self.generateedge(sample['segmentation'].copy())
-            sample = self.synctransform(sample, 'only_totensor_normalize_pad')
-        else:
-            sample['groundtruth'][sample['groundtruth'] == 255] = 1.
-            sample = self.synctransform(sample, 'all')
-        return sample
-    '''length'''
-    def __len__(self):
-        return len(self.imageids)
+        # imageid
+        imageid = self.imageids[index % len(self.imageids)]
+        # read sample_meta
+        imagepath = os.path.join(self.image_dir, f'{imageid}{self.image_ext}')
+        annpath = os.path.join(self.ann_dir, f'{imageid}{self.ann_ext}')
+        sample_meta = self.read(imagepath, annpath)
+        sample_meta['seg_target'][sample_meta['seg_target'] == 255] = 1.
+        # add image id
+        sample_meta.update({'id': imageid})
+        # synctransforms
+        sample_meta = self.synctransforms(sample_meta)
+        # return
+        return sample_meta

@@ -17,9 +17,14 @@ class DarkZurichDataset(BaseDataset):
         'traffic_sign', 'vegetation', 'terrain', 'sky', 'person', 'rider', 'car', 
         'truck', 'bus', 'train', 'motorcycle', 'bicycle'
     ]
-    assert num_classes == len(classnames)
+    palette = [
+        (128, 64, 128), (244, 35, 232), (70, 70, 70), (102, 102, 156), (190, 153, 153), (153, 153, 153), (250, 170, 30), (220, 220, 0),
+        (107, 142, 35), (152, 251, 152), (70, 130, 180), (220, 20, 60), (255, 0, 0), (0, 0, 142), (0, 0, 70), (0, 60, 100),
+        (0, 80, 100), (0, 0, 230), (119, 11, 32)
+    ]
+    assert num_classes == len(classnames) and num_classes == len(palette)
     def __init__(self, mode, logger_handle, dataset_cfg):
-        super(DarkZurichDataset, self).__init__(mode, logger_handle, dataset_cfg)
+        super(DarkZurichDataset, self).__init__(mode=mode, logger_handle=logger_handle, dataset_cfg=dataset_cfg)
         assert dataset_cfg['set'] in ['val'], 'only support testing on DarkZurichDataset'
         # obtain the dirs
         rootdir = dataset_cfg['rootdir']
@@ -28,21 +33,6 @@ class DarkZurichDataset(BaseDataset):
         # obatin imageids
         df = pd.read_csv(os.path.join(rootdir, 'lists_file_names/val_filenames.txt'), names=['imageids'])
         self.imageids = df['imageids'].values
-        self.imageids = [str(_id) for _id in self.imageids]
-    '''pull item'''
-    def __getitem__(self, index):
-        imageid = self.imageids[index].split('/')[-1]
-        imagepath = os.path.join(self.image_dir, f'{imageid}_rgb_anon.png')
-        annpath = os.path.join(self.ann_dir, f'{imageid}_gt_labelTrainIds.png')
-        sample = self.read(imagepath, annpath, self.dataset_cfg.get('with_ann', True))
-        sample.update({'id': imageid})
-        if self.mode == 'TRAIN':
-            sample = self.synctransform(sample, 'without_totensor_normalize_pad')
-            sample['edge'] = self.generateedge(sample['segmentation'].copy())
-            sample = self.synctransform(sample, 'only_totensor_normalize_pad')
-        else:
-            sample = self.synctransform(sample, 'all')
-        return sample
-    '''length'''
-    def __len__(self):
-        return len(self.imageids)
+        self.imageids = [str(_id).split('/')[-1] for _id in self.imageids]
+        self.ann_ext = '_gt_labelTrainIds.png'
+        self.image_ext = '_rgb_anon.png'

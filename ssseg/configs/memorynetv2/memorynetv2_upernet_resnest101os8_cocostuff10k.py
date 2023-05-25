@@ -1,52 +1,28 @@
 '''memorynetv2_upernet_resnest101os8_cocostuff10k'''
-import os
-from .base_cfg import *
+import copy
+from .base_cfg import SEGMENTOR_CFG
+from .._base_ import DATASET_CFG_COCOStuff10k_512x512, DATALOADER_CFG_BS32
 
 
+# deepcopy
+SEGMENTOR_CFG = copy.deepcopy(SEGMENTOR_CFG)
 # modify dataset config
-DATASET_CFG = DATASET_CFG.copy()
-DATASET_CFG.update({
-    'type': 'cocostuff10k',
-    'rootdir': os.path.join(os.getcwd(), 'COCOStuff10k'),
-})
-DATASET_CFG['test']['set'] = 'test'
+SEGMENTOR_CFG['dataset'] = DATASET_CFG_COCOStuff10k_512x512.copy()
 # modify dataloader config
-DATALOADER_CFG = DATALOADER_CFG.copy()
-DATALOADER_CFG['train'].update({
-    'batch_size': 32,
-})
-# modify optimizer config
-OPTIMIZER_CFG = {
-    'type': 'sgd',
-    'lr': 0.001,
-    'momentum': 0.9,
-    'weight_decay': 5e-4,
-    'params_rules': {},
-}
+SEGMENTOR_CFG['dataloader'] = DATALOADER_CFG_BS32.copy()
 # modify scheduler config
-SCHEDULER_CFG = SCHEDULER_CFG.copy()
-SCHEDULER_CFG.update({
-    'max_epochs': 150,
-    'min_lr': 1e-4,
-})
-# modify losses config
-LOSSES_CFG = LOSSES_CFG.copy()
-# modify segmentor config
-SEGMENTOR_CFG = SEGMENTOR_CFG.copy()
-SEGMENTOR_CFG.update({
-    'num_classes': 182,
-    'backbone': {
-        'type': 'resnest101',
-        'series': 'resnest',
-        'pretrained': True,
-        'outstride': 8,
-        'selected_indices': (0, 1, 2, 3),
-    },
-})
+SEGMENTOR_CFG['scheduler']['max_epochs'] = 150
+SEGMENTOR_CFG['scheduler']['min_lr'] = 1e-4
+SEGMENTOR_CFG['scheduler']['optimizer'] = {
+    'type': 'sgd', 'lr': 0.001, 'momentum': 0.9, 'weight_decay': 5e-4, 'params_rules': {},
+}
+# modify other segmentor configs
+SEGMENTOR_CFG['num_classes'] = 182
+SEGMENTOR_CFG['backbone'] = {
+    'type': 'resnest101', 'series': 'resnest', 'pretrained': True, 'outstride': 8, 'selected_indices': (0, 1, 2, 3),
+}
 SEGMENTOR_CFG['head']['fpn'] = {
-    'in_channels_list': [256, 512, 1024, 2048],
-    'feats_channels': 1024,
-    'out_channels': 512,
+    'in_channels_list': [256, 512, 1024, 2048], 'feats_channels': 1024, 'out_channels': 512,
 }
 SEGMENTOR_CFG['head']['decoder'] = {
     'pr': {'in_channels': 512, 'out_channels': 512, 'dropout': 0.1},
@@ -56,12 +32,17 @@ SEGMENTOR_CFG['head']['decoder'] = {
 SEGMENTOR_CFG['head']['context_within_image']['type'] = 'ppm'
 SEGMENTOR_CFG['head']['context_within_image']['is_on'] = True
 SEGMENTOR_CFG['head']['context_within_image']['use_self_attention'] = False
+SEGMENTOR_CFG['work_dir'] = 'memorynetv2_upernet_resnest101os8_cocostuff10k'
+SEGMENTOR_CFG['logfilepath'] = 'memorynetv2_upernet_resnest101os8_cocostuff10k/memorynetv2_upernet_resnest101os8_cocostuff10k.log'
+SEGMENTOR_CFG['resultsavepath'] = 'memorynetv2_upernet_resnest101os8_cocostuff10k/memorynetv2_upernet_resnest101os8_cocostuff10k_results.pkl'
+
+
 # modify inference config
 # --single-scale
-INFERENCE_CFG = INFERENCE_CFG.copy()
+SEGMENTOR_CFG['inference'] = SEGMENTOR_CFG['inference'].copy()
 # --multi-scale
 '''
-INFERENCE_CFG = {
+SEGMENTOR_CFG['inference'] = {
     'mode': 'whole',
     'opts': {}, 
     'tricks': {
@@ -71,8 +52,3 @@ INFERENCE_CFG = {
     }
 }
 '''
-# modify common config
-COMMON_CFG = COMMON_CFG.copy()
-COMMON_CFG['work_dir'] = 'memorynetv2_upernet_resnest101os8_cocostuff10k'
-COMMON_CFG['logfilepath'] = 'memorynetv2_upernet_resnest101os8_cocostuff10k/memorynetv2_upernet_resnest101os8_cocostuff10k.log'
-COMMON_CFG['resultsavepath'] = 'memorynetv2_upernet_resnest101os8_cocostuff10k/memorynetv2_upernet_resnest101os8_cocostuff10k_results.pkl'

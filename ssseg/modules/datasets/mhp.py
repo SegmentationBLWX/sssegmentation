@@ -18,9 +18,14 @@ class MHPv1Dataset(BaseDataset):
         'dress', 'belt', 'left shoe', 'right shoe', 'face', 'left leg', 'right leg',
         'left arm', 'right arm', 'bag', 'scarf', 'torso skin'
     ]
-    assert num_classes == len(classnames)
+    palette = [
+        (0, 0, 0), (128, 0, 0), (255, 0, 0), (0, 85, 0), (170, 0, 51), (255, 85, 0), (0, 0, 85),
+        (0, 119, 221), (85, 85, 0), (0, 85, 85), (85, 51, 0), (52, 86, 128), (0, 128, 0), (0, 0, 255), 
+        (51, 170, 221), (0, 255, 255), (85, 255, 170), (170, 255, 85), (255, 255, 0), (255, 170, 0)
+    ]
+    assert num_classes == len(classnames) and num_classes == len(palette)
     def __init__(self, mode, logger_handle, dataset_cfg):
-        super(MHPv1Dataset, self).__init__(mode, logger_handle, dataset_cfg)
+        super(MHPv1Dataset, self).__init__(mode=mode, logger_handle=logger_handle, dataset_cfg=dataset_cfg)
         # obtain the dirs
         rootdir = dataset_cfg['rootdir']
         self.image_dir = os.path.join(rootdir, 'images')
@@ -29,30 +34,27 @@ class MHPv1Dataset(BaseDataset):
         df = pd.read_csv(os.path.join(rootdir, dataset_cfg['set']+'_list.txt'), names=['imageids'])
         self.imageids = df['imageids'].values
         self.imageids = [str(_id) for _id in self.imageids]
-    '''pull item'''
+    '''getitem'''
     def __getitem__(self, index):
-        imageid = self.imageids[index]
+        # imageid
+        imageid = self.imageids[index % len(self.imageids)]
+        # read sample_meta
         imagepath = os.path.join(self.image_dir, imageid)
         annpath = os.path.join(self.ann_dir, imageid.replace('.jpg', '_*'))
-        sample = self.read(imagepath, annpath, False)
-        if self.dataset_cfg.get('with_ann', True):
-            segmentation = sample['segmentation']
-            for path in glob.glob(annpath):
-                seg_per_image = cv2.imread(path, cv2.IMREAD_GRAYSCALE)
-                segmentation[seg_per_image != 0] = seg_per_image[seg_per_image != 0]
-            if 'segmentation' in sample: sample['segmentation'] = segmentation
-            if 'groundtruth' in sample: sample['groundtruth'] = segmentation
-        sample.update({'id': imageid})
-        if self.mode == 'TRAIN':
-            sample = self.synctransform(sample, 'without_totensor_normalize_pad')
-            sample['edge'] = self.generateedge(sample['segmentation'].copy())
-            sample = self.synctransform(sample, 'only_totensor_normalize_pad')
-        else:
-            sample = self.synctransform(sample, 'all')
-        return sample
-    '''length'''
-    def __len__(self):
-        return len(self.imageids)
+        image = cv2.imread(imagepath)
+        seg_target = np.zeros((image.shape[0], image.shape[1]))
+        for path in glob.glob(annpath):
+            seg_per_image = cv2.imread(path, cv2.IMREAD_GRAYSCALE)
+            seg_target[seg_per_image != 0] = seg_per_image[seg_per_image != 0]
+        sample_meta = {
+            'image': image, 'seg_target': seg_target, 'width': image.shape[1], 'height': image.shape[0],
+        }
+        # add image id
+        sample_meta.update({'id': imageid})
+        # synctransforms
+        sample_meta = self.synctransforms(sample_meta)
+        # return
+        return sample_meta
 
 
 '''MHPv2Dataset'''
@@ -68,9 +70,10 @@ class MHPv2Dataset(BaseDataset):
         'gloves', 'scarf', 'umbrella', 'wallet/purse', 'watch', 'wristband', 'tie', 'other-accessaries',
         'other-upper-body-clothes', 'other-lower-body-clothes'
     ]
-    assert num_classes == len(classnames)
+    palette = BaseDataset.randompalette(num_classes)
+    assert num_classes == len(classnames) and num_classes == len(palette)
     def __init__(self, mode, logger_handle, dataset_cfg):
-        super(MHPv2Dataset, self).__init__(mode, logger_handle, dataset_cfg)
+        super(MHPv2Dataset, self).__init__(mode=mode, logger_handle=logger_handle, dataset_cfg=dataset_cfg)
         # obtain the dirs
         rootdir = dataset_cfg['rootdir']
         self.image_dir = os.path.join(rootdir, dataset_cfg['set'], 'images')
@@ -79,27 +82,24 @@ class MHPv2Dataset(BaseDataset):
         df = pd.read_csv(os.path.join(rootdir, 'list', dataset_cfg['set']+'.txt'), names=['imageids'])
         self.imageids = df['imageids'].values
         self.imageids = [str(_id) for _id in self.imageids]
-    '''pull item'''
+    '''getitem'''
     def __getitem__(self, index):
-        imageid = self.imageids[index]
-        imagepath = os.path.join(self.image_dir, imageid+'.jpg')
+        # imageid
+        imageid = self.imageids[index % len(self.imageids)]
+        # read sample_meta
+        imagepath = os.path.join(self.image_dir, f'{imageid}{self.image_ext}')
         annpath = os.path.join(self.ann_dir, imageid + '_*')
-        sample = self.read(imagepath, annpath, False)
-        if self.dataset_cfg.get('with_ann', True):
-            segmentation = sample['segmentation']
-            for path in glob.glob(annpath):
-                seg_per_image = cv2.imread(path, cv2.IMREAD_GRAYSCALE)
-                segmentation[seg_per_image != 0] = seg_per_image[seg_per_image != 0]
-            if 'segmentation' in sample: sample['segmentation'] = segmentation
-            if 'groundtruth' in sample: sample['groundtruth'] = segmentation
-        sample.update({'id': imageid})
-        if self.mode == 'TRAIN':
-            sample = self.synctransform(sample, 'without_totensor_normalize_pad')
-            sample['edge'] = self.generateedge(sample['segmentation'].copy())
-            sample = self.synctransform(sample, 'only_totensor_normalize_pad')
-        else:
-            sample = self.synctransform(sample, 'all')
-        return sample
-    '''length'''
-    def __len__(self):
-        return len(self.imageids)
+        image = cv2.imread(imagepath)
+        seg_target = np.zeros((image.shape[0], image.shape[1]))
+        for path in glob.glob(annpath):
+            seg_per_image = cv2.imread(path, cv2.IMREAD_GRAYSCALE)
+            seg_target[seg_per_image != 0] = seg_per_image[seg_per_image != 0]
+        sample_meta = {
+            'image': image, 'seg_target': seg_target, 'width': image.shape[1], 'height': image.shape[0],
+        }
+        # add image id
+        sample_meta.update({'id': imageid})
+        # synctransforms
+        sample_meta = self.synctransforms(sample_meta)
+        # return
+        return sample_meta

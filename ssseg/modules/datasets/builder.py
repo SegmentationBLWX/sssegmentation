@@ -4,6 +4,7 @@ Function:
 Author:
     Zhenchao Jin
 '''
+import copy
 from .lip import LIPDataset
 from .atr import ATRDataset
 from .hrf import HRFDataset
@@ -26,38 +27,24 @@ from .voc import VOCDataset, PascalContextDataset, PascalContext59Dataset
 
 '''BuildDataset'''
 def BuildDataset(mode, logger_handle, dataset_cfg):
+    dataset_cfg = copy.deepcopy(dataset_cfg)
     # supported datasets
     supported_datasets = {
-        'voc': VOCDataset,
-        'lip': LIPDataset,
-        'atr': ATRDataset,
-        'hrf': HRFDataset,
-        'base': BaseDataset,
-        'coco': COCODataset,
-        'vspw': VSPWDataset,
-        'cihp': CIHPDataset,
-        'mhpv1': MHPv1Dataset,
-        'mhpv2': MHPv2Dataset,
-        'stare': STAREDataset,
-        'drive': DRIVEDataset,
-        'ade20k': ADE20kDataset,
-        'chasedb1': ChaseDB1Dataset,
-        'cocostuff': COCOStuffDataset,
-        'sbushadow': SBUShadowDataset,
-        'cityscapes': CityScapesDataset,
-        'darkzurich': DarkZurichDataset,
-        'supervisely': SuperviselyDataset,
-        'cocostuff10k': COCOStuff10kDataset,
-        'pascalcontext': PascalContextDataset,
-        'pascalcontext59': PascalContext59Dataset,
-        'nighttimedriving': NighttimeDrivingDataset,
+        'VOCDataset': VOCDataset, 'LIPDataset': LIPDataset, 'ATRDataset': ATRDataset, 'HRFDataset': HRFDataset,
+        'BaseDataset': BaseDataset, 'COCODataset': COCODataset, 'VSPWDataset': VSPWDataset, 'CIHPDataset': CIHPDataset,
+        'MHPv1Dataset': MHPv1Dataset, 'MHPv2Dataset': MHPv2Dataset, 'STAREDataset': STAREDataset, 'DRIVEDataset': DRIVEDataset,
+        'ADE20kDataset': ADE20kDataset, 'ChaseDB1Dataset': ChaseDB1Dataset, 'COCOStuffDataset': COCOStuffDataset, 
+        'SBUShadowDataset': SBUShadowDataset, 'CityScapesDataset': CityScapesDataset, 'DarkZurichDataset': DarkZurichDataset, 
+        'SuperviselyDataset': SuperviselyDataset, 'COCOStuff10kDataset': COCOStuff10kDataset, 'PascalContextDataset': PascalContextDataset, 
+        'PascalContext59Dataset': PascalContext59Dataset, 'NighttimeDrivingDataset': NighttimeDrivingDataset,
     }
-    # parse
-    cfg = dataset_cfg[mode.lower()].copy()
-    if 'train' in dataset_cfg: dataset_cfg.pop('train')
-    if 'test' in dataset_cfg: dataset_cfg.pop('test')
-    dataset_cfg.update(cfg)
-    assert dataset_cfg['type'] in supported_datasets, 'unsupport dataset type %s' % dataset_cfg['type']
-    # return
+    # build dataset
+    train_cfg = dataset_cfg.pop('train')
+    test_cfg = dataset_cfg.pop('test')
+    if mode == 'TRAIN':
+        dataset_cfg.update(train_cfg)
+    else:
+        dataset_cfg.update(test_cfg)
     dataset = supported_datasets[dataset_cfg['type']](mode=mode, logger_handle=logger_handle, dataset_cfg=dataset_cfg)
+    # return
     return dataset

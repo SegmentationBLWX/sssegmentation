@@ -19,10 +19,15 @@ class COCODataset(BaseDataset):
         'cat', 'chair', 'cow', 'diningtable', 'dog', 'horse', 'motorcycle', 'person', 
         'potted-plant', 'sheep', 'sofa', 'train', 'tv'
     ]
+    palette = [
+        (0, 0, 0), (128, 0, 0), (0, 128, 0), (128, 128, 0), (0, 0, 128), (128, 0, 128), (0, 128, 128), (128, 128, 128), (64, 0, 0),
+        (192, 0, 0), (64, 128, 0), (192, 128, 0), (64, 0, 128), (192, 0, 128), (64, 128, 128), (192, 128, 128), (0, 64, 0),
+        (128, 64, 0), (0, 192, 0), (128, 192, 0), (0, 64, 128)
+    ]
     valid_clsids = [0, 5, 2, 16, 9, 44, 6, 3, 17, 62, 21, 67, 18, 19, 4, 1, 64, 20, 63, 7, 72]
-    assert num_classes == len(classnames)
+    assert num_classes == len(classnames) and num_classes == len(palette)
     def __init__(self, mode, logger_handle, dataset_cfg):
-        super(COCODataset, self).__init__(mode, logger_handle, dataset_cfg)
+        super(COCODataset, self).__init__(mode=mode, logger_handle=logger_handle, dataset_cfg=dataset_cfg)
         from pycocotools import mask
         from pycocotools.coco import COCO
         # obtain the dirs
@@ -38,40 +43,29 @@ class COCODataset(BaseDataset):
             imageids_bar.set_description('Preprocess imageid %s' % imageid)
             target = self.coco_api.loadAnns(self.coco_api.getAnnIds(imgIds=imageid))
             image_meta = self.coco_api.loadImgs(imageid)[0]
-            segmentation = self.getsegmentation(target, image_meta['height'], image_meta['width'])
-            if (segmentation > 0).sum() > 1000:
+            seg_target = self.getsegtarget(target, image_meta['height'], image_meta['width'])
+            if (seg_target > 0).sum() > 1000:
                 self.imageids.append(imageid)
-    '''pull item'''
+    '''getitem'''
     def __getitem__(self, index):
-        imageid = self.imageids[index]
+        # imageid
+        imageid = self.imageids[index % len(self.imageids)]
         image_meta = self.coco_api.loadImgs(imageid)[0]
         imagepath = os.path.join(self.image_dir, image_meta['file_name'])
         # read image
         image = cv2.imread(imagepath)
         # read annotation
-        if self.dataset_cfg.get('with_ann', True):
-            target = self.coco_api.loadAnns(self.coco_api.getAnnIds(imgIds=imageid))
-            segmentation = self.getsegmentation(target, image_meta['height'], image_meta['width'])
-        else:
-            segmentation = np.zeros((image.shape[0], image.shape[1]))
-        # construct sample
-        sample = {'image': image, 'segmentation': segmentation, 'width': image.shape[1], 'height': image.shape[0]}
-        if self.mode == 'TEST':
-            sample.update({'groundtruth': segmentation.copy()})
-        sample.update({'id': imageid})
-        # preprocess and return sample
-        if self.mode == 'TRAIN':
-            sample = self.synctransform(sample, 'without_totensor_normalize_pad')
-            sample['edge'] = self.generateedge(sample['segmentation'].copy())
-            sample = self.synctransform(sample, 'only_totensor_normalize_pad')
-        else:
-            sample = self.synctransform(sample, 'all')
-        return sample
-    '''length'''
-    def __len__(self):
-        return len(self.imageids)
-    '''get segmentation mask'''
-    def getsegmentation(self, target, height, width):
+        seg_target = self.coco_api.loadAnns(self.coco_api.getAnnIds(imgIds=imageid))
+        seg_target = self.getsegtarget(seg_target, image_meta['height'], image_meta['width'])
+        # construct sample_meta
+        sample_meta = {'image': image, 'seg_target': seg_target, 'width': image.shape[1], 'height': image.shape[0]}
+        sample_meta.update({'id': imageid})
+        # synctransforms
+        sample_meta = self.synctransforms(sample_meta)
+        # return
+        return sample_meta
+    '''getsegtarget'''
+    def getsegtarget(self, target, height, width):
         segmentation = np.zeros((height, width), dtype=np.uint8)
         for instance in target:
             rle = self.cocomask_api.frPyObjects(instance['segmentation'], height, width)
@@ -107,11 +101,12 @@ class COCOStuff10kDataset(BaseDataset):
         'tent', 'textile-other', 'towel', 'tree', 'vegetable', 'wall-brick', 'wall-concrete', 'wall-other', 'wall-panel',
         'wall-stone', 'wall-tile', 'wall-wood', 'water-other', 'waterdrops', 'window-blind', 'window-other', 'wood'
     ]
+    palette = BaseDataset.randompalette(num_classes)
     clsid2label = {0: 255}
     for i in range(1, num_classes+1): clsid2label[i] = i - 1
-    assert num_classes == len(classnames)
+    assert num_classes == len(classnames) and num_classes == len(palette)
     def __init__(self, mode, logger_handle, dataset_cfg):
-        super(COCOStuff10kDataset, self).__init__(mode, logger_handle, dataset_cfg)
+        super(COCOStuff10kDataset, self).__init__(mode=mode, logger_handle=logger_handle, dataset_cfg=dataset_cfg)
         # obtain the dirs
         rootdir = dataset_cfg['rootdir']
         self.image_dir = os.path.join(rootdir, 'images')
@@ -120,23 +115,8 @@ class COCOStuff10kDataset(BaseDataset):
         df = pd.read_csv(os.path.join(rootdir, 'imageLists', dataset_cfg['set']+'.txt'), names=['imageids'])
         self.imageids = df['imageids'].values
         self.imageids = [str(_id) for _id in self.imageids]
-    '''pull item'''
-    def __getitem__(self, index):
-        imageid = self.imageids[index]
-        imagepath = os.path.join(self.image_dir, imageid+'.jpg')
-        annpath = os.path.join(self.ann_dir, imageid+'.mat')
-        sample = self.read(imagepath, annpath, self.dataset_cfg.get('with_ann', True))
-        sample.update({'id': imageid})
-        if self.mode == 'TRAIN':
-            sample = self.synctransform(sample, 'without_totensor_normalize_pad')
-            sample['edge'] = self.generateedge(sample['segmentation'].copy())
-            sample = self.synctransform(sample, 'only_totensor_normalize_pad')
-        else:
-            sample = self.synctransform(sample, 'all')
-        return sample
-    '''length'''
-    def __len__(self):
-        return len(self.imageids)
+        self.ann_ext = '.mat'
+        self.image_ext = '.jpg'
 
 
 '''COCOStuffDataset'''
@@ -162,11 +142,12 @@ class COCOStuffDataset(BaseDataset):
         'tent', 'textile-other', 'towel', 'tree', 'vegetable', 'wall-brick', 'wall-concrete', 'wall-other', 'wall-panel',
         'wall-stone', 'wall-tile', 'wall-wood', 'water-other', 'waterdrops', 'window-blind', 'window-other', 'wood'
     ]
+    palette = BaseDataset.randompalette(num_classes)
     clsid2label = {0: 255}
     for i in range(1, num_classes+1): clsid2label[i] = i - 1
-    assert num_classes == len(classnames)
+    assert num_classes == len(classnames) and num_classes == len(palette)
     def __init__(self, mode, logger_handle, dataset_cfg):
-        super(COCOStuffDataset, self).__init__(mode, logger_handle, dataset_cfg)
+        super(COCOStuffDataset, self).__init__(mode=mode, logger_handle=logger_handle, dataset_cfg=dataset_cfg)
         from pycocotools import mask
         from pycocotools.coco import COCO
         # obtain the dirs
@@ -176,21 +157,18 @@ class COCOStuffDataset(BaseDataset):
         self.annfilepath = os.path.join(rootdir, f"annotations/stuff_{dataset_cfg['set']}2017.json")
         self.coco_api = COCO(self.annfilepath)
         self.imageids = list(self.coco_api.imgs.keys())
-    '''pull item'''
+    '''getitem'''
     def __getitem__(self, index):
-        imageid = self.imageids[index]
+        # imageid
+        imageid = self.imageids[index % len(self.imageids)]
+        # read sample_meta
         image_meta = self.coco_api.loadImgs(imageid)[0]
         imagepath = os.path.join(self.image_dir, image_meta['file_name'])
         annpath = imagepath.replace('jpg', 'png')
-        sample = self.read(imagepath, annpath, self.dataset_cfg.get('with_ann', True))
-        sample.update({'id': imageid})
-        if self.mode == 'TRAIN':
-            sample = self.synctransform(sample, 'without_totensor_normalize_pad')
-            sample['edge'] = self.generateedge(sample['segmentation'].copy())
-            sample = self.synctransform(sample, 'only_totensor_normalize_pad')
-        else:
-            sample = self.synctransform(sample, 'all')
-        return sample
-    '''length'''
-    def __len__(self):
-        return len(self.imageids)
+        sample_meta = self.read(imagepath, annpath)
+        # add image id
+        sample_meta.update({'id': imageid})
+        # synctransforms
+        sample_meta = self.synctransforms(sample_meta)
+        # return
+        return sample_meta

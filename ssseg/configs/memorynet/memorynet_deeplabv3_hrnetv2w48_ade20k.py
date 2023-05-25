@@ -1,50 +1,29 @@
 '''memorynet_deeplabv3_hrnetv2w48_ade20k'''
-import os
-from .base_cfg import *
+import copy
+from .base_cfg import SEGMENTOR_CFG
+from .._base_ import DATASET_CFG_ADE20k_512x512, DATALOADER_CFG_BS16
 
 
+# deepcopy
+SEGMENTOR_CFG = copy.deepcopy(SEGMENTOR_CFG)
 # modify dataset config
-DATASET_CFG = DATASET_CFG.copy()
-DATASET_CFG.update({
-    'type': 'ade20k',
-    'rootdir': os.path.join(os.getcwd(), 'ADE20k'),
-})
+SEGMENTOR_CFG['dataset'] = DATASET_CFG_ADE20k_512x512.copy()
 # modify dataloader config
-DATALOADER_CFG = DATALOADER_CFG.copy()
-# modify optimizer config
-OPTIMIZER_CFG = OPTIMIZER_CFG.copy()
-OPTIMIZER_CFG.update({
-    'type': 'sgd',
-    'lr': 0.004,
-    'momentum': 0.9,
-    'weight_decay': 5e-4,
-})
+SEGMENTOR_CFG['dataloader'] = DATALOADER_CFG_BS16.copy()
 # modify scheduler config
-SCHEDULER_CFG = SCHEDULER_CFG.copy()
-SCHEDULER_CFG.update({
-    'max_epochs': 180
-})
-# modify losses config
-LOSSES_CFG = LOSSES_CFG.copy()
-LOSSES_CFG.pop('loss_aux')
-# modify segmentor config
-SEGMENTOR_CFG = SEGMENTOR_CFG.copy()
-SEGMENTOR_CFG.update({
-    'num_classes': 150,
-    'backbone': {
-        'type': 'hrnetv2_w48',
-        'series': 'hrnet',
-        'pretrained': True,
-        'selected_indices': (0, 0, 0, 0),
-    },
-    'auxiliary': None,
-})
+SEGMENTOR_CFG['scheduler']['max_epochs'] = 180
+SEGMENTOR_CFG['scheduler']['optimizer'] = {
+    'type': 'sgd', 'lr': 0.004, 'momentum': 0.9, 'weight_decay': 5e-4, 'params_rules': {},
+}
+# modify other segmentor configs
+SEGMENTOR_CFG['num_classes'] = 150
+SEGMENTOR_CFG['backbone'] = {
+    'type': 'hrnetv2_w48', 'series': 'hrnet', 'pretrained': True, 'selected_indices': (0, 0, 0, 0),
+}
 SEGMENTOR_CFG['head']['in_channels'] = sum([48, 96, 192, 384])
 SEGMENTOR_CFG['head']['update_cfg']['momentum_cfg']['base_lr'] = 0.004
-# modify inference config
-INFERENCE_CFG = INFERENCE_CFG.copy()
-# modify common config
-COMMON_CFG = COMMON_CFG.copy()
-COMMON_CFG['work_dir'] = 'memorynet_deeplabv3_hrnetv2w48_ade20k'
-COMMON_CFG['logfilepath'] = 'memorynet_deeplabv3_hrnetv2w48_ade20k/memorynet_deeplabv3_hrnetv2w48_ade20k.log'
-COMMON_CFG['resultsavepath'] = 'memorynet_deeplabv3_hrnetv2w48_ade20k/memorynet_deeplabv3_hrnetv2w48_ade20k_results.pkl'
+SEGMENTOR_CFG['auxiliary'] = None
+SEGMENTOR_CFG['losses'].pop('loss_aux')
+SEGMENTOR_CFG['work_dir'] = 'memorynet_deeplabv3_hrnetv2w48_ade20k'
+SEGMENTOR_CFG['logfilepath'] = 'memorynet_deeplabv3_hrnetv2w48_ade20k/memorynet_deeplabv3_hrnetv2w48_ade20k.log'
+SEGMENTOR_CFG['resultsavepath'] = 'memorynet_deeplabv3_hrnetv2w48_ade20k/memorynet_deeplabv3_hrnetv2w48_ade20k_results.pkl'
