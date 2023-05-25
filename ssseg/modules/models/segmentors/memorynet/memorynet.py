@@ -92,7 +92,7 @@ class MemoryNet(BaseSegmentor):
             'downsample_backbone', 'context_within_image_module', 'auxiliary_decoder'
         ]
     '''forward'''
-    def forward(self, x, targets=None, losses_cfg=None, **kwargs):
+    def forward(self, x, targets=None, **kwargs):
         img_size = x.size(2), x.size(3)
         # feed to backbone network
         backbone_outputs = self.transforminputs(self.backbone_net(x), selected_indices=self.cfg['backbone'].get('selected_indices'))
@@ -117,7 +117,7 @@ class MemoryNet(BaseSegmentor):
                 predictions=preds_stage2,
                 targets=targets,
                 backbone_outputs=backbone_outputs,
-                losses_cfg=losses_cfg,
+                losses_cfg=self.cfg['losses'],
                 img_size=img_size,
                 compute_loss=False,
             )
@@ -127,14 +127,14 @@ class MemoryNet(BaseSegmentor):
             with torch.no_grad():
                 self.memory_module.update(
                     features=F.interpolate(memory_input, size=img_size, mode='bilinear', align_corners=self.align_corners), 
-                    segmentation=targets['segmentation'],
+                    segmentation=targets['seg_target'],
                     learning_rate=kwargs['learning_rate'],
                     **self.cfg['head']['update_cfg']
                 )
             loss, losses_log_dict = self.calculatelosses(
                 predictions=outputs_dict, 
                 targets=targets, 
-                losses_cfg=losses_cfg
+                losses_cfg=self.cfg['losses']
             )
             if (kwargs['epoch'] > 1) and self.cfg['head']['use_loss']:
                 loss_memory, loss_memory_log = self.calculatememoryloss(stored_memory)

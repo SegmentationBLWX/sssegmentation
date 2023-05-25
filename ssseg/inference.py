@@ -15,8 +15,8 @@ import torch.nn.functional as F
 from tqdm import tqdm
 from configs import BuildConfig
 from modules import (
-    BuildDataset, BuildDistributedDataloader, BuildDistributedModel, BuildOptimizer, BuildScheduler,
-    BuildLoss, BuildBackbone, BuildSegmentor, BuildPixelSampler, Logger, setRandomSeed, BuildPalette, checkdir, loadcheckpoints, savecheckpoints
+    BuildDataset, BuildDistributedDataloader, BuildDistributedModel, BuildLoss, BuildBackbone, BuildSegmentor, BuildPixelSampler, 
+    Logger, initslurm, setrandomseed, touchdir, loadckpts, saveckpts, BuildOptimizer, BuildScheduler
 )
 warnings.filterwarnings('ignore')
 
@@ -28,7 +28,7 @@ def parseArgs():
     parser.add_argument('--imagepath', dest='imagepath', help='imagepath for testing single image', type=str)
     parser.add_argument('--outputfilename', dest='outputfilename', help='name to save output image(s)', type=str, default='')
     parser.add_argument('--cfgfilepath', dest='cfgfilepath', help='config file path you want to use', type=str, required=True)
-    parser.add_argument('--checkpointspath', dest='checkpointspath', help='checkpoints you want to resume from', type=str, required=True)
+    parser.add_argument('--ckptspath', dest='ckptspath', help='checkpoints you want to resume from', type=str, required=True)
     args = parser.parse_args()
     return args
 
@@ -43,33 +43,31 @@ class Demo():
     def start(self):
         cmd_args, cfg, cfg_file_path = self.cmd_args, self.cfg, self.cfg_file_path
         # check work dir
-        checkdir(cfg.COMMON_CFG['work_dir'])
+        checkdir(cfg.SEGMENTOR_CFG['work_dir'])
         # cuda detect
         use_cuda = torch.cuda.is_available()
         # initialize logger_handle
-        logger_handle = Logger(cfg.COMMON_CFG['logfilepath'])
+        logger_handle = Logger(cfg.SEGMENTOR_CFG['logfilepath'])
         # build segmentor
         cfg.SEGMENTOR_CFG['backbone']['pretrained'] = False
-        segmentor = BuildSegmentor(segmentor_cfg=copy.deepcopy(cfg.SEGMENTOR_CFG), mode='TEST')
+        segmentor = BuildSegmentor(segmentor_cfg=cfg.SEGMENTOR_CFG, mode='TEST')
         if use_cuda: segmentor = segmentor.cuda()
         # build dataset
-        dataset_cfg = copy.deepcopy(cfg.DATASET_CFG)
-        dataset_cfg['type'] = 'base'
-        dataset = BuildDataset(mode='TEST', logger_handle=logger_handle, dataset_cfg=copy.deepcopy(cfg.DATASET_CFG))
+        dataset = BuildDataset(mode='TEST', logger_handle=logger_handle, dataset_cfg=cfg.SEGMENTOR_CFG['dataset'])
         # build palette
-        palette = BuildPalette(dataset_type=cfg.DATASET_CFG['type'], num_classes=cfg.SEGMENTOR_CFG['num_classes'], logger_handle=logger_handle)
-        # load checkpoints
+        palette = dataset.palette
+        # load ckpts
         cmd_args.local_rank = 0
-        checkpoints = loadcheckpoints(cmd_args.checkpointspath, logger_handle=logger_handle, cmd_args=cmd_args)
+        ckpts = loadckpts(cmd_args.ckptspath)
         try:
-            segmentor.load_state_dict(checkpoints['model'])
+            segmentor.load_state_dict(ckpts['model'])
         except Exception as e:
-            logger_handle.warning(str(e) + '\n' + 'Try to load checkpoints by using strict=False')
-            segmentor.load_state_dict(checkpoints['model'], strict=False)
+            logger_handle.warning(str(e) + '\n' + 'Try to load ckpts by using strict=False')
+            segmentor.load_state_dict(ckpts['model'], strict=False)
         # set eval
         segmentor.eval()
         # start to test
-        inference_cfg = copy.deepcopy(cfg.INFERENCE_CFG)
+        inference_cfg = copy.deepcopy(cfg.SEGMENTOR_CFG['inference'])
         FloatTensor = torch.cuda.FloatTensor if use_cuda else torch.FloatTensor
         if not cmd_args.imagedir:
             imagepaths = [cmd_args.imagepath]
@@ -117,9 +115,9 @@ class Demo():
             image = image * 0.5 + mask * 0.5
             image = image.astype(np.uint8)
             if cmd_args.outputfilename:
-                cv2.imwrite(os.path.join(cfg.COMMON_CFG['work_dir'], cmd_args.outputfilename + '_%d' % idx + '.png'), image)
+                cv2.imwrite(os.path.join(cfg.SEGMENTOR_CFG['work_dir'], cmd_args.outputfilename + '_%d' % idx + '.png'), image)
             else:
-                cv2.imwrite(os.path.join(cfg.COMMON_CFG['work_dir'], imagepath.split('/')[-1].split('.')[0] + '.png'), image)
+                cv2.imwrite(os.path.join(cfg.SEGMENTOR_CFG['work_dir'], imagepath.split('/')[-1].split('.')[0] + '.png'), image)
     '''inference with augmentations'''
     def auginference(self, segmentor, images, inference_cfg, num_classes, FloatTensor, align_corners, forward_args=None):
         infer_tricks, outputs_list = inference_cfg['tricks'], []
@@ -142,14 +140,14 @@ class Demo():
                     num_classes=num_classes, 
                     forward_args=forward_args,
                 )
-                fix_ann_pairs = inference_cfg.get('fix_ann_pairs', None)
-                if fix_ann_pairs is None:
-                    for aug_opt in self.cfg.DATASET_CFG['train']['aug_opts']:
-                        if 'RandomFlip' in aug_opt: 
-                            fix_ann_pairs = aug_opt[-1].get('fix_ann_pairs', None)
-                if fix_ann_pairs is not None:
+                fixed_seg_target_pairs = inference_cfg.get('fixed_seg_target_pairs', None)
+                if fixed_seg_target_pairs is None:
+                    for data_pipeline in self.cfg.SEGMENTOR_CFG['dataset']['train']['data_pipelines']:
+                        if 'RandomFlip' in data_pipeline: 
+                            fixed_seg_target_pairs = data_pipeline[-1].get('fixed_seg_target_pairs', None)
+                if fixed_seg_target_pairs is not None:
                     outputs_flip_clone = outputs_flip.data.clone()
-                    for (pair_a, pair_b) in fix_ann_pairs:
+                    for (pair_a, pair_b) in fixed_seg_target_pairs:
                         outputs_flip[:, pair_a, :, :] = outputs_flip_clone[:, pair_b, :, :]
                         outputs_flip[:, pair_b, :, :] = outputs_flip_clone[:, pair_a, :, :]
                 outputs_flip = torch.from_numpy(np.flip(outputs_flip.cpu().numpy(), axis=3).copy()).type_as(outputs)

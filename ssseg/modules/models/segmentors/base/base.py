@@ -28,7 +28,7 @@ class BaseSegmentor(nn.Module):
             backbone_cfg.update({'norm_cfg': copy.deepcopy(self.norm_cfg)})
         self.backbone_net = BuildBackbone(backbone_cfg)
     '''forward'''
-    def forward(self, x, targets=None, losses_cfg=None):
+    def forward(self, x, targets=None):
         raise NotImplementedError('not to be implemented')
     '''forward when mode = `TRAIN`'''
     def forwardtrain(self, predictions, targets, backbone_outputs, losses_cfg, img_size, compute_loss=True):
@@ -130,14 +130,14 @@ class BaseSegmentor(nn.Module):
     '''calculate the losses'''
     def calculatelosses(self, predictions, targets, losses_cfg, map_preds_to_tgts_dict=None):
         # parse targets
-        target_seg = targets['segmentation']
-        if 'edge' in targets:
-            target_edge = targets['edge']
-            num_neg_edge, num_pos_edge = torch.sum(target_edge == 0, dtype=torch.float), torch.sum(target_edge == 1, dtype=torch.float)
+        seg_target = targets['seg_target']
+        if 'edge_target' in targets and targets['edge_target'] is not None:
+            edge_target = targets['edge_target']
+            num_neg_edge, num_pos_edge = torch.sum(edge_target == 0, dtype=torch.float), torch.sum(edge_target == 1, dtype=torch.float)
             weight_pos_edge, weight_neg_edge = num_neg_edge / (num_pos_edge + num_neg_edge), num_pos_edge / (num_pos_edge + num_neg_edge)
-            cls_weight_edge = torch.Tensor([weight_neg_edge, weight_pos_edge]).type_as(target_edge)
+            cls_weight_edge = torch.Tensor([weight_neg_edge, weight_pos_edge]).type_as(edge_target)
         # calculate loss according to losses_cfg
-        assert len(predictions) == len(losses_cfg), 'length of losses_cfg should be equal to predictions'
+        assert len(predictions) == len(losses_cfg), 'length of losses_cfg should be equal to the one of predictions'
         losses_log_dict = {}
         for loss_name, loss_cfg in losses_cfg.items():
             if 'edge' in loss_name:
@@ -148,7 +148,7 @@ class BaseSegmentor(nn.Module):
             if map_preds_to_tgts_dict is None:
                 losses_log_dict[loss_name] = self.calculateloss(
                     prediction=predictions[loss_name],
-                    target=target_edge if 'edge' in loss_name else target_seg,
+                    target=edge_target if 'edge' in loss_name else seg_target,
                     loss_cfg=loss_cfg,
                 )
             else:
@@ -186,19 +186,15 @@ class BaseSegmentor(nn.Module):
         # calculate the loss
         loss = 0
         for key, value in loss_cfg.items():
-            if (key in ['binaryceloss']) and hasattr(self, 'onehot'):
+            if (key in ['BinaryCrossEntropyLoss']) and hasattr(self, 'onehot'):
                 prediction_iter = prediction_format
                 target_iter = self.onehot(target, self.cfg['num_classes'])
-            elif key in ['diceloss', 'lovaszloss', 'kldivloss', 'l1loss', 'cosinesimilarityloss']:
+            elif key in ['DiceLoss', 'LovaszLoss', 'KLDivLoss', 'L1Loss', 'CosineSimilarityLoss']:
                 prediction_iter = prediction
                 target_iter = target
             else:
                 prediction_iter = prediction_format
                 target_iter = target.view(-1)
-            loss += BuildLoss(key)(
-                prediction=prediction_iter, 
-                target=target_iter, 
-                **value
-            )
+            loss += BuildLoss(key)(**value)(prediction=prediction_iter, target=target_iter)
         # return the loss
         return loss

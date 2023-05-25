@@ -17,8 +17,8 @@ import torch.distributed as dist
 from tqdm import tqdm
 from configs import BuildConfig
 from modules import (
-    BuildDataset, BuildDistributedDataloader, BuildDistributedModel, BuildOptimizer, BuildScheduler, initslurm,
-    BuildLoss, BuildBackbone, BuildSegmentor, BuildPixelSampler, Logger, setRandomSeed, BuildPalette, checkdir, loadcheckpoints, savecheckpoints
+    BuildDataset, BuildDistributedDataloader, BuildDistributedModel, BuildLoss, BuildBackbone, BuildSegmentor, BuildPixelSampler, 
+    Logger, initslurm, setrandomseed, touchdir, loadckpts, saveckpts, BuildOptimizer, BuildScheduler
 )
 warnings.filterwarnings('ignore')
 
@@ -29,7 +29,7 @@ def parseArgs():
     parser.add_argument('--local_rank', dest='local_rank', help='node rank for distributed training', default=0, type=int)
     parser.add_argument('--nproc_per_node', dest='nproc_per_node', help='number of process per node', default=8, type=int)
     parser.add_argument('--cfgfilepath', dest='cfgfilepath', help='config file path you want to use', type=str, required=True)
-    parser.add_argument('--checkpointspath', dest='checkpointspath', help='checkpoints you want to resume from', default='', type=str)
+    parser.add_argument('--ckptspath', dest='ckptspath', help='checkpoints you want to resume from', default='', type=str)
     parser.add_argument('--slurm', dest='slurm', help='please add --slurm if you are using slurm', default=False, action='store_true')
     args = parser.parse_args()
     if args.slurm: initslurm(args, '29000')
@@ -52,13 +52,13 @@ class Trainer():
     def start(self):
         cfg, ngpus_per_node, logger_handle, cmd_args, cfg_file_path = self.cfg, self.ngpus_per_node, self.logger_handle, self.cmd_args, self.cfg_file_path
         # build dataset and dataloader
-        dataset = BuildDataset(mode='TRAIN', logger_handle=logger_handle, dataset_cfg=copy.deepcopy(cfg.DATASET_CFG))
+        dataset = BuildDataset(mode='TRAIN', logger_handle=logger_handle, dataset_cfg=cfg.SEGMENTOR_CFG['dataset'])
         assert dataset.num_classes == cfg.SEGMENTOR_CFG['num_classes'], 'parsed config file %s error' % cfg_file_path
-        dataloader_cfg = copy.deepcopy(cfg.DATALOADER_CFG)
-        batch_size, num_workers = dataloader_cfg['train']['batch_size'], dataloader_cfg['train']['num_workers']
-        batch_size_per_node = batch_size // ngpus_per_node
-        num_workers_per_node = num_workers // ngpus_per_node
-        dataloader_cfg['train'].update({'batch_size': batch_size_per_node, 'num_workers': num_workers_per_node})
+        dataloader_cfg = copy.deepcopy(cfg.SEGMENTOR_CFG['dataloader'])
+        expected_total_train_bs_for_assert = dataloader_cfg.pop('expected_total_train_bs_for_assert')
+        dataloader_cfg['train']['batch_size'], dataloader_cfg['train']['num_workers'] = dataloader_cfg['train'].pop('batch_size_per_gpu'), dataloader_cfg['train'].pop('num_workers_per_gpu')
+        dataloader_cfg['test']['batch_size'], dataloader_cfg['test']['num_workers'] = dataloader_cfg['test'].pop('batch_size_per_gpu'), dataloader_cfg['test'].pop('num_workers_per_gpu')
+        assert expected_total_train_bs_for_assert == dataloader_cfg['train']['batch_size'] * ngpus_per_node
         dataloader = BuildDistributedDataloader(dataset=dataset, dataloader_cfg=dataloader_cfg['train'])
         # build segmentor
         segmentor = BuildSegmentor(segmentor_cfg=copy.deepcopy(cfg.SEGMENTOR_CFG), mode='TRAIN')
@@ -66,8 +66,7 @@ class Trainer():
         segmentor.cuda(cmd_args.local_rank)
         torch.backends.cudnn.benchmark = cfg.SEGMENTOR_CFG['benchmark']
         # build optimizer
-        optimizer_cfg = copy.deepcopy(cfg.OPTIMIZER_CFG)
-        optimizer = BuildOptimizer(segmentor, optimizer_cfg)
+        optimizer = BuildOptimizer(segmentor, cfg.SEGMENTOR_CFG['optimizer'])
         # build fp16
         fp16_cfg = self.cfg.SEGMENTOR_CFG.get('fp16_cfg', {'type': None})
         fp16_type = fp16_cfg.pop('type')
@@ -75,36 +74,33 @@ class Trainer():
         if fp16_type is not None:
             import apex
             segmentor, optimizer = apex.amp.initialize(segmentor, optimizer, **fp16_cfg)
-            for m in segmentor.modules():
-                if hasattr(m, 'fp16_enabled'):
-                    m.fp16_enabled = True
         # build scheduler
-        scheduler_cfg = copy.deepcopy(cfg.SCHEDULER_CFG)
+        scheduler_cfg = copy.deepcopy(cfg.SEGMENTOR_CFG['scheduler'])
         scheduler_cfg.update({
-            'lr': cfg.OPTIMIZER_CFG['lr'],
+            'lr': cfg.SEGMENTOR_CFG['optimizer']['lr'],
             'iters_per_epoch': len(dataloader),
-            'params_rules': cfg.OPTIMIZER_CFG['params_rules'],
+            'params_rules': cfg.SEGMENTOR_CFG['optimizer']['params_rules'],
         })
         scheduler = BuildScheduler(optimizer=optimizer, scheduler_cfg=scheduler_cfg)
         start_epoch, end_epoch = 1, scheduler_cfg['max_epochs']
-        # load checkpoints
-        if cmd_args.checkpointspath and os.path.exists(cmd_args.checkpointspath):
-            checkpoints = loadcheckpoints(cmd_args.checkpointspath, logger_handle=logger_handle, cmd_args=cmd_args)
+        # load ckpts
+        if cmd_args.ckptspath and os.path.exists(cmd_args.ckptspath):
+            ckpts = loadckpts(cmd_args.ckptspath)
             try:
-                segmentor.load_state_dict(checkpoints['model'])
+                segmentor.load_state_dict(ckpts['model'])
             except Exception as e:
-                logger_handle.warning(str(e) + '\n' + 'Try to load checkpoints by using strict=False')
-                segmentor.load_state_dict(checkpoints['model'], strict=False)
-            if 'optimizer' in checkpoints: 
-                optimizer.load_state_dict(checkpoints['optimizer'])
-            if 'cur_epoch' in checkpoints: 
-                start_epoch = checkpoints['cur_epoch'] + 1
-                scheduler.setstate({'cur_epoch': checkpoints['cur_epoch'], 'cur_iter': checkpoints['cur_iter']})
-                assert checkpoints['cur_iter'] == len(dataloader) * checkpoints['cur_epoch']
-            if 'amp' in checkpoints and fp16_type is not None:
-                apex.amp.load_state_dict(checkpoints['amp'])
+                logger_handle.warning(str(e) + '\n' + 'Try to load ckpts by using strict=False')
+                segmentor.load_state_dict(ckpts['model'], strict=False)
+            if 'optimizer' in ckpts: 
+                optimizer.load_state_dict(ckpts['optimizer'])
+            if 'cur_epoch' in ckpts: 
+                start_epoch = ckpts['cur_epoch'] + 1
+                scheduler.setstate({'cur_epoch': ckpts['cur_epoch'], 'cur_iter': ckpts['cur_iter']})
+                assert ckpts['cur_iter'] == len(dataloader) * ckpts['cur_epoch']
+            if 'amp' in ckpts and fp16_type is not None:
+                apex.amp.load_state_dict(ckpts['amp'])
         else:
-            cmd_args.checkpointspath = ''
+            cmd_args.ckptspath = ''
         # parallel segmentor
         build_dist_model_cfg = self.cfg.SEGMENTOR_CFG.get('build_dist_model_cfg', {})
         build_dist_model_cfg.update({'device_ids': [cmd_args.local_rank]})
@@ -112,15 +108,8 @@ class Trainer():
         # print config
         if (cmd_args.local_rank == 0) and (int(os.environ.get('SLURM_PROCID', 0)) == 0):
             logger_handle.info(f'Config file path: {cfg_file_path}')
-            logger_handle.info(f'DATASET_CFG: \n{cfg.DATASET_CFG}')
-            logger_handle.info(f'DATALOADER_CFG: \n{cfg.DATALOADER_CFG}')
-            logger_handle.info(f'OPTIMIZER_CFG: \n{cfg.OPTIMIZER_CFG}')
-            logger_handle.info(f'SCHEDULER_CFG: \n{cfg.SCHEDULER_CFG}')
-            logger_handle.info(f'LOSSES_CFG: \n{cfg.LOSSES_CFG}')
-            logger_handle.info(f'SEGMENTOR_CFG: \n{cfg.SEGMENTOR_CFG}')
-            logger_handle.info(f'INFERENCE_CFG: \n{cfg.INFERENCE_CFG}')
-            logger_handle.info(f'COMMON_CFG: \n{cfg.COMMON_CFG}')
-            logger_handle.info(f'Resume from: {cmd_args.checkpointspath}')
+            logger_handle.info(f'Config details: \n{cfg.SEGMENTOR_CFG}')
+            logger_handle.info(f'Resume from: {cmd_args.ckptspath}')
         # start to train the segmentor
         FloatTensor, losses_log_dict_memory = torch.cuda.FloatTensor, {}
         for epoch in range(start_epoch, end_epoch+1):
@@ -128,14 +117,16 @@ class Trainer():
             segmentor.train()
             dataloader.sampler.set_epoch(epoch)
             # --train epoch
-            for batch_idx, samples in enumerate(dataloader):
+            for batch_idx, samples_meta in enumerate(dataloader):
                 learning_rate = scheduler.updatelr()
-                images, targets = samples['image'].type(FloatTensor), {'segmentation': samples['segmentation'].type(FloatTensor), 'edge': samples['edge'].type(FloatTensor)}
+                images = samples_meta['image'].type(FloatTensor)
+                targets = {'seg_target': samples_meta['seg_target'].type(FloatTensor)}
+                if 'edge_target' in samples_meta: targets['edge_target'] = samples_meta['edge_target'].type(FloatTensor)
                 optimizer.zero_grad()
                 if cfg.SEGMENTOR_CFG['type'] in ['memorynet', 'memorynetv2']:
-                    loss, losses_log_dict = segmentor(images, targets, cfg.LOSSES_CFG, learning_rate=learning_rate, epoch=epoch)
+                    loss, losses_log_dict = segmentor(images, targets, learning_rate=learning_rate, epoch=epoch)
                 else:
-                    loss, losses_log_dict = segmentor(images, targets, cfg.LOSSES_CFG)
+                    loss, losses_log_dict = segmentor(images, targets)
                 for key, value in losses_log_dict.items():
                     if key in losses_log_dict_memory: 
                         losses_log_dict_memory[key].append(value)
@@ -147,27 +138,27 @@ class Trainer():
                 else:
                     loss.backward()
                 scheduler.step()
-                if (cmd_args.local_rank == 0) and (scheduler.cur_iter % cfg.COMMON_CFG['log_interval_iterations'] == 0) and (int(os.environ.get('SLURM_PROCID', 0)) == 0):
-                    loss_log = ''
-                    for key, value in losses_log_dict_memory.items():
-                        loss_log += '%s %.4f, ' % (key, sum(value) / len(value))
+                if (cmd_args.local_rank == 0) and (scheduler.cur_iter % cfg.SEGMENTOR_CFG['log_interval_iterations'] == 0) and (int(os.environ.get('SLURM_PROCID', 0)) == 0):
+                    print_log = {
+                        'epoch': epoch, 'batch': batch_idx+1, 'segmentor': cfg.SEGMENTOR_CFG['type'], 'backbone': cfg.SEGMENTOR_CFG['backbone']['structure_type'],
+                        'dataset': cfg.SEGMENTOR_CFG['dataset']['type'], 'learning_rate': learning_rate,
+                    }
+                    for key in list(losses_log_dict_memory.keys()):
+                        print_log[key] = sum(losses_log_dict_memory[key]) / len(losses_log_dict_memory[key])
+                    logger_handle.info(print_log)
                     losses_log_dict_memory = dict()
-                    logger_handle.info(
-                        f'[Epoch]: {epoch}/{end_epoch}, [Batch]: {batch_idx+1}/{len(dataloader)}, [Segmentor]: {cfg.SEGMENTOR_CFG["type"]}-{cfg.SEGMENTOR_CFG["backbone"]["type"]}, '
-                        f'[DATASET]: {cfg.DATASET_CFG["type"]}, [LEARNING_RATE]: {learning_rate}\n\t[LOSS]: {loss_log}'
-                    )
             scheduler.cur_epoch = epoch
-            # --save checkpoints
-            if (epoch % cfg.COMMON_CFG['save_interval_epochs'] == 0) or (epoch == end_epoch):
+            # --save ckpts
+            if (epoch % cfg.SEGMENTOR_CFG['save_interval_epochs'] == 0) or (epoch == end_epoch):
                 state_dict = scheduler.state()
                 state_dict['model'] = segmentor.module.state_dict()
                 if fp16_type is not None:
                     state_dict['amp'] = apex.amp.state_dict()
-                savepath = os.path.join(cfg.COMMON_CFG['work_dir'], 'epoch_%s.pth' % epoch)
+                savepath = os.path.join(cfg.SEGMENTOR_CFG['work_dir'], 'epoch_%s.pth' % epoch)
                 if (cmd_args.local_rank == 0) and (int(os.environ.get('SLURM_PROCID', 0)) == 0):
-                    savecheckpoints(state_dict, savepath, logger_handle, cmd_args=cmd_args)
-            # --eval checkpoints
-            if (epoch % cfg.COMMON_CFG['eval_interval_epochs'] == 0) or (epoch == end_epoch):
+                    saveckpts(state_dict, savepath)
+            # --eval ckpts
+            if (epoch % cfg.SEGMENTOR_CFG['eval_interval_epochs'] == 0) or (epoch == end_epoch):
                 self.evaluate(segmentor)
     '''evaluate'''
     def evaluate(self, segmentor):
@@ -175,17 +166,18 @@ class Trainer():
         # TODO: bug occurs if use --pyt bash
         rank_id = int(os.environ['SLURM_PROCID']) if 'SLURM_PROCID' in os.environ else cmd_args.local_rank
         # build dataset and dataloader
-        dataset = BuildDataset(mode='TEST', logger_handle=logger_handle, dataset_cfg=copy.deepcopy(cfg.DATASET_CFG))
-        dataloader_cfg = copy.deepcopy(cfg.DATALOADER_CFG)
-        batch_size, num_workers = ngpus_per_node, dataloader_cfg['test']['num_workers']
-        batch_size_per_node = batch_size // ngpus_per_node
-        num_workers_per_node = num_workers // ngpus_per_node
-        dataloader_cfg['test'].update({'batch_size': batch_size_per_node, 'num_workers': num_workers_per_node})
+        dataset = BuildDataset(mode='TEST', logger_handle=logger_handle, dataset_cfg=cfg.SEGMENTOR_CFG['dataset'])
+        assert dataset.num_classes == cfg.SEGMENTOR_CFG['num_classes'], 'parsed config file %s error' % cfg_file_path
+        dataloader_cfg = copy.deepcopy(cfg.SEGMENTOR_CFG['dataloader'])
+        expected_total_train_bs_for_assert = dataloader_cfg.pop('expected_total_train_bs_for_assert')
+        dataloader_cfg['train']['batch_size'], dataloader_cfg['train']['num_workers'] = dataloader_cfg['train'].pop('batch_size_per_gpu'), dataloader_cfg['train'].pop('num_workers_per_gpu')
+        dataloader_cfg['test']['batch_size'], dataloader_cfg['test']['num_workers'] = dataloader_cfg['test'].pop('batch_size_per_gpu'), dataloader_cfg['test'].pop('num_workers_per_gpu')
+        assert expected_total_train_bs_for_assert == dataloader_cfg['train']['batch_size'] * ngpus_per_node
         dataloader = BuildDistributedDataloader(dataset=dataset, dataloader_cfg=dataloader_cfg['test'])
         # start to eval
         segmentor.eval()
         segmentor.module.mode = 'TEST'
-        inference_cfg, all_preds, all_gts = cfg.INFERENCE_CFG, [], []
+        inference_cfg, all_preds, all_gts = cfg.SEGMENTOR_CFG['inference'], [], []
         align_corners = segmentor.module.align_corners
         FloatTensor = torch.cuda.FloatTensor
         use_probs_before_resize = inference_cfg['tricks']['use_probs_before_resize']
@@ -193,9 +185,9 @@ class Trainer():
         with torch.no_grad():
             dataloader.sampler.set_epoch(0)
             pbar = tqdm(enumerate(dataloader))
-            for batch_idx, samples in pbar:
+            for batch_idx, samples_meta in pbar:
                 pbar.set_description('Processing %s/%s in rank %s' % (batch_idx+1, len(dataloader), rank_id))
-                imageids, images, widths, heights, gts = samples['id'], samples['image'].type(FloatTensor), samples['width'], samples['height'], samples['groundtruth']
+                imageids, images, widths, heights, gts = samples_meta['id'], samples_meta['image'].type(FloatTensor), samples_meta['width'], samples_meta['height'], samples_meta['seg_target']
                 if inference_cfg['mode'] == 'whole':
                     outputs = segmentor(images)
                     if use_probs_before_resize:
@@ -231,8 +223,8 @@ class Trainer():
                     gt[gt >= dataset.num_classes] = -1
                     all_gts.append(gt)
         # collect eval results and calculate the metric
-        filename = cfg.COMMON_CFG['resultsavepath'].split('/')[-1].split('.')[0] + f'_{rank_id}.' + cfg.COMMON_CFG['resultsavepath'].split('.')[-1]
-        with open(os.path.join(cfg.COMMON_CFG['work_dir'], filename), 'wb') as fp:
+        filename = cfg.SEGMENTOR_CFG['resultsavepath'].split('/')[-1].split('.')[0] + f'_{rank_id}.' + cfg.SEGMENTOR_CFG['resultsavepath'].split('.')[-1]
+        with open(os.path.join(cfg.SEGMENTOR_CFG['work_dir'], filename), 'wb') as fp:
             pickle.dump([all_preds, all_gts], fp)
         rank = torch.tensor([rank_id], device='cuda')
         rank_list = [rank.clone() for _ in range(ngpus_per_node)]
@@ -242,8 +234,8 @@ class Trainer():
             all_preds_gather, all_gts_gather = [], []
             for rank in rank_list:
                 rank = str(int(rank.item()))
-                filename = cfg.COMMON_CFG['resultsavepath'].split('/')[-1].split('.')[0] + f'_{rank}.' + cfg.COMMON_CFG['resultsavepath'].split('.')[-1]
-                fp = open(os.path.join(cfg.COMMON_CFG['work_dir'], filename), 'rb')
+                filename = cfg.SEGMENTOR_CFG['resultsavepath'].split('/')[-1].split('.')[0] + f'_{rank}.' + cfg.SEGMENTOR_CFG['resultsavepath'].split('.')[-1]
+                fp = open(os.path.join(cfg.SEGMENTOR_CFG['work_dir'], filename), 'rb')
                 all_preds, all_gts = pickle.load(fp)
                 all_preds_gather += all_preds
                 all_gts_gather += all_gts
@@ -260,7 +252,7 @@ class Trainer():
             result = dataset.evaluate(
                 predictions=all_preds, 
                 groundtruths=all_gts, 
-                metric_list=cfg.INFERENCE_CFG.get('metric_list', ['iou', 'miou']),
+                metric_list=inference_cfg.get('metric_list', ['iou', 'miou']),
                 num_classes=cfg.SEGMENTOR_CFG['num_classes'],
                 ignore_index=-1,
             )
@@ -274,10 +266,10 @@ def main():
     # parse arguments
     args = parseArgs()
     cfg, cfg_file_path = BuildConfig(args.cfgfilepath)
-    # check work dir
-    checkdir(cfg.COMMON_CFG['work_dir'])
+    # touch work dir
+    touchdir(cfg.SEGMENTOR_CFG['work_dir'])
     # initialize logger_handle
-    logger_handle = Logger(cfg.COMMON_CFG['logfilepath'])
+    logger_handle = Logger(cfg.SEGMENTOR_CFG['logfilepath'])
     # number of gpus, for distribued training, only support a process for a GPU
     ngpus_per_node = torch.cuda.device_count()
     if ngpus_per_node != args.nproc_per_node:

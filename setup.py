@@ -4,6 +4,9 @@ Function:
 Author:
     Zhenchao Jin
 '''
+import os
+import re
+import sys
 import ssseg
 from setuptools import setup, find_packages
 
@@ -15,9 +18,6 @@ with open('README.md', 'r', encoding='utf-8') as f:
 
 '''parse the package dependencies listed in a requirements file but strips specific versioning information'''
 def parserequirements(fname='requirements.txt', with_version=True):
-    import re
-    import sys
-    from os.path import exists
     require_fpath = fname
     '''parse information from a line in a requirements text file'''
     def parseline(line):
@@ -55,7 +55,7 @@ def parserequirements(fname='requirements.txt', with_version=True):
                         yield info
     '''gen packages items'''
     def genpackagesitems():
-        if exists(require_fpath):
+        if os.path.exists(require_fpath):
             for info in parserequirefile(require_fpath):
                 parts = [info['package']]
                 if with_version and 'version' in info:

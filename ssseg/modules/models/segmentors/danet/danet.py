@@ -65,7 +65,7 @@ class DANet(BaseSegmentor):
             'cam_out_conv', 'decoder_cam', 'decoder_pamcam', 'auxiliary_decoder'
         ]
     '''forward'''
-    def forward(self, x, targets=None, losses_cfg=None):
+    def forward(self, x, targets=None):
         img_size = x.size(2), x.size(3)
         # feed to backbone network
         backbone_outputs = self.transforminputs(self.backbone_net(x), selected_indices=self.cfg['backbone'].get('selected_indices'))
@@ -86,7 +86,7 @@ class DANet(BaseSegmentor):
                 predictions=preds_pamcam,
                 targets=targets,
                 backbone_outputs=backbone_outputs,
-                losses_cfg=losses_cfg,
+                losses_cfg=self.cfg['losses'],
                 img_size=img_size,
                 compute_loss=False,
             )
@@ -99,6 +99,6 @@ class DANet(BaseSegmentor):
             return self.calculatelosses(
                 predictions=outputs_dict, 
                 targets=targets, 
-                losses_cfg=losses_cfg
+                losses_cfg=self.cfg['losses']
             )
         return preds_pamcam

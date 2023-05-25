@@ -15,17 +15,17 @@
 **1.UNet**
 
 - Related Paper: [click](https://arxiv.org/pdf/1505.04597.pdf),
-- Reported Performance: [click](https://github.com/SegmentationBLWX/sssegmentation/tree/main/docs/performances/unet).
+- Reported Performance: [click](https://github.com/SegmentationBLWX/sssegmentation/tree/main/docs/modelzoo/unet).
 
 **2.Twins**
 
 - Related Paper: [click](https://arxiv.org/pdf/2104.13840.pdf),
-- Reported Performance: [click](https://github.com/SegmentationBLWX/sssegmentation/tree/main/docs/performances/twins).
+- Reported Performance: [click](https://github.com/SegmentationBLWX/sssegmentation/tree/main/docs/modelzoo/twins).
 
 **3.CGNet**
 
 - Related Paper: [click](https://arxiv.org/pdf/1811.08201.pdf),
-- Reported Performance: [click](https://github.com/SegmentationBLWX/sssegmentation/tree/main/docs/performances/cgnet).
+- Reported Performance: [click](https://github.com/SegmentationBLWX/sssegmentation/tree/main/docs/modelzoo/cgnet).
 
 **4.HRNet**
 
@@ -34,7 +34,7 @@
 **5.ERFNet**
 
 - Related Paper: [click](https://ieeexplore.ieee.org/document/8063438),
-- Reported Performance: [click](https://github.com/SegmentationBLWX/sssegmentation/tree/main/docs/performances/erfnet).
+- Reported Performance: [click](https://github.com/SegmentationBLWX/sssegmentation/tree/main/docs/modelzoo/erfnet).
 
 **6.ResNet**
 
@@ -43,37 +43,37 @@
 **7.ResNeSt**
 
 - Related Paper: [click](https://arxiv.org/pdf/2004.08955.pdf),
-- Reported Performance: [click](https://github.com/SegmentationBLWX/sssegmentation/tree/main/docs/performances/resnest).
+- Reported Performance: [click](https://github.com/SegmentationBLWX/sssegmentation/tree/main/docs/modelzoo/resnest).
 
 **8.FastSCNN**
 
 - Related Paper: [click](https://arxiv.org/pdf/1902.04502.pdf),
-- Reported Performance: [click](https://github.com/SegmentationBLWX/sssegmentation/tree/main/docs/performances/fastscnn).
+- Reported Performance: [click](https://github.com/SegmentationBLWX/sssegmentation/tree/main/docs/modelzoo/fastscnn).
 
 **9.BiSeNetV1**
 
 - Related Paper: [click](https://arxiv.org/pdf/1808.00897.pdf),
-- Reported Performance: [click](https://github.com/SegmentationBLWX/sssegmentation/tree/main/docs/performances/bisenetv1).
+- Reported Performance: [click](https://github.com/SegmentationBLWX/sssegmentation/tree/main/docs/modelzoo/bisenetv1).
 
 **10.BiSeNetV2**
 
 - Related Paper: [click](https://arxiv.org/pdf/2004.02147.pdf),
-- Reported Performance: [click](https://github.com/SegmentationBLWX/sssegmentation/tree/main/docs/performances/bisenetv2).
+- Reported Performance: [click](https://github.com/SegmentationBLWX/sssegmentation/tree/main/docs/modelzoo/bisenetv2).
 
 **11.MobileNetV2**
 
 - Related Paper: [click](https://arxiv.org/pdf/1801.04381.pdf),
-- Reported Performance: [click](https://github.com/SegmentationBLWX/sssegmentation/tree/main/docs/performances/mobilenet).
+- Reported Performance: [click](https://github.com/SegmentationBLWX/sssegmentation/tree/main/docs/modelzoo/mobilenet).
 
 **12.MobileNetV3**
 
 - Related Paper: [click](https://arxiv.org/pdf/1905.02244.pdf),
-- Reported Performance: [click](https://github.com/SegmentationBLWX/sssegmentation/tree/main/docs/performances/mobilenet).
+- Reported Performance: [click](https://github.com/SegmentationBLWX/sssegmentation/tree/main/docs/modelzoo/mobilenet).
 
 **13.SwinTransformer**
 
 - Related Paper: [click](https://arxiv.org/pdf/2103.14030.pdf),
-- Reported Performance: [click](https://github.com/SegmentationBLWX/sssegmentation/tree/main/docs/performances/swin).
+- Reported Performance: [click](https://github.com/SegmentationBLWX/sssegmentation/tree/main/docs/modelzoo/swin).
 
 **14.VisionTransformer**
 
@@ -82,7 +82,7 @@
 **15.ConvNeXt**
 
 - Related Paper: [click](https://arxiv.org/pdf/2201.03545.pdf),
-- Reported Performance: [click](https://github.com/SegmentationBLWX/sssegmentation/tree/main/docs/performances/convnext).
+- Reported Performance: [click](https://github.com/SegmentationBLWX/sssegmentation/tree/main/docs/modelzoo/convnext).
 
 
 ## Supported Segmentors
@@ -90,149 +90,149 @@
 **1.FCN**
 
 - Related Paper: [click](https://arxiv.org/pdf/1411.4038.pdf),
-- Reported Performance: [click](https://github.com/SegmentationBLWX/sssegmentation/tree/main/docs/performances/fcn).
+- Reported Performance: [click](https://github.com/SegmentationBLWX/sssegmentation/tree/main/docs/modelzoo/fcn).
 
 **2.CE2P**
 
 - Related Paper: [click](https://arxiv.org/pdf/1809.05996.pdf),
-- Reported Performance: [click](https://github.com/SegmentationBLWX/sssegmentation/tree/main/docs/performances/ce2p).
+- Reported Performance: [click](https://github.com/SegmentationBLWX/sssegmentation/tree/main/docs/modelzoo/ce2p).
 
 **3.SETR**
 
 - Related Paper: [click](https://arxiv.org/pdf/2012.15840.pdf),
-- Reported Performance: [click](https://github.com/SegmentationBLWX/sssegmentation/tree/main/docs/performances/setr).
+- Reported Performance: [click](https://github.com/SegmentationBLWX/sssegmentation/tree/main/docs/modelzoo/setr).
 
 **4.ISNet**
 
 - Related Paper: [click](https://arxiv.org/pdf/2108.12382.pdf),
-- Reported Performance: [click](https://github.com/SegmentationBLWX/sssegmentation/tree/main/docs/performances/isnet).
+- Reported Performance: [click](https://github.com/SegmentationBLWX/sssegmentation/tree/main/docs/modelzoo/isnet).
 
 **5.ICNet**
 
 - Related Paper: [click](https://arxiv.org/pdf/1704.08545.pdf),
-- Reported Performance: [click](https://github.com/SegmentationBLWX/sssegmentation/tree/main/docs/performances/icnet).
+- Reported Performance: [click](https://github.com/SegmentationBLWX/sssegmentation/tree/main/docs/modelzoo/icnet).
 
 **6.CCNet**
 
 - Related Paper: [click](https://arxiv.org/pdf/1811.11721.pdf),
-- Reported Performance: [click](https://github.com/SegmentationBLWX/sssegmentation/tree/main/docs/performances/ccnet).
+- Reported Performance: [click](https://github.com/SegmentationBLWX/sssegmentation/tree/main/docs/modelzoo/ccnet).
 
 **7.DANet**
 
 - Related Paper: [click](https://arxiv.org/pdf/1809.02983.pdf),
-- Reported Performance: [click](https://github.com/SegmentationBLWX/sssegmentation/tree/main/docs/performances/danet).
+- Reported Performance: [click](https://github.com/SegmentationBLWX/sssegmentation/tree/main/docs/modelzoo/danet).
 
 **8.GCNet**
 
 - Related Paper: [click](https://arxiv.org/pdf/1904.11492.pdf),
-- Reported Performance: [click](https://github.com/SegmentationBLWX/sssegmentation/tree/main/docs/performances/gcnet).
+- Reported Performance: [click](https://github.com/SegmentationBLWX/sssegmentation/tree/main/docs/modelzoo/gcnet).
 
 **9.DMNet**
 
 - Related Paper: [click](https://openaccess.thecvf.com/content_ICCV_2019/papers/He_Dynamic_Multi-Scale_Filters_for_Semantic_Segmentation_ICCV_2019_paper.pdf),
-- Reported Performance: [click](https://github.com/SegmentationBLWX/sssegmentation/tree/main/docs/performances/dmnet).
+- Reported Performance: [click](https://github.com/SegmentationBLWX/sssegmentation/tree/main/docs/modelzoo/dmnet).
 
 **10.ISANet**
 
 - Related Paper: [click](https://arxiv.org/pdf/1907.12273.pdf),
-- Reported Performance: [click](https://github.com/SegmentationBLWX/sssegmentation/tree/main/docs/performances/isanet).
+- Reported Performance: [click](https://github.com/SegmentationBLWX/sssegmentation/tree/main/docs/modelzoo/isanet).
 
 **11.EncNet**
 
 - Related Paper: [click](https://arxiv.org/pdf/1803.08904.pdf),
-- Reported Performance: [click](https://github.com/SegmentationBLWX/sssegmentation/tree/main/docs/performances/encnet).
+- Reported Performance: [click](https://github.com/SegmentationBLWX/sssegmentation/tree/main/docs/modelzoo/encnet).
 
 **12.OCRNet**
 
 - Related Paper: [click](https://arxiv.org/pdf/1909.11065.pdf),
-- Reported Performance: [click](https://github.com/SegmentationBLWX/sssegmentation/tree/main/docs/performances/ocrnet).
+- Reported Performance: [click](https://github.com/SegmentationBLWX/sssegmentation/tree/main/docs/modelzoo/ocrnet).
 
 **13.DNLNet**
 
 - Related Paper: [click](https://arxiv.org/pdf/2006.06668.pdf),
-- Reported Performance: [click](https://github.com/SegmentationBLWX/sssegmentation/tree/main/docs/performances/dnlnet).
+- Reported Performance: [click](https://github.com/SegmentationBLWX/sssegmentation/tree/main/docs/modelzoo/dnlnet).
 
 **14.ANNNet**
 
 - Related Paper: [click](https://arxiv.org/pdf/1908.07678.pdf),
-- Reported Performance: [click](https://github.com/SegmentationBLWX/sssegmentation/tree/main/docs/performances/annnet).
+- Reported Performance: [click](https://github.com/SegmentationBLWX/sssegmentation/tree/main/docs/modelzoo/annnet).
 
 **15.EMANet**
 
 - Related Paper: [click](https://arxiv.org/pdf/1907.13426.pdf),
-- Reported Performance: [click](https://github.com/SegmentationBLWX/sssegmentation/tree/main/docs/performances/emanet).
+- Reported Performance: [click](https://github.com/SegmentationBLWX/sssegmentation/tree/main/docs/modelzoo/emanet).
 
 **16.PSPNet**
 
 - Related Paper: [click](https://arxiv.org/pdf/1612.01105.pdf),
-- Reported Performance: [click](https://github.com/SegmentationBLWX/sssegmentation/tree/main/docs/performances/pspnet).
+- Reported Performance: [click](https://github.com/SegmentationBLWX/sssegmentation/tree/main/docs/modelzoo/pspnet).
 
 **17.PSANet**
 
 - Related Paper: [click](https://openaccess.thecvf.com/content_ECCV_2018/papers/Hengshuang_Zhao_PSANet_Point-wise_Spatial_ECCV_2018_paper.pdf),
-- Reported Performance: [click](https://github.com/SegmentationBLWX/sssegmentation/tree/main/docs/performances/psanet).
+- Reported Performance: [click](https://github.com/SegmentationBLWX/sssegmentation/tree/main/docs/modelzoo/psanet).
 
 **18.APCNet**
 
 - Related Paper: [click](https://openaccess.thecvf.com/content_CVPR_2019/papers/He_Adaptive_Pyramid_Context_Network_for_Semantic_Segmentation_CVPR_2019_paper.pdf),
-- Reported Performance: [click](https://github.com/SegmentationBLWX/sssegmentation/tree/main/docs/performances/apcnet).
+- Reported Performance: [click](https://github.com/SegmentationBLWX/sssegmentation/tree/main/docs/modelzoo/apcnet).
 
 **19.FastFCN**
 
 - Related Paper: [click](https://arxiv.org/pdf/1903.11816.pdf),
-- Reported Performance: [click](https://github.com/SegmentationBLWX/sssegmentation/tree/main/docs/performances/fastfcn).
+- Reported Performance: [click](https://github.com/SegmentationBLWX/sssegmentation/tree/main/docs/modelzoo/fastfcn).
 
 **20.UPerNet**
 
 - Related Paper: [click](https://arxiv.org/pdf/1807.10221.pdf),
-- Reported Performance: [click](https://github.com/SegmentationBLWX/sssegmentation/tree/main/docs/performances/upernet).
+- Reported Performance: [click](https://github.com/SegmentationBLWX/sssegmentation/tree/main/docs/modelzoo/upernet).
 
 **21.PointRend**
 
 - Related Paper: [click](https://arxiv.org/pdf/1912.08193.pdf),
-- Reported Performance: [click](https://github.com/SegmentationBLWX/sssegmentation/tree/main/docs/performances/pointrend).
+- Reported Performance: [click](https://github.com/SegmentationBLWX/sssegmentation/tree/main/docs/modelzoo/pointrend).
 
 **22.Deeplabv3**
 
 - Related Paper: [click](https://arxiv.org/pdf/1706.05587.pdf),
-- Reported Performance: [click](https://github.com/SegmentationBLWX/sssegmentation/tree/main/docs/performances/deeplabv3).
+- Reported Performance: [click](https://github.com/SegmentationBLWX/sssegmentation/tree/main/docs/modelzoo/deeplabv3).
 
 **23.Segformer**
 
 - Related Paper: [click](https://arxiv.org/pdf/2105.15203.pdf),
-- Reported Performance: [click](https://github.com/SegmentationBLWX/sssegmentation/tree/main/docs/performances/segformer).
+- Reported Performance: [click](https://github.com/SegmentationBLWX/sssegmentation/tree/main/docs/modelzoo/segformer).
 
 **24.MaskFormer**
 
 - Related Paper: [click](https://arxiv.org/pdf/2107.06278.pdf),
-- Reported Performance: [click](https://github.com/SegmentationBLWX/sssegmentation/tree/main/docs/performances/maskformer).
+- Reported Performance: [click](https://github.com/SegmentationBLWX/sssegmentation/tree/main/docs/modelzoo/maskformer).
 
 **25.SemanticFPN**
 
 - Related Paper: [click](https://arxiv.org/pdf/1901.02446.pdf),
-- Reported Performance: [click](https://github.com/SegmentationBLWX/sssegmentation/tree/main/docs/performances/semanticfpn).
+- Reported Performance: [click](https://github.com/SegmentationBLWX/sssegmentation/tree/main/docs/modelzoo/semanticfpn).
 
 **26.NonLocalNet**
 
 - Related Paper: [click](https://arxiv.org/pdf/1711.07971.pdf),
-- Reported Performance: [click](https://github.com/SegmentationBLWX/sssegmentation/tree/main/docs/performances/nonlocalnet).
+- Reported Performance: [click](https://github.com/SegmentationBLWX/sssegmentation/tree/main/docs/modelzoo/nonlocalnet).
 
 **27.Deeplabv3Plus**
 
 - Related Paper: [click](https://arxiv.org/pdf/1802.02611.pdf),
-- Reported Performance: [click](https://github.com/SegmentationBLWX/sssegmentation/tree/main/docs/performances/deeplabv3plus).
+- Reported Performance: [click](https://github.com/SegmentationBLWX/sssegmentation/tree/main/docs/modelzoo/deeplabv3plus).
 
 **28.MemoryNet-MCIBI**
 
 - Related Paper: [click](https://arxiv.org/pdf/2108.11819.pdf),
-- Reported Performance: [click](https://github.com/SegmentationBLWX/sssegmentation/tree/main/docs/performances/memorynet).
+- Reported Performance: [click](https://github.com/SegmentationBLWX/sssegmentation/tree/main/docs/modelzoo/memorynet).
 
 **29.MemoryNetV2-MCIBI++**
 
 - Related Paper: [click](https://arxiv.org/pdf/2209.04471.pdf),
-- Reported Performance: [click](https://github.com/SegmentationBLWX/sssegmentation/tree/main/docs/performances/memorynetv2).
+- Reported Performance: [click](https://github.com/SegmentationBLWX/sssegmentation/tree/main/docs/modelzoo/memorynetv2).
 
 **30.Mixed Precision (FP16) Training**
 
 - Related Paper: [click](https://arxiv.org/pdf/1710.03740.pdf),
-- Reported Performance: [click](https://github.com/SegmentationBLWX/sssegmentation/tree/main/docs/performances/fp16).
+- Reported Performance: [click](https://github.com/SegmentationBLWX/sssegmentation/tree/main/docs/modelzoo/fp16).

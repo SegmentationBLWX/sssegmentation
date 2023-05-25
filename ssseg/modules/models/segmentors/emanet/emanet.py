@@ -56,7 +56,7 @@ class EMANet(BaseSegmentor):
         # layer names for training tricks
         self.layer_names = ['backbone_net', 'ema_in_conv', 'ema_module', 'ema_out_conv', 'bottleneck', 'decoder', 'auxiliary_decoder']
     '''forward'''
-    def forward(self, x, targets=None, losses_cfg=None):
+    def forward(self, x, targets=None):
         img_size = x.size(2), x.size(3)
         # feed to backbone network
         backbone_outputs = self.transforminputs(self.backbone_net(x), selected_indices=self.cfg['backbone'].get('selected_indices'))
@@ -78,7 +78,7 @@ class EMANet(BaseSegmentor):
                 predictions=predictions,
                 targets=targets,
                 backbone_outputs=backbone_outputs,
-                losses_cfg=losses_cfg,
+                losses_cfg=self.cfg['losses'],
                 img_size=img_size,
             )
             return loss, losses_log_dict

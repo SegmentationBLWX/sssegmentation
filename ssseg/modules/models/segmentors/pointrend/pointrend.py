@@ -68,7 +68,7 @@ class PointRend(BaseSegmentor):
         # layer names for training tricks
         self.layer_names = ['backbone_net', 'fpn_neck', 'scale_heads', 'fcs', 'decoder', 'auxiliary_decoder']
     '''forward'''
-    def forward(self, x, targets=None, losses_cfg=None):
+    def forward(self, x, targets=None):
         img_size = x.size(2), x.size(3)
         # feed to backbone network
         backbone_outputs = self.transforminputs(self.backbone_net(x), selected_indices=self.cfg['backbone'].get('selected_indices'))
@@ -92,15 +92,15 @@ class PointRend(BaseSegmentor):
                 if self.coarse_pred_each_layer:
                     outputs = torch.cat([outputs, coarse_point_feats], dim=1)
             predictions = self.decoder(outputs)
-            point_labels = PointSample(targets['segmentation'].unsqueeze(1).float(), points, mode='nearest', align_corners=self.align_corners)
+            point_labels = PointSample(targets['seg_target'].unsqueeze(1).float(), points, mode='nearest', align_corners=self.align_corners)
             point_labels = point_labels.squeeze(1).long()
             targets['point_labels'] = point_labels
             predictions_aux = F.interpolate(predictions_aux, size=img_size, mode='bilinear', align_corners=self.align_corners)
             return self.calculatelosses(
                 predictions={'loss_cls': predictions, 'loss_aux': predictions_aux}, 
                 targets=targets,
-                losses_cfg=losses_cfg,
-                map_preds_to_tgts_dict={'loss_cls': 'point_labels', 'loss_aux': 'segmentation'}
+                losses_cfg=self.cfg['losses'],
+                map_preds_to_tgts_dict={'loss_cls': 'point_labels', 'loss_aux': 'seg_target'}
             )
         # if mode is TEST
         refined_seg_logits = predictions_aux.clone()

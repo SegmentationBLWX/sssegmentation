@@ -77,7 +77,7 @@ class ISNet(BaseSegmentor):
         # layer names for training tricks
         self.layer_names = ['backbone_net', 'bottleneck', 'ilc_net', 'slc_net', 'shortcut', 'decoder_stage1', 'decoder_stage2', 'auxiliary_decoder']
     '''forward'''
-    def forward(self, x, targets=None, losses_cfg=None):
+    def forward(self, x, targets=None):
         img_size = x.size(2), x.size(3)
         # feed to backbone network
         backbone_outputs = self.transforminputs(self.backbone_net(x), selected_indices=self.cfg['backbone'].get('selected_indices'))
@@ -104,7 +104,7 @@ class ISNet(BaseSegmentor):
                 predictions=preds_stage2,
                 targets=targets,
                 backbone_outputs=backbone_outputs,
-                losses_cfg=losses_cfg,
+                losses_cfg=self.cfg['losses'],
                 img_size=img_size,
                 compute_loss=False,
             )
@@ -114,6 +114,6 @@ class ISNet(BaseSegmentor):
             return self.calculatelosses(
                 predictions=outputs_dict, 
                 targets=targets, 
-                losses_cfg=losses_cfg
+                losses_cfg=self.cfg['losses']
             )
         return preds_stage2

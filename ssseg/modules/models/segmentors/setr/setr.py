@@ -44,7 +44,7 @@ class SETRUP(BaseSegmentor):
         # layer names for training tricks
         self.layer_names = ['backbone_net', 'decoder', 'norm_layers', 'auxiliary_decoders']
     '''forward'''
-    def forward(self, x, targets=None, losses_cfg=None):
+    def forward(self, x, targets=None):
         img_size = x.size(2), x.size(3)
         # feed to backbone network
         backbone_outputs = self.transforminputs(self.backbone_net(x), selected_indices=self.cfg['backbone'].get('selected_indices'))
@@ -66,7 +66,7 @@ class SETRUP(BaseSegmentor):
             return self.calculatelosses(
                 predictions=outputs_dict, 
                 targets=targets, 
-                losses_cfg=losses_cfg
+                losses_cfg=self.cfg['losses']
             )
         return predictions
     '''norm layer'''
@@ -139,7 +139,7 @@ class SETRMLA(BaseSegmentor):
         # layer names for training tricks
         self.layer_names = ['backbone_net', 'decoder', 'mla_neck', 'auxiliary_decoders', 'up_convs']
     '''forward'''
-    def forward(self, x, targets=None, losses_cfg=None):
+    def forward(self, x, targets=None):
         img_size = x.size(2), x.size(3)
         # feed to backbone network
         backbone_outputs = self.transforminputs(self.backbone_net(x), selected_indices=self.cfg['backbone'].get('selected_indices'))
@@ -164,7 +164,7 @@ class SETRMLA(BaseSegmentor):
             return self.calculatelosses(
                 predictions=outputs_dict, 
                 targets=targets, 
-                losses_cfg=losses_cfg
+                losses_cfg=self.cfg['losses']
             )
         return predictions
     '''build decoder'''

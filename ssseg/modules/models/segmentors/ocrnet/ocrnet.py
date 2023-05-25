@@ -52,7 +52,7 @@ class OCRNet(BaseSegmentor):
         # layer names for training tricks
         self.layer_names = ['backbone_net', 'bottleneck', 'spatial_gather_module', 'object_context_block', 'decoder', 'auxiliary_decoder']
     '''forward'''
-    def forward(self, x, targets=None, losses_cfg=None):
+    def forward(self, x, targets=None):
         img_size = x.size(2), x.size(3)
         # feed to backbone network
         backbone_outputs = self.transforminputs(self.backbone_net(x), selected_indices=self.cfg['backbone'].get('selected_indices'))
@@ -72,6 +72,6 @@ class OCRNet(BaseSegmentor):
             return self.calculatelosses(
                 predictions={'loss_cls': predictions, 'loss_aux': predictions_aux}, 
                 targets=targets, 
-                losses_cfg=losses_cfg
+                losses_cfg=self.cfg['losses']
             )
         return predictions

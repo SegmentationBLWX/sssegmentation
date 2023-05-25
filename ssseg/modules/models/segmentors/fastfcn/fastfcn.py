@@ -37,8 +37,8 @@ class FastFCN(nn.Module):
         # freeze normalization layer if necessary
         if cfg.get('is_freeze_norm', False): self.freezenormalization()
     '''forward'''
-    def forward(self, x, targets=None, losses_cfg=None, **kwargs):
-        return self.segmentor(x, targets, losses_cfg, **kwargs)
+    def forward(self, x, targets=None, **kwargs):
+        return self.segmentor(x, targets, **kwargs)
     '''transform inputs'''
     def transforminputs(self, x_list, selected_indices=None):
         if selected_indices is None:

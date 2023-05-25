@@ -101,7 +101,7 @@ class MemoryNetV2(BaseSegmentor):
             'self_attention', 'context_within_image_module', 'auxiliary_decoder'
         ]
     '''forward'''
-    def forward(self, x, targets=None, losses_cfg=None, **kwargs):
+    def forward(self, x, targets=None, **kwargs):
         img_size = x.size(2), x.size(3)
         # feed to backbone network
         backbone_outputs = self.transforminputs(self.backbone_net(x), selected_indices=self.cfg['backbone'].get('selected_indices'))
@@ -120,9 +120,9 @@ class MemoryNetV2(BaseSegmentor):
         assert memory_input.shape[2:] == memory_gather_logits.shape[2:]
         if (self.mode == 'TRAIN') and (kwargs['epoch'] < self.cfg['head'].get('warmup_epoch', 0)):
             with torch.no_grad():
-                gt = targets['segmentation']
+                gt = targets['seg_target']
                 gt = F.interpolate(gt.unsqueeze(1), size=memory_gather_logits.shape[2:], mode='nearest')[:, 0, :, :]
-                assert len(gt.shape) == 3, 'segmentation format error'
+                assert len(gt.shape) == 3, 'seg_target format error'
                 preds_gt = gt.new_zeros(memory_gather_logits.shape).type_as(memory_gather_logits)
                 valid_mask = (gt >= 0) & (gt < self.cfg['num_classes'])
                 idxs = torch.nonzero(valid_mask, as_tuple=True)
@@ -164,7 +164,7 @@ class MemoryNetV2(BaseSegmentor):
                 predictions=preds_cls,
                 targets=targets,
                 backbone_outputs=backbone_outputs,
-                losses_cfg=losses_cfg,
+                losses_cfg=self.cfg['losses'],
                 img_size=img_size,
                 compute_loss=False,
             )
@@ -180,14 +180,14 @@ class MemoryNetV2(BaseSegmentor):
             with torch.no_grad():
                 self.memory_module.update(
                     features=F.interpolate(pixel_representations, size=img_size, mode='bilinear', align_corners=self.align_corners), 
-                    segmentation=targets['segmentation'],
+                    segmentation=targets['seg_target'],
                     learning_rate=kwargs['learning_rate'],
                     **self.cfg['head']['update_cfg']
                 )
             loss, losses_log_dict = self.calculatelosses(
                 predictions=outputs_dict, 
                 targets=targets, 
-                losses_cfg=losses_cfg,
+                losses_cfg=self.cfg['losses'],
             )
             return loss, losses_log_dict
         return preds_cls

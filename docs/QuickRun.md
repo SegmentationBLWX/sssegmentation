@@ -25,7 +25,7 @@ bash scripts/distrain.sh 4 ssseg/configs/annnet/annnet_resnet50os16_ade20k.py
 If you want to resume from the checkpoints, you can run as follows,
 
 ```sh
-bash scripts/distrain.sh 4 ssseg/configs/annnet/annnet_resnet50os16_ade20k.py --checkpointspath annnet_resnet50os16_ade20k/epoch_44.pth
+bash scripts/distrain.sh 4 ssseg/configs/annnet/annnet_resnet50os16_ade20k.py --ckptspath annnet_resnet50os16_ade20k/epoch_44.pth
 ```
 
 #### Train with multiple machines
@@ -57,7 +57,7 @@ We provide testing scripts to evaluate a whole dataset (Cityscapes, PASCAL VOC, 
 You can test the segmentors in a single machine as follows,
 
 ```sh
-bash scripts/distest.sh ${NGPUS} ${CFGFILEPATH} ${CHECKPOINTSPATH} [optional arguments]
+bash scripts/distest.sh ${NGPUS} ${CFGFILEPATH} ${ckptspath} [optional arguments]
 ```
 
 For example, you can test a segmentor on a single machine with the following commands,
@@ -76,7 +76,7 @@ It supports both single-node and multi-node testing.
 Specifically, you can test the segmentors with multiple machines as follows,
 
 ```sh
-bash scripts/slurmtest.sh ${PARTITION} ${JOBNAME} ${NGPUS} ${CFGFILEPATH} ${CHECKPOINTSPATH} [optional arguments]
+bash scripts/slurmtest.sh ${PARTITION} ${JOBNAME} ${NGPUS} ${CFGFILEPATH} ${ckptspath} [optional arguments]
 ```
 
 Here is an example of using 16 GPUs to test PSPNet on the dev partition,
@@ -91,7 +91,7 @@ bash scripts/slurmtest.sh dev pspnet 16 ssseg/configs/pspnet/pspnet_resnet101os8
 You can apply the segmentor as follows:
 
 ```sh
-bash scripts/inference.sh ${CFGFILEPATH} ${CHECKPOINTSPATH} [optional arguments]
+bash scripts/inference.sh ${CFGFILEPATH} ${ckptspath} [optional arguments]
 ```
 
 For example, if you want to inference one image, the command can be,
