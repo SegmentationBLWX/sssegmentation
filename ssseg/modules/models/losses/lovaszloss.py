@@ -5,6 +5,7 @@ Author:
     Zhenchao Jin
 '''
 import torch
+import torch.nn as nn
 import torch.nn.functional as F
 
 
@@ -144,10 +145,24 @@ def LovaszSoftmaxLoss(prediction, target, scale_factor=1.0, per_image=False, cla
 
 
 '''LovaszLoss'''
-def LovaszLoss(mode='multi_class', **kwargs):
-    support_modes = {
-        'binary': LovaszHingeLoss,
-        'multi_class': LovaszSoftmaxLoss,
-    }
-    assert mode in support_modes, 'unsupport mode %s' % mode
-    return support_modes[mode](**kwargs)
+class LovaszLoss(nn.Module):
+    def __init__(self, mode='multi_class', **kwargs):
+        super(LovaszLoss, self).__init__()
+        self.mode = mode
+        self.loss_args = kwargs
+    '''forward'''
+    def forward(self, prediction, target):
+        # fetch attributes
+        mode = self.mode
+        # supported modes
+        supported_modes = {
+            'binary': LovaszHingeLoss,
+            'multi_class': LovaszSoftmaxLoss,
+        }
+        # construct loss_cfg
+        lovasz_args = self.loss_args.copy()
+        lovasz_args.update({'prediction': prediction, 'target': target})
+        # calculate loss
+        loss = supported_modes[mode](**lovasz_args)
+        # return
+        return loss

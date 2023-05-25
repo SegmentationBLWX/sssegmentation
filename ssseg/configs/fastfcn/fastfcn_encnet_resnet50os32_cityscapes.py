@@ -35,9 +35,9 @@ SEGMENTOR_CFG.update({
         'in_channels': 1024, 'out_channels': 512, 'dropout': 0.1,
     },
     'losses': {
-        'loss_aux': {'celoss': {'scale_factor': 0.4, 'ignore_index': 255, 'reduction': 'mean'}},
-        'loss_se': {'binaryceloss': {'scale_factor': 0.2, 'reduction': 'mean'}},
-        'loss_cls': {'celoss': {'scale_factor': 1.0, 'ignore_index': 255, 'reduction': 'mean'}},
+        'loss_aux': {'CrossEntropyLoss': {'scale_factor': 0.4, 'ignore_index': 255, 'reduction': 'mean'}},
+        'loss_se': {'BinaryCrossEntropyLoss': {'scale_factor': 0.2, 'reduction': 'mean'}},
+        'loss_cls': {'CrossEntropyLoss': {'scale_factor': 1.0, 'ignore_index': 255, 'reduction': 'mean'}},
     }
 })
 SEGMENTOR_CFG['work_dir'] = 'fastfcn_encnet_resnet50os32_cityscapes'

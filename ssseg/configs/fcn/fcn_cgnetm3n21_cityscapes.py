@@ -42,7 +42,7 @@ SEGMENTOR_CFG['head'] = {
 SEGMENTOR_CFG['auxiliary'] = None
 SEGMENTOR_CFG['losses'] = {
     'loss_cls': {
-        'celoss': {
+        'CrossEntropyLoss': {
             'scale_factor': 1.0, 'ignore_index': 255, 'reduction': 'mean', 
             'weight': torch.tensor([2.5959933, 6.7415504, 3.5354059, 9.8663225, 9.690899, 9.369352, 10.289121, 9.953208, 4.3097677, 9.490387, 7.674431, 9.396905, 10.347791, 6.3927646, 10.226669, 10.241062, 10.280587, 10.396974, 10.055647]),
         }

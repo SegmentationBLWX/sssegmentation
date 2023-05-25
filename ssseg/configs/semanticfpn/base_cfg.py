@@ -22,7 +22,7 @@ SEGMENTOR_CFG = {
         'feature_stride_list': [4, 8, 16, 32], 'scale_head_channels': 128, 'dropout': 0.1,
     },
     'losses': {
-        'loss_cls': {'celoss': {'scale_factor': 1.0, 'ignore_index': 255, 'reduction': 'mean'}},
+        'loss_cls': {'CrossEntropyLoss': {'scale_factor': 1.0, 'ignore_index': 255, 'reduction': 'mean'}},
     },
     'inference': {
         'mode': 'whole',

@@ -32,9 +32,9 @@ SEGMENTOR_CFG['auxiliary'] = [
     {'in_channels': 128, 'out_channels': 64, 'dropout': 0.1, 'num_convs': 1},
 ]
 SEGMENTOR_CFG['losses'] = {
-    'loss_aux1': {'celoss': {'scale_factor': 1.0, 'ignore_index': 255, 'reduction': 'mean'}},
-    'loss_aux2': {'celoss': {'scale_factor': 1.0, 'ignore_index': 255, 'reduction': 'mean'}},
-    'loss_cls': {'celoss': {'scale_factor': 1.0, 'ignore_index': 255, 'reduction': 'mean'}},
+    'loss_aux1': {'CrossEntropyLoss': {'scale_factor': 1.0, 'ignore_index': 255, 'reduction': 'mean'}},
+    'loss_aux2': {'CrossEntropyLoss': {'scale_factor': 1.0, 'ignore_index': 255, 'reduction': 'mean'}},
+    'loss_cls': {'CrossEntropyLoss': {'scale_factor': 1.0, 'ignore_index': 255, 'reduction': 'mean'}},
 }
 SEGMENTOR_CFG['work_dir'] = 'fcn_bisenetv1_resnet18os32_cityscapes'
 SEGMENTOR_CFG['logfilepath'] = 'fcn_bisenetv1_resnet18os32_cityscapes/fcn_bisenetv1_resnet18os32_cityscapes.log'

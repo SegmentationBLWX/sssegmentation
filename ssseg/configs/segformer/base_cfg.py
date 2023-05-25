@@ -21,7 +21,7 @@ SEGMENTOR_CFG = {
         'in_channels_list': [32, 64, 160, 256], 'feats_channels': 256, 'dropout': 0.1,
     },
     'losses': {
-        'loss_cls': {'celoss': {'scale_factor': 1.0, 'ignore_index': 255, 'reduction': 'mean'}},
+        'loss_cls': {'CrossEntropyLoss': {'scale_factor': 1.0, 'ignore_index': 255, 'reduction': 'mean'}},
     },
     'inference': {
         'mode': 'whole',

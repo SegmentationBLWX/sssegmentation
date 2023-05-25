@@ -4,6 +4,7 @@ Function:
 Author:
     Zhenchao Jin
 '''
+import copy
 from .l1loss import L1Loss
 from .klloss import KLDivLoss
 from .diceloss import DiceLoss
@@ -14,15 +15,16 @@ from .celoss import CrossEntropyLoss, BinaryCrossEntropyLoss
 
 
 '''BuildLoss'''
-def BuildLoss(loss_type):
+def BuildLoss(loss_cfg):
+    loss_cfg = copy.deepcopy(loss_cfg)
+    # supported losses
     supported_losses = {
-        'l1loss': L1Loss,
-        'diceloss': DiceLoss,
-        'kldivloss': KLDivLoss,
-        'lovaszloss': LovaszLoss,
-        'celoss': CrossEntropyLoss,
-        'sigmoidfocalloss': SigmoidFocalLoss,
-        'binaryceloss': BinaryCrossEntropyLoss,
-        'cosinesimilarityloss': CosineSimilarityLoss,
+        'L1Loss': L1Loss, 'DiceLoss': DiceLoss, 'KLDivLoss': KLDivLoss, 'LovaszLoss': LovaszLoss,
+        'CrossEntropyLoss': CrossEntropyLoss, 'SigmoidFocalLoss': SigmoidFocalLoss,
+        'CosineSimilarityLoss': CosineSimilarityLoss, 'BinaryCrossEntropyLoss': BinaryCrossEntropyLoss,
     }
-    return supported_losses[loss_type]
+    # build loss
+    loss_type = loss_cfg.pop('type')
+    loss_func = supported_losses[loss_type](**loss_cfg)
+    # return
+    return loss_func
