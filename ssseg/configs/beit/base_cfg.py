@@ -36,7 +36,7 @@ SEGMENTOR_CFG = {
         }
     },
     'scheduler': {
-        'type': 'poly', 'max_epochs': 0, 'power': 1.0, 'min_lr': 0.0, 
+        'type': 'PolyScheduler', 'max_epochs': 0, 'power': 1.0, 'min_lr': 0.0, 
         'warmup_cfg': {'type': 'linear', 'ratio': 1e-6, 'iters': 1500},
         'optimizer': {
             'type': 'adamw', 'lr': 3e-5, 'betas': (0.9, 0.999), 'weight_decay': 0.05, 
