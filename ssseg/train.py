@@ -250,8 +250,8 @@ class Trainer():
             all_preds, all_gts = all_preds_filtered, all_gts_filtered
             logger_handle.info('All Finished, all_preds: %s, all_gts: %s' % (len(all_preds), len(all_gts)))
             result = dataset.evaluate(
-                predictions=all_preds, 
-                groundtruths=all_gts, 
+                seg_preds=all_preds, 
+                seg_targets=all_gts, 
                 metric_list=inference_cfg.get('metric_list', ['iou', 'miou']),
                 num_classes=cfg.SEGMENTOR_CFG['num_classes'],
                 ignore_index=-1,

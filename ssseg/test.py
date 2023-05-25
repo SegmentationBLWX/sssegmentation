@@ -250,8 +250,8 @@ def main():
         dataset = BuildDataset(mode='TEST', logger_handle=logger_handle, dataset_cfg=cfg.SEGMENTOR_CFG['dataset'])
         if args.evalmode == 'offline':
             result = dataset.evaluate(
-                predictions=all_preds, 
-                groundtruths=all_gts, 
+                seg_preds=all_preds, 
+                seg_targets=all_gts, 
                 metric_list=cfg.SEGMENTOR_CFG['inference'].get('metric_list', ['iou', 'miou']),
                 num_classes=cfg.SEGMENTOR_CFG['num_classes'],
                 ignore_index=-1,
