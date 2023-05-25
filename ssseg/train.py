@@ -66,7 +66,7 @@ class Trainer():
         segmentor.cuda(cmd_args.local_rank)
         torch.backends.cudnn.benchmark = cfg.SEGMENTOR_CFG['benchmark']
         # build optimizer
-        optimizer = BuildOptimizer(segmentor, cfg.SEGMENTOR_CFG['optimizer'])
+        optimizer = BuildOptimizer(segmentor, cfg.SEGMENTOR_CFG['scheduler']['optimizer'])
         # build fp16
         fp16_cfg = self.cfg.SEGMENTOR_CFG.get('fp16_cfg', {'type': None})
         fp16_type = fp16_cfg.pop('type')
@@ -77,11 +77,12 @@ class Trainer():
         # build scheduler
         scheduler_cfg = copy.deepcopy(cfg.SEGMENTOR_CFG['scheduler'])
         scheduler_cfg.update({
-            'lr': cfg.SEGMENTOR_CFG['optimizer']['lr'],
+            'optimizer': optimizer,
+            'lr': cfg.SEGMENTOR_CFG['scheduler']['optimizer']['lr'],
             'iters_per_epoch': len(dataloader),
-            'params_rules': cfg.SEGMENTOR_CFG['optimizer']['params_rules'],
+            'params_rules': cfg.SEGMENTOR_CFG['scheduler']['optimizer']['params_rules'],
         })
-        scheduler = BuildScheduler(optimizer=optimizer, scheduler_cfg=scheduler_cfg)
+        scheduler = BuildScheduler(scheduler_cfg=scheduler_cfg)
         start_epoch, end_epoch = 1, scheduler_cfg['max_epochs']
         # load ckpts
         if cmd_args.ckptspath and os.path.exists(cmd_args.ckptspath):

@@ -38,6 +38,7 @@ def BuildBackbone(backbone_cfg):
     }
     # build backbone
     backbone_type = backbone_cfg.pop('type')
+    if 'selected_indices' in backbone_cfg: backbone_cfg.pop('selected_indices')
     backbone = supported_backbones[backbone_type](**backbone_cfg)
     # return
     return backbone

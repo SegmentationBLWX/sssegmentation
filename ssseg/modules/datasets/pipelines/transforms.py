@@ -312,7 +312,7 @@ class Padding(object):
         right = output_size[1] - w_ori - left
         # padding
         for key in ['image', 'seg_target', 'edge_target']:
-            sample_meta = self.padding(key, sample_meta, top, bottom, left, right, getattr(self, f'{key}_fill_value'), data_type)
+            sample_meta = self.padding(key, sample_meta, top, bottom, left, right, getattr(self, f'{key}_fill_value'), self.data_type)
         # return
         return sample_meta
     '''padding'''

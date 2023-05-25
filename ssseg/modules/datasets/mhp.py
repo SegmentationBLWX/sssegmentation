@@ -18,11 +18,7 @@ class MHPv1Dataset(BaseDataset):
         'dress', 'belt', 'left shoe', 'right shoe', 'face', 'left leg', 'right leg',
         'left arm', 'right arm', 'bag', 'scarf', 'torso skin'
     ]
-    palette = [
-        (0, 0, 0), (128, 0, 0), (255, 0, 0), (0, 85, 0), (170, 0, 51), (255, 85, 0), (0, 0, 85),
-        (0, 119, 221), (85, 85, 0), (0, 85, 85), (85, 51, 0), (52, 86, 128), (0, 128, 0), (0, 0, 255), 
-        (51, 170, 221), (0, 255, 255), (85, 255, 170), (170, 255, 85), (255, 255, 0), (255, 170, 0)
-    ]
+    palette = BaseDataset.randompalette(num_classes)
     assert num_classes == len(classnames) and num_classes == len(palette)
     def __init__(self, mode, logger_handle, dataset_cfg):
         super(MHPv1Dataset, self).__init__(mode=mode, logger_handle=logger_handle, dataset_cfg=dataset_cfg)
