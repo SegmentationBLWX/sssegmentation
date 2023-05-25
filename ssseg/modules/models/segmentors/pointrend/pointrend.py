@@ -9,7 +9,10 @@ import numpy as np
 import torch.nn as nn
 import torch.nn.functional as F
 from ..base import FPN, BaseSegmentor
-from mmcv.ops import point_sample as PointSample
+try:
+    from mmcv.ops import point_sample as PointSample
+except:
+    PointSample = None
 from ...backbones import BuildActivation, BuildNormalization
 
 

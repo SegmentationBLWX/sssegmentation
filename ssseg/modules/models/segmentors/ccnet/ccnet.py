@@ -7,7 +7,10 @@ Author:
 import torch
 import torch.nn as nn
 from ..base import BaseSegmentor
-from mmcv.ops import CrissCrossAttention
+try:
+    from mmcv.ops import CrissCrossAttention
+except:
+    CrissCrossAttention = None
 from ...backbones import BuildActivation, BuildNormalization
 
 

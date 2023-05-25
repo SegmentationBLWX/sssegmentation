@@ -7,7 +7,10 @@ Author:
 import torch
 import torch.nn as nn
 import torch.nn.functional as F
-from mmcv.ops import PSAMask
+try:
+    from mmcv.ops import PSAMask
+except:
+    PSAMask = None
 from ..base import BaseSegmentor
 from ...backbones import BuildActivation, BuildNormalization
 
