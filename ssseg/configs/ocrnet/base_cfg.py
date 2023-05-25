@@ -14,7 +14,7 @@ SEGMENTOR_CFG = {
     'norm_cfg': {'type': 'SyncBatchNorm'},
     'act_cfg': {'type': 'ReLU', 'inplace': True},
     'backbone': {
-        'type': 'hrnetv2_w18', 'series': 'hrnet', 'pretrained': True, 'selected_indices': (0, 0),
+        'type': 'HRNet', 'structure_type': 'hrnetv2_w18', 'arch': 'hrnetv2_w18', 'pretrained': True, 'selected_indices': (0, 0),
     },
     'head': {
         'in_channels': sum([18, 36, 72, 144]), 'feats_channels': 512, 'transform_channels': 256, 'scale': 1, 'dropout': 0,

@@ -25,8 +25,8 @@ SEGMENTOR_CFG['scheduler']['max_epochs'] = 60
 # modify other segmentor configs
 SEGMENTOR_CFG['num_classes'] = 21
 SEGMENTOR_CFG['backbone'] = {
-    'type': 'resnet50', 'series': 'resnet', 'pretrained': True,
-    'outstride': 8, 'use_stem': True, 'selected_indices': (0, 1, 2, 3),
+    'type': 'ResNet', 'depth': 50, 'structure_type': 'resnet50conv3x3stem',
+    'pretrained': True, 'outstride': 8, 'use_conv3x3_stem': True, 'selected_indices': (0, 1, 2, 3),
 }
 SEGMENTOR_CFG['work_dir'] = 'ce2p_resnet50os8_voc'
 SEGMENTOR_CFG['logfilepath'] = 'ce2p_resnet50os8_voc/ce2p_resnet50os8_voc.log'

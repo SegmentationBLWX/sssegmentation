@@ -14,7 +14,7 @@ SEGMENTOR_CFG = {
     'norm_cfg': {'type': 'SyncBatchNorm'},
     'act_cfg': {'type': 'ReLU', 'inplace': True},
     'backbone': {
-        'type': 'beit_base_patch16_224_pt22k_ft22k', 'series': 'beit', 'pretrained': True,
+        'type': 'BEiT', 'structure_type': 'beit_base_patch16_224_pt22k_ft22k', 'pretrained': True, 
         'selected_indices': (0, 1, 2, 3), 'norm_cfg': {'type': 'LayerNorm', 'eps': 1e-6},
     },
     'head': {

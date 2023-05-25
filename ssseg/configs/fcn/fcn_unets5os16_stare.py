@@ -15,7 +15,7 @@ SEGMENTOR_CFG['scheduler']['max_epochs'] = 1
 # modify other segmentor configs
 SEGMENTOR_CFG['num_classes'] = 2
 SEGMENTOR_CFG['backbone'] = {
-    'type': None, 'series': 'unet', 'pretrained': False, 'selected_indices': (3, 4),
+    'type': 'UNet', 'structure_type': 'unets5os16', 'pretrained': False, 'selected_indices': (3, 4),
 }
 SEGMENTOR_CFG['head'] = {
     'in_channels': 64, 'feats_channels': 64, 'dropout': 0.1,

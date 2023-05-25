@@ -20,7 +20,7 @@ SEGMENTOR_CFG['scheduler']['optimizer'] = {
 # modify other segmentor configs
 SEGMENTOR_CFG['num_classes'] = 19
 SEGMENTOR_CFG['backbone'] = {
-    'type': 'resnest101', 'series': 'resnest', 'pretrained': True, 'outstride': 8, 'selected_indices': (0, 1, 2, 3),
+    'type': 'ResNeSt', 'depth': 101, 'structure_type': 'resnest101', 'pretrained': True, 'outstride': 8, 'selected_indices': (0, 1, 2, 3),
 }
 SEGMENTOR_CFG['head']['decoder'] = {
     'pr': {'in_channels': 512, 'out_channels': 512, 'dropout': 0.1},

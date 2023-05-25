@@ -15,7 +15,7 @@ SEGMENTOR_CFG['scheduler']['max_epochs'] = 130
 # modify other segmentor configs
 SEGMENTOR_CFG['num_classes'] = 150
 SEGMENTOR_CFG['backbone'] = {
-    'type': 'hrnetv2_w48', 'series': 'hrnet', 'pretrained': True, 'selected_indices': (0, 0),
+    'type': 'HRNet', 'structure_type': 'hrnetv2_w48', 'arch': 'hrnetv2_w48', 'pretrained': True, 'selected_indices': (0, 0),
 }
 SEGMENTOR_CFG['head'] = {
     'in_channels': sum([48, 96, 192, 384]), 'feats_channels': 512, 'transform_channels': 256, 'scale': 1, 'dropout': 0,

@@ -14,8 +14,10 @@ SEGMENTOR_CFG = {
     'norm_cfg': {'type': 'SyncBatchNorm'},
     'act_cfg': {'type': 'ReLU', 'inplace': True},
     'backbone': {
-        'type': 'mit-b0', 'series': 'mit', 'pretrained': True, 'pretrained_model_path': 'mit_b0.pth',
+        'type': 'MixVisionTransformer', 'structure_type': 'mit-b0', 'pretrained': True, 'pretrained_model_path': 'mit_b0.pth',
         'selected_indices': (0, 1, 2, 3), 'norm_cfg': {'type': 'LayerNorm', 'eps': 1e-6},
+        'embed_dims': 32, 'num_stages': 4, 'num_layers': [2, 2, 2, 2], 'num_heads': [1, 2, 5, 8], 'patch_sizes': [7, 3, 3, 3],
+        'sr_ratios': [8, 4, 2, 1], 'mlp_ratio': 4, 'qkv_bias': True, 'drop_rate': 0.0, 'attn_drop_rate': 0.0, 'drop_path_rate': 0.1,
     },
     'head': {
         'in_channels_list': [32, 64, 160, 256], 'feats_channels': 256, 'dropout': 0.1,

@@ -15,7 +15,7 @@ SEGMENTOR_CFG['scheduler']['max_epochs'] = 130
 # modify other segmentor configs
 SEGMENTOR_CFG['num_classes'] = 150
 SEGMENTOR_CFG['backbone'] = {
-    'type': 'mobilenetv2', 'series': 'mobilenet', 'pretrained': True, 'outstride': 8, 'selected_indices': (2, 3),
+    'type': 'MobileNetV2', 'structure_type': 'mobilenetv2', 'pretrained': True, 'outstride': 8, 'selected_indices': (2, 3),
 }
 SEGMENTOR_CFG['head'] = {
     'in_channels': 320, 'feats_channels': 512, 'dilations': [1, 12, 24, 36], 'dropout': 0.1,

@@ -22,7 +22,9 @@ SEGMENTOR_CFG['scheduler']['optimizer'] = {
 # modify other segmentor configs
 SEGMENTOR_CFG['num_classes'] = 150
 SEGMENTOR_CFG['backbone'] = {
-    'type': 'svt_large', 'series': 'twins', 'pretrained': True, 'selected_indices': (0, 1, 2, 3), 'norm_cfg': {'type': 'LayerNorm'},
+    'type': 'SVT', 'structure_type': 'svt_large', 'pretrained': True, 'selected_indices': (0, 1, 2, 3), 'norm_cfg': {'type': 'LayerNorm'},
+    'embed_dims': [128, 256, 512, 1024], 'num_heads': [4, 8, 16, 32], 'mlp_ratios': [4, 4, 4, 4], 'depths': [2, 2, 18, 2], 
+    'windiow_sizes': [7, 7, 7, 7], 'norm_after_stage': True, 'drop_path_rate': 0.3
 }
 SEGMENTOR_CFG['head'] = {
     'in_channels_list': [128, 256, 512, 1024], 'feats_channels': 512, 'pool_scales': [1, 2, 3, 6], 'dropout': 0.1,

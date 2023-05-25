@@ -18,7 +18,7 @@ SEGMENTOR_CFG['scheduler']['warmup_cfg'] = {'type': 'linear', 'ratio': 1e-6, 'it
 # modify other segmentor configs
 SEGMENTOR_CFG['num_classes'] = 150
 SEGMENTOR_CFG['backbone'] = {
-    'type': 'convnext_tiny', 'series': 'convnext', 'arch': 'tiny', 'pretrained': True, 'drop_path_rate': 0.4,
+    'type': 'ConvNeXt', 'structure_type': 'convnext_tiny', 'arch': 'tiny', 'pretrained': True, 'drop_path_rate': 0.4,
     'layer_scale_init_value': 1.0, 'gap_before_final_norm': False, 'selected_indices': (0, 1, 2, 3), 'norm_cfg': {'type': 'LayerNorm2d', 'eps': 1e-6},
 }
 SEGMENTOR_CFG['head'] = {

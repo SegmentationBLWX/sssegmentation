@@ -16,8 +16,8 @@ SEGMENTOR_CFG['scheduler']['max_epochs'] = 150
 SEGMENTOR_CFG['num_classes'] = 20
 SEGMENTOR_CFG['act_cfg'] = {'type': 'LeakyReLU', 'negative_slope': 0.01, 'inplace': True}
 SEGMENTOR_CFG['backbone'] = {
-    'type': 'resnet50', 'series': 'resnet', 'pretrained': True,
-    'outstride': 8, 'use_stem': True, 'selected_indices': (0, 1, 2, 3),
+    'type': 'ResNet', 'depth': 50, 'structure_type': 'resnet50conv3x3stem',
+    'pretrained': True, 'outstride': 8, 'use_conv3x3_stem': True, 'selected_indices': (0, 1, 2, 3),
 }
 SEGMENTOR_CFG['head']['shortcut']['is_on'] = True
 SEGMENTOR_CFG['work_dir'] = 'isnet_resnet50os8_lip'

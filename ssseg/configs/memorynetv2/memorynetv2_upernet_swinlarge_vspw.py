@@ -22,7 +22,11 @@ SEGMENTOR_CFG['scheduler']['optimizer'] = {
 # modify other segmentor configs
 SEGMENTOR_CFG['num_classes'] = 124
 SEGMENTOR_CFG['backbone'] = {
-    'type': 'swin_large_patch4_window12_384_22k', 'series': 'swin', 'pretrained': True, 'selected_indices': (0, 1, 2, 3), 'norm_cfg': {'type': 'LayerNorm'},
+    'type': 'SwinTransformer', 'structure_type': 'swin_large_patch4_window12_384_22k', 'pretrained': True, 
+    'selected_indices': (0, 1, 2, 3), 'norm_cfg': {'type': 'LayerNorm'},
+    'pretrain_img_size': 384, 'in_channels': 3, 'embed_dims': 192, 'patch_size': 4, 'window_size': 12, 'mlp_ratio': 4,
+    'depths': [2, 2, 18, 2], 'num_heads': [6, 12, 24, 48], 'qkv_bias': True, 'qk_scale': None, 'patch_norm': True,
+    'drop_rate': 0., 'attn_drop_rate': 0., 'drop_path_rate': 0.3, 'use_abs_pos_embed': False,
 }
 SEGMENTOR_CFG['head']['fpn'] = {
     'in_channels_list': [192, 384, 768, 1024], 'feats_channels': 1024, 'out_channels': 512,

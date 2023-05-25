@@ -34,7 +34,7 @@ SEGMENTOR_CFG['scheduler']['optimizer'] = {
 # modify other segmentor configs
 SEGMENTOR_CFG['num_classes'] = 19
 SEGMENTOR_CFG['backbone'] = {
-    'type': None, 'series': 'cgnet', 'pretrained': False, 'selected_indices': (1, 2),
+    'type': 'CGNet', 'structure_type': 'cgnetm3n21', 'pretrained': False, 'selected_indices': (1, 2),
 }
 SEGMENTOR_CFG['head'] = {
     'in_channels': 256, 'feats_channels': 256, 'dropout': 0, 'num_convs': 0,

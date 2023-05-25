@@ -15,8 +15,8 @@ SEGMENTOR_CFG['scheduler']['max_epochs'] = 220
 # modify other segmentor configs
 SEGMENTOR_CFG['num_classes'] = 19
 SEGMENTOR_CFG['backbone'] = {
-    'type': 'resnet50', 'series': 'resnet', 'pretrained': True,
-    'outstride': 16, 'use_stem': True, 'selected_indices': (2, 3),
+    'type': 'ResNet', 'depth': 50, 'structure_type': 'resnet50conv3x3stem',
+    'pretrained': True, 'outstride': 16, 'use_conv3x3_stem': True, 'selected_indices': (2, 3),
 }
 SEGMENTOR_CFG['work_dir'] = 'apcnet_resnet50os16_cityscapes'
 SEGMENTOR_CFG['logfilepath'] = 'apcnet_resnet50os16_cityscapes/apcnet_resnet50os16_cityscapes.log'

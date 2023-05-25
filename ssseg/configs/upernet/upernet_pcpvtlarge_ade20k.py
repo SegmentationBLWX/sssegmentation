@@ -22,7 +22,8 @@ SEGMENTOR_CFG['scheduler']['optimizer'] = {
 # modify other segmentor configs
 SEGMENTOR_CFG['num_classes'] = 150
 SEGMENTOR_CFG['backbone'] = {
-    'type': 'pcpvt_large', 'series': 'twins', 'pretrained': True, 'selected_indices': (0, 1, 2, 3), 'norm_cfg': {'type': 'LayerNorm'},
+    'type': 'PCPVT', 'structure_type': 'pcpvt_large', 'pretrained': True, 'selected_indices': (0, 1, 2, 3), 
+    'norm_cfg': {'type': 'LayerNorm'}, 'depths': [3, 8, 27, 3], 'drop_path_rate': 0.3,
 }
 SEGMENTOR_CFG['head'] = {
     'in_channels_list': [64, 128, 320, 512], 'feats_channels': 512, 'pool_scales': [1, 2, 3, 6], 'dropout': 0.1,

@@ -20,7 +20,7 @@ SEGMENTOR_CFG['scheduler']['optimizer'] = {
 # modify other segmentor configs
 SEGMENTOR_CFG['num_classes'] = 19
 SEGMENTOR_CFG['backbone'] = {
-    'type': None, 'series': 'bisenetv2', 'pretrained': False, 'selected_indices': (0, 1, 2, 3, 4),
+    'type': 'BiSeNetV2', 'structure_type': 'bisenetv2', 'pretrained': False, 'selected_indices': (0, 1, 2, 3, 4),
 }
 SEGMENTOR_CFG['head'] = {
     'in_channels': 128, 'feats_channels': 1024, 'dropout': 0.1, 'num_convs': 1,

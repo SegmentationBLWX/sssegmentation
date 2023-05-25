@@ -18,9 +18,9 @@ DEFAULT_MODEL_URLS = {
     'resnet50': 'https://download.pytorch.org/models/resnet50-19c8e357.pth',
     'resnet101': 'https://download.pytorch.org/models/resnet101-5d3b4d8f.pth',
     'resnet152': 'https://download.pytorch.org/models/resnet152-b121ed2d.pth',
-    'resnet18stem': 'https://download.openmmlab.com/pretrain/third_party/resnet18_v1c-b5776b93.pth',
-    'resnet50stem': 'https://download.openmmlab.com/pretrain/third_party/resnet50_v1c-2cccc1ad.pth',
-    'resnet101stem': 'https://download.openmmlab.com/pretrain/third_party/resnet101_v1c-e67eebb6.pth',
+    'resnet18conv3x3stem': 'https://download.openmmlab.com/pretrain/third_party/resnet18_v1c-b5776b93.pth',
+    'resnet50conv3x3stem': 'https://download.openmmlab.com/pretrain/third_party/resnet50_v1c-2cccc1ad.pth',
+    'resnet101conv3x3stem': 'https://download.openmmlab.com/pretrain/third_party/resnet101_v1c-e67eebb6.pth',
 }
 '''AUTO_ASSERT_STRUCTURE_TYPES'''
 AUTO_ASSERT_STRUCTURE_TYPES = {}
@@ -94,7 +94,7 @@ class ResNet(nn.Module):
         101: (Bottleneck, (3, 4, 23, 3)),
         152: (Bottleneck, (3, 8, 36, 3))
     }
-    def __init__(self, structure_type, in_channels=3, base_channels=64, stem_channels=64, depth=101, outstride=8, contract_dilation=True, use_stem=True, 
+    def __init__(self, structure_type, in_channels=3, base_channels=64, stem_channels=64, depth=101, outstride=8, contract_dilation=True, use_conv3x3_stem=True, 
                  out_indices=(0, 1, 2, 3), use_avg_for_downsample=False, norm_cfg={'type': 'SyncBatchNorm'}, act_cfg={'type': 'ReLU', 'inplace': True}, 
                  pretrained=True, pretrained_model_path=''):
         super(ResNet, self).__init__()
@@ -106,7 +106,7 @@ class ResNet(nn.Module):
         self.depth = depth
         self.outstride = outstride
         self.contract_dilation = contract_dilation
-        self.use_stem = use_stem
+        self.use_conv3x3_stem = use_conv3x3_stem
         self.out_indices = out_indices
         self.use_avg_for_downsample = use_avg_for_downsample
         self.norm_cfg = norm_cfg
@@ -130,7 +130,7 @@ class ResNet(nn.Module):
         assert outstride in outstride_to_strides_and_dilations, 'unsupport outstride %s' % outstride
         stride_list, dilation_list = outstride_to_strides_and_dilations[outstride]
         # whether replace the 7x7 conv in the input stem with three 3x3 convs
-        if use_stem:
+        if use_conv3x3_stem:
             self.stem = nn.Sequential(
                 nn.Conv2d(in_channels, stem_channels // 2, kernel_size=3, stride=2, padding=1, bias=False),
                 BuildNormalization(placeholder=stem_channels // 2, norm_cfg=norm_cfg),
@@ -236,7 +236,7 @@ class ResNet(nn.Module):
         return nn.Sequential(*layers)
     '''forward'''
     def forward(self, x):
-        if self.use_stem:
+        if self.use_conv3x3_stem:
             x = self.stem(x)
         else:
             x = self.conv1(x)

@@ -138,7 +138,7 @@ class ResNeSt(ResNet):
         200: (Bottleneck, (3, 24, 36, 3))
     }
     def __init__(self, structure_type, groups=1, base_width=4, radix=2, reduction_factor=4, use_avg_after_block_conv2=True,
-                 in_channels=3, base_channels=64, stem_channels=128, depth=101, outstride=8, contract_dilation=True, use_stem=True, 
+                 in_channels=3, base_channels=64, stem_channels=128, depth=101, outstride=8, contract_dilation=True, use_conv3x3_stem=True, 
                  out_indices=(0, 1, 2, 3), use_avg_for_downsample=True, norm_cfg={'type': 'SyncBatchNorm'}, act_cfg={'type': 'ReLU', 'inplace': True}, 
                  pretrained=True, pretrained_model_path=''):
         self.extra_args_for_makelayer = {
@@ -149,7 +149,7 @@ class ResNeSt(ResNet):
             'base_channels': base_channels,
             'use_avg_after_block_conv2': use_avg_after_block_conv2,
         }
-        super(ResNeSt, self).__init__(structure_type, in_channels, base_channels, stem_channels, depth, outstride, contract_dilation, use_stem, out_indices, use_avg_for_downsample, norm_cfg, act_cfg, False, '')
+        super(ResNeSt, self).__init__(structure_type, in_channels, base_channels, stem_channels, depth, outstride, contract_dilation, use_conv3x3_stem, out_indices, use_avg_for_downsample, norm_cfg, act_cfg, False, '')
         # set attributes
         self.structure_type = structure_type
         self.groups = groups
@@ -163,7 +163,7 @@ class ResNeSt(ResNet):
         self.depth = depth
         self.outstride = outstride
         self.contract_dilation = contract_dilation
-        self.use_stem = use_stem
+        self.use_conv3x3_stem = use_conv3x3_stem
         self.out_indices = out_indices
         self.use_avg_for_downsample = use_avg_for_downsample
         self.norm_cfg = norm_cfg

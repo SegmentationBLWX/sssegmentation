@@ -15,7 +15,7 @@ SEGMENTOR_CFG['scheduler']['max_epochs'] = 130
 # modify other segmentor configs
 SEGMENTOR_CFG['num_classes'] = 150
 SEGMENTOR_CFG['backbone'] = {
-    'type': 'resnest101', 'series': 'resnest', 'pretrained': True, 'outstride': 8, 'selected_indices': (2, 3),
+    'type': 'ResNeSt', 'depth': 101, 'structure_type': 'resnest101', 'pretrained': True, 'outstride': 8, 'selected_indices': (2, 3),
 }
 SEGMENTOR_CFG['work_dir'] = 'pspnet_resnest101os8_ade20k'
 SEGMENTOR_CFG['logfilepath'] = 'pspnet_resnest101os8_ade20k/pspnet_resnest101os8_ade20k.log'

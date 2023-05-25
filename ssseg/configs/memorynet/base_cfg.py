@@ -14,8 +14,8 @@ SEGMENTOR_CFG = {
     'norm_cfg': {'type': 'SyncBatchNorm'},
     'act_cfg': {'type': 'ReLU', 'inplace': True},
     'backbone': {
-        'type': 'resnet101', 'series': 'resnet', 'pretrained': True, 
-        'outstride': 8, 'use_stem': True, 'selected_indices': (0, 1, 2, 3),
+        'type': 'ResNet', 'depth': 101, 'structure_type': 'resnet101conv3x3stem',
+        'pretrained': True, 'outstride': 8, 'use_conv3x3_stem': True, 'selected_indices': (0, 1, 2, 3),
     },
     'head': {
         'downsample_backbone': {'kernel_size': 3, 'stride': 1, 'padding': 1, 'bias': False},

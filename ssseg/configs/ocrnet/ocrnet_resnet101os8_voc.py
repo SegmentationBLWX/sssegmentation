@@ -15,8 +15,8 @@ SEGMENTOR_CFG['scheduler']['max_epochs'] = 60
 # modify other segmentor configs
 SEGMENTOR_CFG['num_classes'] = 21
 SEGMENTOR_CFG['backbone'] = {
-    'type': 'resnet101', 'series': 'resnet', 'pretrained': True,
-    'outstride': 8, 'use_stem': True, 'selected_indices': (2, 3),
+    'type': 'ResNet', 'depth': 101, 'structure_type': 'resnet101conv3x3stem',
+    'pretrained': True, 'outstride': 8, 'use_conv3x3_stem': True, 'selected_indices': (2, 3),
 }
 SEGMENTOR_CFG['head'] = {
     'in_channels': 2048, 'feats_channels': 512, 'transform_channels': 256, 'scale': 1, 'dropout': 0,

@@ -15,7 +15,7 @@ SEGMENTOR_CFG['scheduler']['max_epochs'] = 860
 # modify other segmentor configs
 SEGMENTOR_CFG['num_classes'] = 19
 SEGMENTOR_CFG['backbone'] = {
-    'type': None, 'series': 'erfnet', 'pretrained': False, 'selected_indices': (0,),
+    'type': 'ERFNet', 'structure_type': 'erfnet', 'pretrained': False, 'selected_indices': (0,),
 }
 SEGMENTOR_CFG['head'] = {
     'in_channels': 16, 'feats_channels': 128, 'dropout': 0.1, 'num_convs': 1,

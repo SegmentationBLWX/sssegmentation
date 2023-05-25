@@ -15,7 +15,7 @@ SEGMENTOR_CFG['scheduler']['max_epochs'] = 440
 # modify other segmentor configs
 SEGMENTOR_CFG['num_classes'] = 19
 SEGMENTOR_CFG['backbone'] = {
-    'type': 'resnest101', 'series': 'resnest', 'pretrained': True, 'outstride': 8, 'selected_indices': (0, 1, 2, 3),
+    'type': 'ResNeSt', 'depth': 101, 'structure_type': 'resnest101', 'pretrained': True, 'outstride': 8, 'selected_indices': (0, 1, 2, 3),
 }
 SEGMENTOR_CFG['work_dir'] = 'isnet_resnest101os8_cityscapes'
 SEGMENTOR_CFG['logfilepath'] = 'isnet_resnest101os8_cityscapes/isnet_resnest101os8_cityscapes.log'

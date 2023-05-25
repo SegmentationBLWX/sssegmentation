@@ -15,8 +15,8 @@ SEGMENTOR_CFG['scheduler']['max_epochs'] = 220
 # modify other segmentor configs
 SEGMENTOR_CFG['num_classes'] = 19
 SEGMENTOR_CFG['backbone'] = {
-    'type': 'resnet101', 'series': 'resnet', 'pretrained': True,
-    'outstride': 16, 'use_stem': True, 'selected_indices': (2, 3),
+    'type': 'ResNet', 'depth': 101, 'structure_type': 'resnet101conv3x3stem',
+    'pretrained': True, 'outstride': 16, 'use_conv3x3_stem': True, 'selected_indices': (2, 3),
 }
 SEGMENTOR_CFG['work_dir'] = 'deeplabv3_resnet101os16_cityscapes'
 SEGMENTOR_CFG['logfilepath'] = 'deeplabv3_resnet101os16_cityscapes/deeplabv3_resnet101os16_cityscapes.log'

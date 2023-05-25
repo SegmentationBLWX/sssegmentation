@@ -19,7 +19,7 @@ SEGMENTOR_CFG['scheduler']['optimizer'] = {
 SEGMENTOR_CFG['num_classes'] = 20
 SEGMENTOR_CFG['act_cfg'] = {'type': 'LeakyReLU', 'negative_slope': 0.01, 'inplace': True}
 SEGMENTOR_CFG['backbone'] = {
-    'type': 'resnest101', 'series': 'resnest', 'pretrained': True, 'outstride': 8, 'selected_indices': (0, 1, 2, 3),
+    'type': 'ResNeSt', 'depth': 101, 'structure_type': 'resnest101', 'pretrained': True, 'outstride': 8, 'selected_indices': (0, 1, 2, 3),
 }
 SEGMENTOR_CFG['head']['shortcut']['is_on'] = True
 SEGMENTOR_CFG['work_dir'] = 'isnet_resnest101os8_lip'

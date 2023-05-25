@@ -14,7 +14,7 @@ SEGMENTOR_CFG = {
     'norm_cfg': {'type': 'SyncBatchNorm'},
     'act_cfg': {'type': 'ReLU', 'inplace': True},
     'backbone': {
-        'type': 'convnext_base', 'series': 'convnext', 'arch': 'base', 'pretrained': True, 'drop_path_rate': 0.4,
+        'type': 'ConvNeXt', 'structure_type': 'convnext_base', 'arch': 'base', 'pretrained': True, 'drop_path_rate': 0.4,
         'layer_scale_init_value': 1.0, 'gap_before_final_norm': False, 'selected_indices': (0, 1, 2, 3), 'norm_cfg': {'type': 'LayerNorm2d', 'eps': 1e-6},
     },
     'head': {

@@ -23,8 +23,8 @@ SEGMENTOR_CFG.update({
     'norm_cfg': {'type': 'SyncBatchNorm'},
     'act_cfg': {'type': 'ReLU', 'inplace': True},
     'backbone': {
-        'type': 'resnet50', 'series': 'resnet', 'pretrained': True, 
-        'outstride': 32, 'use_stem': True, 'selected_indices': (1, 2, 3),
+        'type': 'ResNet', 'depth': 50, 'structure_type': 'resnet50conv3x3stem',
+        'pretrained': True, 'outstride': 32, 'use_conv3x3_stem': True, 'selected_indices': (1, 2, 3),
     },
     'head': {
         'jpu': {'in_channels_list': (512, 1024, 2048), 'mid_channels': 512, 'dilations': (1, 2, 4, 8)},

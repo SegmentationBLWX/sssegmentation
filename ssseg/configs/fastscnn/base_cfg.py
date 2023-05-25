@@ -14,7 +14,7 @@ SEGMENTOR_CFG = {
     'norm_cfg': {'type': 'SyncBatchNorm'},
     'act_cfg': {'type': 'ReLU', 'inplace': True},
     'backbone': {
-        'type': None, 'series': 'fastscnn', 'pretrained': False, 'selected_indices': (0, 1, 2),
+        'type': 'FastSCNN', 'structure_type': 'fastscnn', 'pretrained': False, 'selected_indices': (0, 1, 2),
     },
     'head': {
         'in_channels': 128, 'feats_channels': 128, 'dropout': 0.1,

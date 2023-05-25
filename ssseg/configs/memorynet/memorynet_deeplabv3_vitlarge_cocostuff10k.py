@@ -18,8 +18,11 @@ SEGMENTOR_CFG['scheduler']['optimizer'] = {
 # modify other segmentor configs
 SEGMENTOR_CFG['num_classes'] = 182
 SEGMENTOR_CFG['backbone'] = {
-    'type': 'jx_vit_large_p16_384', 'series': 'vit', 'img_size': (512, 512), 'drop_rate': 0., 'out_indices': (9, 14, 19, 23),
+    'type': 'VisionTransformer', 'structure_type': 'jx_vit_large_p16_384', 'img_size': (512, 512), 'out_indices': (9, 14, 19, 23),
     'norm_cfg': {'type': 'LayerNorm', 'eps': 1e-6}, 'pretrained': True, 'selected_indices': (0, 1, 2, 3),
+    'patch_size': 16, 'embed_dims': 1024, 'num_layers': 24, 'num_heads': 16, 'mlp_ratio': 4,
+    'qkv_bias': True, 'drop_rate': 0.1, 'attn_drop_rate': 0., 'drop_path_rate': 0., 'with_cls_token': True,
+    'output_cls_token': False, 'patch_norm': False, 'final_norm': False, 'num_fcs': 2,
 }
 SEGMENTOR_CFG['head']['use_loss'] = False
 SEGMENTOR_CFG['head']['in_channels'] = 1024

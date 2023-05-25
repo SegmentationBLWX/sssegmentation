@@ -15,7 +15,7 @@ SEGMENTOR_CFG['scheduler']['max_epochs'] = 440
 # modify other segmentor configs
 SEGMENTOR_CFG['num_classes'] = 19
 SEGMENTOR_CFG['backbone'] = {
-    'type': 'hrnetv2_w18_small', 'series': 'hrnet', 'pretrained': True, 'selected_indices': (0, 0),
+    'type': 'HRNet', 'structure_type': 'hrnetv2_w18_small', 'arch': 'hrnetv2_w18_small', 'pretrained': True, 'selected_indices': (0, 0),
 }
 SEGMENTOR_CFG['work_dir'] = 'ocrnet_hrnetv2w18s_cityscapes'
 SEGMENTOR_CFG['logfilepath'] = 'ocrnet_hrnetv2w18s_cityscapes/ocrnet_hrnetv2w18s_cityscapes.log'

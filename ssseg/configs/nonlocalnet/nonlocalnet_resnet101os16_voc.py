@@ -15,8 +15,8 @@ SEGMENTOR_CFG['scheduler']['max_epochs'] = 60
 # modify other segmentor configs
 SEGMENTOR_CFG['num_classes'] = 21
 SEGMENTOR_CFG['backbone'] = {
-    'type': 'resnet101', 'series': 'resnet', 'pretrained': True,
-    'outstride': 16, 'use_stem': True, 'selected_indices': (2, 3),
+    'type': 'ResNet', 'depth': 101, 'structure_type': 'resnet101conv3x3stem',
+    'pretrained': True, 'outstride': 16, 'use_conv3x3_stem': True, 'selected_indices': (2, 3),
 }
 SEGMENTOR_CFG['work_dir'] = 'nonlocalnet_resnet101os16_voc'
 SEGMENTOR_CFG['logfilepath'] = 'nonlocalnet_resnet101os16_voc/nonlocalnet_resnet101os16_voc.log'

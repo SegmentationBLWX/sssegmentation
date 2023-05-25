@@ -20,9 +20,9 @@ SEGMENTOR_CFG['scheduler']['optimizer'] = {
 # modify other segmentor configs
 SEGMENTOR_CFG['num_classes'] = 19
 SEGMENTOR_CFG['backbone'] = {
-    'type': None, 'series': 'bisenetv1', 'pretrained': False, 'selected_indices': (0, 1, 2),
+    'type': 'BiSeNetV1', 'structure_type': 'bisenetv1', 'pretrained': False, 'selected_indices': (0, 1, 2),
     'spatial_channels_list': (64, 64, 64, 128), 'context_channels_list': (128, 256, 512), 'out_channels': 256,
-    'backbone_cfg': {'type': 'resnet18', 'series': 'resnet', 'pretrained': True, 'outstride': 32, 'use_stem': True},
+    'backbone_cfg': {'type': 'ResNet', 'structure_type': 'resnet18conv3x3stem', 'pretrained': True, 'outstride': 32, 'use_conv3x3_stem': True},
 }
 SEGMENTOR_CFG['head'] = {
     'in_channels': 256, 'feats_channels': 256, 'dropout': 0.1, 'num_convs': 1,
