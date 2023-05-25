@@ -8,7 +8,7 @@ import math
 import torch
 import torch.nn as nn
 import torch.nn.functional as F
-from ..normalization import BuildNormalization, constructnormcfg
+from ..normalization import BuildNormalization
 
 
 '''AdptivePaddingConv2d'''
@@ -25,7 +25,7 @@ class AdptivePaddingConv2d(nn.Conv2d):
             bias=bias
         )
         if norm_cfg is not None: 
-            self.norm = BuildNormalization(constructnormcfg(placeholder=out_channels, norm_cfg=norm_cfg))
+            self.norm = BuildNormalization(placeholder=out_channels, norm_cfg=norm_cfg)
         if act_cfg is not None: 
             self.activation = BuildActivation(act_cfg)
     '''forward'''

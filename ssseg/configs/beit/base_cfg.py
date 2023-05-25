@@ -11,11 +11,11 @@ SEGMENTOR_CFG = {
     'eval_interval_epochs': 10,
     'save_interval_epochs': 1,
     'resultsavepath': '',
-    'norm_cfg': {'type': 'syncbatchnorm'},
-    'act_cfg': {'type': 'relu', 'inplace': True},
+    'norm_cfg': {'type': 'SyncBatchNorm'},
+    'act_cfg': {'type': 'ReLU', 'inplace': True},
     'backbone': {
         'type': 'beit_base_patch16_224_pt22k_ft22k', 'series': 'beit', 'pretrained': True,
-        'selected_indices': (0, 1, 2, 3), 'norm_cfg': {'type': 'layernorm', 'eps': 1e-6},
+        'selected_indices': (0, 1, 2, 3), 'norm_cfg': {'type': 'LayerNorm', 'eps': 1e-6},
     },
     'head': {
         'feature2pyramid': {'embed_dim': 768, 'rescales': [4, 2, 1, 0.5]}, 'in_channels_list': [768, 768, 768, 768], 

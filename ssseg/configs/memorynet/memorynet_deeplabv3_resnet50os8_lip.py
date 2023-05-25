@@ -14,7 +14,7 @@ SEGMENTOR_CFG['dataloader'] = DATALOADER_CFG_BS32.copy()
 SEGMENTOR_CFG['scheduler']['max_epochs'] = 150
 # modify other segmentor configs
 SEGMENTOR_CFG['num_classes'] = 20
-SEGMENTOR_CFG['act_cfg'] = {'type': 'leakyrelu', 'negative_slope': 0.01, 'inplace': True}
+SEGMENTOR_CFG['act_cfg'] = {'type': 'LeakyReLU', 'negative_slope': 0.01, 'inplace': True}
 SEGMENTOR_CFG['backbone'] = {
     'type': 'resnet50', 'series': 'resnet', 'pretrained': True,
     'outstride': 8, 'use_stem': True, 'selected_indices': (0, 1, 2, 3),

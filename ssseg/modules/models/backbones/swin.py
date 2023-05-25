@@ -14,11 +14,11 @@ import torch.utils.checkpoint as checkpoint
 from collections import OrderedDict
 from .bricks import PatchEmbed as PatchEmbedBase
 from .bricks import PatchMerging as PatchMergingBase
-from .bricks import BuildNormalization, BuildDropout, FFN, constructnormcfg
+from .bricks import BuildNormalization, BuildDropout, FFN
 
 
-'''model urls'''
-model_urls = {
+'''DEFAULT_MODEL_URLS'''
+DEFAULT_MODEL_URLS = {
     'swin_tiny_patch4_window7_224': 'https://github.com/SwinTransformer/storage/releases/download/v1.0.0/swin_tiny_patch4_window7_224.pth',
     'swin_small_patch4_window7_224': 'https://github.com/SwinTransformer/storage/releases/download/v1.0.0/swin_small_patch4_window7_224.pth',
     'swin_base_patch4_window12_384': 'https://github.com/SwinTransformer/storage/releases/download/v1.0.0/swin_base_patch4_window12_384.pth',
@@ -26,6 +26,44 @@ model_urls = {
     'swin_base_patch4_window12_384_22k': 'https://github.com/SwinTransformer/storage/releases/download/v1.0.0/swin_base_patch4_window12_384_22k.pth',
     'swin_base_patch4_window7_224_22k': 'https://github.com/SwinTransformer/storage/releases/download/v1.0.0/swin_base_patch4_window7_224_22k.pth',
     'swin_large_patch4_window12_384_22k': 'https://github.com/SwinTransformer/storage/releases/download/v1.0.0/swin_large_patch4_window12_384_22k.pth',
+}
+'''AUTO_ASSERT_STRUCTURE_TYPES'''
+AUTO_ASSERT_STRUCTURE_TYPES = {
+    'swin_tiny_patch4_window7_224': {
+        'pretrain_img_size': 224, 'in_channels': 3, 'embed_dims': 96, 'patch_size': 4, 'window_size': 7, 'mlp_ratio': 4, 
+        'depths': [2, 2, 6, 2], 'num_heads': [3, 6, 12, 24], 'qkv_bias': True, 'qk_scale': None, 'patch_norm': True, 
+        'drop_rate': 0., 'attn_drop_rate': 0., 'drop_path_rate': 0.3, 'use_abs_pos_embed': False,
+    },
+    'swin_small_patch4_window7_224': {
+        'pretrain_img_size': 224, 'in_channels': 3, 'embed_dims': 96, 'patch_size': 4, 'window_size': 7, 'mlp_ratio': 4,
+        'depths': [2, 2, 18, 2], 'num_heads': [3, 6, 12, 24], 'qkv_bias': True, 'qk_scale': None, 'patch_norm': True,
+        'drop_rate': 0., 'attn_drop_rate': 0., 'drop_path_rate': 0.3, 'use_abs_pos_embed': False,
+    },
+    'swin_base_patch4_window12_384': {
+        'pretrain_img_size': 384, 'in_channels': 3, 'embed_dims': 128, 'patch_size': 4, 'window_size': 12, 'mlp_ratio': 4,
+        'depths': [2, 2, 18, 2], 'num_heads': [4, 8, 16, 32], 'qkv_bias': True, 'qk_scale': None, 'patch_norm': True,
+        'drop_rate': 0., 'attn_drop_rate': 0., 'drop_path_rate': 0.3, 'use_abs_pos_embed': False,
+    },
+    'swin_base_patch4_window7_224': {
+        'pretrain_img_size': 224, 'in_channels': 3, 'embed_dims': 128, 'patch_size': 4, 'window_size': 7, 'mlp_ratio': 4,
+        'depths': [2, 2, 18, 2], 'num_heads': [4, 8, 16, 32], 'qkv_bias': True, 'qk_scale': None, 'patch_norm': True,
+        'drop_rate': 0., 'attn_drop_rate': 0., 'drop_path_rate': 0.3, 'use_abs_pos_embed': False,
+    },
+    'swin_base_patch4_window12_384_22k': {
+        'pretrain_img_size': 384, 'in_channels': 3, 'embed_dims': 128, 'patch_size': 4, 'window_size': 12, 'mlp_ratio': 4,
+        'depths': [2, 2, 18, 2], 'num_heads': [4, 8, 16, 32], 'qkv_bias': True, 'qk_scale': None, 'patch_norm': True,
+        'drop_rate': 0., 'attn_drop_rate': 0., 'drop_path_rate': 0.3, 'use_abs_pos_embed': False,
+    },
+    'swin_base_patch4_window7_224_22k': {
+        'pretrain_img_size': 224, 'in_channels': 3, 'embed_dims': 128, 'patch_size': 4, 'window_size': 7, 'mlp_ratio': 4,
+        'depths': [2, 2, 18, 2], 'num_heads': [4, 8, 16, 32], 'qkv_bias': True, 'qk_scale': None, 'patch_norm': True,
+        'drop_rate': 0., 'attn_drop_rate': 0., 'drop_path_rate': 0.3, 'use_abs_pos_embed': False,
+    },
+    'swin_large_patch4_window12_384_22k': {
+        'pretrain_img_size': 384, 'in_channels': 3, 'embed_dims': 192, 'patch_size': 4, 'window_size': 12, 'mlp_ratio': 4,
+        'depths': [2, 2, 18, 2], 'num_heads': [6, 12, 24, 48], 'qkv_bias': True, 'qk_scale': None, 'patch_norm': True,
+        'drop_rate': 0., 'attn_drop_rate': 0., 'drop_path_rate': 0.3, 'use_abs_pos_embed': False,
+    },
 }
 
 
@@ -217,16 +255,16 @@ class SwinBlock(nn.Module):
                  attn_drop_rate=0., drop_path_rate=0., act_cfg=None, norm_cfg=None, use_checkpoint=False):
         super(SwinBlock, self).__init__()
         self.use_checkpoint = use_checkpoint
-        self.norm1 = BuildNormalization(constructnormcfg(placeholder=embed_dims, norm_cfg=norm_cfg))
+        self.norm1 = BuildNormalization(placeholder=embed_dims, norm_cfg=norm_cfg)
         self.attn = ShiftWindowMSA(
             embed_dims=embed_dims, num_heads=num_heads, window_size=window_size, shift_size=window_size // 2 if shift else 0,
             qkv_bias=qkv_bias, qk_scale=qk_scale, attn_drop_rate=attn_drop_rate, proj_drop_rate=drop_rate,
-            dropout_cfg={'type': 'droppath', 'drop_prob': drop_path_rate},
+            dropout_cfg={'type': 'DropPath', 'drop_prob': drop_path_rate},
         )
-        self.norm2 = BuildNormalization(constructnormcfg(placeholder=embed_dims, norm_cfg=norm_cfg))
+        self.norm2 = BuildNormalization(placeholder=embed_dims, norm_cfg=norm_cfg)
         self.ffn = FFN(
             embed_dims=embed_dims, feedforward_channels=feedforward_channels, num_fcs=2,
-            ffn_drop=drop_rate, dropout_cfg={'type': 'droppath', 'drop_prob': drop_path_rate},
+            ffn_drop=drop_rate, dropout_cfg={'type': 'DropPath', 'drop_prob': drop_path_rate},
             act_cfg=act_cfg, add_identity=True,
         )
     '''layers with zero weight decay'''
@@ -329,16 +367,41 @@ class SwinBlockSequence(nn.Module):
 
 '''SwinTransformer'''
 class SwinTransformer(nn.Module):
-    def __init__(self, pretrain_img_size=224, in_channels=3, embed_dims=96, patch_size=4, window_size=7, mlp_ratio=4, depths=(2, 2, 6, 2), num_heads=(3, 6, 12, 24),
+    def __init__(self, structure_type, pretrain_img_size=224, in_channels=3, embed_dims=96, patch_size=4, window_size=7, mlp_ratio=4, depths=(2, 2, 6, 2), num_heads=(3, 6, 12, 24),
                  strides=(4, 2, 2, 2), out_indices=(0, 1, 2, 3), qkv_bias=True, qk_scale=None, patch_norm=True, drop_rate=0., attn_drop_rate=0., drop_path_rate=0.1,
-                 use_abs_pos_embed=False, act_cfg=None, norm_cfg=None, use_checkpoint=False):
+                 use_abs_pos_embed=False, act_cfg={'type': 'GELU'}, norm_cfg={'type': 'LayerNorm'}, use_checkpoint=False, pretrained=True, pretrained_model_path=''):
         super(SwinTransformer, self).__init__()
-        if isinstance(pretrain_img_size, int):
-            pretrain_img_size = (pretrain_img_size, pretrain_img_size)
-        num_layers = len(depths)
+        if isinstance(pretrain_img_size, int): pretrain_img_size = (pretrain_img_size, pretrain_img_size)
+        # set attributes
+        self.structure_type = structure_type
+        self.pretrain_img_size = pretrain_img_size
+        self.in_channels = in_channels
+        self.embed_dims = embed_dims
+        self.patch_size = patch_size
+        self.window_size = window_size
+        self.mlp_ratio = mlp_ratio
+        self.depths = depths
+        self.num_heads = num_heads
+        self.strides = strides
         self.out_indices = out_indices
+        self.qkv_bias = qkv_bias
+        self.qk_scale = qk_scale
+        self.patch_norm = patch_norm
+        self.drop_rate = drop_rate
+        self.attn_drop_rate = attn_drop_rate
+        self.drop_path_rate = drop_path_rate
+        self.act_cfg = act_cfg
+        self.norm_cfg = norm_cfg
         self.use_abs_pos_embed = use_abs_pos_embed
+        self.use_checkpoint = use_checkpoint
+        self.pretrained = pretrained
+        self.pretrained_model_path = pretrained_model_path
+        # assert
         assert strides[0] == patch_size, 'Use non-overlapping patch embed.'
+        if structure_type in AUTO_ASSERT_STRUCTURE_TYPES:
+            for key, value in AUTO_ASSERT_STRUCTURE_TYPES[structure_type].items():
+                assert hasattr(self, key) and (getattr(self, key) == value)
+        # patch embedding
         self.patch_embed = PatchEmbed(
             in_channels=in_channels,
             embed_dims=embed_dims,
@@ -358,6 +421,7 @@ class SwinTransformer(nn.Module):
         dpr = [x.item() for x in torch.linspace(0, drop_path_rate, total_depth)]
         self.stages = nn.ModuleList()
         in_channels = embed_dims
+        num_layers = len(depths)
         for i in range(num_layers):
             if i < num_layers - 1:
                 downsample = PatchMerging(
@@ -380,16 +444,19 @@ class SwinTransformer(nn.Module):
         self.num_features = [int(embed_dims * 2**i) for i in range(num_layers)]
         # add a norm layer for each output
         for i in out_indices:
-            layer = BuildNormalization(constructnormcfg(placeholder=self.num_features[i], norm_cfg=norm_cfg))
+            layer = BuildNormalization(placeholder=self.num_features[i], norm_cfg=norm_cfg)
             layer_name = f'norm{i}'
             self.add_module(layer_name, layer)
+        # load pretrained weights
+        if pretrained:
+            self.initweights(structure_type, pretrained_model_path)
     '''initialize backbone'''
-    def initweights(self, swin_type='swin_tiny_patch4_window7_224', pretrained_model_path=''):
+    def initweights(self, structure_type='swin_tiny_patch4_window7_224', pretrained_model_path=''):
         # load
         if pretrained_model_path:
             checkpoint = torch.load(pretrained_model_path, map_location='cpu')
         else:
-            checkpoint = model_zoo.load_url(model_urls[swin_type], map_location='cpu')
+            checkpoint = model_zoo.load_url(DEFAULT_MODEL_URLS[structure_type], map_location='cpu')
         if 'state_dict' in checkpoint:
             state_dict = checkpoint['state_dict']
         elif 'model' in checkpoint:
@@ -521,72 +588,3 @@ class SwinTransformer(nn.Module):
                 out = out.view(-1, *out_hw_shape, self.num_features[i]).permute(0, 3, 1, 2).contiguous()
                 outs.append(out)
         return outs
-
-
-'''BuildSwinTransformer'''
-def BuildSwinTransformer(swin_cfg):
-    # assert whether support
-    swin_type = swin_cfg.pop('type')
-    supported_swins = {
-        'swin_tiny_patch4_window7_224': {
-            'pretrain_img_size': 224, 'in_channels': 3, 'embed_dims': 96, 'patch_size': 4, 'window_size': 7, 'mlp_ratio': 4, 
-            'depths': [2, 2, 6, 2], 'num_heads': [3, 6, 12, 24], 'qkv_bias': True, 'qk_scale': None, 'patch_norm': True, 
-            'drop_rate': 0., 'attn_drop_rate': 0., 'drop_path_rate': 0.3, 'use_abs_pos_embed': False,
-        },
-        'swin_small_patch4_window7_224': {
-            'pretrain_img_size': 224, 'in_channels': 3, 'embed_dims': 96, 'patch_size': 4, 'window_size': 7, 'mlp_ratio': 4,
-            'depths': [2, 2, 18, 2], 'num_heads': [3, 6, 12, 24], 'qkv_bias': True, 'qk_scale': None, 'patch_norm': True,
-            'drop_rate': 0., 'attn_drop_rate': 0., 'drop_path_rate': 0.3, 'use_abs_pos_embed': False,
-        },
-        'swin_base_patch4_window12_384': {
-            'pretrain_img_size': 384, 'in_channels': 3, 'embed_dims': 128, 'patch_size': 4, 'window_size': 12, 'mlp_ratio': 4,
-            'depths': [2, 2, 18, 2], 'num_heads': [4, 8, 16, 32], 'qkv_bias': True, 'qk_scale': None, 'patch_norm': True,
-            'drop_rate': 0., 'attn_drop_rate': 0., 'drop_path_rate': 0.3, 'use_abs_pos_embed': False,
-        },
-        'swin_base_patch4_window7_224': {
-            'pretrain_img_size': 224, 'in_channels': 3, 'embed_dims': 128, 'patch_size': 4, 'window_size': 7, 'mlp_ratio': 4,
-            'depths': [2, 2, 18, 2], 'num_heads': [4, 8, 16, 32], 'qkv_bias': True, 'qk_scale': None, 'patch_norm': True,
-            'drop_rate': 0., 'attn_drop_rate': 0., 'drop_path_rate': 0.3, 'use_abs_pos_embed': False,
-        },
-        'swin_base_patch4_window12_384_22k': {
-            'pretrain_img_size': 384, 'in_channels': 3, 'embed_dims': 128, 'patch_size': 4, 'window_size': 12, 'mlp_ratio': 4,
-            'depths': [2, 2, 18, 2], 'num_heads': [4, 8, 16, 32], 'qkv_bias': True, 'qk_scale': None, 'patch_norm': True,
-            'drop_rate': 0., 'attn_drop_rate': 0., 'drop_path_rate': 0.3, 'use_abs_pos_embed': False,
-        },
-        'swin_base_patch4_window7_224_22k': {
-            'pretrain_img_size': 224, 'in_channels': 3, 'embed_dims': 128, 'patch_size': 4, 'window_size': 7, 'mlp_ratio': 4,
-            'depths': [2, 2, 18, 2], 'num_heads': [4, 8, 16, 32], 'qkv_bias': True, 'qk_scale': None, 'patch_norm': True,
-            'drop_rate': 0., 'attn_drop_rate': 0., 'drop_path_rate': 0.3, 'use_abs_pos_embed': False,
-        },
-        'swin_large_patch4_window12_384_22k': {
-            'pretrain_img_size': 384, 'in_channels': 3, 'embed_dims': 192, 'patch_size': 4, 'window_size': 12, 'mlp_ratio': 4,
-            'depths': [2, 2, 18, 2], 'num_heads': [6, 12, 24, 48], 'qkv_bias': True, 'qk_scale': None, 'patch_norm': True,
-            'drop_rate': 0., 'attn_drop_rate': 0., 'drop_path_rate': 0.3, 'use_abs_pos_embed': False,
-        },
-    }
-    assert swin_type in supported_swins, 'unsupport the swin_type %s' % swin_type
-    # parse cfg
-    default_cfg = {
-        'strides': (4, 2, 2, 2),
-        'out_indices': (0, 1, 2, 3),
-        'norm_cfg': {'type': 'layernorm'},
-        'act_cfg': {'type': 'gelu'},
-        'pretrained': True,
-        'pretrained_model_path': '',
-        'use_checkpoint': False,
-    }
-    default_cfg.update(supported_swins[swin_type])
-    for key, value in swin_cfg.items():
-        if key in default_cfg: 
-            default_cfg.update({key: value})
-    # obtain swin_cfg
-    swin_cfg = default_cfg.copy()
-    pretrained = swin_cfg.pop('pretrained')
-    pretrained_model_path = swin_cfg.pop('pretrained_model_path')
-    # obtain the instanced swin
-    model = SwinTransformer(**swin_cfg)
-    # load weights of pretrained model
-    if pretrained:
-        model.initweights(swin_type, pretrained_model_path)
-    # return the model
-    return model

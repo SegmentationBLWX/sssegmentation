@@ -8,7 +8,7 @@ import math
 import torch
 import torch.nn as nn
 import torch.nn.functional as F
-from ..normalization import BuildNormalization, constructnormcfg
+from ..normalization import BuildNormalization
 
 
 '''AdaptivePadding'''
@@ -68,7 +68,7 @@ class PatchEmbed(nn.Module):
         # norm
         self.norm = None
         if norm_cfg is not None: 
-            self.norm = BuildNormalization(constructnormcfg(placeholder=embed_dims, norm_cfg=norm_cfg))
+            self.norm = BuildNormalization(placeholder=embed_dims, norm_cfg=norm_cfg)
         # input size
         self.init_input_size = None
         self.init_out_size = None
@@ -118,7 +118,7 @@ class PatchMerging(nn.Module):
         sample_dim = kernel_size[0] * kernel_size[1] * in_channels
         self.norm = None
         if norm_cfg is not None: 
-            self.norm = BuildNormalization(constructnormcfg(placeholder=sample_dim, norm_cfg=norm_cfg))
+            self.norm = BuildNormalization(placeholder=sample_dim, norm_cfg=norm_cfg)
         # reduction
         self.reduction = nn.Linear(sample_dim, out_channels, bias=bias)
     '''forward'''

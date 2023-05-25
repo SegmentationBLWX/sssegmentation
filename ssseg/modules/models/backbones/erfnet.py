@@ -9,11 +9,13 @@ import torch
 import torch.nn as nn
 import torch.nn.functional as F
 import torch.utils.model_zoo as model_zoo
-from .bricks import BuildNormalization, BuildActivation, constructnormcfg
+from .bricks import BuildNormalization, BuildActivation
 
 
-'''model urls'''
-model_urls = {}
+'''DEFAULT_MODEL_URLS'''
+DEFAULT_MODEL_URLS = {}
+'''AUTO_ASSERT_STRUCTURE_TYPES'''
+AUTO_ASSERT_STRUCTURE_TYPES = {}
 
 
 '''Downsampler block of ERFNet'''
@@ -23,7 +25,7 @@ class DownsamplerBlock(nn.Module):
         self.norm_cfg, self.act_cfg = norm_cfg, act_cfg
         self.conv = nn.Conv2d(in_channels, out_channels - in_channels, kernel_size=3, stride=2, padding=1, bias=False)
         self.pool = nn.MaxPool2d(kernel_size=2, stride=2)
-        self.bn = BuildNormalization(constructnormcfg(placeholder=out_channels, norm_cfg=norm_cfg))
+        self.bn = BuildNormalization(placeholder=out_channels, norm_cfg=norm_cfg)
         self.act = BuildActivation(act_cfg)
     '''forward'''
     def forward(self, x):
@@ -50,7 +52,7 @@ class NonBottleneck1d(nn.Module):
             self.convs_layers.append(nn.Conv2d(channels, channels, kernel_size=(3, 1), stride=1, padding=first_conv_padding, bias=True, dilation=first_conv_dilation))
             self.convs_layers.append(self.act)
             self.convs_layers.append(nn.Conv2d(channels, channels, kernel_size=(1, 3), stride=1, padding=second_conv_padding, bias=True, dilation=second_conv_dilation))
-            self.convs_layers.append(BuildNormalization(constructnormcfg(placeholder=channels, norm_cfg=norm_cfg)))
+            self.convs_layers.append(BuildNormalization(placeholder=channels, norm_cfg=norm_cfg))
             if conv_layer == 0: self.convs_layers.append(self.act)
             else: self.convs_layers.append(nn.Dropout(p=drop_rate))
     '''forward'''
@@ -68,7 +70,7 @@ class UpsamplerBlock(nn.Module):
         super(UpsamplerBlock, self).__init__()
         self.norm_cfg, self.act_cfg = norm_cfg, act_cfg
         self.conv = nn.ConvTranspose2d(in_channels, out_channels, kernel_size=3, stride=2, padding=1, output_padding=1, bias=True)
-        self.bn = BuildNormalization(constructnormcfg(placeholder=out_channels, norm_cfg=norm_cfg))
+        self.bn = BuildNormalization(placeholder=out_channels, norm_cfg=norm_cfg)
         self.act = BuildActivation(act_cfg)
     '''forward'''
     def forward(self, x):
@@ -80,18 +82,12 @@ class UpsamplerBlock(nn.Module):
 
 '''ERFNet'''
 class ERFNet(nn.Module):
-    def __init__(self, in_channels=3, enc_downsample_channels=(16, 64, 128), enc_stage_non_bottlenecks=(5, 8), enc_non_bottleneck_dilations=(2, 4, 8, 16),
+    def __init__(self, structure_type, in_channels=3, enc_downsample_channels=(16, 64, 128), enc_stage_non_bottlenecks=(5, 8), enc_non_bottleneck_dilations=(2, 4, 8, 16),
                  enc_non_bottleneck_channels=(64, 128), dec_upsample_channels=(64, 16), dec_stages_non_bottleneck=(2, 2), dec_non_bottleneck_channels=(64, 16),
-                 dropout_ratio=0.1, norm_cfg=None, act_cfg=None):
+                 dropout_ratio=0.1, norm_cfg={'type': 'SyncBatchNorm'}, act_cfg={'type': 'PReLU'}, pretrained=False, pretrained_model_path=''):
         super(ERFNet, self).__init__()
-        # check arguments
-        assert len(enc_downsample_channels) == len(dec_upsample_channels) + 1
-        assert len(enc_downsample_channels) == len(enc_stage_non_bottlenecks) + 1
-        assert len(enc_downsample_channels) == len(enc_non_bottleneck_channels) + 1
-        assert enc_stage_non_bottlenecks[-1] % len(enc_non_bottleneck_dilations) == 0
-        assert len(dec_upsample_channels) == len(dec_stages_non_bottleneck)
-        assert len(dec_stages_non_bottleneck) == len(dec_non_bottleneck_channels)
         # set attributes
+        self.structure_type = structure_type
         self.in_channels = in_channels
         self.enc_downsample_channels = enc_downsample_channels
         self.enc_stage_non_bottlenecks = enc_stage_non_bottlenecks
@@ -103,7 +99,19 @@ class ERFNet(nn.Module):
         self.dropout_ratio = dropout_ratio
         self.norm_cfg = norm_cfg
         self.act_cfg = act_cfg
-        # define encoder and decoder
+        self.pretrained = pretrained
+        self.pretrained_model_path = pretrained_model_path
+        # assert
+        assert len(enc_downsample_channels) == len(dec_upsample_channels) + 1
+        assert len(enc_downsample_channels) == len(enc_stage_non_bottlenecks) + 1
+        assert len(enc_downsample_channels) == len(enc_non_bottleneck_channels) + 1
+        assert enc_stage_non_bottlenecks[-1] % len(enc_non_bottleneck_dilations) == 0
+        assert len(dec_upsample_channels) == len(dec_stages_non_bottleneck)
+        assert len(dec_stages_non_bottleneck) == len(dec_non_bottleneck_channels)
+        if structure_type in AUTO_ASSERT_STRUCTURE_TYPES:
+            for key, value in AUTO_ASSERT_STRUCTURE_TYPES[structure_type].items():
+                assert hasattr(self, key) and (getattr(self, key) == value)
+        # set encoder and decoder
         self.encoder = nn.ModuleList()
         self.decoder = nn.ModuleList()
         # --encoder
@@ -123,56 +131,23 @@ class ERFNet(nn.Module):
             if i == 0: self.decoder.append(UpsamplerBlock(enc_downsample_channels[-1], dec_non_bottleneck_channels[i], norm_cfg=norm_cfg, act_cfg=act_cfg))
             else: self.decoder.append(UpsamplerBlock(dec_non_bottleneck_channels[i - 1], dec_non_bottleneck_channels[i], norm_cfg=norm_cfg, act_cfg=act_cfg))
             for j in range(dec_stages_non_bottleneck[i]): self.decoder.append(NonBottleneck1d(dec_non_bottleneck_channels[i], norm_cfg=norm_cfg, act_cfg=act_cfg))
+        # load pretrained weights
+        if pretrained and os.path.exists(pretrained_model_path):
+            checkpoint = torch.load(pretrained_model_path, map_location='cpu')
+            if 'state_dict' in checkpoint: 
+                state_dict = checkpoint['state_dict']
+            else: 
+                state_dict = checkpoint
+            self.load_state_dict(state_dict, strict=False)
+        elif pretrained:
+            checkpoint = model_zoo.load_url(DEFAULT_MODEL_URLS[structure_type], map_location='cpu')
+            if 'state_dict' in checkpoint: 
+                state_dict = checkpoint['state_dict']
+            else: 
+                state_dict = checkpoint
+            self.load_state_dict(state_dict, strict=False)
     '''forward'''
     def forward(self, x):
         for enc in self.encoder: x = enc(x)
         for dec in self.decoder: x = dec(x)
         return [x]
-
-
-'''BuildERFNet'''
-def BuildERFNet(erfnet_cfg):
-    # assert whether support
-    erfnet_type = erfnet_cfg.pop('type')
-    # parse cfg
-    default_cfg = {
-        'in_channels': 3, 
-        'enc_downsample_channels': (16, 64, 128),
-        'enc_stage_non_bottlenecks': (5, 8),
-        'enc_non_bottleneck_dilations': (2, 4, 8, 16),
-        'enc_non_bottleneck_channels': (64, 128),
-        'dec_upsample_channels': (64, 16),
-        'dec_stages_non_bottleneck': (2, 2),
-        'dec_non_bottleneck_channels': (64, 16),
-        'dropout_ratio': 0.1,
-        'norm_cfg': None, 
-        'act_cfg': {'type': 'prelu'},
-        'pretrained': False,
-        'pretrained_model_path': '',
-    }
-    for key, value in erfnet_cfg.items():
-        if key in default_cfg: 
-            default_cfg.update({key: value})
-    # obtain erfnet_cfg
-    erfnet_cfg = default_cfg.copy()
-    pretrained = erfnet_cfg.pop('pretrained')
-    pretrained_model_path = erfnet_cfg.pop('pretrained_model_path')
-    # obtain the instanced erfnet
-    model = ERFNet(**erfnet_cfg)
-    # load weights of pretrained model
-    if pretrained and os.path.exists(pretrained_model_path):
-        checkpoint = torch.load(pretrained_model_path)
-        if 'state_dict' in checkpoint: 
-            state_dict = checkpoint['state_dict']
-        else: 
-            state_dict = checkpoint
-        model.load_state_dict(state_dict, strict=False)
-    elif pretrained:
-        checkpoint = model_zoo.load_url(model_urls[erfnet_type])
-        if 'state_dict' in checkpoint: 
-            state_dict = checkpoint['state_dict']
-        else: 
-            state_dict = checkpoint
-        model.load_state_dict(state_dict, strict=False)
-    # return the model
-    return model

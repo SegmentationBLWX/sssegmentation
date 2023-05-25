@@ -11,8 +11,8 @@ SEGMENTOR_CFG = {
     'eval_interval_epochs': 10,
     'save_interval_epochs': 1,
     'resultsavepath': '',
-    'norm_cfg': {'type': 'syncbatchnorm'},
-    'act_cfg': {'type': 'relu', 'inplace': True},
+    'norm_cfg': {'type': 'SyncBatchNorm'},
+    'act_cfg': {'type': 'ReLU', 'inplace': True},
     'backbone': {
         'type': 'hrnetv2_w18', 'series': 'hrnet', 'pretrained': True, 'selected_indices': (0, 0),
     },

@@ -9,11 +9,13 @@ import torch
 import torch.nn as nn
 import torch.nn.functional as F
 import torch.utils.model_zoo as model_zoo
-from .bricks import BuildNormalization, BuildActivation, DepthwiseSeparableConv2d, InvertedResidual, constructnormcfg
+from .bricks import BuildNormalization, BuildActivation, DepthwiseSeparableConv2d, InvertedResidual
 
 
-'''model urls'''
-model_urls = {}
+'''DEFAULT_MODEL_URLS'''
+DEFAULT_MODEL_URLS = {}
+'''AUTO_ASSERT_STRUCTURE_TYPES'''
+AUTO_ASSERT_STRUCTURE_TYPES = {}
 
 
 '''Pooling Pyramid Module used in PSPNet'''
@@ -30,7 +32,7 @@ class PoolingPyramidModule(nn.ModuleList):
             self.append(nn.Sequential(
                 nn.AdaptiveAvgPool2d(pool_scale),
                 nn.Conv2d(in_channels, out_channels, kernel_size=1, stride=1, padding=0, bias=False),
-                BuildNormalization(constructnormcfg(placeholder=out_channels, norm_cfg=norm_cfg)),
+                BuildNormalization(placeholder=out_channels, norm_cfg=norm_cfg),
                 BuildActivation(act_cfg),
             ))
     '''forward'''
@@ -58,7 +60,7 @@ class LearningToDownsample(nn.Module):
         dw_channels1, dw_channels2 = dw_channels
         self.conv = nn.Sequential(
             nn.Conv2d(in_channels, dw_channels1, kernel_size=3, stride=2, padding=1, bias=False),
-            BuildNormalization(constructnormcfg(placeholder=dw_channels1, norm_cfg=norm_cfg)),
+            BuildNormalization(placeholder=dw_channels1, norm_cfg=norm_cfg),
             BuildActivation(act_cfg),
         )
         self.dsconv1 = DepthwiseSeparableConv2d(
@@ -105,7 +107,7 @@ class GlobalFeatureExtractor(nn.Module):
         self.ppm = PoolingPyramidModule(pool_scales, block_channels[2], block_channels[2] // 4, norm_cfg=self.norm_cfg, act_cfg=self.act_cfg, align_corners=align_corners)
         self.out = nn.Sequential(
             nn.Conv2d(block_channels[2] * 2, out_channels, kernel_size=3, stride=1, padding=1, bias=False),
-            BuildNormalization(constructnormcfg(placeholder=out_channels, norm_cfg=norm_cfg)),
+            BuildNormalization(placeholder=out_channels, norm_cfg=norm_cfg),
             BuildActivation(act_cfg),
         )
     '''make layer'''
@@ -140,16 +142,16 @@ class FeatureFusionModule(nn.Module):
         # define modules
         self.dwconv = nn.Sequential(
             nn.Conv2d(lower_in_channels, out_channels, kernel_size=3, stride=1, padding=1, groups=out_channels, bias=False),
-            BuildNormalization(constructnormcfg(placeholder=out_channels, norm_cfg=norm_cfg)),
+            BuildNormalization(placeholder=out_channels, norm_cfg=norm_cfg),
             BuildActivation(dwconv_act_cfg),
         )
         self.conv_lower_res = nn.Sequential(
             nn.Conv2d(out_channels, out_channels, kernel_size=1, stride=1, padding=0, bias=False),
-            BuildNormalization(constructnormcfg(placeholder=out_channels, norm_cfg=norm_cfg)),
+            BuildNormalization(placeholder=out_channels, norm_cfg=norm_cfg),
         )
         self.conv_higher_res = nn.Sequential(
             nn.Conv2d(higher_in_channels, out_channels, kernel_size=1, stride=1, padding=0, bias=False),
-            BuildNormalization(constructnormcfg(placeholder=out_channels, norm_cfg=norm_cfg)),
+            BuildNormalization(placeholder=out_channels, norm_cfg=norm_cfg),
         )
         self.act = BuildActivation(conv_act_cfg)
     '''forward'''
@@ -164,13 +166,15 @@ class FeatureFusionModule(nn.Module):
 
 '''FastSCNN'''
 class FastSCNN(nn.Module):
-    def __init__(self, in_channels=3, downsample_dw_channels=(32, 48), global_in_channels=64, global_block_channels=(64, 96, 128), global_block_strides=(2, 2, 1), global_out_channels=128, 
-                 higher_in_channels=64, lower_in_channels=128, fusion_out_channels=128, out_indices=(0, 1, 2), norm_cfg=None, act_cfg=None, align_corners=False, dw_act_cfg=None):
+    def __init__(self, structure_type, in_channels=3, downsample_dw_channels=(32, 48), global_in_channels=64, global_block_channels=(64, 96, 128), 
+                 global_block_strides=(2, 2, 1), global_out_channels=128, higher_in_channels=64, lower_in_channels=128, fusion_out_channels=128, 
+                 out_indices=(0, 1, 2), norm_cfg={'type': 'SyncBatchNorm'}, act_cfg={'type': 'ReLU', 'inplace': True}, align_corners=False, 
+                 dw_act_cfg={'type': 'ReLU', 'inplace': True}, pretrained=False, pretrained_model_path=''):
         super(FastSCNN, self).__init__()
-        assert global_in_channels == higher_in_channels, 'Global Input Channels must be the same with Higher Input Channels'
-        assert global_out_channels == lower_in_channels, 'Global Output Channels must be the same with Lower Input Channels'
-        # set attrs
+        # set attributes
+        self.structure_type = structure_type
         self.in_channels = in_channels
+        self.downsample_dw_channels = downsample_dw_channels
         self.downsample_dw_channels1 = downsample_dw_channels[0]
         self.downsample_dw_channels2 = downsample_dw_channels[1]
         self.global_in_channels = global_in_channels
@@ -185,7 +189,15 @@ class FastSCNN(nn.Module):
         self.act_cfg = act_cfg
         self.align_corners = align_corners
         self.dw_act_cfg = dw_act_cfg
-        # define modules
+        self.pretrained = pretrained
+        self.pretrained_model_path = pretrained_model_path
+        # assert
+        assert global_in_channels == higher_in_channels, 'Global Input Channels must be the same with Higher Input Channels'
+        assert global_out_channels == lower_in_channels, 'Global Output Channels must be the same with Lower Input Channels'
+        if structure_type in AUTO_ASSERT_STRUCTURE_TYPES:
+            for key, value in AUTO_ASSERT_STRUCTURE_TYPES[structure_type].items():
+                assert hasattr(self, key) and (getattr(self, key) == value)
+        # set modules
         self.learning_to_downsample = LearningToDownsample(
             in_channels=in_channels, 
             dw_channels=downsample_dw_channels, 
@@ -212,6 +224,21 @@ class FastSCNN(nn.Module):
             conv_act_cfg=self.act_cfg, 
             align_corners=self.align_corners,
         )
+        # load pretrained weights
+        if pretrained and os.path.exists(pretrained_model_path):
+            checkpoint = torch.load(pretrained_model_path, map_location='cpu')
+            if 'state_dict' in checkpoint: 
+                state_dict = checkpoint['state_dict']
+            else: 
+                state_dict = checkpoint
+            self.load_state_dict(state_dict, strict=False)
+        elif pretrained:
+            checkpoint = model_zoo.load_url(DEFAULT_MODEL_URLS[structure_type], map_location='cpu')
+            if 'state_dict' in checkpoint: 
+                state_dict = checkpoint['state_dict']
+            else: 
+                state_dict = checkpoint
+            self.load_state_dict(state_dict, strict=False)
     '''forward'''
     def forward(self, x):
         higher_res_features = self.learning_to_downsample(x)
@@ -220,54 +247,3 @@ class FastSCNN(nn.Module):
         outs = [higher_res_features, lower_res_features, fusion_output]
         outs = [outs[i] for i in self.out_indices]
         return tuple(outs)
-
-
-'''BuildFastSCNN'''
-def BuildFastSCNN(fastscnn_cfg):
-    # assert whether support
-    fastscnn_type = fastscnn_cfg.pop('type')
-    # parse cfg
-    default_cfg = {
-        'in_channels': 3, 
-        'downsample_dw_channels': (32, 48),
-        'global_in_channels': 64,
-        'global_block_channels': (64, 96, 128),
-        'global_block_strides': (2, 2, 1),
-        'global_out_channels': 128,
-        'higher_in_channels': 64,
-        'lower_in_channels': 128,
-        'fusion_out_channels': 128,
-        'out_indices': (0, 1, 2),
-        'norm_cfg': None,
-        'act_cfg': {'type': 'relu', 'inplace': True},
-        'align_corners': False,
-        'dw_act_cfg': {'type': 'relu', 'inplace': True},
-        'pretrained': False,
-        'pretrained_model_path': '',
-    }
-    for key, value in fastscnn_cfg.items():
-        if key in default_cfg: 
-            default_cfg.update({key: value})
-    # obtain fastscnn_cfg
-    fastscnn_cfg = default_cfg.copy()
-    pretrained = fastscnn_cfg.pop('pretrained')
-    pretrained_model_path = fastscnn_cfg.pop('pretrained_model_path')
-    # obtain the instanced fastscnn
-    model = FastSCNN(**fastscnn_cfg)
-    # load weights of pretrained model
-    if pretrained and os.path.exists(pretrained_model_path):
-        checkpoint = torch.load(pretrained_model_path)
-        if 'state_dict' in checkpoint: 
-            state_dict = checkpoint['state_dict']
-        else: 
-            state_dict = checkpoint
-        model.load_state_dict(state_dict, strict=False)
-    elif pretrained:
-        checkpoint = model_zoo.load_url(model_urls[fastscnn_type])
-        if 'state_dict' in checkpoint: 
-            state_dict = checkpoint['state_dict']
-        else: 
-            state_dict = checkpoint
-        model.load_state_dict(state_dict, strict=False)
-    # return the model
-    return model

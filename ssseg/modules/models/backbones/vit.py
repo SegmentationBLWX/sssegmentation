@@ -11,12 +11,20 @@ import torch.nn as nn
 import torch.nn.functional as F
 import torch.utils.model_zoo as model_zoo
 import torch.utils.checkpoint as checkpoint
-from .bricks import BuildNormalization, MultiheadAttention, PatchEmbed, FFN, constructnormcfg
+from .bricks import BuildNormalization, MultiheadAttention, PatchEmbed, FFN
 
 
-'''model urls'''
-model_urls = {
+'''DEFAULT_MODEL_URLS'''
+DEFAULT_MODEL_URLS = {
     'jx_vit_large_p16_384': 'https://github.com/rwightman/pytorch-image-models/releases/download/v0.1-vitjx/jx_vit_large_p16_384-b3be5167.pth',
+}
+'''AUTO_ASSERT_STRUCTURE_TYPES'''
+AUTO_ASSERT_STRUCTURE_TYPES = {
+    'jx_vit_large_p16_384': {
+        'img_size': 384, 'patch_size': 16, 'embed_dims': 1024, 'num_layers': 24, 'num_heads': 16, 'mlp_ratio': 4,
+        'qkv_bias': True, 'drop_rate': 0.1, 'attn_drop_rate': 0., 'drop_path_rate': 0., 'with_cls_token': True,
+        'output_cls_token': False, 'patch_norm': False, 'final_norm': False, 'num_fcs': 2,
+    }
 }
 
 
@@ -25,24 +33,24 @@ class TransformerEncoderLayer(nn.Module):
     def __init__(self, embed_dims, num_heads, feedforward_channels, drop_rate=0., attn_drop_rate=0., drop_path_rate=0., num_fcs=2, 
                  qkv_bias=True, act_cfg=None, norm_cfg=None, batch_first=True, attn_cfg=dict(), ffn_cfg=dict(), use_checkpoint=False):
         super(TransformerEncoderLayer, self).__init__()
-        self.ln1 = BuildNormalization(constructnormcfg(placeholder=embed_dims, norm_cfg=norm_cfg))
+        self.ln1 = BuildNormalization(placeholder=embed_dims, norm_cfg=norm_cfg)
         attn_cfg.update(dict(
             embed_dims=embed_dims,
             num_heads=num_heads,
             attn_drop=attn_drop_rate,
             proj_drop=drop_rate,
-            dropout_cfg={'type': 'droppath', 'drop_prob': drop_path_rate},
+            dropout_cfg={'type': 'DropPath', 'drop_prob': drop_path_rate},
             batch_first=batch_first,
             bias=qkv_bias,
         ))
         self.attn = MultiheadAttention(**attn_cfg)
-        self.ln2 = BuildNormalization(constructnormcfg(placeholder=embed_dims, norm_cfg=norm_cfg))
+        self.ln2 = BuildNormalization(placeholder=embed_dims, norm_cfg=norm_cfg)
         ffn_cfg.update(dict(
             embed_dims=embed_dims,
             feedforward_channels=feedforward_channels,
             num_fcs=num_fcs,
             ffn_drop=drop_rate,
-            dropout_cfg={'type': 'droppath', 'drop_prob': drop_path_rate},
+            dropout_cfg={'type': 'DropPath', 'drop_prob': drop_path_rate},
             act_cfg=act_cfg,
         ))
         self.ffn = FFN(**ffn_cfg)
@@ -62,18 +70,41 @@ class TransformerEncoderLayer(nn.Module):
 
 '''VisionTransformer'''
 class VisionTransformer(nn.Module):
-    def __init__(self, img_size=224, patch_size=16, in_channels=3, embed_dims=768, num_layers=12, num_heads=12, mlp_ratio=4, out_indices=-1, qkv_bias=True,
-                 drop_rate=0., attn_drop_rate=0., drop_path_rate=0., with_cls_token=True, output_cls_token=False, norm_cfg=None, act_cfg=None, 
-                 patch_norm=False, final_norm=False, interpolate_mode='bicubic', num_fcs=2, use_checkpoint=False):
+    def __init__(self, structure_type, img_size=224, patch_size=16, in_channels=3, embed_dims=768, num_layers=12, num_heads=12, mlp_ratio=4, out_indices=(9, 14, 19, 23), qkv_bias=True,
+                 drop_rate=0., attn_drop_rate=0., drop_path_rate=0., with_cls_token=True, output_cls_token=False, norm_cfg={'type': 'LayerNorm', 'eps': 1e-6}, act_cfg={'type': 'GELU'}, 
+                 patch_norm=False, final_norm=False, interpolate_mode='bilinear', num_fcs=2, use_checkpoint=False, pretrained=True, pretrained_model_path=''):
         super(VisionTransformer, self).__init__()
-        if isinstance(img_size, int):
-            img_size = (img_size, img_size)
-        if output_cls_token:
-            assert with_cls_token, 'with_cls_token must be True if set output_cls_token to True.'
+        if isinstance(img_size, int): img_size = (img_size, img_size)
+        # set attributes
+        self.structure_type = structure_type
         self.img_size = img_size
         self.patch_size = patch_size
+        self.in_channels = in_channels
+        self.embed_dims = embed_dims
+        self.num_layers = num_layers
+        self.num_heads = num_heads
+        self.mlp_ratio = mlp_ratio
+        self.out_indices = out_indices
+        self.qkv_bias = qkv_bias
+        self.drop_rate = drop_rate
+        self.attn_drop_rate = attn_drop_rate
+        self.drop_path_rate = drop_path_rate
+        self.with_cls_token = with_cls_token
+        self.output_cls_token = output_cls_token
+        self.norm_cfg = norm_cfg
+        self.act_cfg = act_cfg
+        self.patch_norm = patch_norm
+        self.num_fcs = num_fcs
+        self.pretrained = pretrained
+        self.pretrained_model_path = pretrained_model_path
         self.interpolate_mode = interpolate_mode
         self.use_checkpoint = use_checkpoint
+        self.final_norm = final_norm
+        # assert
+        if output_cls_token: assert with_cls_token, 'with_cls_token must be True if set output_cls_token to True.'
+        if structure_type in AUTO_ASSERT_STRUCTURE_TYPES:
+            for key, value in AUTO_ASSERT_STRUCTURE_TYPES[structure_type].items():
+                assert hasattr(self, key) and (getattr(self, key) == value)
         # Image to Patch Embedding
         self.patch_embed = PatchEmbed(
             in_channels=in_channels,
@@ -84,8 +115,6 @@ class VisionTransformer(nn.Module):
             norm_cfg=norm_cfg if patch_norm else None,
         )
         num_patches = (img_size[0] // patch_size) * (img_size[1] // patch_size)
-        self.with_cls_token = with_cls_token
-        self.output_cls_token = output_cls_token
         self.cls_token = nn.Parameter(torch.zeros(1, 1, embed_dims))
         self.pos_embed = nn.Parameter(torch.zeros(1, num_patches + 1, embed_dims))
         self.drop_after_pos = nn.Dropout(p=drop_rate)
@@ -115,15 +144,18 @@ class VisionTransformer(nn.Module):
                 batch_first=True,
                 use_checkpoint=use_checkpoint,
             ))
-        self.final_norm = final_norm
+        
         if final_norm:
-            self.ln1 = BuildNormalization(constructnormcfg(placeholder=embed_dims, norm_cfg=norm_cfg))
+            self.ln1 = BuildNormalization(placeholder=embed_dims, norm_cfg=norm_cfg)
+        # load pretrained weights
+        if pretrained:
+            self.initweights(structure_type, pretrained_model_path)
     '''initialize backbone'''
-    def initweights(self, vit_type='jx_vit_large_p16_384', pretrained_model_path=''):
+    def initweights(self, structure_type='jx_vit_large_p16_384', pretrained_model_path=''):
         if pretrained_model_path:
             checkpoint = torch.load(pretrained_model_path, map_location='cpu')
         else:
-            checkpoint = model_zoo.load_url(model_urls[vit_type], map_location='cpu')
+            checkpoint = model_zoo.load_url(DEFAULT_MODEL_URLS[structure_type], map_location='cpu')
         if 'state_dict' in checkpoint:
             state_dict = checkpoint['state_dict']
         elif 'model' in checkpoint:
@@ -219,43 +251,3 @@ class VisionTransformer(nn.Module):
                 if self.output_cls_token: out = [out, x[:, 0]]
                 outs.append(out)
         return tuple(outs)
-
-
-'''BuildVisionTransformer'''
-def BuildVisionTransformer(vit_cfg):
-    # assert whether support
-    vit_type = vit_cfg.pop('type')
-    supported_vits = {
-        'jx_vit_large_p16_384': {
-            'img_size': 384, 'patch_size': 16, 'embed_dims': 1024, 'num_layers': 24, 'num_heads': 16, 'mlp_ratio': 4,
-            'qkv_bias': True, 'drop_rate': 0.1, 'attn_drop_rate': 0., 'drop_path_rate': 0., 'with_cls_token': True,
-            'output_cls_token': False, 'patch_norm': False, 'final_norm': False, 'num_fcs': 2,
-        }
-    }
-    assert vit_type in supported_vits, 'unspport the vit_type %s' % vit_type
-    # parse cfg
-    default_cfg = {
-        'in_channels': 3,
-        'out_indices': (9, 14, 19, 23),
-        'norm_cfg': {'type': 'layernorm', 'eps': 1e-6},
-        'act_cfg': {'type': 'gelu'},
-        'interpolate_mode': 'bilinear',
-        'pretrained': True,
-        'pretrained_model_path': '',
-        'use_checkpoint': False,
-    }
-    default_cfg.update(supported_vits[vit_type])
-    for key, value in vit_cfg.items():
-        if key in default_cfg: 
-            default_cfg.update({key: value})
-    # obtain vit_cfg
-    vit_cfg = default_cfg.copy()
-    pretrained = vit_cfg.pop('pretrained')
-    pretrained_model_path = vit_cfg.pop('pretrained_model_path')
-    # obtain the instanced vit
-    model = VisionTransformer(**vit_cfg)
-    # load weights of pretrained model
-    if pretrained:
-        model.initweights(vit_type, pretrained_model_path)
-    # return the model
-    return model

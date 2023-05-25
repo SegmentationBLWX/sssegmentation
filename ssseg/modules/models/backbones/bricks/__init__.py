@@ -6,7 +6,7 @@ from .activation import (
     BuildActivation
 )
 from .normalization import (
-    BuildNormalization, constructnormcfg
+    BuildNormalization
 )
 from .misc import (
     Scale, L2Norm, makedivisible, truncnormal

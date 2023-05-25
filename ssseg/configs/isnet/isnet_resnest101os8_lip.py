@@ -17,7 +17,7 @@ SEGMENTOR_CFG['scheduler']['optimizer'] = {
 }
 # modify other segmentor configs
 SEGMENTOR_CFG['num_classes'] = 20
-SEGMENTOR_CFG['act_cfg'] = {'type': 'leakyrelu', 'negative_slope': 0.01, 'inplace': True}
+SEGMENTOR_CFG['act_cfg'] = {'type': 'LeakyReLU', 'negative_slope': 0.01, 'inplace': True}
 SEGMENTOR_CFG['backbone'] = {
     'type': 'resnest101', 'series': 'resnest', 'pretrained': True, 'outstride': 8, 'selected_indices': (0, 1, 2, 3),
 }

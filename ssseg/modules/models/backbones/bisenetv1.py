@@ -9,11 +9,13 @@ import torch
 import torch.nn as nn
 import torch.nn.functional as F
 import torch.utils.model_zoo as model_zoo
-from .bricks import BuildNormalization, BuildActivation, constructnormcfg
+from .bricks import BuildNormalization, BuildActivation
 
 
-'''model urls'''
-model_urls = {}
+'''DEFAULT_MODEL_URLS'''
+DEFAULT_MODEL_URLS = {}
+'''AUTO_ASSERT_STRUCTURE_TYPES'''
+AUTO_ASSERT_STRUCTURE_TYPES = {}
 
 
 '''Spatial Path to preserve the spatial size of the original input image and encode affluent spatial information'''
@@ -28,19 +30,19 @@ class SpatialPath(nn.Module):
             if idx == 0:
                 conv = nn.Sequential(
                     nn.Conv2d(in_channels, num_channels_list[idx], kernel_size=7, stride=2, padding=3, bias=False),
-                    BuildNormalization(constructnormcfg(placeholder=num_channels_list[idx], norm_cfg=norm_cfg)),
+                    BuildNormalization(placeholder=num_channels_list[idx], norm_cfg=norm_cfg),
                     BuildActivation(act_cfg),
                 )
             elif idx == len(num_channels_list) - 1:
                 conv = nn.Sequential(
                     nn.Conv2d(num_channels_list[idx - 1], num_channels_list[idx], kernel_size=1, stride=1, padding=0, bias=False),
-                    BuildNormalization(constructnormcfg(placeholder=num_channels_list[idx], norm_cfg=norm_cfg)),
+                    BuildNormalization(placeholder=num_channels_list[idx], norm_cfg=norm_cfg),
                     BuildActivation(act_cfg),
                 )
             else:
                 conv = nn.Sequential(
                     nn.Conv2d(num_channels_list[idx - 1], num_channels_list[idx], kernel_size=3, stride=2, padding=1, bias=False),
-                    BuildNormalization(constructnormcfg(placeholder=num_channels_list[idx], norm_cfg=norm_cfg)),
+                    BuildNormalization(placeholder=num_channels_list[idx], norm_cfg=norm_cfg),
                     BuildActivation(act_cfg),
                 )
             self.add_module(layer_name, conv)
@@ -58,13 +60,13 @@ class AttentionRefinementModule(nn.Module):
         super(AttentionRefinementModule, self).__init__()
         self.conv_layer = nn.Sequential(
             nn.Conv2d(in_channels, out_channels, kernel_size=3, stride=1, padding=1, bias=False),
-            BuildNormalization(constructnormcfg(placeholder=out_channels, norm_cfg=norm_cfg)),
+            BuildNormalization(placeholder=out_channels, norm_cfg=norm_cfg),
             BuildActivation(act_cfg),
         )
         self.atten_conv_layer = nn.Sequential(
             nn.AdaptiveAvgPool2d((1, 1)),
             nn.Conv2d(out_channels, out_channels, kernel_size=1, stride=1, padding=0, bias=False),
-            BuildNormalization(constructnormcfg(placeholder=out_channels, norm_cfg=norm_cfg)),
+            BuildNormalization(placeholder=out_channels, norm_cfg=norm_cfg),
             nn.Sigmoid(),
         )
     '''forward'''
@@ -86,18 +88,18 @@ class ContextPath(nn.Module):
         self.arm32 = AttentionRefinementModule(context_channels_list[2], context_channels_list[0], norm_cfg=norm_cfg, act_cfg=act_cfg)
         self.conv_head32 = nn.Sequential(
             nn.Conv2d(context_channels_list[0], context_channels_list[0], kernel_size=3, stride=1, padding=1, bias=False),
-            BuildNormalization(constructnormcfg(placeholder=context_channels_list[0], norm_cfg=norm_cfg)),
+            BuildNormalization(placeholder=context_channels_list[0], norm_cfg=norm_cfg),
             BuildActivation(act_cfg),
         )
         self.conv_head16 = nn.Sequential(
             nn.Conv2d(context_channels_list[0], context_channels_list[0], kernel_size=3, stride=1, padding=1, bias=False),
-            BuildNormalization(constructnormcfg(placeholder=context_channels_list[0], norm_cfg=norm_cfg)),
+            BuildNormalization(placeholder=context_channels_list[0], norm_cfg=norm_cfg),
             BuildActivation(act_cfg),
         )
         self.gap_conv = nn.Sequential(
             nn.AdaptiveAvgPool2d((1, 1)),
             nn.Conv2d(context_channels_list[2], context_channels_list[0], kernel_size=1, stride=1, padding=0, bias=False),
-            BuildNormalization(constructnormcfg(placeholder=context_channels_list[0], norm_cfg=norm_cfg)),
+            BuildNormalization(placeholder=context_channels_list[0], norm_cfg=norm_cfg),
             BuildActivation(act_cfg),
         )
     '''forward'''
@@ -129,13 +131,13 @@ class FeatureFusionModule(nn.Module):
         super(FeatureFusionModule, self).__init__()
         self.conv1 = nn.Sequential(
             nn.Conv2d(in_channels, out_channels, kernel_size=1, stride=1, padding=0, bias=False),
-            BuildNormalization(constructnormcfg(placeholder=out_channels, norm_cfg=norm_cfg)),
+            BuildNormalization(placeholder=out_channels, norm_cfg=norm_cfg),
             BuildActivation(act_cfg),
         )
         self.gap = nn.AdaptiveAvgPool2d((1, 1))
         self.conv_atten = nn.Sequential(
             nn.Conv2d(out_channels, out_channels, kernel_size=1, stride=1, padding=0, bias=False),
-            BuildNormalization(constructnormcfg(placeholder=out_channels, norm_cfg=norm_cfg)),
+            BuildNormalization(placeholder=out_channels, norm_cfg=norm_cfg),
             BuildActivation(act_cfg),
             nn.Sigmoid(),
         )
@@ -152,18 +154,46 @@ class FeatureFusionModule(nn.Module):
 
 '''BiSeNetV1'''
 class BiSeNetV1(nn.Module):
-    def __init__(self, backbone_cfg, in_channels=3, spatial_channels_list=(64, 64, 64, 128), context_channels_list=(128, 256, 512),
-                 out_indices=(0, 1, 2), out_channels=256, norm_cfg=None, act_cfg=None):
+    def __init__(self, structure_type, backbone_cfg=None, in_channels=3, spatial_channels_list=(64, 64, 64, 128), 
+                 context_channels_list=(128, 256, 512), out_indices=(0, 1, 2), out_channels=256, norm_cfg={'type': 'SyncBatchNorm'}, 
+                 act_cfg={'type': 'ReLU', 'inplace': True}, pretrained=False, pretrained_model_path=''):
         super(BiSeNetV1, self).__init__()
         assert (len(spatial_channels_list) == 4) and (len(context_channels_list) == 3)
-        # set attrs
+        # set attributes
+        self.structure_type = structure_type
+        self.backbone_cfg = backbone_cfg
+        self.in_channels = in_channels
+        self.spatial_channels_list = spatial_channels_list
+        self.context_channels_list = context_channels_list
         self.out_indices = out_indices
+        self.out_channels = out_channels
         self.norm_cfg = norm_cfg
         self.act_cfg = act_cfg
-        # define modules
+        self.pretrained = pretrained
+        self.pretrained_model_path = pretrained_model_path
+        # assert
+        if structure_type in AUTO_ASSERT_STRUCTURE_TYPES:
+            for key, value in AUTO_ASSERT_STRUCTURE_TYPES[structure_type].items():
+                assert hasattr(self, key) and (getattr(self, key) == value)
+        # set modules
         self.context_path = ContextPath(backbone_cfg, context_channels_list, norm_cfg=norm_cfg, act_cfg=act_cfg)
         self.spatial_path = SpatialPath(in_channels, spatial_channels_list, norm_cfg=norm_cfg, act_cfg=act_cfg)
         self.ffm = FeatureFusionModule(context_channels_list[1], out_channels, norm_cfg=norm_cfg, act_cfg=act_cfg)
+        # load pretrained weights
+        if pretrained and os.path.exists(pretrained_model_path):
+            checkpoint = torch.load(pretrained_model_path, map_location='cpu')
+            if 'state_dict' in checkpoint: 
+                state_dict = checkpoint['state_dict']
+            else: 
+                state_dict = checkpoint
+            self.load_state_dict(state_dict, strict=False)
+        elif pretrained:
+            checkpoint = model_zoo.load_url(DEFAULT_MODEL_URLS[structure_type], map_location='cpu')
+            if 'state_dict' in checkpoint: 
+                state_dict = checkpoint['state_dict']
+            else: 
+                state_dict = checkpoint
+            self.load_state_dict(state_dict, strict=False)
     '''forward'''
     def forward(self, x):
         x_context8, x_context16 = self.context_path(x)
@@ -172,48 +202,3 @@ class BiSeNetV1(nn.Module):
         outs = [x_context8, x_context16, x_fuse]
         outs = [outs[i] for i in self.out_indices]
         return tuple(outs)
-
-
-'''BuildBiSeNetV1'''
-def BuildBiSeNetV1(bisenetv1_cfg):
-    # assert whether support
-    bisenetv1_type = bisenetv1_cfg.pop('type')
-    # parse cfg
-    default_cfg = {
-        'backbone_cfg': None,
-        'in_channels': 3, 
-        'spatial_channels_list': (64, 64, 64, 128),
-        'context_channels_list': (128, 256, 512),
-        'out_indices': (0, 1, 2),
-        'out_channels': 256,
-        'norm_cfg': None, 
-        'act_cfg': {'type': 'relu', 'inplace': True},
-        'pretrained': False,
-        'pretrained_model_path': '',
-    }
-    for key, value in bisenetv1_cfg.items():
-        if key in default_cfg: 
-            default_cfg.update({key: value})
-    # obtain bisenetv1_cfg
-    bisenetv1_cfg = default_cfg.copy()
-    pretrained = bisenetv1_cfg.pop('pretrained')
-    pretrained_model_path = bisenetv1_cfg.pop('pretrained_model_path')
-    # obtain the instanced bisenetv1
-    model = BiSeNetV1(**bisenetv1_cfg)
-    # load weights of pretrained model
-    if pretrained and os.path.exists(pretrained_model_path):
-        checkpoint = torch.load(pretrained_model_path)
-        if 'state_dict' in checkpoint: 
-            state_dict = checkpoint['state_dict']
-        else: 
-            state_dict = checkpoint
-        model.load_state_dict(state_dict, strict=False)
-    elif pretrained:
-        checkpoint = model_zoo.load_url(model_urls[bisenetv1_type])
-        if 'state_dict' in checkpoint: 
-            state_dict = checkpoint['state_dict']
-        else: 
-            state_dict = checkpoint
-        model.load_state_dict(state_dict, strict=False)
-    # return the model
-    return model

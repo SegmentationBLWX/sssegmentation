@@ -8,11 +8,11 @@ import os
 import torch
 import torch.nn as nn
 import torch.utils.model_zoo as model_zoo
-from .bricks import BuildNormalization, BuildActivation, constructnormcfg
+from .bricks import BuildNormalization, BuildActivation
 
 
-'''model urls'''
-model_urls = {
+'''DEFAULT_MODEL_URLS'''
+DEFAULT_MODEL_URLS = {
     'resnet18': 'https://download.pytorch.org/models/resnet18-5c106cde.pth',
     'resnet34': 'https://download.pytorch.org/models/resnet34-333f7ec4.pth',
     'resnet50': 'https://download.pytorch.org/models/resnet50-19c8e357.pth',
@@ -22,6 +22,8 @@ model_urls = {
     'resnet50stem': 'https://download.openmmlab.com/pretrain/third_party/resnet50_v1c-2cccc1ad.pth',
     'resnet101stem': 'https://download.openmmlab.com/pretrain/third_party/resnet101_v1c-e67eebb6.pth',
 }
+'''AUTO_ASSERT_STRUCTURE_TYPES'''
+AUTO_ASSERT_STRUCTURE_TYPES = {}
 
 
 '''BasicBlock'''
@@ -30,9 +32,9 @@ class BasicBlock(nn.Module):
     def __init__(self, inplanes, planes, stride=1, dilation=1, downsample=None, norm_cfg=None, act_cfg=None):
         super(BasicBlock, self).__init__()
         self.conv1 = nn.Conv2d(inplanes, planes, kernel_size=3, stride=stride, padding=dilation, dilation=dilation, bias=False)
-        self.bn1 = BuildNormalization(constructnormcfg(placeholder=planes, norm_cfg=norm_cfg))
+        self.bn1 = BuildNormalization(placeholder=planes, norm_cfg=norm_cfg)
         self.conv2 = nn.Conv2d(planes, planes, kernel_size=3, stride=1, padding=1, bias=False)
-        self.bn2 = BuildNormalization(constructnormcfg(placeholder=planes, norm_cfg=norm_cfg))
+        self.bn2 = BuildNormalization(placeholder=planes, norm_cfg=norm_cfg)
         self.relu = BuildActivation(act_cfg)
         self.downsample = downsample
         self.stride = stride
@@ -57,11 +59,11 @@ class Bottleneck(nn.Module):
     def __init__(self, inplanes, planes, stride=1, dilation=1, downsample=None, norm_cfg=None, act_cfg=None):
         super(Bottleneck, self).__init__()
         self.conv1 = nn.Conv2d(inplanes, planes, kernel_size=1, stride=1, padding=0, bias=False)
-        self.bn1 = BuildNormalization(constructnormcfg(placeholder=planes, norm_cfg=norm_cfg))
+        self.bn1 = BuildNormalization(placeholder=planes, norm_cfg=norm_cfg)
         self.conv2 = nn.Conv2d(planes, planes, kernel_size=3, stride=stride, padding=dilation, dilation=dilation, bias=False)
-        self.bn2 = BuildNormalization(constructnormcfg(placeholder=planes, norm_cfg=norm_cfg))
+        self.bn2 = BuildNormalization(placeholder=planes, norm_cfg=norm_cfg)
         self.conv3 = nn.Conv2d(planes, planes * self.expansion, kernel_size=1, stride=1, padding=0, bias=False)
-        self.bn3 = BuildNormalization(constructnormcfg(placeholder=planes * self.expansion, norm_cfg=norm_cfg))
+        self.bn3 = BuildNormalization(placeholder=planes * self.expansion, norm_cfg=norm_cfg)
         self.relu = BuildActivation(act_cfg)
         self.downsample = downsample
         self.stride = stride
@@ -92,12 +94,30 @@ class ResNet(nn.Module):
         101: (Bottleneck, (3, 4, 23, 3)),
         152: (Bottleneck, (3, 8, 36, 3))
     }
-    def __init__(self, in_channels=3, base_channels=64, stem_channels=64, depth=101, outstride=8, contract_dilation=True, use_stem=True, 
-                 out_indices=(0, 1, 2, 3), use_avg_for_downsample=False, norm_cfg=None, act_cfg=None):
+    def __init__(self, structure_type, in_channels=3, base_channels=64, stem_channels=64, depth=101, outstride=8, contract_dilation=True, use_stem=True, 
+                 out_indices=(0, 1, 2, 3), use_avg_for_downsample=False, norm_cfg={'type': 'SyncBatchNorm'}, act_cfg={'type': 'ReLU', 'inplace': True}, 
+                 pretrained=True, pretrained_model_path=''):
         super(ResNet, self).__init__()
-        self.inplanes = stem_channels
-        # set out_indices
+        # set attributes
+        self.structure_type = structure_type
+        self.in_channels = in_channels
+        self.base_channels = base_channels
+        self.stem_channels = stem_channels
+        self.depth = depth
+        self.outstride = outstride
+        self.contract_dilation = contract_dilation
+        self.use_stem = use_stem
         self.out_indices = out_indices
+        self.use_avg_for_downsample = use_avg_for_downsample
+        self.norm_cfg = norm_cfg
+        self.act_cfg = act_cfg
+        self.pretrained = pretrained
+        self.pretrained_model_path = pretrained_model_path
+        # assert
+        if structure_type in AUTO_ASSERT_STRUCTURE_TYPES:
+            for key, value in AUTO_ASSERT_STRUCTURE_TYPES[structure_type].items():
+                assert hasattr(self, key) and (getattr(self, key) == value)
+        self.inplanes = stem_channels
         # parse depth settings
         assert depth in self.arch_settings, 'unsupport depth %s' % depth
         block, num_blocks_list = self.arch_settings[depth]
@@ -110,22 +130,21 @@ class ResNet(nn.Module):
         assert outstride in outstride_to_strides_and_dilations, 'unsupport outstride %s' % outstride
         stride_list, dilation_list = outstride_to_strides_and_dilations[outstride]
         # whether replace the 7x7 conv in the input stem with three 3x3 convs
-        self.use_stem = use_stem
         if use_stem:
             self.stem = nn.Sequential(
                 nn.Conv2d(in_channels, stem_channels // 2, kernel_size=3, stride=2, padding=1, bias=False),
-                BuildNormalization(constructnormcfg(placeholder=stem_channels // 2, norm_cfg=norm_cfg)),
+                BuildNormalization(placeholder=stem_channels // 2, norm_cfg=norm_cfg),
                 BuildActivation(act_cfg),
                 nn.Conv2d(stem_channels // 2, stem_channels // 2, kernel_size=3, stride=1, padding=1, bias=False),
-                BuildNormalization(constructnormcfg(placeholder=stem_channels // 2, norm_cfg=norm_cfg)),
+                BuildNormalization(placeholder=stem_channels // 2, norm_cfg=norm_cfg),
                 BuildActivation(act_cfg),
                 nn.Conv2d(stem_channels // 2, stem_channels, kernel_size=3, stride=1, padding=1, bias=False),
-                BuildNormalization(constructnormcfg(placeholder=stem_channels, norm_cfg=norm_cfg)),
+                BuildNormalization(placeholder=stem_channels, norm_cfg=norm_cfg),
                 BuildActivation(act_cfg),
             )
         else:
             self.conv1 = nn.Conv2d(in_channels, stem_channels, kernel_size=7, stride=2, padding=3, bias=False)
-            self.bn1 = BuildNormalization(constructnormcfg(placeholder=stem_channels, norm_cfg=norm_cfg))
+            self.bn1 = BuildNormalization(placeholder=stem_channels, norm_cfg=norm_cfg)
             self.relu = BuildActivation(act_cfg)
         self.maxpool = nn.MaxPool2d(kernel_size=3, stride=2, padding=1)
         # make layers
@@ -177,6 +196,21 @@ class ResNet(nn.Module):
             norm_cfg=norm_cfg, 
             act_cfg=act_cfg,
         )
+        # load pretrained weights
+        if pretrained and os.path.exists(pretrained_model_path):
+            checkpoint = torch.load(pretrained_model_path, map_location='cpu')
+            if 'state_dict' in checkpoint: 
+                state_dict = checkpoint['state_dict']
+            else: 
+                state_dict = checkpoint
+            self.load_state_dict(state_dict, strict=False)
+        elif pretrained:
+            checkpoint = model_zoo.load_url(DEFAULT_MODEL_URLS[structure_type], map_location='cpu')
+            if 'state_dict' in checkpoint: 
+                state_dict = checkpoint['state_dict']
+            else: 
+                state_dict = checkpoint
+            self.load_state_dict(state_dict, strict=False)
     '''make res layer'''
     def makelayer(self, block, inplanes, planes, num_blocks, stride=1, dilation=1, contract_dilation=True, use_avg_for_downsample=False, norm_cfg=None, act_cfg=None):
         downsample = None
@@ -187,12 +221,12 @@ class ResNet(nn.Module):
                 downsample = nn.Sequential(
                     nn.AvgPool2d(kernel_size=stride, stride=stride, ceil_mode=True, count_include_pad=False),
                     nn.Conv2d(inplanes, planes * block.expansion, kernel_size=1, stride=1, padding=0, bias=False),
-                    BuildNormalization(constructnormcfg(placeholder=planes * block.expansion, norm_cfg=norm_cfg))
+                    BuildNormalization(placeholder=planes * block.expansion, norm_cfg=norm_cfg)
                 )
             else:
                 downsample = nn.Sequential(
                     nn.Conv2d(inplanes, planes * block.expansion, kernel_size=1, stride=stride, padding=0, bias=False),
-                    BuildNormalization(constructnormcfg(placeholder=planes * block.expansion, norm_cfg=norm_cfg))
+                    BuildNormalization(placeholder=planes * block.expansion, norm_cfg=norm_cfg)
                 )
         layers = []
         layers.append(block(inplanes, planes, stride=stride, dilation=dilations[0], downsample=downsample, norm_cfg=norm_cfg, act_cfg=act_cfg))
@@ -217,58 +251,3 @@ class ResNet(nn.Module):
         for i, feats in enumerate([x1, x2, x3, x4]):
             if i in self.out_indices: outs.append(feats)
         return tuple(outs)
-
-
-'''BuildResNet'''
-def BuildResNet(resnet_cfg):
-    # assert whether support
-    resnet_type = resnet_cfg.pop('type')
-    supported_resnets = {
-        'resnet18': {'depth': 18}, 'resnet34': {'depth': 34}, 'resnet50': {'depth': 50},
-        'resnet101': {'depth': 101}, 'resnet152': {'depth': 152},
-    }
-    assert resnet_type in supported_resnets, 'unsupport the resnet_type %s' % resnet_type
-    # parse cfg
-    default_cfg = {
-        'outstride': 8,
-        'use_stem': True,
-        'norm_cfg': None,
-        'in_channels': 3,
-        'pretrained': True,
-        'base_channels': 64,
-        'stem_channels': 64,
-        'contract_dilation': True,
-        'out_indices': (0, 1, 2, 3),
-        'pretrained_model_path': '',
-        'use_avg_for_downsample': False,
-        'act_cfg': {'type': 'relu', 'inplace': True},
-    }
-    for key, value in resnet_cfg.items():
-        if key in default_cfg: 
-            default_cfg.update({key: value})
-    # obtain resnet_cfg
-    resnet_cfg = default_cfg.copy()
-    resnet_cfg.update(supported_resnets[resnet_type])
-    pretrained = resnet_cfg.pop('pretrained')
-    pretrained_model_path = resnet_cfg.pop('pretrained_model_path')
-    # obtain the instanced resnet
-    model = ResNet(**resnet_cfg)
-    # load weights of pretrained model
-    if resnet_cfg['use_stem']: 
-        resnet_type = resnet_type + 'stem'
-    if pretrained and os.path.exists(pretrained_model_path):
-        checkpoint = torch.load(pretrained_model_path)
-        if 'state_dict' in checkpoint: 
-            state_dict = checkpoint['state_dict']
-        else: 
-            state_dict = checkpoint
-        model.load_state_dict(state_dict, strict=False)
-    elif pretrained:
-        checkpoint = model_zoo.load_url(model_urls[resnet_type])
-        if 'state_dict' in checkpoint: 
-            state_dict = checkpoint['state_dict']
-        else: 
-            state_dict = checkpoint
-        model.load_state_dict(state_dict, strict=False)
-    # return the model
-    return model

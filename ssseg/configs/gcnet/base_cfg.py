@@ -11,15 +11,15 @@ SEGMENTOR_CFG = {
     'eval_interval_epochs': 10,
     'save_interval_epochs': 1,
     'resultsavepath': '',
-    'norm_cfg': {'type': 'syncbatchnorm'},
-    'act_cfg': {'type': 'relu', 'inplace': True},
+    'norm_cfg': {'type': 'SyncBatchNorm'},
+    'act_cfg': {'type': 'ReLU', 'inplace': True},
     'backbone': {
         'type': 'resnet101', 'series': 'resnet', 'pretrained': True, 
         'outstride': 8, 'use_stem': True, 'selected_indices': (2, 3),
     },
     'head': {
         'in_channels': 2048, 'feats_channels': 512, 'ratio': 0.25, 'pooling_type': 'att',
-        'fusion_types': ('channel_add', ), 'norm_cfg': {'type': 'layernorm'}, 'dropout': 0.1,
+        'fusion_types': ('channel_add', ), 'norm_cfg': {'type': 'LayerNorm'}, 'dropout': 0.1,
     },
     'auxiliary': {
         'in_channels': 1024, 'out_channels': 512, 'dropout': 0.1,

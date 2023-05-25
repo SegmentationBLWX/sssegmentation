@@ -22,7 +22,7 @@ SEGMENTOR_CFG['scheduler']['optimizer'] = {
 # modify other segmentor configs
 SEGMENTOR_CFG['num_classes'] = 150
 SEGMENTOR_CFG['backbone'] = {
-    'type': 'svt_base', 'series': 'twins', 'pretrained': True, 'selected_indices': (0, 1, 2, 3), 'norm_cfg': {'type': 'layernorm'},
+    'type': 'svt_base', 'series': 'twins', 'pretrained': True, 'selected_indices': (0, 1, 2, 3), 'norm_cfg': {'type': 'LayerNorm'},
 }
 SEGMENTOR_CFG['head'] = {
     'in_channels_list': [96, 192, 384, 768], 'feats_channels': 512, 'pool_scales': [1, 2, 3, 6], 'dropout': 0.1,

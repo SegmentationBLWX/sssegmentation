@@ -7,13 +7,15 @@ Author:
 import torch.nn as nn
 
 
-'''model urls'''
-model_urls = {}
+'''DEFAULT_MODEL_URLS'''
+DEFAULT_MODEL_URLS = {}
+'''AUTO_ASSERT_STRUCTURE_TYPES'''
+AUTO_ASSERT_STRUCTURE_TYPES = {}
 
 
 '''TIMMBackbone'''
 class TIMMBackbone(nn.Module):
-    def __init__(self, model_name, features_only=True, pretrained=True, pretrained_model_path='', in_channels=3, extra_args={}):
+    def __init__(self, structure_type, model_name, features_only=True, pretrained=True, pretrained_model_path='', in_channels=3, extra_args={}):
         super(TIMMBackbone, self).__init__()
         import timm
         self.timm_model = timm.create_model(
@@ -31,27 +33,3 @@ class TIMMBackbone(nn.Module):
     def forward(self, x):
         features = self.timm_model(x)
         return features
-
-
-'''BuildTIMMBackbone'''
-def BuildTIMMBackbone(timm_cfg):
-    # assert whether support
-    timm_type = timm_cfg.pop('type')
-    # parse cfg
-    default_cfg = {
-        'model_name': None,
-        'features_only': True,
-        'pretrained': True,
-        'pretrained_model_path': '',
-        'in_channels': 3,
-        'extra_args': {},
-    }
-    for key, value in timm_cfg.items():
-        if key in default_cfg: 
-            default_cfg.update({key: value})
-    # obtain timm_cfg
-    timm_cfg = default_cfg.copy()
-    # obtain the instanced timm
-    model = TIMMBackbone(**timm_cfg)
-    # return the model
-    return model

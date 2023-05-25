@@ -11,11 +11,11 @@ SEGMENTOR_CFG = {
     'eval_interval_epochs': 10,
     'save_interval_epochs': 1,
     'resultsavepath': '',
-    'norm_cfg': {'type': 'syncbatchnorm'},
-    'act_cfg': {'type': 'relu', 'inplace': True},
+    'norm_cfg': {'type': 'SyncBatchNorm'},
+    'act_cfg': {'type': 'ReLU', 'inplace': True},
     'backbone': {
         'type': 'convnext_base', 'series': 'convnext', 'arch': 'base', 'pretrained': True, 'drop_path_rate': 0.4,
-        'layer_scale_init_value': 1.0, 'gap_before_final_norm': False, 'selected_indices': (0, 1, 2, 3), 'norm_cfg': {'type': 'layernorm2d', 'eps': 1e-6},
+        'layer_scale_init_value': 1.0, 'gap_before_final_norm': False, 'selected_indices': (0, 1, 2, 3), 'norm_cfg': {'type': 'LayerNorm2d', 'eps': 1e-6},
     },
     'head': {
         'in_channels_list': [128, 256, 512, 1024], 'feats_channels': 512, 'pool_scales': [1, 2, 3, 6], 'dropout': 0.1,

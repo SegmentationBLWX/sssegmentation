@@ -11,8 +11,8 @@ SEGMENTOR_CFG = {
     'eval_interval_epochs': 10,
     'save_interval_epochs': 1,
     'resultsavepath': '',
-    'norm_cfg': {'type': 'syncbatchnorm', 'eps': 0.001},
-    'act_cfg': {'type': 'relu', 'inplace': True},
+    'norm_cfg': {'type': 'SyncBatchNorm', 'eps': 0.001},
+    'act_cfg': {'type': 'ReLU', 'inplace': True},
     'backbone': {
         'type': 'mobilenetv3', 'series': 'mobilenet', 'pretrained': True,
         'outstride': 8, 'arch_type': 'large', 'selected_indices': (0, 1, 2),

@@ -16,7 +16,7 @@ SEGMENTOR_CFG['scheduler']['max_epochs'] = 130
 SEGMENTOR_CFG['num_classes'] = 150
 SEGMENTOR_CFG['backbone'] = {
     'type': 'mit-b3', 'series': 'mit', 'pretrained': True, 'pretrained_model_path': 'mit_b3.pth',
-    'selected_indices': (0, 1, 2, 3), 'norm_cfg': {'type': 'layernorm', 'eps': 1e-6},
+    'selected_indices': (0, 1, 2, 3), 'norm_cfg': {'type': 'LayerNorm', 'eps': 1e-6},
 }
 SEGMENTOR_CFG['head'] = {
     'in_channels_list': [64, 128, 320, 512], 'feats_channels': 256, 'dropout': 0.1,

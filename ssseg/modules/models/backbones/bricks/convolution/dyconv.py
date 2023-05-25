@@ -8,7 +8,7 @@ import torch
 import torch.nn as nn
 import torch.nn.functional as F
 from ..activation import BuildActivation
-from ..normalization import BuildNormalization, constructnormcfg
+from ..normalization import BuildNormalization
 
 
 '''Attention2d'''
@@ -57,7 +57,7 @@ class DynamicConv2d(nn.Module):
         if bias:
             self.bias = nn.Parameter(torch.randn(K, out_channels))
         if norm_cfg is not None: 
-            self.norm = BuildNormalization(constructnormcfg(placeholder=out_channels, norm_cfg=norm_cfg))
+            self.norm = BuildNormalization(placeholder=out_channels, norm_cfg=norm_cfg)
         if act_cfg is not None: 
             self.activation = BuildActivation(act_cfg)
     '''update'''

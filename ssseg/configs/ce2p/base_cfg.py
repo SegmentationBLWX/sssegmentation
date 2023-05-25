@@ -11,8 +11,8 @@ SEGMENTOR_CFG = {
     'eval_interval_epochs': 10,
     'save_interval_epochs': 1,
     'resultsavepath': '',
-    'norm_cfg': {'type': 'syncbatchnorm'},
-    'act_cfg': {'type': 'leakyrelu', 'negative_slope': 0.01, 'inplace': True},
+    'norm_cfg': {'type': 'SyncBatchNorm'},
+    'act_cfg': {'type': 'LeakyReLU', 'negative_slope': 0.01, 'inplace': True},
     'backbone': {
         'type': 'resnet101', 'series': 'resnet', 'pretrained': True, 
         'outstride': 8, 'use_stem': True, 'selected_indices': (0, 1, 2, 3),

@@ -11,13 +11,21 @@ import torch.nn.functional as F
 import torch.utils.model_zoo as model_zoo
 from scipy import interpolate
 from .vit import TransformerEncoderLayer as VisionTransformerEncoderLayer
-from .bricks import BuildNormalization, constructnormcfg, PatchEmbed, BuildDropout, truncnormal
+from .bricks import BuildNormalization, PatchEmbed, BuildDropout, truncnormal
 
 
-'''model urls'''
-model_urls = {
+'''DEFAULT_MODEL_URLS'''
+DEFAULT_MODEL_URLS = {
     'beit_base_patch16_224_pt22k_ft22k': 'https://conversationhub.blob.core.windows.net/beit-share-public/beit/beit_base_patch16_224_pt22k_ft22k.pth',
     'beit_large_patch16_224_pt22k_ft22k': 'https://conversationhub.blob.core.windows.net/beit-share-public/beit/beit_large_patch16_224_pt22k_ft22k.pth',
+}
+'''AUTO_ASSERT_STRUCTURE_TYPES'''
+AUTO_ASSERT_STRUCTURE_TYPES = {
+    'beit_base_patch16_224_pt22k_ft22k': {},
+    'beit_large_patch16_224_pt22k_ft22k': {
+        'embed_dims': 1024, 'num_layers': 24, 'num_heads': 16, 'mlp_ratio': 4,
+        'qv_bias': True, 'init_values': 1e-6, 'drop_path_rate': 0.2, 'out_indices': [7, 11, 15, 23]
+    },
 }
 
 
@@ -108,7 +116,7 @@ class BEiTTransformerEncoderLayer(VisionTransformerEncoderLayer):
             drop_path_rate=0., drop_rate=0., num_fcs=num_fcs, qkv_bias=bias, act_cfg=act_cfg, norm_cfg=norm_cfg, attn_cfg=dict(), 
             ffn_cfg=ffn_cfg
         )
-        dropout_cfg = dict(type='droppath', drop_prob=drop_path_rate)
+        dropout_cfg = dict(type='DropPath', drop_prob=drop_path_rate)
         self.drop_path = BuildDropout(dropout_cfg) if dropout_cfg else nn.Identity()
         self.gamma_1 = nn.Parameter(init_values * torch.ones((embed_dims)), requires_grad=True)
         self.gamma_2 = nn.Parameter(init_values * torch.ones((embed_dims)), requires_grad=True)
@@ -131,33 +139,38 @@ class BEiTTransformerEncoderLayer(VisionTransformerEncoderLayer):
 
 '''BEiT'''
 class BEiT(nn.Module):
-    def __init__(self, img_size=224, patch_size=16, in_channels=3, embed_dims=768, num_layers=12, num_heads=12, mlp_ratio=4,
-                 out_indices=-1, qv_bias=True, attn_drop_rate=0., drop_path_rate=0., norm_cfg=None, act_cfg=None, patch_norm=False,
-                 final_norm=False, num_fcs=2, init_values=0.1):
+    def __init__(self, structure_type, img_size=(640, 640), patch_size=16, in_channels=3, embed_dims=768, num_layers=12, num_heads=12, mlp_ratio=4,
+                 out_indices=(3, 5, 7, 11), qv_bias=True, attn_drop_rate=0., drop_path_rate=0.1, norm_cfg={'type': 'LayerNorm', 'eps': 1e-6}, 
+                 act_cfg={'type': 'GELU'}, patch_norm=False, final_norm=False, num_fcs=2, init_values=0.1, pretrained=True, pretrained_model_path=''):
         super(BEiT, self).__init__()
         img_size = img_size if isinstance(img_size, tuple) else (img_size, img_size)
-        # set attrs
-        self.in_channels = in_channels
+        # set attributes
+        self.structure_type = structure_type
         self.img_size = img_size
         self.patch_size = patch_size
-        self.num_layers = num_layers
+        self.in_channels = in_channels
         self.embed_dims = embed_dims
+        self.num_layers = num_layers
         self.num_heads = num_heads
         self.mlp_ratio = mlp_ratio
+        self.out_indices = out_indices
+        self.qv_bias = qv_bias
         self.attn_drop_rate = attn_drop_rate
         self.drop_path_rate = drop_path_rate
-        self.num_fcs = num_fcs
-        self.qv_bias = qv_bias
-        self.act_cfg = act_cfg
         self.norm_cfg = norm_cfg
+        self.act_cfg = act_cfg
         self.patch_norm = patch_norm
+        self.final_norm = final_norm
+        self.num_fcs = num_fcs
         self.init_values = init_values
+        self.pretrained = pretrained
+        self.pretrained_model_path = pretrained_model_path
         self.window_size = (img_size[0] // patch_size, img_size[1] // patch_size)
         self.patch_shape = self.window_size
-        # define modules
-        self.cls_token = nn.Parameter(torch.zeros(1, 1, embed_dims))
-        self.buildpatchembedding()
-        self.buildlayers()
+        # assert
+        if structure_type in AUTO_ASSERT_STRUCTURE_TYPES:
+            for key, value in AUTO_ASSERT_STRUCTURE_TYPES[structure_type].items():
+                assert hasattr(self, key) and (getattr(self, key) == value)
         if isinstance(out_indices, int):
             if out_indices == -1:
                 out_indices = num_layers - 1
@@ -166,9 +179,15 @@ class BEiT(nn.Module):
             self.out_indices = out_indices
         else:
             raise TypeError('out_indices must be type of int, list or tuple')
-        self.final_norm = final_norm
+        # set modules
+        self.cls_token = nn.Parameter(torch.zeros(1, 1, embed_dims))
+        self.buildpatchembedding()
+        self.buildlayers()
         if final_norm:
-            self.norm1 = BuildNormalization(constructnormcfg(placeholder=embed_dims, norm_cfg=norm_cfg))
+            self.norm1 = BuildNormalization(placeholder=embed_dims, norm_cfg=norm_cfg)
+        # load pretrained weights
+        if pretrained:
+            self.initweights(structure_type, pretrained_model_path)
     '''buildpatchembedding'''
     def buildpatchembedding(self):
         self.patch_embed = PatchEmbed(
@@ -246,11 +265,11 @@ class BEiT(nn.Module):
                     state_dict[key] = new_rel_pos_bias
         return state_dict
     '''initweights'''
-    def initweights(self, beit_type='beit_base_patch16_224_pt22k_ft22k', pretrained_model_path=''):
+    def initweights(self, structure_type='beit_base_patch16_224_pt22k_ft22k', pretrained_model_path=''):
         if pretrained_model_path:
             checkpoint = torch.load(pretrained_model_path, map_location='cpu')
         else:
-            checkpoint = model_zoo.load_url(model_urls[beit_type], map_location='cpu')
+            checkpoint = model_zoo.load_url(DEFAULT_MODEL_URLS[structure_type], map_location='cpu')
         if 'state_dict' in checkpoint:
             state_dict = checkpoint['state_dict']
         elif 'model' in checkpoint:
@@ -300,54 +319,3 @@ class BEiT(nn.Module):
                 out = out.reshape(B, hw_shape[0], hw_shape[1], C).permute(0, 3, 1, 2).contiguous()
                 outs.append(out)
         return tuple(outs)
-
-
-'''BuildBEiT'''
-def BuildBEiT(beit_cfg):
-    # assert whether support
-    beit_type = beit_cfg.pop('type')
-    supported_beits = {
-        'beit_base_patch16_224_pt22k_ft22k': {},
-        'beit_large_patch16_224_pt22k_ft22k': {
-            'embed_dims': 1024, 'num_layers': 24, 'num_heads': 16, 'mlp_ratio': 4,
-            'qv_bias': True, 'init_values': 1e-6, 'drop_path_rate': 0.2, 'out_indices': [7, 11, 15, 23]
-        },
-    }
-    assert beit_type in supported_beits, 'unspport the beit_type %s' % beit_type
-    # parse cfg
-    default_cfg = {
-        'img_size': (640, 640), 
-        'patch_size': 16, 
-        'in_channels': 3, 
-        'embed_dims': 768, 
-        'num_layers': 12, 
-        'num_heads': 12, 
-        'mlp_ratio': 4,
-        'out_indices': (3, 5, 7, 11), 
-        'qv_bias': True, 
-        'attn_drop_rate': 0., 
-        'drop_path_rate': 0.1, 
-        'norm_cfg': {'type': 'layernorm', 'eps': 1e-6},
-        'act_cfg': {'type': 'gelu'},
-        'patch_norm': False,
-        'final_norm': False, 
-        'num_fcs': 2, 
-        'init_values': 0.1,
-        'pretrained': True,
-        'pretrained_model_path': '',
-    }
-    default_cfg.update(supported_beits[beit_type])
-    for key, value in beit_cfg.items():
-        if key in default_cfg: 
-            default_cfg.update({key: value})
-    # obtain beit_cfg
-    beit_cfg = default_cfg.copy()
-    pretrained = beit_cfg.pop('pretrained')
-    pretrained_model_path = beit_cfg.pop('pretrained_model_path')
-    # obtain the instanced beit
-    model = BEiT(**beit_cfg)
-    # load weights of pretrained model
-    if pretrained:
-        model.initweights(beit_type, pretrained_model_path)
-    # return the model
-    return model

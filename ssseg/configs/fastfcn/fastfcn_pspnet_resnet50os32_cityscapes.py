@@ -20,8 +20,8 @@ SEGMENTOR_CFG.update({
     'type': 'fastfcn',
     'segmentor': 'pspnet',
     'backend': 'nccl',
-    'norm_cfg': {'type': 'syncbatchnorm'},
-    'act_cfg': {'type': 'relu', 'inplace': True},
+    'norm_cfg': {'type': 'SyncBatchNorm'},
+    'act_cfg': {'type': 'ReLU', 'inplace': True},
     'backbone': {
         'type': 'resnet50', 'series': 'resnet', 'pretrained': True, 
         'outstride': 32, 'use_stem': True, 'selected_indices': (1, 2, 3),

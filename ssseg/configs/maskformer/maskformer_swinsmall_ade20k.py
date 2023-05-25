@@ -18,7 +18,7 @@ SEGMENTOR_CFG['scheduler']['warmup_cfg'] = {'type': 'linear', 'ratio': 1e-6, 'it
 # modify other segmentor configs
 SEGMENTOR_CFG['num_classes'] = 150
 SEGMENTOR_CFG['backbone'] = {
-    'type': 'swin_small_patch4_window7_224', 'series': 'swin', 'pretrained': True, 'selected_indices': (0, 1, 2, 3), 'norm_cfg': {'type': 'layernorm'},
+    'type': 'swin_small_patch4_window7_224', 'series': 'swin', 'pretrained': True, 'selected_indices': (0, 1, 2, 3), 'norm_cfg': {'type': 'LayerNorm'},
 }
 SEGMENTOR_CFG['head']['in_channels_list'] = [96, 192, 384, 768]
 SEGMENTOR_CFG['work_dir'] = 'maskformer_swinsmall_ade20k'

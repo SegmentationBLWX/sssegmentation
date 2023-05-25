@@ -14,7 +14,7 @@ SEGMENTOR_CFG['dataloader'] = DATALOADER_CFG_BS32.copy()
 SEGMENTOR_CFG['scheduler']['max_epochs'] = 150
 # modify other segmentor configs
 SEGMENTOR_CFG['num_classes'] = 20
-SEGMENTOR_CFG['act_cfg'] = {'type': 'leakyrelu', 'negative_slope': 0.01, 'inplace': True}
+SEGMENTOR_CFG['act_cfg'] = {'type': 'LeakyReLU', 'negative_slope': 0.01, 'inplace': True}
 SEGMENTOR_CFG['head']['shortcut']['is_on'] = True
 SEGMENTOR_CFG['work_dir'] = 'isnet_resnet101os8_lip'
 SEGMENTOR_CFG['logfilepath'] = 'isnet_resnet101os8_lip/isnet_resnet101os8_lip.log'

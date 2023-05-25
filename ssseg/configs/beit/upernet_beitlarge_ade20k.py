@@ -20,7 +20,7 @@ SEGMENTOR_CFG['scheduler']['optimizer'] = {
 SEGMENTOR_CFG['num_classes'] = 150
 SEGMENTOR_CFG['backbone'] = {
     'type': 'beit_large_patch16_224_pt22k_ft22k', 'series': 'beit', 'pretrained': True,
-    'selected_indices': (0, 1, 2, 3), 'norm_cfg': {'type': 'layernorm', 'eps': 1e-6},
+    'selected_indices': (0, 1, 2, 3), 'norm_cfg': {'type': 'LayerNorm', 'eps': 1e-6},
 }
 SEGMENTOR_CFG['head'] = {
     'feature2pyramid': {'embed_dim': 1024, 'rescales': [4, 2, 1, 0.5]}, 'in_channels_list': [1024, 1024, 1024, 1024],

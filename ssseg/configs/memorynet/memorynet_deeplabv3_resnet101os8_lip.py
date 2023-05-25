@@ -14,7 +14,7 @@ SEGMENTOR_CFG['dataloader'] = DATALOADER_CFG_BS32.copy()
 SEGMENTOR_CFG['scheduler']['max_epochs'] = 150
 # modify other segmentor configs
 SEGMENTOR_CFG['num_classes'] = 20
-SEGMENTOR_CFG['act_cfg'] = {'type': 'leakyrelu', 'negative_slope': 0.01, 'inplace': True}
+SEGMENTOR_CFG['act_cfg'] = {'type': 'LeakyReLU', 'negative_slope': 0.01, 'inplace': True}
 SEGMENTOR_CFG['head']['use_loss'] = False
 SEGMENTOR_CFG['work_dir'] = 'memorynet_deeplabv3_resnet101os8_lip'
 SEGMENTOR_CFG['logfilepath'] = 'memorynet_deeplabv3_resnet101os8_lip/memorynet_deeplabv3_resnet101os8_lip.log'
