@@ -22,7 +22,7 @@ _INTERPOLATION_CV2_CONVERTOR = {
 class Resize(object):
     def __init__(self, output_size, keep_ratio=True, min_size=None, scale_range=(0.5, 2.0), image_interpolation='bilinear', seg_target_interpolation='nearest'):
         # assert
-        assert isinstance(scale_range, collections.Sequence) or isinstance(scale_range, None)
+        assert isinstance(scale_range, collections.Sequence) or scale_range is None
         assert isinstance(output_size, int) or (isinstance(output_size, collections.Sequence) and len(output_size) == 2)
         # set attributes
         self.min_size = min_size
