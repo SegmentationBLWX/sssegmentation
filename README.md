@@ -23,43 +23,39 @@ You can star this repository to keep track of the project if it's helpful for yo
 
 ## Major Features
 
-- **Unified Benchmark**
-
-  We provide a unified benchmark toolbox for various semantic segmentation methods.
-
-- **Modular Design**
-
-  We decompose the semantic segmentation framework into different components and one can easily construct a customized semantic segmentation framework by combining different modules.
- 
-- **Support of Multiple Methods Out of Box**
-
-  The toolbox directly supports popular and contemporary semantic segmentation frameworks, *e.g.*, ISNet, DeepLabV3, PSPNet, MCIBI, etc.
- 
 - **High Performance**
 
-  The segmentation performance is better than or comparable to other codebases.
-
+  The performance of re-implemented segmentation algorithms is better than or comparable to other codebases.
+ 
+- **Modular Design and Unified Benchmark**
+  
+  Various segmentation methods are unified into several specific modules.
+  Benefiting from this design, SSSegmentation can integrate a great deal of popular and contemporary semantic segmentation frameworks and then, train and test them on unified benchmarks.
+ 
 
 ## Benchmark and Model Zoo
 
 #### Supported Backbones
 
-- [UNet](./docs/modelzoo/unet)
-- [BEiT](./docs/modelzoo/beit)
-- [Twins](./docs/modelzoo/twins)
-- [CGNet](./docs/modelzoo/cgnet)
-- [HRNet](https://arxiv.org/pdf/1908.07919.pdf)
-- [ERFNet](./docs/modelzoo/erfnet)
-- [ResNet](https://arxiv.org/pdf/1512.03385.pdf)
-- [ResNeSt](./docs/modelzoo/resnest)
-- [ConvNeXt](./docs/modelzoo/convnext)
-- [FastSCNN](./docs/modelzoo/fastscnn)
-- [BiSeNetV1](./docs/modelzoo/bisenetv1)
-- [BiSeNetV2](./docs/modelzoo/bisenetv2)
-- [MobileNetV2](./docs/modelzoo/mobilenet)
-- [MobileNetV3](./docs/modelzoo/mobilenet)
-- [SwinTransformer](./docs/modelzoo/swin)
-- [VisionTransformer](https://arxiv.org/pdf/2010.11929.pdf)
+| Backbone               | Model Zoo                                    | Paper Link                                                    | Code Snippet                                             |
+| :-:                    | :-:                                          | :-:                                                           | :-:                                                      |
+| UNet                   | [Click](./docs/modelzoo/unet)                | [MICCAI 2015](https://arxiv.org/pdf/1505.04597.pdf)           | [Click](./ssseg/modules/models/backbones/unet.py)        |
+| BEiT                   | [Click](./docs/modelzoo/beit)                | [ICLR 2022](https://arxiv.org/pdf/2106.08254.pdf)             | [Click](./ssseg/modules/models/backbones/beit.py)        |
+| Twins                  | [Click](./docs/modelzoo/twins)               | [NeurIPS 2021](https://arxiv.org/pdf/2104.13840.pdf)          | [Click](./ssseg/modules/models/backbones/twins.py)       |
+| CGNet                  | [Click](./docs/modelzoo/cgnet)               | [TIP 2020](https://arxiv.org/pdf/1811.08201.pdf)              | [Click](./ssseg/modules/models/backbones/cgnet.py)       |
+| HRNet                  | [Click](./docs/modelzoo/ocrnet)              | [CVPR 2019](https://arxiv.org/pdf/1908.07919.pdf)             | [Click](./ssseg/modules/models/backbones/hrnet.py)       |
+| ERFNet                 | [Click](./docs/modelzoo/erfnet)              | [T-ITS 2017](https://ieeexplore.ieee.org/document/8063438)    | [Click](./ssseg/modules/models/backbones/erfnet.py)      |
+| ResNet                 | [Click](./docs/modelzoo/fcn)                 | [CVPR 2016](https://arxiv.org/pdf/1512.03385.pdf)             | [Click](./ssseg/modules/models/backbones/resnet.py)      |
+| ResNeSt                | [Click](./docs/modelzoo/resnest)             | [ArXiv 2020](https://arxiv.org/pdf/2004.08955.pdf)            | [Click](./ssseg/modules/models/backbones/resnest.py)     |
+| ConvNeXt               | [Click](./docs/modelzoo/convnext)            | [CVPR 2022](https://arxiv.org/pdf/2201.03545.pdf)             | [Click](./ssseg/modules/models/backbones/convnext.py)    |
+| FastSCNN               | [Click](./docs/modelzoo/fastscnn)            | [ArXiv 2019](https://arxiv.org/pdf/1902.04502.pdf)            | [Click](./ssseg/modules/models/backbones/fastscnn.py)    |
+| BiSeNetV1              | [Click](./docs/modelzoo/bisenetv1)           | [ECCV 2018](https://arxiv.org/pdf/1808.00897.pdf)             | [Click](./ssseg/modules/models/backbones/bisenetv1.py)   |
+| BiSeNetV2              | [Click](./docs/modelzoo/bisenetv2)           | [IJCV 2021](https://arxiv.org/pdf/2004.02147.pdf)             | [Click](./ssseg/modules/models/backbones/bisenetv2.py)   |
+| MobileNetV2            | [Click](./docs/modelzoo/mobilenet)           | [CVPR 2018](https://arxiv.org/pdf/1801.04381.pdf)             | [Click](./ssseg/modules/models/backbones/mobilenet.py)   |
+| MobileNetV3            | [Click](./docs/modelzoo/mobilenet)           | [ICCV 2019](https://arxiv.org/pdf/1905.02244.pdf)             | [Click](./ssseg/modules/models/backbones/mobilenet.py)   |
+| SwinTransformer        | [Click](./docs/modelzoo/swin)                | [ICCV 2021](https://arxiv.org/pdf/2103.14030.pdf)             | [Click](./ssseg/modules/models/backbones/swin.py)        |
+| VisionTransformer      | [Click](./docs/modelzoo/setr)                | [IClR 2021](https://arxiv.org/pdf/2010.11929.pdf)             | [Click](./ssseg/modules/models/backbones/vit.py)         |
+
 
 #### Supported Segmentors
 
