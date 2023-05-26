@@ -59,36 +59,39 @@ You can star this repository to keep track of the project if it's helpful for yo
 
 #### Supported Segmentors
 
-- [FCN](./docs/modelzoo/fcn)
-- [CE2P](./docs/modelzoo/ce2p)
-- [SETR](./docs/modelzoo/setr)
-- [ISNet](./docs/modelzoo/isnet)
-- [ICNet](./docs/modelzoo/icnet)
-- [CCNet](./docs/modelzoo/ccnet)
-- [DANet](./docs/modelzoo/danet)
-- [GCNet](./docs/modelzoo/gcnet)
-- [DMNet](./docs/modelzoo/dmnet)
-- [ISANet](./docs/modelzoo/isanet)
-- [EncNet](./docs/modelzoo/encnet)
-- [OCRNet](./docs/modelzoo/ocrnet)
-- [DNLNet](./docs/modelzoo/dnlnet)
-- [ANNNet](./docs/modelzoo/annnet)
-- [EMANet](./docs/modelzoo/emanet)
-- [PSPNet](./docs/modelzoo/pspnet)
-- [PSANet](./docs/modelzoo/psanet)
-- [APCNet](./docs/modelzoo/apcnet)
-- [FastFCN](./docs/modelzoo/fastfcn)
-- [UPerNet](./docs/modelzoo/upernet)
-- [PointRend](./docs/modelzoo/pointrend)
-- [Deeplabv3](./docs/modelzoo/deeplabv3)
-- [Segformer](./docs/modelzoo/segformer)
-- [MaskFormer](./docs/modelzoo/maskformer)
-- [SemanticFPN](./docs/modelzoo/semanticfpn)
-- [NonLocalNet](./docs/modelzoo/nonlocalnet)
-- [Deeplabv3Plus](./docs/modelzoo/deeplabv3plus)
-- [MemoryNet-MCIBI](./docs/modelzoo/memorynet)
-- [MemoryNet-MCIBI++](./docs/modelzoo/memorynetv2)
-- [Mixed Precision (FP16) Training](./docs/modelzoo/fp16)
+| Segmentor                         | Model Zoo                                    | Paper Link                                                                                                                                              | Code Snippet                                                                |
+| :-:                               | :-:                                          | :-:                                                                                                                                                     | :-:                                                                         |
+| FCN                               | [Click](./docs/modelzoo/fcn)                 | [TPAMI 2017](https://arxiv.org/pdf/1411.4038.pdf)                                                                                                       | [Click](./ssseg/modules/models/segmentors/fcn/fcn.py)                       |
+| CE2P                              | [Click](./docs/modelzoo/ce2p)                | [AAAI 2019](https://arxiv.org/pdf/1809.05996.pdf)                                                                                                       | [Click](./ssseg/modules/models/segmentors/ce2p/ce2p.py)                     |
+| SETR                              | [Click](./docs/modelzoo/setr)                | [CVPR 2021](https://arxiv.org/pdf/2012.15840.pdf)                                                                                                       | [Click](./ssseg/modules/models/segmentors/setr/setr.py)                     |
+| ISNet                             | [Click](./docs/modelzoo/isnet)               | [ICCV 2021](https://arxiv.org/pdf/2108.12382.pdf)                                                                                                       | [Click](./ssseg/modules/models/segmentors/isnet/isnet.py)                   |
+| ICNet                             | [Click](./docs/modelzoo/icnet)               | [ECCV 2018](https://arxiv.org/pdf/1704.08545.pdf)                                                                                                       | [Click](./ssseg/modules/models/segmentors/icnet/icnet.py)                   |
+| CCNet                             | [Click](./docs/modelzoo/ccnet)               | [ICCV 2019](https://arxiv.org/pdf/1811.11721.pdf)                                                                                                       | [Click](./ssseg/modules/models/segmentors/ccnet/ccnet.py)                   |
+| DANet                             | [Click](./docs/modelzoo/danet)               | [CVPR 2019](https://arxiv.org/pdf/1809.02983.pdf)                                                                                                       | [Click](./ssseg/modules/models/segmentors/danet/danet.py)                   |
+| DMNet                             | [Click](./docs/modelzoo/dmnet)               | [ICCV 2019](https://openaccess.thecvf.com/content_ICCV_2019/papers/He_Dynamic_Multi-Scale_Filters_for_Semantic_Segmentation_ICCV_2019_paper.pdf)        | [Click](./ssseg/modules/models/segmentors/dmnet/dmnet.py)                   |
+| GCNet                             | [Click](./docs/modelzoo/gcnet)               | [TPAMI 2020](https://arxiv.org/pdf/1904.11492.pdf)                                                                                                      | [Click](./ssseg/modules/models/segmentors/gcnet/gcnet.py)                   |
+| ISANet                            | [Click](./docs/modelzoo/isanet)              | [IJCV 2021](https://arxiv.org/pdf/1907.12273.pdf)                                                                                                       | [Click](./ssseg/modules/models/segmentors/isanet/isanet.py)                 |
+| EncNet                            | [Click](./docs/modelzoo/encnet)              | [CVPR 2018](https://arxiv.org/pdf/1803.08904.pdf)                                                                                                       | [Click](./ssseg/modules/models/segmentors/encnet/encnet.py)                 |
+| OCRNet                            | [Click](./docs/modelzoo/ocrnet)              | [ECCV 2020](https://arxiv.org/pdf/1909.11065.pdf)                                                                                                       | [Click](./ssseg/modules/models/segmentors/ocrnet/ocrnet.py)                 |
+| DNLNet                            | [Click](./docs/modelzoo/dnlnet)              | [ECCV 2020](https://arxiv.org/pdf/2006.06668.pdf)                                                                                                       | [Click](./ssseg/modules/models/segmentors/dnlnet/dnlnet.py)                 |
+| ANNNet                            | [Click](./docs/modelzoo/annnet)              | [ICCV 2019](https://arxiv.org/pdf/1908.07678.pdf)                                                                                                       | [Click](./ssseg/modules/models/segmentors/annnet/annnet.py)                 |
+| EMANet                            | [Click](./docs/modelzoo/emanet)              | [ICCV 2019](https://arxiv.org/pdf/1907.13426.pdf)                                                                                                       | [Click](./ssseg/modules/models/segmentors/emanet/emanet.py)                 |
+| PSPNet                            | [Click](./docs/modelzoo/pspnet)              | [CVPR 2017](https://arxiv.org/pdf/1612.01105.pdf)                                                                                                       | [Click](./ssseg/modules/models/segmentors/pspnet/pspnet.py)                 |
+| PSANet                            | [Click](./docs/modelzoo/psanet)              | [ECCV 2018](https://openaccess.thecvf.com/content_ECCV_2018/papers/Hengshuang_Zhao_PSANet_Point-wise_Spatial_ECCV_2018_paper.pdf)                       | [Click](./ssseg/modules/models/segmentors/psanet/psanet.py)                 |
+| APCNet                            | [Click](./docs/modelzoo/apcnet)              | [CVPR 2019](https://openaccess.thecvf.com/content_CVPR_2019/papers/He_Adaptive_Pyramid_Context_Network_for_Semantic_Segmentation_CVPR_2019_paper.pdf)   | [Click](./ssseg/modules/models/segmentors/apcnet/apcnet.py)                 |
+| FastFCN                           | [Click](./docs/modelzoo/fastfcn)             | [ArXiv 2019](https://arxiv.org/pdf/1903.11816.pdf)                                                                                                      | [Click](./ssseg/modules/models/segmentors/fastfcn/fastfcn.py)               |
+| UPerNet                           | [Click](./docs/modelzoo/upernet)             | [ECCV 2018](https://arxiv.org/pdf/1807.10221.pdf)                                                                                                       | [Click](./ssseg/modules/models/segmentors/upernet/upernet.py)               |
+| PointRend                         | [Click](./docs/modelzoo/pointrend)           | [CVPR 2020](https://arxiv.org/pdf/1912.08193.pdf)                                                                                                       | [Click](./ssseg/modules/models/segmentors/pointrend/pointrend.py)           |
+| Deeplabv3                         | [Click](./docs/modelzoo/deeplabv3)           | [ArXiv 2017](https://arxiv.org/pdf/1706.05587.pdf)                                                                                                      | [Click](./ssseg/modules/models/segmentors/deeplabv3/deeplabv3.py)           |
+| Segformer                         | [Click](./docs/modelzoo/segformer)           | [NeurIPS 2021](https://arxiv.org/pdf/2105.15203.pdf)                                                                                                    | [Click](./ssseg/modules/models/segmentors/segformer/segformer.py)           |
+| MaskFormer                        | [Click](./docs/modelzoo/maskformer)          | [NeurIPS 2021](https://arxiv.org/pdf/2107.06278.pdf)                                                                                                    | [Click](./ssseg/modules/models/segmentors/maskformer/maskformer.py)         |
+| SemanticFPN                       | [Click](./docs/modelzoo/semanticfpn)         | [CVPR 2019](https://arxiv.org/pdf/1901.02446.pdf)                                                                                                       | [Click](./ssseg/modules/models/segmentors/semanticfpn/semanticfpn.py)       |
+| NonLocalNet                       | [Click](./docs/modelzoo/nonlocalnet)         | [CVPR 2018](https://arxiv.org/pdf/1711.07971.pdf)                                                                                                       | [Click](./ssseg/modules/models/segmentors/nonlocalnet/nonlocalnet.py)       |
+| Deeplabv3Plus                     | [Click](./docs/modelzoo/deeplabv3plus)       | [CVPR 2018](https://arxiv.org/pdf/1802.02611.pdf)                                                                                                       | [Click](./ssseg/modules/models/segmentors/deeplabv3plus/deeplabv3plus.py)   |
+| MemoryNet-MCIBI                   | [Click](./docs/modelzoo/memorynet)           | [ICCV 2021](https://arxiv.org/pdf/2108.11819.pdf)                                                                                                       | [Click](./ssseg/modules/models/segmentors/memorynet/memorynet.py)           |
+| MemoryNet-MCIBI++                 | [Click](./docs/modelzoo/memorynetv2)         | [TPAMI 2022](https://arxiv.org/pdf/2209.04471.pdf)                                                                                                      | [Click](./ssseg/modules/models/segmentors/memorynetv2/memorynetv2.py)       |
+| Mixed Precision (FP16) Training   | [Click](./docs/modelzoo/fp16)                | [ArXiv 2017](https://arxiv.org/pdf/1710.03740.pdf)                                                                                                      | [Click](./ssseg/train.py)                                                   |
+
 
 #### Supported Datasets
 

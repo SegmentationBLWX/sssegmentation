@@ -5,7 +5,7 @@
 <a href="https://github.com/SegmentationBLWX/sssegmentation/blob/main/ssseg/modules/models/segmentors/memorynetv2/memorynetv2.py">Code Snippet</a>
 
 <details>
-<summary align="left"><a href="">MemoryNetV2-MCIBI++ (TPAMI'2022)</a></summary>
+<summary align="left"><a href="https://arxiv.org/pdf/2209.04471.pdf">MemoryNetV2-MCIBI++ (TPAMI'2022)</a></summary>
 
 ```latex
 @article{jin2022mcibi++,
