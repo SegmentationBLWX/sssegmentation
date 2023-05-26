@@ -95,26 +95,28 @@ You can star this repository to keep track of the project if it's helpful for yo
 
 #### Supported Datasets
 
-- [LIP](http://sysu-hcp.net/lip/)
-- [ATR](http://sysu-hcp.net/lip/overview.php)
-- [HRF](https://www5.cs.fau.de/fileadmin/research/datasets/fundus-images/)
-- [CIHP](http://sysu-hcp.net/lip/overview.php)
-- [VSPW](https://www.vspwdataset.com/)
-- [DRIVE](https://drive.grand-challenge.org/)
-- [STARE](http://cecas.clemson.edu/~ahoover/stare/)
-- [ADE20k](https://groups.csail.mit.edu/vision/datasets/ADE20K/)
-- [MS COCO](https://cocodataset.org/#home)
-- [MHPv1&v2](https://lv-mhp.github.io/dataset)
-- [CHASE DB1](https://staffnet.kingston.ac.uk/~ku15565/)
-- [CityScapes](https://www.cityscapes-dataset.com/)
-- [Supervisely](https://supervise.ly/explore/projects/supervisely-person-dataset-23304/datasets)
-- [SBUShadow](https://www3.cs.stonybrook.edu/~cvl/projects/shadow_noisy_label/index.html)
-- [PASCAL VOC](http://host.robots.ox.ac.uk/pascal/VOC/)
-- [Dark Zurich](https://data.vision.ee.ethz.ch/csakarid/shared/GCMA_UIoU/Dark_Zurich_val_anon.zip)
-- [COCOStuff10k](https://github.com/nightrome/cocostuff10k)
-- [COCOStuff164k](https://github.com/nightrome/cocostuff)
-- [Pascal Context](https://cs.stanford.edu/~roozbeh/pascal-context/)
-- [Nighttime Driving](http://data.vision.ee.ethz.ch/daid/NighttimeDriving/NighttimeDrivingTest.zip)
+| Dataset                | Project Link                                                                               | Paper Link                                                                                | Code Snippet                                             |
+| :-:                    | :-:                                                                                        | :-:                                                                                       | :-:                                                      |
+| LIP                    | [Click](http://sysu-hcp.net/lip/)                                                          | [CVPR 2017](https://arxiv.org/pdf/1703.05446.pdf)                                         | [Click](./ssseg/modules/datasets/lip.py)                 |
+| ATR                    | [Click](http://sysu-hcp.net/lip/overview.php)                                              | [ICCV 2015](https://ieeexplore.ieee.org/document/7410520)                                 | [Click](./ssseg/modules/datasets/atr.py)                 |
+| HRF                    | [Click](https://www5.cs.fau.de/fileadmin/research/datasets/fundus-images/)                 | [Int J Biomed Sci 2013](https://www.hindawi.com/journals/ijbi/2013/154860/)               | [Click](./ssseg/modules/datasets/hrf.py)                 |
+| CIHP                   | [Click](http://sysu-hcp.net/lip/overview.php)                                              | [ECCV 2018](https://arxiv.org/pdf/1808.00157.pdf)                                         | [Click](./ssseg/modules/datasets/cihp.py)                |
+| VSPW                   | [Click](https://www.vspwdataset.com/)                                                      | [CVPR 2021](https://yu-wu.net/pdf/CVPR21-vspw.pdf)                                        | [Click](./ssseg/modules/datasets/vspw.py)                |
+| DRIVE                  | [Click](https://drive.grand-challenge.org/)                                                | [TMI 2004](https://ieeexplore.ieee.org/document/1282003)                                  | [Click](./ssseg/modules/datasets/drive.py)               |
+| STARE                  | [Click](http://cecas.clemson.edu/~ahoover/stare/)                                          | [TMI 2000](https://ieeexplore.ieee.org/document/845178)                                   | [Click](./ssseg/modules/datasets/stare.py)               |
+| ADE20k                 | [Click](https://groups.csail.mit.edu/vision/datasets/ADE20K/)                              | [CVPR 2017](https://arxiv.org/pdf/1608.05442.pdf)                                         | [Click](./ssseg/modules/datasets/ade20k.py)              |
+| MS COCO                | [Click](https://cocodataset.org/#home)                                                     | [ECCV 2014](https://arxiv.org/pdf/1405.0312.pdf)                                          | [Click](./ssseg/modules/datasets/coco.py)                |
+| MHPv1&v2               | [Click](https://lv-mhp.github.io/dataset)                                                  | [ArXiv 2017](https://arxiv.org/pdf/1705.07206.pdf)                                        | [Click](./ssseg/modules/datasets/mhp.py)                 |
+| CHASE DB1              | [Click](https://staffnet.kingston.ac.uk/~ku15565/)                                         | [TBME 2012](https://ieeexplore.ieee.org/document/6224174)                                 | [Click](./ssseg/modules/datasets/chasedb1.py)            |
+| CityScapes             | [Click](https://www.cityscapes-dataset.com/)                                               | [CVPR 2016](https://arxiv.org/pdf/1604.01685.pdf)                                         | [Click](./ssseg/modules/datasets/cityscapes.py)          |
+| Supervisely            | [Click](https://supervise.ly/explore/projects/supervisely-person-dataset-23304/datasets)   | [Website Release 2022](https://ecosystem.supervisely.com/projects/persons)                | [Click](./ssseg/modules/datasets/supervisely.py)         |
+| PASCAL VOC             | [Click](http://host.robots.ox.ac.uk/pascal/VOC/)                                           | [IJCV 2010](http://host.robots.ox.ac.uk/pascal/VOC/pubs/everingham10.pdf)                 | [Click](./ssseg/modules/datasets/voc.py)                 |
+| SBUShadow              | [Click](https://www3.cs.stonybrook.edu/~cvl/projects/shadow_noisy_label/index.html)        | [ECCV 2016](https://www3.cs.stonybrook.edu/~cvl/content/papers/2016/LSS_ECCV16.pdf?)      | [Click](./ssseg/modules/datasets/sbushadow.py)           |
+| Dark Zurich            | [Click](https://data.vision.ee.ethz.ch/csakarid/shared/GCMA_UIoU/Dark_Zurich_val_anon.zip) | [ICCV 2019](https://arxiv.org/pdf/1901.05946.pdf)                                         | [Click](./ssseg/modules/datasets/darkzurich.py)          |
+| COCOStuff10k           | [Click](https://github.com/nightrome/cocostuff10k)                                         | [CVPR 2018](https://arxiv.org/pdf/1612.03716.pdf)                                         | [Click](./ssseg/modules/datasets/coco.py)                |
+| COCOStuff164k          | [Click](https://github.com/nightrome/cocostuff)                                            | [CVPR 2018](https://arxiv.org/pdf/1612.03716.pdf)                                         | [Click](./ssseg/modules/datasets/coco.py)                |
+| Pascal Context         | [Click](https://cs.stanford.edu/~roozbeh/pascal-context/)                                  | [CVPR 2014](https://ieeexplore.ieee.org/document/6909514)                                 | [Click](./ssseg/modules/datasets/voc.py)                 |
+| Nighttime Driving      | [Click](http://data.vision.ee.ethz.ch/daid/NighttimeDriving/NighttimeDrivingTest.zip)      | [ITSC 2018](https://arxiv.org/pdf/1810.02575.pdf)                                         | [Click](./ssseg/modules/datasets/nighttimedriving.py)    |
 
 
 ## Citation
