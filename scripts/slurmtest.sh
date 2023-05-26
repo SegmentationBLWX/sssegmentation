@@ -9,7 +9,7 @@ PARTITION=$1
 JOBNAME=$2
 NGPUS=$3
 CFGFILEPATH=$4
-CHECKPOINTSPATH=$5
+CKPTSPATH=$5
 GPUSPERNODE=${GPUSPERNODE:-8}
 CPUSPERTASK=${CPUSPERTASK:-10}
 SRUNAGRS=${SRUNAGRS:-""}
@@ -27,5 +27,5 @@ srun -p ${PARTITION} \
     python -u ssseg/test.py \
         --nproc_per_node $NGPUS \
         --cfgfilepath $CFGFILEPATH \
-        --checkpointspath $CHECKPOINTSPATH \
+        --ckptspath $CKPTSPATH \
         --slurm ${PYARGS}

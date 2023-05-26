@@ -5,7 +5,7 @@ cd ..
 
 NGPUS=$1
 CFGFILEPATH=$2
-CHECKPOINTSPATH=$3
+CKPTSPATH=$3
 PORT=${PORT:-$(($RANDOM+6666))}
 NNODES=${NNODES:-1}
 NODERANK=${NODERANK:-0}
@@ -19,4 +19,4 @@ python -m torch.distributed.launch \
     --master_port=$PORT \
     ssseg/test.py --nproc_per_node $NGPUS \
                   --cfgfilepath $CFGFILEPATH \
-                  --checkpointspath $CHECKPOINTSPATH ${@:4}
+                  --ckptspath $CKPTSPATH ${@:4}
