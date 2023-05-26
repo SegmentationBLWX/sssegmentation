@@ -31,6 +31,9 @@ You can star this repository to keep track of the project if it's helpful for yo
   
   Various segmentation methods are unified into several specific modules.
   Benefiting from this design, SSSegmentation can integrate a great deal of popular and contemporary semantic segmentation frameworks and then, train and test them on unified benchmarks.
+  
+- **Fewer Dependencies**
+  SSSegmenation tries its best to avoid introducing more dependencies when reproducing novel semantic segmentation approaches.
  
 
 ## Benchmark and Model Zoo
