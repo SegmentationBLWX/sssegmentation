@@ -5,7 +5,7 @@
 <a href="https://github.com/SegmentationBLWX/sssegmentation/blob/main/ssseg/modules/models/segmentors/deeplabv3plus/deeplabv3plus.py">Code Snippet</a>
 
 <details>
-<summary align="left"><a href="https://arxiv.org/pdf/1802.02611.pdf">DeepLabV3Plus (CVPR'2018)</a></summary>
+<summary align="left"><a href="https://arxiv.org/pdf/1802.02611.pdf">DeepLabV3Plus (ECCV'2018)</a></summary>
 
 ```latex
 @inproceedings{chen2018encoder,
