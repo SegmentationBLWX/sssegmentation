@@ -39,6 +39,9 @@ class Demo():
         self.cmd_args = parseArgs()
         self.cfg, self.cfg_file_path = BuildConfig(self.cmd_args.cfgfilepath)
         assert self.cmd_args.imagepath or self.cmd_args.imagedir, 'imagepath or imagedir should be specified'
+        # open full fp32
+        torch.backends.cuda.matmul.allow_tf32 = False
+        torch.backends.cudnn.allow_tf32 = False
     '''start'''
     def start(self):
         cmd_args, cfg, cfg_file_path = self.cmd_args, self.cfg, self.cfg_file_path

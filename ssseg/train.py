@@ -48,6 +48,9 @@ class Trainer():
         assert torch.cuda.is_available(), 'cuda is not available'
         # init distributed training
         dist.init_process_group(backend=self.cfg.SEGMENTOR_CFG.get('backend', 'nccl'))
+        # open full fp32
+        torch.backends.cuda.matmul.allow_tf32 = False
+        torch.backends.cudnn.allow_tf32 = False
     '''start trainer'''
     def start(self):
         cfg, ngpus_per_node, logger_handle, cmd_args, cfg_file_path = self.cfg, self.ngpus_per_node, self.logger_handle, self.cmd_args, self.cfg_file_path
