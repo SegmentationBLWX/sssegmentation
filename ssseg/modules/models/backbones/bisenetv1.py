@@ -117,12 +117,13 @@ class ContextPath(nn.Module):
         return x_16_up, x_32_up
     '''build the backbone'''
     def buildbackbone(self, cfg):
-        from .resnet import BuildResNet
+        from .resnet import ResNet
         supported_backbones = {
-            'resnet': BuildResNet,
+            'ResNet': ResNet,
         }
-        assert cfg['series'] in supported_backbones, 'unsupport backbone type %s' % cfg['type']
-        return supported_backbones[cfg['series']](cfg)
+        backbone_type = cfg.pop('type')
+        assert backbone_type, f'unsupport backbone type {backbone_type}'
+        return supported_backbones[backbone_type](**cfg)
 
 
 '''Feature Fusion Module to fuse low level output feature of Spatial Path and high level output feature of Context Path'''
