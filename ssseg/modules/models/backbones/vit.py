@@ -74,7 +74,6 @@ class VisionTransformer(nn.Module):
                  drop_rate=0., attn_drop_rate=0., drop_path_rate=0., with_cls_token=True, output_cls_token=False, norm_cfg={'type': 'LayerNorm', 'eps': 1e-6}, act_cfg={'type': 'GELU'}, 
                  patch_norm=False, final_norm=False, interpolate_mode='bilinear', num_fcs=2, use_checkpoint=False, pretrained=True, pretrained_model_path=''):
         super(VisionTransformer, self).__init__()
-        if isinstance(img_size, int): img_size = (img_size, img_size)
         # set attributes
         self.structure_type = structure_type
         self.img_size = img_size
@@ -105,6 +104,8 @@ class VisionTransformer(nn.Module):
         if structure_type in AUTO_ASSERT_STRUCTURE_TYPES:
             for key, value in AUTO_ASSERT_STRUCTURE_TYPES[structure_type].items():
                 assert hasattr(self, key) and (getattr(self, key) == value)
+        if isinstance(img_size, int): img_size = (img_size, img_size)
+        self.img_size = img_size
         # Image to Patch Embedding
         self.patch_embed = PatchEmbed(
             in_channels=in_channels,

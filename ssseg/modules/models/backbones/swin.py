@@ -371,7 +371,6 @@ class SwinTransformer(nn.Module):
                  strides=(4, 2, 2, 2), out_indices=(0, 1, 2, 3), qkv_bias=True, qk_scale=None, patch_norm=True, drop_rate=0., attn_drop_rate=0., drop_path_rate=0.1,
                  use_abs_pos_embed=False, act_cfg={'type': 'GELU'}, norm_cfg={'type': 'LayerNorm'}, use_checkpoint=False, pretrained=True, pretrained_model_path=''):
         super(SwinTransformer, self).__init__()
-        if isinstance(pretrain_img_size, int): pretrain_img_size = (pretrain_img_size, pretrain_img_size)
         # set attributes
         self.structure_type = structure_type
         self.pretrain_img_size = pretrain_img_size
@@ -401,6 +400,8 @@ class SwinTransformer(nn.Module):
         if structure_type in AUTO_ASSERT_STRUCTURE_TYPES:
             for key, value in AUTO_ASSERT_STRUCTURE_TYPES[structure_type].items():
                 assert hasattr(self, key) and (getattr(self, key) == value)
+        if isinstance(pretrain_img_size, int): pretrain_img_size = (pretrain_img_size, pretrain_img_size)
+        self.pretrain_img_size = pretrain_img_size
         # patch embedding
         self.patch_embed = PatchEmbed(
             in_channels=in_channels,
