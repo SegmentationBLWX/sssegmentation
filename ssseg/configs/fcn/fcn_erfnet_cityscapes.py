@@ -21,7 +21,7 @@ SEGMENTOR_CFG['head'] = {
     'in_channels': 16, 'feats_channels': 128, 'dropout': 0.1, 'num_convs': 1,
 }
 SEGMENTOR_CFG['auxiliary'] = None
-SEGMENTOR_CFG['backbone']['losses'].pop('loss_aux')
+SEGMENTOR_CFG['losses'].pop('loss_aux')
 SEGMENTOR_CFG['work_dir'] = 'fcn_erfnet_cityscapes'
 SEGMENTOR_CFG['logfilepath'] = 'fcn_erfnet_cityscapes/fcn_erfnet_cityscapes.log'
 SEGMENTOR_CFG['resultsavepath'] = 'fcn_erfnet_cityscapes/fcn_erfnet_cityscapes_results.pkl'
