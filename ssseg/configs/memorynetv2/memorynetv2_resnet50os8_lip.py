@@ -18,7 +18,7 @@ SEGMENTOR_CFG['backbone'] = {
     'type': 'ResNet', 'depth': 50, 'structure_type': 'resnet50conv3x3stem',
     'pretrained': True, 'outstride': 8, 'use_conv3x3_stem': True, 'selected_indices': (0, 1, 2, 3),
 }
-SEGMENTOR_CFG['head']['losses'].pop('loss_cwi')
+SEGMENTOR_CFG['losses'].pop('loss_cwi')
 SEGMENTOR_CFG['work_dir'] = 'memorynetv2_resnet50os8_lip'
 SEGMENTOR_CFG['logfilepath'] = 'memorynetv2_resnet50os8_lip/memorynetv2_resnet50os8_lip.log'
 SEGMENTOR_CFG['resultsavepath'] = 'memorynetv2_resnet50os8_lip/memorynetv2_resnet50os8_lip_results.pkl'

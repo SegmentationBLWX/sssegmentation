@@ -126,7 +126,7 @@ class Trainer():
                 targets = {'seg_target': samples_meta['seg_target'].type(FloatTensor)}
                 if 'edge_target' in samples_meta: targets['edge_target'] = samples_meta['edge_target'].type(FloatTensor)
                 optimizer.zero_grad()
-                if cfg.SEGMENTOR_CFG['type'] in ['memorynet', 'memorynetv2']:
+                if cfg.SEGMENTOR_CFG['type'] in ['MemoryNet', 'MemoryNetV2']:
                     loss, losses_log_dict = segmentor(images, targets, learning_rate=learning_rate, epoch=epoch)
                 else:
                     loss, losses_log_dict = segmentor(images, targets)
