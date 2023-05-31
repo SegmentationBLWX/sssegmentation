@@ -395,7 +395,7 @@ class SVT(PCPVT):
         super(SVT, self).__init__(
             in_channels=in_channels, embed_dims=embed_dims, patch_sizes=patch_sizes, strides=strides, num_heads=num_heads, mlp_ratios=mlp_ratios,
             out_indices=out_indices, qkv_bias=qkv_bias, drop_rate=drop_rate, attn_drop_rate=attn_drop_rate, drop_path_rate=drop_path_rate,
-            depths=depths, sr_ratios=sr_ratios, norm_after_stage=norm_after_stage, norm_cfg=norm_cfg, act_cfg=act_cfg, pretrained=True, pretrained_model_path='',
+            depths=depths, sr_ratios=sr_ratios, norm_after_stage=norm_after_stage, norm_cfg=norm_cfg, act_cfg=act_cfg, pretrained=False, pretrained_model_path='',
             structure_type=structure_type,
         )
         # transformer encoder, stochastic depth decay rule
@@ -408,3 +408,6 @@ class SVT(PCPVT):
                         drop_rate=drop_rate, attn_drop_rate=attn_drop_rate, drop_path_rate=dpr[sum(depths[:k])+i], num_fcs=2,
                         qkv_bias=qkv_bias, window_size=windiow_sizes[k], norm_cfg=norm_cfg, act_cfg=act_cfg
                     )
+        # load pretrained weights
+        if pretrained:
+            self.initweights(structure_type, pretrained_model_path)
