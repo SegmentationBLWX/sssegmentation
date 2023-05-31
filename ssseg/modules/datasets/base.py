@@ -57,13 +57,13 @@ class BaseDataset(torch.utils.data.Dataset):
             seg_target = np.zeros((image.shape[0], image.shape[1]))
             self.logger_handle.warning(f'seg_target from {annpath} is missed')
         elif annpath.endswith('.png'):
-            if self.dataset_cfg['type'] in ['vspw']:
+            if self.dataset_cfg['type'] in ['VSPWDataset']:
                 seg_target = np.array(Image.open(annpath))
             else:
                 seg_target = cv2.imread(annpath, cv2.IMREAD_GRAYSCALE)
         elif annpath.endswith('.mat'):
             seg_target = sio.loadmat(annpath)
-            if self.dataset_cfg['type'] in ['cocostuff10k']:
+            if self.dataset_cfg['type'] in ['COCOStuff10kDataset']:
                 seg_target = seg_target['S']
         else:
             seg_target = np.zeros((image.shape[0], image.shape[1]))
