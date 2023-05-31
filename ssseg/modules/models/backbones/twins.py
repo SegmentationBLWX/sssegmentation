@@ -391,10 +391,12 @@ class SVT(PCPVT):
     def __init__(self, structure_type, in_channels=3, embed_dims=[64, 128, 256], patch_sizes=[4, 2, 2, 2], strides=[4, 2, 2, 2], num_heads=[1, 2, 4], mlp_ratios=[4, 4, 4],
                  out_indices=(0, 1, 2, 3), qkv_bias=True, drop_rate=0., attn_drop_rate=0., drop_path_rate=0.2, depths=[4, 4, 4], sr_ratios=[8, 4, 2, 1],
                  windiow_sizes=[7, 7, 7], norm_after_stage=True, norm_cfg={'type': 'LayerNorm'}, act_cfg={'type': 'GELU'}, pretrained=True, pretrained_model_path=''):
+        self.windiow_sizes = windiow_sizes
         super(SVT, self).__init__(
             in_channels=in_channels, embed_dims=embed_dims, patch_sizes=patch_sizes, strides=strides, num_heads=num_heads, mlp_ratios=mlp_ratios,
             out_indices=out_indices, qkv_bias=qkv_bias, drop_rate=drop_rate, attn_drop_rate=attn_drop_rate, drop_path_rate=drop_path_rate,
-            depths=depths, sr_ratios=sr_ratios, norm_after_stage=norm_after_stage, norm_cfg=norm_cfg, act_cfg=act_cfg, pretrained=True, pretrained_model_path=''
+            depths=depths, sr_ratios=sr_ratios, norm_after_stage=norm_after_stage, norm_cfg=norm_cfg, act_cfg=act_cfg, pretrained=True, pretrained_model_path='',
+            structure_type=structure_type,
         )
         # transformer encoder, stochastic depth decay rule
         dpr = [x.item() for x in torch.linspace(0, drop_path_rate, sum(depths))]
