@@ -14,6 +14,7 @@ SEGMENTOR_CFG['dataloader'] = DATALOADER_CFG_BS16.copy()
 SEGMENTOR_CFG['scheduler']['max_epochs'] = 130
 # modify other segmentor configs
 SEGMENTOR_CFG['num_classes'] = 150
+SEGMENTOR_CFG['inference']['tricks']['use_probs_before_resize'] = True
 SEGMENTOR_CFG['work_dir'] = 'upernet_beitbase_ade20k'
 SEGMENTOR_CFG['logfilepath'] = 'upernet_beitbase_ade20k/upernet_beitbase_ade20k.log'
 SEGMENTOR_CFG['resultsavepath'] = 'upernet_beitbase_ade20k/upernet_beitbase_ade20k_results.pkl'

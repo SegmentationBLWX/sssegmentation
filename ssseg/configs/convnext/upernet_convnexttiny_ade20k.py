@@ -27,6 +27,7 @@ SEGMENTOR_CFG['head'] = {
 SEGMENTOR_CFG['auxiliary'] = {
     'in_channels': 384, 'out_channels': 512, 'dropout': 0.1,
 }
+SEGMENTOR_CFG['inference']['tricks']['use_probs_before_resize'] = True
 SEGMENTOR_CFG['work_dir'] = 'upernet_convnexttiny_ade20k'
 SEGMENTOR_CFG['logfilepath'] = 'upernet_convnexttiny_ade20k/upernet_convnexttiny_ade20k.log'
 SEGMENTOR_CFG['resultsavepath'] = 'upernet_convnexttiny_ade20k/upernet_convnexttiny_ade20k_results.pkl'
