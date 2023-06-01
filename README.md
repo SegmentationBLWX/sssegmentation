@@ -128,13 +128,11 @@ You can star this repository to keep track of the project if it's helpful for yo
 If you use this framework in your research, please cite this project:
 
 ```
-@misc{ssseg2020,
-    author = {Zhenchao Jin},
-    title = {SSSegmentation: An Open Source Supervised Semantic Segmentation Toolbox Based on PyTorch},
-    year = {2020},
-    publisher = {GitHub},
-    journal = {GitHub repository},
-    howpublished = {\url{https://github.com/SegmentationBLWX/sssegmentation}},
+@article{jin2023sssegmenation,
+  title={SSSegmenation: An Open Source Supervised Semantic Segmentation Toolbox Based on PyTorch},
+  author={Jin, Zhenchao},
+  journal={arXiv preprint arXiv:2305.17091},
+  year={2023}
 }
 
 @inproceedings{jin2021isnet,
