@@ -1,6 +1,6 @@
 '''
 Function:
-    Implementation of Demo
+    Implementation of Inferencer
 Author:
     Zhenchao Jin
 '''
@@ -33,8 +33,8 @@ def parseArgs():
     return args
 
 
-'''Demo'''
-class Demo():
+'''Inferencer'''
+class Inferencer():
     def __init__(self):
         self.cmd_args = parseArgs()
         self.cfg, self.cfg_file_path = BuildConfig(self.cmd_args.cfgfilepath)
@@ -45,8 +45,8 @@ class Demo():
     '''start'''
     def start(self):
         cmd_args, cfg, cfg_file_path = self.cmd_args, self.cfg, self.cfg_file_path
-        # check work dir
-        checkdir(cfg.SEGMENTOR_CFG['work_dir'])
+        # touch work dir
+        touchdir(cfg.SEGMENTOR_CFG['work_dir'])
         # cuda detect
         use_cuda = torch.cuda.is_available()
         # initialize logger_handle
@@ -200,5 +200,5 @@ class Demo():
 '''debug'''
 if __name__ == '__main__':
     with torch.no_grad():
-        client = Demo()
+        client = Inferencer()
         client.start()
