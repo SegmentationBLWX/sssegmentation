@@ -85,10 +85,10 @@ class Inferencer():
             pbar.set_description('Processing %s' % imagepath)
             infer_tricks = inference_cfg['tricks']
             cascade_cfg = infer_tricks.get('cascade', {'key_for_pre_output': 'memory_gather_logits', 'times': 1, 'forward_default_args': None})
-            sample = dataset.read(imagepath, 'none.png', False)
-            image = sample['image']
-            sample = dataset.synctransform(sample, 'all')
-            image_tensor = sample['image'].unsqueeze(0).type(FloatTensor)
+            sample_meta = dataset.read(imagepath, 'none.png')
+            image = sample_meta['image']
+            sample_meta = dataset.synctransforms(sample_meta)
+            image_tensor = sample_meta['image'].unsqueeze(0).type(FloatTensor)
             for idx in range(cascade_cfg['times']):
                 forward_args = None
                 if idx > 0: 
@@ -108,7 +108,7 @@ class Inferencer():
                     forward_args=forward_args,
                 )
             output_list = [
-                F.interpolate(output, size=(sample['height'], sample['width']), mode='bilinear', align_corners=segmentor.align_corners) for output in output_list
+                F.interpolate(output, size=(sample_meta['height'], sample_meta['width']), mode='bilinear', align_corners=segmentor.align_corners) for output in output_list
             ]
             output = sum(output_list) / len(output_list)
             pred = (torch.argmax(output[0], dim=0)).cpu().numpy().astype(np.int32)
