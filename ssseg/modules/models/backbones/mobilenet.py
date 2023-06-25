@@ -34,7 +34,6 @@ class MobileNetV2(nn.Module):
         self.in_channels = in_channels
         self.widen_factor = widen_factor
         self.outstride = outstride
-        self.out_indices = out_indices
         self.norm_cfg = norm_cfg
         self.act_cfg = act_cfg
         self.pretrained = pretrained
@@ -99,10 +98,10 @@ class MobileNetV2(nn.Module):
     def forward(self, x):
         x = self.conv1(x)
         outs = []
-        for i, layer_name in enumerate(self.layers):
+        for idx, layer_name in enumerate(self.layers):
             layer = getattr(self, layer_name)
             x = layer(x)
-            if i in self.out_indices:
+            if idx in self.out_indices:
                 outs.append(x)
         return tuple(outs)
     '''make layer'''
@@ -112,13 +111,8 @@ class MobileNetV2(nn.Module):
         for i in range(num_blocks):
             layers.append(
                 InvertedResidual(
-                    self.in_channels, 
-                    out_channels, 
-                    stride=stride if i == 0 else 1, 
-                    expand_ratio=expand_ratio, 
-                    dilation=dilation if i == 0 else 1, 
-                    norm_cfg=norm_cfg, 
-                    act_cfg=act_cfg
+                    self.in_channels,  out_channels, stride=stride if i == 0 else 1, expand_ratio=expand_ratio, 
+                    dilation=dilation if i == 0 else 1, norm_cfg=norm_cfg, act_cfg=act_cfg
                 )
             )
             self.in_channels = out_channels
@@ -146,7 +140,6 @@ class MobileNetV3(nn.Module):
                  act_cfg={'type': 'HardSwish'}, pretrained=True, pretrained_model_path=''):
         super(MobileNetV3, self).__init__()
         # set attributes
-        self.out_indices = out_indices
         self.structure_type = structure_type
         self.in_channels = in_channels
         self.arch_type = arch_type
@@ -214,20 +207,11 @@ class MobileNetV3(nn.Module):
             se_cfg = None
             if with_se:
                 se_cfg = {
-                    'channels': mid_channels,
-                    'ratio': 4,
-                    'act_cfgs': ({'type': 'ReLU'}, {'type': 'HardSigmoid', 'bias': 3.0, 'divisor': 6.0})
+                    'channels': mid_channels, 'ratio': 4, 'act_cfgs': ({'type': 'ReLU'}, {'type': 'HardSigmoid', 'bias': 3.0, 'divisor': 6.0})
                 }
             layer = InvertedResidualV3(
-                in_channels=in_channels,
-                out_channels=out_channels,
-                mid_channels=mid_channels,
-                kernel_size=kernel_size,
-                stride=stride,
-                se_cfg=se_cfg,
-                with_expand_conv=(in_channels != mid_channels),
-                norm_cfg=norm_cfg,
-                act_cfg=act_cfg,
+                in_channels=in_channels, out_channels=out_channels, mid_channels=mid_channels, kernel_size=kernel_size,
+                stride=stride, se_cfg=se_cfg, with_expand_conv=(in_channels != mid_channels), norm_cfg=norm_cfg, act_cfg=act_cfg,
             )
             in_channels = out_channels
             layer_name = 'layer{}'.format(i + 1)
@@ -283,9 +267,9 @@ class MobileNetV3(nn.Module):
     '''forward'''
     def forward(self, x):
         outs = []
-        for i, layer_name in enumerate(self.layers):
+        for idx, layer_name in enumerate(self.layers):
             layer = getattr(self, layer_name)
             x = layer(x)
-            if i in self.out_indices:
+            if idx in self.out_indices:
                 outs.append(x)
         return tuple(outs)
