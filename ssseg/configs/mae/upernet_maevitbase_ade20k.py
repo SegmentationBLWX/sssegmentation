@@ -1,13 +1,13 @@
 '''upernet_maevitbase_ade20k'''
 import copy
 from .base_cfg import SEGMENTOR_CFG
-from .._base_ import DATASET_CFG_ADE20k_640x640, DATALOADER_CFG_BS16
+from .._base_ import DATASET_CFG_ADE20k_512x512, DATALOADER_CFG_BS16
 
 
 # deepcopy
 SEGMENTOR_CFG = copy.deepcopy(SEGMENTOR_CFG)
 # modify dataset config
-SEGMENTOR_CFG['dataset'] = DATASET_CFG_ADE20k_640x640.copy()
+SEGMENTOR_CFG['dataset'] = DATASET_CFG_ADE20k_512x512.copy()
 # modify dataloader config
 SEGMENTOR_CFG['dataloader'] = DATALOADER_CFG_BS16.copy()
 # modify scheduler config

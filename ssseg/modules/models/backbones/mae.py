@@ -4,6 +4,7 @@ Function:
 Author:
     Zhenchao Jin
 '''
+import math
 import torch
 import torch.nn as nn
 import torch.utils.model_zoo as model_zoo
@@ -29,15 +30,22 @@ class MAE(BEiT):
             img_size=img_size, patch_size=patch_size, in_channels=in_channels, embed_dims=embed_dims, num_layers=num_layers, num_heads=num_heads,
             mlp_ratio=mlp_ratio, out_indices=out_indices, qv_bias=False, attn_drop_rate=attn_drop_rate, drop_path_rate=drop_path_rate,
             norm_cfg=norm_cfg, act_cfg=act_cfg, patch_norm=patch_norm, final_norm=final_norm, num_fcs=num_fcs, init_values=init_values, 
-            pretrained=pretrained, pretrained_model_path=pretrained_model_path
+            pretrained=False, pretrained_model_path=pretrained_model_path, structure_type=structure_type
         )
         self.cls_token = nn.Parameter(torch.zeros(1, 1, embed_dims))
         self.num_patches = self.patch_shape[0] * self.patch_shape[1]
         self.pos_embed = nn.Parameter(torch.zeros(1, self.num_patches + 1, embed_dims))
+        # assert
+        if structure_type in AUTO_ASSERT_STRUCTURE_TYPES:
+            for key, value in AUTO_ASSERT_STRUCTURE_TYPES[structure_type].items():
+                assert hasattr(self, key) and (getattr(self, key) == value)
+        # load pretrained weights
+        if pretrained:
+            self.initweights(structure_type, pretrained_model_path)
     '''buildlayers'''
     def buildlayers(self):
         dpr = [x.item() for x in torch.linspace(0, self.drop_path_rate, self.num_layers)]
-        self.layers = ModuleList()
+        self.layers = nn.ModuleList()
         for i in range(self.num_layers):
             self.layers.append(MAETransformerEncoderLayer(
                 embed_dims=self.embed_dims, num_heads=self.num_heads, feedforward_channels=self.mlp_ratio * self.embed_dims, attn_drop_rate=self.attn_drop_rate,
