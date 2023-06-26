@@ -5,6 +5,7 @@ Author:
     Zhenchao Jin
 '''
 import copy
+from .mae import MAE
 from .unet import UNet
 from .beit import BEiT
 from .cgnet import CGNet
@@ -34,7 +35,7 @@ def BuildBackbone(backbone_cfg):
         'SVT': SVT, 'FastSCNN': FastSCNN, 'ConvNeXt': ConvNeXt, 'BiSeNetV1': BiSeNetV1,
         'BiSeNetV2': BiSeNetV2, 'SwinTransformer': SwinTransformer, 'VisionTransformer': VisionTransformer,
         'MixVisionTransformer': MixVisionTransformer, 'TIMMBackbone': TIMMBackbone, 
-        'MobileNetV2': MobileNetV2, 'MobileNetV3': MobileNetV3,
+        'MobileNetV2': MobileNetV2, 'MobileNetV3': MobileNetV3, 'MAE': MAE,
     }
     # build backbone
     backbone_type = backbone_cfg.pop('type')

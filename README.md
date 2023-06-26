@@ -43,6 +43,7 @@ You can star this repository to keep track of the project if it's helpful for yo
 
 | Backbone               | Model Zoo                                    | Paper Link                                                    | Code Snippet                                             |
 | :-:                    | :-:                                          | :-:                                                           | :-:                                                      |
+| MAE                    | [Click](./docs/modelzoo/mae)                 | [CVPR 2022](https://arxiv.org/pdf/2111.06377.pdf)             | [Click](./ssseg/modules/models/backbones/mae.py)         |
 | UNet                   | [Click](./docs/modelzoo/unet)                | [MICCAI 2015](https://arxiv.org/pdf/1505.04597.pdf)           | [Click](./ssseg/modules/models/backbones/unet.py)        |
 | BEiT                   | [Click](./docs/modelzoo/beit)                | [ICLR 2022](https://arxiv.org/pdf/2106.08254.pdf)             | [Click](./ssseg/modules/models/backbones/beit.py)        |
 | Twins                  | [Click](./docs/modelzoo/twins)               | [NeurIPS 2021](https://arxiv.org/pdf/2104.13840.pdf)          | [Click](./ssseg/modules/models/backbones/twins.py)       |
