@@ -130,10 +130,10 @@ If you use this framework in your research, please cite this project:
 
 ```
 @article{jin2023sssegmenation,
-  title={SSSegmenation: An Open Source Supervised Semantic Segmentation Toolbox Based on PyTorch},
-  author={Jin, Zhenchao},
-  journal={arXiv preprint arXiv:2305.17091},
-  year={2023}
+    title={SSSegmenation: An Open Source Supervised Semantic Segmentation Toolbox Based on PyTorch},
+    author={Jin, Zhenchao},
+    journal={arXiv preprint arXiv:2305.17091},
+    year={2023}
 }
 
 @inproceedings{jin2021isnet,
