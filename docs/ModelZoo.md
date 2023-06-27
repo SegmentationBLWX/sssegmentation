@@ -84,6 +84,11 @@
 - Related Paper: [click](https://arxiv.org/pdf/2201.03545.pdf),
 - Reported Performance: [click](https://github.com/SegmentationBLWX/sssegmentation/tree/main/docs/modelzoo/convnext).
 
+**16.MAE**
+
+- Related Paper: [click](https://arxiv.org/pdf/2111.06377.pdf),
+- Reported Performance: [click](https://github.com/SegmentationBLWX/sssegmentation/tree/main/docs/modelzoo/mae).
+
 
 ## Supported Segmentors
 

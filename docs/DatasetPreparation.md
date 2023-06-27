@@ -100,3 +100,13 @@ So, it is recommended to download the supported dataset from Baidu Disk rather t
 
 - Official Website: [click](https://cs.stanford.edu/~roozbeh/pascal-context/),
 - Baidu Disk: [click](https://pan.baidu.com/s/1TZbgxPnY0Als6LoiV80Xrw) (access code: fn1i).
+
+**19.Nighttime Driving**
+
+- Official Website: [click](http://data.vision.ee.ethz.ch/daid/NighttimeDriving/NighttimeDrivingTest.zip),
+- Baidu Disk: [click](https://pan.baidu.com/s/1TZbgxPnY0Als6LoiV80Xrw) (access code: fn1i).
+
+**20.Dark Zurich**
+
+- Official Website: [click](https://data.vision.ee.ethz.ch/csakarid/shared/GCMA_UIoU/Dark_Zurich_val_anon.zip),
+- Baidu Disk: [click](https://pan.baidu.com/s/1TZbgxPnY0Als6LoiV80Xrw) (access code: fn1i).
