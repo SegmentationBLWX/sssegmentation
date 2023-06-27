@@ -27,7 +27,7 @@ SEGMENTOR_CFG['backbone'] = {
 SEGMENTOR_CFG['head']['use_loss'] = False
 SEGMENTOR_CFG['head']['in_channels'] = 1024
 SEGMENTOR_CFG['head']['update_cfg']['momentum_cfg']['base_lr'] = 0.001 * 0.9
-SEGMENTOR_CFG['head']['context_within_image']['cfg']['dilations'] = [1, 6, 12, 18]
+SEGMENTOR_CFG['head']['context_within_image']['cfg']['dilations'] = [1, 12, 24, 36]
 SEGMENTOR_CFG['head']['norm_cfg'] = {'in_channels_list': [1024, 1024, 1024, 1024], 'type': 'LayerNorm', 'eps': 1e-6}
 SEGMENTOR_CFG['auxiliary'] = [
     {'in_channels': 1024, 'out_channels': 512, 'dropout': 0.1, 'num_convs': 2, 'upsample': {'scale_factor': 4}},
