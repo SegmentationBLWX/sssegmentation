@@ -8,7 +8,7 @@ We incorporate modular design into our config system, which is convenient to con
 #### Config File Structure
 
 Now, there are 2 basic component types under "configs/_base_", *i.e.*, datasets and dataloaders, which are responsible for loading various datasets with different settings.
-For example, to train FCN segmentor on Pascal VOC dataset, you can import them like this,
+For example, to train FCN segmentor on Pascal VOC dataset (assuming that we hope the total batch size is 16 and the training image size is 512x512), you can import them like this,
 ```python
 from .._base_ import DATASET_CFG_VOCAUG_512x512, DATALOADER_CFG_BS16
 ```
@@ -20,7 +20,7 @@ SEGMENTOR_CFG['dataset'] = DATASET_CFG_VOCAUG_512x512.copy()
 SEGMENTOR_CFG['dataloader'] = DATALOADER_CFG_BS16.copy()
 ```
 
-Then, speaking of specific methods, there is also one and only one "base_cfg.py" used to define some necessary information for these methods.
+Speaking of config files in specific methods, there is also one and only one "base_cfg.py" used to define some necessary information for these methods.
 Like loading configs from datasets and dataloaders in "configs/_base_", you can also import the "base_cfg.py" and modify some keys in "SEGMENTOR_CFG" to customize your segmentors.
 For instance, to customize FCN with ResNet-50-D16 backbone and train it on Pascal VOC dataset, you can create a config file in "fcn" directory, named "fcn_resnet50os16_voc.py" and write in some contents like this,
 ```python
