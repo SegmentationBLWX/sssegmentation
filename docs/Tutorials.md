@@ -87,17 +87,17 @@ DATALOADER_CFG_BS16 = {
     'expected_total_train_bs_for_assert': 16, # it is defined for asserting whether the users adopt the correct batch size for training the models
     'train': {
         'batch_size_per_gpu': 2, # number of images in each gpu during training
-		'num_workers_per_gpu': 2, # number of workers for dataloader in each gpu during training
-		'shuffle': True, # whether to shuffle the image order during training
-		'pin_memory': True, # whether to achieve higher bandwidth between the host and the device using pinned memory during training
-		'drop_last': True, # whether to drop out the last images which cannot form a batch size of "expected_total_train_bs_for_assert" during training
+        'num_workers_per_gpu': 2, # number of workers for dataloader in each gpu during training
+        'shuffle': True, # whether to shuffle the image order during training
+        'pin_memory': True, # whether to achieve higher bandwidth between the host and the device using pinned memory during training
+        'drop_last': True, # whether to drop out the last images which cannot form a batch size of "expected_total_train_bs_for_assert" during training
     },
     'test': {
         'batch_size_per_gpu': 1, # number of images in each gpu during testing
-		'num_workers_per_gpu': 2, # number of workers for dataloader in each gpu during testing
-		'shuffle': False, # whether to shuffle the image order during testing
-		'pin_memory': True, # whether to achieve higher bandwidth between the host and the device using pinned memory during testing
-		'drop_last': False, # whether to drop out the last images which cannot form a batch size of "expected_total_train_bs_for_assert" during testing
+        'num_workers_per_gpu': 2, # number of workers for dataloader in each gpu during testing
+        'shuffle': False, # whether to shuffle the image order during testing
+        'pin_memory': True, # whether to achieve higher bandwidth between the host and the device using pinned memory during testing
+        'drop_last': False, # whether to drop out the last images which cannot form a batch size of "expected_total_train_bs_for_assert" during testing
     }
 }
 SEGMENTOR_CFG = {
