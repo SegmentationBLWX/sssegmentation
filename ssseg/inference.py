@@ -22,7 +22,7 @@ warnings.filterwarnings('ignore')
 
 
 '''parse arguments in command line'''
-def parseArgs():
+def parsecmdargs():
     parser = argparse.ArgumentParser(description='SSSegmentation is an open source supervised semantic segmentation toolbox based on PyTorch')
     parser.add_argument('--imagedir', dest='imagedir', help='images dir for testing multi images', type=str)
     parser.add_argument('--imagepath', dest='imagepath', help='imagepath for testing single image', type=str)
@@ -36,7 +36,7 @@ def parseArgs():
 '''Inferencer'''
 class Inferencer():
     def __init__(self):
-        self.cmd_args = parseArgs()
+        self.cmd_args = parsecmdargs()
         self.cfg, self.cfg_file_path = BuildConfig(self.cmd_args.cfgfilepath)
         assert self.cmd_args.imagepath or self.cmd_args.imagedir, 'imagepath or imagedir should be specified'
         # open full fp32

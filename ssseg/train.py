@@ -24,7 +24,7 @@ warnings.filterwarnings('ignore')
 
 
 '''parse arguments in command line'''
-def parseArgs():
+def parsecmdargs():
     parser = argparse.ArgumentParser(description='SSSegmentation is an open source supervised semantic segmentation toolbox based on PyTorch')
     parser.add_argument('--local_rank', dest='local_rank', help='node rank for distributed training', default=0, type=int)
     parser.add_argument('--nproc_per_node', dest='nproc_per_node', help='number of process per node', default=8, type=int)
@@ -267,7 +267,7 @@ class Trainer():
 '''main'''
 def main():
     # parse arguments
-    args = parseArgs()
+    args = parsecmdargs()
     cfg, cfg_file_path = BuildConfig(args.cfgfilepath)
     # touch work dir
     touchdir(cfg.SEGMENTOR_CFG['work_dir'])
