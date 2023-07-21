@@ -165,7 +165,7 @@ class Trainer():
                 self.evaluate(segmentor)
     '''evaluate'''
     def evaluate(self, segmentor):
-        cfg, ngpus_per_node, cmd_args, logger_handle = self.cfg, self.ngpus_per_node, self.cmd_args, self.logger_handle
+        cfg, ngpus_per_node, logger_handle, cmd_args, cfg_file_path = self.cfg, self.ngpus_per_node, self.logger_handle, self.cmd_args, self.cfg_file_path
         # TODO: bug occurs if use --pyt bash
         rank_id = int(os.environ['SLURM_PROCID']) if 'SLURM_PROCID' in os.environ else cmd_args.local_rank
         # build dataset and dataloader
