@@ -125,7 +125,7 @@ class BaseSegmentor(nn.Module):
     def freezenormalization(self):
         for module in self.modules():
             if isinstance(module, nn.BatchNorm1d) or isinstance(module, nn.BatchNorm2d) or \
-               isinstance(module, nn.BatchNorm3d) or isinstance(module, SyncBatchNorm):
+               isinstance(module, nn.BatchNorm3d) or isinstance(module, nn.SyncBatchNorm):
                 module.eval()
     '''calculate the losses'''
     def calculatelosses(self, predictions, targets, losses_cfg, map_preds_to_tgts_dict=None):
