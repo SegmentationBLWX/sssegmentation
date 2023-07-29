@@ -4,35 +4,32 @@ Function:
 Author:
     Zhenchao Jin
 '''
-import logging
+import os
+import time
 
 
 '''Logger'''
 class Logger():
     def __init__(self, logfilepath):
-        logging.basicConfig(
-            level=logging.INFO,
-            format='%(asctime)s %(levelname)-8s %(message)s',
-            datefmt='%Y-%m-%d %H:%M:%S',
-            handlers=[logging.FileHandler(logfilepath, encoding='utf-8'), logging.StreamHandler()]
-        )
+        self.logfilepath = logfilepath
+        self.fp_handler = open(logfilepath, 'a')
     '''log'''
-    @staticmethod
-    def log(level, message):
-        logging.log(level, message)
+    def log(self, message, level='INFO'):
+        message = f'{time.strftime("%Y-%m-%d %H:%M:%S", time.localtime())} {level}\t{message}'
+        print(message)
+        self.fp_handler.write(message)
     '''debug'''
-    @staticmethod
-    def debug(message):
-        Logger.log(logging.DEBUG, message)
+    def debug(self, message):
+        self.log(message, 'DEBUG')
     '''info'''
-    @staticmethod
-    def info(message):
-        Logger.log(logging.INFO, message)
+    def info(self, message):
+        self.log(message, 'INFO')
     '''warning'''
-    @staticmethod
-    def warning(message):
-        Logger.log(logging.WARNING, message)
+    def warning(self, message):
+        self.log(message, 'WARNING')
     '''error'''
-    @staticmethod
-    def error(message):
-        Logger.log(logging.ERROR, message)
+    def error(self, message):
+        self.log(message, 'ERROR')
+    '''close'''
+    def close(self):
+        self.fp_handler.close()
