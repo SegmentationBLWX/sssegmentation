@@ -15,7 +15,7 @@ class Logger():
         self.fp_handler = open(logfilepath, 'a')
     '''log'''
     def log(self, message, level='INFO'):
-        message = f'{time.strftime("%Y-%m-%d %H:%M:%S", time.localtime())} {level}\t{message}'
+        message = f'{time.strftime("%Y-%m-%d %H:%M:%S", time.localtime())} {level} {message}'
         print(message)
         self.fp_handler.write(message)
     '''debug'''
