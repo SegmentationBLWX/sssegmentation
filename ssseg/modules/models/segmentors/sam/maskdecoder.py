@@ -51,7 +51,7 @@ class MaskDecoder(nn.Module):
         self.iou_prediction_head = MLP(transformer_dim, iou_head_hidden_dim, self.num_mask_tokens, iou_head_depth)
     '''forward'''
     def forward(self, image_embeddings, image_pe, sparse_prompt_embeddings, dense_prompt_embeddings, multimask_output):
-        masks, iou_pred = self.predict_masks(
+        masks, iou_pred = self.predictmasks(
             image_embeddings=image_embeddings,
             image_pe=image_pe,
             sparse_prompt_embeddings=sparse_prompt_embeddings,
