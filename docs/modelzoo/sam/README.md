@@ -349,5 +349,68 @@ plt.show()
 
 #### Batched prompt inputs
 
+```python
+import cv2
+import torch
+import numpy as np
+import matplotlib.pyplot as plt
+from ssseg.modules.models.segmentors.sam import SAMPredictor
+
+'''showmask'''
+def showmask(mask, ax, random_color=False):
+    if random_color:
+        color = np.concatenate([np.random.random(3), np.array([0.6])], axis=0)
+    else:
+        color = np.array([30/255, 144/255, 255/255, 0.6])
+    h, w = mask.shape[-2:]
+    mask_image = mask.reshape(h, w, 1) * color.reshape(1, 1, -1)
+    ax.imshow(mask_image)
+ 
+'''showpoints''' 
+def showpoints(coords, labels, ax, marker_size=375):
+    pos_points = coords[labels==1]
+    neg_points = coords[labels==0]
+    ax.scatter(pos_points[:, 0], pos_points[:, 1], color='green', marker='*', s=marker_size, edgecolor='white', linewidth=1.25)
+    ax.scatter(neg_points[:, 0], neg_points[:, 1], color='red', marker='*', s=marker_size, edgecolor='white', linewidth=1.25)   
+
+'''showbox'''
+def showbox(box, ax):
+    x0, y0 = box[0], box[1]
+    w, h = box[2] - box[0], box[3] - box[1]
+    ax.add_patch(plt.Rectangle((x0, y0), w, h, edgecolor='green', facecolor=(0,0,0,0), lw=2)) 
+
+# read image
+image = cv2.imread('images/truck.jpg')
+image = cv2.cvtColor(image, cv2.COLOR_BGR2RGB)
+# predictor could be SAMPredictor(use_default_sam_h=True) or SAMPredictor(use_default_sam_l=True) or SAMPredictor(use_default_sam_b=True)
+predictor = SAMPredictor(use_default_sam_h=True)
+# set image
+predictor.setimage(image)
+# set prompt
+input_boxes = torch.tensor([
+    [75, 275, 1725, 850],
+    [425, 600, 700, 875],
+    [1375, 550, 1650, 800],
+    [1240, 675, 1400, 750],
+], device=predictor.device)
+transformed_boxes = predictor.transform.applyboxestorch(input_boxes, image.shape[:2])
+# inference
+masks, _, _ = predictor.predicttorch(
+    point_coords=None,
+    point_labels=None,
+    boxes=transformed_boxes,
+    multimask_output=False,
+)
+# show results
+plt.figure(figsize=(10, 10))
+plt.imshow(image)
+for mask in masks:
+    showmask(mask.cpu().numpy(), plt.gca(), random_color=True)
+for box in input_boxes:
+    showbox(box.cpu().numpy(), plt.gca())
+plt.axis('off')
+plt.show()
+```
 
 #### End-to-end batched inference
+
