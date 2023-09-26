@@ -15,6 +15,11 @@
 Documents: https://sssegmentation.readthedocs.io/en/latest/
 
 
+## What's New
+
+- 2023-09-27: Support SAM (Segment Anything), refer to [LINK](./docs/modelzoo/sam) for more details.
+
+
 ## Introduction
 
 SSSegmentation is an open source supervised semantic segmentation toolbox based on PyTorch.
