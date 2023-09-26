@@ -209,7 +209,7 @@ class SAMPredictor(nn.Module):
             dense_prompt_embeddings=dense_embeddings, multimask_output=multimask_output,
         )
         # upscale the masks to the original image resolution
-        masks = self.model.postprocess_masks(low_res_masks, self.input_size, self.original_size)
+        masks = self.model.postprocessmasks(low_res_masks, self.input_size, self.original_size)
         if not return_logits:
             masks = masks > self.model.mask_threshold
         # return

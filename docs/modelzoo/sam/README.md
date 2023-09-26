@@ -38,6 +38,8 @@ wget -P images https://raw.githubusercontent.com/facebookresearch/segment-anythi
 wget -P images https://raw.githubusercontent.com/facebookresearch/segment-anything/main/notebooks/images/groceries.jpg
 ```
 
+Refer to [SAM official repo](https://github.com/facebookresearch/segment-anything/blob/main/notebooks/predictor_example.ipynb), we provide some examples to use sssegmenation to perform SAM.
+
 #### Selecting objects with SAM
 
 ```python
