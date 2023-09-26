@@ -12,6 +12,7 @@ from .cgnet import CGNet
 from .hrnet import HRNet
 from .erfnet import ERFNet
 from .resnet import ResNet
+from .samvit import SAMViT
 from .resnest import ResNeSt
 from .twins import PCPVT, SVT
 from .fastscnn import FastSCNN
@@ -35,7 +36,7 @@ def BuildBackbone(backbone_cfg):
         'SVT': SVT, 'FastSCNN': FastSCNN, 'ConvNeXt': ConvNeXt, 'BiSeNetV1': BiSeNetV1,
         'BiSeNetV2': BiSeNetV2, 'SwinTransformer': SwinTransformer, 'VisionTransformer': VisionTransformer,
         'MixVisionTransformer': MixVisionTransformer, 'TIMMBackbone': TIMMBackbone, 
-        'MobileNetV2': MobileNetV2, 'MobileNetV3': MobileNetV3, 'MAE': MAE,
+        'MobileNetV2': MobileNetV2, 'MobileNetV3': MobileNetV3, 'MAE': MAE, 'SAMViT': SAMViT,
     }
     # build backbone
     backbone_type = backbone_cfg.pop('type')

@@ -17,4 +17,4 @@ assignees: ''
 
 **Screenshot (报错截图)**
 
-**Advice (修复建议)**
+**Suggestion (修复建议)**
