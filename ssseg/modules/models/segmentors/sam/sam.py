@@ -8,6 +8,7 @@ import os
 import torch
 import numpy as np
 import torch.nn as nn
+import torch.nn.functional as F
 import torch.utils.model_zoo as model_zoo
 from functools import partial
 from .maskdecoder import MaskDecoder
@@ -88,7 +89,7 @@ class SAMPredictor(nn.Module):
     def __init__(self, sam_cfg=None, use_default_sam_h=False, use_default_sam_l=False, use_default_sam_b=False):
         super(SAMPredictor, self).__init__()
         if sam_cfg is None:
-            default_sam_cfg = {
+            sam_cfg = {
                 'backbone': {
                     'depth': None, 'embed_dim': None, 'img_size': 1024, 'mlp_ratio': 4, 'norm_layer': partial(torch.nn.LayerNorm, eps=1e-6), 'num_heads': None, 
                     'patch_size': 16, 'qkv_bias': True, 'use_rel_pos': True, 'global_attn_indexes': None, 'window_size': 14, 'out_chans': 256, 'type': 'SAMViT'
@@ -147,7 +148,7 @@ class SAMPredictor(nn.Module):
         if image_format != self.model.image_format:
             image = image[..., ::-1]
         # transform the image to the form expected by the model
-        input_image = self.transform.apply_image(image)
+        input_image = self.transform.applyimage(image)
         input_image_torch = torch.as_tensor(input_image, device=self.device)
         input_image_torch = input_image_torch.permute(2, 0, 1).contiguous()[None, :, :, :]
         self.settorchimage(input_image_torch, image.shape[:2])
@@ -171,12 +172,12 @@ class SAMPredictor(nn.Module):
         coords_torch, labels_torch, box_torch, mask_input_torch = None, None, None, None
         if point_coords is not None:
             assert point_labels is not None, 'point_labels must be supplied if point_coords is supplied.'
-            point_coords = self.transform.apply_coords(point_coords, self.original_size)
+            point_coords = self.transform.applycoords(point_coords, self.original_size)
             coords_torch = torch.as_tensor(point_coords, dtype=torch.float, device=self.device)
             labels_torch = torch.as_tensor(point_labels, dtype=torch.int, device=self.device)
             coords_torch, labels_torch = coords_torch[None, :, :], labels_torch[None, :]
         if box is not None:
-            box = self.transform.apply_boxes(box, self.original_size)
+            box = self.transform.applyboxes(box, self.original_size)
             box_torch = torch.as_tensor(box, dtype=torch.float, device=self.device)
             box_torch = box_torch[None, :]
         if mask_input is not None:

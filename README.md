@@ -17,7 +17,7 @@ Documents: https://sssegmentation.readthedocs.io/en/latest/
 
 ## What's New
 
-- 2023-09-27: Support SAM (Segment Anything), refer to [LINK](./docs/modelzoo/sam) for more details.
+- **2023-09-27**: Support SAM ([Segment Anything](https://arxiv.org/pdf/2304.02643.pdf)), refer to [LINK](./docs/modelzoo/sam) for more details.
 
 
 ## Introduction
