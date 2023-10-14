@@ -69,7 +69,7 @@ class MaskData():
 def isboxnearcropedge(boxes, crop_box, orig_box, atol=20.0):
     crop_box_torch = torch.as_tensor(crop_box, dtype=torch.float, device=boxes.device)
     orig_box_torch = torch.as_tensor(orig_box, dtype=torch.float, device=boxes.device)
-    boxes = uncrop_boxes_xyxy(boxes, crop_box).float()
+    boxes = uncropboxesxyxy(boxes, crop_box).float()
     near_crop_edge = torch.isclose(boxes, crop_box_torch[None, :], atol=atol, rtol=0)
     near_image_edge = torch.isclose(boxes, orig_box_torch[None, :], atol=atol, rtol=0)
     near_crop_edge = torch.logical_and(near_crop_edge, ~near_image_edge)

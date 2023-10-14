@@ -26,7 +26,7 @@ from .amg import (
 '''SAM'''
 class SAM(nn.Module):
     mask_threshold = 0.0
-    image_format = "RGB"
+    image_format = 'RGB'
     def __init__(self, cfg, mode):
         super(SAM, self).__init__()
         assert mode in ['TEST'], 'only support test mode for SAM now'
@@ -92,7 +92,7 @@ class SAM(nn.Module):
 
 '''SAMPredictor'''
 class SAMPredictor(nn.Module):
-    def __init__(self, sam_cfg=None, use_default_sam_h=False, use_default_sam_l=False, use_default_sam_b=False):
+    def __init__(self, sam_cfg=None, use_default_sam_h=False, use_default_sam_l=False, use_default_sam_b=False, device='cuda'):
         super(SAMPredictor, self).__init__()
         if sam_cfg is None:
             sam_cfg = {
@@ -131,7 +131,7 @@ class SAMPredictor(nn.Module):
                 sam_cfg['ckptpath'] = 'https://dl.fbaipublicfiles.com/segment_anything/sam_vit_b_01ec64.pth'
         else:
             assert (not use_default_sam_h) and (not use_default_sam_l) and (not use_default_sam_b)
-        self.model = self.buildsam(sam_cfg)
+        self.model = self.buildsam(sam_cfg, device)
         if 'ckptpath' in sam_cfg and (os.path.exists(sam_cfg['ckptpath']) or sam_cfg['ckptpath'].startswith('https')):
             if os.path.exists(sam_cfg['ckptpath']):
                 with open(sam_cfg['ckptpath'], 'rb') as fp:
@@ -144,8 +144,9 @@ class SAMPredictor(nn.Module):
         self.transform = ResizeLongestSide(self.model.image_encoder.img_size)
         self.resetimage()
     '''buildsam'''
-    def buildsam(self, sam_cfg):
+    def buildsam(self, sam_cfg, device):
         sam_model = SAM(sam_cfg, mode='TEST')
+        sam_model.to(device=device)
         sam_model.eval()
         return sam_model
     '''setimage'''
@@ -242,7 +243,7 @@ class SAMPredictor(nn.Module):
 
 '''SAMAutomaticMaskGenerator'''
 class SAMAutomaticMaskGenerator(nn.Module):
-    def __init__(self, model, points_per_side=32, points_per_batch=64, pred_iou_thresh=0.88, stability_score_thresh=0.95, stability_score_offset=1.0,
+    def __init__(self, points_per_side=32, points_per_batch=64, pred_iou_thresh=0.88, stability_score_thresh=0.95, stability_score_offset=1.0, device='cuda',
                  box_nms_thresh=0.7, crop_n_layers=0, crop_nms_thresh=0.7, crop_overlap_ratio=512/1500, crop_n_points_downscale_factor=1, point_grids=None,
                  min_mask_region_area=0, output_mode='binary_mask', sam_cfg=None, use_default_sam_h=False, use_default_sam_l=False, use_default_sam_b=False):
         super(SAMAutomaticMaskGenerator, self).__init__()
@@ -258,7 +259,7 @@ class SAMAutomaticMaskGenerator(nn.Module):
         else:
             raise ValueError("can't have both points_per_side and point_grid be None")
         # set attributes
-        self.predictor = SAMPredictor(sam_cfg, use_default_sam_h, use_default_sam_l, use_default_sam_b)
+        self.predictor = SAMPredictor(sam_cfg, use_default_sam_h, use_default_sam_l, use_default_sam_b, device=device)
         self.points_per_batch = points_per_batch
         self.pred_iou_thresh = pred_iou_thresh
         self.stability_score_thresh = stability_score_thresh

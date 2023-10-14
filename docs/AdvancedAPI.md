@@ -29,7 +29,7 @@ wget -P images https://raw.githubusercontent.com/facebookresearch/segment-anythi
 wget -P images https://raw.githubusercontent.com/facebookresearch/segment-anything/main/notebooks/images/groceries.jpg
 ```
 
-Refer to [SAM official repo](https://github.com/facebookresearch/segment-anything/blob/main/notebooks/predictor_example.ipynb), we provide some examples to use sssegmenation to perform SAM.
+Refer to [SAM official repo](https://github.com/facebookresearch/segment-anything/blob/main/notebooks/predictor_example.ipynb), we provide some examples to use sssegmenation to generate object masks from prompts with SAM.
 
 #### Selecting objects with SAM
 
@@ -507,3 +507,114 @@ It works by sampling single-point input prompts in a grid over the image, from e
 Then, masks are filtered for quality and deduplicated using non-maximal suppression. 
 Additional options allow for further improvement of mask quality and quantity, such as running prediction on multiple crops of the image or postprocessing masks to remove small disconnected regions and holes.
 
+#### Environment Set-up
+
+Install sssegmentation:
+
+```sh
+git clone https://github.com/SegmentationBLWX/sssegmentation
+cd sssegmentation
+pip install -r requirements.txt # install dependencies refer to https://sssegmentation.readthedocs.io/en/latest/GetStarted.html#prerequisites
+```
+
+Download images:
+
+```sh
+wget -P images https://raw.githubusercontent.com/facebookresearch/segment-anything/main/notebooks/images/dog.jpg
+```
+
+Refer to [SAM official repo](https://github.com/facebookresearch/segment-anything/blob/main/notebooks/automatic_mask_generator_example.ipynb), we provide some examples to use sssegmenation to automatically generating object masks with SAM.
+
+#### Automatic mask generation
+
+To run automatic mask generation, provide a SAM model to the `SAMAutomaticMaskGenerator` class. Set the path below to the SAM checkpoint. Running on CUDA and with the default model is recommended.
+
+```python
+import cv2
+import torch
+import numpy as np
+import matplotlib.pyplot as plt
+from ssseg.modules.models.segmentors.sam import SAMAutomaticMaskGenerator
+
+'''showanns'''
+def showanns(anns):
+    if len(anns) == 0: return
+    sorted_anns = sorted(anns, key=(lambda x: x['area']), reverse=True)
+    ax = plt.gca()
+    ax.set_autoscale_on(False)
+    img = np.ones((sorted_anns[0]['segmentation'].shape[0], sorted_anns[0]['segmentation'].shape[1], 4))
+    img[:, :, 3] = 0
+    for ann in sorted_anns:
+        m = ann['segmentation']
+        color_mask = np.concatenate([np.random.random(3), [0.35]])
+        img[m] = color_mask
+    ax.imshow(img)
+
+# read image
+image = cv2.imread('images/dog.jpg')
+image = cv2.cvtColor(image, cv2.COLOR_BGR2RGB)
+# mask generator
+mask_generator = SAMAutomaticMaskGenerator(use_default_sam_h=True, device='cuda')
+# generate masks on an image
+masks = mask_generator.generate(image)
+# show all the masks overlayed on the image
+plt.figure(figsize=(20,20))
+plt.imshow(image)
+showanns(masks)
+plt.axis('off')
+plt.show()
+```
+
+Mask generation returns a list over masks, where each mask is a dictionary containing various data about the mask. These keys are:
+
+- `segmentation` : the mask,
+- `area` : the area of the mask in pixels,
+- `bbox` : the boundary box of the mask in XYWH format,
+- `predicted_iou` : the model's own prediction for the quality of the mask,
+- `point_coords` : the sampled input point that generated this mask,
+- `stability_score` : an additional measure of mask quality,
+- `crop_box` : the crop of the image used to generate this mask in XYWH format.
+
+#### Automatic mask generation options
+
+There are several tunable parameters in automatic mask generation that control how densely points are sampled and what the thresholds are for removing low quality or duplicate masks. 
+Additionally, generation can be automatically run on crops of the image to get improved performance on smaller objects, and post-processing can remove stray pixels and holes. Here is an example configuration that samples more masks:
+
+```python
+import cv2
+import torch
+import numpy as np
+import matplotlib.pyplot as plt
+from ssseg.modules.models.segmentors.sam import SAMAutomaticMaskGenerator
+
+'''showanns'''
+def showanns(anns):
+    if len(anns) == 0: return
+    sorted_anns = sorted(anns, key=(lambda x: x['area']), reverse=True)
+    ax = plt.gca()
+    ax.set_autoscale_on(False)
+    img = np.ones((sorted_anns[0]['segmentation'].shape[0], sorted_anns[0]['segmentation'].shape[1], 4))
+    img[:, :, 3] = 0
+    for ann in sorted_anns:
+        m = ann['segmentation']
+        color_mask = np.concatenate([np.random.random(3), [0.35]])
+        img[m] = color_mask
+    ax.imshow(img)
+
+# read image
+image = cv2.imread('images/dog.jpg')
+image = cv2.cvtColor(image, cv2.COLOR_BGR2RGB)
+# mask generator
+mask_generator = SAMAutomaticMaskGenerator(
+    use_default_sam_h=True, device='cuda', points_per_side=32, pred_iou_thresh=0.86, stability_score_thresh=0.92,
+    crop_n_layers=1, crop_n_points_downscale_factor=2, min_mask_region_area=100,
+)
+# generate masks on an image
+masks = mask_generator.generate(image)
+# show all the masks overlayed on the image
+plt.figure(figsize=(20,20))
+plt.imshow(image)
+showanns(masks)
+plt.axis('off')
+plt.show()
+```
