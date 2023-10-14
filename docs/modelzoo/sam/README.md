@@ -21,6 +21,13 @@
 
 ## Inference with SAM
 
+The Segment Anything Model (SAM) predicts object masks given prompts that indicate the desired object. The model first converts the image into an image embedding that allows high quality masks to be efficiently produced from a prompt. 
+
+The `SAMPredictor` class provides an easy interface to the model for prompting the model. 
+It allows the user to first set an image using the `setimage` method, which calculates the necessary image embeddings. 
+Then, prompts can be provided via the `predict` method to efficiently predict masks from those prompts. 
+The model can take as input both point and box prompts, as well as masks from the previous iteration of prediction.
+
 #### Environment Set-up
 
 Install sssegmentation:

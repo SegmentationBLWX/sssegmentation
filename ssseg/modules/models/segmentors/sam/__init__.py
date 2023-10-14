@@ -1,2 +1,2 @@
 '''initialize'''
-from .sam import SAM, SAMPredictor
+from .sam import SAM, SAMPredictor, SAMAutomaticMaskGenerator
