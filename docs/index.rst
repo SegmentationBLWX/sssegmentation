@@ -14,3 +14,4 @@ Welcome to SSSegmentation’s documentation!
 	ModelZoo.md
 	QuickRun.md
 	Tutorials.md
+	AdvancedAPI.md

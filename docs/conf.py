@@ -18,7 +18,7 @@
 # -- Project information -----------------------------------------------------
 
 project = 'SSSegmentation'
-copyright = '2020-2022, Zhenchao Jin'
+copyright = '2020-2023, Zhenchao Jin'
 author = 'Zhenchao Jin'
 release = '1.2.0'
 
