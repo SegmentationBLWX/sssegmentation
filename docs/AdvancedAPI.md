@@ -651,3 +651,29 @@ showanns(masks)
 plt.axis('off')
 plt.show()
 ```
+
+
+## Inference with MobileSAM
+
+The usage of MobileSAM in sssegmenation is exactly the same as SAM by replacing
+
+- `SAM`: `MobileSAM`,
+- `SAMPredictor`: `MobileSAMPredictor`,
+- `SAMAutomaticMaskGenerator`: `MobileSAMAutomaticMaskGenerator`.
+
+Specifically, you can import the three classes by
+
+```python
+from ssseg.modules.models.segmentors.mobilesam import MobileSAM
+from ssseg.modules.models.segmentors.mobilesam import MobileSAMPredictor
+from ssseg.modules.models.segmentors.mobilesam import MobileSAMAutomaticMaskGenerator
+
+# predictor only could be MobileSAMPredictor(use_default_sam_t_5m=True, device='cuda')
+predictor = MobileSAMPredictor(use_default_sam_t_5m=True, device='cuda')
+
+# mask_generator only could be MobileSAMAutomaticMaskGenerator(use_default_sam_t_5m=True, device='cuda')
+mask_generator = MobileSAMAutomaticMaskGenerator(use_default_sam_t_5m=True, device='cuda')
+```
+
+By the way, you can refer to [This Link](https://sssegmentation.readthedocs.io/en/latest/AdvancedAPI.html#inference-with-sam) to learn about how to use SAM with sssegmenation.
+Also, you can refer to [This Link](https://github.com/ChaoningZhang/MobileSAM) to compare our implemented MobileSAM with official version.

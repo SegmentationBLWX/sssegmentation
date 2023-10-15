@@ -246,3 +246,8 @@
 
 - Related Paper: [click](https://arxiv.org/pdf/2304.02643.pdf),
 - Reported Performance: [click](https://github.com/SegmentationBLWX/sssegmentation/tree/main/docs/modelzoo/sam).
+
+**32.MobileSAM**
+
+- Related Paper: [click](https://arxiv.org/pdf/2306.14289.pdf),
+- Reported Performance: [click](https://github.com/SegmentationBLWX/sssegmentation/tree/main/docs/modelzoo/mobilesam).

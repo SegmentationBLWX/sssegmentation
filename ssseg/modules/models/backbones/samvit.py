@@ -9,6 +9,12 @@ import torch.nn as nn
 import torch.nn.functional as F
 
 
+'''DEFAULT_MODEL_URLS'''
+DEFAULT_MODEL_URLS = {}
+'''AUTO_ASSERT_STRUCTURE_TYPES'''
+AUTO_ASSERT_STRUCTURE_TYPES = {}
+
+
 '''MLPBlock'''
 class MLPBlock(nn.Module):
     def __init__(self, embedding_dim, mlp_dim, act=nn.GELU):

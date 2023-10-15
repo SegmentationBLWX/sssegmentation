@@ -29,7 +29,7 @@ class SAM(nn.Module):
     image_format = 'RGB'
     def __init__(self, cfg, mode):
         super(SAM, self).__init__()
-        assert mode in ['TEST'], 'only support test mode for SAM now'
+        assert mode in ['TEST'], f'only support test mode for {self.__class__.__name__} now'
         pixel_mean = cfg.get('pixel_mean', [123.675, 116.28, 103.53])
         pixel_std = cfg.get('pixel_std', [58.395, 57.12, 57.375])
         self.image_encoder = BuildBackbone(cfg['backbone'])
@@ -43,7 +43,7 @@ class SAM(nn.Module):
         return self.pixel_mean.device
     '''forward'''
     def forward(self, x, targets=None):
-        raise NotImplementedError('train SAM not to be implemented')
+        raise NotImplementedError(f'train {self.__class__.__name__} not to be implemented')
     '''inference'''
     @torch.no_grad()
     def inference(self, batched_input, multimask_output=False):
@@ -245,7 +245,8 @@ class SAMPredictor(nn.Module):
 class SAMAutomaticMaskGenerator(nn.Module):
     def __init__(self, points_per_side=32, points_per_batch=64, pred_iou_thresh=0.88, stability_score_thresh=0.95, stability_score_offset=1.0, device='cuda',
                  box_nms_thresh=0.7, crop_n_layers=0, crop_nms_thresh=0.7, crop_overlap_ratio=512/1500, crop_n_points_downscale_factor=1, point_grids=None,
-                 min_mask_region_area=0, output_mode='binary_mask', sam_cfg=None, use_default_sam_h=False, use_default_sam_l=False, use_default_sam_b=False):
+                 min_mask_region_area=0, output_mode='binary_mask', sam_cfg=None, use_default_sam_h=False, use_default_sam_l=False, use_default_sam_b=False,
+                 user_defined_sam_predictor=None):
         super(SAMAutomaticMaskGenerator, self).__init__()
         from pycocotools import mask as mask_utils
         # assert arguments
@@ -259,7 +260,10 @@ class SAMAutomaticMaskGenerator(nn.Module):
         else:
             raise ValueError("can't have both points_per_side and point_grid be None")
         # set attributes
-        self.predictor = SAMPredictor(sam_cfg, use_default_sam_h, use_default_sam_l, use_default_sam_b, device=device)
+        if user_defined_sam_predictor is not None:
+            self.predictor = user_defined_sam_predictor
+        else:
+            self.predictor = SAMPredictor(sam_cfg, use_default_sam_h, use_default_sam_l, use_default_sam_b, device=device)
         self.points_per_batch = points_per_batch
         self.pred_iou_thresh = pred_iou_thresh
         self.stability_score_thresh = stability_score_thresh

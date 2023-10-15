@@ -24,6 +24,7 @@ from .dnlnet import DNLNet
 from .annnet import ANNNet
 from .fastfcn import FastFCN
 from .upernet import UPerNet
+from .mobilesam import MobileSAM
 from .pointrend import PointRend
 from .deeplabv3 import Deeplabv3
 from .lrasppnet import LRASPPNet
@@ -50,6 +51,7 @@ def BuildSegmentor(segmentor_cfg, mode):
         'Segformer': Segformer, 'MemoryNet': MemoryNet, 'PointRend': PointRend, 'Deeplabv3': Deeplabv3,
         'LRASPPNet': LRASPPNet, 'MaskFormer': MaskFormer, 'MemoryNetV2': MemoryNetV2, 'SemanticFPN': SemanticFPN,
         'NonLocalNet': NonLocalNet, 'Deeplabv3Plus': Deeplabv3Plus, 'DepthwiseSeparableFCN': DepthwiseSeparableFCN,
+        'MobileSAM': MobileSAM,
     }
     # build segmentor
     segmentor_type = segmentor_cfg.pop('type')

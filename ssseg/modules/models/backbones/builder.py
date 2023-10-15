@@ -23,6 +23,7 @@ from .swin import SwinTransformer
 from .vit import VisionTransformer
 from .mit import MixVisionTransformer
 from .timmwrapper import TIMMBackbone
+from .sammobilevit import SAMMobileViT
 from .mobilenet import MobileNetV2, MobileNetV3
 
 
@@ -37,6 +38,7 @@ def BuildBackbone(backbone_cfg):
         'BiSeNetV2': BiSeNetV2, 'SwinTransformer': SwinTransformer, 'VisionTransformer': VisionTransformer,
         'MixVisionTransformer': MixVisionTransformer, 'TIMMBackbone': TIMMBackbone, 
         'MobileNetV2': MobileNetV2, 'MobileNetV3': MobileNetV3, 'MAE': MAE, 'SAMViT': SAMViT,
+        'SAMMobileViT': SAMMobileViT,
     }
     # build backbone
     backbone_type = backbone_cfg.pop('type')
