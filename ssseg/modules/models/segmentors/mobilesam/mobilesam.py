@@ -40,6 +40,7 @@ class MobileSAMPredictor(SAMPredictor):
         super(MobileSAMPredictor, self).__init__(
             use_default_sam_h=False, use_default_sam_l=False, use_default_sam_b=False, sam_cfg=sam_cfg, device=device, load_ckpt_strict=load_ckpt_strict,
         )
+        self.model.eval()
     '''buildsam'''
     def buildsam(self, sam_cfg, device):
         sam_model = MobileSAM(sam_cfg, mode='TEST')
