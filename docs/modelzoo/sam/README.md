@@ -51,6 +51,9 @@ Refer to [SAM official repo](https://github.com/facebookresearch/segment-anythin
 
 #### Selecting objects with SAM
 
+To select the truck, choose a point on it. Points are input to the model in (x,y) format and come with labels 1 (foreground point) or 0 (background point). 
+Multiple points can be input; here we use only one. The chosen point will be shown as a star on the image.
+
 ```python
 import cv2
 import numpy as np
@@ -108,6 +111,11 @@ for i, (mask, score) in enumerate(zip(masks, scores)):
 ```
 
 #### Specifying a specific object with additional points
+
+The single input point is ambiguous, and the model has returned multiple objects consistent with it. 
+To obtain a single object, multiple points can be provided. 
+If available, a mask from a previous iteration can also be supplied to the model to aid in prediction. 
+When specifying a single object with multiple prompts, a single mask can be requested by setting `multimask_output=False`.
 
 ```python
 import cv2
@@ -243,6 +251,8 @@ plt.show()
 
 #### Specifying a specific object with a box
 
+The model can also take a box as input, provided in xyxy format.
+
 ```python
 import cv2
 import numpy as np
@@ -298,6 +308,8 @@ plt.show()
 ```
 
 #### Combining points and boxes
+
+Points and boxes may be combined, just by including both types of prompts to the predictor. Here this can be used to select just the trucks's tire, instead of the entire wheel.
 
 ```python
 import cv2
@@ -357,6 +369,8 @@ plt.show()
 ```
 
 #### Batched prompt inputs
+
+`SAMPredictor` can take multiple input prompts for the same image, using `predicttorch` method. This method assumes input points are already torch tensors and have already been transformed to the input frame.
 
 ```python
 import cv2
@@ -422,6 +436,19 @@ plt.show()
 ```
 
 #### End-to-end batched inference
+
+If all prompts are available in advance, it is possible to run SAM directly in an end-to-end fashion. This also allows batching over images.
+
+Both images and prompts are input as PyTorch tensors that are already transformed to the correct frame. Inputs are packaged as a list over images, which each element is a dict that takes the following keys:
+
+- `image`: The input image as a PyTorch tensor in CHW format.
+- `original_size`: The size of the image before transforming for input to SAM, in (H, W) format.
+- `point_coords`: Batched coordinates of point prompts.
+- `point_labels`: Batched labels of point prompts.
+- `boxes`: Batched input boxes.
+- `mask_inputs`: Batched input masks.
+
+If a prompt is not present, the key can be excluded.
 
 ```python
 import cv2
@@ -515,6 +542,12 @@ ax[1].axis('off')
 plt.tight_layout()
 plt.show()
 ```
+
+The output is a list over results for each input image, where list elements are dictionaries with the following keys:
+
+- `masks`: A batched torch tensor of predicted binary masks, the size of the original image.
+- `iou_predictions`: The model's prediction of the quality for each mask.
+- `low_res_logits`: Low res logits for each mask, which can be passed back to the model as mask input on a later iteration.
 
 ### Automatically generating object masks with SAM
 

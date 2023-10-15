@@ -18,6 +18,7 @@ Documents: https://sssegmentation.readthedocs.io/en/latest/
 ## What's New
 
 - **2023-09-27**: Support SAM ([Segment Anything](https://arxiv.org/pdf/2304.02643.pdf)), refer to [LINK](./docs/modelzoo/sam) for more details.
+- **2023-10-27**: Support MobileSAM ([Faster Segment Anything](https://arxiv.org/pdf/2306.14289.pdf)), refer to [LINK](./docs/modelzoo/mobilesam) for more details.
 
 
 ## Introduction
@@ -95,6 +96,7 @@ You can star this repository to keep track of the project if it's helpful for yo
 | PointRend                         | [Click](./docs/modelzoo/pointrend)           | [CVPR 2020](https://arxiv.org/pdf/1912.08193.pdf)                                                                                                       | [Click](./ssseg/modules/models/segmentors/pointrend/pointrend.py)           |
 | Deeplabv3                         | [Click](./docs/modelzoo/deeplabv3)           | [ArXiv 2017](https://arxiv.org/pdf/1706.05587.pdf)                                                                                                      | [Click](./ssseg/modules/models/segmentors/deeplabv3/deeplabv3.py)           |
 | Segformer                         | [Click](./docs/modelzoo/segformer)           | [NeurIPS 2021](https://arxiv.org/pdf/2105.15203.pdf)                                                                                                    | [Click](./ssseg/modules/models/segmentors/segformer/segformer.py)           |
+| MobileSAM                         | [Click](./docs/modelzoo/mobilesam)           | [ArXiv 2023](https://arxiv.org/pdf/2306.14289.pdf)                                                                                                      | [Click](./ssseg/modules/models/segmentors/segformer/mobilesam.py)           |
 | MaskFormer                        | [Click](./docs/modelzoo/maskformer)          | [NeurIPS 2021](https://arxiv.org/pdf/2107.06278.pdf)                                                                                                    | [Click](./ssseg/modules/models/segmentors/maskformer/maskformer.py)         |
 | SemanticFPN                       | [Click](./docs/modelzoo/semanticfpn)         | [CVPR 2019](https://arxiv.org/pdf/1901.02446.pdf)                                                                                                       | [Click](./ssseg/modules/models/segmentors/semanticfpn/semanticfpn.py)       |
 | NonLocalNet                       | [Click](./docs/modelzoo/nonlocalnet)         | [CVPR 2018](https://arxiv.org/pdf/1711.07971.pdf)                                                                                                       | [Click](./ssseg/modules/models/segmentors/nonlocalnet/nonlocalnet.py)       |
