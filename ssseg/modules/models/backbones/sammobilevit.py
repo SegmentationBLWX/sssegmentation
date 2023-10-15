@@ -10,7 +10,7 @@ import torch.nn as nn
 import torch.nn.functional as F
 import torch.utils.checkpoint as checkpoint
 from .samvit import LayerNorm2d
-from .brick.dropout.droppath import DropPath
+from .bricks.dropout.droppath import DropPath
 
 
 '''DEFAULT_MODEL_URLS'''
@@ -30,19 +30,19 @@ DEFAULT_MODEL_URLS = {
 '''AUTO_ASSERT_STRUCTURE_TYPES'''
 AUTO_ASSERT_STRUCTURE_TYPES = {
     'tiny_vit_5m_22kto1k_distill': {
-        'embed_dims': [64, 128, 160, 320], 'depths': [2, 2, 6, 2], 'num_heads': [2, 4, 5, 10], 'window_sizes': [7, 7, 14, 7], 'img_size': 224,
+        'embed_dims': [64, 128, 160, 320], 'depths': [2, 2, 6, 2], 'num_heads': [2, 4, 5, 10], 'window_sizes': [7, 7, 14, 7], 
     },
     'tiny_vit_11m_22kto1k_distill': {
-        'embed_dims': [64, 128, 256, 448], 'depths': [2, 2, 6, 2], 'num_heads': [2, 4, 8, 14], 'window_sizes': [7, 7, 14, 7], 'img_size': 224,
+        'embed_dims': [64, 128, 256, 448], 'depths': [2, 2, 6, 2], 'num_heads': [2, 4, 8, 14], 'window_sizes': [7, 7, 14, 7], 
     },
     'tiny_vit_21m_22kto1k_distill': {
-        'embed_dims': [96, 192, 384, 576], 'depths': [2, 2, 6, 2], 'num_heads': [3, 6, 12, 18], 'window_sizes': [7, 7, 14, 7], 'img_size': 224,
+        'embed_dims': [96, 192, 384, 576], 'depths': [2, 2, 6, 2], 'num_heads': [3, 6, 12, 18], 'window_sizes': [7, 7, 14, 7], 
     },
     'tiny_vit_21m_22kto1k_384_distill': {
-        'embed_dims': [96, 192, 384, 576], 'depths': [2, 2, 6, 2], 'num_heads': [3, 6, 12, 18], 'window_sizes': [12, 12, 24, 12], 'img_size': 384,
+        'embed_dims': [96, 192, 384, 576], 'depths': [2, 2, 6, 2], 'num_heads': [3, 6, 12, 18], 'window_sizes': [12, 12, 24, 12], 
     },
     'tiny_vit_21m_22kto1k_512_distill': {
-        'embed_dims': [96, 192, 384, 576], 'depths': [2, 2, 6, 2], 'num_heads': [3, 6, 12, 18], 'window_sizes': [16, 16, 32, 16], 'img_size': 512,
+        'embed_dims': [96, 192, 384, 576], 'depths': [2, 2, 6, 2], 'num_heads': [3, 6, 12, 18], 'window_sizes': [16, 16, 32, 16], 
     },
 }
 
@@ -244,10 +244,10 @@ class Attention(nn.Module):
         return x
 
 
-'''TinyViTBlock'''
-class TinyViTBlock(nn.Module):
+'''MobileViTBlock'''
+class MobileViTBlock(nn.Module):
     def __init__(self, dim, input_resolution, num_heads, window_size=7, mlp_ratio=4., drop=0., drop_path=0., local_conv_size=3, act_layer=nn.GELU):
-        super(TinyViTBlock, self).__init__()
+        super(MobileViTBlock, self).__init__()
         # assert
         assert window_size > 0, 'window_size must be greater than 0'
         assert dim % num_heads == 0, 'dim must be divisible by num_heads'
@@ -306,7 +306,7 @@ class BasicLayer(nn.Module):
         self.use_checkpoint = use_checkpoint
         self.input_resolution = PatchEmbed.totuple(input_resolution)
         # build blocks
-        self.blocks = nn.ModuleList([TinyViTBlock(
+        self.blocks = nn.ModuleList([MobileViTBlock(
             dim=dim, input_resolution=input_resolution, num_heads=num_heads, window_size=window_size, mlp_ratio=mlp_ratio, drop=drop,
             drop_path=drop_path[i] if isinstance(drop_path, list) else drop_path, local_conv_size=local_conv_size, act_layer=act_layer,
         ) for i in range(depth)])

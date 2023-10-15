@@ -92,7 +92,7 @@ class SAM(nn.Module):
 
 '''SAMPredictor'''
 class SAMPredictor(nn.Module):
-    def __init__(self, sam_cfg=None, use_default_sam_h=False, use_default_sam_l=False, use_default_sam_b=False, device='cuda'):
+    def __init__(self, sam_cfg=None, use_default_sam_h=False, use_default_sam_l=False, use_default_sam_b=False, device='cuda', load_ckpt_strict=True):
         super(SAMPredictor, self).__init__()
         if sam_cfg is None:
             sam_cfg = {
@@ -140,7 +140,7 @@ class SAMPredictor(nn.Module):
                 state_dict = model_zoo.load_url(sam_cfg['ckptpath'])
             else:
                 raise ValueError('ckptpath %s could not be loaded' % sam_cfg['ckptpath'])
-            self.model.load_state_dict(state_dict, strict=True)
+            self.model.load_state_dict(state_dict, strict=load_ckpt_strict)
         self.transform = ResizeLongestSide(self.model.image_encoder.img_size)
         self.resetimage()
     '''buildsam'''
@@ -246,7 +246,7 @@ class SAMAutomaticMaskGenerator(nn.Module):
     def __init__(self, points_per_side=32, points_per_batch=64, pred_iou_thresh=0.88, stability_score_thresh=0.95, stability_score_offset=1.0, device='cuda',
                  box_nms_thresh=0.7, crop_n_layers=0, crop_nms_thresh=0.7, crop_overlap_ratio=512/1500, crop_n_points_downscale_factor=1, point_grids=None,
                  min_mask_region_area=0, output_mode='binary_mask', sam_cfg=None, use_default_sam_h=False, use_default_sam_l=False, use_default_sam_b=False,
-                 user_defined_sam_predictor=None):
+                 user_defined_sam_predictor=None, load_ckpt_strict=True):
         super(SAMAutomaticMaskGenerator, self).__init__()
         from pycocotools import mask as mask_utils
         # assert arguments
@@ -263,7 +263,7 @@ class SAMAutomaticMaskGenerator(nn.Module):
         if user_defined_sam_predictor is not None:
             self.predictor = user_defined_sam_predictor
         else:
-            self.predictor = SAMPredictor(sam_cfg, use_default_sam_h, use_default_sam_l, use_default_sam_b, device=device)
+            self.predictor = SAMPredictor(sam_cfg, use_default_sam_h, use_default_sam_l, use_default_sam_b, device=device, load_ckpt_strict=load_ckpt_strict)
         self.points_per_batch = points_per_batch
         self.pred_iou_thresh = pred_iou_thresh
         self.stability_score_thresh = stability_score_thresh
