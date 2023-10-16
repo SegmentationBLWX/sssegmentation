@@ -13,6 +13,7 @@ from .ccnet import CCNet
 from .danet import DANet
 from .gcnet import GCNet
 from .dmnet import DMNet
+from .idrnet import IDRNet
 from .isanet import ISANet
 from .encnet import ENCNet
 from .apcnet import APCNet
@@ -51,7 +52,7 @@ def BuildSegmentor(segmentor_cfg, mode):
         'Segformer': Segformer, 'MemoryNet': MemoryNet, 'PointRend': PointRend, 'Deeplabv3': Deeplabv3,
         'LRASPPNet': LRASPPNet, 'MaskFormer': MaskFormer, 'MemoryNetV2': MemoryNetV2, 'SemanticFPN': SemanticFPN,
         'NonLocalNet': NonLocalNet, 'Deeplabv3Plus': Deeplabv3Plus, 'DepthwiseSeparableFCN': DepthwiseSeparableFCN,
-        'MobileSAM': MobileSAM,
+        'MobileSAM': MobileSAM, 'IDRNet': IDRNet,
     }
     # build segmentor
     segmentor_type = segmentor_cfg.pop('type')
