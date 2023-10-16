@@ -19,7 +19,7 @@ Documents: https://sssegmentation.readthedocs.io/en/latest/
 
 - **2023-09-27**: Support SAM ([Segment Anything](https://arxiv.org/pdf/2304.02643.pdf)), refer to [inference-with-sam](https://sssegmentation.readthedocs.io/en/latest/AdvancedAPI.html#inference-with-sam) for more details.
 - **2023-10-15**: Support MobileSAM ([Faster Segment Anything](https://arxiv.org/pdf/2306.14289.pdf)), refer to [inference-with-mobilesam](https://sssegmentation.readthedocs.io/en/latest/AdvancedAPI.html#inference-with-mobilesam) for more details.
-- **2023-10-17**: Release source codes of our NeurIPS 2023 paper ([IDRNet: Intervention-Driven Relation Network for Semantic Segmentation]()), refer to [Results and Models for IDRNet](./docs/modelzoo/idrnet)
+- **2023-10-17**: Release source codes of our NeurIPS 2023 paper ([IDRNet: Intervention-Driven Relation Network for Semantic Segmentation]()), refer to [Results and Models for IDRNet](./docs/modelzoo/idrnet) for more details.
 
 
 ## Introduction
