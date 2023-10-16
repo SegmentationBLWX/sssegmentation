@@ -17,8 +17,9 @@ Documents: https://sssegmentation.readthedocs.io/en/latest/
 
 ## What's New
 
-- **2023-09-27**: Support SAM ([Segment Anything](https://arxiv.org/pdf/2304.02643.pdf)), refer to [LINK](./docs/modelzoo/sam) for more details.
-- **2023-10-15**: Support MobileSAM ([Faster Segment Anything](https://arxiv.org/pdf/2306.14289.pdf)), refer to [LINK](./docs/modelzoo/mobilesam) for more details.
+- **2023-09-27**: Support SAM ([Segment Anything](https://arxiv.org/pdf/2304.02643.pdf)), refer to [inference-with-sam](https://sssegmentation.readthedocs.io/en/latest/AdvancedAPI.html#inference-with-sam) for more details.
+- **2023-10-15**: Support MobileSAM ([Faster Segment Anything](https://arxiv.org/pdf/2306.14289.pdf)), refer to [inference-with-mobilesam](https://sssegmentation.readthedocs.io/en/latest/AdvancedAPI.html#inference-with-mobilesam) for more details.
+- **2023-10-17**: Release source codes of our NeurIPS 2023 paper ([IDRNet: Intervention-Driven Relation Network for Semantic Segmentation]()), refer to [Results and Models for IDRNet](./docs/modelzoo/idrnet)
 
 
 ## Introduction
@@ -91,6 +92,7 @@ You can star this repository to keep track of the project if it's helpful for yo
 | PSPNet                            | [Click](./docs/modelzoo/pspnet)              | [CVPR 2017](https://arxiv.org/pdf/1612.01105.pdf)                                                                                                       | [Click](./ssseg/modules/models/segmentors/pspnet/pspnet.py)                 |
 | PSANet                            | [Click](./docs/modelzoo/psanet)              | [ECCV 2018](https://openaccess.thecvf.com/content_ECCV_2018/papers/Hengshuang_Zhao_PSANet_Point-wise_Spatial_ECCV_2018_paper.pdf)                       | [Click](./ssseg/modules/models/segmentors/psanet/psanet.py)                 |
 | APCNet                            | [Click](./docs/modelzoo/apcnet)              | [CVPR 2019](https://openaccess.thecvf.com/content_CVPR_2019/papers/He_Adaptive_Pyramid_Context_Network_for_Semantic_Segmentation_CVPR_2019_paper.pdf)   | [Click](./ssseg/modules/models/segmentors/apcnet/apcnet.py)                 |
+| IDRNet                            | [Click](./docs/modelzoo/idrnet)              | [NeurIPS 2023]()                                                                                                                                        | [Click](./ssseg/modules/models/segmentors/idrnet/idrnet.py)                 |
 | FastFCN                           | [Click](./docs/modelzoo/fastfcn)             | [ArXiv 2019](https://arxiv.org/pdf/1903.11816.pdf)                                                                                                      | [Click](./ssseg/modules/models/segmentors/fastfcn/fastfcn.py)               |
 | UPerNet                           | [Click](./docs/modelzoo/upernet)             | [ECCV 2018](https://arxiv.org/pdf/1807.10221.pdf)                                                                                                       | [Click](./ssseg/modules/models/segmentors/upernet/upernet.py)               |
 | PointRend                         | [Click](./docs/modelzoo/pointrend)           | [CVPR 2020](https://arxiv.org/pdf/1912.08193.pdf)                                                                                                       | [Click](./ssseg/modules/models/segmentors/pointrend/pointrend.py)           |

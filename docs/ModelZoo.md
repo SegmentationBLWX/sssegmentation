@@ -251,3 +251,8 @@
 
 - Related Paper: [click](https://arxiv.org/pdf/2306.14289.pdf),
 - Reported Performance: [click](https://github.com/SegmentationBLWX/sssegmentation/tree/main/docs/modelzoo/mobilesam).
+
+**33.IDRNet**
+
+- Related Paper: [click](),
+- Reported Performance: [click](https://github.com/SegmentationBLWX/sssegmentation/tree/main/docs/modelzoo/idrnet).
