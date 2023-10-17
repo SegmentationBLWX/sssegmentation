@@ -26,6 +26,7 @@ SEGMENTOR_CFG['head']['use_fpn_after'] = True
 SEGMENTOR_CFG['head']['use_sa_on_coarsecontext_before'] = True
 SEGMENTOR_CFG['head']['use_sa_on_coarsecontext_after'] = False
 SEGMENTOR_CFG['head']['coarse_context'] = {'type': 'aspp', 'dilations': (1, 12, 24, 36)}
+SEGMENTOR_CFG['inference']['tricks']['use_probs_before_resize'] = True
 SEGMENTOR_CFG['work_dir'] = 'idrnet_aspp_resnet50os8_cocostuff10k'
 SEGMENTOR_CFG['logfilepath'] = 'idrnet_aspp_resnet50os8_cocostuff10k/idrnet_aspp_resnet50os8_cocostuff10k.log'
 SEGMENTOR_CFG['resultsavepath'] = 'idrnet_aspp_resnet50os8_cocostuff10k/idrnet_aspp_resnet50os8_cocostuff10k_results.pkl'
