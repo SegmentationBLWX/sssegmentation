@@ -224,8 +224,8 @@ class IDRNet(BaseSegmentor):
                 preds_anchor_stage2 = F.interpolate(preds_stage2, size=img_size, mode='bilinear', align_corners=self.align_corners)
                 preds_anchor_stage2 = preds_anchor_stage2.permute(0, 2, 3, 1).contiguous()
                 for batch_idx in range(feats.shape[0]):
-                    gts_iter = targets['segmentation'][batch_idx]
-                    clsids = targets['segmentation'][batch_idx].unique()
+                    gts_iter = targets['seg_target'][batch_idx]
+                    clsids = targets['seg_target'][batch_idx].unique()
                     logits_intervention_stage2_iter, logits_anchor_stage2_iter = preds_intervention_stage2[batch_idx], preds_anchor_stage2[batch_idx]
                     for clsid in clsids:
                         clsid = int(clsid.item())
@@ -249,7 +249,7 @@ class IDRNet(BaseSegmentor):
                         setattr(self, syn, nn.Parameter(attr, requires_grad=False))
             # --update dl_cls_representations
             momentum = self.cfg['head']['dlclsreps_momentum']
-            self.updatedlclsreps(feats, targets['segmentation'], momentum, img_size)
+            self.updatedlclsreps(feats, targets['seg_target'], momentum, img_size)
             # --calculate losses
             outputs_dict = self.forwardtrain(
                 predictions=preds_stage2,
