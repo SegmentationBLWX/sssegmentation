@@ -13,6 +13,8 @@ from .chasedb1_128x128 import DATASET_CFG_CHASEDB1_128x128
 from .cityscapes_832x832 import DATASET_CFG_CITYSCAPES_832x832
 from .cityscapes_512x1024 import DATASET_CFG_CITYSCAPES_512x1024
 from .cocostuff10k_512x512 import DATASET_CFG_COCOStuff10k_512x512
+from .cocostuff10k_640x640 import DATASET_CFG_COCOStuff10k_640x640
 from .cityscapes_1024x1024 import DATASET_CFG_CITYSCAPES_1024x1024
 from .pascalcontext_480x480 import DATASET_CFG_PASCALCONTEXT_480x480
 from .pascalcontext59_480x480 import DATASET_CFG_PASCALCONTEXT59_480x480
+from .pascalcontext59_640x640 import DATASET_CFG_PASCALCONTEXT59_640x640
