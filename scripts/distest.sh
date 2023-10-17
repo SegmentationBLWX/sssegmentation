@@ -13,7 +13,8 @@ MASTERADDR=${MASTERADDR:-"127.0.0.1"}
 TORCHVERSION=`python -c 'import torch; print(torch.__version__)'`
 
 if [[ $TORCHVERSION == "2."* ]]; then
-    torchrun ssseg/test.py --nproc_per_node $NGPUS --cfgfilepath $CFGFILEPATH --ckptspath $CKPTSPATH ${@:4}
+    torchrun --nnodes=$NNODES --nproc_per_node=$NGPUS \
+        ssseg/test.py --nproc_per_node $NGPUS --cfgfilepath $CFGFILEPATH --ckptspath $CKPTSPATH ${@:4}
 else
     python -m torch.distributed.launch \
         --nnodes=$NNODES \

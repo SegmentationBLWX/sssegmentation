@@ -7,6 +7,7 @@ Author:
 import os
 import copy
 import torch
+import random
 import pickle
 import warnings
 import argparse
@@ -32,7 +33,9 @@ def parsecmdargs():
     parser.add_argument('--ckptspath', dest='ckptspath', help='checkpoints you want to resume from', default='', type=str)
     parser.add_argument('--slurm', dest='slurm', help='please add --slurm if you are using slurm', default=False, action='store_true')
     args = parser.parse_args()
-    if args.slurm: initslurm(args, '29000')
+    if torch.__version__.startswith('2.'):
+        args.local_rank = int(os.environ['LOCAL_RANK'])
+    if args.slurm: initslurm(args, str(8888 + random.randint(0, 1000)))
     return args
 
 
