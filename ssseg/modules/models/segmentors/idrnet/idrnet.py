@@ -122,7 +122,7 @@ class IDRNet(BaseSegmentor):
             'coarsecontext_refiner_before', 'coarsecontext_refiner_after', 
         ]
     '''forward'''
-    def forward(self, x, targets=None, losses_cfg=None, **kwargs):
+    def forward(self, x, targets=None):
         img_size = x.shape[2:]
         seed = random.randint(1, 1e16)
         # feed to backbone network
@@ -255,7 +255,7 @@ class IDRNet(BaseSegmentor):
                 predictions=preds_stage2,
                 targets=targets,
                 backbone_outputs=backbone_outputs,
-                losses_cfg=losses_cfg,
+                losses_cfg=self.cfg['losses'],
                 img_size=img_size,
                 compute_loss=False,
             )
@@ -265,7 +265,7 @@ class IDRNet(BaseSegmentor):
             loss, losses_log_dict = self.calculatelosses(
                 predictions=outputs_dict,
                 targets=targets,
-                losses_cfg=losses_cfg,
+                losses_cfg=self.cfg['losses'],
             )
             return loss, losses_log_dict
         return preds_stage2
