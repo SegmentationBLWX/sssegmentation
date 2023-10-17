@@ -18,6 +18,7 @@ SEGMENTOR_CFG['backbone'] = {
     'type': 'ResNet', 'depth': 50, 'structure_type': 'resnet50conv3x3stem',
     'pretrained': True, 'outstride': 8, 'use_conv3x3_stem': True, 'selected_indices': (2, 3),
 }
+SEGMENTOR_CFG['head']['feats_channels'] = 1024
 SEGMENTOR_CFG['work_dir'] = 'idrnet_fcn_resnet50os8_ade20k'
 SEGMENTOR_CFG['logfilepath'] = 'idrnet_fcn_resnet50os8_ade20k/idrnet_fcn_resnet50os8_ade20k.log'
 SEGMENTOR_CFG['resultsavepath'] = 'idrnet_fcn_resnet50os8_ade20k/idrnet_fcn_resnet50os8_ade20k_results.pkl'
