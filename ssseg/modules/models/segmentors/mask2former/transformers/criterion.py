@@ -21,7 +21,7 @@ class SetCriterion(MaskFormerSetCriterion):
         self.oversample_ratio = oversample_ratio
         self.importance_sample_ratio = importance_sample_ratio
     '''sigmoidceloss'''
-    def sigmoidceloss(inputs, targets, num_masks):
+    def sigmoidceloss(self, inputs, targets, num_masks):
         loss = F.binary_cross_entropy_with_logits(inputs, targets, reduction='none')
         return loss.mean(1).sum() / num_masks
     '''lossmasks'''
