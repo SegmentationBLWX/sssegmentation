@@ -56,6 +56,7 @@ class MaskFormer(BaseSegmentor):
         head_cfg['predictor']['mask_dim'] = head_cfg['mask_feats_channels']
         head_cfg['predictor']['in_channels'] = head_cfg['in_channels_list'][-1]
         self.decoder_predictor = Predictor(**head_cfg['predictor'])
+        # build matcher and criterion
         matcher = HungarianMatcher(**head_cfg['matcher'])
         weight_dict = {'loss_ce': head_cfg['matcher']['cost_class'], 'loss_mask': head_cfg['matcher']['cost_mask'], 'loss_dice': head_cfg['matcher']['cost_dice']}
         if head_cfg['predictor']['deep_supervision']:
@@ -96,17 +97,16 @@ class MaskFormer(BaseSegmentor):
         if self.mode == 'TRAIN':
             losses_dict = self.criterion(predictions, targets)
             for k in list(losses_dict.keys()):
-                if k in self.criterion.weight_dict: losses_dict[k] *= self.criterion.weight_dict[k]
-                else: losses_dict.pop(k)
+                if k in self.criterion.weight_dict:
+                    losses_dict[k] *= self.criterion.weight_dict[k]
+                else:
+                    losses_dict.pop(k)
             loss, losses_log_dict = 0, {}
             for key, value in losses_dict.items():
                 loss += value
-                if dist.is_available() and dist.is_initialized():
-                    value = value.data.clone()
-                    dist.all_reduce(value.div_(dist.get_world_size()))
-                else:
-                    value = torch.Tensor([value.item()]).type_as(ppm_out)
-                losses_log_dict[key] = value
+                value = value.data.clone()
+                dist.all_reduce(value.div_(dist.get_world_size()))
+                losses_log_dict[key] = value.item()
             losses_log_dict['total'] = sum(losses_log_dict.values())
             return loss, losses_log_dict
         mask_cls_results = predictions['pred_logits']

@@ -17,9 +17,10 @@ Documents: https://sssegmentation.readthedocs.io/en/latest/
 
 ## What's New
 
-- **2023-09-27**: Support SAM ([Segment Anything](https://arxiv.org/pdf/2304.02643.pdf)), refer to [inference-with-sam](https://sssegmentation.readthedocs.io/en/latest/AdvancedAPI.html#inference-with-sam) for more details.
-- **2023-10-15**: Support MobileSAM ([Faster Segment Anything](https://arxiv.org/pdf/2306.14289.pdf)), refer to [inference-with-mobilesam](https://sssegmentation.readthedocs.io/en/latest/AdvancedAPI.html#inference-with-mobilesam) for more details.
-- **2023-10-17**: Release source codes of our NeurIPS 2023 paper ([IDRNet: Intervention-Driven Relation Network for Semantic Segmentation](https://arxiv.org/pdf/2310.10755.pdf)), refer to [Results and Models for IDRNet](./docs/modelzoo/idrnet) for more details.
+- **2023-10-18**: Support [Mask2Former](https://arxiv.org/pdf/2112.01527.pdf), refer to [Results and Models for Mask2Former](./docs/modelzoo/mask2former) for more details.
+- **2023-10-17**: Our paper [IDRNet: Intervention-Driven Relation Network for Semantic Segmentation](https://arxiv.org/pdf/2310.10755.pdf) was accepted by NeurIPS 2023, refer to [Results and Models for IDRNet](./docs/modelzoo/idrnet) for more details.
+- **2023-10-15**: Support [MobileSAM](https://arxiv.org/pdf/2306.14289.pdf), refer to [inference-with-mobilesam](https://sssegmentation.readthedocs.io/en/latest/AdvancedAPI.html#inference-with-mobilesam) for more details.
+- **2023-09-27**: Support [SAM](https://arxiv.org/pdf/2304.02643.pdf), refer to [inference-with-sam](https://sssegmentation.readthedocs.io/en/latest/AdvancedAPI.html#inference-with-sam) for more details.
 
 
 ## Introduction
@@ -72,10 +73,11 @@ You can star this repository to keep track of the project if it's helpful for yo
 
 | Segmentor                         | Model Zoo                                    | Paper Link                                                                                                                                              | Code Snippet                                                                |
 | :-:                               | :-:                                          | :-:                                                                                                                                                     | :-:                                                                         |
-| IDRNet                            | [Click](./docs/modelzoo/idrnet)              | [NeurIPS 2023]()                                                                                                                                        | [Click](./ssseg/modules/models/segmentors/idrnet/idrnet.py)                 |
+| IDRNet                            | [Click](./docs/modelzoo/idrnet)              | [NeurIPS 2023](https://arxiv.org/pdf/2310.10755.pdf)                                                                                                    | [Click](./ssseg/modules/models/segmentors/idrnet/idrnet.py)                 |
 | MobileSAM                         | [Click](./docs/modelzoo/mobilesam)           | [ArXiv 2023](https://arxiv.org/pdf/2306.14289.pdf)                                                                                                      | [Click](./ssseg/modules/models/segmentors/mobilesam/mobilesam.py)           |
 | SAM                               | [Click](./docs/modelzoo/sam)                 | [ArXiv 2023](https://arxiv.org/pdf/2304.02643.pdf)                                                                                                      | [Click](./ssseg/modules/models/segmentors/sam/sam.py)                       |
 | MemoryNet-MCIBI++                 | [Click](./docs/modelzoo/memorynetv2)         | [TPAMI 2022](https://arxiv.org/pdf/2209.04471.pdf)                                                                                                      | [Click](./ssseg/modules/models/segmentors/memorynetv2/memorynetv2.py)       |
+| Mask2Former                       | [Click](./docs/modelzoo/mask2former)         | [CVPR 2022](https://arxiv.org/pdf/2112.01527.pdf)                                                                                                       | [Click](./ssseg/modules/models/segmentors/mask2former/mask2former.py)       |
 | ISNet                             | [Click](./docs/modelzoo/isnet)               | [ICCV 2021](https://arxiv.org/pdf/2108.12382.pdf)                                                                                                       | [Click](./ssseg/modules/models/segmentors/isnet/isnet.py)                   |
 | MemoryNet-MCIBI                   | [Click](./docs/modelzoo/memorynet)           | [ICCV 2021](https://arxiv.org/pdf/2108.11819.pdf)                                                                                                       | [Click](./ssseg/modules/models/segmentors/memorynet/memorynet.py)           |
 | MaskFormer                        | [Click](./docs/modelzoo/maskformer)          | [NeurIPS 2021](https://arxiv.org/pdf/2107.06278.pdf)                                                                                                    | [Click](./ssseg/modules/models/segmentors/maskformer/maskformer.py)         |

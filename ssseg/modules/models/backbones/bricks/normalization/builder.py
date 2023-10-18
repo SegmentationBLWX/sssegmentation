@@ -27,6 +27,9 @@ def BuildNormalization(placeholder, norm_cfg):
         'InstanceNorm3d': nn.InstanceNorm3d,
     }
     norm_type = norm_cfg.pop('type')
-    normalization = supported_normalizations[norm_type](placeholder, **norm_cfg)
+    if norm_type in ['GroupNorm']:
+        normalization = supported_normalizations[norm_type](num_channels=placeholder, **norm_cfg)
+    else:
+        normalization = supported_normalizations[norm_type](placeholder, **norm_cfg)
     # return
     return normalization

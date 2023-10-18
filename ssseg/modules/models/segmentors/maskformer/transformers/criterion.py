@@ -44,7 +44,7 @@ class SetCriterion(nn.Module):
         assert 'pred_logits' in outputs
         src_logits = outputs['pred_logits']
         idx = self.getsrcpermutationidx(indices)
-        target_classes_o = torch.cat([t["labels"][J] for t, (_, J) in zip(targets, indices)])
+        target_classes_o = torch.cat([t['labels'][J] for t, (_, J) in zip(targets, indices)])
         target_classes = torch.full(src_logits.shape[:2], self.num_classes, dtype=torch.int64, device=src_logits.device)
         target_classes[idx] = target_classes_o
         loss_ce = F.cross_entropy(src_logits.transpose(1, 2), target_classes, self.empty_weight)
@@ -100,13 +100,12 @@ class SetCriterion(nn.Module):
     '''forward'''
     def forward(self, outputs, targets):
         # format targets
-        segs = targets['segmentation']
+        segs = targets['seg_target']
         batch_size, targets_format = segs.shape[0], []
         for idx in range(batch_size):
             masks, labels = self.formattargets(segs[idx])
             target_format = {
-                'masks': masks,
-                'labels': labels,
+                'masks': masks, 'labels': labels,
             }
             targets_format.append(target_format)
         targets = targets_format
