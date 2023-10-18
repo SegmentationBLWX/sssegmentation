@@ -5,9 +5,15 @@
 <a href="https://github.com/SegmentationBLWX/sssegmentation/blob/main/ssseg/modules/models/segmentors/idrnet/idrnet.py">Code Snippet</a>
 
 <details>
-<summary align="left"><a href="">IDRNet (NeurIPS'2023)</a></summary>
+<summary align="left"><a href="https://arxiv.org/pdf/2310.10755.pdf">IDRNet (NeurIPS'2023)</a></summary>
 
 ```latex
+@inproceedings{jin2023idrnet,
+    title={IDRNet: Intervention-Driven Relation Network for Semantic Segmentation},
+    author={Jin, Zhenchao and Hu, Xiaowei and Zhu, Lingting and Song, Luchuan and Yuan, Li and Yu, Lequan},
+    booktitle={Thirty-Seventh Conference on Neural Information Processing Systems},
+    year={2023}
+}
 ```
 
 </details>
@@ -58,12 +64,12 @@
 #### LIP
 | Segmentor     | Pretrain               | Backbone     | Crop Size  | Schedule                                | Train/Eval Set  | mIoU/mIoU (flip)/mIoU (ms+flip) | Download                                                                                                                                                                                                                                                                                                                                                                                                   |
 | :-:           | :-:                    | :-:          | :-:        | :-:                                     | :-:             | :-:                             | :-:                                                                                                                                                                                                                                                                                                                                                                                                        |
-| UperNet       | ImageNet-22k-384x384   | Swin-Large   | 473x473    | LR/POLICY/BS/EPOCH: 0.00006/poly/16/110 | train/val       |                                 | [cfg](https://raw.githubusercontent.com/SegmentationBLWX/sssegmentation/main/ssseg/configs/idrnet/idrnet_upernet_swinlarge_lip.py) &#124; [model](https://github.com/SegmentationBLWX/modelstore/releases/download/ssseg_idrnet/idrnet_upernet_swinlarge_lip.pth) &#124; [log](https://github.com/SegmentationBLWX/modelstore/releases/download/ssseg_idrnet/idrnet_upernet_swinlarge_lip.log)             |
+| UperNet       | ImageNet-22k-384x384   | Swin-Large   | 473x473    | LR/POLICY/BS/EPOCH: 0.00006/poly/16/110 | train/val       | 60.53%/                     | [cfg](https://raw.githubusercontent.com/SegmentationBLWX/sssegmentation/main/ssseg/configs/idrnet/idrnet_upernet_swinlarge_lip.py) &#124; [model](https://github.com/SegmentationBLWX/modelstore/releases/download/ssseg_idrnet/idrnet_upernet_swinlarge_lip.pth) &#124; [log](https://github.com/SegmentationBLWX/modelstore/releases/download/ssseg_idrnet/idrnet_upernet_swinlarge_lip.log)             |
 
 #### ADE20k
 | Segmentor     | Pretrain               | Backbone     | Crop Size  | Schedule                                | Train/Eval Set  | mIoU/mIoU (ms+flip)             | Download                                                                                                                                                                                                                                                                                                                                                                                                            |
 | :-:           | :-:                    | :-:          | :-:        | :-:                                     | :-:             | :-:                             | :-:                                                                                                                                                                                                                                                                                                                                                                                                                 |
-| UperNet       | ImageNet-22k-384x384   | Swin-Large   | 640x640    | LR/POLICY/BS/EPOCH: 0.00006/poly/16/130 | train/val       | 53.97%/54.67%                   | [cfg](https://raw.githubusercontent.com/SegmentationBLWX/sssegmentation/main/ssseg/configs/idrnet/idrnet_upernet_swinlarge_ade20k.py) &#124; [model](https://github.com/SegmentationBLWX/modelstore/releases/download/ssseg_idrnet/idrnet_upernet_swinlarge_ade20k.pth) &#124; [log](https://github.com/SegmentationBLWX/modelstore/releases/download/ssseg_idrnet/idrnet_upernet_swinlarge_ade20k.log)             |
+| UperNet       | ImageNet-22k-384x384   | Swin-Large   | 640x640    | LR/POLICY/BS/EPOCH: 0.00006/poly/16/130 | train/val       | 53.97%/54.68%                   | [cfg](https://raw.githubusercontent.com/SegmentationBLWX/sssegmentation/main/ssseg/configs/idrnet/idrnet_upernet_swinlarge_ade20k.py) &#124; [model](https://github.com/SegmentationBLWX/modelstore/releases/download/ssseg_idrnet/idrnet_upernet_swinlarge_ade20k.pth) &#124; [log](https://github.com/SegmentationBLWX/modelstore/releases/download/ssseg_idrnet/idrnet_upernet_swinlarge_ade20k.log)             |
 
 #### COCOStuff-10k
 | Segmentor     | Pretrain               | Backbone     | Crop Size  | Schedule                                | Train/Eval Set  | mIoU/mIoU (ms+flip)             | Download                                                                                                                                                                                                                                                                                                                                                                                                                              |

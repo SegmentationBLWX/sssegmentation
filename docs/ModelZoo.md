@@ -254,5 +254,5 @@
 
 **33.IDRNet**
 
-- Related Paper: [click](),
+- Related Paper: [click](https://arxiv.org/pdf/2310.10755.pdf),
 - Reported Performance: [click](https://github.com/SegmentationBLWX/sssegmentation/tree/main/docs/modelzoo/idrnet).
