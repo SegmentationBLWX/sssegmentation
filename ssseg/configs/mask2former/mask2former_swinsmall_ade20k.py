@@ -24,7 +24,6 @@ SEGMENTOR_CFG['backbone'] = {
     'depths': [2, 2, 18, 2], 'num_heads': [3, 6, 12, 24], 'qkv_bias': True, 'qk_scale': None, 'patch_norm': True,
     'drop_rate': 0., 'attn_drop_rate': 0., 'drop_path_rate': 0.3, 'use_abs_pos_embed': False,
 }
-SEGMENTOR_CFG['head']['predictor']['in_channels'] = 768
 SEGMENTOR_CFG['head']['pixel_decoder']['input_shape']['in_channels'] = [96, 192, 384, 768]
 SEGMENTOR_CFG['work_dir'] = 'mask2former_swinsmall_ade20k'
 SEGMENTOR_CFG['logfilepath'] = 'mask2former_swinsmall_ade20k/mask2former_swinsmall_ade20k.log'

@@ -6,6 +6,7 @@ Author:
 '''
 import math
 import torch
+import numpy as np
 import torch.nn as nn
 import torch.nn.functional as F
 from .misc import getclones
@@ -173,7 +174,7 @@ class MSDeformAttnTransformerEncoderOnly(nn.Module):
         for m in self.modules():
             if isinstance(m, MSDeformAttn):
                 m.resetparameters()
-        nn.normal_(self.level_embed)
+        nn.init.normal_(self.level_embed)
     '''getvalidratio'''
     def getvalidratio(self, mask):
         _, H, W = mask.shape
@@ -269,7 +270,7 @@ class MSDeformAttnPixelDecoder(nn.Module):
         # extra fpn levels
         stride = min(self.transformer_feature_strides)
         self.num_fpn_levels = int(np.log2(stride) - np.log2(self.common_stride))
-        lateral_convs, output_convs = [], []
+        lateral_convs, output_convs = nn.ModuleList(), nn.ModuleList()
         use_bias = (norm_cfg is None)
         for idx, in_channels in enumerate(self.feature_channels[:self.num_fpn_levels]):
             lateral_conv = nn.Sequential(
@@ -281,8 +282,8 @@ class MSDeformAttnPixelDecoder(nn.Module):
                 BuildNormalization(placeholder=conv_dim, norm_cfg=norm_cfg),
                 BuildActivation(act_cfg=act_cfg),
             )
-            weight_init.c2_xavier_fill(lateral_conv)
-            weight_init.c2_xavier_fill(output_conv)
+            weight_init.c2_xavier_fill(lateral_conv[0])
+            weight_init.c2_xavier_fill(output_conv[0])
             lateral_convs.append(lateral_conv)
             output_convs.append(output_conv)
         # place convs into top-down order (from low to high resolution) to make the top-down computation in forward clearer.

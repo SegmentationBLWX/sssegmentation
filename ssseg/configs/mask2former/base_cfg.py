@@ -29,11 +29,11 @@ SEGMENTOR_CFG = {
             'input_shape': {'in_channels': [128, 256, 512, 1024], 'strides': [4, 8, 16, 32]},
         },
         'predictor': {
-            'in_channels': 1024, 'hidden_dim': 256, 'num_queries': 100, 'nheads': 8, 'dim_feedforward': 2048, 'dec_layers': 10, 
+            'in_channels': 256, 'hidden_dim': 256, 'num_queries': 100, 'nheads': 8, 'dim_feedforward': 2048, 'dec_layers': 10, 
             'pre_norm': False, 'mask_dim': 256, 'enforce_input_project': False, 'mask_classification': True,
         },
         'matcher': {
-            'class_weight': 2.0, 'cost_mask': 5.0, 'cost_dice': 5.0,
+            'cost_class': 2.0, 'cost_mask': 5.0, 'cost_dice': 5.0,
         },
         'criterion': {
             'num_points': 12544, 'eos_coef': 0.1, 'losses': ['labels', 'masks'], 'oversample_ratio': 3.0, 'importance_sample_ratio': 0.75,

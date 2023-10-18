@@ -14,7 +14,7 @@ from .transformers import MultiScaleMaskedTransformerDecoder, MSDeformAttnPixelD
 
 '''ShapeSpec'''
 class ShapeSpec():
-    def __init__(stride, channels):
+    def __init__(self, stride, channels):
         self.stride = stride
         self.channels = channels
 
@@ -26,7 +26,8 @@ class Mask2Former(BaseSegmentor):
         align_corners, norm_cfg, act_cfg, head_cfg = self.align_corners, self.norm_cfg, self.act_cfg, cfg['head']
         # build pixel decoder
         iterator = zip(head_cfg['pixel_decoder']['input_shape']['strides'], head_cfg['pixel_decoder']['input_shape']['in_channels'])
-        head_cfg['pixel_decoder']['input_shape'] = [ShapeSpec(stride, channels) for stride, channels in iterator]
+        assert len(head_cfg['pixel_decoder']['input_shape']['strides']) == 4
+        head_cfg['pixel_decoder']['input_shape'] = {f'res{idx+2}': ShapeSpec(stride, channels) for idx, (stride, channels) in enumerate(iterator)}
         self.pixel_decoder = MSDeformAttnPixelDecoder(**head_cfg['pixel_decoder'])
         # build predictor
         predictor_cfg = copy.deepcopy(head_cfg['predictor'])
