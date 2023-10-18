@@ -18,7 +18,7 @@ Documents: https://sssegmentation.readthedocs.io/en/latest/
 ## What's New
 
 - **2023-10-18**: Support [Mask2Former](https://arxiv.org/pdf/2112.01527.pdf), refer to [Results and Models for Mask2Former](./docs/modelzoo/mask2former) for more details.
-- **2023-10-17**: Our paper [IDRNet: Intervention-Driven Relation Network for Semantic Segmentation](https://arxiv.org/pdf/2310.10755.pdf) was accepted by NeurIPS 2023, refer to [Results and Models for IDRNet](./docs/modelzoo/idrnet) for more details.
+- **2023-10-17**: We release the source codes of [IDRNet: Intervention-Driven Relation Network for Semantic Segmentation](https://arxiv.org/pdf/2310.10755.pdf), which was accepted by NeurIPS 2023, refer to [Results and Models for IDRNet](./docs/modelzoo/idrnet) for more details.
 - **2023-10-15**: Support [MobileSAM](https://arxiv.org/pdf/2306.14289.pdf), refer to [inference-with-mobilesam](https://sssegmentation.readthedocs.io/en/latest/AdvancedAPI.html#inference-with-mobilesam) for more details.
 - **2023-09-27**: Support [SAM](https://arxiv.org/pdf/2304.02643.pdf), refer to [inference-with-sam](https://sssegmentation.readthedocs.io/en/latest/AdvancedAPI.html#inference-with-sam) for more details.
 
