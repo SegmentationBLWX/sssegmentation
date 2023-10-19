@@ -5,7 +5,7 @@
 <a href="https://github.com/SegmentationBLWX/sssegmentation/blob/main/ssseg/modules/models/segmentors/mask2former/mask2former.py">Code Snippet</a>
 
 <details>
-<summary align="left"><a href="https://arxiv.org/pdf/2112.01527.pdf">mask2former (CVPR'2022)</a></summary>
+<summary align="left"><a href="https://arxiv.org/pdf/2112.01527.pdf">Mask2Former (CVPR'2022)</a></summary>
 
 ```latex
 @inproceedings{cheng2021mask2former,
