@@ -61,7 +61,10 @@ class Trainer():
         dataset = BuildDataset(mode='TRAIN', logger_handle=logger_handle, dataset_cfg=cfg.SEGMENTOR_CFG['dataset'])
         assert dataset.num_classes == cfg.SEGMENTOR_CFG['num_classes'], 'parsed config file %s error' % cfg_file_path
         dataloader_cfg = copy.deepcopy(cfg.SEGMENTOR_CFG['dataloader'])
+        auto_adapt_to_expected_train_bs = dataloader_cfg.pop('auto_adapt_to_expected_train_bs')
         expected_total_train_bs_for_assert = dataloader_cfg.pop('expected_total_train_bs_for_assert')
+        if auto_adapt_to_expected_train_bs:
+            dataloader_cfg['train']['batch_size_per_gpu'] = expected_total_train_bs_for_assert // ngpus_per_node
         dataloader_cfg['train']['batch_size'], dataloader_cfg['train']['num_workers'] = dataloader_cfg['train'].pop('batch_size_per_gpu'), dataloader_cfg['train'].pop('num_workers_per_gpu')
         dataloader_cfg['test']['batch_size'], dataloader_cfg['test']['num_workers'] = dataloader_cfg['test'].pop('batch_size_per_gpu'), dataloader_cfg['test'].pop('num_workers_per_gpu')
         assert expected_total_train_bs_for_assert == dataloader_cfg['train']['batch_size'] * ngpus_per_node
