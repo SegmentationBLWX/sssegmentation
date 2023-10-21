@@ -69,7 +69,7 @@ class BaseSegmentor(nn.Module):
             outs.append(x_list[idx])
         return outs
     '''return all layers with learnable parameters'''
-    def alllayers(self):
+    def fetchtraininglayers(self):
         assert len(self.layer_names) == len(set(self.layer_names))
         require_training_layers = {}
         for layer_name in self.layer_names:

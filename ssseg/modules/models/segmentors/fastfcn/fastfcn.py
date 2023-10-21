@@ -52,7 +52,7 @@ class FastFCN(nn.Module):
         outs = self.jpu_neck(outs)
         return outs
     '''return all layers with learnable parameters'''
-    def alllayers(self):
-        require_training_layers = self.segmentor.alllayers()
+    def fetchtraininglayers(self):
+        require_training_layers = self.segmentor.fetchtraininglayers()
         require_training_layers['jpu_neck'] = self.jpu_neck
         return require_training_layers

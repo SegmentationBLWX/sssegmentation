@@ -11,13 +11,14 @@ from torch.nn.utils import clip_grad
 
 '''BaseScheduler'''
 class BaseScheduler():
-    def __init__(self, optimizer=None, lr=0.01, min_lr=None, warmup_cfg=None, max_epochs=-1, iters_per_epoch=-1, params_rules=dict()):
+    def __init__(self, optimizer=None, lr=0.01, min_lr=None, warmup_cfg=None, clipgrad_cfg=None, max_epochs=-1, iters_per_epoch=-1, params_rules=dict()):
         # set attrs
         self.lr = lr
         self.min_lr = min_lr if min_lr is not None else lr * 0.01
         self.optimizer = optimizer
         self.max_epochs = max_epochs
         self.warmup_cfg = warmup_cfg
+        self.clipgrad_cfg = clipgrad_cfg
         self.params_rules = params_rules
         self.max_iters = max_epochs * iters_per_epoch
         # initialize some variables

@@ -18,8 +18,8 @@ class DefaultParamsConstructor():
     def __call__(self, model):
         params_rules, filter_params, optimizer_cfg = self.params_rules, self.filter_params, self.optimizer_cfg
         if params_rules:
-            params, all_layers = [], model.alllayers()
-            assert 'others' not in all_layers, 'potential bug in model.alllayers'
+            params, all_layers = [], model.fetchtraininglayers()
+            assert 'others' not in all_layers, 'potential bug in model.fetchtraininglayers'
             for key, value in params_rules.items():
                 if not isinstance(value, tuple): value = (value, value)
                 if key == 'others': continue
