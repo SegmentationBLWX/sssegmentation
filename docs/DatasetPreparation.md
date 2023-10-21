@@ -88,7 +88,8 @@ So, it is recommended to adopt the provided script (*i.e.*, `scripts/prepare_dat
 **14.SBUShadow**
 
 - Official Website: [click](https://www3.cs.stonybrook.edu/~cvl/projects/shadow_noisy_label/index.html),
-- Baidu Disk: [click](https://pan.baidu.com/s/1TZbgxPnY0Als6LoiV80Xrw) (access code: fn1i).
+- Baidu Disk: [click](https://pan.baidu.com/s/1TZbgxPnY0Als6LoiV80Xrw) (access code: fn1i),
+- Script Command: `bash scripts/prepare_datasets.sh sbushadow`.
 
 **15.PASCAL VOC**
 
@@ -116,9 +117,11 @@ So, it is recommended to adopt the provided script (*i.e.*, `scripts/prepare_dat
 **19.Nighttime Driving**
 
 - Official Website: [click](http://data.vision.ee.ethz.ch/daid/NighttimeDriving/NighttimeDrivingTest.zip),
-- Baidu Disk: [click](https://pan.baidu.com/s/1TZbgxPnY0Als6LoiV80Xrw) (access code: fn1i).
+- Baidu Disk: [click](https://pan.baidu.com/s/1TZbgxPnY0Als6LoiV80Xrw) (access code: fn1i),
+- Script Command: `bash scripts/prepare_datasets.sh nighttimedriving`.
 
 **20.Dark Zurich**
 
 - Official Website: [click](https://data.vision.ee.ethz.ch/csakarid/shared/GCMA_UIoU/Dark_Zurich_val_anon.zip),
-- Baidu Disk: [click](https://pan.baidu.com/s/1TZbgxPnY0Als6LoiV80Xrw) (access code: fn1i).
+- Baidu Disk: [click](https://pan.baidu.com/s/1TZbgxPnY0Als6LoiV80Xrw) (access code: fn1i),
+- Script Command: `bash scripts/prepare_datasets.sh darkzurich`.

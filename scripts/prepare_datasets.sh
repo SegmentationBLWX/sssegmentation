@@ -10,7 +10,8 @@ help() {
     echo "    <dataset name>: The dataset name you want to download and prepare."
     echo "                    The keyword should be in ['ade20k', 'lip', 'pascalcontext', 'cocostuff10k',"
     echo "                                              'pascalvoc', 'cityscapes', 'atr', 'chase_db1',"
-    echo "                                              'cihp', 'hrf', 'drive', 'stare', ]"
+    echo "                                              'cihp', 'hrf', 'drive', 'stare', 'nighttimedriving',"
+    echo "                                              'darkzurich',]"
     echo "    -h or --help: Show this message."
     echo "------------------------------------------------------------------------------------"
     exit 0
@@ -37,13 +38,12 @@ elif [[ "$OPT" == "cocostuff10k" ]]; then
     tar zxvf COCOStuff10k.tar.gz
     rm -rf COCOStuff10k.tar.gz
 elif [[ "$OPT" == "pascalvoc" ]]; then
-    wget https://github.com/SegmentationBLWX/modelstore/releases/download/ssseg_datasets/VOCdevkit.zip
-    wget https://github.com/SegmentationBLWX/modelstore/releases/download/ssseg_datasets/VOCdevkit.z01
-    wget https://github.com/SegmentationBLWX/modelstore/releases/download/ssseg_datasets/VOCdevkit.z02
-    zip VOCdevkit.zip VOCdevkit.z01 VOCdevkit.z02 -s=0 --out VOCdevkit_Merged.zip
-    unzip VOCdevkit_Merged.zip
-    tar zxvf VOCdevkit.tar.gz
-    rm -rf VOCdevkit.tar.gz VOCdevkit_Merged.zip VOCdevkit.zip VOCdevkit.z01 VOCdevkit.z02
+    wget https://github.com/SegmentationBLWX/modelstore/releases/download/ssseg_datasets/VOCdevkit.zip.001
+    wget https://github.com/SegmentationBLWX/modelstore/releases/download/ssseg_datasets/VOCdevkit.zip.002
+    wget https://github.com/SegmentationBLWX/modelstore/releases/download/ssseg_datasets/VOCdevkit.zip.003
+    zip VOCdevkit.zip.001 VOCdevkit.zip.002 VOCdevkit.zip.003 -s=0 --out VOCdevkit.zip
+    unzip VOCdevkit.zip
+    rm -rf VOCdevkit.zip.001 VOCdevkit.zip.002 VOCdevkit.zip.003 VOCdevkit.zip
 elif [[ "$OPT" == "cityscapes" ]]; then
     wget https://github.com/SegmentationBLWX/modelstore/releases/download/ssseg_datasets/CityScapes.zip
     wget https://github.com/SegmentationBLWX/modelstore/releases/download/ssseg_datasets/CityScapes.z01
@@ -88,6 +88,14 @@ elif [[ "$OPT" == "stare" ]]; then
     wget https://github.com/SegmentationBLWX/modelstore/releases/download/ssseg_datasets/STARE.tar.gz
     tar zxvf STARE.tar.gz
     rm -rf STARE.tar.gz
+elif [[ "$OPT" == "nighttimedriving" ]]; then
+    wget https://github.com/SegmentationBLWX/modelstore/releases/download/ssseg_datasets/NighttimeDrivingTest.zip
+    unzip NighttimeDrivingTest.zip
+    rm -rf NighttimeDrivingTest.zip
+elif [[ "$OPT" == "darkzurich" ]]; then
+    wget https://github.com/SegmentationBLWX/modelstore/releases/download/ssseg_datasets/Dark_Zurich_val_anon.zip
+    unzip Dark_Zurich_val_anon.zip
+    rm -rf Dark_Zurich_val_anon.zip
 else
     echo "Preparing dataset ${DATASET} is not supported in this script now."
     exit 0
