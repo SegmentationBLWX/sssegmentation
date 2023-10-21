@@ -6,7 +6,7 @@
 **1.Download Source**
 
 For easier io reading, some supported datasets have been pre-processed like creating the train.txt/val.txt/test.txt used to record the corresponding imageids.
-So, it is recommended to download the supported dataset from Baidu Disk rather than official website.
+So, it is recommended to adopt the provided script (*i.e.*, `scripts/prepare_datasets.sh`) to download the supported datasets or download the supported datasets from Baidu Disk rather than official website.
 
 
 ## Supported Datasets
@@ -14,22 +14,26 @@ So, it is recommended to download the supported dataset from Baidu Disk rather t
 **1.LIP**
 
 - Official Website: [click](http://sysu-hcp.net/lip/),
-- Baidu Disk: [click](https://pan.baidu.com/s/1TZbgxPnY0Als6LoiV80Xrw) (access code: fn1i).
+- Baidu Disk: [click](https://pan.baidu.com/s/1TZbgxPnY0Als6LoiV80Xrw) (access code: fn1i),
+- Script Command: `bash scripts/prepare_datasets.sh lip`.
 
 **2.ATR**
 
 - Official Website: [click](http://sysu-hcp.net/lip/),
-- Baidu Disk: [click](https://pan.baidu.com/s/1TZbgxPnY0Als6LoiV80Xrw) (access code: fn1i).
+- Baidu Disk: [click](https://pan.baidu.com/s/1TZbgxPnY0Als6LoiV80Xrw) (access code: fn1i),
+- Script Command: `bash scripts/prepare_datasets.sh atr`.
 
 **3.HRF**
 
 - Official Website: [click](https://www5.cs.fau.de/fileadmin/research/datasets/fundus-images/),
-- Baidu Disk: [click](https://pan.baidu.com/s/1TZbgxPnY0Als6LoiV80Xrw) (access code: fn1i).
+- Baidu Disk: [click](https://pan.baidu.com/s/1TZbgxPnY0Als6LoiV80Xrw) (access code: fn1i),
+- Script Command: `bash scripts/prepare_datasets.sh hrf`.
 
 **4.CIHP**
 
 - Official Website: [click](http://sysu-hcp.net/lip/),
-- Baidu Disk: [click](https://pan.baidu.com/s/1TZbgxPnY0Als6LoiV80Xrw) (access code: fn1i).
+- Baidu Disk: [click](https://pan.baidu.com/s/1TZbgxPnY0Als6LoiV80Xrw) (access code: fn1i),
+- Script Command: `bash scripts/prepare_datasets.sh cihp`.
 
 **5.VSPW**
 
@@ -39,17 +43,20 @@ So, it is recommended to download the supported dataset from Baidu Disk rather t
 **6.DRIVE**
 
 - Official Website: [click](https://drive.grand-challenge.org/),
-- Baidu Disk: [click](https://pan.baidu.com/s/1TZbgxPnY0Als6LoiV80Xrw) (access code: fn1i).
+- Baidu Disk: [click](https://pan.baidu.com/s/1TZbgxPnY0Als6LoiV80Xrw) (access code: fn1i),
+- Script Command: `bash scripts/prepare_datasets.sh drive`.
 
 **7.STARE**
 
 - Official Website: [click](http://cecas.clemson.edu/~ahoover/stare/),
-- Baidu Disk: [click](https://pan.baidu.com/s/1TZbgxPnY0Als6LoiV80Xrw) (access code: fn1i).
+- Baidu Disk: [click](https://pan.baidu.com/s/1TZbgxPnY0Als6LoiV80Xrw) (access code: fn1i),
+- Script Command: `bash scripts/prepare_datasets.sh stare`.
 
 **8.ADE20k**
 
 - Official Website: [click](https://groups.csail.mit.edu/vision/datasets/ADE20K/),
-- Baidu Disk: [click](https://pan.baidu.com/s/1TZbgxPnY0Als6LoiV80Xrw) (access code: fn1i).
+- Baidu Disk: [click](https://pan.baidu.com/s/1TZbgxPnY0Als6LoiV80Xrw) (access code: fn1i),
+- Script Command: `bash scripts/prepare_datasets.sh ade20k`.
 
 **9.MS COCO**
 
@@ -64,12 +71,14 @@ So, it is recommended to download the supported dataset from Baidu Disk rather t
 **11.CHASE DB1**
 
 - Official Website: [click](https://staffnet.kingston.ac.uk/~ku15565/),
-- Baidu Disk: [click](https://pan.baidu.com/s/1TZbgxPnY0Als6LoiV80Xrw) (access code: fn1i).
+- Baidu Disk: [click](https://pan.baidu.com/s/1TZbgxPnY0Als6LoiV80Xrw) (access code: fn1i),
+- Script Command: `bash scripts/prepare_datasets.sh chase_db1`.
 
 **12.CityScapes**
 
 - Official Website: [click](https://www.cityscapes-dataset.com/),
-- Baidu Disk: [click](https://pan.baidu.com/s/1TZbgxPnY0Als6LoiV80Xrw) (access code: fn1i).
+- Baidu Disk: [click](https://pan.baidu.com/s/1TZbgxPnY0Als6LoiV80Xrw) (access code: fn1i),
+- Script Command: `bash scripts/prepare_datasets.sh cityscapes`.
 
 **13.Supervisely**
 
@@ -84,12 +93,14 @@ So, it is recommended to download the supported dataset from Baidu Disk rather t
 **15.PASCAL VOC**
 
 - Official Website: [click](http://host.robots.ox.ac.uk/pascal/VOC/),
-- Baidu Disk: [click](https://pan.baidu.com/s/1TZbgxPnY0Als6LoiV80Xrw) (access code: fn1i).
+- Baidu Disk: [click](https://pan.baidu.com/s/1TZbgxPnY0Als6LoiV80Xrw) (access code: fn1i),
+- Script Command: `bash scripts/prepare_datasets.sh pascalvoc`.
 
 **16.COCOStuff10k**
 
 - Official Website: [click](https://github.com/nightrome/cocostuff10k),
-- Baidu Disk: [click](https://pan.baidu.com/s/1TZbgxPnY0Als6LoiV80Xrw) (access code: fn1i).
+- Baidu Disk: [click](https://pan.baidu.com/s/1TZbgxPnY0Als6LoiV80Xrw) (access code: fn1i),
+- Script Command: `bash scripts/prepare_datasets.sh cocostuff10k`.
 
 **17.COCOStuff164k**
 
@@ -99,7 +110,8 @@ So, it is recommended to download the supported dataset from Baidu Disk rather t
 **18.Pascal Context**
 
 - Official Website: [click](https://cs.stanford.edu/~roozbeh/pascal-context/),
-- Baidu Disk: [click](https://pan.baidu.com/s/1TZbgxPnY0Als6LoiV80Xrw) (access code: fn1i).
+- Baidu Disk: [click](https://pan.baidu.com/s/1TZbgxPnY0Als6LoiV80Xrw) (access code: fn1i),
+- Script Command: `bash scripts/prepare_datasets.sh pascalcontext`.
 
 **19.Nighttime Driving**
 
