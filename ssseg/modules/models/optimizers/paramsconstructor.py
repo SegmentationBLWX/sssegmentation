@@ -18,19 +18,19 @@ class DefaultParamsConstructor():
     def __call__(self, model):
         params_rules, filter_params, optimizer_cfg = self.params_rules, self.filter_params, self.optimizer_cfg
         if params_rules:
-            params, all_layers = [], model.fetchtraininglayers()
-            assert 'others' not in all_layers, 'potential bug in model.fetchtraininglayers'
+            params, require_training_layers = [], model.fetchtraininglayers()
+            assert 'others' not in require_training_layers, 'potential bug in model.fetchtraininglayers'
             for key, value in params_rules.items():
                 if not isinstance(value, tuple): value = (value, value)
                 if key == 'others': continue
                 params.append({
-                    'params': all_layers[key].parameters() if not filter_params else filter(lambda p: p.requires_grad, all_layers[key].parameters()), 
+                    'params': require_training_layers[key].parameters() if not filter_params else filter(lambda p: p.requires_grad, require_training_layers[key].parameters()), 
                     'lr': optimizer_cfg['lr'] * value[0], 
                     'name': key,
                     'weight_decay': optimizer_cfg['weight_decay'] * value[1],
                 })
             others = []
-            for key, layer in all_layers.items():
+            for key, layer in require_training_layers.items():
                 if key not in params_rules: others.append(layer)
             others = nn.Sequential(*others)
             value = (params_rules['others'], params_rules['others']) if not isinstance(params_rules['others'], tuple) else params_rules['others']
