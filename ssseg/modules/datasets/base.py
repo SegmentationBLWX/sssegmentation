@@ -12,8 +12,9 @@ import scipy.io as sio
 from PIL import Image
 from chainercv.evaluations import eval_semantic_segmentation
 from .pipelines import (
-    Evaluation, Resize, RandomCrop, RandomFlip, PhotoMetricDistortion,
-    RandomRotation, Padding, ToTensor, Normalize, Compose, EdgeExtractor
+    Evaluation, Resize, RandomCrop, RandomFlip, PhotoMetricDistortion, ResizeShortestEdge,
+    RandomRotation, Padding, ToTensor, Normalize, Compose, EdgeExtractor, RGB2Gray, AdjustGamma,
+    RandomChoiceResize, Rerange, CLAHE, RandomCutOut, AlbumentationsWrapper,
 )
 
 
@@ -109,7 +110,9 @@ class BaseDataset(torch.utils.data.Dataset):
         # supported transforms
         supported_transforms = {
             'Resize': Resize, 'RandomCrop': RandomCrop, 'RandomFlip': RandomFlip, 'RandomRotation': RandomRotation, 'EdgeExtractor': EdgeExtractor,
-            'PhotoMetricDistortion': PhotoMetricDistortion, 'Padding': Padding, 'ToTensor': ToTensor, 'Normalize': Normalize,
+            'PhotoMetricDistortion': PhotoMetricDistortion, 'Padding': Padding, 'ToTensor': ToTensor, 'ResizeShortestEdge': ResizeShortestEdge,
+            'Normalize': Normalize, 'RandomChoiceResize': RandomChoiceResize, 'Rerange': Rerange, 'CLAHE': CLAHE, 'RandomCutOut': RandomCutOut, 
+            'AlbumentationsWrapper': AlbumentationsWrapper, 'RGB2Gray': RGB2Gray, 'AdjustGamma': AdjustGamma,
         }
         # build transforms
         transforms = []
