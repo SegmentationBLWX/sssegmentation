@@ -11,7 +11,7 @@ help() {
     echo "                    The keyword should be in ['ade20k', 'lip', 'pascalcontext', 'cocostuff10k',"
     echo "                                              'pascalvoc', 'cityscapes', 'atr', 'chase_db1',"
     echo "                                              'cihp', 'hrf', 'drive', 'stare', 'nighttimedriving',"
-    echo "                                              'darkzurich',]"
+    echo "                                              'darkzurich', 'sbushadow']"
     echo "    -h or --help: Show this message."
     echo "------------------------------------------------------------------------------------"
     exit 0
@@ -41,8 +41,7 @@ elif [[ "$OPT" == "pascalvoc" ]]; then
     wget https://github.com/SegmentationBLWX/modelstore/releases/download/ssseg_datasets/VOCdevkit.zip.001
     wget https://github.com/SegmentationBLWX/modelstore/releases/download/ssseg_datasets/VOCdevkit.zip.002
     wget https://github.com/SegmentationBLWX/modelstore/releases/download/ssseg_datasets/VOCdevkit.zip.003
-    zip VOCdevkit.zip.001 VOCdevkit.zip.002 VOCdevkit.zip.003 -s=0 --out VOCdevkit.zip
-    unzip VOCdevkit.zip
+    7z x VOCdevkit.zip.001
     rm -rf VOCdevkit.zip.001 VOCdevkit.zip.002 VOCdevkit.zip.003 VOCdevkit.zip
 elif [[ "$OPT" == "cityscapes" ]]; then
     wget https://github.com/SegmentationBLWX/modelstore/releases/download/ssseg_datasets/CityScapes.zip
@@ -96,6 +95,10 @@ elif [[ "$OPT" == "darkzurich" ]]; then
     wget https://github.com/SegmentationBLWX/modelstore/releases/download/ssseg_datasets/Dark_Zurich_val_anon.zip
     unzip Dark_Zurich_val_anon.zip
     rm -rf Dark_Zurich_val_anon.zip
+elif [[ "$OPT" == "sbushadow" ]]; then
+    wget https://github.com/SegmentationBLWX/modelstore/releases/download/ssseg_datasets/SBUShadow.tar.gz
+    tar zxvf SBUShadow.tar.gz
+    rm -rf SBUShadow.tar.gz
 else
     echo "Preparing dataset ${DATASET} is not supported in this script now."
     exit 0
