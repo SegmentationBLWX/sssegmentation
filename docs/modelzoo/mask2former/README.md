@@ -29,7 +29,8 @@
 | Mask2Former    | ImageNet-22k-384x384   | Swin-Base   | 640x640    | LR/POLICY/BS/EPOCH: 0.00006/poly/16/130 | train/val       |        | [cfg](https://raw.githubusercontent.com/SegmentationBLWX/sssegmentation/main/ssseg/configs/mask2former/mask2former_swinbase_ade20k.py) &#124; [model](https://github.com/SegmentationBLWX/modelstore/releases/download/ssseg_mask2former/mask2former_swinbase_ade20k_train.pth) &#124; [log](https://github.com/SegmentationBLWX/modelstore/releases/download/ssseg_mask2former/mask2former_swinbase_ade20k_train.log)    |
 
 #### Cityscapes
-
+| Segmentor      | Pretrain               | Backbone    | Crop Size  | Schedule                                | Train/Eval Set  | mIoU   | Download                                                                                                                                                                                                                                                                                                                                                                                                                  |
+| :-:            | :-:                    | :-:         | :-:        | :-:                                     | :-:             | :-:    | :-:                                                                                                                                                                                                                                                                                                                                                                                                                       |
 
 ## More
 You can also download the model weights from following sources:

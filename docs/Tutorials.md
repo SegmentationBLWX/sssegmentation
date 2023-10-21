@@ -5,7 +5,6 @@
 
 We incorporate modular design into our config system, which is convenient to conduct various experiments. 
 
-
 #### Config File Structure
 
 Now, there are 2 basic component types under "configs/\_base\_", *i.e.*, datasets and dataloaders, which are responsible for loading various datasets with different runtime settings (*e.g.*, batch size, image size, data augmentation, to name a few).
@@ -52,8 +51,8 @@ SEGMENTOR_CFG['resultsavepath'] = 'fcn_resnet50os16_voc/fcn_resnet50os16_voc_res
 ```
 You can refer to "ssseg/configs" for more examples about creating a valid config file.
 
-
 #### An Example of PSPNet
+
 ```python
 import os
 
@@ -146,3 +145,6 @@ SEGMENTOR_CFG = {
 }
 ```
 
+## Construct Data Pipelines
+
+Constructing data pipelines is used to preprocess the input data (*e.g.*, images and segmentation masks) for the following training and testing of the segmentors.

@@ -12,39 +12,39 @@ All outputs (log files and checkpoints) will be saved to the working directory, 
 You can train the segmentors in a single machine as follows,
 
 ```sh
-bash scripts/distrain.sh ${NGPUS} ${CFGFILEPATH} [optional arguments]
+bash scripts/dist_train.sh ${NGPUS} ${CFGFILEPATH} [optional arguments]
 ```
 
 where "${NGPUS}" means the number of GPUS you want to use and "${CFGFILEPATH}" denotes for the config file path.
 For example, you can train a segmentor on a single machine with the following commands,
 
 ```sh
-bash scripts/distrain.sh 4 ssseg/configs/annnet/annnet_resnet50os16_ade20k.py
+bash scripts/dist_train.sh 4 ssseg/configs/annnet/annnet_resnet50os16_ade20k.py
 ```
 
 If you want to resume from the checkpoints, you can run as follows,
 
 ```sh
-bash scripts/distrain.sh 4 ssseg/configs/annnet/annnet_resnet50os16_ade20k.py --ckptspath annnet_resnet50os16_ade20k/epoch_44.pth
+bash scripts/dist_train.sh 4 ssseg/configs/annnet/annnet_resnet50os16_ade20k.py --ckptspath annnet_resnet50os16_ade20k/epoch_44.pth
 ```
 
 #### Train with multiple machines
 
 Now, we only support training with multiple machines with Slurm.
 Slurm is a good job scheduling system for computing clusters.
-On a cluster managed by Slurm, you can use "slurmtrain.sh" to spawn training jobs.
+On a cluster managed by Slurm, you can use "slurm_train.sh" to spawn training jobs.
 It supports both single-node and multi-node training.
 
 Specifically, you can train the segmentors with multiple machines as follows,
 
 ```sh
-bash scripts/slurmtrain.sh ${PARTITION} ${JOBNAME} ${NGPUS} ${CFGFILEPATH} [optional arguments]
+bash scripts/slurm_train.sh ${PARTITION} ${JOBNAME} ${NGPUS} ${CFGFILEPATH} [optional arguments]
 ```
 
 Here is an example of using 16 GPUs to train PSPNet on the dev partition,
 
 ```sh
-bash scripts/slurmtrain.sh dev pspnet 16 ssseg/configs/pspnet/pspnet_resnet101os8_ade20k.py
+bash scripts/slurm_train.sh dev pspnet 16 ssseg/configs/pspnet/pspnet_resnet101os8_ade20k.py
 ```
 
 
@@ -57,32 +57,32 @@ We provide testing scripts to evaluate a whole dataset (Cityscapes, PASCAL VOC, 
 You can test the segmentors in a single machine as follows,
 
 ```sh
-bash scripts/distest.sh ${NGPUS} ${CFGFILEPATH} ${ckptspath} [optional arguments]
+bash scripts/dist_test.sh ${NGPUS} ${CFGFILEPATH} ${ckptspath} [optional arguments]
 ```
 
 For example, you can test a segmentor on a single machine with the following commands,
 
 ```sh
-bash scripts/distest.sh 4 ssseg/configs/annnet/annnet_resnet50os16_ade20k.py annnet_resnet50os16_ade20k/epoch_130.pth
+bash scripts/dist_test.sh 4 ssseg/configs/annnet/annnet_resnet50os16_ade20k.py annnet_resnet50os16_ade20k/epoch_130.pth
 ```
 
 #### Test with multiple machines
 
 Now, we only support testing with multiple machines with Slurm.
 Slurm is a good job scheduling system for computing clusters.
-On a cluster managed by Slurm, you can use "slurmtest.sh" to spawn testing jobs.
+On a cluster managed by Slurm, you can use "slurm_test.sh" to spawn testing jobs.
 It supports both single-node and multi-node testing.
 
 Specifically, you can test the segmentors with multiple machines as follows,
 
 ```sh
-bash scripts/slurmtest.sh ${PARTITION} ${JOBNAME} ${NGPUS} ${CFGFILEPATH} ${ckptspath} [optional arguments]
+bash scripts/slurm_test.sh ${PARTITION} ${JOBNAME} ${NGPUS} ${CFGFILEPATH} ${ckptspath} [optional arguments]
 ```
 
 Here is an example of using 16 GPUs to test PSPNet on the dev partition,
 
 ```sh
-bash scripts/slurmtest.sh dev pspnet 16 ssseg/configs/pspnet/pspnet_resnet101os8_ade20k.py pspnet_resnet101os8_ade20k/epoch_130.pth
+bash scripts/slurm_test.sh dev pspnet 16 ssseg/configs/pspnet/pspnet_resnet101os8_ade20k.py pspnet_resnet101os8_ade20k/epoch_130.pth
 ```
 
 
