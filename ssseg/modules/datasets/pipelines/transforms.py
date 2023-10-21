@@ -5,6 +5,7 @@ Author:
     Zhenchao Jin
 '''
 import cv2
+import copy
 import torch
 import collections
 import numpy as np
@@ -100,6 +101,297 @@ class RandomCrop(object):
     def crop(image, top, left, h_out, w_out):
         image = image[top: top + h_out, left: left + w_out]
         return image
+
+
+'''ResizeShortestEdge'''
+class ResizeShortestEdge(object):
+    def __init__(self, short_edge_length, max_size):
+        # set attributes
+        self.max_size = max_size
+        self.short_edge_length = short_edge_length
+    '''call'''
+    def __call__(self, sample_meta):
+        return self.resize(sample_meta, self.getoutputshape)
+    '''getoutputshape'''
+    def getoutputshape(self, image):
+        h, w = image.shape[:2]
+        # calculate new size
+        short_edge_length = self.short_edge_length
+        if isinstance(short_edge_length, int):
+            size = short_edge_length * 1.0
+        elif isinstance(short_edge_length, collections.Sequence):
+            size = min(short_edge_length) * 1.0
+        scale = size / min(h, w)
+        if h < w: new_h, new_w = size, scale * w
+        else: new_h, new_w = scale * h, size
+        # clip if > max_size
+        if max(new_h, new_w) > self.max_size:
+            scale = self.max_size * 1.0 / max(new_h, new_w)
+            new_h *= scale
+            new_w *= scale
+        new_h = int(new_h + 0.5)
+        new_w = int(new_w + 0.5)
+        # return new size
+        return (new_w, new_h)
+    '''resize'''
+    @staticmethod
+    def resize(sample_meta, getoutputshape_func):
+        kwargs = {'output_size': getoutputshape_func(sample_meta['image']), 'keep_ratio': True, 'scale_range': None}
+        resize_transform = Resize(**kwargs)
+        return resize_transform(sample_meta)
+
+
+'''RandomChoiceResize'''
+class RandomChoiceResize(object):
+    def __init__(self, scales, resize_type='Resize', **resize_kwargs):
+        # set attributes
+        if isinstance(scales, collections.Sequence): self.scales = scales
+        else: self.scales = [scales]
+        self.resize_type = resize_type
+        self.resize_kwargs = resize_kwargs
+        self.resize_type_key_convertor = {
+            'Resize': 'output_size', 'ResizeShortestEdge': 'short_edge_length'
+        }
+        assert resize_type in self.resize_type_key_convertor, f'unsupport resize_type {resize_type}'
+        # fetch resize transform
+        self.resize_transform = {
+            'Resize': Resize, 'ResizeShortestEdge': ResizeShortestEdge
+        }[resize_type]
+    '''call'''
+    def __call__(self, sample_meta):
+        # random select scale
+        target_scale, target_scale_idx = self.randomselect()
+        # obtain kwargs
+        kwargs = copy.deepcopy(self.resize_kwargs)
+        kwargs[self.resize_type_key_convertor[self.resize_type]] = target_scale
+        # obtain resize_transform
+        resize_transform = self.resize_transform(**kwargs)
+        # resize
+        sample_meta = self.resize(sample_meta, resize_transform)
+        # return
+        return sample_meta
+    '''randomselect'''
+    def randomselect(self):
+        target_scale_idx = np.random.randint(len(self.scales))
+        target_scale = self.scales[target_scale_idx]
+        return target_scale, target_scale_idx
+    '''resize'''
+    @staticmethod
+    def resize(sample_meta, resize_transform):
+        return resize_transform(sample_meta)
+
+
+'''AdjustGamma'''
+class AdjustGamma(object):
+    def __init__(self, gamma=1.0):
+        # assert
+        assert gamma > 0.0
+        assert isinstance(gamma, float) or isinstance(gamma, int)
+        # set attributes
+        self.gamma = gamma
+        inv_gamma = 1.0 / gamma
+        self.table = np.array([(i / 255.0)**inv_gamma * 255 for i in np.arange(256)]).astype('uint8')
+        assert self.table.shape == (256, )
+    '''call'''
+    def __call__(self, sample_meta):
+        # assert
+        assert isinstance(sample_meta['image'], np.ndarray)
+        assert 0 <= np.min(sample_meta['image']) and np.max(sample_meta['image']) <= 255
+        # perform lut transform
+        sample_meta = self.lut('image', sample_meta, self.table)
+        # return
+        return sample_meta
+    '''lut'''
+    @staticmethod
+    def lut(key, sample_meta, lut_table):
+        if key not in sample_meta: return sample_meta
+        sample_meta[key] = cv2.LUT(np.array(sample_meta[key], dtype=np.uint8), lut_table)
+        return sample_meta
+
+
+'''Rerange'''
+class Rerange(object):
+    def __init__(self, min_value=0, max_value=255):
+        # assert
+        assert min_value < max_value
+        assert isinstance(min_value, (float, int))
+        assert isinstance(max_value, (float, int))
+        # set attributes
+        self.min_value = min_value
+        self.max_value = max_value
+    '''call'''
+    def __call__(self, sample_meta):
+        sample_meta = self.rerange('image', sample_meta, self.min_value, self.max_value)
+        return sample_meta
+    '''rerange'''
+    @staticmethod
+    def rerange(key, sample_meta, min_value, max_value):
+        if key not in sample_meta: return sample_meta
+        # max and min value in sample_meta[key]
+        key_min_value = np.min(sample_meta[key])
+        key_max_value = np.max(sample_meta[key])
+        assert key_min_value < key_max_value
+        # rerange to [0, 1]
+        sample_meta[key] = (sample_meta[key] - key_min_value) / (key_max_value - key_min_value)
+        # rerange to [min_value, max_value]
+        sample_meta[key] = sample_meta[key] * (max_value - min_value) + min_value
+        # return
+        return sample_meta
+
+
+'''CLAHE'''
+class CLAHE(object):
+    def __init__(self, clip_limit=40.0, tile_grid_size=(8, 8)):
+        # assert
+        assert isinstance(clip_limit, (float, int))
+        assert isinstance(tile_grid_size, collections.Sequence)
+        assert len(tile_grid_size) == 2
+        # set attribute
+        self.clip_limit = clip_limit
+        self.tile_grid_size = tile_grid_size
+    '''call'''
+    def __call__(self, sample_meta):
+        sample_meta = self.clahe('image', sample_meta, self.clip_limit, self.tile_grid_size)
+        return sample_meta
+    '''clahe'''
+    @staticmethod
+    def clahe(key, sample_meta, clip_limit, tile_grid_size):
+        if key not in sample_meta: return sample_meta
+        for i in range(sample_meta[key].shape[2]):
+            clahe = cv2.createCLAHE(clip_limit, tile_grid_size)
+            sample_meta[key][:, :, i] = clahe.apply(np.array(sample_meta[key][:, :, i], dtype=np.uint8))
+        return sample_meta
+
+
+'''RGB2Gray'''
+class RGB2Gray(object):
+    def __init__(self, out_channels=None, weights=(0.299, 0.587, 0.114)):
+        # assert
+        assert isinstance(weights, collections.Sequence)
+        assert out_channels is None or out_channels > 0
+        for item in weights: assert isinstance(item, (float, int))
+        # set attributes
+        self.weights = weights
+        self.out_channels = out_channels
+    '''call'''
+    def __call__(self, sample_meta):
+        sample_meta = self.rgb2gray('image', sample_meta, self.weights, self.out_channels)
+        return sample_meta
+    '''rgb2gray'''
+    @staticmethod
+    def rgb2gray(key, sample_meta, weights, out_channels):
+        if key not in sample_meta: return sample_meta
+        # assert
+        assert len(sample_meta[key].shape) == 3
+        assert sample_meta[key].shape[2] == len(weights)
+        # apply
+        weights = np.array(weights).reshape((1, 1, -1))
+        sample_meta[key] = (sample_meta[key] * weights).sum(2, keepdims=True)
+        if out_channels is None:
+            sample_meta[key] = sample_meta[key].repeat(weights.shape[2], axis=2)
+        else:
+            sample_meta[key] = sample_meta[key].repeat(out_channels, axis=2)
+        # return
+        return sample_meta
+
+
+'''RandomCutOut'''
+class RandomCutOut(object):
+    def __init__(self, prob, n_holes, cutout_shape=None, cutout_ratio=None, image_fill_value=(0, 0, 0), seg_target_fill_value=255):
+        # assert
+        assert 0 <= prob and prob <= 1
+        assert (cutout_shape is None) ^ (cutout_ratio is None), 'either cutout_shape or cutout_ratio should be specified'
+        assert (isinstance(cutout_shape, collections.Sequence) or isinstance(cutout_ratio, collections.Sequence))
+        if isinstance(n_holes, collections.Sequence):
+            assert len(n_holes) == 2 and 0 <= n_holes[0] < n_holes[1]
+        else:
+            n_holes = (n_holes, n_holes)
+        if seg_target_fill_value is not None:
+            assert (isinstance(seg_target_fill_value, int) and 0 <= seg_target_fill_value and seg_target_fill_value <= 255)
+        # set attributes
+        self.prob = prob
+        self.n_holes = n_holes
+        self.image_fill_value = image_fill_value
+        self.seg_target_fill_value = seg_target_fill_value
+        self.with_ratio = cutout_ratio is not None
+        self.candidates = cutout_ratio if self.with_ratio else cutout_shape
+        if not isinstance(self.candidates, collections.Sequence): self.candidates = [self.candidates]
+    '''call'''
+    def __call__(self, sample_meta):
+        cutout, n_holes, x1_lst, y1_lst, index_lst = self.generatepatches(sample_meta['image'])
+        if cutout:
+            h, w, c = sample_meta['image'].shape
+            for i in range(n_holes):
+                x1, y1, index = x1_lst[i], y1_lst[i], index_lst[i]
+                if not self.with_ratio:
+                    cutout_w, cutout_h = self.candidates[index]
+                else:
+                    cutout_w = int(self.candidates[index][0] * w)
+                    cutout_h = int(self.candidates[index][1] * h)
+                x2 = np.clip(x1 + cutout_w, 0, w)
+                y2 = np.clip(y1 + cutout_h, 0, h)
+                sample_meta = self.cutout('image', sample_meta, x1, y1, x2, y2, self.image_fill_value)
+                sample_meta = self.cutout('seg_target', sample_meta, x1, y1, x2, y2, self.seg_target_fill_value)
+        return sample_meta
+    '''docutout'''
+    def docutout(self):
+        return np.random.rand() < self.prob
+    '''generatepatches'''
+    def generatepatches(self, image):
+        cutout = self.docutout()
+        h, w, _ = image.shape
+        # obtain n_holes
+        if cutout:
+            n_holes = np.random.randint(self.n_holes[0], self.n_holes[1] + 1)
+        else:
+            n_holes = 0
+        # generate patches
+        x1_lst, y1_lst, index_lst = [], [], []
+        for _ in range(n_holes):
+            x1_lst.append(np.random.randint(0, w))
+            y1_lst.append(np.random.randint(0, h))
+            index_lst.append(np.random.randint(0, len(self.candidates)))
+        # return
+        return cutout, n_holes, x1_lst, y1_lst, index_lst
+    '''cutout'''
+    @staticmethod
+    def cutout(key, sample_meta, x1, y1, x2, y2, fill_value):
+        if key not in sample_meta: return sample_meta
+        sample_meta[key][y1: y2, x1: x2, :] = fill_value
+        return sample_meta
+
+
+'''AlbumentationsWrapper'''
+class AlbumentationsWrapper():
+    def __init__(self, albu_cfg, albu_forward_args={}, transform_keys=['image', 'seg_target']):
+        # assert
+        assert isinstance(albu_cfg, dict)
+        assert isinstance(transform_keys, collections.Sequence)
+        # set attributes
+        self.albu_forward_args = albu_forward_args
+        self.transform_keys = transform_keys
+        self.transform_key_convertor = {
+            'image': 'image', 'seg_target': 'mask',
+        }
+        # build albu transform
+        import albumentations
+        albu_type = albu_cfg.pop('type')
+        assert hasattr(albumentations, albu_type), f'Albumentations lib unsupport {albu_type}, refer to https://github.com/albumentations-team/albumentations for more details'
+        self.albu_transform = getattr(albumentations, albu_type)(**albu_cfg)
+    '''call'''
+    def __call__(self, sample_meta):
+        albu_forward_args = copy.deepcopy(self.albu_forward_args)
+        for key in self.transform_keys:
+            albu_forward_args[self.transform_key_convertor[key]] = sample_meta[key]
+        transformed_results = self.albu(self.albu_transform, albu_forward_args)
+        for key in self.transform_keys:
+            sample_meta[key] = transformed_results[self.transform_key_convertor[key]]
+        return sample_meta
+    '''albu'''
+    @staticmethod
+    def albu(albu_transform, albu_forward_args):
+        transformed_results = albu_transform(**albu_forward_args)
+        return transformed_results
 
 
 '''RandomFlip'''
