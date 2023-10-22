@@ -197,11 +197,23 @@ elif [[ "$OPT" == "supervisely" ]]; then
            Supervisely.zip.006 Supervisely.zip.007 Supervisely.zip.008
 elif [[ "$OPT" == "vspw" ]]; then
     {
-        wget 
+        wget https://github.com/SegmentationBLWX/modelstore/releases/download/ssseg_datasets/VSPW_480p.zip.001
+        wget https://github.com/SegmentationBLWX/modelstore/releases/download/ssseg_datasets/VSPW_480p.zip.002
+        wget https://github.com/SegmentationBLWX/modelstore/releases/download/ssseg_datasets/VSPW_480p.zip.003
+        wget https://github.com/SegmentationBLWX/modelstore/releases/download/ssseg_datasets/VSPW_480p.zip.004
+        wget https://github.com/SegmentationBLWX/modelstore/releases/download/ssseg_datasets/VSPW_480p.zip.005
+        wget https://github.com/SegmentationBLWX/modelstore/releases/download/ssseg_datasets/VSPW_480p.zip.006
+        wget https://github.com/SegmentationBLWX/modelstore/releases/download/ssseg_datasets/VSPW_480p.zip.007
+        wget https://github.com/SegmentationBLWX/modelstore/releases/download/ssseg_datasets/VSPW_480p.zip.008
+        wget https://github.com/SegmentationBLWX/modelstore/releases/download/ssseg_datasets/VSPW_480p.zip.009
+        wget https://github.com/SegmentationBLWX/modelstore/releases/download/ssseg_datasets/VSPW_480p.zip.010
+        7z x VSPW_480p.zip.001
     } || {
         echo "Fail to download ${DATASET} dataset."
         exit 0
     }
+    rm -rf VSPW_480p.zip.001 VSPW_480p.zip.002 VSPW_480p.zip.003 VSPW_480p.zip.004 VSPW_480p.zip.005 \
+           VSPW_480p.zip.006 VSPW_480p.zip.007 VSPW_480p.zip.008 VSPW_480p.zip.009 VSPW_480p.zip.010
 elif [[ "$OPT" == "coco" ]]; then
     {
         wget 
