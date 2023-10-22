@@ -83,7 +83,8 @@ So, it is recommended to adopt the provided script (*i.e.*, `scripts/prepare_dat
 **13.Supervisely**
 
 - Official Website: [click](https://supervise.ly/explore/projects/supervisely-person-dataset-23304/datasets),
-- Baidu Disk: [click](https://pan.baidu.com/s/1TZbgxPnY0Als6LoiV80Xrw) (access code: fn1i).
+- Baidu Disk: [click](https://pan.baidu.com/s/1TZbgxPnY0Als6LoiV80Xrw) (access code: fn1i),
+- Script Command: `bash scripts/prepare_datasets.sh supervisely`.
 
 **14.SBUShadow**
 
