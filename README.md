@@ -181,5 +181,12 @@ If you use this framework in your research, please cite this project:
 
 ## References
 
-- [MMCV](https://github.com/open-mmlab/mmcv)
 - [MMSegmentation](https://github.com/open-mmlab/mmsegmentation)
+- [segment-anything](https://github.com/facebookresearch/segment-anything)
+- [MobileSAM](https://github.com/ChaoningZhang/MobileSAM)
+- [Mask2Former](https://github.com/facebookresearch/Mask2Former/)
+- [Swin-Transformer](https://github.com/microsoft/Swin-Transformer)
+- [HRNet-Semantic-Segmentation](https://github.com/HRNet/HRNet-Semantic-Segmentation)
+- [apex](https://github.com/NVIDIA/apex)
+- [MMCV](https://github.com/open-mmlab/mmcv)
+- [VSPW_code](https://github.com/VSPW-dataset/VSPW_code)
