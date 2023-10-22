@@ -181,6 +181,8 @@ If you use this framework in your research, please cite this project:
 
 ## References
 
+We are very grateful to the following projects for their help in building SSSegmentation,
+
 - [MMSegmentation](https://github.com/open-mmlab/mmsegmentation)
 - [segment-anything](https://github.com/facebookresearch/segment-anything)
 - [MobileSAM](https://github.com/ChaoningZhang/MobileSAM)
