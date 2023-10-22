@@ -38,7 +38,8 @@ So, it is recommended to adopt the provided script (*i.e.*, `scripts/prepare_dat
 **5.VSPW**
 
 - Official Website: [click](https://www.vspwdataset.com/),
-- Baidu Disk: [click](https://pan.baidu.com/s/1TZbgxPnY0Als6LoiV80Xrw) (access code: fn1i).
+- Baidu Disk: [click](https://pan.baidu.com/s/1TZbgxPnY0Als6LoiV80Xrw) (access code: fn1i),
+- Script Command: `bash scripts/prepare_datasets.sh vspw`.
 
 **6.DRIVE**
 
@@ -61,12 +62,14 @@ So, it is recommended to adopt the provided script (*i.e.*, `scripts/prepare_dat
 **9.MS COCO**
 
 - Official Website: [click](https://cocodataset.org/#home),
-- Baidu Disk: [click](https://pan.baidu.com/s/1TZbgxPnY0Als6LoiV80Xrw) (access code: fn1i).
+- Baidu Disk: [click](https://pan.baidu.com/s/1TZbgxPnY0Als6LoiV80Xrw) (access code: fn1i),
+- Script Command: `bash scripts/prepare_datasets.sh coco`.
 
 **10.MHPv1&v2**
 
 - Official Website: [click](https://lv-mhp.github.io/dataset),
-- Baidu Disk: [click](https://pan.baidu.com/s/1TZbgxPnY0Als6LoiV80Xrw) (access code: fn1i).
+- Baidu Disk: [click](https://pan.baidu.com/s/1TZbgxPnY0Als6LoiV80Xrw) (access code: fn1i),
+- Script Command: `bash scripts/prepare_datasets.sh mhpv1` & `bash scripts/prepare_datasets.sh mhpv2`.
 
 **11.CHASE DB1**
 
@@ -108,6 +111,7 @@ So, it is recommended to adopt the provided script (*i.e.*, `scripts/prepare_dat
 
 - Official Website: [click](https://github.com/nightrome/cocostuff),
 - Baidu Disk: [click](https://pan.baidu.com/s/1TZbgxPnY0Als6LoiV80Xrw) (access code: fn1i).
+- Script Command: `bash scripts/prepare_datasets.sh coco`.
 
 **18.Pascal Context**
 

@@ -11,7 +11,8 @@ help() {
     echo "                    The keyword should be in ['ade20k', 'lip', 'pascalcontext', 'cocostuff10k',"
     echo "                                              'pascalvoc', 'cityscapes', 'atr', 'chase_db1',"
     echo "                                              'cihp', 'hrf', 'drive', 'stare', 'nighttimedriving',"
-    echo "                                              'darkzurich', 'sbushadow', 'supervisely', ]"
+    echo "                                              'darkzurich', 'sbushadow', 'supervisely', 'vspw',"
+    echo "                                              'mhpv1', 'mhpv2', 'coco',]"
     echo "    <-h> or <--help>: Show this message."
     echo "Examples:"
     echo "    If you want to fetch ADE20k dataset, you can run 'bash $0 ade20k'."
@@ -194,6 +195,36 @@ elif [[ "$OPT" == "supervisely" ]]; then
     }
     rm -rf Supervisely.zip.001 Supervisely.zip.002 Supervisely.zip.003 Supervisely.zip.004 Supervisely.zip.005 \
            Supervisely.zip.006 Supervisely.zip.007 Supervisely.zip.008
+elif [[ "$OPT" == "vspw" ]]; then
+    {
+        wget 
+    } || {
+        echo "Fail to download ${DATASET} dataset."
+        exit 0
+    }
+elif [[ "$OPT" == "coco" ]]; then
+    {
+        wget 
+    } || {
+        echo "Fail to download ${DATASET} dataset."
+        exit 0
+    }
+elif [[ "$OPT" == "mhpv1" ]]; then
+    {
+        wget https://github.com/SegmentationBLWX/modelstore/releases/download/ssseg_datasets/LV-MHP-v1.tar.gz
+        tar zxvf LV-MHP-v1.tar.gz
+    } || {
+        echo "Fail to download ${DATASET} dataset."
+        exit 0
+    }
+    rm -rf LV-MHP-v1.tar.gz
+elif [[ "$OPT" == "mhpv2" ]]; then
+    {
+        wget 
+    } || {
+        echo "Fail to download ${DATASET} dataset."
+        exit 0
+    }
 else
     echo "Preparing dataset ${DATASET} is not supported in this script now."
     exit 0
