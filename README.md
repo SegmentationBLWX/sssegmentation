@@ -136,7 +136,7 @@ You can star this repository to keep track of the project if it's helpful for yo
 
 ## Citation
 
-If you use this framework in your research, please cite this project:
+If you use SSSegmentation in your research, please consider citing this project,
 
 ```
 @article{jin2023sssegmenation,

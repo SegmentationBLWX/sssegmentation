@@ -1,2 +1,3 @@
 chainercv
 cityscapesscripts
+pycocotools
