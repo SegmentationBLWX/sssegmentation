@@ -232,11 +232,16 @@ elif [[ "$OPT" == "mhpv1" ]]; then
     rm -rf LV-MHP-v1.tar.gz
 elif [[ "$OPT" == "mhpv2" ]]; then
     {
-        wget 
+        wget https://github.com/SegmentationBLWX/modelstore/releases/download/ssseg_datasets/LV-MHP-v2.zip.001
+        wget https://github.com/SegmentationBLWX/modelstore/releases/download/ssseg_datasets/LV-MHP-v2.zip.002
+        wget https://github.com/SegmentationBLWX/modelstore/releases/download/ssseg_datasets/LV-MHP-v2.zip.003
+        wget https://github.com/SegmentationBLWX/modelstore/releases/download/ssseg_datasets/LV-MHP-v2.zip.004
+        7z x LV-MHP-v2.zip.001
     } || {
         echo "Fail to download ${DATASET} dataset."
         exit 0
     }
+    rm -rf LV-MHP-v2.zip.001 LV-MHP-v2.zip.002 LV-MHP-v2.zip.003 LV-MHP-v2.zip.004
 else
     echo "Preparing dataset ${DATASET} is not supported in this script now."
     exit 0
