@@ -216,11 +216,32 @@ elif [[ "$OPT" == "vspw" ]]; then
            VSPW_480p.zip.006 VSPW_480p.zip.007 VSPW_480p.zip.008 VSPW_480p.zip.009 VSPW_480p.zip.010
 elif [[ "$OPT" == "coco" ]]; then
     {
-        wget 
+        wget https://github.com/SegmentationBLWX/modelstore/releases/download/ssseg_datasets/COCO.zip.001
+        wget https://github.com/SegmentationBLWX/modelstore/releases/download/ssseg_datasets/COCO.zip.002
+        wget https://github.com/SegmentationBLWX/modelstore/releases/download/ssseg_datasets/COCO.zip.003
+        wget https://github.com/SegmentationBLWX/modelstore/releases/download/ssseg_datasets/COCO.zip.004
+        wget https://github.com/SegmentationBLWX/modelstore/releases/download/ssseg_datasets/COCO.zip.005
+        wget https://github.com/SegmentationBLWX/modelstore/releases/download/ssseg_datasets/COCO.zip.006
+        wget https://github.com/SegmentationBLWX/modelstore/releases/download/ssseg_datasets/COCO.zip.007
+        wget https://github.com/SegmentationBLWX/modelstore/releases/download/ssseg_datasets/COCO.zip.008
+        wget https://github.com/SegmentationBLWX/modelstore/releases/download/ssseg_datasets/COCO.zip.009
+        wget https://github.com/SegmentationBLWX/modelstore/releases/download/ssseg_datasets/COCO.zip.010
+        wget https://github.com/SegmentationBLWX/modelstore/releases/download/ssseg_datasets/COCO.zip.011
+        wget https://github.com/SegmentationBLWX/modelstore/releases/download/ssseg_datasets/COCO.zip.012
+        wget https://github.com/SegmentationBLWX/modelstore/releases/download/ssseg_datasets/COCO.zip.013
+        wget https://github.com/SegmentationBLWX/modelstore/releases/download/ssseg_datasets/COCO.zip.014
+        wget https://github.com/SegmentationBLWX/modelstore/releases/download/ssseg_datasets/COCO.zip.015
+        wget https://github.com/SegmentationBLWX/modelstore/releases/download/ssseg_datasets/COCO.zip.016
+        wget https://github.com/SegmentationBLWX/modelstore/releases/download/ssseg_datasets/COCO.zip.017
+        wget https://github.com/SegmentationBLWX/modelstore/releases/download/ssseg_datasets/COCO.zip.018
+        7z x COCO.zip.001
     } || {
         echo "Fail to download ${DATASET} dataset."
         exit 0
     }
+    rm -rf COCO.zip.001 COCO.zip.002 COCO.zip.003 COCO.zip.004 COCO.zip.005 COCO.zip.006 COCO.zip.007 \
+           COCO.zip.008 COCO.zip.009 COCO.zip.010 COCO.zip.011 COCO.zip.012 COCO.zip.013 COCO.zip.014 \
+           COCO.zip.015 COCO.zip.016 COCO.zip.017 COCO.zip.018
 elif [[ "$OPT" == "mhpv1" ]]; then
     {
         wget https://github.com/SegmentationBLWX/modelstore/releases/download/ssseg_datasets/LV-MHP-v1.tar.gz
