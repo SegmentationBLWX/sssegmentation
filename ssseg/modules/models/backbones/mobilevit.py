@@ -33,10 +33,14 @@ class MobileVitBlock(nn.Module):
         super(MobileVitBlock, self).__init__()
         # build layers
         self.local_rep = nn.Sequential(
-            nn.Conv2d(in_channels, in_channels, kernel_size=conv_ksize, stride=1, padding=int((conv_ksize - 1) / 2), bias=False),
-            BuildNormalization(placeholder=in_channels, norm_cfg=norm_cfg),
-            BuildActivation(act_cfg),
-            nn.Conv2d(in_channels, transformer_dim, kernel_size=1, stride=1, padding=0, bias=False),
+            nn.Sequential(collections.OrderedDict([
+                ('conv', nn.Conv2d(in_channels, in_channels, kernel_size=conv_ksize, stride=1, padding=int((conv_ksize - 1) / 2), bias=False)),
+                ('bn', BuildNormalization(placeholder=in_channels, norm_cfg=norm_cfg)),
+                ('activate', BuildActivation(act_cfg)),
+            ])),
+            nn.Sequential(collections.OrderedDict([
+                ('conv', nn.Conv2d(in_channels, transformer_dim, kernel_size=1, stride=1, padding=0, bias=False))
+            ])),
         )
         global_rep = [TransformerEncoderLayer(
             embed_dims=transformer_dim, num_heads=num_heads, feedforward_channels=ffn_dim, drop_rate=drop_rate, attn_drop_rate=attn_drop_rate,
@@ -44,19 +48,19 @@ class MobileVitBlock(nn.Module):
         ) for _ in range(num_transformer_blocks)]
         global_rep.append(BuildNormalization(placeholder=transformer_dim, norm_cfg=transformer_norm_cfg))
         self.global_rep = nn.Sequential(*global_rep)
-        self.conv_proj = nn.Sequential(
-            nn.Conv2d(transformer_dim, out_channels, kernel_size=1, stride=1, padding=0, bias=False),
-            BuildNormalization(placeholder=out_channels, norm_cfg=norm_cfg),
-            BuildActivation(act_cfg),
-        )
+        self.conv_proj = nn.Sequential(collections.OrderedDict([
+            ('conv', nn.Conv2d(transformer_dim, out_channels, kernel_size=1, stride=1, padding=0, bias=False)),
+            ('bn', BuildNormalization(placeholder=out_channels, norm_cfg=norm_cfg)),
+            
+        ]))
         if no_fusion:
             self.conv_fusion = None
         else:
-            self.conv_fusion = nn.Sequential(
-                nn.Conv2d(in_channels + out_channels, out_channels, kernel_size=conv_ksize, stride=1, padding=int((conv_ksize - 1) / 2), bias=False),
-                BuildNormalization(placeholder=out_channels, norm_cfg=norm_cfg),
-                BuildActivation(act_cfg),
-            )
+            self.conv_fusion = nn.Sequential(collections.OrderedDict([
+                ('conv', nn.Conv2d(in_channels + out_channels, out_channels, kernel_size=conv_ksize, stride=1, padding=int((conv_ksize - 1) / 2), bias=False)),
+                ('bn', BuildNormalization(placeholder=out_channels, norm_cfg=norm_cfg)),
+                ('activate', BuildActivation(act_cfg)),
+            ]))
         # set attributes
         self.patch_size = (patch_size, patch_size)
         self.patch_area = self.patch_size[0] * self.patch_size[1]
@@ -111,7 +115,8 @@ class MobileViT(nn.Module):
             ['mobilevit', 64, 2, 80, 160, 4, 2], ['mobilevit', 80, 2, 96, 192, 3, 2],
         ],
     }
-    def __init__(self, arch='small', in_channels=3, stem_channels=16, last_exp_factor=4, out_indices=(4, ), norm_cfg=dict(type='SyncBatchNorm'), act_cfg=dict(type='Swish')):
+    def __init__(self, structure_type, arch='small', in_channels=3, stem_channels=16, last_exp_factor=4, out_indices=(4, ), norm_cfg=dict(type='SyncBatchNorm'), 
+                 act_cfg=dict(type='Swish'), pretrained=True, pretrained_model_path=''):
         super(MobileViT, self).__init__()
         # assert
         arch = arch.lower()
@@ -127,31 +132,71 @@ class MobileViT(nn.Module):
                 out_indices[i] = self.num_stages + index
                 assert out_indices[i] >= 0, f'invalid out_indices {index}'
         self.out_indices = out_indices
+        if structure_type in AUTO_ASSERT_STRUCTURE_TYPES:
+            for key, value in AUTO_ASSERT_STRUCTURE_TYPES[structure_type].items():
+                assert hasattr(self, key) and (getattr(self, key) == value)
         # build layers
         _make_layer_func = {
             'mobilenetv2': self.makemobilenetv2layer, 'mobilevit': self.makemobilevitlayer,
         }
-        self.stem = nn.Sequential(
-            nn.Conv2d(in_channels, stem_channels, kernel_size=3, stride=2, padding=1, bias=False),
-            BuildNormalization(placeholder=stem_channels, norm_cfg=norm_cfg),
-            BuildActivation(act_cfg),
-        )
+        self.stem = nn.Sequential(collections.OrderedDict([
+            ('conv', nn.Conv2d(in_channels, stem_channels, kernel_size=3, stride=2, padding=1, bias=False)),
+            ('bn', BuildNormalization(placeholder=stem_channels, norm_cfg=norm_cfg)),
+            ('activate', BuildActivation(act_cfg)),
+        ]))
         in_channels = stem_channels
         layers = []
         for i, layer_settings in enumerate(arch):
             layer_type, settings = layer_settings[0], layer_settings[1:]
-            layer, out_channels = _make_layer_func[layer_type](in_channels, *settings)
+            layer, out_channels = _make_layer_func[layer_type](in_channels, norm_cfg, *settings)
             layers.append(layer)
             in_channels = out_channels
         self.layers = nn.Sequential(*layers)
-        self.conv_1x1_exp = nn.Sequential(
-            nn.Conv2d(in_channels, last_exp_factor * in_channels, kernel_size=1, stride=1, padding=0, bias=False),
-            BuildNormalization(placeholder=last_exp_factor * in_channels, norm_cfg=norm_cfg),
-            BuildActivation(act_cfg),
-        )
+        self.conv_1x1_exp = nn.Sequential(collections.OrderedDict([
+            ('conv', nn.Conv2d(in_channels, last_exp_factor * in_channels, kernel_size=1, stride=1, padding=0, bias=False)),
+            ('bn', BuildNormalization(placeholder=last_exp_factor * in_channels, norm_cfg=norm_cfg)),
+            ('activate', BuildActivation(act_cfg)),
+        ]))
+        # load pretrained weights
+        if pretrained and os.path.exists(pretrained_model_path):
+            checkpoint = torch.load(pretrained_model_path, map_location='cpu')
+            if 'state_dict' in checkpoint: 
+                state_dict = checkpoint['state_dict']
+            else: 
+                state_dict = checkpoint
+            keys = list(state_dict.keys())
+            for key in keys:
+                if key.startswith('backbone.'):
+                    value = state_dict.pop(key)
+                    key = '.'.join(key.split('.')[1:])
+                    state_dict[key] = value
+                if key.startswith('head'):
+                    state_dict.pop(key)
+            self.load_state_dict(state_dict, strict=True)
+        elif pretrained:
+            checkpoint = model_zoo.load_url(DEFAULT_MODEL_URLS[structure_type], map_location='cpu')
+            if 'state_dict' in checkpoint: 
+                state_dict = checkpoint['state_dict']
+            else: 
+                state_dict = checkpoint
+            keys = list(state_dict.keys())
+            for key in keys:
+                if key.startswith('backbone.'):
+                    value = state_dict.pop(key)
+                    key = '.'.join(key.split('.')[1:])
+                    state_dict[key] = value
+                if key.startswith('head'):
+                    state_dict.pop(key)
+                if 'attn.qkv' in key:
+                    new_key = key.replace('attn.qkv.', 'attn.attn.in_proj_')
+                    state_dict[new_key] = state_dict.pop(key)
+                if 'attn.proj' in key:
+                    new_key = key.replace('attn.proj', 'attn.attn.out_proj')
+                    state_dict[new_key] = state_dict.pop(key)
+            self.load_state_dict(state_dict, strict=True)
     '''makemobilevitlayer'''
     @staticmethod
-    def makemobilevitlayer(in_channels, out_channels, stride, transformer_dim, ffn_dim, num_transformer_blocks, expand_ratio=4):
+    def makemobilevitlayer(in_channels, norm_cfg, out_channels, stride, transformer_dim, ffn_dim, num_transformer_blocks, expand_ratio=4):
         layer = []
         layer.append(InvertedResidual(
             in_channels=in_channels, out_channels=out_channels, stride=stride, expand_ratio=expand_ratio, act_cfg=dict(type='Swish'),
@@ -162,7 +207,7 @@ class MobileViT(nn.Module):
         return nn.Sequential(*layer), out_channels
     '''makemobilenetv2layer'''
     @staticmethod
-    def makemobilenetv2layer(in_channels, out_channels, stride, num_blocks, expand_ratio=4):
+    def makemobilenetv2layer(in_channels, norm_cfg, out_channels, stride, num_blocks, expand_ratio=4):
         layer = []
         for i in range(num_blocks):
             stride = stride if i == 0 else 1
