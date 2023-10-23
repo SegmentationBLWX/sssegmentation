@@ -17,6 +17,7 @@ Documents: https://sssegmentation.readthedocs.io/en/latest/
 
 ## What's New
 
+- **2023-10-23**: Support [MobileViT](https://arxiv.org/pdf/2110.02178.pdf) and [MobileViTV2](https://arxiv.org/pdf/2206.02680.pdf), refer to [Results and Models for MobileViT](./docs/modelzoo/mobilevit) for more details.
 - **2023-10-18**: Support [Mask2Former](https://arxiv.org/pdf/2112.01527.pdf), refer to [Results and Models for Mask2Former](./docs/modelzoo/mask2former) for more details.
 - **2023-10-17**: We release the source codes of [IDRNet: Intervention-Driven Relation Network for Semantic Segmentation](https://arxiv.org/pdf/2310.10755.pdf), which was accepted by NeurIPS 2023, refer to [Results and Models for IDRNet](./docs/modelzoo/idrnet) for more details.
 - **2023-10-15**: Support [MobileSAM](https://arxiv.org/pdf/2306.14289.pdf), refer to [inference-with-mobilesam](https://sssegmentation.readthedocs.io/en/latest/AdvancedAPI.html#inference-with-mobilesam) for more details.
@@ -51,8 +52,10 @@ You can star this repository to keep track of the project if it's helpful for yo
 
 | Backbone               | Model Zoo                                    | Paper Link                                                    | Code Snippet                                             |
 | :-:                    | :-:                                          | :-:                                                           | :-:                                                      |
+| MobileViTV2            | [Click](./docs/modelzoo/mobilevit)           | [ArXiv 2022](https://arxiv.org/pdf/2206.02680.pdf)            | [Click](./ssseg/modules/models/backbones/mobilevit.py)   |
 | ConvNeXt               | [Click](./docs/modelzoo/convnext)            | [CVPR 2022](https://arxiv.org/pdf/2201.03545.pdf)             | [Click](./ssseg/modules/models/backbones/convnext.py)    |
 | MAE                    | [Click](./docs/modelzoo/mae)                 | [CVPR 2022](https://arxiv.org/pdf/2111.06377.pdf)             | [Click](./ssseg/modules/models/backbones/mae.py)         |
+| MobileViT              | [Click](./docs/modelzoo/mobilevit)           | [ICLR 2022](https://arxiv.org/pdf/2110.02178.pdf)             | [Click](./ssseg/modules/models/backbones/mobilevit.py)   |
 | BEiT                   | [Click](./docs/modelzoo/beit)                | [ICLR 2022](https://arxiv.org/pdf/2106.08254.pdf)             | [Click](./ssseg/modules/models/backbones/beit.py)        |
 | Twins                  | [Click](./docs/modelzoo/twins)               | [NeurIPS 2021](https://arxiv.org/pdf/2104.13840.pdf)          | [Click](./ssseg/modules/models/backbones/twins.py)       |
 | SwinTransformer        | [Click](./docs/modelzoo/swin)                | [ICCV 2021](https://arxiv.org/pdf/2103.14030.pdf)             | [Click](./ssseg/modules/models/backbones/swin.py)        |
@@ -192,3 +195,4 @@ We are very grateful to the following projects for their help in building SSSegm
 - [apex](https://github.com/NVIDIA/apex)
 - [MMCV](https://github.com/open-mmlab/mmcv)
 - [VSPW_code](https://github.com/VSPW-dataset/VSPW_code)
+- [MMPreTrain](https://github.com/open-mmlab/mmpretrain)
