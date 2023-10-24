@@ -1,6 +1,6 @@
 '''
 Function:
-    Implementation of Swin
+    Implementation of SwinTransformer
 Author:
     Zhenchao Jin
 '''
