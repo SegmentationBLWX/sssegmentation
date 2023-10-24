@@ -1,2 +1,2 @@
 '''initialize'''
-from .builder import BuildDataset
+from .builder import DatasetBuilder, BuildDataset
