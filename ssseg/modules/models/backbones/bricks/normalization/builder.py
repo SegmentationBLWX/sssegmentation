@@ -33,9 +33,9 @@ class NormalizationBuilder():
         norm_cfg = copy.deepcopy(norm_cfg)
         norm_type = norm_cfg.pop('type')
         if norm_type in ['GroupNorm']:
-            normalization = supported_normalizations[norm_type](num_channels=placeholder, **norm_cfg)
+            normalization = self.REGISTERED_NORMALIZATIONS[norm_type](num_channels=placeholder, **norm_cfg)
         else:
-            normalization = supported_normalizations[norm_type](placeholder, **norm_cfg)
+            normalization = self.REGISTERED_NORMALIZATIONS[norm_type](placeholder, **norm_cfg)
         return normalization
     '''register'''
     def register(self, norm_type, norm_module):
