@@ -542,3 +542,12 @@ class MobileViTV2(nn.Module):
                 bottle_ratio=bottle_ratio, act_cfg=act_cfg, norm_cfg=norm_cfg, mlp_ratio=mlp_ratio,
             ))
         return nn.Sequential(*layer), out_channels
+    '''forward'''
+    def forward(self, x):
+        x = self.stem(x)
+        outs = []
+        for i, layer in enumerate(self.stages):
+            x = layer(x)
+            if i in self.out_indices:
+                outs.append(x)
+        return tuple(outs)
