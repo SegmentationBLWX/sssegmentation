@@ -196,3 +196,4 @@ We are very grateful to the following projects for their help in building SSSegm
 - [MMCV](https://github.com/open-mmlab/mmcv)
 - [VSPW_code](https://github.com/VSPW-dataset/VSPW_code)
 - [MMPreTrain](https://github.com/open-mmlab/mmpretrain)
+- [PyTorch Image Models](https://github.com/huggingface/pytorch-image-models)
