@@ -1,6 +1,6 @@
 '''
 Function:
-    Implementation of SAMMobileViT
+    Implementation of MobileSAMTinyViT
 Author:
     Zhenchao Jin
 '''
@@ -244,10 +244,10 @@ class Attention(nn.Module):
         return x
 
 
-'''MobileViTBlock'''
-class MobileViTBlock(nn.Module):
+'''TinyViTBlock'''
+class TinyViTBlock(nn.Module):
     def __init__(self, dim, input_resolution, num_heads, window_size=7, mlp_ratio=4., drop=0., drop_path=0., local_conv_size=3, act_layer=nn.GELU):
-        super(MobileViTBlock, self).__init__()
+        super(TinyViTBlock, self).__init__()
         # assert
         assert window_size > 0, 'window_size must be greater than 0'
         assert dim % num_heads == 0, 'dim must be divisible by num_heads'
@@ -306,7 +306,7 @@ class BasicLayer(nn.Module):
         self.use_checkpoint = use_checkpoint
         self.input_resolution = PatchEmbed.totuple(input_resolution)
         # build blocks
-        self.blocks = nn.ModuleList([MobileViTBlock(
+        self.blocks = nn.ModuleList([TinyViTBlock(
             dim=dim, input_resolution=input_resolution, num_heads=num_heads, window_size=window_size, mlp_ratio=mlp_ratio, drop=drop,
             drop_path=drop_path[i] if isinstance(drop_path, list) else drop_path, local_conv_size=local_conv_size, act_layer=act_layer,
         ) for i in range(depth)])
@@ -327,11 +327,11 @@ class BasicLayer(nn.Module):
         return x
 
 
-'''SAMMobileViT'''
-class SAMMobileViT(nn.Module):
+'''MobileSAMTinyViT'''
+class MobileSAMTinyViT(nn.Module):
     def __init__(self, structure_type, img_size=224, in_chans=3, embed_dims=[96, 192, 384, 768], depths=[2, 2, 6, 2], num_heads=[3, 6, 12, 24], window_sizes=[7, 7, 14, 7], 
                  mlp_ratio=4., drop_rate=0., drop_path_rate=0.1, use_checkpoint=False, mbconv_expand_ratio=4.0, local_conv_size=3, pretrained=False, pretrained_model_path=''):
-        super(SAMMobileViT, self).__init__()
+        super(MobileSAMTinyViT, self).__init__()
         # build patch_embed
         act_layer = nn.GELU
         self.patch_embed = PatchEmbed(in_chans=in_chans, embed_dim=embed_dims[0], resolution=img_size, act_layer=act_layer)
