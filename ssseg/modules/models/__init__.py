@@ -1,7 +1,7 @@
 '''initialize'''
-from .losses import BuildLoss
-from .backbones import BuildBackbone
-from .segmentors import BuildSegmentor
-from .schedulers import BuildScheduler
-from .optimizers import BuildOptimizer
-from .samplers import BuildPixelSampler
+from .losses import LossBuilder, BuildLoss
+from .backbones import BackboneBuilder, BuildBackbone
+from .segmentors import SegmentorBuilder, BuildSegmentor
+from .schedulers import SchedulerBuilder, BuildScheduler
+from .optimizers import OptimizerBuilder, BuildOptimizer
+from .samplers import PixelSamplerBuilder, BuildPixelSampler

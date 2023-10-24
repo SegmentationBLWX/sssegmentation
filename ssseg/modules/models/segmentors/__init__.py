@@ -1,2 +1,2 @@
 '''initialize'''
-from .builder import BuildSegmentor
+from .builder import SegmentorBuilder, BuildSegmentor

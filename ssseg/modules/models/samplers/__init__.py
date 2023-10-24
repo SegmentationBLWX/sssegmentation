@@ -1,2 +1,2 @@
 '''initialize'''
-from .builder import BuildPixelSampler
+from .builder import PixelSamplerBuilder, BuildPixelSampler
