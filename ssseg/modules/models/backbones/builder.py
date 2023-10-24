@@ -1,6 +1,6 @@
 '''
 Function:
-    Implementation of BuildBackbone
+    Implementation of BackboneBuilder and BuildBackbone
 Author:
     Zhenchao Jin
 '''
@@ -28,11 +28,9 @@ from .mobilesamtinyvit import MobileSAMTinyViT
 from .mobilenet import MobileNetV2, MobileNetV3
 
 
-'''BuildBackbone'''
-def BuildBackbone(backbone_cfg):
-    backbone_cfg = copy.deepcopy(backbone_cfg)
-    # supported backbones
-    supported_backbones = {
+'''BackboneBuilder'''
+class BackboneBuilder():
+    REGISTERED_BACKBONES = {
         'UNet': UNet, 'BEiT': BEiT, 'CGNet': CGNet, 'HRNet': HRNet,
         'ERFNet': ERFNet, 'ResNet': ResNet, 'ResNeSt': ResNeSt, 'PCPVT': PCPVT,
         'SVT': SVT, 'FastSCNN': FastSCNN, 'ConvNeXt': ConvNeXt, 'BiSeNetV1': BiSeNetV1,
@@ -41,9 +39,29 @@ def BuildBackbone(backbone_cfg):
         'MobileNetV2': MobileNetV2, 'MobileNetV3': MobileNetV3, 'MAE': MAE, 'SAMViT': SAMViT,
         'MobileSAMTinyViT': MobileSAMTinyViT, 'MobileViT': MobileViT, 'MobileViTV2': MobileViTV2,
     }
-    # build backbone
-    backbone_type = backbone_cfg.pop('type')
-    if 'selected_indices' in backbone_cfg: backbone_cfg.pop('selected_indices')
-    backbone = supported_backbones[backbone_type](**backbone_cfg)
-    # return
-    return backbone
+    def __init__(self, require_register_backbones=None, require_update_backbones=None):
+        if require_register_backbones and isinstance(require_register_backbones, dict):
+            for backbone_type, backbone in require_register_backbones.items():
+                self.register(backbone_type, backbone)
+        if require_update_backbones and isinstance(require_update_backbones, dict):
+            for backbone_type, backbone in require_update_backbones.items():
+                self.update(backbone_type, backbone)
+    '''build'''
+    def build(self, backbone_cfg):
+        backbone_cfg = copy.deepcopy(backbone_cfg)
+        backbone_type = backbone_cfg.pop('type')
+        if 'selected_indices' in backbone_cfg: backbone_cfg.pop('selected_indices')
+        backbone = self.REGISTERED_BACKBONES[backbone_type](**backbone_cfg)
+        return backbone
+    '''register'''
+    def register(self, backbone_type, backbone):
+        assert backbone_type not in self.REGISTERED_BACKBONES
+        self.REGISTERED_BACKBONES[backbone_type] = backbone
+    '''update'''
+    def update(self, backbone_type, backbone):
+        assert backbone_type in self.REGISTERED_BACKBONES
+        self.REGISTERED_BACKBONES[backbone_type] = backbone
+
+
+'''BuildBackbone'''
+BuildBackbone = BackboneBuilder().build

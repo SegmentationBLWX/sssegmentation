@@ -1,6 +1,6 @@
 '''
 Function:
-    Implementation of BuildDropout
+    Implementation of DropoutBuilder and BuildDropout
 Author:
     Zhenchao Jin
 '''

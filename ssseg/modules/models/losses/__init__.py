@@ -1,3 +1,3 @@
 '''initialize'''
-from .builder import BuildLoss
 from .accuracy import calculateaccuracy
+from .builder import LossBuilder, BuildLoss
