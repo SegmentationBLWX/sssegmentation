@@ -74,8 +74,8 @@ class LayerNorm(nn.Module):
 
 '''BuildNormalization'''
 BuildNormalization = NormalizationBuilder(
-    require_update_normalizations={'LayerNorm', LayerNorm}
-)
+    require_update_normalizations={'LayerNorm': LayerNorm}
+).build
 
 
 '''ConvNeXtV2Block'''
@@ -107,14 +107,14 @@ class ConvNeXtV2Block(nn.Module):
 '''ConvNeXtV2'''
 class ConvNeXtV2(nn.Module):
     arch_settings = {
-        'atto': {'depth': [2, 2, 6, 2], 'dims': [40, 80, 160, 320]},
-        'femto': {'depth': [2, 2, 6, 2], 'dims': [48, 96, 192, 384]},
-        'pico': {'depth': [2, 2, 6, 2], 'dims': [64, 128, 256, 512]},
-        'nano': {'depth': [2, 2, 8, 2], 'dims': [80, 160, 320, 640]},
-        'tiny': {'depth': [3, 3, 9, 3], 'dims': [96, 192, 384, 768]},
-        'base': {'depth': [3, 3, 27, 3], 'dims': [128, 256, 512, 1024]},
-        'large': {'depth': [3, 3, 27, 3], 'dims': [192, 384, 768, 1536]},
-        'huge': {'depth': [3, 3, 27, 3], 'dims': [352, 704, 1408, 2816]},
+        'atto': {'depths': [2, 2, 6, 2], 'dims': [40, 80, 160, 320]},
+        'femto': {'depths': [2, 2, 6, 2], 'dims': [48, 96, 192, 384]},
+        'pico': {'depths': [2, 2, 6, 2], 'dims': [64, 128, 256, 512]},
+        'nano': {'depths': [2, 2, 8, 2], 'dims': [80, 160, 320, 640]},
+        'tiny': {'depths': [3, 3, 9, 3], 'dims': [96, 192, 384, 768]},
+        'base': {'depths': [3, 3, 27, 3], 'dims': [128, 256, 512, 1024]},
+        'large': {'depths': [3, 3, 27, 3], 'dims': [192, 384, 768, 1536]},
+        'huge': {'depths': [3, 3, 27, 3], 'dims': [352, 704, 1408, 2816]},
     }
     def __init__(self, structure_type, in_channels=3, arch='tiny', drop_path_rate=0., out_indices=(0, 1, 2, 3), norm_cfg={'type': 'LayerNorm', 'eps': 1e-6}, 
                  act_cfg={'type': 'GELU'}, pretrained=True, pretrained_model_path=''):
@@ -199,4 +199,8 @@ class ConvNeXtV2(nn.Module):
         state_dict_convert = {}
         for key, value in state_dict.items():
             state_dict_convert[key.replace('backbone.', '')] = value
+            if 'grn.gamma' in key:
+                state_dict_convert[key] = value.reshape(1, 1, 1, -1)
+            if 'grn.beta' in key:
+                state_dict_convert[key] = value.reshape(1, 1, 1, -1)
         self.load_state_dict(state_dict_convert, strict=False)

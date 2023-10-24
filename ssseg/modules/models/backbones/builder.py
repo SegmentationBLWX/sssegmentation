@@ -20,6 +20,7 @@ from .convnext import ConvNeXt
 from .bisenetv1 import BiSeNetV1
 from .bisenetv2 import BiSeNetV2
 from .swin import SwinTransformer
+from .convnextv2 import ConvNeXtV2
 from .vit import VisionTransformer
 from .mit import MixVisionTransformer
 from .timmwrapper import TIMMBackbone
@@ -35,7 +36,7 @@ class BackboneBuilder():
         'ERFNet': ERFNet, 'ResNet': ResNet, 'ResNeSt': ResNeSt, 'PCPVT': PCPVT,
         'SVT': SVT, 'FastSCNN': FastSCNN, 'ConvNeXt': ConvNeXt, 'BiSeNetV1': BiSeNetV1,
         'BiSeNetV2': BiSeNetV2, 'SwinTransformer': SwinTransformer, 'VisionTransformer': VisionTransformer,
-        'MixVisionTransformer': MixVisionTransformer, 'TIMMBackbone': TIMMBackbone, 
+        'MixVisionTransformer': MixVisionTransformer, 'TIMMBackbone': TIMMBackbone, 'ConvNeXtV2': ConvNeXtV2,
         'MobileNetV2': MobileNetV2, 'MobileNetV3': MobileNetV3, 'MAE': MAE, 'SAMViT': SAMViT,
         'MobileSAMTinyViT': MobileSAMTinyViT, 'MobileViT': MobileViT, 'MobileViTV2': MobileViTV2,
     }
