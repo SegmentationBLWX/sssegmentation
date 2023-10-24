@@ -196,9 +196,11 @@ class MobileViT(nn.Module):
                 state_dict.pop(key)
             if 'attn.qkv' in key:
                 new_key = key.replace('attn.qkv.', 'attn.attn.in_proj_')
+                assert new_key not in state_dict
                 state_dict[new_key] = state_dict.pop(key)
             if 'attn.proj' in key:
                 new_key = key.replace('attn.proj', 'attn.attn.out_proj')
+                assert new_key not in state_dict
                 state_dict[new_key] = state_dict.pop(key)
         return state_dict
     '''makemobilevitlayer'''
@@ -416,18 +418,42 @@ class MobileVitV2Block(nn.Module):
 '''MobileViTV2'''
 class MobileViTV2(nn.Module):
     arch_settings = {
-        'mobilevitv2_050': [
+        'mobilevitv2_050': [[
             ['mobilenetv2', 32, 1, 1, 2], ['mobilenetv2', 64, 2, 2, 2], ['mobilevitv2', 128, 2, 0.5, 2, 1, 2, 2],
             ['mobilevitv2', 192, 2, 0.5, 4, 1, 2, 2], ['mobilevitv2', 256, 2, 0.5, 3, 1, 2, 2],
-        ],
+        ], 16],
+        'mobilevitv2_075': [[
+            ['mobilenetv2', 48, 1, 1, 2], ['mobilenetv2', 96, 2, 2, 2], ['mobilevitv2', 192, 2, 0.5, 2, 1, 2, 2],
+            ['mobilevitv2', 288, 2, 0.5, 4, 1, 2, 2], ['mobilevitv2', 384, 2, 0.5, 3, 1, 2, 2],
+        ], 24],
+        'mobilevitv2_100': [[
+            ['mobilenetv2', 64, 1, 1, 2], ['mobilenetv2', 128, 2, 2, 2], ['mobilevitv2', 256, 2, 0.5, 2, 1, 2, 2],
+            ['mobilevitv2', 384, 2, 0.5, 4, 1, 2, 2], ['mobilevitv2', 512, 2, 0.5, 3, 1, 2, 2],
+        ], 32],
+        'mobilevitv2_125': [[
+            ['mobilenetv2', 80, 1, 1, 2], ['mobilenetv2', 160, 2, 2, 2], ['mobilevitv2', 320, 2, 0.5, 2, 1, 2, 2],
+            ['mobilevitv2', 480, 2, 0.5, 4, 1, 2, 2], ['mobilevitv2', 640, 2, 0.5, 3, 1, 2, 2],
+        ], 40],
+        'mobilevitv2_150': [[
+            ['mobilenetv2', 96, 1, 1, 2], ['mobilenetv2', 192, 2, 2, 2], ['mobilevitv2', 384, 2, 0.5, 2, 1, 2, 2],
+            ['mobilevitv2', 576, 2, 0.5, 4, 1, 2, 2], ['mobilevitv2', 768, 2, 0.5, 3, 1, 2, 2],
+        ], 48],
+        'mobilevitv2_175': [[
+            ['mobilenetv2', 112, 1, 1, 2], ['mobilenetv2', 224, 2, 2, 2], ['mobilevitv2', 448, 2, 0.5, 2, 1, 2, 2],
+            ['mobilevitv2', 672, 2, 0.5, 4, 1, 2, 2], ['mobilevitv2', 896, 2, 0.5, 3, 1, 2, 2],
+        ], 56],
+        'mobilevitv2_200': [[
+            ['mobilenetv2', 128, 1, 1, 2], ['mobilenetv2', 256, 2, 2, 2], ['mobilevitv2', 512, 2, 0.5, 2, 1, 2, 2],
+            ['mobilevitv2', 768, 2, 0.5, 4, 1, 2, 2], ['mobilevitv2', 1024, 2, 0.5, 3, 1, 2, 2],
+        ], 64],
     }
-    def __init__(self, structure_type, arch='mobilevitv2_050', in_channels=3, stem_channels=16, out_indices=(4, ), norm_cfg=dict(type='SyncBatchNorm'), 
+    def __init__(self, structure_type, arch='mobilevitv2_050', in_channels=3, out_indices=(4, ), norm_cfg=dict(type='SyncBatchNorm'), 
                  act_cfg=dict(type='SiLU', inplace=True), pretrained=True, pretrained_model_path=''):
         super(MobileViTV2, self).__init__()
         # assert
         arch = arch.lower()
         assert arch in self.arch_settings
-        arch = self.arch_settings[arch]
+        arch, stem_channels = self.arch_settings[arch]
         if isinstance(out_indices, int): out_indices = [out_indices]
         assert isinstance(out_indices, collections.Sequence)
         # set attributes
@@ -462,45 +488,36 @@ class MobileViTV2(nn.Module):
         # load pretrained weights
         if pretrained and os.path.exists(pretrained_model_path):
             checkpoint = torch.load(pretrained_model_path, map_location='cpu')
-            if 'state_dict' in checkpoint: 
-                state_dict = checkpoint['state_dict']
-            else: 
-                state_dict = checkpoint
-            keys = list(state_dict.keys())
-            for key in keys:
-                if key.startswith('backbone.'):
-                    value = state_dict.pop(key)
-                    key = '.'.join(key.split('.')[1:])
-                    state_dict[key] = value
-                if key.startswith('head'):
-                    state_dict.pop(key)
+            state_dict = self.convertstatedict(checkpoint)
             self.load_state_dict(state_dict, strict=True)
         elif pretrained:
             checkpoint = model_zoo.load_url(DEFAULT_MODEL_URLS[structure_type], map_location='cpu')
-            if 'state_dict' in checkpoint: 
-                state_dict = checkpoint['state_dict']
-            else: 
-                state_dict = checkpoint
-            keys = list(state_dict.keys())
-            for key in keys:
-                if key.startswith('head'):
-                    state_dict.pop(key)
-                if 'conv1_1x1' in key:
-                    new_key = key.replace('conv1_1x1', 'conv')
-                    state_dict[new_key] = state_dict.pop(key)
-                if 'conv2_kxk' in key:
-                    new_key = key.replace('conv2_kxk', 'conv')
-                    state_dict[new_key] = state_dict.pop(key)
-                if 'conv3_1x1' in key:
-                    new_key = key.replace('conv3_1x1', 'conv')
-                    state_dict[new_key] = state_dict.pop(key)
-                if 'attn.qkv' in key:
-                    new_key = key.replace('attn.qkv.', 'attn.attn.in_proj_')
-                    state_dict[new_key] = state_dict.pop(key)
-                if 'attn.proj' in key:
-                    new_key = key.replace('attn.proj', 'attn.attn.out_proj')
-                    state_dict[new_key] = state_dict.pop(key)
+            state_dict = self.convertstatedict(checkpoint)
             self.load_state_dict(state_dict, strict=True)
+    '''convertstatedict'''
+    @staticmethod
+    def convertstatedict(checkpoint):
+        if 'state_dict' in checkpoint: 
+            state_dict = checkpoint['state_dict']
+        else: 
+            state_dict = checkpoint
+        keys = list(state_dict.keys())
+        for key in keys:
+            if key.startswith('head'):
+                state_dict.pop(key)
+            if 'conv1_1x1' in key:
+                new_key = key.replace('conv1_1x1', 'conv.0')
+                assert new_key not in state_dict, new_key
+                state_dict[new_key] = state_dict.pop(key)
+            if 'conv2_kxk' in key:
+                new_key = key.replace('conv2_kxk', 'conv.1')
+                assert new_key not in state_dict, new_key
+                state_dict[new_key] = state_dict.pop(key)
+            if 'conv3_1x1' in key:
+                new_key = key.replace('conv3_1x1', 'conv.2')
+                assert new_key not in state_dict, new_key
+                state_dict[new_key] = state_dict.pop(key)
+        return state_dict
     '''makemobilenetv2layer'''
     @staticmethod
     def makemobilenetv2layer(in_channels, norm_cfg, act_cfg, out_channels, stride, num_blocks, expand_ratio=2):
