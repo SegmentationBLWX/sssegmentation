@@ -12,252 +12,68 @@
 
 ## Supported Backbones
 
-**1.UNet**
+The supported backbones in SSSegmentation are summarized as following table,
 
-- Related Paper: [click](https://arxiv.org/pdf/1505.04597.pdf),
-- Reported Performance: [click](https://github.com/SegmentationBLWX/sssegmentation/tree/main/docs/modelzoo/unet).
-
-**2.Twins**
-
-- Related Paper: [click](https://arxiv.org/pdf/2104.13840.pdf),
-- Reported Performance: [click](https://github.com/SegmentationBLWX/sssegmentation/tree/main/docs/modelzoo/twins).
-
-**3.CGNet**
-
-- Related Paper: [click](https://arxiv.org/pdf/1811.08201.pdf),
-- Reported Performance: [click](https://github.com/SegmentationBLWX/sssegmentation/tree/main/docs/modelzoo/cgnet).
-
-**4.HRNet**
-
-- Related Paper: [click](https://arxiv.org/pdf/1908.07919.pdf).
-
-**5.ERFNet**
-
-- Related Paper: [click](https://ieeexplore.ieee.org/document/8063438),
-- Reported Performance: [click](https://github.com/SegmentationBLWX/sssegmentation/tree/main/docs/modelzoo/erfnet).
-
-**6.ResNet**
-
-- Related Paper: [click](https://arxiv.org/pdf/1512.03385.pdf).
-
-**7.ResNeSt**
-
-- Related Paper: [click](https://arxiv.org/pdf/2004.08955.pdf),
-- Reported Performance: [click](https://github.com/SegmentationBLWX/sssegmentation/tree/main/docs/modelzoo/resnest).
-
-**8.FastSCNN**
-
-- Related Paper: [click](https://arxiv.org/pdf/1902.04502.pdf),
-- Reported Performance: [click](https://github.com/SegmentationBLWX/sssegmentation/tree/main/docs/modelzoo/fastscnn).
-
-**9.BiSeNetV1**
-
-- Related Paper: [click](https://arxiv.org/pdf/1808.00897.pdf),
-- Reported Performance: [click](https://github.com/SegmentationBLWX/sssegmentation/tree/main/docs/modelzoo/bisenetv1).
-
-**10.BiSeNetV2**
-
-- Related Paper: [click](https://arxiv.org/pdf/2004.02147.pdf),
-- Reported Performance: [click](https://github.com/SegmentationBLWX/sssegmentation/tree/main/docs/modelzoo/bisenetv2).
-
-**11.MobileNetV2**
-
-- Related Paper: [click](https://arxiv.org/pdf/1801.04381.pdf),
-- Reported Performance: [click](https://github.com/SegmentationBLWX/sssegmentation/tree/main/docs/modelzoo/mobilenet).
-
-**12.MobileNetV3**
-
-- Related Paper: [click](https://arxiv.org/pdf/1905.02244.pdf),
-- Reported Performance: [click](https://github.com/SegmentationBLWX/sssegmentation/tree/main/docs/modelzoo/mobilenet).
-
-**13.SwinTransformer**
-
-- Related Paper: [click](https://arxiv.org/pdf/2103.14030.pdf),
-- Reported Performance: [click](https://github.com/SegmentationBLWX/sssegmentation/tree/main/docs/modelzoo/swin).
-
-**14.VisionTransformer**
-
-- Related Paper: [click](https://arxiv.org/pdf/2010.11929.pdf).
-
-**15.ConvNeXt**
-
-- Related Paper: [click](https://arxiv.org/pdf/2201.03545.pdf),
-- Reported Performance: [click](https://github.com/SegmentationBLWX/sssegmentation/tree/main/docs/modelzoo/convnext).
-
-**16.MAE**
-
-- Related Paper: [click](https://arxiv.org/pdf/2111.06377.pdf),
-- Reported Performance: [click](https://github.com/SegmentationBLWX/sssegmentation/tree/main/docs/modelzoo/mae).
+| Backbone               | Model Zoo                                                                                               | Paper Link                                                    | Code Snippet                                                                                                        |
+| :-:                    | :-:                                                                                                     | :-:                                                           | :-:                                                                                                                 |
+| MobileViTV2            | [Click](https://github.com/SegmentationBLWX/sssegmentation/tree/main/docs/modelzoo/mobilevit)           | [ArXiv 2022](https://arxiv.org/pdf/2206.02680.pdf)            | [Click](https://github.com/SegmentationBLWX/sssegmentation/tree/main/ssseg/modules/models/backbones/mobilevit.py)   |
+| ConvNeXt               | [Click](https://github.com/SegmentationBLWX/sssegmentation/tree/main/docs/modelzoo/convnext)            | [CVPR 2022](https://arxiv.org/pdf/2201.03545.pdf)             | [Click](https://github.com/SegmentationBLWX/sssegmentation/tree/main/ssseg/modules/models/backbones/convnext.py)    |
+| MAE                    | [Click](https://github.com/SegmentationBLWX/sssegmentation/tree/main/docs/modelzoo/mae)                 | [CVPR 2022](https://arxiv.org/pdf/2111.06377.pdf)             | [Click](https://github.com/SegmentationBLWX/sssegmentation/tree/main/ssseg/modules/models/backbones/mae.py)         |
+| MobileViT              | [Click](https://github.com/SegmentationBLWX/sssegmentation/tree/main/docs/modelzoo/mobilevit)           | [ICLR 2022](https://arxiv.org/pdf/2110.02178.pdf)             | [Click](https://github.com/SegmentationBLWX/sssegmentation/tree/main/ssseg/modules/models/backbones/mobilevit.py)   |
+| BEiT                   | [Click](https://github.com/SegmentationBLWX/sssegmentation/tree/main/docs/modelzoo/beit)                | [ICLR 2022](https://arxiv.org/pdf/2106.08254.pdf)             | [Click](https://github.com/SegmentationBLWX/sssegmentation/tree/main/ssseg/modules/models/backbones/beit.py)        |
+| Twins                  | [Click](https://github.com/SegmentationBLWX/sssegmentation/tree/main/docs/modelzoo/twins)               | [NeurIPS 2021](https://arxiv.org/pdf/2104.13840.pdf)          | [Click](https://github.com/SegmentationBLWX/sssegmentation/tree/main/ssseg/modules/models/backbones/twins.py)       |
+| SwinTransformer        | [Click](https://github.com/SegmentationBLWX/sssegmentation/tree/main/docs/modelzoo/swin)                | [ICCV 2021](https://arxiv.org/pdf/2103.14030.pdf)             | [Click](https://github.com/SegmentationBLWX/sssegmentation/tree/main/ssseg/modules/models/backbones/swin.py)        |
+| VisionTransformer      | [Click](https://github.com/SegmentationBLWX/sssegmentation/tree/main/docs/modelzoo/setr)                | [IClR 2021](https://arxiv.org/pdf/2010.11929.pdf)             | [Click](https://github.com/SegmentationBLWX/sssegmentation/tree/main/ssseg/modules/models/backbones/vit.py)         |
+| BiSeNetV2              | [Click](https://github.com/SegmentationBLWX/sssegmentation/tree/main/docs/modelzoo/bisenetv2)           | [IJCV 2021](https://arxiv.org/pdf/2004.02147.pdf)             | [Click](https://github.com/SegmentationBLWX/sssegmentation/tree/main/ssseg/modules/models/backbones/bisenetv2.py)   |
+| ResNeSt                | [Click](https://github.com/SegmentationBLWX/sssegmentation/tree/main/docs/modelzoo/resnest)             | [ArXiv 2020](https://arxiv.org/pdf/2004.08955.pdf)            | [Click](https://github.com/SegmentationBLWX/sssegmentation/tree/main/ssseg/modules/models/backbones/resnest.py)     |
+| CGNet                  | [Click](https://github.com/SegmentationBLWX/sssegmentation/tree/main/docs/modelzoo/cgnet)               | [TIP 2020](https://arxiv.org/pdf/1811.08201.pdf)              | [Click](https://github.com/SegmentationBLWX/sssegmentation/tree/main/ssseg/modules/models/backbones/cgnet.py)       |
+| HRNet                  | [Click](https://github.com/SegmentationBLWX/sssegmentation/tree/main/docs/modelzoo/ocrnet)              | [CVPR 2019](https://arxiv.org/pdf/1908.07919.pdf)             | [Click](https://github.com/SegmentationBLWX/sssegmentation/tree/main/ssseg/modules/models/backbones/hrnet.py)       |
+| MobileNetV3            | [Click](https://github.com/SegmentationBLWX/sssegmentation/tree/main/docs/modelzoo/mobilenet)           | [ICCV 2019](https://arxiv.org/pdf/1905.02244.pdf)             | [Click](https://github.com/SegmentationBLWX/sssegmentation/tree/main/ssseg/modules/models/backbones/mobilenet.py)   |
+| FastSCNN               | [Click](https://github.com/SegmentationBLWX/sssegmentation/tree/main/docs/modelzoo/fastscnn)            | [ArXiv 2019](https://arxiv.org/pdf/1902.04502.pdf)            | [Click](https://github.com/SegmentationBLWX/sssegmentation/tree/main/ssseg/modules/models/backbones/fastscnn.py)    |
+| BiSeNetV1              | [Click](https://github.com/SegmentationBLWX/sssegmentation/tree/main/docs/modelzoo/bisenetv1)           | [ECCV 2018](https://arxiv.org/pdf/1808.00897.pdf)             | [Click](https://github.com/SegmentationBLWX/sssegmentation/tree/main/ssseg/modules/models/backbones/bisenetv1.py)   |
+| MobileNetV2            | [Click](https://github.com/SegmentationBLWX/sssegmentation/tree/main/docs/modelzoo/mobilenet)           | [CVPR 2018](https://arxiv.org/pdf/1801.04381.pdf)             | [Click](https://github.com/SegmentationBLWX/sssegmentation/tree/main/ssseg/modules/models/backbones/mobilenet.py)   |
+| ERFNet                 | [Click](https://github.com/SegmentationBLWX/sssegmentation/tree/main/docs/modelzoo/erfnet)              | [T-ITS 2017](https://ieeexplore.ieee.org/document/8063438)    | [Click](https://github.com/SegmentationBLWX/sssegmentation/tree/main/ssseg/modules/models/backbones/erfnet.py)      |
+| ResNet                 | [Click](https://github.com/SegmentationBLWX/sssegmentation/tree/main/docs/modelzoo/fcn)                 | [CVPR 2016](https://arxiv.org/pdf/1512.03385.pdf)             | [Click](https://github.com/SegmentationBLWX/sssegmentation/tree/main/ssseg/modules/models/backbones/resnet.py)      |
+| UNet                   | [Click](https://github.com/SegmentationBLWX/sssegmentation/tree/main/docs/modelzoo/unet)                | [MICCAI 2015](https://arxiv.org/pdf/1505.04597.pdf)           | [Click](https://github.com/SegmentationBLWX/sssegmentation/tree/main/ssseg/modules/models/backbones/unet.py)        |
 
 
 ## Supported Segmentors
 
-**1.FCN**
-
-- Related Paper: [click](https://arxiv.org/pdf/1411.4038.pdf),
-- Reported Performance: [click](https://github.com/SegmentationBLWX/sssegmentation/tree/main/docs/modelzoo/fcn).
-
-**2.CE2P**
-
-- Related Paper: [click](https://arxiv.org/pdf/1809.05996.pdf),
-- Reported Performance: [click](https://github.com/SegmentationBLWX/sssegmentation/tree/main/docs/modelzoo/ce2p).
-
-**3.SETR**
-
-- Related Paper: [click](https://arxiv.org/pdf/2012.15840.pdf),
-- Reported Performance: [click](https://github.com/SegmentationBLWX/sssegmentation/tree/main/docs/modelzoo/setr).
-
-**4.ISNet**
-
-- Related Paper: [click](https://arxiv.org/pdf/2108.12382.pdf),
-- Reported Performance: [click](https://github.com/SegmentationBLWX/sssegmentation/tree/main/docs/modelzoo/isnet).
-
-**5.ICNet**
-
-- Related Paper: [click](https://arxiv.org/pdf/1704.08545.pdf),
-- Reported Performance: [click](https://github.com/SegmentationBLWX/sssegmentation/tree/main/docs/modelzoo/icnet).
-
-**6.CCNet**
-
-- Related Paper: [click](https://arxiv.org/pdf/1811.11721.pdf),
-- Reported Performance: [click](https://github.com/SegmentationBLWX/sssegmentation/tree/main/docs/modelzoo/ccnet).
-
-**7.DANet**
-
-- Related Paper: [click](https://arxiv.org/pdf/1809.02983.pdf),
-- Reported Performance: [click](https://github.com/SegmentationBLWX/sssegmentation/tree/main/docs/modelzoo/danet).
-
-**8.GCNet**
-
-- Related Paper: [click](https://arxiv.org/pdf/1904.11492.pdf),
-- Reported Performance: [click](https://github.com/SegmentationBLWX/sssegmentation/tree/main/docs/modelzoo/gcnet).
-
-**9.DMNet**
-
-- Related Paper: [click](https://openaccess.thecvf.com/content_ICCV_2019/papers/He_Dynamic_Multi-Scale_Filters_for_Semantic_Segmentation_ICCV_2019_paper.pdf),
-- Reported Performance: [click](https://github.com/SegmentationBLWX/sssegmentation/tree/main/docs/modelzoo/dmnet).
-
-**10.ISANet**
-
-- Related Paper: [click](https://arxiv.org/pdf/1907.12273.pdf),
-- Reported Performance: [click](https://github.com/SegmentationBLWX/sssegmentation/tree/main/docs/modelzoo/isanet).
-
-**11.EncNet**
-
-- Related Paper: [click](https://arxiv.org/pdf/1803.08904.pdf),
-- Reported Performance: [click](https://github.com/SegmentationBLWX/sssegmentation/tree/main/docs/modelzoo/encnet).
-
-**12.OCRNet**
-
-- Related Paper: [click](https://arxiv.org/pdf/1909.11065.pdf),
-- Reported Performance: [click](https://github.com/SegmentationBLWX/sssegmentation/tree/main/docs/modelzoo/ocrnet).
-
-**13.DNLNet**
-
-- Related Paper: [click](https://arxiv.org/pdf/2006.06668.pdf),
-- Reported Performance: [click](https://github.com/SegmentationBLWX/sssegmentation/tree/main/docs/modelzoo/dnlnet).
-
-**14.ANNNet**
-
-- Related Paper: [click](https://arxiv.org/pdf/1908.07678.pdf),
-- Reported Performance: [click](https://github.com/SegmentationBLWX/sssegmentation/tree/main/docs/modelzoo/annnet).
-
-**15.EMANet**
-
-- Related Paper: [click](https://arxiv.org/pdf/1907.13426.pdf),
-- Reported Performance: [click](https://github.com/SegmentationBLWX/sssegmentation/tree/main/docs/modelzoo/emanet).
-
-**16.PSPNet**
-
-- Related Paper: [click](https://arxiv.org/pdf/1612.01105.pdf),
-- Reported Performance: [click](https://github.com/SegmentationBLWX/sssegmentation/tree/main/docs/modelzoo/pspnet).
-
-**17.PSANet**
-
-- Related Paper: [click](https://openaccess.thecvf.com/content_ECCV_2018/papers/Hengshuang_Zhao_PSANet_Point-wise_Spatial_ECCV_2018_paper.pdf),
-- Reported Performance: [click](https://github.com/SegmentationBLWX/sssegmentation/tree/main/docs/modelzoo/psanet).
-
-**18.APCNet**
-
-- Related Paper: [click](https://openaccess.thecvf.com/content_CVPR_2019/papers/He_Adaptive_Pyramid_Context_Network_for_Semantic_Segmentation_CVPR_2019_paper.pdf),
-- Reported Performance: [click](https://github.com/SegmentationBLWX/sssegmentation/tree/main/docs/modelzoo/apcnet).
-
-**19.FastFCN**
-
-- Related Paper: [click](https://arxiv.org/pdf/1903.11816.pdf),
-- Reported Performance: [click](https://github.com/SegmentationBLWX/sssegmentation/tree/main/docs/modelzoo/fastfcn).
-
-**20.UPerNet**
-
-- Related Paper: [click](https://arxiv.org/pdf/1807.10221.pdf),
-- Reported Performance: [click](https://github.com/SegmentationBLWX/sssegmentation/tree/main/docs/modelzoo/upernet).
-
-**21.PointRend**
-
-- Related Paper: [click](https://arxiv.org/pdf/1912.08193.pdf),
-- Reported Performance: [click](https://github.com/SegmentationBLWX/sssegmentation/tree/main/docs/modelzoo/pointrend).
-
-**22.Deeplabv3**
-
-- Related Paper: [click](https://arxiv.org/pdf/1706.05587.pdf),
-- Reported Performance: [click](https://github.com/SegmentationBLWX/sssegmentation/tree/main/docs/modelzoo/deeplabv3).
-
-**23.Segformer**
-
-- Related Paper: [click](https://arxiv.org/pdf/2105.15203.pdf),
-- Reported Performance: [click](https://github.com/SegmentationBLWX/sssegmentation/tree/main/docs/modelzoo/segformer).
-
-**24.MaskFormer**
-
-- Related Paper: [click](https://arxiv.org/pdf/2107.06278.pdf),
-- Reported Performance: [click](https://github.com/SegmentationBLWX/sssegmentation/tree/main/docs/modelzoo/maskformer).
-
-**25.SemanticFPN**
-
-- Related Paper: [click](https://arxiv.org/pdf/1901.02446.pdf),
-- Reported Performance: [click](https://github.com/SegmentationBLWX/sssegmentation/tree/main/docs/modelzoo/semanticfpn).
-
-**26.NonLocalNet**
-
-- Related Paper: [click](https://arxiv.org/pdf/1711.07971.pdf),
-- Reported Performance: [click](https://github.com/SegmentationBLWX/sssegmentation/tree/main/docs/modelzoo/nonlocalnet).
-
-**27.Deeplabv3Plus**
-
-- Related Paper: [click](https://arxiv.org/pdf/1802.02611.pdf),
-- Reported Performance: [click](https://github.com/SegmentationBLWX/sssegmentation/tree/main/docs/modelzoo/deeplabv3plus).
-
-**28.MemoryNet-MCIBI**
-
-- Related Paper: [click](https://arxiv.org/pdf/2108.11819.pdf),
-- Reported Performance: [click](https://github.com/SegmentationBLWX/sssegmentation/tree/main/docs/modelzoo/memorynet).
-
-**29.MemoryNetV2-MCIBI++**
-
-- Related Paper: [click](https://arxiv.org/pdf/2209.04471.pdf),
-- Reported Performance: [click](https://github.com/SegmentationBLWX/sssegmentation/tree/main/docs/modelzoo/memorynetv2).
-
-**30.Mixed Precision (FP16) Training**
-
-- Related Paper: [click](https://arxiv.org/pdf/1710.03740.pdf),
-- Reported Performance: [click](https://github.com/SegmentationBLWX/sssegmentation/tree/main/docs/modelzoo/fp16).
-
-**31.SAM**
-
-- Related Paper: [click](https://arxiv.org/pdf/2304.02643.pdf),
-- Reported Performance: [click](https://github.com/SegmentationBLWX/sssegmentation/tree/main/docs/modelzoo/sam).
-
-**32.MobileSAM**
-
-- Related Paper: [click](https://arxiv.org/pdf/2306.14289.pdf),
-- Reported Performance: [click](https://github.com/SegmentationBLWX/sssegmentation/tree/main/docs/modelzoo/mobilesam).
-
-**33.IDRNet**
-
-- Related Paper: [click](https://arxiv.org/pdf/2310.10755.pdf),
-- Reported Performance: [click](https://github.com/SegmentationBLWX/sssegmentation/tree/main/docs/modelzoo/idrnet).
-
-**34.Mask2Former**
-
-- Related Paper: [click](https://arxiv.org/pdf/2112.01527.pdf),
-- Reported Performance: [click](https://github.com/SegmentationBLWX/sssegmentation/tree/main/docs/modelzoo/mask2former).
+The supported segmentors in SSSegmentation are summarized as following table,
+
+| Segmentor                         | Model Zoo                                                                                               | Paper Link                                                                                                                                              | Code Snippet                                                                                                                           |
+| :-:                               | :-:                                                                                                     | :-:                                                                                                                                                     | :-:                                                                                                                                    |
+| IDRNet                            | [Click](https://github.com/SegmentationBLWX/sssegmentation/tree/main/docs/modelzoo/idrnet)              | [NeurIPS 2023](https://arxiv.org/pdf/2310.10755.pdf)                                                                                                    | [Click](https://github.com/SegmentationBLWX/sssegmentation/tree/main/ssseg/modules/models/segmentors/idrnet/idrnet.py)                 |
+| MobileSAM                         | [Click](https://github.com/SegmentationBLWX/sssegmentation/tree/main/docs/modelzoo/mobilesam)           | [ArXiv 2023](https://arxiv.org/pdf/2306.14289.pdf)                                                                                                      | [Click](https://github.com/SegmentationBLWX/sssegmentation/tree/main/ssseg/modules/models/segmentors/mobilesam/mobilesam.py)           |
+| SAM                               | [Click](https://github.com/SegmentationBLWX/sssegmentation/tree/main/docs/modelzoo/sam)                 | [ArXiv 2023](https://arxiv.org/pdf/2304.02643.pdf)                                                                                                      | [Click](https://github.com/SegmentationBLWX/sssegmentation/tree/main/ssseg/modules/models/segmentors/sam/sam.py)                       |
+| MemoryNet-MCIBI++                 | [Click](https://github.com/SegmentationBLWX/sssegmentation/tree/main/docs/modelzoo/memorynetv2)         | [TPAMI 2022](https://arxiv.org/pdf/2209.04471.pdf)                                                                                                      | [Click](https://github.com/SegmentationBLWX/sssegmentation/tree/main/ssseg/modules/models/segmentors/memorynetv2/memorynetv2.py)       |
+| Mask2Former                       | [Click](https://github.com/SegmentationBLWX/sssegmentation/tree/main/docs/modelzoo/mask2former)         | [CVPR 2022](https://arxiv.org/pdf/2112.01527.pdf)                                                                                                       | [Click](https://github.com/SegmentationBLWX/sssegmentation/tree/main/ssseg/modules/models/segmentors/mask2former/mask2former.py)       |
+| ISNet                             | [Click](https://github.com/SegmentationBLWX/sssegmentation/tree/main/docs/modelzoo/isnet)               | [ICCV 2021](https://arxiv.org/pdf/2108.12382.pdf)                                                                                                       | [Click](https://github.com/SegmentationBLWX/sssegmentation/tree/main/ssseg/modules/models/segmentors/isnet/isnet.py)                   |
+| MemoryNet-MCIBI                   | [Click](https://github.com/SegmentationBLWX/sssegmentation/tree/main/docs/modelzoo/memorynet)           | [ICCV 2021](https://arxiv.org/pdf/2108.11819.pdf)                                                                                                       | [Click](https://github.com/SegmentationBLWX/sssegmentation/tree/main/ssseg/modules/models/segmentors/memorynet/memorynet.py)           |
+| MaskFormer                        | [Click](https://github.com/SegmentationBLWX/sssegmentation/tree/main/docs/modelzoo/maskformer)          | [NeurIPS 2021](https://arxiv.org/pdf/2107.06278.pdf)                                                                                                    | [Click](https://github.com/SegmentationBLWX/sssegmentation/tree/main/ssseg/modules/models/segmentors/maskformer/maskformer.py)         |
+| Segformer                         | [Click](https://github.com/SegmentationBLWX/sssegmentation/tree/main/docs/modelzoo/segformer)           | [NeurIPS 2021](https://arxiv.org/pdf/2105.15203.pdf)                                                                                                    | [Click](https://github.com/SegmentationBLWX/sssegmentation/tree/main/ssseg/modules/models/segmentors/segformer/segformer.py)           |
+| SETR                              | [Click](https://github.com/SegmentationBLWX/sssegmentation/tree/main/docs/modelzoo/setr)                | [CVPR 2021](https://arxiv.org/pdf/2012.15840.pdf)                                                                                                       | [Click](https://github.com/SegmentationBLWX/sssegmentation/tree/main/ssseg/modules/models/segmentors/setr/setr.py)                     |
+| ISANet                            | [Click](https://github.com/SegmentationBLWX/sssegmentation/tree/main/docs/modelzoo/isanet)              | [IJCV 2021](https://arxiv.org/pdf/1907.12273.pdf)                                                                                                       | [Click](https://github.com/SegmentationBLWX/sssegmentation/tree/main/ssseg/modules/models/segmentors/isanet/isanet.py)                 |
+| DNLNet                            | [Click](https://github.com/SegmentationBLWX/sssegmentation/tree/main/docs/modelzoo/dnlnet)              | [ECCV 2020](https://arxiv.org/pdf/2006.06668.pdf)                                                                                                       | [Click](https://github.com/SegmentationBLWX/sssegmentation/tree/main/ssseg/modules/models/segmentors/dnlnet/dnlnet.py)                 |
+| PointRend                         | [Click](https://github.com/SegmentationBLWX/sssegmentation/tree/main/docs/modelzoo/pointrend)           | [CVPR 2020](https://arxiv.org/pdf/1912.08193.pdf)                                                                                                       | [Click](https://github.com/SegmentationBLWX/sssegmentation/tree/main/ssseg/modules/models/segmentors/pointrend/pointrend.py)           |
+| OCRNet                            | [Click](https://github.com/SegmentationBLWX/sssegmentation/tree/main/docs/modelzoo/ocrnet)              | [ECCV 2020](https://arxiv.org/pdf/1909.11065.pdf)                                                                                                       | [Click](https://github.com/SegmentationBLWX/sssegmentation/tree/main/ssseg/modules/models/segmentors/ocrnet/ocrnet.py)                 |
+| GCNet                             | [Click](https://github.com/SegmentationBLWX/sssegmentation/tree/main/docs/modelzoo/gcnet)               | [TPAMI 2020](https://arxiv.org/pdf/1904.11492.pdf)                                                                                                      | [Click](https://github.com/SegmentationBLWX/sssegmentation/tree/main/ssseg/modules/models/segmentors/gcnet/gcnet.py)                   |
+| APCNet                            | [Click](https://github.com/SegmentationBLWX/sssegmentation/tree/main/docs/modelzoo/apcnet)              | [CVPR 2019](https://openaccess.thecvf.com/content_CVPR_2019/papers/He_Adaptive_Pyramid_Context_Network_for_Semantic_Segmentation_CVPR_2019_paper.pdf)   | [Click](https://github.com/SegmentationBLWX/sssegmentation/tree/main/ssseg/modules/models/segmentors/apcnet/apcnet.py)                 |
+| DMNet                             | [Click](https://github.com/SegmentationBLWX/sssegmentation/tree/main/docs/modelzoo/dmnet)               | [ICCV 2019](https://openaccess.thecvf.com/content_ICCV_2019/papers/He_Dynamic_Multi-Scale_Filters_for_Semantic_Segmentation_ICCV_2019_paper.pdf)        | [Click](https://github.com/SegmentationBLWX/sssegmentation/tree/main/ssseg/modules/models/segmentors/dmnet/dmnet.py)                   |
+| ANNNet                            | [Click](https://github.com/SegmentationBLWX/sssegmentation/tree/main/docs/modelzoo/annnet)              | [ICCV 2019](https://arxiv.org/pdf/1908.07678.pdf)                                                                                                       | [Click](https://github.com/SegmentationBLWX/sssegmentation/tree/main/ssseg/modules/models/segmentors/annnet/annnet.py)                 |
+| EMANet                            | [Click](https://github.com/SegmentationBLWX/sssegmentation/tree/main/docs/modelzoo/emanet)              | [ICCV 2019](https://arxiv.org/pdf/1907.13426.pdf)                                                                                                       | [Click](https://github.com/SegmentationBLWX/sssegmentation/tree/main/ssseg/modules/models/segmentors/emanet/emanet.py)                 |
+| FastFCN                           | [Click](https://github.com/SegmentationBLWX/sssegmentation/tree/main/docs/modelzoo/fastfcn)             | [ArXiv 2019](https://arxiv.org/pdf/1903.11816.pdf)                                                                                                      | [Click](https://github.com/SegmentationBLWX/sssegmentation/tree/main/ssseg/modules/models/segmentors/fastfcn/fastfcn.py)               |
+| SemanticFPN                       | [Click](https://github.com/SegmentationBLWX/sssegmentation/tree/main/docs/modelzoo/semanticfpn)         | [CVPR 2019](https://arxiv.org/pdf/1901.02446.pdf)                                                                                                       | [Click](https://github.com/SegmentationBLWX/sssegmentation/tree/main/ssseg/modules/models/segmentors/semanticfpn/semanticfpn.py)       |
+| CCNet                             | [Click](https://github.com/SegmentationBLWX/sssegmentation/tree/main/docs/modelzoo/ccnet)               | [ICCV 2019](https://arxiv.org/pdf/1811.11721.pdf)                                                                                                       | [Click](https://github.com/SegmentationBLWX/sssegmentation/tree/main/ssseg/modules/models/segmentors/ccnet/ccnet.py)                   |
+| CE2P                              | [Click](https://github.com/SegmentationBLWX/sssegmentation/tree/main/docs/modelzoo/ce2p)                | [AAAI 2019](https://arxiv.org/pdf/1809.05996.pdf)                                                                                                       | [Click](https://github.com/SegmentationBLWX/sssegmentation/tree/main/ssseg/modules/models/segmentors/ce2p/ce2p.py)                     |
+| DANet                             | [Click](https://github.com/SegmentationBLWX/sssegmentation/tree/main/docs/modelzoo/danet)               | [CVPR 2019](https://arxiv.org/pdf/1809.02983.pdf)                                                                                                       | [Click](https://github.com/SegmentationBLWX/sssegmentation/tree/main/ssseg/modules/models/segmentors/danet/danet.py)                   |
+| PSANet                            | [Click](https://github.com/SegmentationBLWX/sssegmentation/tree/main/docs/modelzoo/psanet)              | [ECCV 2018](https://openaccess.thecvf.com/content_ECCV_2018/papers/Hengshuang_Zhao_PSANet_Point-wise_Spatial_ECCV_2018_paper.pdf)                       | [Click](https://github.com/SegmentationBLWX/sssegmentation/tree/main/ssseg/modules/models/segmentors/psanet/psanet.py)                 |
+| UPerNet                           | [Click](https://github.com/SegmentationBLWX/sssegmentation/tree/main/docs/modelzoo/upernet)             | [ECCV 2018](https://arxiv.org/pdf/1807.10221.pdf)                                                                                                       | [Click](https://github.com/SegmentationBLWX/sssegmentation/tree/main/ssseg/modules/models/segmentors/upernet/upernet.py)               |
+| EncNet                            | [Click](https://github.com/SegmentationBLWX/sssegmentation/tree/main/docs/modelzoo/encnet)              | [CVPR 2018](https://arxiv.org/pdf/1803.08904.pdf)                                                                                                       | [Click](https://github.com/SegmentationBLWX/sssegmentation/tree/main/ssseg/modules/models/segmentors/encnet/encnet.py)                 |
+| Deeplabv3Plus                     | [Click](https://github.com/SegmentationBLWX/sssegmentation/tree/main/docs/modelzoo/deeplabv3plus)       | [ECCV 2018](https://arxiv.org/pdf/1802.02611.pdf)                                                                                                       | [Click](https://github.com/SegmentationBLWX/sssegmentation/tree/main/ssseg/modules/models/segmentors/deeplabv3plus/deeplabv3plus.py)   |
+| NonLocalNet                       | [Click](https://github.com/SegmentationBLWX/sssegmentation/tree/main/docs/modelzoo/nonlocalnet)         | [CVPR 2018](https://arxiv.org/pdf/1711.07971.pdf)                                                                                                       | [Click](https://github.com/SegmentationBLWX/sssegmentation/tree/main/ssseg/modules/models/segmentors/nonlocalnet/nonlocalnet.py)       |
+| ICNet                             | [Click](https://github.com/SegmentationBLWX/sssegmentation/tree/main/docs/modelzoo/icnet)               | [ECCV 2018](https://arxiv.org/pdf/1704.08545.pdf)                                                                                                       | [Click](https://github.com/SegmentationBLWX/sssegmentation/tree/main/ssseg/modules/models/segmentors/icnet/icnet.py)                   |
+| Mixed Precision (FP16) Training   | [Click](https://github.com/SegmentationBLWX/sssegmentation/tree/main/docs/modelzoo/fp16)                | [ArXiv 2017](https://arxiv.org/pdf/1710.03740.pdf)                                                                                                      | [Click](https://github.com/SegmentationBLWX/sssegmentation/tree/main/ssseg/train.py)                                                   |
+| Deeplabv3                         | [Click](https://github.com/SegmentationBLWX/sssegmentation/tree/main/docs/modelzoo/deeplabv3)           | [ArXiv 2017](https://arxiv.org/pdf/1706.05587.pdf)                                                                                                      | [Click](https://github.com/SegmentationBLWX/sssegmentation/tree/main/ssseg/modules/models/segmentors/deeplabv3/deeplabv3.py)           |
+| PSPNet                            | [Click](https://github.com/SegmentationBLWX/sssegmentation/tree/main/docs/modelzoo/pspnet)              | [CVPR 2017](https://arxiv.org/pdf/1612.01105.pdf)                                                                                                       | [Click](https://github.com/SegmentationBLWX/sssegmentation/tree/main/ssseg/modules/models/segmentors/pspnet/pspnet.py)                 |
+| FCN                               | [Click](https://github.com/SegmentationBLWX/sssegmentation/tree/main/docs/modelzoo/fcn)                 | [TPAMI 2017](https://arxiv.org/pdf/1411.4038.pdf)                                                                                                       | [Click](https://github.com/SegmentationBLWX/sssegmentation/tree/main/ssseg/modules/models/segmentors/fcn/fcn.py)                       |
