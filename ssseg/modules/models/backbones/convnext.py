@@ -100,7 +100,7 @@ class ConvNeXt(nn.Module):
         for i, index in enumerate(out_indices):
             if index < 0:
                 out_indices[i] = 4 + index
-                assert out_indices[i] >= 0, f'Invalid out_indices {index}'
+                assert out_indices[i] >= 0, f'invalid out_indices {index}'
         self.out_indices = out_indices
         # assert
         if structure_type in AUTO_ASSERT_STRUCTURE_TYPES:

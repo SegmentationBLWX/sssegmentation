@@ -1,2 +1,2 @@
 '''initialize'''
-from .builder import BuildDropout
+from .builder import DropoutBuilder, BuildDropout

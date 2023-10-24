@@ -1,2 +1,2 @@
 '''initialize'''
-from .builder import BuildActivation
+from .builder import ActivationBuilder, BuildActivation

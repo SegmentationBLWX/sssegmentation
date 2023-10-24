@@ -1,2 +1,2 @@
 '''initialize'''
-from .builder import BuildNormalization
+from .builder import NormalizationBuilder, BuildNormalization

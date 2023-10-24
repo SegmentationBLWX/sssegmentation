@@ -1,12 +1,12 @@
 '''initialize'''
 from .dropout import (
-    BuildDropout
+    DropoutBuilder, BuildDropout
 )
 from .activation import (
-    BuildActivation
+    ActivationBuilder, BuildActivation
 )
 from .normalization import (
-    BuildNormalization
+    NormalizationBuilder, BuildNormalization
 )
 from .misc import (
     Scale, L2Norm, makedivisible, truncnormal
