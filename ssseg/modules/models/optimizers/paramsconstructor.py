@@ -113,7 +113,7 @@ class LearningRateDecayParamsConstructor(DefaultParamsConstructor):
         base_lr = optimizer_cfg['lr']
         weight_decay = optimizer_cfg['weight_decay']
         # iter to group parameters
-        params, parameter_groups = [], {}
+        parameter_groups = {}
         for name, param in model.named_parameters():
             param_group = {'params': [param]}
             # --if `parameter requires gradient` is False
