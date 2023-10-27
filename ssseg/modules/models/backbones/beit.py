@@ -16,8 +16,8 @@ from .bricks import BuildNormalization, PatchEmbed, BuildDropout, truncnormal
 
 '''DEFAULT_MODEL_URLS'''
 DEFAULT_MODEL_URLS = {
-    'beit_base_patch16_224_pt22k_ft22k': 'https://conversationhub.blob.core.windows.net/beit-share-public/beit/beit_base_patch16_224_pt22k_ft22k.pth',
-    'beit_large_patch16_224_pt22k_ft22k': 'https://conversationhub.blob.core.windows.net/beit-share-public/beit/beit_large_patch16_224_pt22k_ft22k.pth',
+    'beit_base_patch16_224_pt22k_ft22k': 'https://github.com/SegmentationBLWX/modelstore/releases/download/ssseg_beit/beit_base_patch16_224_pt22k_ft22k.pth',
+    'beit_large_patch16_224_pt22k_ft22k': 'https://github.com/SegmentationBLWX/modelstore/releases/download/ssseg_beit/beit_large_patch16_224_pt22k_ft22k.pth',
 }
 '''AUTO_ASSERT_STRUCTURE_TYPES'''
 AUTO_ASSERT_STRUCTURE_TYPES = {
