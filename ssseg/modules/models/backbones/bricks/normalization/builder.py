@@ -45,7 +45,15 @@ class NormalizationBuilder():
     def update(self, norm_type, norm_module):
         assert norm_type in self.REGISTERED_NORMALIZATIONS
         self.REGISTERED_NORMALIZATIONS[norm_type] = norm_module
-    
+    '''isnorm'''
+    @staticmethod
+    def isnorm(module):
+        norm_list = (
+            nn.GroupNorm, nn.LayerNorm, nn.BatchNorm1d, nn.BatchNorm2d, nn.BatchNorm3d,
+            nn.InstanceNorm1d, nn.InstanceNorm2d, nn.InstanceNorm3d, nn.SyncBatchNorm,
+        )
+        return isinstance(module, norm_list)
+
 
 '''BuildNormalization'''
 BuildNormalization = NormalizationBuilder().build

@@ -13,7 +13,10 @@ SEGMENTOR_CFG['dataloader'] = DATALOADER_CFG_BS16.copy()
 # modify scheduler config
 SEGMENTOR_CFG['scheduler']['max_epochs'] = 110
 SEGMENTOR_CFG['scheduler']['optimizer'] = {
-    'type': 'SGD', 'lr': 0.001, 'momentum': 0.9, 'weight_decay': 0.0, 'params_rules': {'backbone_net': 0.1, 'others': 1.0},
+    'type': 'SGD', 'lr': 0.001, 'momentum': 0.9, 'weight_decay': 0.0, 
+    'params_rules': {
+        'backbone_net': dict(lr_multiplier=0.1, wd_multiplier=1.0),
+    },
 }
 # modify other segmentor configs
 SEGMENTOR_CFG['num_classes'] = 182

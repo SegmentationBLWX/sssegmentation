@@ -40,7 +40,7 @@ SEGMENTOR_CFG = {
         'warmup_cfg': {'type': 'linear', 'ratio': 1e-6, 'iters': 1500},
         'optimizer': {
             'type': 'AdamW', 'lr': 3e-5, 'betas': (0.9, 0.999), 'weight_decay': 0.05, 
-            'params_rules': {'type': 'LayerDecayParamsConstructor', 'num_layers': 12, 'decay_rate': 0.9, 'decay_type': 'layer_wise_vit'},
+            'params_rules': {'type': 'LearningRateDecayParamsConstructor', 'num_layers': 12, 'decay_rate': 0.9, 'decay_type': 'layer_wise_vit'},
         }
     },
     'dataset': None,

@@ -7,7 +7,7 @@ Author:
 import copy
 import torch.nn as nn
 import torch.optim as optim
-from .paramsconstructor import DefaultParamsConstructor, LayerDecayParamsConstructor
+from .paramsconstructor import DefaultParamsConstructor, LearningRateDecayParamsConstructor
 
 
 '''OptimizerBuilder'''
@@ -16,7 +16,7 @@ class OptimizerBuilder():
         'SGD': optim.SGD, 'Adam': optim.Adam, 'AdamW': optim.AdamW, 'Adadelta': optim.Adadelta,
     }
     REGISTERED_PARAMS_CONSTRUCTORS = {
-        'DefaultParamsConstructor': DefaultParamsConstructor, 'LayerDecayParamsConstructor': LayerDecayParamsConstructor,
+        'DefaultParamsConstructor': DefaultParamsConstructor, 'LearningRateDecayParamsConstructor': LearningRateDecayParamsConstructor,
     }
     def __init__(self, require_register_optimizers=None, require_update_optimizers=None, require_register_params_constructors=None, require_update_params_constructors=None):
         # register params optimizers

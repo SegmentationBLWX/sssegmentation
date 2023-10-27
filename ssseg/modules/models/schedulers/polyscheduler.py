@@ -20,8 +20,6 @@ class PolyScheduler(BaseScheduler):
         # obtain variables
         base_lr, min_lr, cur_iter, max_iters, power = self.lr, self.min_lr, self.cur_iter, self.max_iters, self.power
         optimizer, warmup_cfg, params_rules = self.optimizer, self.warmup_cfg, self.params_rules
-        if params_rules and params_rules.get('type', 'DefaultParamsConstructor') == 'DefaultParamsConstructor':
-            assert len(optimizer.param_groups) == len(params_rules)
         # calculate target learning rate
         coeff = (1 - cur_iter / max_iters) ** power
         target_lr = coeff * (base_lr - min_lr) + min_lr
@@ -30,11 +28,8 @@ class PolyScheduler(BaseScheduler):
         # update learning rate
         for param_group in optimizer.param_groups:
             if params_rules and params_rules.get('type', 'DefaultParamsConstructor') == 'DefaultParamsConstructor':
-                value = params_rules[param_group['name']]
-                if not isinstance(value, tuple):
-                    value = (value, value)
-                param_group['lr'] = target_lr * value[0]
-            elif params_rules and params_rules.get('type', 'DefaultParamsConstructor') == 'LayerDecayParamsConstructor':
+                param_group['lr'] = param_group.get('lr_multiplier', 1.0) * target_lr
+            elif params_rules and params_rules.get('type', 'DefaultParamsConstructor') == 'LearningRateDecayParamsConstructor':
                 param_group['lr'] = param_group['lr_scale'] * target_lr
             else:
                 param_group['lr'] = target_lr

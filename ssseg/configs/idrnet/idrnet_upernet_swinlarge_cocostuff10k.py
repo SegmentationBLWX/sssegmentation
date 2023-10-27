@@ -17,7 +17,11 @@ SEGMENTOR_CFG['scheduler']['power'] = 1.0
 SEGMENTOR_CFG['scheduler']['warmup_cfg'] = {'type': 'linear', 'ratio': 1e-6, 'iters': 1500}
 SEGMENTOR_CFG['scheduler']['optimizer'] = {
     'type': 'AdamW', 'lr': 0.00006, 'betas': (0.9, 0.999), 'weight_decay': 0.01,
-    'params_rules': {'backbone_net_zerowd': (1.0, 0.0), 'others': (1.0, 1.0)},
+    'params_rules': {
+        'absolute_pos_embed': dict(wd_multiplier=0.),
+        'relative_position_bias_table': dict(wd_multiplier=0.),
+        'norm': dict(wd_multiplier=0.),
+    },
 }
 # modify other segmentor configs
 SEGMENTOR_CFG['num_classes'] = 182

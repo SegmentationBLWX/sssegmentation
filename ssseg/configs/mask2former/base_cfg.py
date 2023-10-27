@@ -53,12 +53,27 @@ SEGMENTOR_CFG = {
         'optimizer': {
             'type': 'AdamW', 'lr': 0.0001, 'betas': (0.9, 0.999), 'weight_decay': 0.05, 'eps': 1e-8,
             'params_rules': {
-                'backbone_net_zerowd': (0.1, 0.0), 'backbone_net_nonzerowd': (0.1, 1.0),
-                'predictor.query_feat': (1.0, 0.0), 'predictor.query_embed': (1.0, 0.0), 
-                'predictor.level_embed': (1.0, 0.0), 'others': (1.0, 1.0),
+                'base_setting': dict(norm_wd_multiplier=0.0),
+                'backbone_net': dict(lr_multiplier=0.1, wd_multiplier=1.0),
+                'backbone_net.patch_embed.norm': dict(lr_multiplier=0.1, wd_multiplier=0.0),
+                'backbone_net.norm': dict(lr_multiplier=0.1, wd_multiplier=0.0),
+                'absolute_pos_embed': dict(lr_multiplier=0.1, wd_multiplier=0.0),
+                'relative_position_bias_table': dict(lr_multiplier=0.1, wd_multiplier=0.0),
+                'query_embed': dict(lr_multiplier=1.0, wd_multiplier=0.0),
+                'query_feat': dict(lr_multiplier=1.0, wd_multiplier=0.0),
+                'level_embed': dict(lr_multiplier=1.0, wd_multiplier=0.0),
             },
         }
     },
     'dataset': None,
     'dataloader': None,
 }
+for stage_id, num_blocks in enumerate(SEGMENTOR_CFG['backbone']['depths']):
+    for block_id in range(num_blocks):
+        SEGMENTOR_CFG['scheduler']['optimizer']['params_rules'].update({
+            f'backbone_net.stages.{stage_id}.blocks.{block_id}.norm': dict(lr_multiplier=0.1, wd_multiplier=0.0)
+        })
+for stage_id in range(len(SEGMENTOR_CFG['backbone']['depths']) - 1):
+    SEGMENTOR_CFG['scheduler']['optimizer']['params_rules'].update({
+        f'backbone.stages.{stage_id}.downsample.norm': dict(lr_multiplier=0.1, wd_multiplier=0.0)
+    })

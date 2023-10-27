@@ -34,3 +34,13 @@ SEGMENTOR_CFG['head']['pixel_decoder']['input_shape']['in_channels'] = [96, 192,
 SEGMENTOR_CFG['work_dir'] = 'mask2former_swintiny_cityscapes'
 SEGMENTOR_CFG['logfilepath'] = 'mask2former_swintiny_cityscapes/mask2former_swintiny_cityscapes.log'
 SEGMENTOR_CFG['resultsavepath'] = 'mask2former_swintiny_cityscapes/mask2former_swintiny_cityscapes_results.pkl'
+# append training tricks in scheduler config
+for stage_id, num_blocks in enumerate(SEGMENTOR_CFG['backbone']['depths']):
+    for block_id in range(num_blocks):
+        SEGMENTOR_CFG['scheduler']['optimizer']['params_rules'].update({
+            f'backbone_net.stages.{stage_id}.blocks.{block_id}.norm': dict(lr_multiplier=0.1, wd_multiplier=0.0)
+        })
+for stage_id in range(len(SEGMENTOR_CFG['backbone']['depths']) - 1):
+    SEGMENTOR_CFG['scheduler']['optimizer']['params_rules'].update({
+        f'backbone.stages.{stage_id}.downsample.norm': dict(lr_multiplier=0.1, wd_multiplier=0.0)
+    })

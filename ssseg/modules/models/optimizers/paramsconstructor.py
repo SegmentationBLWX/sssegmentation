@@ -1,11 +1,13 @@
 '''
 Function:
-    Implementation of DefaultParamsConstructor
+    Implementation of ParamsConstructors
 Author:
     Zhenchao Jin
 '''
+import copy
 import torch
 import torch.nn as nn
+from ..backbones import NormalizationBuilder
 
 
 '''DefaultParamsConstructor'''
@@ -16,62 +18,110 @@ class DefaultParamsConstructor():
         self.optimizer_cfg = optimizer_cfg
     '''call'''
     def __call__(self, model):
+        # fetch attributes
         params_rules, filter_params, optimizer_cfg = self.params_rules, self.filter_params, self.optimizer_cfg
-        if params_rules:
-            params, require_training_layers = [], model.fetchtraininglayers()
-            assert 'others' not in require_training_layers, 'potential bug in model.fetchtraininglayers'
-            for key, value in params_rules.items():
-                if not isinstance(value, tuple): value = (value, value)
-                if key == 'others': continue
-                params.append({
-                    'params': require_training_layers[key].parameters() if not filter_params else filter(lambda p: p.requires_grad, require_training_layers[key].parameters()), 
-                    'lr': optimizer_cfg['lr'] * value[0], 
-                    'name': key,
-                    'weight_decay': optimizer_cfg['weight_decay'] * value[1],
-                })
-            others = []
-            for key, layer in require_training_layers.items():
-                if key not in params_rules: others.append(layer)
-            others = nn.Sequential(*others)
-            value = (params_rules['others'], params_rules['others']) if not isinstance(params_rules['others'], tuple) else params_rules['others']
-            params.append({
-                'params': others.parameters() if not filter_params else filter(lambda p: p.requires_grad, others.parameters()), 
-                'lr': optimizer_cfg['lr'] * value[0], 
-                'name': 'others',
-                'weight_decay': optimizer_cfg['weight_decay'] * value[1],
-            })
-        else:
+        # without specific parameter rules
+        if not params_rules:
             params = model.parameters() if not filter_params else filter(lambda p: p.requires_grad, model.parameters())
+            return params
+        # with specific parameter rules
+        params = []
+        self.groupparams(model, params_rules, filter_params, optimizer_cfg, params)
         return params
+    '''groupparams'''
+    def groupparams(self, model, params_rules, filter_params, optimizer_cfg, params, prefix=''):
+        # fetch base_setting
+        optimizer_cfg = copy.deepcopy(optimizer_cfg)
+        if 'base_setting' in optimizer_cfg:
+            base_setting = optimizer_cfg.pop('base_setting')
+        else:
+            base_setting = {'bias_lr_multiplier': 1.0, 'bias_wd_multiplier': 1.0, 'norm_wd_multiplier': 1.0}
+        # iter to group current parameters
+        sorted_rule_keys = sorted(sorted(params_rules.keys()), key=len, reverse=True)
+        for name, param in model.named_parameters(recurse=False):
+            param_group = {'params': [param]}
+            # --if `parameter requires gradient` is False
+            if not param.requires_grad:
+                if not filter_params:
+                    params.append(param_group)
+                continue
+            # --find parameters with specific rules
+            set_base_setting = True
+            for rule_key in sorted_rule_keys:
+                if rule_key not in f'{prefix}.{name}': continue
+                set_base_setting = False
+                param_group['lr'] = params_rules[rule_key].get('lr_multiplier', 1.0) * optimizer_cfg['lr']
+                param_group['name'] = f'{prefix}.{name}' if prefix else name
+                param_group['rule_key'] = rule_key
+                if 'weight_decay' in optimizer_cfg:
+                    param_group['weight_decay'] = params_rules[rule_key].get('wd_multiplier', 1.0) * optimizer_cfg['weight_decay']
+                for k, v in params_rules[rule_key].items():
+                    param_group[k] = v
+                params.append(param_group)
+                break
+            if not set_base_setting: continue
+            # --set base setting
+            param_group['lr'] = optimizer_cfg['lr']
+            if name == 'bias' and (not NormalizationBuilder.isnorm(model)):
+                param_group['lr'] = param_group['lr'] * base_setting.get('bias_lr_multiplier', 1.0)
+            param_group['name'] = f'{prefix}.{name}' if prefix else name
+            param_group['rule_key'] = 'base_setting'
+            if 'weight_decay' in optimizer_cfg:
+                param_group['weight_decay'] = optimizer_cfg['weight_decay']
+                if NormalizationBuilder.isnorm(model):
+                    param_group['weight_decay'] = param_group['weight_decay'] * base_setting.get('norm_wd_multiplier', 1.0)
+                elif name == 'bias':
+                    param_group['weight_decay'] = param_group['weight_decay'] * base_setting.get('bias_wd_multiplier', 1.0)
+            params.append(param_group)
+        # iter to group children parameters
+        for child_name, child_model in model.named_children():
+            if prefix:
+                prefix = f'{prefix}.{child_name}'
+            else:
+                prefix = child_name
+            self.groupparams(child_model, params_rules, filter_params, optimizer_cfg, params, prefix=prefix)
+    '''isin'''
+    def isin(self, param_group, param_group_list):
+        param = set(param_group['params'])
+        param_set = set()
+        for group in param_group_list:
+            param_set.update(set(group['params']))
+        return not param.isdisjoint(param_set)
 
 
-'''LayerDecayParamsConstructor'''
-class LayerDecayParamsConstructor():
+'''LearningRateDecayParamsConstructor'''
+class LearningRateDecayParamsConstructor(DefaultParamsConstructor):
     def __init__(self, params_rules={}, filter_params=True, optimizer_cfg=None):
-        self.params_rules = params_rules
-        self.filter_params = filter_params
-        self.optimizer_cfg = optimizer_cfg
-        setattr(self, 'filter_params', True)
-    '''call'''
-    def __call__(self, model):
-        # parse config
-        params_rules, filter_params, optimizer_cfg = self.params_rules, self.filter_params, self.optimizer_cfg
+        # force filter_params as True
+        filter_params = True
+        super(LearningRateDecayParamsConstructor, self).__init__(
+            params_rules=params_rules, filter_params=filter_params, optimizer_cfg=optimizer_cfg,
+        )
+    '''groupparams'''
+    def groupparams(self, model, params_rules, filter_params, optimizer_cfg, params, prefix=''):
+        # parse params_rules
         num_layers = params_rules['num_layers'] + 2
         decay_rate = params_rules['decay_rate']
         decay_type = params_rules['decay_type']
-        weight_decay = optimizer_cfg['weight_decay']
         base_lr = optimizer_cfg['lr']
-        # iter params
+        weight_decay = optimizer_cfg['weight_decay']
+        # iter to group parameters
         params, parameter_groups = [], {}
         for name, param in model.named_parameters():
+            param_group = {'params': [param]}
+            # --if `parameter requires gradient` is False
             if not param.requires_grad:
+                if not filter_params:
+                    params.append(param_group)
                 continue
+            # --find parameters with specific weight_decay rules
             if len(param.shape) == 1 or name.endswith('.bias') or name in ('pos_embed', 'cls_token'):
                 group_name = 'no_decay'
                 this_weight_decay = 0.
             else:
                 group_name = 'decay'
                 this_weight_decay = weight_decay
+            # --set layer_id
             if 'layer_wise' in decay_type:
                 if 'ConvNeXt' in model.backbone_net.__class__.__name__:
                     layer_id = self.getlayeridforconvnext(name, params_rules['num_layers'])
@@ -84,6 +134,7 @@ class LayerDecayParamsConstructor():
                     layer_id = self.getstageidforconvnext(name, num_layers)
                 else:
                     raise NotImplementedError('not to be implemented')
+            # --set group_name and thus append to parameter_groups
             group_name = f'layer_{layer_id}_{group_name}'
             if group_name not in parameter_groups:
                 scale = decay_rate**(num_layers - layer_id - 1)
@@ -98,34 +149,24 @@ class LayerDecayParamsConstructor():
             parameter_groups[group_name]['params'].append(param)
             parameter_groups[group_name]['param_names'].append(name)
         params.extend(parameter_groups.values())
-        # return
-        return params
     '''getlayeridforconvnext'''
     def getlayeridforconvnext(self, var_name, max_layer_id):
         if var_name in ('backbone_net.cls_token', 'backbone_net.mask_token', 'backbone_net.pos_embed'):
             return 0
         elif var_name.startswith('backbone_net.downsample_layers'):
             stage_id = int(var_name.split('.')[2])
-            if stage_id == 0:
-                layer_id = 0
-            elif stage_id == 1:
-                layer_id = 2
-            elif stage_id == 2:
-                layer_id = 3
-            elif stage_id == 3:
-                layer_id = max_layer_id
+            if stage_id == 0: layer_id = 0
+            elif stage_id == 1: layer_id = 2
+            elif stage_id == 2: layer_id = 3
+            elif stage_id == 3: layer_id = max_layer_id
             return layer_id
         elif var_name.startswith('backbone_net.stages'):
             stage_id = int(var_name.split('.')[2])
             block_id = int(var_name.split('.')[3])
-            if stage_id == 0:
-                layer_id = 1
-            elif stage_id == 1:
-                layer_id = 2
-            elif stage_id == 2:
-                layer_id = 3 + block_id // 3
-            elif stage_id == 3:
-                layer_id = max_layer_id
+            if stage_id == 0: layer_id = 1
+            elif stage_id == 1: layer_id = 2
+            elif stage_id == 2: layer_id = 3 + block_id // 3
+            elif stage_id == 3: layer_id = max_layer_id
             return layer_id
         else:
             return max_layer_id + 1

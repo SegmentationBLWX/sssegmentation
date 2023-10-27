@@ -12,7 +12,7 @@ SEGMENTOR_CFG['dataset'] = DATASET_CFG_VSPW_512x512.copy()
 SEGMENTOR_CFG['dataloader'] = DATALOADER_CFG_BS16.copy()
 # modify scheduler config
 SEGMENTOR_CFG['scheduler']['max_epochs'] = 240
-SEGMENTOR_CFG['scheduler']['optimizer']['params_rules'] = {'backbone_net': 0.1, 'others': 1.0}
+SEGMENTOR_CFG['scheduler']['optimizer']['params_rules'] = {'backbone_net': dict(lr_multiplier=0.1, wd_multiplier=1.0)}
 # modify other segmentor configs
 SEGMENTOR_CFG['num_classes'] = 124
 SEGMENTOR_CFG['head']['fpn'] = {
