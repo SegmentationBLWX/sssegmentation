@@ -31,7 +31,7 @@ def parsecmdargs():
     parser.add_argument('--local_rank', '--local-rank', dest='local_rank', help='node rank for distributed testing', default=0, type=int)
     parser.add_argument('--nproc_per_node', dest='nproc_per_node', help='number of process per node', default=8, type=int)
     parser.add_argument('--cfgfilepath', dest='cfgfilepath', help='config file path you want to use', type=str, required=True)
-    parser.add_argument('--evalmode', dest='evalmode', help='evaluate mode, support online and offline', default='offline', type=str)
+    parser.add_argument('--evalmode', dest='evalmode', help='evaluate mode, support server and local', default='local', type=str, choices=['server', 'local'])
     parser.add_argument('--ckptspath', dest='ckptspath', help='checkpoints you want to resume from', type=str, required=True)
     parser.add_argument('--slurm', dest='slurm', help='please add --slurm if you are using slurm', default=False, action='store_true')
     args = parser.parse_args()
@@ -61,6 +61,7 @@ class Tester():
         cfg, ngpus_per_node, logger_handle, cmd_args, cfg_file_path = self.cfg, self.ngpus_per_node, self.logger_handle, self.cmd_args, self.cfg_file_path
         rank_id = int(os.environ['SLURM_PROCID']) if 'SLURM_PROCID' in os.environ else cmd_args.local_rank
         # build dataset and dataloader
+        cfg.SEGMENTOR_CFG['dataset']['evalmode'] = self.cmd_args.evalmode
         dataset = BuildDataset(mode='TEST', logger_handle=logger_handle, dataset_cfg=cfg.SEGMENTOR_CFG['dataset'])
         assert dataset.num_classes == cfg.SEGMENTOR_CFG['num_classes'], 'parsed config file %s error' % cfg_file_path
         dataloader_cfg = copy.deepcopy(cfg.SEGMENTOR_CFG['dataloader'])
@@ -251,7 +252,7 @@ def main():
         all_preds, all_gts = all_preds_filtered, all_gts_filtered
         logger_handle.info('All Finished, all_preds: %s, all_gts: %s' % (len(all_preds), len(all_gts)))
         dataset = BuildDataset(mode='TEST', logger_handle=logger_handle, dataset_cfg=cfg.SEGMENTOR_CFG['dataset'])
-        if args.evalmode == 'offline':
+        if args.evalmode == 'local':
             result = dataset.evaluate(
                 seg_preds=all_preds, 
                 seg_targets=all_gts, 

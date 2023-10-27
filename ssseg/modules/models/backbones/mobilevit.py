@@ -136,7 +136,7 @@ class MobileViT(nn.Module):
         assert arch in self.arch_settings
         arch = self.arch_settings[arch]
         if isinstance(out_indices, int): out_indices = [out_indices]
-        assert isinstance(out_indices, collections.Sequence)
+        assert isinstance(out_indices, collections.abc.Sequence)
         # set attributes
         self.arch = arch
         self.num_stages = len(arch)
@@ -455,7 +455,7 @@ class MobileViTV2(nn.Module):
         assert arch in self.arch_settings
         arch, stem_channels = self.arch_settings[arch]
         if isinstance(out_indices, int): out_indices = [out_indices]
-        assert isinstance(out_indices, collections.Sequence)
+        assert isinstance(out_indices, collections.abc.Sequence)
         # set attributes
         self.arch = arch
         self.num_stages = len(arch)

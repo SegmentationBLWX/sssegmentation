@@ -56,6 +56,7 @@ class Inferencer():
         segmentor = BuildSegmentor(segmentor_cfg=cfg.SEGMENTOR_CFG, mode='TEST')
         if use_cuda: segmentor = segmentor.cuda()
         # build dataset
+        cfg.SEGMENTOR_CFG['dataset']['evalmode'] = 'server'
         dataset = BuildDataset(mode='TEST', logger_handle=logger_handle, dataset_cfg=cfg.SEGMENTOR_CFG['dataset'])
         # build palette
         palette = dataset.palette
@@ -85,7 +86,7 @@ class Inferencer():
             pbar.set_description('Processing %s' % imagepath)
             infer_tricks = inference_cfg['tricks']
             cascade_cfg = infer_tricks.get('cascade', {'key_for_pre_output': 'memory_gather_logits', 'times': 1, 'forward_default_args': None})
-            sample_meta = dataset.read(imagepath, 'none.png')
+            sample_meta = dataset.read(imagepath)
             image = sample_meta['image']
             sample_meta = dataset.synctransforms(sample_meta)
             image_tensor = sample_meta['image'].unsqueeze(0).type(FloatTensor)

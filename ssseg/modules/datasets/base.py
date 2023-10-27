@@ -8,14 +8,11 @@ import os
 import cv2
 import torch
 import numpy as np
+import collections
 import scipy.io as sio
 from PIL import Image
 from chainercv.evaluations import eval_semantic_segmentation
-from .pipelines import (
-    Evaluation, Resize, RandomCrop, RandomFlip, PhotoMetricDistortion, ResizeShortestEdge,
-    RandomRotation, Padding, ToTensor, Normalize, Compose, EdgeExtractor, RGB2Gray, AdjustGamma,
-    RandomChoiceResize, Rerange, CLAHE, RandomCutOut, AlbumentationsWrapper,
-)
+from .pipelines import Evaluation, BuildDataTransform, DataTransformBuilder, Compose
 
 
 '''BaseDataset'''
@@ -49,34 +46,33 @@ class BaseDataset(torch.utils.data.Dataset):
     def __len__(self):
         return len(self.imageids) * self.repeat_times
     '''read sample_meta'''
-    def read(self, imagepath, annpath):
+    def read(self, imagepath, annpath=None):
         # read image
         image = cv2.imread(imagepath)
         # read annotation
-        assert annpath.split('.')[-1] in ['png', 'mat']
-        if not os.path.exists(annpath):
-            seg_target = np.zeros((image.shape[0], image.shape[1]))
-            self.logger_handle.warning(f'seg_target from {annpath} is missed')
-        elif annpath.endswith('.png'):
-            if self.dataset_cfg['type'] in ['VSPWDataset']:
-                seg_target = np.array(Image.open(annpath))
-            else:
-                seg_target = cv2.imread(annpath, cv2.IMREAD_GRAYSCALE)
-        elif annpath.endswith('.mat'):
-            seg_target = sio.loadmat(annpath)
-            if self.dataset_cfg['type'] in ['COCOStuff10kDataset']:
-                seg_target = seg_target['S']
+        if self.mode == 'TRAIN' or (self.mode == 'TEST' and self.dataset_cfg.get('evalmode', 'local') == 'local'):
+            assert (annpath is not None) and os.path.exists(annpath)
+            assert annpath.split('.')[-1] in ['png', 'mat']
+            if annpath.endswith('.png'):
+                if self.dataset_cfg['type'] in ['VSPWDataset']:
+                    seg_target = np.array(Image.open(annpath))
+                else:
+                    seg_target = cv2.imread(annpath, cv2.IMREAD_GRAYSCALE)
+            elif annpath.endswith('.mat'):
+                seg_target = sio.loadmat(annpath)
+                if self.dataset_cfg['type'] in ['COCOStuff10kDataset']:
+                    seg_target = seg_target['S']
         else:
-            seg_target = np.zeros((image.shape[0], image.shape[1]))
-            self.logger_handle.warning(f'seg_target from {annpath} is not supported to read')
+            seg_target = None
         # auto transform seg_target to train labels
-        if hasattr(self, 'clsid2label'):
+        if hasattr(self, 'clsid2label') and seg_target is not None:
             for key, value in self.clsid2label.items():
                 seg_target[seg_target == key] = value
         # construct sample_meta
         sample_meta = {
             'image': image, 'seg_target': seg_target, 'width': image.shape[1], 'height': image.shape[0],
         }
+        if seg_target is None: sample_meta.pop('seg_target')
         # return
         return sample_meta
     '''evaluate'''
@@ -107,18 +103,18 @@ class BaseDataset(torch.utils.data.Dataset):
         return selected_result      
     '''constructtransforms'''
     def constructtransforms(self, data_pipelines):
-        # supported transforms
-        supported_transforms = {
-            'Resize': Resize, 'RandomCrop': RandomCrop, 'RandomFlip': RandomFlip, 'RandomRotation': RandomRotation, 'EdgeExtractor': EdgeExtractor,
-            'PhotoMetricDistortion': PhotoMetricDistortion, 'Padding': Padding, 'ToTensor': ToTensor, 'ResizeShortestEdge': ResizeShortestEdge,
-            'Normalize': Normalize, 'RandomChoiceResize': RandomChoiceResize, 'Rerange': Rerange, 'CLAHE': CLAHE, 'RandomCutOut': RandomCutOut, 
-            'AlbumentationsWrapper': AlbumentationsWrapper, 'RGB2Gray': RGB2Gray, 'AdjustGamma': AdjustGamma,
-        }
-        # build transforms
         transforms = []
         for data_pipeline in data_pipelines:
-            assert len(data_pipeline) == 2
-            transforms.append(supported_transforms[data_pipeline[0]](**data_pipeline[1]))
+            if isinstance(data_pipeline, collections.abc.Sequence):
+                assert len(data_pipeline) == 2
+                assert isinstance(data_pipeline[1], dict)
+                transform_type, transform_cfg = data_pipeline
+                transform_cfg['type'] = transform_type
+                transform = BuildDataTransform(transform_cfg)
+            else:
+                assert isinstance(data_pipeline, dict)
+                transform = BuildDataTransform(data_pipeline)
+            transforms.append(transform)
         transforms = Compose(transforms)
         # return
         return transforms

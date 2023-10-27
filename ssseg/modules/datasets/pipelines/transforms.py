@@ -23,8 +23,8 @@ _INTERPOLATION_CV2_CONVERTOR = {
 class Resize(object):
     def __init__(self, output_size, keep_ratio=True, min_size=None, scale_range=(0.5, 2.0), image_interpolation='bilinear', seg_target_interpolation='nearest'):
         # assert
-        assert isinstance(scale_range, collections.Sequence) or scale_range is None
-        assert isinstance(output_size, int) or (isinstance(output_size, collections.Sequence) and len(output_size) == 2)
+        assert isinstance(scale_range, collections.abc.Sequence) or scale_range is None
+        assert isinstance(output_size, int) or (isinstance(output_size, collections.abc.Sequence) and len(output_size) == 2)
         # set attributes
         self.min_size = min_size
         self.keep_ratio = keep_ratio
@@ -69,7 +69,7 @@ class Resize(object):
 class RandomCrop(object):
     def __init__(self, crop_size, ignore_index=255, one_category_max_ratio=0.75):
         # assert
-        assert isinstance(crop_size, int) or (isinstance(crop_size, collections.Sequence) and len(crop_size) == 2)
+        assert isinstance(crop_size, int) or (isinstance(crop_size, collections.abc.Sequence) and len(crop_size) == 2)
         # set attributes
         self.ignore_index = ignore_index
         self.one_category_max_ratio = one_category_max_ratio
@@ -119,7 +119,7 @@ class ResizeShortestEdge(object):
         short_edge_length = self.short_edge_length
         if isinstance(short_edge_length, int):
             size = short_edge_length * 1.0
-        elif isinstance(short_edge_length, collections.Sequence):
+        elif isinstance(short_edge_length, collections.abc.Sequence):
             size = min(short_edge_length) * 1.0
         scale = size / min(h, w)
         if h < w: new_h, new_w = size, scale * w
@@ -145,7 +145,7 @@ class ResizeShortestEdge(object):
 class RandomChoiceResize(object):
     def __init__(self, scales, resize_type='Resize', **resize_kwargs):
         # set attributes
-        if isinstance(scales, collections.Sequence): self.scales = scales
+        if isinstance(scales, collections.abc.Sequence): self.scales = scales
         else: self.scales = [scales]
         self.resize_type = resize_type
         self.resize_kwargs = resize_kwargs
@@ -244,7 +244,7 @@ class CLAHE(object):
     def __init__(self, clip_limit=40.0, tile_grid_size=(8, 8)):
         # assert
         assert isinstance(clip_limit, (float, int))
-        assert isinstance(tile_grid_size, collections.Sequence)
+        assert isinstance(tile_grid_size, collections.abc.Sequence)
         assert len(tile_grid_size) == 2
         # set attribute
         self.clip_limit = clip_limit
@@ -267,7 +267,7 @@ class CLAHE(object):
 class RGB2Gray(object):
     def __init__(self, out_channels=None, weights=(0.299, 0.587, 0.114)):
         # assert
-        assert isinstance(weights, collections.Sequence)
+        assert isinstance(weights, collections.abc.Sequence)
         assert out_channels is None or out_channels > 0
         for item in weights: assert isinstance(item, (float, int))
         # set attributes
@@ -301,8 +301,8 @@ class RandomCutOut(object):
         # assert
         assert 0 <= prob and prob <= 1
         assert (cutout_shape is None) ^ (cutout_ratio is None), 'either cutout_shape or cutout_ratio should be specified'
-        assert (isinstance(cutout_shape, collections.Sequence) or isinstance(cutout_ratio, collections.Sequence))
-        if isinstance(n_holes, collections.Sequence):
+        assert (isinstance(cutout_shape, collections.abc.Sequence) or isinstance(cutout_ratio, collections.abc.Sequence))
+        if isinstance(n_holes, collections.abc.Sequence):
             assert len(n_holes) == 2 and 0 <= n_holes[0] < n_holes[1]
         else:
             n_holes = (n_holes, n_holes)
@@ -315,7 +315,7 @@ class RandomCutOut(object):
         self.seg_target_fill_value = seg_target_fill_value
         self.with_ratio = cutout_ratio is not None
         self.candidates = cutout_ratio if self.with_ratio else cutout_shape
-        if not isinstance(self.candidates, collections.Sequence): self.candidates = [self.candidates]
+        if not isinstance(self.candidates, collections.abc.Sequence): self.candidates = [self.candidates]
     '''call'''
     def __call__(self, sample_meta):
         cutout, n_holes, x1_lst, y1_lst, index_lst = self.generatepatches(sample_meta['image'])
@@ -366,7 +366,7 @@ class AlbumentationsWrapper():
     def __init__(self, albu_cfg, albu_forward_args={}, transform_keys=['image', 'seg_target']):
         # assert
         assert isinstance(albu_cfg, dict)
-        assert isinstance(transform_keys, collections.Sequence)
+        assert isinstance(transform_keys, collections.abc.Sequence)
         # set attributes
         self.albu_forward_args = albu_forward_args
         self.transform_keys = transform_keys
@@ -429,8 +429,8 @@ class RandomFlip(object):
 class PhotoMetricDistortion(object):
     def __init__(self, brightness_delta=32, contrast_range=(0.5, 1.5), saturation_range=(0.5, 1.5), hue_delta=18):
         # assert
-        assert isinstance(contrast_range, collections.Sequence) and len(contrast_range) == 2
-        assert isinstance(saturation_range, collections.Sequence) and len(saturation_range) == 2
+        assert isinstance(contrast_range, collections.abc.Sequence) and len(contrast_range) == 2
+        assert isinstance(saturation_range, collections.abc.Sequence) and len(saturation_range) == 2
         # set attributes
         self.hue_delta = hue_delta
         self.brightness_delta = brightness_delta
@@ -550,7 +550,7 @@ class EdgeExtractor(object):
 class Normalize(object):
     def __init__(self, mean, std, to_rgb=True):
         # assert
-        assert isinstance(mean, collections.Sequence) and isinstance(std, collections.Sequence)
+        assert isinstance(mean, collections.abc.Sequence) and isinstance(std, collections.abc.Sequence)
         # set attributes
         self.to_rgb = to_rgb
         self.std = np.array(std)
@@ -573,7 +573,7 @@ class Padding(object):
     def __init__(self, output_size, data_type='numpy', image_fill_value=0, seg_target_fill_value=255, edge_target_fill_value=255, output_size_auto_adaptive=True):
         # assert
         assert data_type in ['numpy', 'tensor']
-        assert isinstance(output_size, int) or (isinstance(output_size, collections.Sequence) and len(output_size) == 2)
+        assert isinstance(output_size, int) or (isinstance(output_size, collections.abc.Sequence) and len(output_size) == 2)
         # set attributes
         self.data_type = data_type
         self.image_fill_value = image_fill_value
@@ -655,3 +655,38 @@ class Compose(object):
         for transform in self.transforms:
             sample_meta = transform(sample_meta)
         return sample_meta
+
+
+'''DataTransformBuilder'''
+class DataTransformBuilder():
+    REGISTERED_TRANSFORMS = {
+        'Resize': Resize, 'RandomCrop': RandomCrop, 'RandomFlip': RandomFlip, 'RandomRotation': RandomRotation, 'EdgeExtractor': EdgeExtractor,
+        'PhotoMetricDistortion': PhotoMetricDistortion, 'Padding': Padding, 'ToTensor': ToTensor, 'ResizeShortestEdge': ResizeShortestEdge,
+        'Normalize': Normalize, 'RandomChoiceResize': RandomChoiceResize, 'Rerange': Rerange, 'CLAHE': CLAHE, 'RandomCutOut': RandomCutOut, 
+        'AlbumentationsWrapper': AlbumentationsWrapper, 'RGB2Gray': RGB2Gray, 'AdjustGamma': AdjustGamma,
+    }
+    def __init__(self, require_register_transforms=None, require_update_transforms=None):
+        if require_register_transforms and isinstance(require_register_transforms, dict):
+            for transform_type, transform in require_register_transforms.items():
+                self.register(transform_type, transform)
+        if require_update_transforms and isinstance(require_update_transforms, dict):
+            for transform_type, transform in require_update_transforms.items():
+                self.update(transform_type, transform)
+    '''build'''
+    def build(self, transform_cfg):
+        transform_cfg = copy.deepcopy(transform_cfg)
+        transform_type = transform_cfg.pop('type')
+        transform = self.REGISTERED_TRANSFORMS[transform_type](**transform_cfg)
+        return transform
+    '''register'''
+    def register(self, transform_type, transform):
+        assert transform_type not in self.REGISTERED_TRANSFORMS
+        self.REGISTERED_TRANSFORMS[transform_type] = transform
+    '''update'''
+    def update(self, transform_type, transform):
+        assert transform_type in self.REGISTERED_TRANSFORMS
+        self.REGISTERED_TRANSFORMS[transform_type] = transform
+
+
+'''BuildDataTransform'''
+BuildDataTransform = DataTransformBuilder().build
