@@ -72,7 +72,6 @@ class BaseDataset(torch.utils.data.Dataset):
         sample_meta = {
             'image': image, 'seg_target': seg_target, 'width': image.shape[1], 'height': image.shape[0],
         }
-        if seg_target is None: sample_meta.pop('seg_target')
         # return
         return sample_meta
     '''evaluate'''
