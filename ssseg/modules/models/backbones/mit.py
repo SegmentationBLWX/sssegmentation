@@ -9,8 +9,7 @@ import torch
 import torch.nn as nn
 import torch.utils.model_zoo as model_zoo
 import torch.utils.checkpoint as checkpoint
-from .bricks import PatchEmbed as PatchEmbedBase
-from .bricks import BuildNormalization, BuildActivation, BuildDropout, nlctonchw, nchwtonlc, MultiheadAttention
+from .bricks import BuildNormalization, BuildActivation, BuildDropout, nlctonchw, nchwtonlc, MultiheadAttention, PatchEmbed
 
 
 '''DEFAULT_MODEL_URLS, the pretrained weights are stored in https://drive.google.com/drive/folders/1b7bwrInTW4VLEm27YawHOAMSMikga2Ia'''
@@ -51,19 +50,6 @@ AUTO_ASSERT_STRUCTURE_TYPES = {
 }
 
 
-'''PatchEmbed'''
-class PatchEmbed(PatchEmbedBase):
-    def __init__(self, **kwargs):
-        super(PatchEmbed, self).__init__(**kwargs)
-    '''layers with zero weight decay'''
-    def zerowdlayers(self):
-        if self.norm is None: return {}
-        return {'PatchEmbed.norm': self.norm}
-    '''layers with non zero weight decay'''
-    def nonzerowdlayers(self):
-        return {'PatchEmbed.projection': self.projection}
-
-
 '''MixFFN'''
 class MixFFN(nn.Module):
     def __init__(self, embed_dims, feedforward_channels, act_cfg=None, ffn_drop=0., dropout_cfg=None):
@@ -83,12 +69,6 @@ class MixFFN(nn.Module):
         )
         # define dropout layer
         self.dropout_layer = BuildDropout(dropout_cfg) if dropout_cfg else torch.nn.Identity()
-    '''layers with zero weight decay'''
-    def zerowdlayers(self):
-        return {}
-    '''layers with non zero weight decay'''
-    def nonzerowdlayers(self):
-        return {'MixFFN.layers': self.layers}
     '''forward'''
     def forward(self, x, hw_shape, identity=None):
         out = nlctonchw(x, hw_shape)
@@ -106,17 +86,6 @@ class EfficientMultiheadAttention(MultiheadAttention):
         if sr_ratio > 1:
             self.sr = nn.Conv2d(embed_dims, embed_dims, kernel_size=sr_ratio, stride=sr_ratio, padding=0)
             self.norm = BuildNormalization(placeholder=embed_dims, norm_cfg=norm_cfg)
-    '''layers with zero weight decay'''
-    def zerowdlayers(self):
-        if hasattr(self, 'norm'):
-            return {'EfficientMultiheadAttention.norm': self.norm}
-        return {}
-    '''layers with non zero weight decay'''
-    def nonzerowdlayers(self):
-        layers = {'EfficientMultiheadAttention.attn': self.attn}
-        if hasattr(self, 'sr'):
-            layers.update({'EfficientMultiheadAttention.sr': self.sr})
-        return layers
     '''forward'''
     def forward(self, x, hw_shape, identity=None):
         x_q = x
@@ -162,25 +131,6 @@ class TransformerEncoderLayer(nn.Module):
             act_cfg=act_cfg
         )
         self.use_checkpoint = use_checkpoint
-    '''layers with zero weight decay'''
-    def zerowdlayers(self):
-        layers = {
-            'TransformerEncoderLayer.norm1': self.norm1,
-            'TransformerEncoderLayer.norm2': self.norm2,
-        }
-        for key, value in self.attn.zerowdlayers().items():
-            layers['TransformerEncoderLayer.' + key] = value
-        for key, value in self.ffn.zerowdlayers().items():
-            layers['TransformerEncoderLayer.' + key] = value
-        return layers
-    '''layers with non zero weight decay'''
-    def nonzerowdlayers(self):
-        layers = {}
-        for key, value in self.attn.nonzerowdlayers().items():
-            layers['TransformerEncoderLayer.' + key] = value
-        for key, value in self.ffn.nonzerowdlayers().items():
-            layers['TransformerEncoderLayer.' + key] = value
-        return layers
     '''forward'''
     def forward(self, x, hw_shape):
         def _forward(x):
@@ -261,29 +211,6 @@ class MixVisionTransformer(nn.Module):
         # load pretrained weights
         if pretrained:
             self.initweights(structure_type, pretrained_model_path)
-    '''layers with zero weight decay'''
-    def zerowdlayers(self):
-        zwd_layers = {}
-        for layer_idx, layer in enumerate(self.layers):
-            assert len(layer) == 3
-            for key, value in layer[0].zerowdlayers().items():
-                zwd_layers[f'MixVisionTransformer.{layer_idx}_{key}'] = value
-            for trans_idx, trans in enumerate(layer[1]):
-                for key, value in trans.zerowdlayers().items():
-                    zwd_layers[f'MixVisionTransformer.{layer_idx}_{trans_idx}_{key}'] = value
-            zwd_layers[f'MixVisionTransformer.{layer_idx}_norm'] = layer[2]
-        return zwd_layers
-    '''layers with non zero weight decay'''
-    def nonzerowdlayers(self):
-        nonzwd_layers = {}
-        for layer_idx, layer in enumerate(self.layers):
-            assert len(layer) == 3
-            for key, value in layer[0].nonzerowdlayers().items():
-                nonzwd_layers[f'MixVisionTransformer.{layer_idx}_{key}'] = value
-            for trans_idx, trans in enumerate(layer[1]):
-                for key, value in trans.nonzerowdlayers().items():
-                    nonzwd_layers[f'MixVisionTransformer.{layer_idx}_{trans_idx}_{key}'] = value
-        return nonzwd_layers
     '''init weights'''
     def initweights(self, structure_type='', pretrained_model_path=''):
         if pretrained_model_path:

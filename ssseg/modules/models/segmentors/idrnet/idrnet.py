@@ -115,12 +115,6 @@ class IDRNet(BaseSegmentor):
         self.setauxiliarydecoder(cfg['auxiliary'])
         # freeze normalization layer if necessary
         if cfg.get('is_freeze_norm', False): self.freezenormalization()
-        # layer names for training tricks
-        self.layer_names = [
-            'backbone_net', 'bottleneck', 'auxiliary_decoder', 'decoder_stage1', 'lateral_convs', 
-            'decoder_stage2', 'idcontext_refiner', 'coarse_context_module', 'fpn_convs', 
-            'coarsecontext_refiner_before', 'coarsecontext_refiner_after', 
-        ]
     '''forward'''
     def forward(self, x, targets=None):
         img_size = x.shape[2:]

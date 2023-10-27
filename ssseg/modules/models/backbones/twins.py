@@ -11,8 +11,7 @@ import torch.nn.functional as F
 import torch.utils.model_zoo as model_zoo
 from collections import OrderedDict
 from .mit import EfficientMultiheadAttention
-from .bricks import PatchEmbed as PatchEmbedBase
-from .bricks import BuildNormalization, FFN, BuildDropout
+from .bricks import BuildNormalization, FFN, BuildDropout, PatchEmbed
 
 
 '''DEFAULT_MODEL_URLS'''
@@ -35,34 +34,10 @@ AUTO_ASSERT_STRUCTURE_TYPES = {
 }
 
 
-'''PatchEmbed'''
-class PatchEmbed(PatchEmbedBase):
-    def __init__(self, **kwargs):
-        super(PatchEmbed, self).__init__(**kwargs)
-    '''layers with zero weight decay'''
-    def zerowdlayers(self):
-        if self.norm is None: return {}
-        return {'PatchEmbed.norm': self.norm}
-    '''layers with non zero weight decay'''
-    def nonzerowdlayers(self):
-        return {'PatchEmbed.projection': self.projection}
-
-
 '''GlobalSubsampledAttention'''
 class GlobalSubsampledAttention(EfficientMultiheadAttention):
     def __init__(self, embed_dims, num_heads, attn_drop=0., proj_drop=0., dropout_cfg=None, batch_first=True, qkv_bias=True, norm_cfg=None, sr_ratio=1):
         super(GlobalSubsampledAttention, self).__init__(embed_dims, num_heads, attn_drop, proj_drop, dropout_cfg, batch_first, qkv_bias, norm_cfg, sr_ratio)
-    '''layers with zero weight decay'''
-    def zerowdlayers(self):
-        if hasattr(self, 'norm'):
-            return {'GlobalSubsampledAttention.norm': self.norm}
-        return {}
-    '''layers with non zero weight decay'''
-    def nonzerowdlayers(self):
-        layers = {'GlobalSubsampledAttention.attn': self.attn}
-        if hasattr(self, 'sr'):
-            layers.update({'GlobalSubsampledAttention.sr': self.sr})
-        return layers
 
 
 '''GSAEncoderLayer'''
@@ -87,18 +62,6 @@ class GSAEncoderLayer(nn.Module):
         x = x + self.drop_path(self.attn(self.norm1(x), hw_shape, identity=0.))
         x = x + self.drop_path(self.ffn(self.norm2(x)))
         return x
-    '''layers with zero weight decay'''
-    def zerowdlayers(self):
-        layers = {'GSAEncoderLayer.norm1': self.norm1, 'GSAEncoderLayer.norm2': self.norm2}
-        for key, value in self.attn.zerowdlayers().items():
-            layers['GSAEncoderLayer.' + key] = value
-        return layers
-    '''layers with non zero weight decay'''
-    def nonzerowdlayers(self):
-        layers = {'GSAEncoderLayer.ffn': self.ffn}
-        for key, value in self.attn.nonzerowdlayers().items():
-            layers['GSAEncoderLayer.' + key] = value
-        return layers
 
 
 '''LocallyGroupedSelfAttention'''
@@ -154,12 +117,6 @@ class LocallyGroupedSelfAttention(nn.Module):
         x = self.proj(x)
         x = self.proj_drop(x)
         return x
-    '''layers with zero weight decay'''
-    def zerowdlayers(self):
-        return {}
-    '''layers with non zero weight decay'''
-    def nonzerowdlayers(self):
-        return {'LocallyGroupedSelfAttention.qkv': self.qkv, 'LocallyGroupedSelfAttention.proj': self.proj}
 
 
 '''LSAEncoderLayer'''
@@ -181,18 +138,6 @@ class LSAEncoderLayer(nn.Module):
         x = x + self.drop_path(self.attn(self.norm1(x), hw_shape))
         x = x + self.drop_path(self.ffn(self.norm2(x)))
         return x
-    '''layers with zero weight decay'''
-    def zerowdlayers(self):
-        layers = {'LSAEncoderLayer.norm1': self.norm1, 'LSAEncoderLayer.norm2': self.norm2}
-        for key, value in self.attn.zerowdlayers().items():
-            layers['LSAEncoderLayer.' + key] = value
-        return layers
-    '''layers with non zero weight decay'''
-    def nonzerowdlayers(self):
-        layers = {'LSAEncoderLayer.ffn': self.ffn}
-        for key, value in self.attn.nonzerowdlayers().items():
-            layers['LSAEncoderLayer.' + key] = value
-        return layers
 
 
 '''The Conditional Position Encoding (CPE) module'''
@@ -211,12 +156,6 @@ class ConditionalPositionEncoding(nn.Module):
         else: x = self.proj(cnn_feat)
         x = x.flatten(2).transpose(1, 2)
         return x
-    '''layers with zero weight decay'''
-    def zerowdlayers(self):
-        return {}
-    '''layers with non zero weight decay'''
-    def nonzerowdlayers(self):
-        return {'ConditionalPositionEncoding.proj': self.proj}
 
 
 '''Twins-PCPVT'''
@@ -296,41 +235,6 @@ class PCPVT(nn.Module):
             if i in self.out_indices:
                 outputs.append(x)
         return tuple(outputs)
-    '''layers with zero weight decay'''
-    def zerowdlayers(self):
-        layers = {}
-        if hasattr(self, 'norm_list'): layers['PCPVT.norm_list'] = self.norm_list
-        for layer_idx, layer in enumerate(self.layers):
-            for blk_idx, blk in enumerate(layer):
-                for key, value in blk.zerowdlayers().items():
-                    assert f'PCPVT.{key}.{layer_idx}.{blk_idx}' not in layers
-                    layers[f'PCPVT.{key}.{layer_idx}.{blk_idx}'] = value
-        for layer_idx, layer in enumerate(self.position_encodings):
-            for key, value in layer.zerowdlayers().items():
-                assert f'PCPVT.{key}.{layer_idx}' not in layers
-                layers[f'PCPVT.{key}.{layer_idx}'] = value
-        for layer_idx, layer in enumerate(self.patch_embeds):
-            for key, value in layer.zerowdlayers().items():
-                assert f'PCPVT.{key}.{layer_idx}' not in layers
-                layers[f'PCPVT.{key}.{layer_idx}'] = value
-        return layers
-    '''layers with non zero weight decay'''
-    def nonzerowdlayers(self):
-        layers = {}
-        for layer_idx, layer in enumerate(self.layers):
-            for blk_idx, blk in enumerate(layer):
-                for key, value in blk.nonzerowdlayers().items():
-                    assert f'PCPVT.{key}.{layer_idx}.{blk_idx}' not in layers
-                    layers[f'PCPVT.{key}.{layer_idx}.{blk_idx}'] = value
-        for layer_idx, layer in enumerate(self.position_encodings):
-            for key, value in layer.nonzerowdlayers().items():
-                assert f'PCPVT.{key}.{layer_idx}' not in layers
-                layers[f'PCPVT.{key}.{layer_idx}'] = value
-        for layer_idx, layer in enumerate(self.patch_embeds):
-            for key, value in layer.nonzerowdlayers().items():
-                assert f'PCPVT.{key}.{layer_idx}' not in layers
-                layers[f'PCPVT.{key}.{layer_idx}'] = value
-        return layers
     '''initialize backbone'''
     def initweights(self, structure_type='pcpvt_small', pretrained_model_path=''):
         # load

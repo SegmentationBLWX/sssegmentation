@@ -53,8 +53,6 @@ class EMANet(BaseSegmentor):
         self.setauxiliarydecoder(cfg['auxiliary'])
         # freeze normalization layer if necessary
         if cfg.get('is_freeze_norm', False): self.freezenormalization()
-        # layer names for training tricks
-        self.layer_names = ['backbone_net', 'ema_in_conv', 'ema_module', 'ema_out_conv', 'bottleneck', 'decoder', 'auxiliary_decoder']
     '''forward'''
     def forward(self, x, targets=None):
         img_size = x.size(2), x.size(3)

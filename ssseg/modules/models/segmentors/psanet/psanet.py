@@ -71,11 +71,6 @@ class PSANet(BaseSegmentor):
         self.setauxiliarydecoder(cfg['auxiliary'])
         # freeze normalization layer if necessary
         if cfg.get('is_freeze_norm', False): self.freezenormalization()
-        # layer names for training tricks
-        self.layer_names = [
-            'backbone_net', 'reduce', 'attention', 'proj', 'decoder', 'auxiliary_decoder', 'reduce_p',
-            'attention_p', 'psamask_collect', 'psamask_distribute', 'psamask',
-        ]
     '''forward'''
     def forward(self, x, targets=None):
         img_size = x.size(2), x.size(3)

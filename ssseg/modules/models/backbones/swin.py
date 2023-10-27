@@ -12,9 +12,7 @@ import torch.nn.functional as F
 import torch.utils.model_zoo as model_zoo
 import torch.utils.checkpoint as checkpoint
 from collections import OrderedDict
-from .bricks import PatchEmbed as PatchEmbedBase
-from .bricks import PatchMerging as PatchMergingBase
-from .bricks import BuildNormalization, BuildDropout, FFN
+from .bricks import BuildNormalization, BuildDropout, FFN, PatchEmbed, PatchMerging
 
 
 '''DEFAULT_MODEL_URLS'''
@@ -67,32 +65,6 @@ AUTO_ASSERT_STRUCTURE_TYPES = {
 }
 
 
-'''PatchMerging'''
-class PatchMerging(PatchMergingBase):
-    def __init__(self, **kwargs):
-        super(PatchMerging, self).__init__(**kwargs)
-    '''layers with zero weight decay'''
-    def zerowdlayers(self):
-        if self.norm is None: return {}
-        return {'PatchMerging.norm': self.norm}
-    '''layers with non zero weight decay'''
-    def nonzerowdlayers(self):
-        return {'PatchMerging.reduction': self.reduction}
-
-
-'''PatchEmbed'''
-class PatchEmbed(PatchEmbedBase):
-    def __init__(self, **kwargs):
-        super(PatchEmbed, self).__init__(**kwargs)
-    '''layers with zero weight decay'''
-    def zerowdlayers(self):
-        if self.norm is None: return {}
-        return {'PatchEmbed.norm': self.norm}
-    '''layers with non zero weight decay'''
-    def nonzerowdlayers(self):
-        return {'PatchEmbed.projection': self.projection}
-
-
 '''WindowMSA'''
 class WindowMSA(nn.Module):
     def __init__(self, embed_dims, num_heads, window_size, qkv_bias=True, qk_scale=None, attn_drop_rate=0., proj_drop_rate=0.):
@@ -114,12 +86,6 @@ class WindowMSA(nn.Module):
         self.proj = nn.Linear(embed_dims, embed_dims)
         self.proj_drop = nn.Dropout(proj_drop_rate)
         self.softmax = nn.Softmax(dim=-1)
-    '''layers with zero weight decay'''
-    def zerowdlayers(self):
-        return {'WindowMSA.relative_position_bias_table': self.relative_position_bias_table}
-    '''layers with non zero weight decay'''
-    def nonzerowdlayers(self):
-        return {'WindowMSA.qkv': self.qkv, 'WindowMSA.proj': self.proj}
     '''forward'''
     def forward(self, x, mask=None):
         B, N, C = x.shape
@@ -167,20 +133,6 @@ class ShiftWindowMSA(nn.Module):
             proj_drop_rate=proj_drop_rate,
         )
         self.drop = BuildDropout(dropout_cfg)
-    '''layers with zero weight decay'''
-    def zerowdlayers(self):
-        tmp_layers = self.w_msa.zerowdlayers()
-        layers = dict()
-        for key, value in tmp_layers.items():
-            layers[f'ShiftWindowMSA.{key}'] = value
-        return layers
-    '''layers with non zero weight decay'''
-    def nonzerowdlayers(self):
-        tmp_layers = self.w_msa.nonzerowdlayers()
-        layers = dict()
-        for key, value in tmp_layers.items():
-            layers[f'ShiftWindowMSA.{key}'] = value
-        return layers
     '''forward'''
     def forward(self, query, hw_shape):
         B, L, C = query.shape
@@ -267,28 +219,6 @@ class SwinBlock(nn.Module):
             ffn_drop=drop_rate, dropout_cfg={'type': 'DropPath', 'drop_prob': drop_path_rate},
             act_cfg=act_cfg, add_identity=True,
         )
-    '''layers with zero weight decay'''
-    def zerowdlayers(self, apply_wd_to_relative_position_bias_table=True):
-        # Note: our experiments find that do not set the weight decay of relative_position_bias_table as zero can achieve better segmentation performance
-        if apply_wd_to_relative_position_bias_table: return {'SwinBlock.norm1': self.norm1, 'SwinBlock.norm2': self.norm2}
-        layers = {'SwinBlock.norm1': self.norm1, 'SwinBlock.norm2': self.norm2}
-        for key, value in self.attn.zerowdlayers().items():
-            if 'relative_position_bias_table' in key:
-                layers[f'SwinBlock.{key}'] = nn.ParameterList([value])
-            else:
-                layers[f'SwinBlock.{key}'] = value
-        return layers
-    '''layers with non zero weight decay'''
-    def nonzerowdlayers(self, apply_wd_to_relative_position_bias_table=True):
-        # Note: our experiments find that do not set the weight decay of relative_position_bias_table as zero can achieve better segmentation performance
-        if apply_wd_to_relative_position_bias_table: return {'SwinBlock.attn': self.attn, 'SwinBlock.ffn': self.ffn}
-        layers = {'SwinBlock.ffn': self.ffn}
-        for key, value in self.attn.nonzerowdlayers().items():
-            if 'relative_position_bias_table' in key:
-                layers[f'SwinBlock.{key}'] = nn.ParameterList([value])
-            else:
-                layers[f'SwinBlock.{key}'] = value
-        return layers
     '''forward'''
     def forward(self, x, hw_shape):
         def _forward(x):
@@ -322,38 +252,6 @@ class SwinBlockSequence(nn.Module):
             )
             self.blocks.append(block)
         self.downsample = downsample
-    '''layers with zero weight decay'''
-    def zerowdlayers(self):
-        layers = {}
-        for layer_idx, block in enumerate(self.blocks):
-            tmp_layers = block.zerowdlayers()
-            new_tmp_layers = {}
-            for key, value in tmp_layers.items():
-                new_tmp_layers[f"SwinBlockSequence.{layer_idx}_{key}"] = value
-            layers.update(new_tmp_layers)
-        if self.downsample is not None:
-            tmp_layers = self.downsample.zerowdlayers()
-            new_tmp_layers = {}
-            for key, value in tmp_layers.items():
-                new_tmp_layers[f"SwinBlockSequence.{key}"] = value
-            layers.update(new_tmp_layers)
-        return layers
-    '''layers with non zero weight decay'''
-    def nonzerowdlayers(self):
-        layers = {}
-        for layer_idx, block in enumerate(self.blocks):
-            tmp_layers = block.nonzerowdlayers()
-            new_tmp_layers = {}
-            for key, value in tmp_layers.items():
-                new_tmp_layers[f"SwinBlockSequence.{layer_idx}_{key}"] = value
-            layers.update(new_tmp_layers)
-        if self.downsample is not None:
-            tmp_layers = self.downsample.nonzerowdlayers()
-            new_tmp_layers = {}
-            for key, value in tmp_layers.items():
-                new_tmp_layers[f"SwinBlockSequence.{key}"] = value
-            layers.update(new_tmp_layers)
-        return layers
     '''forward'''
     def forward(self, x, hw_shape):
         for block in self.blocks:
@@ -540,40 +438,6 @@ class SwinTransformer(nn.Module):
                 new_k = k
             new_ckpt[new_k] = new_v
         return new_ckpt
-    '''layers zero weight decay'''
-    def zerowdlayers(self):
-        layers = {}
-        if hasattr(self, 'absolute_pos_embed'):
-            layers['SwinTransformer.absolute_pos_embed'] = self.absolute_pos_embed
-        tmp_layers = self.patch_embed.zerowdlayers()
-        new_tmp_layers = {}
-        for key, value in tmp_layers.items():
-            new_tmp_layers[f'SwinTransformer.{key}'] = value
-        layers.update(new_tmp_layers)
-        for layer_idx, stage in enumerate(self.stages):
-            tmp_layers = stage.zerowdlayers()
-            new_tmp_layers = {}
-            for key, value in tmp_layers.items():
-                new_tmp_layers[f"SwinTransformer.{layer_idx}_{key}"] = value
-            layers.update(new_tmp_layers)
-        for idx in self.out_indices:
-            layers[f'SwinTransformer.norm{idx}'] = getattr(self, f'norm{idx}')
-        return layers
-    '''layers non zero weight decay'''
-    def nonzerowdlayers(self):
-        layers = {}
-        tmp_layers = self.patch_embed.nonzerowdlayers()
-        new_tmp_layers = {}
-        for key, value in tmp_layers.items():
-            new_tmp_layers[f'SwinTransformer.{key}'] = value
-        layers.update(new_tmp_layers)
-        for layer_idx, stage in enumerate(self.stages):
-            tmp_layers = stage.nonzerowdlayers()
-            new_tmp_layers = {}
-            for key, value in tmp_layers.items():
-                new_tmp_layers[f"SwinTransformer.{layer_idx}_{key}"] = value
-            layers.update(new_tmp_layers)
-        return layers
     '''forward'''
     def forward(self, x):
         x, hw_shape = self.patch_embed(x)

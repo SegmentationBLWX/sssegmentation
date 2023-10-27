@@ -50,8 +50,6 @@ class LRASPPNet(BaseSegmentor):
         )
         # freeze normalization layer if necessary
         if cfg.get('is_freeze_norm', False): self.freezenormalization()
-        # layer names for training tricks
-        self.layer_names = ['backbone_net', 'branch_convs', 'branch_ups', 'aspp_conv', 'image_pool', 'bottleneck', 'decoder']
     '''forward'''
     def forward(self, x, targets=None):
         img_size = x.size(2), x.size(3)

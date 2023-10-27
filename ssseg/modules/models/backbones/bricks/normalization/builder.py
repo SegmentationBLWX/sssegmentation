@@ -47,11 +47,12 @@ class NormalizationBuilder():
         self.REGISTERED_NORMALIZATIONS[norm_type] = norm_module
     '''isnorm'''
     @staticmethod
-    def isnorm(module):
-        norm_list = (
-            nn.GroupNorm, nn.LayerNorm, nn.BatchNorm1d, nn.BatchNorm2d, nn.BatchNorm3d,
-            nn.InstanceNorm1d, nn.InstanceNorm2d, nn.InstanceNorm3d, nn.SyncBatchNorm,
-        )
+    def isnorm(module, norm_list=None):
+        if norm_list is None:
+            norm_list = (
+                nn.GroupNorm, nn.LayerNorm, nn.BatchNorm1d, nn.BatchNorm2d, nn.BatchNorm3d,
+                nn.InstanceNorm1d, nn.InstanceNorm2d, nn.InstanceNorm3d, nn.SyncBatchNorm,
+            )
         return isinstance(module, norm_list)
 
 

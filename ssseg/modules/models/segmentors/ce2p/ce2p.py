@@ -69,8 +69,6 @@ class CE2P(BaseSegmentor):
         )
         # freeze normalization layer if necessary
         if cfg.get('is_freeze_norm', False): self.freezenormalization()
-        # layer names for training tricks
-        self.layer_names = ['backbone_net', 'ppm_net', 'edge_net', 'shortcut', 'decoder_stage1', 'decoder_stage2']
     '''forward'''
     def forward(self, x, targets=None):
         img_size = x.size(2), x.size(3)

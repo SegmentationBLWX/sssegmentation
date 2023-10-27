@@ -42,8 +42,6 @@ class APCNet(BaseSegmentor):
         self.setauxiliarydecoder(cfg['auxiliary'])
         # freeze normalization layer if necessary
         if cfg.get('is_freeze_norm', False): self.freezenormalization()
-        # layer names for training tricks
-        self.layer_names = ['backbone_net', 'acm_modules', 'decoder', 'auxiliary_decoder']
     '''forward'''
     def forward(self, x, targets=None):
         img_size = x.size(2), x.size(3)

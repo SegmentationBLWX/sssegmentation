@@ -11,7 +11,7 @@ import torch.nn.functional as F
 import torch.distributed as dist
 from ...losses import BuildLoss
 from .utils import attrfetcher, attrjudger
-from ...backbones import BuildBackbone, BuildActivation, BuildNormalization
+from ...backbones import BuildBackbone, BuildActivation, BuildNormalization, NormalizationBuilder
 
 
 '''BaseSegmentor'''
@@ -50,11 +50,7 @@ class BaseSegmentor(nn.Module):
                 outputs_dict = {'loss_cls': predictions, 'loss_aux': predictions_aux}
         if not compute_loss: 
             return outputs_dict
-        return self.calculatelosses(
-            predictions=outputs_dict, 
-            targets=targets, 
-            losses_cfg=losses_cfg
-        )
+        return self.calculatelosses(predictions=outputs_dict, targets=targets, losses_cfg=losses_cfg)
     '''forward when mode = `TEST`'''
     def forwardtest(self):
         raise NotImplementedError('not to be implemented')
@@ -69,32 +65,6 @@ class BaseSegmentor(nn.Module):
         for idx in selected_indices:
             outs.append(x_list[idx])
         return outs
-    '''return all layers with learnable parameters'''
-    def fetchtraininglayers(self):
-        # assert
-        assert len(self.layer_names) == len(set(self.layer_names))
-        # obtain required training layers
-        require_training_layers = {}
-        for layer_name in self.layer_names:
-            if attrjudger(self, layer_name) and layer_name not in ['backbone_net']:
-                require_training_layers[layer_name] = attrfetcher(self, layer_name)
-            elif attrjudger(self, layer_name) and layer_name in ['backbone_net']:
-                if attrjudger(attrfetcher(self, layer_name), 'nonzerowdlayers'):
-                    assert attrjudger(attrfetcher(self, layer_name), 'zerowdlayers')
-                    tmp_layers = []
-                    for key, value in attrfetcher(self, layer_name).zerowdlayers().items():
-                        tmp_layers.append(value)
-                    require_training_layers.update({f'{layer_name}_zerowd': nn.Sequential(*tmp_layers)})
-                    tmp_layers = []
-                    for key, value in attrfetcher(self, layer_name).nonzerowdlayers().items():
-                        tmp_layers.append(value)
-                    require_training_layers.update({f'{layer_name}_nonzerowd': nn.Sequential(*tmp_layers)})
-                else:
-                    require_training_layers[layer_name] = attrfetcher(self, layer_name)
-            elif attrjudger(self, layer_name):
-                raise NotImplementedError(f'layer name {layer_name} error')
-        # return
-        return require_training_layers
     '''set auxiliary decoder as attribute'''
     def setauxiliarydecoder(self, auxiliary_cfg):
         norm_cfg, act_cfg, num_classes = self.norm_cfg.copy(), self.act_cfg.copy(), self.cfg['num_classes']
@@ -128,9 +98,9 @@ class BaseSegmentor(nn.Module):
     '''freeze normalization'''
     def freezenormalization(self):
         for module in self.modules():
-            if isinstance(module, nn.BatchNorm1d) or isinstance(module, nn.BatchNorm2d) or \
-               isinstance(module, nn.BatchNorm3d) or isinstance(module, nn.SyncBatchNorm):
+            if NormalizationBuilder.isnorm(module, norm_list=(nn.BatchNorm1d, nn.BatchNorm2d, nn.BatchNorm3d, nn.SyncBatchNorm)):
                 module.eval()
+                for p in module.parameters(): p.requires_grad = False
     '''calculate the losses'''
     def calculatelosses(self, predictions, targets, losses_cfg, map_preds_to_tgts_dict=None):
         # parse targets

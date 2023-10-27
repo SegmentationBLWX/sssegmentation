@@ -36,7 +36,11 @@ SEGMENTOR_CFG = {
         'type': 'PolyScheduler', 'max_epochs': 0, 'power': 1.0, 'min_lr': 0.0, 'warmup_cfg': {'type': 'linear', 'ratio': 1e-6, 'iters': 1500},
         'optimizer': {
             'type': 'AdamW', 'lr': 0.00006, 'betas': (0.9, 0.999), 'weight_decay': 0.01,
-            'params_rules': {'backbone_net_zerowd': (1.0, 0.0), 'backbone_net_nonzerowd': (1.0, 1.0), 'others': (10.0, 1.0)},
+            'params_rules': {
+                'norm': dict(wd_multiplier=0.),
+                'convs': dict(lr_multiplier=10.0, wd_multiplier=1.0),
+                'decoder': dict(lr_multiplier=10.0, wd_multiplier=1.0),
+            },
         }
     },
     'dataset': None,

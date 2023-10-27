@@ -86,11 +86,6 @@ class MemoryNet(BaseSegmentor):
         self.setauxiliarydecoder(cfg['auxiliary'])
         # freeze normalization layer if necessary
         if cfg.get('is_freeze_norm', False): self.freezenormalization()
-        # layer names for training tricks
-        self.layer_names = [
-            'backbone_net', 'bottleneck', 'memory_module', 'decoder_stage1', 'decoder_stage2', 'norm_layers',
-            'downsample_backbone', 'context_within_image_module', 'auxiliary_decoder'
-        ]
     '''forward'''
     def forward(self, x, targets=None, **kwargs):
         img_size = x.size(2), x.size(3)

@@ -47,13 +47,6 @@ class Mask2Former(BaseSegmentor):
         self.setauxiliarydecoder(cfg['auxiliary'])
         # freeze normalization layer if necessary
         if cfg.get('is_freeze_norm', False): self.freezenormalization()
-        # layer names for training tricks
-        self.layer_names = [
-            'backbone_net', 'pixel_decoder', 'predictor.pe_layer', 'predictor.transformer_self_attention_layers',
-            'predictor.transformer_cross_attention_layers', 'predictor.transformer_ffn_layers', 'predictor.decoder_norm',
-            'predictor.query_feat', 'predictor.query_embed', 'predictor.level_embed', 'predictor.input_proj', 
-            'predictor.class_embed', 'predictor.mask_embed',
-        ]
     '''forward'''
     def forward(self, x, targets=None):
         img_size = x.shape[-2:]

@@ -35,7 +35,10 @@ class DefaultParamsConstructor():
         if 'base_setting' in optimizer_cfg:
             base_setting = optimizer_cfg.pop('base_setting')
         else:
-            base_setting = {'bias_lr_multiplier': 1.0, 'bias_wd_multiplier': 1.0, 'norm_wd_multiplier': 1.0}
+            base_setting = {
+                'bias_lr_multiplier': 1.0, 'bias_wd_multiplier': 1.0, 'norm_wd_multiplier': 1.0,
+                'lr_multiplier': 1.0, 'wd_multiplier': 1.0
+            }
         # iter to group current parameters
         sorted_rule_keys = sorted(sorted(params_rules.keys()), key=len, reverse=True)
         for name, param in model.named_parameters(recurse=False):
@@ -62,16 +65,20 @@ class DefaultParamsConstructor():
             if not set_base_setting: continue
             # --set base setting
             param_group['lr'] = optimizer_cfg['lr']
-            if name == 'bias' and (not NormalizationBuilder.isnorm(model)):
-                param_group['lr'] = param_group['lr'] * base_setting.get('bias_lr_multiplier', 1.0)
             param_group['name'] = f'{prefix}.{name}' if prefix else name
             param_group['rule_key'] = 'base_setting'
+            if name == 'bias' and (not NormalizationBuilder.isnorm(model)):
+                param_group['lr'] = param_group['lr'] * base_setting.get('bias_lr_multiplier', 1.0)
+            else:
+                param_group['lr'] = param_group['lr'] * base_setting.get('lr_multiplier', 1.0)
             if 'weight_decay' in optimizer_cfg:
                 param_group['weight_decay'] = optimizer_cfg['weight_decay']
                 if NormalizationBuilder.isnorm(model):
                     param_group['weight_decay'] = param_group['weight_decay'] * base_setting.get('norm_wd_multiplier', 1.0)
                 elif name == 'bias':
                     param_group['weight_decay'] = param_group['weight_decay'] * base_setting.get('bias_wd_multiplier', 1.0)
+                else:
+                    param_group['weight_decay'] = param_group['weight_decay'] * base_setting.get('wd_multiplier', 1.0)
             params.append(param_group)
         # iter to group children parameters
         for child_name, child_model in model.named_children():

@@ -47,8 +47,6 @@ class SemanticFPN(BaseSegmentor):
         )
         # freeze normalization layer if necessary
         if cfg.get('is_freeze_norm', False): self.freezenormalization()
-        # layer names for training tricks
-        self.layer_names = ['backbone_net', 'decoder', 'fpn_neck', 'scale_heads']
     '''forward'''
     def forward(self, x, targets=None):
         img_size = x.size(2), x.size(3)
