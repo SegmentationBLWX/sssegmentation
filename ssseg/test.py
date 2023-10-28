@@ -5,7 +5,6 @@ Author:
     Zhenchao Jin
 '''
 import os
-import cv2
 import copy
 import torch
 import random
@@ -13,14 +12,12 @@ import pickle
 import warnings
 import argparse
 import numpy as np
-import torch.nn as nn
 import torch.nn.functional as F
 import torch.distributed as dist
 from tqdm import tqdm
 from configs import BuildConfig
 from modules import (
-    BuildDataset, BuildDistributedDataloader, BuildDistributedModel, BuildLoss, BuildBackbone, BuildSegmentor, BuildPixelSampler, 
-    Logger, initslurm, setrandomseed, touchdir, loadckpts, saveckpts, BuildOptimizer, BuildScheduler
+    BuildDataset, BuildDistributedDataloader, BuildDistributedModel, BuildSegmentor, Logger, initslurm, touchdir, loadckpts
 )
 warnings.filterwarnings('ignore')
 
