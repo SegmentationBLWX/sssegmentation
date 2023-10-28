@@ -83,10 +83,10 @@ class DefaultParamsConstructor():
         # iter to group children parameters
         for child_name, child_model in model.named_children():
             if prefix:
-                prefix = f'{prefix}.{child_name}'
+                child_prefix = f'{prefix}.{child_name}'
             else:
-                prefix = child_name
-            self.groupparams(child_model, params_rules, filter_params, optimizer_cfg, params, prefix=prefix)
+                child_prefix = child_name
+            self.groupparams(child_model, params_rules, filter_params, optimizer_cfg, params, prefix=child_prefix)
     '''isin'''
     def isin(self, param_group, param_group_list):
         param = set(param_group['params'])

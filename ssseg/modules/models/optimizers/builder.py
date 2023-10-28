@@ -44,7 +44,7 @@ class OptimizerBuilder():
         if 'filter_params' in optimizer_cfg:
             filter_params = optimizer_cfg.pop('filter_params')
         # build params_constructor
-        constructor_type = params_rules.get('type', 'DefaultParamsConstructor')
+        constructor_type = params_rules.pop('type', 'DefaultParamsConstructor')
         params_constructor = self.REGISTERED_PARAMS_CONSTRUCTORS[constructor_type](params_rules=params_rules, filter_params=filter_params, optimizer_cfg=optimizer_cfg)
         # obtain params
         optimizer_cfg['params'] = params_constructor(model=model)
