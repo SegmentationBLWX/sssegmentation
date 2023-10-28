@@ -18,7 +18,7 @@ SEGMENTOR_CFG['dataset']['train']['data_pipelines'][0] = (
 # modify dataloader config
 SEGMENTOR_CFG['dataloader'] = DATALOADER_CFG_BS16.copy()
 # modify scheduler config
-SEGMENTOR_CFG['scheduler']['max_epochs'] = 220
+SEGMENTOR_CFG['scheduler']['max_epochs'] = 440
 SEGMENTOR_CFG['scheduler']['min_lr'] = 0.0
 SEGMENTOR_CFG['scheduler']['clipgrad_cfg'] = {'max_norm': 0.01, 'norm_type': 2}
 # modify other segmentor configs
