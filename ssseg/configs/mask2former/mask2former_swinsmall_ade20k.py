@@ -34,7 +34,18 @@ SEGMENTOR_CFG['head']['pixel_decoder']['input_shape']['in_channels'] = [96, 192,
 SEGMENTOR_CFG['work_dir'] = 'mask2former_swinsmall_ade20k'
 SEGMENTOR_CFG['logfilepath'] = 'mask2former_swinsmall_ade20k/mask2former_swinsmall_ade20k.log'
 SEGMENTOR_CFG['resultsavepath'] = 'mask2former_swinsmall_ade20k/mask2former_swinsmall_ade20k_results.pkl'
-# append training tricks in scheduler config
+# modify training tricks in scheduler config
+SEGMENTOR_CFG['scheduler']['optimizer']['params_rules'] = {
+    'base_setting': dict(norm_wd_multiplier=0.0),
+    'backbone_net': dict(lr_multiplier=0.1, wd_multiplier=1.0),
+    'backbone_net.patch_embed.norm': dict(lr_multiplier=0.1, wd_multiplier=0.0),
+    'backbone_net.norm': dict(lr_multiplier=0.1, wd_multiplier=0.0),
+    'absolute_pos_embed': dict(lr_multiplier=0.1, wd_multiplier=0.0),
+    'relative_position_bias_table': dict(lr_multiplier=0.1, wd_multiplier=0.0),
+    'query_embed': dict(lr_multiplier=1.0, wd_multiplier=0.0),
+    'query_feat': dict(lr_multiplier=1.0, wd_multiplier=0.0),
+    'level_embed': dict(lr_multiplier=1.0, wd_multiplier=0.0),
+}
 for stage_id, num_blocks in enumerate(SEGMENTOR_CFG['backbone']['depths']):
     for block_id in range(num_blocks):
         SEGMENTOR_CFG['scheduler']['optimizer']['params_rules'].update({
