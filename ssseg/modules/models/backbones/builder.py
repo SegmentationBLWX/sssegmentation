@@ -24,44 +24,27 @@ from .convnextv2 import ConvNeXtV2
 from .vit import VisionTransformer
 from .mit import MixVisionTransformer
 from .timmwrapper import TIMMBackbone
+from ...utils import BaseModuleBuilder
 from .mobilevit import MobileViT, MobileViTV2
 from .mobilesamtinyvit import MobileSAMTinyViT
 from .mobilenet import MobileNetV2, MobileNetV3
 
 
 '''BackboneBuilder'''
-class BackboneBuilder():
+class BackboneBuilder(BaseModuleBuilder):
     REGISTERED_BACKBONES = {
-        'UNet': UNet, 'BEiT': BEiT, 'CGNet': CGNet, 'HRNet': HRNet,
-        'ERFNet': ERFNet, 'ResNet': ResNet, 'ResNeSt': ResNeSt, 'PCPVT': PCPVT,
-        'SVT': SVT, 'FastSCNN': FastSCNN, 'ConvNeXt': ConvNeXt, 'BiSeNetV1': BiSeNetV1,
+        'UNet': UNet, 'BEiT': BEiT, 'CGNet': CGNet, 'HRNet': HRNet, 'MobileViT': MobileViT, 'MobileViTV2': MobileViTV2,
+        'ERFNet': ERFNet, 'ResNet': ResNet, 'ResNeSt': ResNeSt, 'PCPVT': PCPVT, 'MobileSAMTinyViT': MobileSAMTinyViT, 
+        'SVT': SVT, 'FastSCNN': FastSCNN, 'ConvNeXt': ConvNeXt, 'BiSeNetV1': BiSeNetV1, 'MAE': MAE, 'SAMViT': SAMViT,
         'BiSeNetV2': BiSeNetV2, 'SwinTransformer': SwinTransformer, 'VisionTransformer': VisionTransformer,
         'MixVisionTransformer': MixVisionTransformer, 'TIMMBackbone': TIMMBackbone, 'ConvNeXtV2': ConvNeXtV2,
-        'MobileNetV2': MobileNetV2, 'MobileNetV3': MobileNetV3, 'MAE': MAE, 'SAMViT': SAMViT,
-        'MobileSAMTinyViT': MobileSAMTinyViT, 'MobileViT': MobileViT, 'MobileViTV2': MobileViTV2,
+        'MobileNetV2': MobileNetV2, 'MobileNetV3': MobileNetV3, 
     }
-    def __init__(self, require_register_backbones=None, require_update_backbones=None):
-        if require_register_backbones and isinstance(require_register_backbones, dict):
-            for backbone_type, backbone in require_register_backbones.items():
-                self.register(backbone_type, backbone)
-        if require_update_backbones and isinstance(require_update_backbones, dict):
-            for backbone_type, backbone in require_update_backbones.items():
-                self.update(backbone_type, backbone)
     '''build'''
     def build(self, backbone_cfg):
         backbone_cfg = copy.deepcopy(backbone_cfg)
-        backbone_type = backbone_cfg.pop('type')
         if 'selected_indices' in backbone_cfg: backbone_cfg.pop('selected_indices')
-        backbone = self.REGISTERED_BACKBONES[backbone_type](**backbone_cfg)
-        return backbone
-    '''register'''
-    def register(self, backbone_type, backbone):
-        assert backbone_type not in self.REGISTERED_BACKBONES
-        self.REGISTERED_BACKBONES[backbone_type] = backbone
-    '''update'''
-    def update(self, backbone_type, backbone):
-        assert backbone_type in self.REGISTERED_BACKBONES
-        self.REGISTERED_BACKBONES[backbone_type] = backbone
+        return super().build(backbone_cfg)
 
 
 '''BuildBackbone'''

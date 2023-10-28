@@ -37,13 +37,14 @@ from .memorynetv2 import MemoryNetV2
 from .mask2former import Mask2Former
 from .semanticfpn import SemanticFPN
 from .nonlocalnet import NonLocalNet
+from ...utils import BaseModuleBuilder
 from .deeplabv3plus import Deeplabv3Plus
 from .fcn import FCN, DepthwiseSeparableFCN
 
 
 '''SegmentorBuilder'''
-class SegmentorBuilder():
-    REGISTERED_SEGMENTORS = {
+class SegmentorBuilder(BaseModuleBuilder):
+    REGISTERED_MODULES = {
         'FCN': FCN, 'CE2P': CE2P, 'ICNet': ICNet, 'ISNet': ISNet, 'CCNet': CCNet, 'DANet': DANet,
         'GCNet': GCNet, 'DMNet': DMNet, 'ISANet': ISANet, 'ENCNet': ENCNet, 'APCNet': APCNet, 'SAM': SAM,
         'EMANet': EMANet, 'PSPNet': PSPNet, 'PSANet': PSANet, 'OCRNet': OCRNet, 'DNLNet': DNLNet,
@@ -53,27 +54,12 @@ class SegmentorBuilder():
         'NonLocalNet': NonLocalNet, 'Deeplabv3Plus': Deeplabv3Plus, 'DepthwiseSeparableFCN': DepthwiseSeparableFCN,
         'MobileSAM': MobileSAM, 'IDRNet': IDRNet, 'Mask2Former': Mask2Former,
     }
-    def __init__(self, require_register_segmentors=None, require_update_segmentors=None):
-        if require_register_segmentors and isinstance(require_register_segmentors, dict):
-            for segmentor_type, segmentor in require_register_segmentors.items():
-                self.register(segmentor_type, segmentor)
-        if require_update_segmentors and isinstance(require_update_segmentors, dict):
-            for segmentor_type, segmentor in require_update_segmentors.items():
-                self.update(segmentor_type, segmentor)
     '''build'''
     def build(self, segmentor_cfg, mode):
         segmentor_cfg = copy.deepcopy(segmentor_cfg)
         segmentor_type = segmentor_cfg.pop('type')
-        segmentor = self.REGISTERED_SEGMENTORS[segmentor_type](cfg=segmentor_cfg, mode=mode)
+        segmentor = self.REGISTERED_MODULES[segmentor_type](cfg=segmentor_cfg, mode=mode)
         return segmentor
-    '''register'''
-    def register(self, segmentor_type, segmentor):
-        assert segmentor_type not in self.REGISTERED_SEGMENTORS
-        self.REGISTERED_SEGMENTORS[segmentor_type] = segmentor
-    '''update'''
-    def update(self, segmentor_type, segmentor):
-        assert segmentor_type in self.REGISTERED_SEGMENTORS
-        self.REGISTERED_SEGMENTORS[segmentor_type] = segmentor
 
 
 '''BuildSegmentor'''

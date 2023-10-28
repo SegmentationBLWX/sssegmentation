@@ -5,8 +5,7 @@ Author:
     Zhenchao Jin
 '''
 import copy
-import torch
-import torch.nn as nn
+from ...utils import BaseModuleBuilder
 from ..backbones import NormalizationBuilder
 
 
@@ -199,3 +198,21 @@ class LearningRateDecayParamsConstructor(DefaultParamsConstructor):
             return layer_id + 1
         else:
             return max_layer_id - 1
+
+
+'''ParamsConstructorBuilder'''
+class ParamsConstructorBuilder(BaseModuleBuilder):
+    REGISTERED_MODULES = {
+        'DefaultParamsConstructor': DefaultParamsConstructor, 'LearningRateDecayParamsConstructor': LearningRateDecayParamsConstructor,
+    }
+    '''build'''
+    def build(self, params_rules={}, filter_params=False, optimizer_cfg={}):
+        constructor_type = params_rules.pop('type', 'DefaultParamsConstructor')
+        module_cfg = {
+            'params_rules': params_rules, 'filter_params': filter_params, 'optimizer_cfg': optimizer_cfg, 'type': constructor_type
+        }
+        return super().build(module_cfg)
+
+
+'''BuildParamsConstructor'''
+BuildParamsConstructor = ParamsConstructorBuilder().build

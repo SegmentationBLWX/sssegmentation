@@ -10,5 +10,5 @@ from .models import (
     LossBuilder, BackboneBuilder, SegmentorBuilder, PixelSamplerBuilder, OptimizerBuilder, SchedulerBuilder
 )
 from .utils import (
-    Logger, initslurm, setrandomseed, touchdir, loadckpts, saveckpts
+    Logger, initslurm, setrandomseed, touchdir, loadckpts, saveckpts, BaseModuleBuilder
 )

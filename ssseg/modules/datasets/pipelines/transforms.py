@@ -10,6 +10,7 @@ import torch
 import collections
 import numpy as np
 import torch.nn.functional as F
+from ...utils import BaseModuleBuilder
 
 
 '''_INTERPOLATION_CV2_CONVERTOR'''
@@ -658,34 +659,16 @@ class Compose(object):
 
 
 '''DataTransformBuilder'''
-class DataTransformBuilder():
-    REGISTERED_TRANSFORMS = {
+class DataTransformBuilder(BaseModuleBuilder):
+    REGISTERED_MODULES = {
         'Resize': Resize, 'RandomCrop': RandomCrop, 'RandomFlip': RandomFlip, 'RandomRotation': RandomRotation, 'EdgeExtractor': EdgeExtractor,
         'PhotoMetricDistortion': PhotoMetricDistortion, 'Padding': Padding, 'ToTensor': ToTensor, 'ResizeShortestEdge': ResizeShortestEdge,
         'Normalize': Normalize, 'RandomChoiceResize': RandomChoiceResize, 'Rerange': Rerange, 'CLAHE': CLAHE, 'RandomCutOut': RandomCutOut, 
         'AlbumentationsWrapper': AlbumentationsWrapper, 'RGB2Gray': RGB2Gray, 'AdjustGamma': AdjustGamma,
     }
-    def __init__(self, require_register_transforms=None, require_update_transforms=None):
-        if require_register_transforms and isinstance(require_register_transforms, dict):
-            for transform_type, transform in require_register_transforms.items():
-                self.register(transform_type, transform)
-        if require_update_transforms and isinstance(require_update_transforms, dict):
-            for transform_type, transform in require_update_transforms.items():
-                self.update(transform_type, transform)
     '''build'''
     def build(self, transform_cfg):
-        transform_cfg = copy.deepcopy(transform_cfg)
-        transform_type = transform_cfg.pop('type')
-        transform = self.REGISTERED_TRANSFORMS[transform_type](**transform_cfg)
-        return transform
-    '''register'''
-    def register(self, transform_type, transform):
-        assert transform_type not in self.REGISTERED_TRANSFORMS
-        self.REGISTERED_TRANSFORMS[transform_type] = transform
-    '''update'''
-    def update(self, transform_type, transform):
-        assert transform_type in self.REGISTERED_TRANSFORMS
-        self.REGISTERED_TRANSFORMS[transform_type] = transform
+        return super().build(transform_cfg)
 
 
 '''BuildDataTransform'''
