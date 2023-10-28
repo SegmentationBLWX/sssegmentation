@@ -149,8 +149,10 @@ class Trainer():
                 scheduler.step()
                 if (cmd_args.local_rank == 0) and (scheduler.cur_iter % cfg.SEGMENTOR_CFG['log_interval_iterations'] == 0) and (int(os.environ.get('SLURM_PROCID', 0)) == 0):
                     print_log = {
-                        'epoch': epoch, 'batch': batch_idx+1, 'segmentor': cfg.SEGMENTOR_CFG['type'], 'backbone': cfg.SEGMENTOR_CFG['backbone']['structure_type'],
-                        'dataset': cfg.SEGMENTOR_CFG['dataset']['type'], 'learning_rate': learning_rate,
+                        'cur_epoch': epoch, 'max_epochs': end_epoch, 'cur_iter': scheduler.cur_iter, 'max_iters': scheduler.max_iters,
+                        'cur_iter_in_cur_epoch': batch_idx+1, 'max_iters_in_cur_epoch': len(dataloader), 'segmentor': cfg.SEGMENTOR_CFG['type'], 
+                        'backbone': cfg.SEGMENTOR_CFG['backbone']['structure_type'], 'dataset': cfg.SEGMENTOR_CFG['dataset']['type'], 
+                        'learning_rate': learning_rate,
                     }
                     for key in list(losses_log_dict_memory.keys()):
                         print_log[key] = sum(losses_log_dict_memory[key]) / len(losses_log_dict_memory[key])
