@@ -16,7 +16,7 @@ from .celoss import CrossEntropyLoss, BinaryCrossEntropyLoss
 
 '''LossBuilder'''
 class LossBuilder(BaseModuleBuilder):
-    REGISTERED_LOSSES = {
+    REGISTERED_MODULES = {
         'L1Loss': L1Loss, 'DiceLoss': DiceLoss, 'KLDivLoss': KLDivLoss, 'LovaszLoss': LovaszLoss,
         'CrossEntropyLoss': CrossEntropyLoss, 'SigmoidFocalLoss': SigmoidFocalLoss,
         'CosineSimilarityLoss': CosineSimilarityLoss, 'BinaryCrossEntropyLoss': BinaryCrossEntropyLoss,

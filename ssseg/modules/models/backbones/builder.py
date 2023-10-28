@@ -32,7 +32,7 @@ from .mobilenet import MobileNetV2, MobileNetV3
 
 '''BackboneBuilder'''
 class BackboneBuilder(BaseModuleBuilder):
-    REGISTERED_BACKBONES = {
+    REGISTERED_MODULES = {
         'UNet': UNet, 'BEiT': BEiT, 'CGNet': CGNet, 'HRNet': HRNet, 'MobileViT': MobileViT, 'MobileViTV2': MobileViTV2,
         'ERFNet': ERFNet, 'ResNet': ResNet, 'ResNeSt': ResNeSt, 'PCPVT': PCPVT, 'MobileSAMTinyViT': MobileSAMTinyViT, 
         'SVT': SVT, 'FastSCNN': FastSCNN, 'ConvNeXt': ConvNeXt, 'BiSeNetV1': BiSeNetV1, 'MAE': MAE, 'SAMViT': SAMViT,
