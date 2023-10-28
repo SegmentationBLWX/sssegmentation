@@ -74,7 +74,7 @@ class LayerNorm(nn.Module):
 
 '''BuildNormalization'''
 BuildNormalization = NormalizationBuilder(
-    require_update_normalizations={'LayerNorm': LayerNorm}
+    require_renew_normalizations={'LayerNorm': LayerNorm}
 ).build
 
 

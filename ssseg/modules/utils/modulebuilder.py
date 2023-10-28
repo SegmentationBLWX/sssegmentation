@@ -1,4 +1,4 @@
-+'''
+'''
 Function:
     Implementation of BaseModuleBuilder
 Author:
