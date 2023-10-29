@@ -169,6 +169,8 @@ class Trainer():
                     saveckpts(state_dict, savepath)
             # --eval ckpts
             if (epoch % cfg.SEGMENTOR_CFG['eval_interval_epochs'] == 0) or (epoch == end_epoch):
+                if (cmd_args.local_rank == 0) and (int(os.environ.get('SLURM_PROCID', 0)) == 0): 
+                    self.logger_handle.info(f'Evaluate {cfg.SEGMENTOR_CFG["type"]} at epoch {epoch}')
                 self.evaluate(segmentor)
     '''evaluate'''
     def evaluate(self, segmentor):
