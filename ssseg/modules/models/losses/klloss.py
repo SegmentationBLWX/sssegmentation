@@ -6,7 +6,6 @@ Author:
 '''
 import torch
 import torch.nn as nn
-import torch.nn.functional as F
 
 
 '''KLDivLoss'''
@@ -22,7 +21,7 @@ class KLDivLoss(nn.Module):
     def forward(self, prediction, target):
         # fetch attributes
         assert prediction.size() == target.size()
-        reduction, log_target, temperature = self.reduction, self.log_target, self.temperature
+        reduction, log_target, temperature, scale_factor, lowest_loss_value = self.reduction, self.log_target, self.temperature, self.scale_factor, self.lowest_loss_value
         # construct loss_cfg
         kl_args = {'reduction': reduction}
         if log_target is not None:
