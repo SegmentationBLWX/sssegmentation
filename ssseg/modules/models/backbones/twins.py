@@ -219,7 +219,7 @@ class PCPVT(nn.Module):
                 self.norm_list.append(BuildNormalization(placeholder=dim, norm_cfg=norm_cfg))
         # load pretrained weights
         if pretrained:
-            self.initweights(structure_type, pretrained_model_path)
+            self.loadpretrainedweights(structure_type, pretrained_model_path)
     '''forward'''
     def forward(self, x):
         outputs, b = list(), x.shape[0]
@@ -235,10 +235,10 @@ class PCPVT(nn.Module):
             if i in self.out_indices:
                 outputs.append(x)
         return tuple(outputs)
-    '''initialize backbone'''
-    def initweights(self, structure_type='pcpvt_small', pretrained_model_path=''):
+    '''loadpretrainedweights'''
+    def loadpretrainedweights(self, structure_type='pcpvt_small', pretrained_model_path=''):
         # load
-        if pretrained_model_path:
+        if pretrained_model_path and os.path.exists(pretrained_model_path):
             checkpoint = torch.load(pretrained_model_path, map_location='cpu')
         else:
             checkpoint = model_zoo.load_url(DEFAULT_MODEL_URLS[structure_type], map_location='cpu')

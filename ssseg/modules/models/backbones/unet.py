@@ -4,10 +4,9 @@ Function:
 Author:
     Zhenchao Jin
 '''
-import os
 import torch
 import torch.nn as nn
-import torch.utils.model_zoo as model_zoo
+from ...utils import loadpretrainedweights
 from .bricks import BuildNormalization, BuildActivation
 
 
@@ -153,47 +152,34 @@ class UNet(nn.Module):
                 if strides[i] == 1 and downsamples[i - 1]:
                     enc_conv_block.append(nn.MaxPool2d(kernel_size=2))
                 upsample = (strides[i] != 1 or downsamples[i - 1])
-                self.decoder.append(
-                    UpConvBlock(
-                        conv_block=BasicConvBlock,
-                        in_channels=base_channels * 2**i,
-                        skip_channels=base_channels * 2**(i - 1),
-                        out_channels=base_channels * 2**(i - 1),
-                        num_convs=dec_num_convs[i - 1],
-                        stride=1,
-                        dilation=dec_dilations[i - 1],
-                        norm_cfg=norm_cfg,
-                        act_cfg=act_cfg,
-                        upsample_type=upsample_type if upsample else None,
-                    )
-                )
-            enc_conv_block.append(
-                BasicConvBlock(
-                    in_channels=in_channels,
-                    out_channels=base_channels * 2**i,
-                    num_convs=enc_num_convs[i],
-                    stride=strides[i],
-                    dilation=enc_dilations[i],
+                self.decoder.append(UpConvBlock(
+                    conv_block=BasicConvBlock,
+                    in_channels=base_channels * 2**i,
+                    skip_channels=base_channels * 2**(i - 1),
+                    out_channels=base_channels * 2**(i - 1),
+                    num_convs=dec_num_convs[i - 1],
+                    stride=1,
+                    dilation=dec_dilations[i - 1],
                     norm_cfg=norm_cfg,
                     act_cfg=act_cfg,
-                )
-            )
+                    upsample_type=upsample_type if upsample else None,
+                ))
+            enc_conv_block.append(BasicConvBlock(
+                in_channels=in_channels,
+                out_channels=base_channels * 2**i,
+                num_convs=enc_num_convs[i],
+                stride=strides[i],
+                dilation=enc_dilations[i],
+                norm_cfg=norm_cfg,
+                act_cfg=act_cfg,
+            ))
             self.encoder.append((nn.Sequential(*enc_conv_block)))
             in_channels = base_channels * 2**i
         # load pretrained weights
-        if pretrained and os.path.exists(pretrained_model_path):
-            checkpoint = torch.load(pretrained_model_path, map_location='cpu')
-            if 'state_dict' in checkpoint: 
-                state_dict = checkpoint['state_dict']
-            else: 
-                state_dict = checkpoint
-            self.load_state_dict(state_dict, strict=False)
-        elif pretrained:
-            checkpoint = model_zoo.load_url(DEFAULT_MODEL_URLS[structure_type], map_location='cpu')
-            if 'state_dict' in checkpoint: 
-                state_dict = checkpoint['state_dict']
-            else: 
-                state_dict = checkpoint
+        if pretrained:
+            state_dict = loadpretrainedweights(
+                structure_type=structure_type, pretrained_model_path=pretrained_model_path, default_model_urls=DEFAULT_MODEL_URLS
+            )
             self.load_state_dict(state_dict, strict=False)
     '''forward'''
     def forward(self, x):

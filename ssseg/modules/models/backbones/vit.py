@@ -150,10 +150,10 @@ class VisionTransformer(nn.Module):
             self.ln1 = BuildNormalization(placeholder=embed_dims, norm_cfg=norm_cfg)
         # load pretrained weights
         if pretrained:
-            self.initweights(structure_type, pretrained_model_path)
-    '''initialize backbone'''
-    def initweights(self, structure_type='jx_vit_large_p16_384', pretrained_model_path=''):
-        if pretrained_model_path:
+            self.loadpretrainedweights(structure_type, pretrained_model_path)
+    '''loadpretrainedweights'''
+    def loadpretrainedweights(self, structure_type='jx_vit_large_p16_384', pretrained_model_path=''):
+        if pretrained_model_path and os.path.exists(pretrained_model_path):
             checkpoint = torch.load(pretrained_model_path, map_location='cpu')
         else:
             checkpoint = model_zoo.load_url(DEFAULT_MODEL_URLS[structure_type], map_location='cpu')

@@ -7,7 +7,6 @@ Author:
 import os
 import torch
 import torch.nn as nn
-import torch.nn.functional as F
 import torch.utils.model_zoo as model_zoo
 from .bricks import makedivisible, BuildNormalization, BuildActivation, AdptivePaddingConv2d, InvertedResidual, InvertedResidualV3
 
@@ -67,33 +66,26 @@ class MobileNetV2(nn.Module):
             layer_name = f'layer{i + 1}'
             self.add_module(layer_name, inverted_res_layer)
             self.layers.append(layer_name)
-        # load weights of pretrained model
-        if pretrained and os.path.exists(pretrained_model_path):
+        # load pretrained weights
+        if pretrained:
+            self.loadpretrainedweights(structure_type, pretrained_model_path)
+    '''loadpretrainedweights'''
+    def loadpretrainedweights(self, structure_type='mobilenetv2', pretrained_model_path=''):
+        if pretrained_model_path and os.path.exists(pretrained_model_path):
             checkpoint = torch.load(pretrained_model_path, map_location='cpu')
-            if 'state_dict' in checkpoint: 
-                state_dict = checkpoint['state_dict']
-            else: 
-                state_dict = checkpoint
-            keys = list(state_dict.keys())
-            for key in keys:
-                if key.startswith('backbone.'):
-                    value = state_dict.pop(key)
-                    key = '.'.join(key.split('.')[1:])
-                    state_dict[key] = value
-            self.load_state_dict(state_dict, strict=False)
-        elif pretrained:
+        else:
             checkpoint = model_zoo.load_url(DEFAULT_MODEL_URLS[structure_type], map_location='cpu')
-            if 'state_dict' in checkpoint: 
-                state_dict = checkpoint['state_dict']
-            else: 
-                state_dict = checkpoint
-            keys = list(state_dict.keys())
-            for key in keys:
-                if key.startswith('backbone.'):
-                    value = state_dict.pop(key)
-                    key = '.'.join(key.split('.')[1:])
-                    state_dict[key] = value
-            self.load_state_dict(state_dict, strict=False)
+        if 'state_dict' in checkpoint: 
+            state_dict = checkpoint['state_dict']
+        else: 
+            state_dict = checkpoint
+        keys = list(state_dict.keys())
+        for key in keys:
+            if key.startswith('backbone.'):
+                value = state_dict.pop(key)
+                key = '.'.join(key.split('.')[1:])
+                state_dict[key] = value
+        self.load_state_dict(state_dict, strict=False)
     '''forward'''
     def forward(self, x):
         x = self.conv1(x)
@@ -159,33 +151,26 @@ class MobileNetV3(nn.Module):
                 assert hasattr(self, key) and (getattr(self, key) == value)
         # set layers
         self.layers = self.makelayers(in_channels, arch_type, reduction_factor, outstride, norm_cfg, act_cfg)
-        # load weights of pretrained model
-        if pretrained and os.path.exists(pretrained_model_path):
+        # load pretrained weights
+        if pretrained:
+            self.loadpretrainedweights(structure_type, pretrained_model_path)
+    '''loadpretrainedweights'''
+    def loadpretrainedweights(self, structure_type='mobilenetv3_small', pretrained_model_path=''):
+        if pretrained_model_path and os.path.exists(pretrained_model_path):
             checkpoint = torch.load(pretrained_model_path, map_location='cpu')
-            if 'state_dict' in checkpoint: 
-                state_dict = checkpoint['state_dict']
-            else: 
-                state_dict = checkpoint
-            keys = list(state_dict.keys())
-            for key in keys:
-                if key.startswith('backbone.'):
-                    value = state_dict.pop(key)
-                    key = '.'.join(key.split('.')[1:])
-                    state_dict[key] = value
-            self.load_state_dict(state_dict, strict=False)
-        elif pretrained:
+        else:
             checkpoint = model_zoo.load_url(DEFAULT_MODEL_URLS[structure_type], map_location='cpu')
-            if 'state_dict' in checkpoint: 
-                state_dict = checkpoint['state_dict']
-            else: 
-                state_dict = checkpoint
-            keys = list(state_dict.keys())
-            for key in keys:
-                if key.startswith('backbone.'):
-                    value = state_dict.pop(key)
-                    key = '.'.join(key.split('.')[1:])
-                    state_dict[key] = value
-            self.load_state_dict(state_dict, strict=False)
+        if 'state_dict' in checkpoint: 
+            state_dict = checkpoint['state_dict']
+        else: 
+            state_dict = checkpoint
+        keys = list(state_dict.keys())
+        for key in keys:
+            if key.startswith('backbone.'):
+                value = state_dict.pop(key)
+                key = '.'.join(key.split('.')[1:])
+                state_dict[key] = value
+        self.load_state_dict(state_dict, strict=False)
     '''make layers'''
     def makelayers(self, in_channels, arch_type, reduction_factor, outstride, norm_cfg=None, act_cfg=None):
         layers, act_cfg_default = [], act_cfg.copy()

@@ -4,11 +4,10 @@ Function:
 Author:
     Zhenchao Jin
 '''
-import os
 import torch
 import torch.nn as nn
 import torch.nn.functional as F
-import torch.utils.model_zoo as model_zoo
+from ...utils import loadpretrainedweights
 from .resnet import BasicBlock, Bottleneck
 from .bricks import BuildNormalization, BuildActivation
 
@@ -90,33 +89,27 @@ class HRModule(nn.Module):
             fuse_layer = []
             for j in range(num_branches):
                 if j > i:
-                    fuse_layer.append(
-                        nn.Sequential(
-                            nn.Conv2d(in_channels[j], in_channels[i], kernel_size=1, stride=1, padding=0, bias=False),
-                            BuildNormalization(placeholder=in_channels[i], norm_cfg=norm_cfg),
-                            nn.Upsample(scale_factor=2**(j-i), mode='bilinear', align_corners=False)
-                        )
-                    )
+                    fuse_layer.append(nn.Sequential(
+                        nn.Conv2d(in_channels[j], in_channels[i], kernel_size=1, stride=1, padding=0, bias=False),
+                        BuildNormalization(placeholder=in_channels[i], norm_cfg=norm_cfg),
+                        nn.Upsample(scale_factor=2**(j-i), mode='bilinear', align_corners=False)
+                    ))
                 elif j == i:
                     fuse_layer.append(None)
                 else:
                     conv_downsamples = []
                     for k in range(i - j):
                         if k == i - j - 1:
-                            conv_downsamples.append(
-                                nn.Sequential(
-                                    nn.Conv2d(in_channels[j], in_channels[i], kernel_size=3, stride=2, padding=1, bias=False),
-                                    BuildNormalization(placeholder=in_channels[i], norm_cfg=norm_cfg),
-                                )
-                            )
+                            conv_downsamples.append(nn.Sequential(
+                                nn.Conv2d(in_channels[j], in_channels[i], kernel_size=3, stride=2, padding=1, bias=False),
+                                BuildNormalization(placeholder=in_channels[i], norm_cfg=norm_cfg),
+                            ))
                         else:
-                            conv_downsamples.append(
-                                nn.Sequential(
-                                    nn.Conv2d(in_channels[j], in_channels[j], kernel_size=3, stride=2, padding=1, bias=False),
-                                    BuildNormalization(placeholder=in_channels[j], norm_cfg=norm_cfg),
-                                    BuildActivation(act_cfg),
-                                )
-                            )
+                            conv_downsamples.append(nn.Sequential(
+                                nn.Conv2d(in_channels[j], in_channels[j], kernel_size=3, stride=2, padding=1, bias=False),
+                                BuildNormalization(placeholder=in_channels[j], norm_cfg=norm_cfg),
+                                BuildActivation(act_cfg),
+                            ))
                     fuse_layer.append(nn.Sequential(*conv_downsamples))
             fuse_layers.append(nn.ModuleList(fuse_layer))
         return nn.ModuleList(fuse_layers)
@@ -212,19 +205,10 @@ class HRNet(nn.Module):
         self.transition3 = self.maketransitionlayer(pre_stage_channels, num_channels, norm_cfg=norm_cfg, act_cfg=act_cfg)
         self.stage4, pre_stage_channels = self.makestage(self.stage4_cfg, num_channels, norm_cfg=norm_cfg, act_cfg=act_cfg)
         # load pretrained weights
-        if pretrained and os.path.exists(pretrained_model_path):
-            checkpoint = torch.load(pretrained_model_path, map_location='cpu')
-            if 'state_dict' in checkpoint: 
-                state_dict = checkpoint['state_dict']
-            else: 
-                state_dict = checkpoint
-            self.load_state_dict(state_dict, strict=False)
-        elif pretrained:
-            checkpoint = model_zoo.load_url(DEFAULT_MODEL_URLS[structure_type], map_location='cpu')
-            if 'state_dict' in checkpoint: 
-                state_dict = checkpoint['state_dict']
-            else: 
-                state_dict = checkpoint
+        if pretrained:
+            state_dict = loadpretrainedweights(
+                structure_type=structure_type, pretrained_model_path=pretrained_model_path, default_model_urls=DEFAULT_MODEL_URLS
+            )
             self.load_state_dict(state_dict, strict=False)
     '''forward'''
     def forward(self, x):
@@ -300,13 +284,11 @@ class HRNet(nn.Module):
         for i in range(num_branches_cur):
             if i < num_branches_pre:
                 if num_channels_cur_layer[i] != num_channels_pre_layer[i]:
-                    transition_layers.append(
-                        nn.Sequential(
-                            nn.Conv2d(num_channels_pre_layer[i], num_channels_cur_layer[i], kernel_size=3, stride=1, padding=1, bias=False),
-                            BuildNormalization(placeholder=num_channels_cur_layer[i], norm_cfg=norm_cfg),
-                            BuildActivation(act_cfg),
-                        )
-                     )
+                    transition_layers.append(nn.Sequential(
+                        nn.Conv2d(num_channels_pre_layer[i], num_channels_cur_layer[i], kernel_size=3, stride=1, padding=1, bias=False),
+                        BuildNormalization(placeholder=num_channels_cur_layer[i], norm_cfg=norm_cfg),
+                        BuildActivation(act_cfg),
+                    ))
                 else:
                     transition_layers.append(None)
             else:
@@ -314,12 +296,10 @@ class HRNet(nn.Module):
                 for j in range(i + 1 - num_branches_pre):
                     in_channels = num_channels_pre_layer[-1]
                     out_channels = num_channels_cur_layer[i] if j == i - num_branches_pre else in_channels
-                    conv_downsamples.append(
-                        nn.Sequential(
-                            nn.Conv2d(in_channels, out_channels, kernel_size=3, stride=2, padding=1, bias=False),
-                            BuildNormalization(placeholder=out_channels, norm_cfg=norm_cfg),
-                            BuildActivation(act_cfg),
-                        )
-                    )
+                    conv_downsamples.append(nn.Sequential(
+                        nn.Conv2d(in_channels, out_channels, kernel_size=3, stride=2, padding=1, bias=False),
+                        BuildNormalization(placeholder=out_channels, norm_cfg=norm_cfg),
+                        BuildActivation(act_cfg),
+                    ))
                 transition_layers.append(nn.Sequential(*conv_downsamples))
         return nn.ModuleList(transition_layers)

@@ -486,14 +486,16 @@ class MobileViTV2(nn.Module):
             in_channels = out_channels
         self.stages = nn.Sequential(*layers)
         # load pretrained weights
-        if pretrained and os.path.exists(pretrained_model_path):
+        if pretrained:
+            self.loadpretrainedweights(structure_type, pretrained_model_path)
+    '''loadpretrainedweights'''
+    def loadpretrainedweights(self, structure_type='mobilevit-small', pretrained_model_path=''):
+        if pretrained_model_path and os.path.exists(pretrained_model_path):
             checkpoint = torch.load(pretrained_model_path, map_location='cpu')
-            state_dict = self.convertstatedict(checkpoint)
-            self.load_state_dict(state_dict, strict=True)
-        elif pretrained:
+        else:
             checkpoint = model_zoo.load_url(DEFAULT_MODEL_URLS[structure_type], map_location='cpu')
-            state_dict = self.convertstatedict(checkpoint)
-            self.load_state_dict(state_dict, strict=True)
+        state_dict = self.convertstatedict(checkpoint)
+        self.load_state_dict(state_dict, strict=True)
     '''convertstatedict'''
     @staticmethod
     def convertstatedict(checkpoint):

@@ -11,5 +11,5 @@ from .models import (
     ParamsConstructorBuilder, BuildParamsConstructor
 )
 from .utils import (
-    Logger, initslurm, setrandomseed, touchdir, loadckpts, saveckpts, BaseModuleBuilder
+    Logger, initslurm, setrandomseed, touchdir, loadckpts, saveckpts, BaseModuleBuilder, loadpretrainedweights
 )

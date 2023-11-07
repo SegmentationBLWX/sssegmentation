@@ -4,11 +4,10 @@ Function:
 Author:
     Zhenchao Jin
 '''
-import os
 import torch
 import torch.nn as nn
 import torch.nn.functional as F
-import torch.utils.model_zoo as model_zoo
+from ...utils import loadpretrainedweights
 from .bricks import BuildNormalization, BuildActivation, DepthwiseSeparableConv2d, InvertedResidual
 
 
@@ -225,19 +224,10 @@ class FastSCNN(nn.Module):
             align_corners=self.align_corners,
         )
         # load pretrained weights
-        if pretrained and os.path.exists(pretrained_model_path):
-            checkpoint = torch.load(pretrained_model_path, map_location='cpu')
-            if 'state_dict' in checkpoint: 
-                state_dict = checkpoint['state_dict']
-            else: 
-                state_dict = checkpoint
-            self.load_state_dict(state_dict, strict=False)
-        elif pretrained:
-            checkpoint = model_zoo.load_url(DEFAULT_MODEL_URLS[structure_type], map_location='cpu')
-            if 'state_dict' in checkpoint: 
-                state_dict = checkpoint['state_dict']
-            else: 
-                state_dict = checkpoint
+        if pretrained:
+            state_dict = loadpretrainedweights(
+                structure_type=structure_type, pretrained_model_path=pretrained_model_path, default_model_urls=DEFAULT_MODEL_URLS
+            )
             self.load_state_dict(state_dict, strict=False)
     '''forward'''
     def forward(self, x):

@@ -4,6 +4,7 @@ Function:
 Author:
     Zhenchao Jin
 '''
+import os
 import torch
 import numpy as np
 import torch.nn as nn
@@ -187,7 +188,7 @@ class BEiT(nn.Module):
             self.norm1 = BuildNormalization(placeholder=embed_dims, norm_cfg=norm_cfg)
         # load pretrained weights
         if pretrained:
-            self.initweights(structure_type, pretrained_model_path)
+            self.loadpretrainedweights(structure_type, pretrained_model_path)
     '''buildpatchembedding'''
     def buildpatchembedding(self):
         self.patch_embed = PatchEmbed(
@@ -264,9 +265,9 @@ class BEiT(nn.Module):
                     new_rel_pos_bias = torch.cat((new_rel_pos_bias, extra_tokens), dim=0)
                     state_dict[key] = new_rel_pos_bias
         return state_dict
-    '''initweights'''
-    def initweights(self, structure_type='beit_base_patch16_224_pt22k_ft22k', pretrained_model_path=''):
-        if pretrained_model_path:
+    '''loadpretrainedweights'''
+    def loadpretrainedweights(self, structure_type='beit_base_patch16_224_pt22k_ft22k', pretrained_model_path=''):
+        if pretrained_model_path and os.path.exists(pretrained_model_path):
             checkpoint = torch.load(pretrained_model_path, map_location='cpu')
         else:
             checkpoint = model_zoo.load_url(DEFAULT_MODEL_URLS[structure_type], map_location='cpu')

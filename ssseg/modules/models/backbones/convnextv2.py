@@ -173,7 +173,7 @@ class ConvNeXtV2(nn.Module):
                 self.add_module(f'norm{i}', norm_layer)
         # load pretrained weights
         if pretrained:
-            self.initweights(structure_type, pretrained_model_path)
+            self.loadpretrainedweights(structure_type, pretrained_model_path)
     '''forward'''
     def forward(self, x):
         outs = []
@@ -184,9 +184,9 @@ class ConvNeXtV2(nn.Module):
                 norm_layer = getattr(self, f'norm{i}')
                 outs.append(norm_layer(x).contiguous())
         return tuple(outs)
-    '''initweights'''
-    def initweights(self, structure_type, pretrained_model_path=''):
-        if pretrained_model_path:
+    '''loadpretrainedweights'''
+    def loadpretrainedweights(self, structure_type, pretrained_model_path=''):
+        if pretrained_model_path and os.path.exists(pretrained_model_path):
             checkpoint = torch.load(pretrained_model_path, map_location='cpu')
         else:
             checkpoint = model_zoo.load_url(DEFAULT_MODEL_URLS[structure_type], map_location='cpu')

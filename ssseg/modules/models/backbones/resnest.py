@@ -4,13 +4,12 @@ Function:
 Author:
     Zhenchao Jin
 '''
-import os
 import math
 import torch
 import torch.nn as nn
 import torch.nn.functional as F
-import torch.utils.model_zoo as model_zoo
 from .resnet import ResNet
+from ...utils import loadpretrainedweights
 from .resnet import Bottleneck as _Bottleneck
 from .bricks import BuildNormalization, BuildActivation
 
@@ -175,19 +174,10 @@ class ResNeSt(ResNet):
             for key, value in AUTO_ASSERT_STRUCTURE_TYPES[structure_type].items():
                 assert hasattr(self, key) and (getattr(self, key) == value)
         # load pretrained weights
-        if pretrained and os.path.exists(pretrained_model_path):
-            checkpoint = torch.load(pretrained_model_path, map_location='cpu')
-            if 'state_dict' in checkpoint: 
-                state_dict = checkpoint['state_dict']
-            else: 
-                state_dict = checkpoint
-            self.load_state_dict(state_dict, strict=False)
-        elif pretrained:
-            checkpoint = model_zoo.load_url(DEFAULT_MODEL_URLS[structure_type], map_location='cpu')
-            if 'state_dict' in checkpoint: 
-                state_dict = checkpoint['state_dict']
-            else: 
-                state_dict = checkpoint
+        if pretrained:
+            state_dict = loadpretrainedweights(
+                structure_type=structure_type, pretrained_model_path=pretrained_model_path, default_model_urls=DEFAULT_MODEL_URLS
+            )
             self.load_state_dict(state_dict, strict=False)
     '''make res layer'''
     def makelayer(self, block, inplanes, planes, num_blocks, stride=1, dilation=1, contract_dilation=True, use_avg_for_downsample=False, norm_cfg=None, act_cfg=None):

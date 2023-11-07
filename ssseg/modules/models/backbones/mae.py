@@ -4,12 +4,11 @@ Function:
 Author:
     Zhenchao Jin
 '''
-import math
+import os
 import torch
 import torch.nn as nn
 import torch.utils.model_zoo as model_zoo
 from .beit import BEiT
-from .beit import BEiTAttention as MAEAttention
 from .beit import BEiTTransformerEncoderLayer as MAETransformerEncoderLayer
 
 
@@ -41,7 +40,7 @@ class MAE(BEiT):
                 assert hasattr(self, key) and (getattr(self, key) == value)
         # load pretrained weights
         if pretrained:
-            self.initweights(structure_type, pretrained_model_path)
+            self.loadpretrainedweights(structure_type, pretrained_model_path)
     '''buildlayers'''
     def buildlayers(self):
         dpr = [x.item() for x in torch.linspace(0, self.drop_path_rate, self.num_layers)]
@@ -51,9 +50,9 @@ class MAE(BEiT):
                 embed_dims=self.embed_dims, num_heads=self.num_heads, feedforward_channels=self.mlp_ratio * self.embed_dims, attn_drop_rate=self.attn_drop_rate,
                 drop_path_rate=dpr[i], num_fcs=self.num_fcs, bias=True, act_cfg=self.act_cfg, norm_cfg=self.norm_cfg, window_size=self.patch_shape, init_values=self.init_values
             ))
-    '''initweights'''
-    def initweights(self, structure_type='mae_pretrain_vit_base', pretrained_model_path=''):
-        if pretrained_model_path:
+    '''loadpretrainedweights'''
+    def loadpretrainedweights(self, structure_type='mae_pretrain_vit_base', pretrained_model_path=''):
+        if pretrained_model_path and os.path.exists(pretrained_model_path):
             checkpoint = torch.load(pretrained_model_path, map_location='cpu')
         else:
             checkpoint = model_zoo.load_url(DEFAULT_MODEL_URLS[structure_type], map_location='cpu')

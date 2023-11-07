@@ -348,11 +348,11 @@ class SwinTransformer(nn.Module):
             self.add_module(layer_name, layer)
         # load pretrained weights
         if pretrained:
-            self.initweights(structure_type, pretrained_model_path)
-    '''initialize backbone'''
-    def initweights(self, structure_type='swin_tiny_patch4_window7_224', pretrained_model_path=''):
+            self.loadpretrainedweights(structure_type, pretrained_model_path)
+    '''loadpretrainedweights'''
+    def loadpretrainedweights(self, structure_type='swin_tiny_patch4_window7_224', pretrained_model_path=''):
         # load
-        if pretrained_model_path:
+        if pretrained_model_path and os.path.exists(pretrained_model_path):
             checkpoint = torch.load(pretrained_model_path, map_location='cpu')
         else:
             checkpoint = model_zoo.load_url(DEFAULT_MODEL_URLS[structure_type], map_location='cpu')
