@@ -58,6 +58,7 @@ class DefaultParamsConstructor():
                 if 'weight_decay' in optimizer_cfg:
                     param_group['weight_decay'] = params_rules[rule_key].get('wd_multiplier', 1.0) * optimizer_cfg['weight_decay']
                 for k, v in params_rules[rule_key].items():
+                    assert k not in param_group, 'construct param_group error'
                     param_group[k] = v
                 params.append(param_group)
                 break
@@ -68,8 +69,10 @@ class DefaultParamsConstructor():
             param_group['rule_key'] = 'base_setting'
             if name == 'bias' and (not NormalizationBuilder.isnorm(model)):
                 param_group['lr'] = param_group['lr'] * base_setting.get('bias_lr_multiplier', 1.0)
+                param_group['lr_multiplier'] = base_setting.get('bias_lr_multiplier', 1.0)
             else:
                 param_group['lr'] = param_group['lr'] * base_setting.get('lr_multiplier', 1.0)
+                param_group['lr_multiplier'] = base_setting.get('lr_multiplier', 1.0)
             if 'weight_decay' in optimizer_cfg:
                 param_group['weight_decay'] = optimizer_cfg['weight_decay']
                 if NormalizationBuilder.isnorm(model):
