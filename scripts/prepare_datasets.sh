@@ -86,17 +86,14 @@ elif [[ "$OPT" == "cityscapes" ]]; then
         wget https://github.com/SegmentationBLWX/modelstore/releases/download/ssseg_datasets/CityScapes.z09
         wget https://github.com/SegmentationBLWX/modelstore/releases/download/ssseg_datasets/CityScapes.z10
         wget https://github.com/SegmentationBLWX/modelstore/releases/download/ssseg_datasets/CityScapes.z11
-        zip CityScapes.zip CityScapes.z01 CityScapes.z02 CityScapes.z03 CityScapes.z04 \
-            CityScapes.z04 CityScapes.z05 CityScapes.z06 CityScapes.z07 CityScapes.z08 \
-            CityScapes.z09 CityScapes.z10 CityScapes.z11 -s=0 --out CityScapes_Merged.zip
-        unzip -o CityScapes_Merged.zip
+        7z x CityScapes.zip
     } || {
         echo "Fail to download ${DATASET} dataset."
         exit 0
     }
     rm -rf CityScapes.zip CityScapes.z01 CityScapes.z02 CityScapes.z03 CityScapes.z04 \
            CityScapes.z04 CityScapes.z05 CityScapes.z06 CityScapes.z07 CityScapes.z08 \
-           CityScapes.z09 CityScapes.z10 CityScapes.z11 CityScapes_Merged.zip
+           CityScapes.z09 CityScapes.z10 CityScapes.z11 
 elif [[ "$OPT" == "atr" ]]; then
     {
         wget https://github.com/SegmentationBLWX/modelstore/releases/download/ssseg_datasets/ATR.tar.gz
