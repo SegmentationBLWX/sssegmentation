@@ -1,4 +1,5 @@
 -r requirements/io.txt
+-r requirements/misc.txt
 -r requirements/science.txt
 -r requirements/evaluate.txt
 -r requirements/terminal.txt

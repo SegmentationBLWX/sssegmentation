@@ -34,13 +34,32 @@ cd sssegmentation
 
 **2.Install Requirements**
 
-You can run the following commands to install the necessary requirements,
+**2.1 Basic Requirements (Necessary)**
+
+To set up the essential prerequisites for running SSSegmentation, execute the following commands,
 
 ```sh
 pip install -r requirements.txt
 ```
 
-For pytorch and torchvision, we recommend you to follow the [official instructions](https://pytorch.org/get-started/previous-versions/), *e.g.*,
+This command will automatically install the following packages,
+
+- `chainercv`: set in requirements/evaluate.txt,
+- `cityscapesscripts`: set in requirements/evaluate.txt,
+- `pycocotools`: set in requirements/evaluate.txt,
+- `pillow`: set in requirements/io.txt,
+- `pandas`: set in requirements/io.txt,
+- `opencv-python`: set in requirements/io.txt,
+- `numpy`: set in requirements/science.txt,
+- `scipy`: set in requirements/science.txt,
+- `tqdm`: set in requirements/terminal.txt,
+- `argparse`: set in requirements/terminal.txt,
+- `cython`: set in requirements/misc.txt.
+
+**2.2 Pytorch and Torchvision (Necessary)**
+
+If you intend to utilize SSSegmentation, it is imperative to install PyTorch and torchvision. 
+We recommend you to follow the [official instructions](https://pytorch.org/get-started/previous-versions/) to install them, *e.g.*,
 
 ```sh
 # CUDA 11.0
@@ -48,6 +67,8 @@ pip install torch==1.8.0+cu111 torchvision==0.9.0+cu111 torchaudio==0.8.0 -f htt
 # CUDA 10.2
 pip install torch==1.8.0 torchvision==0.9.0 torchaudio==0.8.0
 ```
+
+**2.3 MMCV (Optional)**
 
 If you want to install mmcv-full for training some segmentors with mmcv-integrated operators like [CCNet](https://arxiv.org/pdf/1811.11721.pdf) and [Mask2Former](https://arxiv.org/pdf/2112.01527.pdf), we recommend you to install the pre-build mmcv-full package as below,
 
@@ -58,7 +79,9 @@ pip install mmcv-full -f https://download.openmmlab.com/mmcv/dist/{cu_version}/{
 pip install mmcv -f https://download.openmmlab.com/mmcv/dist/{cu_version}/{torch_version}/index.html
 ```
 
-More details can refer to [MMCV official repo](https://github.com/open-mmlab/mmcv).
+For more details, you can refer to [MMCV official repository](https://github.com/open-mmlab/mmcv).
+
+**2.4 Apex (Optional)**
 
 If you want to install apex for [Mixed Precision (FP16) Training](https://arxiv.org/pdf/1710.03740.pdf), we recommend you to follow the instructions in [official repository](https://github.com/NVIDIA/apex).
 For example, the Linux users can install apex with the following commands,
@@ -73,3 +96,29 @@ pip install -v --disable-pip-version-check --no-cache-dir --no-build-isolation -
 # a Python-only build
 pip install -v --disable-pip-version-check --no-build-isolation --no-cache-dir ./
 ```
+
+Then, you need to turn on mixed precision training in corresponding config file as follow,
+
+```python
+SEGMENTOR_CFG['fp16_cfg'] = {'type': 'apex', 'opt_level': 'O1'}
+```
+
+**2.5 TIMM (Optional)**
+
+SSSegmentation provides support for importing backbone networks from [timm](https://github.com/huggingface/pytorch-image-models) to train our segmentors. To install timm, you can simply run,
+
+```sh
+pip install timm
+```
+
+For more details, you can refer to [TIMM official repository](https://github.com/huggingface/pytorch-image-models) and [SSSegmentation timm backbone wrapper](https://github.com/SegmentationBLWX/sssegmentation/blob/main/ssseg/modules/models/backbones/timmwrapper.py).
+
+**2.6 Albumentations (Optional)**
+
+SSSegmentation provides support for importing data augmentation transforms from [albumentations](https://github.com/albumentations-team/albumentations) to train our segmentors. To install albumentations, you can simply run,
+
+```sh
+pip install -U albumentations
+```
+
+For more details, you can refer to [Albumentations official repository](https://github.com/albumentations-team/albumentations) and [SSSegmentation albumentations wrapper](https://github.com/SegmentationBLWX/sssegmentation/blob/main/ssseg/modules/datasets/pipelines/transforms.py).
