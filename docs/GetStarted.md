@@ -40,12 +40,6 @@ You can run the following commands to install the necessary requirements,
 pip install -r requirements.txt
 ```
 
-For mmcv-full, we recommend you to install the pre-build package as below,
-
-```sh
-pip install mmcv-full -f https://download.openmmlab.com/mmcv/dist/{cu_version}/{torch_version}/index.html
-```
-
 For pytorch and torchvision, we recommend you to follow the [official instructions](https://pytorch.org/get-started/previous-versions/), *e.g.*,
 
 ```sh
@@ -55,11 +49,27 @@ pip install torch==1.8.0+cu111 torchvision==0.9.0+cu111 torchaudio==0.8.0 -f htt
 pip install torch==1.8.0 torchvision==0.9.0 torchaudio==0.8.0
 ```
 
+If you want to install mmcv-full for training some segmentors with mmcv-integrated operators like [CCNet](https://arxiv.org/pdf/1811.11721.pdf) and [Mask2Former](https://arxiv.org/pdf/2112.01527.pdf), we recommend you to install the pre-build mmcv-full package as below,
+
+```sh
+# mmcv < 2.0.0, mmcv versions include mmcv-full and mmcv
+pip install mmcv-full -f https://download.openmmlab.com/mmcv/dist/{cu_version}/{torch_version}/index.html
+# mmcv > 2.0.0, mmcv versions include mmcv and mmcv-lite
+pip install mmcv -f https://download.openmmlab.com/mmcv/dist/{cu_version}/{torch_version}/index.html
+```
+
+More details can refer to [MMCV official repo](https://github.com/open-mmlab/mmcv).
+
 If you want to install apex for [Mixed Precision (FP16) Training](https://arxiv.org/pdf/1710.03740.pdf), we recommend you to follow the instructions in [official repository](https://github.com/NVIDIA/apex).
 For example, the Linux users can install apex with the following commands,
 
 ```sh
 git clone https://github.com/NVIDIA/apex
 cd apex
-pip install -v --disable-pip-version-check --no-cache-dir --global-option="--cpp_ext" --global-option="--cuda_ext" ./
+# if pip >= 23.1 (ref: https://pip.pypa.io/en/stable/news/#v23-1) which supports multiple `--config-settings` with the same key... 
+pip install -v --disable-pip-version-check --no-cache-dir --no-build-isolation --config-settings "--build-option=--cpp_ext" --config-settings "--build-option=--cuda_ext" ./
+# otherwise
+pip install -v --disable-pip-version-check --no-cache-dir --no-build-isolation --global-option="--cpp_ext" --global-option="--cuda_ext" ./
+# a Python-only build
+pip install -v --disable-pip-version-check --no-build-isolation --no-cache-dir ./
 ```
