@@ -1,5 +1,5 @@
 '''
-Funtion:
+Function:
     Implementation of SchedulerBuilder and BuildScheduler
 Author:
     Zhenchao Jin

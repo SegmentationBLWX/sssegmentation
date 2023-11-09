@@ -1,5 +1,5 @@
 '''
-Funtion:
+Function:
     Implementation of BaseScheduler
 Author:
     Zhenchao Jin

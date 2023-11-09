@@ -1,5 +1,5 @@
 '''
-Funtion:
+Function:
     Implementation of PolyScheduler
 Author:
     Zhenchao Jin
