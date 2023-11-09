@@ -20,6 +20,14 @@ conda create --name ssseg python=3.8 -y
 conda activate ssseg
 ```
 
+**3.WGET & Decompression Software**
+
+If you want to utilize the provided scripts to prepare the datasets, it is necessary for you to install wget (for downloading datasets), 7z (for processing compressed packages) and tar (for processing compressed packages) in your operation system.
+For windows user, the resources are listed as following,
+
+- 7Z: [Download](https://sparanoid.com/lab/7z/download.html),
+- RAR: [Download](https://www.win-rar.com/start.html?&L=0),
+- WGET: [Download](http://downloads.sourceforge.net/gnuwin32/wget-1.11.4-1-setup.exe?spm=a2c6h.12873639.article-detail.7.3f825677H6sKF2&file=wget-1.11.4-1-setup.exe),
 
 ## Installation
 
