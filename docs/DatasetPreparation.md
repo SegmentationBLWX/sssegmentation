@@ -6,7 +6,7 @@
 **1.Download Source**
 
 For easier io reading, some supported datasets have been pre-processed like creating the train.txt/val.txt/test.txt used to record the corresponding imageids.
-So, it is recommended to adopt the provided script (*i.e.*, `scripts/prepare_datasets.sh`) to download the supported datasets or download the supported datasets from Baidu Disk rather than official website.
+So, it is recommended to adopt the provided script (*i.e.*, `scripts/prepare_datasets.sh`) to download the supported datasets or download the supported datasets from the provided network disk link rather than official website.
 
 
 ## Supported Datasets
