@@ -175,8 +175,10 @@ class Trainer():
             if (epoch % cfg.SEGMENTOR_CFG['save_interval_epochs'] == 0) or (epoch == end_epoch):
                 state_dict = scheduler.state()
                 state_dict['model'] = segmentor.module.state_dict()
-                if fp16_type is not None:
+                if fp16_type in ['apex']:
                     state_dict['amp'] = apex.amp.state_dict()
+                elif fp16_type in ['pytorch']:
+                    state_dict['grad_scaler'] = grad_scaler.state_dict()
                 savepath = os.path.join(cfg.SEGMENTOR_CFG['work_dir'], 'epoch_%s.pth' % epoch)
                 if (cmd_args.local_rank == 0) and (int(os.environ.get('SLURM_PROCID', 0)) == 0):
                     saveckpts(state_dict, savepath)
