@@ -35,10 +35,3 @@ class PolyScheduler(BaseScheduler):
                 param_group['lr'] = target_lr
         # return
         return target_lr
-    '''step'''
-    def step(self):
-        if self.clipgrad_cfg is not None:
-            for param_group in self.optimizer.param_groups:
-                self.clipgradients(params=param_group['params'], **self.clipgrad_cfg)
-        self.optimizer.step()
-        self.cur_iter += 1

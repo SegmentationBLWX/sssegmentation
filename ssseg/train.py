@@ -77,11 +77,16 @@ class Trainer():
         optimizer = BuildOptimizer(segmentor, cfg.SEGMENTOR_CFG['scheduler']['optimizer'])
         # build fp16
         fp16_cfg = self.cfg.SEGMENTOR_CFG.get('fp16_cfg', {'type': None})
-        fp16_type = fp16_cfg.pop('type')
-        assert fp16_type in [None, 'apex']
-        if fp16_type is not None:
+        fp16_type, grad_scaler = fp16_cfg.pop('type'), None
+        assert fp16_type in [None, 'apex', 'pytorch']
+        if fp16_type in ['apex']:
             import apex
-            segmentor, optimizer = apex.amp.initialize(segmentor, optimizer, **fp16_cfg)
+            segmentor, optimizer = apex.amp.initialize(segmentor, optimizer, **fp16_cfg['initialize'])
+        elif fp16_type in ['pytorch']:
+            from torch.cuda.amp import autocast
+            from torch.cuda.amp import GradScaler
+            from torch.distributed.algorithms.ddp_comm_hooks import default as comm_hooks
+            grad_scaler = GradScaler(**fp16_cfg['grad_scaler'])
         # build scheduler
         scheduler_cfg = copy.deepcopy(cfg.SEGMENTOR_CFG['scheduler'])
         scheduler_cfg.update({
@@ -105,14 +110,18 @@ class Trainer():
                 start_epoch = ckpts['cur_epoch'] + 1
                 scheduler.setstate({'cur_epoch': ckpts['cur_epoch'], 'cur_iter': ckpts['cur_iter']})
                 assert ckpts['cur_iter'] == len(dataloader) * ckpts['cur_epoch']
-            if 'amp' in ckpts and fp16_type is not None:
+            if 'amp' in ckpts and fp16_type in ['apex']:
                 apex.amp.load_state_dict(ckpts['amp'])
+            if 'grad_scaler' in ckpts and fp16_type in ['pytorch']:
+                grad_scaler.load_state_dict(ckpts['grad_scaler'])
         else:
             cmd_args.ckptspath = ''
         # parallel segmentor
         build_dist_model_cfg = self.cfg.SEGMENTOR_CFG.get('build_dist_model_cfg', {})
         build_dist_model_cfg.update({'device_ids': [cmd_args.local_rank]})
         segmentor = BuildDistributedModel(segmentor, build_dist_model_cfg)
+        if fp16_type in ['pytorch']:
+            segmentor.register_comm_hook(state=None, hook=comm_hooks.fp16_compress_hook)
         # print config
         if (cmd_args.local_rank == 0) and (int(os.environ.get('SLURM_PROCID', 0)) == 0):
             logger_handle.info(f'Config file path: {cfg_file_path}')
@@ -131,21 +140,25 @@ class Trainer():
                 targets = {'seg_target': samples_meta['seg_target'].type(FloatTensor)}
                 if 'edge_target' in samples_meta: targets['edge_target'] = samples_meta['edge_target'].type(FloatTensor)
                 optimizer.zero_grad()
-                if cfg.SEGMENTOR_CFG['type'] in ['MemoryNet', 'MemoryNetV2']:
-                    loss, losses_log_dict = segmentor(images, targets, learning_rate=learning_rate, epoch=epoch)
+                forward_kwargs = {'learning_rate': learning_rate, 'epoch': epoch} if cfg.SEGMENTOR_CFG['type'] in ['MemoryNet', 'MemoryNetV2'] else {}
+                if fp16_type in ['pytorch']:
+                    with autocast(**fp16_cfg['autocast']):
+                        loss, losses_log_dict = segmentor(images, targets, **forward_kwargs)
                 else:
-                    loss, losses_log_dict = segmentor(images, targets)
+                    loss, losses_log_dict = segmentor(images, targets, **forward_kwargs)
                 for key, value in losses_log_dict.items():
                     if key in losses_log_dict_memory: 
                         losses_log_dict_memory[key].append(value)
                     else: 
                         losses_log_dict_memory[key] = [value]
-                if fp16_type is not None:
-                    with apex.amp.scale_loss(loss, optimizer) as scaled_loss:
+                if fp16_type in ['apex']:
+                    with apex.amp.scale_loss(loss, optimizer, **fp16_cfg['scale_loss']) as scaled_loss:
                         scaled_loss.backward()
+                elif fp16_type in ['autocast']:
+                    grad_scaler.scale(loss).backward()
                 else:
                     loss.backward()
-                scheduler.step()
+                scheduler.step(grad_scaler=grad_scaler)
                 if (cmd_args.local_rank == 0) and (scheduler.cur_iter % cfg.SEGMENTOR_CFG['log_interval_iterations'] == 0) and (int(os.environ.get('SLURM_PROCID', 0)) == 0):
                     print_log = {
                         'cur_epoch': epoch, 'max_epochs': end_epoch, 'cur_iter': scheduler.cur_iter, 'max_iters': scheduler.max_iters,

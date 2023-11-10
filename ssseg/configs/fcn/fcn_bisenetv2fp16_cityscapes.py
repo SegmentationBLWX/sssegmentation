@@ -38,7 +38,7 @@ SEGMENTOR_CFG['losses'] = {
     'loss_aux4': {'CrossEntropyLoss': {'scale_factor': 1.0, 'ignore_index': 255, 'reduction': 'mean'}},
     'loss_cls': {'CrossEntropyLoss': {'scale_factor': 1.0, 'ignore_index': 255, 'reduction': 'mean'}},
 }
-SEGMENTOR_CFG['fp16_cfg'] = {'type': 'apex', 'opt_level': 'O1'}
+SEGMENTOR_CFG['fp16_cfg'] = {'type': 'apex', 'initialize': {'opt_level': 'O1'}, 'scale_loss': {}}
 SEGMENTOR_CFG['work_dir'] = 'fcn_bisenetv2fp16_cityscapes'
 SEGMENTOR_CFG['logfilepath'] = 'fcn_bisenetv2fp16_cityscapes/fcn_bisenetv2fp16_cityscapes.log'
 SEGMENTOR_CFG['resultsavepath'] = 'fcn_bisenetv2fp16_cityscapes/fcn_bisenetv2fp16_cityscapes_results.pkl'

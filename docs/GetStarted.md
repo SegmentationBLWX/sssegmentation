@@ -110,7 +110,27 @@ pip install -v --disable-pip-version-check --no-build-isolation --no-cache-dir .
 Then, you need to turn on mixed precision training in corresponding config file as follow,
 
 ```python
-SEGMENTOR_CFG['fp16_cfg'] = {'type': 'apex', 'opt_level': 'O1'}
+SEGMENTOR_CFG['fp16_cfg'] = {'type': 'apex', 'initialize': {'opt_level': 'O1'}, 'scale_loss': {}}
+```
+
+Note that, SSSegmentation supports two types of mixed precision training, *i.e.*, 'apex' and 'pytorch'.
+If you want to use mixed precision training supported by [Pytorch](https://pytorch.org/), you only need to install torch with `torch.__version >= 1.5.0`, *e.g.*,
+
+```sh
+# CUDA 11.6
+conda install pytorch==1.13.1 torchvision==0.14.1 torchaudio==0.13.1 pytorch-cuda=11.6 -c pytorch -c nvidia
+# CUDA 11.7
+conda install pytorch==1.13.1 torchvision==0.14.1 torchaudio==0.13.1 pytorch-cuda=11.7 -c pytorch -c nvidia
+# CPU Only
+conda install pytorch==1.13.1 torchvision==0.14.1 torchaudio==0.13.1 cpuonly -c pytorch
+```
+
+Then, you need to turn on mixed precision training in corresponding config file as follow,
+
+```python
+import torch
+
+SEGMENTOR_CFG['fp16_cfg'] = {'type': 'pytorch', 'autocast': {'dtype': torch.float16}, 'grad_scaler': {}}
 ```
 
 **2.5 TIMM (Optional)**
