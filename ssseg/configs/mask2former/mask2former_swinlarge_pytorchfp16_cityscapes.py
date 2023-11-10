@@ -1,4 +1,4 @@
-'''mask2former_swinsmall_cityscapes'''
+'''mask2former_swinlarge_pytorchfp16_cityscapes'''
 import copy
 from .base_cfg import SEGMENTOR_CFG
 from .._base_ import DATASET_CFG_CITYSCAPES_512x1024, DATALOADER_CFG_BS16
@@ -24,16 +24,16 @@ SEGMENTOR_CFG['scheduler']['clipgrad_cfg'] = {'max_norm': 0.01, 'norm_type': 2}
 # modify other segmentor configs
 SEGMENTOR_CFG['num_classes'] = 19
 SEGMENTOR_CFG['backbone'] = {
-    'type': 'SwinTransformer', 'structure_type': 'swin_small_patch4_window7_224', 'pretrained': True, 
+    'type': 'SwinTransformer', 'structure_type': 'swin_large_patch4_window12_384_22k', 'pretrained': True, 
     'selected_indices': (0, 1, 2, 3), 'norm_cfg': {'type': 'LayerNorm'},
-    'pretrain_img_size': 224, 'in_channels': 3, 'embed_dims': 96, 'patch_size': 4, 'window_size': 7, 'mlp_ratio': 4,
-    'depths': [2, 2, 18, 2], 'num_heads': [3, 6, 12, 24], 'qkv_bias': True, 'qk_scale': None, 'patch_norm': True,
+    'pretrain_img_size': 384, 'in_channels': 3, 'embed_dims': 192, 'patch_size': 4, 'window_size': 12, 'mlp_ratio': 4,
+    'depths': [2, 2, 18, 2], 'num_heads': [6, 12, 24, 48], 'qkv_bias': True, 'qk_scale': None, 'patch_norm': True,
     'drop_rate': 0., 'attn_drop_rate': 0., 'drop_path_rate': 0.3, 'use_abs_pos_embed': False,
 }
-SEGMENTOR_CFG['head']['pixel_decoder']['input_shape']['in_channels'] = [96, 192, 384, 768]
-SEGMENTOR_CFG['work_dir'] = 'mask2former_swinsmall_cityscapes'
-SEGMENTOR_CFG['logfilepath'] = 'mask2former_swinsmall_cityscapes/mask2former_swinsmall_cityscapes.log'
-SEGMENTOR_CFG['resultsavepath'] = 'mask2former_swinsmall_cityscapes/mask2former_swinsmall_cityscapes_results.pkl'
+SEGMENTOR_CFG['head']['pixel_decoder']['input_shape']['in_channels'] = [192, 384, 768, 1536]
+SEGMENTOR_CFG['work_dir'] = 'mask2former_swinlarge_pytorchfp16_cityscapes'
+SEGMENTOR_CFG['logfilepath'] = 'mask2former_swinlarge_pytorchfp16_cityscapes/mask2former_swinlarge_pytorchfp16_cityscapes.log'
+SEGMENTOR_CFG['resultsavepath'] = 'mask2former_swinlarge_pytorchfp16_cityscapes/mask2former_swinlarge_pytorchfp16_cityscapes_results.pkl'
 # modify training tricks in scheduler config
 SEGMENTOR_CFG['scheduler']['optimizer']['params_rules'] = {
     'base_setting': dict(norm_wd_multiplier=0.0),

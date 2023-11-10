@@ -1,4 +1,4 @@
-'''mask2former_swinbase_cityscapes'''
+'''mask2former_swinbase_pytorchfp16_cityscapes'''
 import copy
 from .base_cfg import SEGMENTOR_CFG
 from .._base_ import DATASET_CFG_CITYSCAPES_512x1024, DATALOADER_CFG_BS16
@@ -23,6 +23,6 @@ SEGMENTOR_CFG['scheduler']['min_lr'] = 0.0
 SEGMENTOR_CFG['scheduler']['clipgrad_cfg'] = {'max_norm': 0.01, 'norm_type': 2}
 # modify other segmentor configs
 SEGMENTOR_CFG['num_classes'] = 19
-SEGMENTOR_CFG['work_dir'] = 'mask2former_swinbase_cityscapes'
-SEGMENTOR_CFG['logfilepath'] = 'mask2former_swinbase_cityscapes/mask2former_swinbase_cityscapes.log'
-SEGMENTOR_CFG['resultsavepath'] = 'mask2former_swinbase_cityscapes/mask2former_swinbase_cityscapes_results.pkl'
+SEGMENTOR_CFG['work_dir'] = 'mask2former_swinbase_pytorchfp16_cityscapes'
+SEGMENTOR_CFG['logfilepath'] = 'mask2former_swinbase_pytorchfp16_cityscapes/mask2former_swinbase_pytorchfp16_cityscapes.log'
+SEGMENTOR_CFG['resultsavepath'] = 'mask2former_swinbase_pytorchfp16_cityscapes/mask2former_swinbase_pytorchfp16_cityscapes_results.pkl'
