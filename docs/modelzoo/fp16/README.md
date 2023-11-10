@@ -37,7 +37,7 @@ You can also download the model weights from following sources:
 
 - BaiduNetdisk: https://pan.baidu.com/s/1gD-NJJWOtaHCtB0qHE79rA with access code **s757**
 
-SSSegmentation supports two types of mixed precision training, *i.e.*, 'apex' and 'pytorch'.
+SSSegmentation supports two types of mixed precision training, *i.e.*, `apex` and `pytorch`.
 
 (1) To use mixed precision training supported by [APEX](https://github.com/NVIDIA/apex), you should install apex as follow,
 
@@ -58,7 +58,7 @@ Then, you need to turn on mixed precision training in corresponding config file 
 SEGMENTOR_CFG['fp16_cfg'] = {'type': 'apex', 'initialize': {'opt_level': 'O1'}, 'scale_loss': {}}
 ```
 
-(2) To use mixed precision training supported by [Pytorch](https://pytorch.org/), you should install torch with `torch.__version >= 1.5.0`, *e.g.*,
+(2) To use mixed precision training supported by [Pytorch](https://pytorch.org/), you should install torch with `torch.__version__ >= 1.5.0`, *e.g.*,
 
 ```sh
 # CUDA 11.6
