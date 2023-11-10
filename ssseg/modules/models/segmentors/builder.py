@@ -13,6 +13,7 @@ from .ccnet import CCNet
 from .danet import DANet
 from .gcnet import GCNet
 from .dmnet import DMNet
+from .mcibi import MCIBI
 from .idrnet import IDRNet
 from .isanet import ISANet
 from .encnet import ENCNet
@@ -30,15 +31,14 @@ from .pointrend import PointRend
 from .deeplabv3 import Deeplabv3
 from .lrasppnet import LRASPPNet
 from .segformer import Segformer
-from .memorynet import MemoryNet
 from .setr import SETRUP, SETRMLA
 from .maskformer import MaskFormer
-from .memorynetv2 import MemoryNetV2
 from .mask2former import Mask2Former
 from .semanticfpn import SemanticFPN
 from .nonlocalnet import NonLocalNet
 from ...utils import BaseModuleBuilder
 from .deeplabv3plus import Deeplabv3Plus
+from .mcibiplusplus import MCIBIPlusPlus
 from .fcn import FCN, DepthwiseSeparableFCN
 
 
@@ -49,8 +49,8 @@ class SegmentorBuilder(BaseModuleBuilder):
         'GCNet': GCNet, 'DMNet': DMNet, 'ISANet': ISANet, 'ENCNet': ENCNet, 'APCNet': APCNet, 'SAM': SAM,
         'EMANet': EMANet, 'PSPNet': PSPNet, 'PSANet': PSANet, 'OCRNet': OCRNet, 'DNLNet': DNLNet,
         'ANNNet': ANNNet, 'SETRUP': SETRUP, 'SETRMLA': SETRMLA, 'FastFCN': FastFCN, 'UPerNet': UPerNet,
-        'Segformer': Segformer, 'MemoryNet': MemoryNet, 'PointRend': PointRend, 'Deeplabv3': Deeplabv3,
-        'LRASPPNet': LRASPPNet, 'MaskFormer': MaskFormer, 'MemoryNetV2': MemoryNetV2, 'SemanticFPN': SemanticFPN,
+        'Segformer': Segformer, 'MCIBI': MCIBI, 'PointRend': PointRend, 'Deeplabv3': Deeplabv3,
+        'LRASPPNet': LRASPPNet, 'MaskFormer': MaskFormer, 'MCIBIPlusPlus': MCIBIPlusPlus, 'SemanticFPN': SemanticFPN,
         'NonLocalNet': NonLocalNet, 'Deeplabv3Plus': Deeplabv3Plus, 'DepthwiseSeparableFCN': DepthwiseSeparableFCN,
         'MobileSAM': MobileSAM, 'IDRNet': IDRNet, 'Mask2Former': Mask2Former,
     }

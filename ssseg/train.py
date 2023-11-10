@@ -140,7 +140,7 @@ class Trainer():
                 targets = {'seg_target': samples_meta['seg_target'].type(FloatTensor)}
                 if 'edge_target' in samples_meta: targets['edge_target'] = samples_meta['edge_target'].type(FloatTensor)
                 optimizer.zero_grad()
-                forward_kwargs = {'learning_rate': learning_rate, 'epoch': epoch} if cfg.SEGMENTOR_CFG['type'] in ['MemoryNet', 'MemoryNetV2'] else {}
+                forward_kwargs = {'learning_rate': learning_rate, 'epoch': epoch} if cfg.SEGMENTOR_CFG['type'] in ['MCIBI', 'MCIBIPlusPlus'] else {}
                 if fp16_type in ['pytorch']:
                     with autocast(**fp16_cfg['autocast']):
                         loss, losses_log_dict = segmentor(images, targets, **forward_kwargs)
