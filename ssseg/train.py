@@ -154,7 +154,7 @@ class Trainer():
                 if fp16_type in ['apex']:
                     with apex.amp.scale_loss(loss, optimizer, **fp16_cfg['scale_loss']) as scaled_loss:
                         scaled_loss.backward()
-                elif fp16_type in ['autocast']:
+                elif fp16_type in ['pytorch']:
                     grad_scaler.scale(loss).backward()
                 else:
                     loss.backward()
