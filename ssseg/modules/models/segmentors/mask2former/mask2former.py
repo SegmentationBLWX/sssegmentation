@@ -49,6 +49,7 @@ class Mask2Former(BaseSegmentor):
         if cfg.get('is_freeze_norm', False): self.freezenormalization()
     '''forward'''
     def forward(self, x, targets=None):
+        from torch.cuda.amp import autocast
         img_size = x.shape[-2:]
         # feed to backbone network
         backbone_outputs = self.transforminputs(self.backbone_net(x), selected_indices=self.cfg['backbone'].get('selected_indices'))
@@ -57,7 +58,8 @@ class Mask2Former(BaseSegmentor):
         features = {
             'res2': backbone_outputs[0], 'res3': backbone_outputs[1], 'res4': backbone_outputs[2], 'res5': backbone_outputs[3]
         }
-        mask_features, transformer_encoder_features, multi_scale_features = self.pixel_decoder.forwardfeatures(features)
+        with autocast(enabled=False):
+            mask_features, transformer_encoder_features, multi_scale_features = self.pixel_decoder.forwardfeatures(features)
         # feed to predictor
         predictions = self.predictor(multi_scale_features, mask_features, None)
         # forward according to the mode

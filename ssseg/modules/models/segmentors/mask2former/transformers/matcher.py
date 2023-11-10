@@ -44,6 +44,7 @@ class HungarianMatcher(nn.Module):
     '''memoryefficientforward'''
     @torch.no_grad()
     def memoryefficientforward(self, outputs, targets):
+        from torch.cuda.amp import autocast
         bs, num_queries = outputs['pred_logits'].shape[:2]
         indices = []
         # iterate through batch size
@@ -63,12 +64,14 @@ class HungarianMatcher(nn.Module):
             # get gt labels
             tgt_mask = pointsample(tgt_mask, point_coords.repeat(tgt_mask.shape[0], 1, 1), align_corners=False).squeeze(1)
             out_mask = pointsample(out_mask, point_coords.repeat(out_mask.shape[0], 1, 1), align_corners=False).squeeze(1)
-            out_mask = out_mask.float()
-            tgt_mask = tgt_mask.float()
-            # compute the focal loss between masks
-            cost_mask = batchsigmoidceloss(out_mask, tgt_mask)
-            # compute the dice loss betwen masks
-            cost_dice = batchdiceloss(out_mask, tgt_mask)
+            # disable autocast
+            with autocast(enabled=False):
+                out_mask = out_mask.float()
+                tgt_mask = tgt_mask.float()
+                # compute the focal loss between masks
+                cost_mask = batchsigmoidceloss(out_mask, tgt_mask)
+                # compute the dice loss betwen masks
+                cost_dice = batchdiceloss(out_mask, tgt_mask)
             # final cost matrix
             C = (self.cost_mask * cost_mask + self.cost_class * cost_class + self.cost_dice * cost_dice)
             C = C.reshape(num_queries, -1).cpu()
