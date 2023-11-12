@@ -13,7 +13,6 @@ SEGMENTOR_CFG = {
     'resultsavepath': '',
     'norm_cfg': {'type': 'SyncBatchNorm'},
     'act_cfg': {'type': 'ReLU', 'inplace': True},
-    'fp16_cfg': {'type': 'pytorch', 'autocast': {}, 'grad_scaler': {}},
     'backbone': {
         'type': 'SwinTransformer', 'structure_type': 'swin_base_patch4_window12_384_22k', 'pretrained': True,
         'selected_indices': (0, 1, 2, 3), 'norm_cfg': {'type': 'LayerNorm'},

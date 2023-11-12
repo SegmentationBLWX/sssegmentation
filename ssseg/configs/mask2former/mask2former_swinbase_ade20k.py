@@ -1,4 +1,4 @@
-'''mask2former_swinbase_pytorchfp16_ade20k'''
+'''mask2former_swinbase_ade20k'''
 import copy
 from .base_cfg import SEGMENTOR_CFG
 from .._base_ import DATASET_CFG_ADE20k_640x640, DATALOADER_CFG_BS16
@@ -23,6 +23,6 @@ SEGMENTOR_CFG['scheduler']['min_lr'] = 0.0
 SEGMENTOR_CFG['scheduler']['clipgrad_cfg'] = {'max_norm': 0.01, 'norm_type': 2}
 # modify other segmentor configs
 SEGMENTOR_CFG['num_classes'] = 150
-SEGMENTOR_CFG['work_dir'] = 'mask2former_swinbase_pytorchfp16_ade20k'
-SEGMENTOR_CFG['logfilepath'] = 'mask2former_swinbase_pytorchfp16_ade20k/mask2former_swinbase_pytorchfp16_ade20k.log'
-SEGMENTOR_CFG['resultsavepath'] = 'mask2former_swinbase_pytorchfp16_ade20k/mask2former_swinbase_pytorchfp16_ade20k_results.pkl'
+SEGMENTOR_CFG['work_dir'] = 'mask2former_swinbase_ade20k'
+SEGMENTOR_CFG['logfilepath'] = 'mask2former_swinbase_ade20k/mask2former_swinbase_ade20k.log'
+SEGMENTOR_CFG['resultsavepath'] = 'mask2former_swinbase_ade20k/mask2former_swinbase_ade20k_results.pkl'
