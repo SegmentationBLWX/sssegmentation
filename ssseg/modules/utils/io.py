@@ -30,9 +30,12 @@ def loadckpts(ckptspath, map_to_cpu=True):
 
 
 '''saveckpts'''
-def saveckpts(ckpts, savepath, make_soft_link=True, soft_link_dst='epoch_last.pth'):
+def saveckpts(ckpts, savepath, make_soft_link=True, soft_link_dst=None):
     save_response = torch.save(ckpts, savepath)
-    if make_soft_link: symlink(savepath, soft_link_dst)
+    if make_soft_link:
+        if soft_link_dst is None:
+            soft_link_dst = os.path.join(os.path.dirname(savepath), 'epoch_last.pth')
+        symlink(savepath, soft_link_dst)
     return save_response
 
 
