@@ -18,7 +18,7 @@ from tqdm import tqdm
 from configs import BuildConfig
 from modules import (
     BuildDataset, BuildDistributedDataloader, BuildDistributedModel, BuildSegmentor, Logger, 
-    initslurm, touchdir, loadckpts, saveckpts, BuildOptimizer, BuildScheduler
+    initslurm, touchdir, loadckpts, saveckpts, BuildOptimizer, BuildScheduler, judgefileexist
 )
 warnings.filterwarnings('ignore')
 
@@ -97,7 +97,7 @@ class Trainer():
         scheduler = BuildScheduler(optimizer=optimizer, scheduler_cfg=scheduler_cfg)
         start_epoch, end_epoch = 1, scheduler_cfg['max_epochs']
         # load ckpts
-        if cmd_args.ckptspath and os.path.exists(cmd_args.ckptspath):
+        if cmd_args.ckptspath and judgefileexist(cmd_args.ckptspath):
             ckpts = loadckpts(cmd_args.ckptspath)
             try:
                 segmentor.load_state_dict(ckpts['model'])

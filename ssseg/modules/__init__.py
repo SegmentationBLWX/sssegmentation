@@ -11,5 +11,6 @@ from .models import (
     ParamsConstructorBuilder, BuildParamsConstructor
 )
 from .utils import (
-    Logger, initslurm, setrandomseed, touchdir, loadckpts, saveckpts, BaseModuleBuilder, loadpretrainedweights, symlink
+    Logger, initslurm, setrandomseed, touchdir, loadckpts, saveckpts, BaseModuleBuilder, loadpretrainedweights, 
+    symlink, judgefileexist
 )

@@ -9,6 +9,13 @@ import torch
 import torch.utils.model_zoo as model_zoo
 
 
+'''judgefileexist'''
+def judgefileexist(filepath):
+    if os.path.islink(filepath):
+        filepath = os.readlink(filepath)
+    return os.path.exists(filepath)
+
+
 '''touchdir'''
 def touchdir(dirname):
     if not os.path.exists(dirname):
