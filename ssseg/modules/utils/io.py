@@ -20,6 +20,8 @@ def touchdir(dirname):
 
 '''loadckpts'''
 def loadckpts(ckptspath, map_to_cpu=True):
+    if os.path.islink(ckptspath):
+        ckptspath = os.readlink(ckptspath)
     if map_to_cpu: 
         ckpts = torch.load(ckptspath, map_location=torch.device('cpu'))
     else: 
@@ -28,9 +30,18 @@ def loadckpts(ckptspath, map_to_cpu=True):
 
 
 '''saveckpts'''
-def saveckpts(ckpts, savepath):
+def saveckpts(ckpts, savepath, make_soft_link=True, soft_link_dst='epoch_last.pth'):
     save_response = torch.save(ckpts, savepath)
+    if make_soft_link: symlink(savepath, soft_link_dst)
     return save_response
+
+
+'''symlink'''
+def symlink(src_path, dst_path):
+    if os.path.islink(dst_path):
+        os.unlink(dst_path)
+    os.symlink(src_path, dst_path)
+    return True
 
 
 '''loadpretrainedweights'''
