@@ -84,4 +84,4 @@ You can also download the model weights from following sources:
 - BaiduNetdisk: https://pan.baidu.com/s/1gD-NJJWOtaHCtB0qHE79rA with access code **s757**
 
 Please note that, due to differences in computational precision, the numerical values obtained when testing model performance on different versions of PyTorch or graphics cards may vary slightly. 
-This is considered a normal phenomenon. (Performance differences are generally within 0.1%.)
+This is a normal phenomenon and the performance differences are generally within 0.1%.
