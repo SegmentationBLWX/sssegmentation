@@ -200,3 +200,76 @@ And each item in the list should be a `tuple` or `dict`. For example, it could b
 ```
 
 where `Resize` means a data transform method defined in `ssseg/modules/datasets/pipelines/transforms.py` and other values denote for the arguments for the corresponding data transform method.
+
+Here is a list of supported data transform methods,
+
+```python
+REGISTERED_MODULES = {
+    'Resize': Resize, 'RandomCrop': RandomCrop, 'RandomFlip': RandomFlip, 'RandomRotation': RandomRotation, 'EdgeExtractor': EdgeExtractor,
+    'PhotoMetricDistortion': PhotoMetricDistortion, 'Padding': Padding, 'ToTensor': ToTensor, 'ResizeShortestEdge': ResizeShortestEdge,
+    'Normalize': Normalize, 'RandomChoiceResize': RandomChoiceResize, 'Rerange': Rerange, 'CLAHE': CLAHE, 'RandomCutOut': RandomCutOut, 
+    'AlbumentationsWrapper': AlbumentationsWrapper, 'RGB2Gray': RGB2Gray, 'AdjustGamma': AdjustGamma,
+}
+```
+
+To learn the functions of each data transform method, please check the source codes in `ssseg/modules/datasets/pipelines/transforms.py` by yourselves.
+
+It is worth mentioning that SSSegmentation provides `AlbumentationsWrapper` to make the users leverage the data augmentation algorithms implemented in [albumentations](https://albumentations.ai/docs/).
+Here is an example of calling `AlbumentationsWrapper`,
+
+```python
+SEGMENTOR_CFG['dataset']['train']['data_pipelines'] = [
+    ('AlbumentationsWrapper', {'albu_cfg': {'type': 'HorizontalFlip', 'width': 256, 'height': 256}}),
+    ('AlbumentationsWrapper', {'albu_cfg': {'type': 'HorizontalFlip', 'p': 0.5}}),
+    ('AlbumentationsWrapper', {'albu_cfg': {'type': 'RandomBrightnessContrast', 'p': 0.2}}),
+]
+```
+
+Finally, if you want to define the data transform method by yourselves during developing, you can first write the transform method like following,
+
+```
+class RGB2Gray(object):
+    def __init__(self, out_channels=None, weights=(0.299, 0.587, 0.114)):
+        # assert
+        assert isinstance(weights, collections.abc.Sequence)
+        assert out_channels is None or out_channels > 0
+        for item in weights: assert isinstance(item, (float, int))
+        # set attributes
+        self.weights = weights
+        self.out_channels = out_channels
+    '''call'''
+    def __call__(self, sample_meta):
+        sample_meta = self.rgb2gray('image', sample_meta, self.weights, self.out_channels)
+        return sample_meta
+    '''rgb2gray'''
+    @staticmethod
+    def rgb2gray(key, sample_meta, weights, out_channels):
+        if key not in sample_meta: return sample_meta
+        # assert
+        assert len(sample_meta[key].shape) == 3
+        assert sample_meta[key].shape[2] == len(weights)
+        # apply
+        weights = np.array(weights).reshape((1, 1, -1))
+        sample_meta[key] = (sample_meta[key] * weights).sum(2, keepdims=True)
+        if out_channels is None:
+            sample_meta[key] = sample_meta[key].repeat(weights.shape[2], axis=2)
+        else:
+            sample_meta[key] = sample_meta[key].repeat(out_channels, axis=2)
+        # return
+        return sample_meta
+```
+
+Then, import `DataTransformBuilder` and register this method,
+
+```python
+from ssseg.modules.datasets import DataTransformBuilder
+
+data_transformer_builder = DataTransformBuilder()
+data_transformer_builder.register('RGB2Gray', RGB2Gray)
+```
+
+From this, you can call `data_transformer_builder.build` to build your own defined transform algorithms as well as the original supported data transform methods.
+
+
+## Customize Datasets
+
