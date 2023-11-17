@@ -75,5 +75,5 @@ for stage_id, num_blocks in enumerate(SEGMENTOR_CFG['backbone']['depths']):
         })
 for stage_id in range(len(SEGMENTOR_CFG['backbone']['depths']) - 1):
     SEGMENTOR_CFG['scheduler']['optimizer']['params_rules'].update({
-        f'backbone.stages.{stage_id}.downsample.norm': dict(lr_multiplier=0.1, wd_multiplier=0.0)
+        f'backbone_net.stages.{stage_id}.downsample.norm': dict(lr_multiplier=0.1, wd_multiplier=0.0)
     })
