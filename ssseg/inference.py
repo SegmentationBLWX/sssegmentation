@@ -23,8 +23,8 @@ warnings.filterwarnings('ignore')
 '''parse arguments in command line'''
 def parsecmdargs():
     parser = argparse.ArgumentParser(description='SSSegmentation is an open source supervised semantic segmentation toolbox based on PyTorch')
-    parser.add_argument('--imagedir', dest='imagedir', help='images dir for testing multi images', type=str)
-    parser.add_argument('--imagepath', dest='imagepath', help='imagepath for testing single image', type=str)
+    parser.add_argument('--imagedir', dest='imagedir', help='image directory, which means we let the segmentor inference on the images existed in the given image directory', type=str)
+    parser.add_argument('--imagepath', dest='imagepath', help='image path, which means we let the segmentor inference on the given image', type=str)
     parser.add_argument('--outputdir', dest='outputdir', help='directory to save output image(s)', type=str, default='inference_outputs')
     parser.add_argument('--cfgfilepath', dest='cfgfilepath', help='config file path you want to use', type=str, required=True)
     parser.add_argument('--ckptspath', dest='ckptspath', help='checkpoints you want to resume from', type=str, required=True)

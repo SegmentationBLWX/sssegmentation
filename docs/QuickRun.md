@@ -1,117 +1,151 @@
 # Quick Run
 
-In this chapter, we introduce some basic usage and commands of SSSegmentation to the users.
+In this chapter, we introduce users to some basic usage and commands of SSSegmentation to help users quickly get started running SSSegmentation.
 
 
-## Train A Segmentor
+## Training and Testing Segmentors Integrated in SSSegmentation
 
-SSSegmentation only supports distributed training which uses `nn.parallel.DistributedDataParallel`.
-All outputs (training log and checkpoints) will be saved to the working directory, which is specified by `SEGMENTOR_CFG['work_dir']` in the config file.
+SSSegmentation supports training and testing segmentation frameworks on a single machine or multiple machines (cluster) by utilizing `nn.parallel.DistributedDataParallel`.
+In this section, you will learn how to train and test these supported segmentors using the scripts provided by SSSegmentation.
 
-#### Train on a single machine
+#### Training and Testing on A Single Machine
 
-You can train the segmentors in a single machine as follows,
+**1. Training a segmentor**
+
+We provide `scripts/dist_train.sh` to launch training jobs on a single machine. The basic usage is as follows,
 
 ```sh
 bash scripts/dist_train.sh ${NGPUS} ${CFGFILEPATH} [optional arguments]
 ```
 
-where `${NGPUS}` means the number of GPUS you want to use and `${CFGFILEPATH}` denotes for the config file path.
-For example, you can train a segmentor on a single machine with the following commands,
+This script accepts several optional arguments, including:
+
+- `${NGPUS}`: The number of GPUS you want to use,
+- `${CFGFILEPATH}`: The config file path which is used to customize segmentors,
+- `--ckptspath`: Checkpoints you want to resume from, if you want to resume from the latest checkpoint in the `SEGMENTOR_CFG['work_dir']` automatically, you can specify it as `f'{work_dir}/epoch_last.pth'`,
+- `--slurm`: Please add `--slurm` if you are using slurm to spawn training jobs.
+
+Here, we provide some examples about training a segmentor on a single machine,
 
 ```sh
+# train ANNNet
 bash scripts/dist_train.sh 4 ssseg/configs/annnet/annnet_resnet50os16_ade20k.py
-```
-
-If you want to resume training from a specific checkpoint, you can run as follows,
-
-```sh
+# load epoch_44.pth and then train ANNNet
 bash scripts/dist_train.sh 4 ssseg/configs/annnet/annnet_resnet50os16_ade20k.py --ckptspath annnet_resnet50os16_ade20k/epoch_44.pth
-```
-
-If you want to auto resume from the last checkpoint, you can run as follows,
-
-```sh
+# auto resume
 bash scripts/dist_train.sh 4 ssseg/configs/annnet/annnet_resnet50os16_ade20k.py --ckptspath annnet_resnet50os16_ade20k/epoch_last.pth
 ```
 
-This trick is very useful when you are training your segmentors in an unstable environment and your program will be interrupted and restarted frequently.
+The last command will be very useful if you are training your segmentors in an unstable environment, *e.g.*, your program will be interrupted and restarted frequently.
 
-#### Train with multiple machines
+**2. Testing a segmentor**
 
-Now, we only support training with multiple machines using Slurm.
-Slurm is a good job scheduling system for computing clusters.
-On a cluster managed by Slurm, you can use `slurm_train.sh` to spawn training jobs.
-It supports both single-node and multi-node training.
+We provide `scripts/dist_test.sh` to launch testing jobs on a single machine. The basic usage is as follows,
 
-Specifically, you can train the segmentors with multiple machines as follows,
+```sh
+bash scripts/dist_test.sh ${NGPUS} ${CFGFILEPATH} ${CKPTSPATH} [optional arguments]
+```
+
+This script accepts several optional arguments, including:
+
+- `${NGPUS}`: The number of GPUS you want to use,
+- `${CFGFILEPATH}`: The config file path which is used to customize segmentors,
+- `${CKPTSPATH}`: Checkpoints you want to resume from,
+- `--evalmode`: Used to specify evaluate mode, support server mode (only save the test results which could be submitted to the corresponding dataset's official website to obtain the segmentation performance) and local mode (the default mode, test segmentors with the local images and annotations provided by the corresponding dataset),
+- `--slurm`: Please add `--slurm` if you are using slurm to spawn testing jobs.
+
+Here, we provide some examples about testing a segmentor on a single machine,
+
+```sh
+# test ANNNet on ADE20k
+bash scripts/dist_test.sh 4 ssseg/configs/annnet/annnet_resnet50os16_ade20k.py annnet_resnet50os16_ade20k/epoch_130.pth
+# test ANNNet on Cityscapes
+bash scripts/dist_test.sh 4 ssseg/configs/annnet/annnet_resnet50os16_cityscapes.py annnet_resnet50os16_cityscapes/epoch_220.pth
+```
+
+#### Training and Testing on Multiple Machines
+
+Now, we only support training with multiple machines using Slurm, where Slurm is a good job scheduling system for computing clusters.
+
+**1. Training a segmentor**
+
+On a cluster managed by Slurm, you can use `scripts/slurm_train.sh` to spawn training jobs. It supports both single-node and multi-node training. The basic usage is as follows,
 
 ```sh
 bash scripts/slurm_train.sh ${PARTITION} ${JOBNAME} ${NGPUS} ${CFGFILEPATH} [optional arguments]
 ```
 
-Here is an example of using 16 GPUs to train PSPNet on the dev partition,
+This script accepts several optional arguments, including:
+
+- `${PARTITION}`: The Slurm partition you want to use,
+- `${JOBNAME}`: The job name you want to show,
+- `${NGPUS}`: The number of GPUS you want to use,
+- `${CFGFILEPATH}`: The config file path which is used to customize segmentors,
+- `--ckptspath`: Checkpoints you want to resume from, if you want to resume from the latest checkpoint in the `SEGMENTOR_CFG['work_dir']` automatically, you can specify it as `f'{work_dir}/epoch_last.pth'`,
+- `--slurm`: Please add `--slurm` if you are using slurm to spawn training jobs.
+
+Here is an example of using 16 GPUs to train PSPNet on Slurm partition named *dev*,
 
 ```sh
-bash scripts/slurm_train.sh dev pspnet 16 ssseg/configs/pspnet/pspnet_resnet101os8_ade20k.py
+bash scripts/slurm_train.sh dev pspnet 16 ssseg/configs/pspnet/pspnet_resnet101os8_ade20k.py --slurm
 ```
 
+Please note that, `--slurm` is required to set for environment initialization if you are using slurm to spawn training jobs.
 
-## Test A Segmentor
+**2. Testing a segmentor**
 
-We provide testing scripts to evaluate a whole dataset (Cityscapes, PASCAL VOC, ADE20k, etc.), and also some high-level apis for easier integration to other projects.
-Also, all outputs (testing log and results) will be saved to the working directory, which is specified by `SEGMENTOR_CFG['work_dir']` in the config file.
-
-#### Test on a single machine
-
-You can test the segmentors in a single machine as follows,
+Similar to the training task, SSSegmentation provides `scripts/slurm_test.sh` to spawn testing jobs. The basic usage is as follows,
 
 ```sh
-bash scripts/dist_test.sh ${NGPUS} ${CFGFILEPATH} ${ckptspath} [optional arguments]
+bash scripts/slurm_test.sh ${PARTITION} ${JOBNAME} ${NGPUS} ${CFGFILEPATH} ${CKPTSPATH} [optional arguments]
 ```
 
-For example, you can test a segmentor on a single machine with the following commands,
+This script accepts several optional arguments, including:
 
-```sh
-bash scripts/dist_test.sh 4 ssseg/configs/annnet/annnet_resnet50os16_ade20k.py annnet_resnet50os16_ade20k/epoch_130.pth
-```
+- `${PARTITION}`: The Slurm partition you want to use,
+- `${JOBNAME}`: The job name you want to show,
+- `${NGPUS}`: The number of GPUS you want to use,
+- `${CFGFILEPATH}`: The config file path which is used to customize segmentors,
+- `${CKPTSPATH}`: Checkpoints you want to resume from,
+- `--evalmode`: Used to specify evaluate mode, support server mode (only save the test results which could be submitted to the corresponding dataset's official website to obtain the segmentation performance) and local mode (the default mode, test segmentors with the local images and annotations provided by the corresponding dataset),
+- `--slurm`: Please add `--slurm` if you are using slurm to spawn testing jobs.
 
-#### Test with multiple machines
-
-Now, we only support testing with multiple machines using Slurm.
-Slurm is a good job scheduling system for computing clusters.
-On a cluster managed by Slurm, you can use `slurm_test.sh` to spawn testing jobs.
-It supports both single-node and multi-node testing.
-
-Specifically, you can test the segmentors with multiple machines as follows,
-
-```sh
-bash scripts/slurm_test.sh ${PARTITION} ${JOBNAME} ${NGPUS} ${CFGFILEPATH} ${ckptspath} [optional arguments]
-```
-
-Here is an example of using 16 GPUs to test PSPNet on the dev partition,
+Here is an example of using 16 GPUs to test PSPNet on Slurm partition named *dev*,
 
 ```sh
 bash scripts/slurm_test.sh dev pspnet 16 ssseg/configs/pspnet/pspnet_resnet101os8_ade20k.py pspnet_resnet101os8_ade20k/epoch_130.pth
 ```
 
+Also, `--slurm` is required to set for slurm environment initialization.
 
-## Inference A Segmentor
 
-You can apply the trained segmentors to segment images with the following commands,
+## Inference with Segmentors Integrated in SSSegmentation
+
+SSSegmentation provides pre-trained models for semantic segmentation in [Model Zoo](https://sssegmentation.readthedocs.io/en/latest/ModelZoo.html), and supports multiple standard datasets, including Pascal VOC, Cityscapes, ADE20K, etc.
+This section will show how to use existing pre-trained models to inference on given images. 
+
+Specifically, SSSegmentation provides `scripts/inference.sh` to apply the trained segmentors to segment images. The basic usage is as follows,
 
 ```sh
-bash scripts/inference.sh ${CFGFILEPATH} ${ckptspath} [optional arguments]
+bash scripts/inference.sh ${CFGFILEPATH} ${CKPTSPATH} [optional arguments]
 ```
 
-For example, if you want to inference one image, you can run as follows,
+This script accepts several optional arguments, including:
+
+- `${CFGFILEPATH}`: The config file path which is used to customize segmentors,
+- `${CKPTSPATH}`: Checkpoints you want to resume from,
+- `--outputdir`: The directory used to save output image(s),
+- `--imagepath`: Image path, which means we let the segmentor inference on the given image,
+- `--imagedir`: Image directory, which means we let the segmentor inference on the images existed in the given image directory.
+
+Here are some example commands,
 
 ```sh
+# inference on a given image
 bash scripts/inference.sh ssseg/configs/pspnet/pspnet_resnet101os8_ade20k.py pspnet_resnet101os8_ade20k/epoch_130.pth --imagepath dog.jpg
-```
-
-If you want to inference the images in one directory, you can run as follows,
-
-```sh
+# inference on given images
 bash scripts/inference.sh ssseg/configs/pspnet/pspnet_resnet101os8_ade20k.py pspnet_resnet101os8_ade20k/epoch_130.pth --imagedir dogs
 ```
+
+Please note that, if you specify `--imagedir` and `--imagepath` at the same time, only the value following `--imagedir` will be used.
+And the image format should be in `[png, jpg, jpeg]`.
