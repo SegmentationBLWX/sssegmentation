@@ -282,3 +282,6 @@ For example, if you want to train the segmentors with ADE20K dataset, you can pr
 ```sh
 bash scripts/prepare_datasets.sh ade20k
 ```
+
+If the terminal finally outputs "Download ade20k done.", it means you have downloaded the dataset successfully. 
+Otherwise, you may have to check and fix your environment issues before re-executing the provided script.
