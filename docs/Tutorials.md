@@ -219,7 +219,7 @@ Here is an example of calling `AlbumentationsWrapper`,
 
 ```python
 SEGMENTOR_CFG['dataset']['train']['data_pipelines'] = [
-    ('AlbumentationsWrapper', {'albu_cfg': {'type': 'HorizontalFlip', 'width': 256, 'height': 256}}),
+    ('AlbumentationsWrapper', {'albu_cfg': {'type': 'RandomCrop', 'width': 256, 'height': 256}}),
     ('AlbumentationsWrapper', {'albu_cfg': {'type': 'HorizontalFlip', 'p': 0.5}}),
     ('AlbumentationsWrapper', {'albu_cfg': {'type': 'RandomBrightnessContrast', 'p': 0.2}}),
 ]
