@@ -202,7 +202,7 @@ Except for installing SSSegmentation, you are also required to download the benc
 
 Here is a summary of the supported benchmark datasets and the corresponding download sources,
 
-| Dataset                | Download from Official Websites                                                            | Download with Provided Scripts                                                                                                  | Download from Baidu Disk                                                                                                        |
+| Dataset                | Official Websites                                                                          | Download with Provided Scripts                                                                                                  | Download from Baidu Disk                                                                                                        |
 | :-:                    | :-:                                                                                        | :-:                                                                                                                             | :-:                                                                                                                             |
 | VSPW                   | [Click](https://www.vspwdataset.com/)                                                      | <details><summary>CMD</summary> `bash scripts/prepare_datasets.sh vspw` </details>                                              | <details><summary>URL</summary> `https://pan.baidu.com/s/1TZbgxPnY0Als6LoiV80Xrw` with access code `fn1i` </details>            |
 | Supervisely            | [Click](https://supervise.ly/explore/projects/supervisely-person-dataset-23304/datasets)   | <details><summary>CMD</summary> `bash scripts/prepare_datasets.sh supervisely` </details>                                       | <details><summary>URL</summary> `https://pan.baidu.com/s/1TZbgxPnY0Als6LoiV80Xrw` with access code `fn1i` </details>            |
@@ -249,9 +249,9 @@ So you don’t need to run the above command to install them again.
 
 For windows users, you can download the corresponding software installation package to install them,
 
-- 7z: https://sparanoid.com/lab/7z/download.html,
-- RAR: https://www.win-rar.com/start.html?&L=0,
-- WGET: http://downloads.sourceforge.net/gnuwin32/wget-1.11.4-1-setup.exe?spm=a2c6h.12873639.article-detail.7.3f825677H6sKF2&file=wget-1.11.4-1-setup.exe.
+- 7z: [7z official website](https://sparanoid.com/lab/7z/download.html),
+- RAR: [rar official website](https://www.win-rar.com/start.html?&L=0),
+- WGET: [wget official website](http://downloads.sourceforge.net/gnuwin32/wget-1.11.4-1-setup.exe?spm=a2c6h.12873639.article-detail.7.3f825677H6sKF2&file=wget-1.11.4-1-setup.exe).
 
 Besides, the windows users also need to install [Cmder](https://cmder.app/) to execute the provided script.
 
