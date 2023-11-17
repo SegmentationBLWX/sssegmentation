@@ -65,6 +65,7 @@ This command will automatically install the following packages,
 - `tqdm`: set in requirements/terminal.txt,
 - `argparse`: set in requirements/terminal.txt,
 - `cython`: set in requirements/misc.txt.
+- `fvcore`: set in requirements/misc.txt.
 
 **2.2 Pytorch and Torchvision (Necessary)**
 
