@@ -10,8 +10,7 @@ Welcome to SSSegmentation's documentation!
 	:maxdepth: 2
 	
 	GetStarted.md
-	DatasetPreparation.md
-	ModelZoo.md
 	QuickRun.md
 	Tutorials.md
+	ModelZoo.md
 	AdvancedAPI.md

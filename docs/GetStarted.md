@@ -1,63 +1,51 @@
 # Get Started
 
-In this chapter, we demonstrate how to prepare an environment for SSSegmentation.
-If you are experienced with Python and PyTorch and have already installed them, just skip this chapter.
+SSSegmentation is an open source supervised semantic segmentation toolbox based on pytorch.
 
-**Note:** SSSegmentation works on Linux, Windows and macOS. It requires Python 3.7+, CUDA 10.2+ and PyTorch 1.8+. 
+In this chapter, we demonstrate some necessary preparations before developing or using SSSegmentation.
 
 
-## Prerequisites
+## Install SSSegmentation for Developing
 
-**1.Anaconda**
+SSSegmentation works on Linux, Windows and macOS. It requires Python 3.7+, CUDA 10.2+ and PyTorch 1.8+. 
 
-For Linux and Mac users, we strongly recommend you to download and install [Anaconda](https://docs.conda.io/en/latest/miniconda.html).
-Then, you can create a conda environment for SSSegmentation and activate it, *e.g.*,
+If you are experienced with Python and PyTorch and have already installed them, just skip this section and jump to the next section [Prepare Datasets](https://sssegmentation.readthedocs.io/en/latest/GetStarted.html#prepare-datasets).
+Otherwise, you can follow the instructions in this section for installing SSSegmentation.
+
+#### Install Anaconda
+
+Anaconda is an open-source package and environment management system that runs on Windows, macOS, and Linux. 
+
+We recommend the users to download and install Anaconda to create an independent environment for SSSegmentation.
+Specifically, you can download and install Anaconda or Miniconda from the [official website](https://www.anaconda.com/).
+If you have any questions about installing Anaconda, you can refer to the [official document](https://docs.anaconda.com/free/anaconda/install/index.html) for more details.
+
+After installing Anaconda, you can create a conda environment for SSSegmentation and activate it, *e.g.*,
 
 ```sh
 conda create --name ssseg python=3.8 -y
 conda activate ssseg
 ```
 
-For Windows users, you may directly install Python or also download [Anaconda](https://docs.conda.io/en/latest/miniconda.html) to create a conda environment for SSSegmentation.
+For more advanced usages of Anaconda, please also refer to the [official document](https://docs.anaconda.com/free/anaconda/install/index.html).
 
-**2.WGET & Decompression Software**
+#### Install Requirements
 
-If you want to utilize the provided scripts to prepare the datasets, it is necessary for you to install wget (for downloading datasets), 7z (for processing compressed packages) and tar (for processing compressed packages) in your operation system.
-For windows users, the resources are listed as following,
+Now, we can install the necessary requirements in the created environment `ssseg`.
 
-- 7Z: [Download](https://sparanoid.com/lab/7z/download.html),
-- RAR: [Download](https://www.win-rar.com/start.html?&L=0),
-- WGET: [Download](http://downloads.sourceforge.net/gnuwin32/wget-1.11.4-1-setup.exe?spm=a2c6h.12873639.article-detail.7.3f825677H6sKF2&file=wget-1.11.4-1-setup.exe).
+**Step 1: Install Basic Requirements (Necessary)**
 
-Besides, [Cmder](https://cmder.app/) are recommended to help the windows users execute the provided scripts successfully.
-
-
-## Installation
-
-#### Developer Mode
-
-This section is for the users who want to develop SSSegmentation for training your own algorithms or datasets.
-
-**Step 1: Clone SSSegmentation**
-
-You can run the following commands to clone the sssegmentation repository,
-
-```sh 
-git clone https://github.com/SegmentationBLWX/sssegmentation.git
-cd sssegmentation
-```
-
-**Step 2: Install Requirements**
-
-**Step 2.1: Basic Requirements (Necessary)**
-
-To set up the essential prerequisites for running SSSegmentation, execute the following commands,
+Specifically, we can first install some essential third-party packages, 
 
 ```sh
+# clone the source codes from official repository
+git clone https://github.com/CharlesPikachu/sssegmentation
+cd sssegmentation
+# install some essential requirements
 pip install -r requirements.txt
 ```
 
-This command will automatically install the following packages,
+With the above commands, these python packages will be installed,
 
 - `chainercv`: set in requirements/evaluate.txt,
 - `cityscapesscripts`: set in requirements/evaluate.txt,
@@ -72,21 +60,51 @@ This command will automatically install the following packages,
 - `cython`: set in requirements/misc.txt.
 - `fvcore`: set in requirements/misc.txt.
 
-**Step 2.2: Pytorch and Torchvision (Necessary)**
+All requirements are also summarized at our [official repository](https://github.com/SegmentationBLWX/sssegmentation/tree/main/requirements).
 
-If you intend to utilize SSSegmentation, it is imperative to install PyTorch and torchvision. 
-We recommend you to follow the [official instructions](https://pytorch.org/get-started/previous-versions/) to install them, *e.g.*,
+**Step 2: Install PyTorch and Torchvision (Necessary)**
+
+Next, it is imperative to install PyTorch and torchvision, which is "Tensors and Dynamic neural networks in Python with strong GPU acceleration". 
+Particularly, we recommend the users to follow the [official instructions](https://pytorch.org/get-started/previous-versions/) to install them.
+
+Here, we also provide some example commands about installing PyTorch and Torchvision,
 
 ```sh
-# CUDA 11.0
-pip install torch==1.8.0+cu111 torchvision==0.9.0+cu111 torchaudio==0.8.0 -f https://download.pytorch.org/whl/torch_stable.html
-# CUDA 10.2
-pip install torch==1.8.0 torchvision==0.9.0 torchaudio==0.8.0
+# conda
+conda install pytorch==1.13.0 torchvision==0.14.0 torchaudio==0.13.0 -c pytorch
+# CUDA 11.6
+conda install pytorch==1.13.0 torchvision==0.14.0 torchaudio==0.13.0 pytorch-cuda=11.6 -c pytorch -c nvidia
+# CUDA 11.7
+conda install pytorch==1.13.0 torchvision==0.14.0 torchaudio==0.13.0 pytorch-cuda=11.7 -c pytorch -c nvidia
+# CPU Only
+conda install pytorch==1.13.0 torchvision==0.14.0 torchaudio==0.13.0 cpuonly -c pytorch
+# OSX
+pip install torch==1.13.0 torchvision==0.14.0 torchaudio==0.13.0
+# ROCM 5.2 (Linux only)
+pip install torch==1.13.0+rocm5.2 torchvision==0.14.0+rocm5.2 torchaudio==0.13.0 --extra-index-url https://download.pytorch.org/whl/rocm5.2
+# CUDA 11.6
+pip install torch==1.13.0+cu116 torchvision==0.14.0+cu116 torchaudio==0.13.0 --extra-index-url https://download.pytorch.org/whl/cu116
+# CUDA 11.7
+pip install torch==1.13.0+cu117 torchvision==0.14.0+cu117 torchaudio==0.13.0 --extra-index-url https://download.pytorch.org/whl/cu117
+# CPU only
+pip install torch==1.13.0+cpu torchvision==0.14.0+cpu torchaudio==0.13.0 --extra-index-url https://download.pytorch.org/whl/cpu
 ```
 
-**Step 2.3: MMCV (Optional)**
+Please note that, SSSegmentation requires `torch.cuda.is_available()` to be `True` and thus, does not support the cpu-only version' pytorch and torchvision now.
 
-If you want to install mmcv-full for training some segmentors with mmcv-integrated operators like [CCNet](https://arxiv.org/pdf/1811.11721.pdf) and [Mask2Former](https://arxiv.org/pdf/2112.01527.pdf), we recommend you to install the pre-build mmcv-full package as below,
+**Step 3: Install MMCV (Optional)**
+
+Since some of algorithms integrated in SSSegmentation rely on MMCV that is a foundational library for computer vision research, you are required to install MMCV if you want to use the following algorithms,
+
+- [Mask2Former: Masked-attention Mask Transformer for Universal Image Segmentation - CVPR 2022](https://arxiv.org/pdf/2112.01527.pdf),
+- [Focal Loss for Dense Object Detection - ICCV 2017](https://arxiv.org/pdf/1708.02002.pdf),
+- [PointRend: Image Segmentation as Rendering - CVPR 2020](https://arxiv.org/pdf/1912.08193.pdf),
+- [PSANet: Point-wise Spatial Attention Network for Scene Parsing - ECCV 2018](https://hszhao.github.io/papers/eccv18_psanet.pdf),
+- [CCNet: Criss-Cross Attention for Semantic Segmentation - ICCV 2019](https://arxiv.org/pdf/1811.11721.pdf).
+
+Specifically, the users can follow the [official instructions](https://mmcv.readthedocs.io/en/latest/) to install MMCV.
+
+Here, we recommend the users to install the pre-build mmcv-full package according to your CUDA and PyTorch version,
 
 ```sh
 # mmcv < 2.0.0, mmcv versions include mmcv-full and mmcv
@@ -95,12 +113,16 @@ pip install mmcv-full -f https://download.openmmlab.com/mmcv/dist/{cu_version}/{
 pip install mmcv -f https://download.openmmlab.com/mmcv/dist/{cu_version}/{torch_version}/index.html
 ```
 
-For more details, you can refer to [MMCV official repository](https://github.com/open-mmlab/mmcv).
+Please note that, if the users do not plan to use these mmcv-dependent algorithms, it is not necessary for you to install mmcv. 
 
-**Step 2.4: Apex (Optional)**
+**Step 4: Install Apex (Optional)**
 
-If you want to install apex for [Mixed Precision (FP16) Training](https://arxiv.org/pdf/1710.03740.pdf), we recommend you to follow the instructions in [official repository](https://github.com/NVIDIA/apex).
-For example, the Linux users can install apex with the following commands,
+Apex holds NVIDIA-maintained utilities to streamline mixed precision and distributed training in Pytorch.
+So, the users can install it to utilize [Mixed Precision (FP16) Training](https://arxiv.org/pdf/1710.03740.pdf) supported by Apex to train the segmentors.
+
+In details, the users can follow the [official instructions](https://nvidia.github.io/apex/) to install Apex.
+
+Also, you can leverage the following commands to install Apex,
 
 ```sh
 git clone https://github.com/NVIDIA/apex
@@ -113,61 +135,150 @@ pip install -v --disable-pip-version-check --no-cache-dir --no-build-isolation -
 pip install -v --disable-pip-version-check --no-build-isolation --no-cache-dir ./
 ```
 
-Then, you need to turn on mixed precision training in corresponding config file as follow,
-
-```python
-SEGMENTOR_CFG['fp16_cfg'] = {'type': 'apex', 'initialize': {'opt_level': 'O1'}, 'scale_loss': {}}
-```
-
-Note that, SSSegmentation supports two types of mixed precision training, *i.e.*, `apex` and `pytorch`.
-If you want to use mixed precision training supported by [Pytorch](https://pytorch.org/), you only need to install torch with `torch.__version__ >= 1.5.0`, *e.g.*,
-
-```sh
-# CUDA 11.6
-conda install pytorch==1.13.1 torchvision==0.14.1 torchaudio==0.13.1 pytorch-cuda=11.6 -c pytorch -c nvidia
-# CUDA 11.7
-conda install pytorch==1.13.1 torchvision==0.14.1 torchaudio==0.13.1 pytorch-cuda=11.7 -c pytorch -c nvidia
-# CPU Only
-conda install pytorch==1.13.1 torchvision==0.14.1 torchaudio==0.13.1 cpuonly -c pytorch
-```
-
-Then, you need to turn on mixed precision training in corresponding config file as follow,
+Please note that, SSSegmentation supports two types of mixed precision training, *i.e.*, `apex` and `pytorch`,
 
 ```python
 import torch
 
+# use Mixed Precision (FP16) Training supported by Apex
+SEGMENTOR_CFG['fp16_cfg'] = {'type': 'apex', 'initialize': {'opt_level': 'O1'}, 'scale_loss': {}}
+# use Mixed Precision (FP16) Training supported by Pytorch
 SEGMENTOR_CFG['fp16_cfg'] = {'type': 'pytorch', 'autocast': {'dtype': torch.float16}, 'grad_scaler': {}}
 ```
 
-**Step 2.5: TIMM (Optional)**
+So, the users can choose to utilize [Mixed Precision (FP16) Training](https://arxiv.org/pdf/1710.03740.pdf) supported by Pytorch to train the segmentors if you find it is difficult to install Apex in your environment.
 
-SSSegmentation provides support for importing backbone networks from [timm](https://github.com/huggingface/pytorch-image-models) to train our segmentors. To install timm, you can simply run,
+**Step 5: Install TIMM (Optional)**
+
+Timm is a library containing SOTA computer vision models, layers, utilities, optimizers, schedulers, data-loaders, augmentations, and training/evaluation scripts. 
+It comes packaged with >700 pretrained models, and is designed to be flexible and easy to use.
+
+SSSegmentation provides support for importing backbone networks from [timm](https://github.com/huggingface/pytorch-image-models) to train the segmentors. 
+So, if the users want to leverage this feature, you can follow the [official instructions](https://huggingface.co/docs/timm/index) to install timm.
+
+Of course, you can also simply install it with the following command,
 
 ```sh
 pip install timm
 ```
 
-For more details, you can refer to [TIMM official repository](https://github.com/huggingface/pytorch-image-models) and [SSSegmentation timm backbone wrapper](https://github.com/SegmentationBLWX/sssegmentation/blob/main/ssseg/modules/models/backbones/timmwrapper.py).
+For more details, you can refer to [TIMM official repository](https://github.com/huggingface/pytorch-image-models) and [TIMM official document](https://huggingface.co/docs/timm/index).
 
-**Step 2.6: Albumentations (Optional)**
+**Step 6: Install Albumentations (Optional)**
 
-SSSegmentation provides support for importing data augmentation transforms from [albumentations](https://github.com/albumentations-team/albumentations) to train our segmentors. To install albumentations, you can simply run,
+Albumentations is a Python library for fast and flexible image augmentations.
+
+SSSegmentation provides support for importing data augmentation transforms from [albumentations](https://github.com/albumentations-team/albumentations) to train the segmentors.
+Thus, if the users want to utilize this feature, you can follow the [official instructions](https://albumentations.ai/docs/) to install albumentations.
+
+Of course, you can also simply install it with the following command,
 
 ```sh
 pip install -U albumentations
 ```
 
-For more details, you can refer to [Albumentations official repository](https://github.com/albumentations-team/albumentations) and [SSSegmentation albumentations wrapper](https://github.com/SegmentationBLWX/sssegmentation/blob/main/ssseg/modules/datasets/pipelines/transforms.py).
+For more details, you can refer to [Albumentations official repository](https://github.com/albumentations-team/albumentations) and [Albumentations official document](https://albumentations.ai/docs/).
 
-#### Third-party Mode
 
-This section is for the users who want to use SSSegmentation as a dependency or third-party package.
+## Install SSSegmentation as Third-party Package
 
-For this situation, we assume that you have installed Python and PyTorch in your environment and you can install SSSegmentation with pip as following,
+If the users just want to use SSSegmentation as a dependency or third-party package, you can install SSSegmentation with pip as following,
 
 ```sh
 # from pypi
 pip install SSSegmentation
 # from Github repository
 pip install git+https://github.com/CharlesPikachu/sssegmentation.git
+```
+
+Here, we assume that you have installed a suitable version of Python, PyTorch and other optional requirements (*e.g.*, mmcv and timm) in your environment before importing SSSegmentation.
+
+
+## Prepare Datasets
+
+Except for installing SSSegmentation, you are also required to download the benchmark datasets before training the integrated segmentation frameworks.
+
+#### Supported Dataset List
+
+Here is a summary of the supported benchmark datasets and the corresponding download sources,
+
+| Dataset                | Download from Official Websites                                                            | Download with Provided Scripts                                                                                                  | Download from Baidu Disk                                                                                                        |
+| :-:                    | :-:                                                                                        | :-:                                                                                                                             | :-:                                                                                                                             |
+| VSPW                   | [Click](https://www.vspwdataset.com/)                                                      | <details><summary>CMD</summary> `bash scripts/prepare_datasets.sh vspw` </details>                                              | <details><summary>URL</summary> `https://pan.baidu.com/s/1TZbgxPnY0Als6LoiV80Xrw` with access code `fn1i` </details>            |
+| Supervisely            | [Click](https://supervise.ly/explore/projects/supervisely-person-dataset-23304/datasets)   | <details><summary>CMD</summary> `bash scripts/prepare_datasets.sh supervisely` </details>                                       | <details><summary>URL</summary> `https://pan.baidu.com/s/1TZbgxPnY0Als6LoiV80Xrw` with access code `fn1i` </details>            |
+| Dark Zurich            | [Click](https://data.vision.ee.ethz.ch/csakarid/shared/GCMA_UIoU/Dark_Zurich_val_anon.zip) | <details><summary>CMD</summary> `bash scripts/prepare_datasets.sh darkzurich` </details>                                        | <details><summary>URL</summary> `https://pan.baidu.com/s/1TZbgxPnY0Als6LoiV80Xrw` with access code `fn1i` </details>            |
+| Nighttime Driving      | [Click](http://data.vision.ee.ethz.ch/daid/NighttimeDriving/NighttimeDrivingTest.zip)      | <details><summary>CMD</summary> `bash scripts/prepare_datasets.sh nighttimedriving` </details>                                  | <details><summary>URL</summary> `https://pan.baidu.com/s/1TZbgxPnY0Als6LoiV80Xrw` with access code `fn1i` </details>            |
+| CIHP                   | [Click](http://sysu-hcp.net/lip/overview.php)                                              | <details><summary>CMD</summary> `bash scripts/prepare_datasets.sh cihp` </details>                                              | <details><summary>URL</summary> `https://pan.baidu.com/s/1TZbgxPnY0Als6LoiV80Xrw` with access code `fn1i` </details>            |
+| COCOStuff10k           | [Click](https://github.com/nightrome/cocostuff10k)                                         | <details><summary>CMD</summary> `bash scripts/prepare_datasets.sh cocostuff10k` </details>                                      | <details><summary>URL</summary> `https://pan.baidu.com/s/1TZbgxPnY0Als6LoiV80Xrw` with access code `fn1i` </details>            |
+| COCOStuff164k          | [Click](https://github.com/nightrome/cocostuff)                                            | <details><summary>CMD</summary> `bash scripts/prepare_datasets.sh coco` </details>                                              | <details><summary>URL</summary> `https://pan.baidu.com/s/1TZbgxPnY0Als6LoiV80Xrw` with access code `fn1i` </details>            |
+| MHPv1&v2               | [Click](https://lv-mhp.github.io/dataset)                                                  | <details><summary>CMD</summary> `bash scripts/prepare_datasets.sh mhpv1` & `bash scripts/prepare_datasets.sh mhpv2` </details>  | <details><summary>URL</summary> `https://pan.baidu.com/s/1TZbgxPnY0Als6LoiV80Xrw` with access code `fn1i` </details>            |
+| LIP                    | [Click](http://sysu-hcp.net/lip/)                                                          | <details><summary>CMD</summary> `bash scripts/prepare_datasets.sh lip` </details>                                               | <details><summary>URL</summary> `https://pan.baidu.com/s/1TZbgxPnY0Als6LoiV80Xrw` with access code `fn1i` </details>            |
+| ADE20k                 | [Click](https://groups.csail.mit.edu/vision/datasets/ADE20K/)                              | <details><summary>CMD</summary> `bash scripts/prepare_datasets.sh ade20k` </details>                                            | <details><summary>URL</summary> `https://pan.baidu.com/s/1TZbgxPnY0Als6LoiV80Xrw` with access code `fn1i` </details>            |
+| SBUShadow              | [Click](https://www3.cs.stonybrook.edu/~cvl/projects/shadow_noisy_label/index.html)        | <details><summary>CMD</summary> `bash scripts/prepare_datasets.sh sbushadow` </details>                                         | <details><summary>URL</summary> `https://pan.baidu.com/s/1TZbgxPnY0Als6LoiV80Xrw` with access code `fn1i` </details>            |
+| CityScapes             | [Click](https://www.cityscapes-dataset.com/)                                               | <details><summary>CMD</summary> `bash scripts/prepare_datasets.sh cityscapes` </details>                                        | <details><summary>URL</summary> `https://pan.baidu.com/s/1TZbgxPnY0Als6LoiV80Xrw` with access code `fn1i` </details>            |
+| ATR                    | [Click](http://sysu-hcp.net/lip/overview.php)                                              | <details><summary>CMD</summary> `bash scripts/prepare_datasets.sh atr` </details>                                               | <details><summary>URL</summary> `https://pan.baidu.com/s/1TZbgxPnY0Als6LoiV80Xrw` with access code `fn1i` </details>            |
+| Pascal Context         | [Click](https://cs.stanford.edu/~roozbeh/pascal-context/)                                  | <details><summary>CMD</summary> `bash scripts/prepare_datasets.sh pascalcontext` </details>                                     | <details><summary>URL</summary> `https://pan.baidu.com/s/1TZbgxPnY0Als6LoiV80Xrw` with access code `fn1i` </details>            |
+| MS COCO                | [Click](https://cocodataset.org/#home)                                                     | <details><summary>CMD</summary> `bash scripts/prepare_datasets.sh coco` </details>                                              | <details><summary>URL</summary> `https://pan.baidu.com/s/1TZbgxPnY0Als6LoiV80Xrw` with access code `fn1i` </details>            |
+| HRF                    | [Click](https://www5.cs.fau.de/fileadmin/research/datasets/fundus-images/)                 | <details><summary>CMD</summary> `bash scripts/prepare_datasets.sh hrf` </details>                                               | <details><summary>URL</summary> `https://pan.baidu.com/s/1TZbgxPnY0Als6LoiV80Xrw` with access code `fn1i` </details>            |
+| CHASE DB1              | [Click](https://staffnet.kingston.ac.uk/~ku15565/)                                         | <details><summary>CMD</summary> `bash scripts/prepare_datasets.sh chase_db1` </details>                                         | <details><summary>URL</summary> `https://pan.baidu.com/s/1TZbgxPnY0Als6LoiV80Xrw` with access code `fn1i` </details>            |
+| PASCAL VOC             | [Click](http://host.robots.ox.ac.uk/pascal/VOC/)                                           | <details><summary>CMD</summary> `bash scripts/prepare_datasets.sh pascalvoc` </details>                                         | <details><summary>URL</summary> `https://pan.baidu.com/s/1TZbgxPnY0Als6LoiV80Xrw` with access code `fn1i` </details>            |
+| DRIVE                  | [Click](https://drive.grand-challenge.org/)                                                | <details><summary>CMD</summary> `bash scripts/prepare_datasets.sh drive` </details>                                             | <details><summary>URL</summary> `https://pan.baidu.com/s/1TZbgxPnY0Als6LoiV80Xrw` with access code `fn1i` </details>            |
+| STARE                  | [Click](http://cecas.clemson.edu/~ahoover/stare/)                                          | <details><summary>CMD</summary> `bash scripts/prepare_datasets.sh stare` </details>                                             | <details><summary>URL</summary> `https://pan.baidu.com/s/1TZbgxPnY0Als6LoiV80Xrw` with access code `fn1i` </details>            |
+
+For easier io reading, we will generate `train.txt/val.txt/test.txt` to record the imageids of training, validation and test images for each dataset.
+So, it is recommended to adopt the provided script (*i.e.*, `scripts/prepare_datasets.sh`) to download the supported datasets or download the supported datasets from the provided network disk link rather than official website.
+
+#### Prepare Datasets with Provided Scripts
+
+We strongly recommend users to use the scripts we provide to prepare datasets.
+And before using the script, it is necessary for you to install wget (for downloading datasets), 7z (for processing compressed packages) and tar (for processing compressed packages) in the environment.
+
+For example, for Linux users, you can run the following commands to install them,
+
+```sh
+# wget
+apt-get install wget
+# 7z
+apt-get install p7zip
+# tar
+apt-get install tar
+```
+
+Note that in fact, most Linux systems will install the above three packages by default.
+So you don’t need to run the above command to install them again.
+
+For windows users, you can download the corresponding software installation package to install them,
+
+- 7z: https://sparanoid.com/lab/7z/download.html,
+- RAR: https://www.win-rar.com/start.html?&L=0,
+- WGET: http://downloads.sourceforge.net/gnuwin32/wget-1.11.4-1-setup.exe?spm=a2c6h.12873639.article-detail.7.3f825677H6sKF2&file=wget-1.11.4-1-setup.exe.
+
+Besides, the windows users also need to install [Cmder](https://cmder.app/) to execute the provided script.
+
+After installing these prerequisites, you can using `scripts/prepare_datasets.sh` to prepare the supported benchmark datasets as following,
+
+```sh
+------------------------------------------------------------------------------------
+scripts/prepare_datasets.sh - prepare datasets for training and inference of SSSegmentation.
+------------------------------------------------------------------------------------
+Usage:
+    bash scripts/prepare_datasets.sh <dataset name>
+Options:
+    <dataset name>: The dataset name you want to download and prepare.
+                    The keyword should be in ['ade20k', 'lip', 'pascalcontext', 'cocostuff10k',
+                                              'pascalvoc', 'cityscapes', 'atr', 'chase_db1',
+                                              'cihp', 'hrf', 'drive', 'stare', 'nighttimedriving',
+                                              'darkzurich', 'sbushadow', 'supervisely', 'vspw',
+                                              'mhpv1', 'mhpv2', 'coco',]
+    <-h> or <--help>: Show this message.
+Examples:
+    If you want to fetch ADE20k dataset, you can run 'bash scripts/prepare_datasets.sh ade20k'.
+    If you want to fetch Cityscapes dataset, you can run 'bash scripts/prepare_datasets.sh cityscapes'.
+------------------------------------------------------------------------------------
+```
+
+For example, if you want to train the segmentors with ADE20K dataset, you can prepare the datasets with the following commands,
+
+```sh
+bash scripts/prepare_datasets.sh ade20k
 ```
