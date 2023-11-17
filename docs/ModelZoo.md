@@ -6,8 +6,9 @@
 - We use distributed training with 8 GPUs by default.
 - Our ResNet style backbone are based on ResNetV1c variant, where the 7x7 conv in the input stem is replaced with three 3x3 convs.
 - There are two inference modes in this framework.
-	- slide mode: In this mode, multiple patches will be cropped from input image, passed into network individually. The overlapping area will be merged by average.
-	- whole mode: In this mode, the whole imaged will be passed into network directly.
+	- `slide` mode: In this mode, multiple patches will be cropped from input image, passed into network individually. The overlapping area will be merged by average.
+	- `whole` mode: In this mode, the whole imaged will be passed into network directly.
+- For input size of `8x+1` (e.g., 473, 769), `align_corner=True` is adopted as a traditional practice. Otherwise, for input size of `8x` (e.g., 512, 1024), `align_corner=False` is adopted.
 
 
 ## Supported Backbones
