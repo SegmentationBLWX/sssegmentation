@@ -1,26 +1,26 @@
 # Get Started
 
+In this chapter, we demonstrate how to prepare an environment for SSSegmentation.
+If you are experienced with Python and PyTorch and have already installed them, just skip this chapter.
+
+**Note:** SSSegmentation works on Linux, Windows and macOS. It requires Python 3.7+, CUDA 10.2+ and PyTorch 1.8+. 
+
 
 ## Prerequisites
 
-In this section, we introduce some prerequisites for using SSSegmentation. 
-If you are experienced with Python and PyTorch and have already installed them, just skip this part.
-
-**1.Operation System**
-
-SSSegmentation works on Linux, Windows and macOS. It requires Python 3.6+, CUDA 9.2+ and PyTorch 1.3+.
-
-**2.Anaconda**
+**1.Anaconda**
 
 For Linux and Mac users, we strongly recommend you to download and install [Anaconda](https://docs.conda.io/en/latest/miniconda.html).
-Then, you can create a conda environment for SSSegmentation and activate it,
+Then, you can create a conda environment for SSSegmentation and activate it, *e.g.*,
 
 ```sh
 conda create --name ssseg python=3.8 -y
 conda activate ssseg
 ```
 
-**3.WGET & Decompression Software**
+For Windows users, you may directly install Python or also download [Anaconda](https://docs.conda.io/en/latest/miniconda.html) to create a conda environment for SSSegmentation.
+
+**2.WGET & Decompression Software**
 
 If you want to utilize the provided scripts to prepare the datasets, it is necessary for you to install wget (for downloading datasets), 7z (for processing compressed packages) and tar (for processing compressed packages) in your operation system.
 For windows users, the resources are listed as following,
@@ -31,9 +31,14 @@ For windows users, the resources are listed as following,
 
 Besides, [Cmder](https://cmder.app/) are recommended to help the windows users execute the provided scripts successfully.
 
+
 ## Installation
 
-**1.Clone SSSegmentation**
+#### Developer Mode
+
+This section is for the users who want to develop SSSegmentation for training your own algorithms or datasets.
+
+**Step 1: Clone SSSegmentation**
 
 You can run the following commands to clone the sssegmentation repository,
 
@@ -42,9 +47,9 @@ git clone https://github.com/SegmentationBLWX/sssegmentation.git
 cd sssegmentation
 ```
 
-**2.Install Requirements**
+**Step 2: Install Requirements**
 
-**2.1 Basic Requirements (Necessary)**
+**Step 2.1: Basic Requirements (Necessary)**
 
 To set up the essential prerequisites for running SSSegmentation, execute the following commands,
 
@@ -67,7 +72,7 @@ This command will automatically install the following packages,
 - `cython`: set in requirements/misc.txt.
 - `fvcore`: set in requirements/misc.txt.
 
-**2.2 Pytorch and Torchvision (Necessary)**
+**Step 2.2: Pytorch and Torchvision (Necessary)**
 
 If you intend to utilize SSSegmentation, it is imperative to install PyTorch and torchvision. 
 We recommend you to follow the [official instructions](https://pytorch.org/get-started/previous-versions/) to install them, *e.g.*,
@@ -79,7 +84,7 @@ pip install torch==1.8.0+cu111 torchvision==0.9.0+cu111 torchaudio==0.8.0 -f htt
 pip install torch==1.8.0 torchvision==0.9.0 torchaudio==0.8.0
 ```
 
-**2.3 MMCV (Optional)**
+**Step 2.3: MMCV (Optional)**
 
 If you want to install mmcv-full for training some segmentors with mmcv-integrated operators like [CCNet](https://arxiv.org/pdf/1811.11721.pdf) and [Mask2Former](https://arxiv.org/pdf/2112.01527.pdf), we recommend you to install the pre-build mmcv-full package as below,
 
@@ -92,7 +97,7 @@ pip install mmcv -f https://download.openmmlab.com/mmcv/dist/{cu_version}/{torch
 
 For more details, you can refer to [MMCV official repository](https://github.com/open-mmlab/mmcv).
 
-**2.4 Apex (Optional)**
+**Step 2.4: Apex (Optional)**
 
 If you want to install apex for [Mixed Precision (FP16) Training](https://arxiv.org/pdf/1710.03740.pdf), we recommend you to follow the instructions in [official repository](https://github.com/NVIDIA/apex).
 For example, the Linux users can install apex with the following commands,
@@ -134,7 +139,7 @@ import torch
 SEGMENTOR_CFG['fp16_cfg'] = {'type': 'pytorch', 'autocast': {'dtype': torch.float16}, 'grad_scaler': {}}
 ```
 
-**2.5 TIMM (Optional)**
+**Step 2.5: TIMM (Optional)**
 
 SSSegmentation provides support for importing backbone networks from [timm](https://github.com/huggingface/pytorch-image-models) to train our segmentors. To install timm, you can simply run,
 
@@ -144,7 +149,7 @@ pip install timm
 
 For more details, you can refer to [TIMM official repository](https://github.com/huggingface/pytorch-image-models) and [SSSegmentation timm backbone wrapper](https://github.com/SegmentationBLWX/sssegmentation/blob/main/ssseg/modules/models/backbones/timmwrapper.py).
 
-**2.6 Albumentations (Optional)**
+**Step 2.6: Albumentations (Optional)**
 
 SSSegmentation provides support for importing data augmentation transforms from [albumentations](https://github.com/albumentations-team/albumentations) to train our segmentors. To install albumentations, you can simply run,
 
@@ -153,3 +158,16 @@ pip install -U albumentations
 ```
 
 For more details, you can refer to [Albumentations official repository](https://github.com/albumentations-team/albumentations) and [SSSegmentation albumentations wrapper](https://github.com/SegmentationBLWX/sssegmentation/blob/main/ssseg/modules/datasets/pipelines/transforms.py).
+
+#### Third-party Mode
+
+This section is for the users who want to use SSSegmentation as a dependency or third-party package.
+
+For this situation, we assume that you have installed Python and PyTorch in your environment and you can install SSSegmentation with pip as following,
+
+```sh
+# from pypi
+pip install SSSegmentation
+# from Github repository
+pip install git+https://github.com/CharlesPikachu/sssegmentation.git
+```

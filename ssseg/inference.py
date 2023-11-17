@@ -25,7 +25,7 @@ def parsecmdargs():
     parser = argparse.ArgumentParser(description='SSSegmentation is an open source supervised semantic segmentation toolbox based on PyTorch')
     parser.add_argument('--imagedir', dest='imagedir', help='images dir for testing multi images', type=str)
     parser.add_argument('--imagepath', dest='imagepath', help='imagepath for testing single image', type=str)
-    parser.add_argument('--outputfilename', dest='outputfilename', help='name to save output image(s)', type=str, default='')
+    parser.add_argument('--outputdir', dest='outputdir', help='directory to save output image(s)', type=str, default='inference_outputs')
     parser.add_argument('--cfgfilepath', dest='cfgfilepath', help='config file path you want to use', type=str, required=True)
     parser.add_argument('--ckptspath', dest='ckptspath', help='checkpoints you want to resume from', type=str, required=True)
     args = parser.parse_args()
@@ -44,8 +44,9 @@ class Inferencer():
     '''start'''
     def start(self):
         cmd_args, cfg, cfg_file_path = self.cmd_args, self.cfg, self.cfg_file_path
-        # touch work dir
+        # touch work dir and output dir
         touchdir(cfg.SEGMENTOR_CFG['work_dir'])
+        touchdir(cmd_args.outputdir)
         # cuda detect
         use_cuda = torch.cuda.is_available()
         # initialize logger_handle
@@ -117,8 +118,8 @@ class Inferencer():
                 mask[pred == clsid, :] = np.array(color)[::-1]
             image = image * 0.5 + mask * 0.5
             image = image.astype(np.uint8)
-            if cmd_args.outputfilename:
-                cv2.imwrite(os.path.join(cfg.SEGMENTOR_CFG['work_dir'], cmd_args.outputfilename + '_%d' % idx + '.png'), image)
+            if cmd_args.outputdir:
+                cv2.imwrite(os.path.join(cmd_args.outputdir, imagepath.split('/')[-1].split('.')[0] + '.png'), image)
             else:
                 cv2.imwrite(os.path.join(cfg.SEGMENTOR_CFG['work_dir'], imagepath.split('/')[-1].split('.')[0] + '.png'), image)
     '''inference with augmentations'''
