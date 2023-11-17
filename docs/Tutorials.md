@@ -1,5 +1,7 @@
 # Tutorials
 
+In this chapter, we will provide detailed tutorials to help the users learn how to use SSSegmentation.
+
 
 ## Learn about Config
 
@@ -7,25 +9,32 @@ We incorporate modular design into our config system, which is convenient to con
 
 #### Config File Structure
 
-Now, there are 2 basic component types under "configs/\_base\_", *i.e.*, datasets and dataloaders, which are responsible for loading various datasets with different runtime settings (*e.g.*, batch size, image size, data augmentation, to name a few).
+Now, there are 2 basic component types under `ssseg/configs/_base_`, *i.e.*, `datasets` and `dataloaders`, which are responsible for defining configs of various datasets with different runtime settings (*e.g.*, batch size, image size, data augmentation, to name a few).
+
 For example, to train FCN segmentor on Pascal VOC dataset (assuming that we hope the total batch size is 16 and the training image size is 512x512), you can import the corresponding pre-defined config like this,
+
 ```python
 from .._base_ import DATASET_CFG_VOCAUG_512x512, DATALOADER_CFG_BS16
 ```
-Then, modify "SEGMENTOR_CFG" in the corresponding method config file (*e.g.*, "fcn_resnet50os16_voc.py") as follows,
+
+Then, modify `SEGMENTOR_CFG` in the corresponding method config file (*e.g.*, `ssseg/configs/fcn/fcn_resnet50os16_voc.py`) as follows,
+
 ```python
 # modify dataset config
 SEGMENTOR_CFG['dataset'] = DATASET_CFG_VOCAUG_512x512.copy()
 # modify dataloader config
 SEGMENTOR_CFG['dataloader'] = DATALOADER_CFG_BS16.copy()
 ```
+
 From this, you are not required to define the same dataloader and dataset configs over and over again if you just want to follow the conventional training and testing settings of various datasets to train your segmentors.
 
-Next, we talk about config files in specific method directories (*e.g.*, "fcn" directory), there is also one and only one "base_cfg.py" used to define some necessary configs for these methods.
-Like loading configs from datasets and dataloaders in "configs/\_base\_", you can also import the "base_cfg.py" and simply modify some key values in "SEGMENTOR_CFG" to customize and train the corresponding segmentor.
-For instance, to customize FCN with ResNet-50-D16 backbone and train it on Pascal VOC dataset, you can create a config file in "fcn" directory, named "fcn_resnet50os16_voc.py" and write in some contents like this,
+Next, we talk about config files in specific segmentation algorithm directories (*e.g.*, `ssseg/configs/fcn` directory). 
+There is also one and only one `base_cfg.py` used to define some necessary configs for the corresponding algorithm (*e.g.*, `ssseg/configs/fcn/base_cfg.py` is used to define the basic configs for FCN segmentation algorithm).
+Like loading configs from `ssseg/configs/_base_`, you can also import the `base_cfg.py` and simply modify some key values in `SEGMENTOR_CFG` to customize and train the corresponding segmentor.
+
+For instance, to customize FCN with ResNet-50-D16 backbone and train it on Pascal VOC dataset, you can create a config file in `ssseg/configs/fcn` directory, named `fcn_resnet50os16_voc.py` and write in some contents like this,
+
 ```python
-'''fcn_resnet50os16_voc'''
 import copy
 from .base_cfg import SEGMENTOR_CFG
 from .._base_ import DATASET_CFG_VOCAUG_512x512, DATALOADER_CFG_BS16
@@ -49,9 +58,18 @@ SEGMENTOR_CFG['work_dir'] = 'fcn_resnet50os16_voc'
 SEGMENTOR_CFG['logfilepath'] = 'fcn_resnet50os16_voc/fcn_resnet50os16_voc.log'
 SEGMENTOR_CFG['resultsavepath'] = 'fcn_resnet50os16_voc/fcn_resnet50os16_voc_results.pkl'
 ```
-You can refer to "ssseg/configs" for more examples about creating a valid config file.
+
+After that, you can train this segmentor with the following command,
+
+```sh
+bash scripts/dist_train.sh 4 ssseg/configs/fcn/fcn_resnet50os16_voc.py
+```
+
+How relaxing and enjoyable! Maybe, you can read more config examples in `ssseg/configs` to help you learn about how to create a valid config file in SSSegmentation.
 
 #### An Example of PSPNet
+
+To help the users have a basic idea of a complete config and the modules in SSSegmentation, we make brief comments on the config of PSPNet using ResNet-101-D8 as the following,
 
 ```python
 import os
@@ -84,6 +102,7 @@ DATASET_CFG_ADE20k_512x512 = {
 }
 DATALOADER_CFG_BS16 = {
     'expected_total_train_bs_for_assert': 16, # it is defined for asserting whether the users adopt the correct batch size for training the models
+	'auto_adapt_to_expected_train_bs': True, # if set Ture, the "expected_total_train_bs_for_assert" will be used to determine the value of "batch_size_per_gpu" rather than using the specified value in the config
     'train': {
         'batch_size_per_gpu': 2, # number of images in each gpu during training
         'num_workers_per_gpu': 2, # number of workers for dataloader in each gpu during training
@@ -106,7 +125,7 @@ SEGMENTOR_CFG = {
     'align_corners': False, # align_corners in torch.nn.functional.interpolate
     'backend': 'nccl', # backend for DDP training and testing
     'work_dir': 'ckpts', # directory used to save checkpoints and training and testing logs
-    'logfilepath': '', # file path to store the training and testing logs
+    'logfilepath': '', # file path to record the training and testing logs
     'log_interval_iterations': 50, # print training log after "log_interval_iterations" iterations
     'eval_interval_epochs': 10, # evaluate models after "eval_interval_epochs" epochs
     'save_interval_epochs': 1, # save the checkpoints of models after "save_interval_epochs" epochs
@@ -145,6 +164,39 @@ SEGMENTOR_CFG = {
 }
 ```
 
-## Construct Data Pipelines
+In the following sections, we will give more explanations and examples about each module specified in the config above.
+
+
+## Customize Data Pipelines
 
 Constructing data pipelines is used to preprocess the input data (*e.g.*, images and segmentation masks) for the following training and testing of the segmentors.
+
+Specifically, it is defined at,
+
+- `SEGMENTOR_CFG['dataset']['train']['data_pipelines']`: The constructed data pipelines for training,
+- `SEGMENTOR_CFG['dataset']['test']['data_pipelines']`: The constructed data pipelines for testing.
+
+The value of the `data_pipelines` should be a `list` like following,
+
+```python
+SEGMENTOR_CFG['dataset']['train']['data_pipelines'] = [
+    ('Resize', {'output_size': (2048, 512), 'keep_ratio': True, 'scale_range': (0.5, 2.0)}),
+    ('RandomCrop', {'crop_size': (512, 512), 'one_category_max_ratio': 0.75}),
+    ('RandomFlip', {'flip_prob': 0.5}),
+    ('PhotoMetricDistortion', {}),
+    ('Normalize', {'mean': [123.675, 116.28, 103.53], 'std': [58.395, 57.12, 57.375]}),
+    ('ToTensor', {}),
+    ('Padding', {'output_size': (512, 512), 'data_type': 'tensor'}),
+]
+```
+
+And each item in the list should be a `tuple` or `dict`. For example, it could be,
+
+```
+# tuple
+('Resize', {'output_size': (2048, 512), 'keep_ratio': True, 'scale_range': (0.5, 2.0)})
+# dict
+{'type': 'Resize', 'output_size': (2048, 512), 'keep_ratio': True, 'scale_range': (0.5, 2.0)}
+```
+
+where `Resize` means a data transform method defined in `ssseg/modules/datasets/pipelines/transforms.py` and other values denote for the arguments for the corresponding data transform method.
