@@ -410,3 +410,38 @@ Finally, the users could jump to the [`ssseg/modules/datasets` directory](https:
 ## Customize Segmentors
 
 ## Mixed Precision Training
+
+Mixed precision methods combine the use of different numerical formats in one computational workload.
+It offers significant computational speedup by performing operations in half-precision format, while storing minimal information in single-precision to retain as much information as possible in critical parts of the network.
+
+SSSegmentation supports two types of mixed precision training, *i.e.*,
+
+- `apex`: Mixed precision training implemented by using the third-party python package `apex` supported by NVIDIA,
+- `pytorch`: Mixed precision training implemented by using `torch.cuda.amp` supported by Pytorch official API.
+
+To turn on the mixed precision training in SSSegmentation, you could modify the corresponding config file with the following codes,
+
+```python
+import torch
+
+# use Mixed Precision (FP16) Training supported by Apex
+SEGMENTOR_CFG['fp16_cfg'] = {'type': 'apex', 'initialize': {'opt_level': 'O1'}, 'scale_loss': {}}
+# use Mixed Precision (FP16) Training supported by Pytorch
+SEGMENTOR_CFG['fp16_cfg'] = {'type': 'pytorch', 'autocast': {'dtype': torch.float16}, 'grad_scaler': {}}
+```
+
+If you choose to use the mixed precision training supported by [Apex](https://nvidia.github.io/apex/), the following arguments could be given,
+
+- `initialize`: Arguments `dict` for instancing `apex.amp.initialize`,
+- `scale_loss`: Arguments `dict` for calling `apex.amp.scale_loss`.
+
+The detailed usage and the explanations of each argument please refer to [Apex Official Document](https://nvidia.github.io/apex/).
+
+Of course, you can also choose to adopt the mixed precision training supported by [Pytorch](https://pytorch.org/docs/stable/amp.html#module-torch.amp) and the following arguments could be given,
+
+- `autocast`: Arguments `dict` for instancing `torch.cuda.amp.autocast`,
+- `grad_scaler`: Arguments `dict` for instancing `torch.cuda.amp.GradScaler`.
+
+The detailed usage and the explanations of each argument please refer to [Pytorch Official Document](https://pytorch.org/docs/stable/amp.html#module-torch.amp).
+
+Finally, if you want turn off the mixed precision training in SSSegmentation, just delete `fp16_cfg` in `SEGMENTOR_CFG` or set `SEGMENTOR_CFG['fp16_cfg']['type']` as `None`.
