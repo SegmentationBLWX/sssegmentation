@@ -5,7 +5,6 @@ Author:
     Zhenchao Jin
 '''
 import copy
-import torch
 import torch.nn as nn
 from .aspp import ASPP
 from ..base import BaseSegmentor

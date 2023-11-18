@@ -8,7 +8,8 @@ from .parallel import (
 from .models import (
     BuildLoss, BuildBackbone, BuildSegmentor, BuildPixelSampler, BuildOptimizer, BuildScheduler,
     LossBuilder, BackboneBuilder, SegmentorBuilder, PixelSamplerBuilder, OptimizerBuilder, SchedulerBuilder,
-    ParamsConstructorBuilder, BuildParamsConstructor
+    ParamsConstructorBuilder, BuildParamsConstructor, NormalizationBuilder, BuildNormalization,
+    ActivationBuilder, BuildActivation, DropoutBuilder, BuildDropout
 )
 from .utils import (
     Logger, initslurm, setrandomseed, touchdir, loadckpts, saveckpts, BaseModuleBuilder, loadpretrainedweights, 

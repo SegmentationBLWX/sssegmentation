@@ -384,7 +384,7 @@ Besides, `clsid2label` could be set for transferring the label ids in ground tru
 For example, `clsid2label = {10: 1}` means if the class id in ground truth segmentation mask is 10, they will be set as class id 1 before feeding into the models.
 Other attributes `classnames` is used to set the class names in the dataset, `palette` is used to set the colors for each class during [Inference with Segmentors Integrated in SSSegmentation](https://sssegmentation.readthedocs.io/en/latest/QuickRun.html#inference-with-segmentors-integrated-in-sssegmentation) and `num_classes` represents the number of the classes existed in the dataset.
 
-After that, you should add this custom dataset class in [`ssseg/modules/datasets/builder.py`](https://github.com/SegmentationBLWX/sssegmentation/blob/main/ssseg/modules/datasets/builder.py) if you want to use it by modifying `SEGMENTOR_CFG['dataset']`.
+After that, you should add this custom dataset class in [`ssseg/modules/datasets/builder.py`](https://github.com/SegmentationBLWX/sssegmentation/blob/main/ssseg/modules/datasets/builder.py) if you want to use it by simply modifying `SEGMENTOR_CFG['dataset']`.
 Of course, you can also register this custom dataset by the following codes,
 
 ```python
@@ -503,6 +503,12 @@ REGISTERED_MODULES = {
 }
 ```
 
+Here we also list some common arguments and their explanation,
+
+- `scale_factor`: The return loss value is equal to the original loss times `scale_factor`,
+- `ignore_index`: Specifies a target value that is ignored and does not contribute to the input gradient,
+- `lowest_loss_value`: If `lowest_loss_value` is set, the return loss value is equal to `min(lowest_loss_value, scale_factor * original loss)`, this argument is designed according to the paper [Do We Need Zero Training Loss After Achieving Zero Training Error? - ICML 2020](https://arxiv.org/pdf/2002.08709.pdf).
+
 To learn more about how to set the specific arguments for each loss function, you can jump to [`ssseg/modules/models/losses` directory](https://github.com/SegmentationBLWX/sssegmentation/tree/main/ssseg/modules/models/losses) to check the source codes of each loss function.
 
 #### Add New Custom Loss
@@ -537,23 +543,6 @@ From this, you can also call `loss_builder.build` to build your own defined loss
 Finally, the users could jump to the [`ssseg/modules/models/losses` directory](https://github.com/SegmentationBLWX/sssegmentation/tree/main/ssseg/modules/models/losses) in SSSegmentation to read more source codes of the supported loss classes and thus better learn how to customize the loss classes in SSSegmentation.
 
 
-## Customize Optimizers
-
-Optimizer is used to define the process of adjusting model parameters to reduce model error in each training step, such as the [Stochastic Gradient Descent](https://en.wikipedia.org/wiki/Stochastic_gradient_descent).
-
-#### Optimizer Config Structure
-
-An example of optimizer config is as follows,
-
-```python
-SEGMENTOR_CFG['']['losses'] = {
-            'type': 'SGD', 'lr': 0.01, 'momentum': 0.9, 'weight_decay': 5e-4, 'params_rules': {},
-        }
-```
-
-#### Add New Custom Optimizer
-
-
 ## Customize Schedulers
 
 Scheduler provides several methods to adjust the learning rate based on the number of epochs or iterations.
@@ -564,6 +553,31 @@ An example of scheduler config is as follows,
 
 ```python
 ```
+
+
+
+
+Customize Optimizers
+
+Optimizer is used to define the process of adjusting model parameters to reduce model error in each training step, such as the [Stochastic Gradient Descent](https://en.wikipedia.org/wiki/Stochastic_gradient_descent).
+
+#### Optimizer Config Structure
+
+An example of optimizer config is as follows,
+
+```python
+SEGMENTOR_CFG['']['losses'] = {
+    'type': 'SGD', 'lr': 0.01, 'momentum': 0.9, 'weight_decay': 5e-4, 'params_rules': {},
+}
+```
+
+#### Add New Custom Optimizer
+
+
+## 
+
+
+
 
 #### Add New Custom Scheduler
 
@@ -577,26 +591,197 @@ Head is the image decoder that transforms feature maps to a predicted segmentati
 An example of head config is as follows,
 
 ```python
+SEGMENTOR_CFG['head'] = {
+    'in_channels_list': [1024, 2048], 'transform_channels': 256, 'query_scales': (1, ), 
+    'feats_channels': 512, 'key_pool_scales': (1, 3, 6, 8), 'dropout': 0.1,
+}
 ```
+
+These arguments will be used during instancing the segmentor where the segmentor type is specified in `SEGMENTOR_CFG['type']`.
+Now, SSSegmentation supports the following segmentor types,
+
+```python
+REGISTERED_MODULES = {
+    'FCN': FCN, 'CE2P': CE2P, 'ICNet': ICNet, 'ISNet': ISNet, 'CCNet': CCNet, 'DANet': DANet,
+    'GCNet': GCNet, 'DMNet': DMNet, 'ISANet': ISANet, 'ENCNet': ENCNet, 'APCNet': APCNet, 'SAM': SAM,
+    'EMANet': EMANet, 'PSPNet': PSPNet, 'PSANet': PSANet, 'OCRNet': OCRNet, 'DNLNet': DNLNet,
+    'ANNNet': ANNNet, 'SETRUP': SETRUP, 'SETRMLA': SETRMLA, 'FastFCN': FastFCN, 'UPerNet': UPerNet,
+    'Segformer': Segformer, 'MCIBI': MCIBI, 'PointRend': PointRend, 'Deeplabv3': Deeplabv3,
+    'LRASPPNet': LRASPPNet, 'MaskFormer': MaskFormer, 'MCIBIPlusPlus': MCIBIPlusPlus, 'SemanticFPN': SemanticFPN,
+    'NonLocalNet': NonLocalNet, 'Deeplabv3Plus': Deeplabv3Plus, 'DepthwiseSeparableFCN': DepthwiseSeparableFCN,
+    'MobileSAM': MobileSAM, 'IDRNet': IDRNet, 'Mask2Former': Mask2Former,
+}
+```
+
+To learn more about how to set the specific arguments for each segmentor, you can jump to [`ssseg/modules/models/backbones/bricks/normalization` directory](https://github.com/SegmentationBLWX/sssegmentation/tree/main/ssseg/modules/models/backbones/bricks/normalization) to check the source codes of each normalization layer.
 
 #### Add New Custom Head
 
 
 ## Customize Auxiliary Heads
 
-Auxiliary head is also the image decoder that transforms the feature maps outputted by the shallow layers of the backbone network to a predicted segmentation mask.
+Auxiliary head is also the image decoder that transforms the shallow feature maps to a predicted segmentation mask.
 It is first introduced in [PSPNet](https://arxiv.org/pdf/1612.01105.pdf), which is used to help segmentation framework training.
 
 #### Auxiliary Head Config Structure
 
+An example of auxiliary head config is as follows,
+
+```python
+SEGMENTOR_CFG['auxiliary'] = {'in_channels': 1024, 'out_channels': 512, 'dropout': 0.1}
+```
+
+With the arguments in `SEGMENTOR_CFG['auxiliary']`, the `setauxiliarydecoder` function defined in [`ssseg/modules/models/segmentors/base/base.py`](https://github.com/SegmentationBLWX/sssegmentation/blob/main/ssseg/modules/models/segmentors/base/base.py) will be called to build the auxiliary head.
+
+To disable auxiliary head, you can simply set `SEGMENTOR_CFG['auxiliary']` as `None`.
+
 #### Add New Custom Auxiliary Head
 
-The same as [Add New Custom Head](https://sssegmentation.readthedocs.io/en/latest/Tutorials.html#add-new-custom-head).
+If the users want to add a new custom auxiliary head, you can first define a new segmentor inherited from `BaseSegmentor` class like following, 
+
+```python
+from ..base import BaseSegmentor
+
+'''Deeplabv3'''
+class Deeplabv3(BaseSegmentor):
+    def __init__(self, arg1, arg2):
+        pass
+    def forward(self, x, targets=None):
+        pass
+```
+
+After that, you can define the `setauxiliarydecoder` function in this class by yourselves, *e.g.*,
+
+```python
+from ..base import BaseSegmentor
+
+'''Deeplabv3'''
+class Deeplabv3(BaseSegmentor):
+    def __init__(self, arg1, arg2):
+        pass
+    def forward(self, x, targets=None):
+        pass
+	def setauxiliarydecoder(self, auxiliary_cfg):
+	    pass
+```
+
+And the arguments in `SEGMENTOR_CFG['auxiliary']` could be changed according to the new defined `setauxiliarydecoder` function.
 
 
 ## Customize Normalizations
 
+Normalization layer transforms the inputs to have zero mean and unit variance across some specific dimensions.
+
+#### Normalization Config Structure
+
+An example of normalization config is as follows,
+
+```python
+SEGMENTOR_CFG['norm_cfg'] = {'type': 'SyncBatchNorm'}
+```
+
+where `type` denotes the normalization layer you want to leverage. Now, SSSegmentation supports the following normalization types,
+
+```python
+REGISTERED_MODULES = {
+    'LayerNorm': nn.LayerNorm, 'LayerNorm2d': LayerNorm2d, 'GroupNorm': nn.GroupNorm, 'LocalResponseNorm': nn.LocalResponseNorm, 
+    'BatchNorm1d': nn.BatchNorm1d, 'BatchNorm2d': nn.BatchNorm2d, 'BatchNorm3d': nn.BatchNorm3d, 'SyncBatchNorm': nn.SyncBatchNorm, 
+    'InstanceNorm1d': nn.InstanceNorm1d, 'InstanceNorm2d': nn.InstanceNorm2d, 'InstanceNorm3d': nn.InstanceNorm3d, 'GRN': GRN,
+}
+```
+
+The other arguments are set for instancing the corresponding normalization layer.
+
+To learn more about how to set the specific arguments for each normalization layer, you can jump to [`ssseg/modules/models/backbones/bricks/normalization` directory](https://github.com/SegmentationBLWX/sssegmentation/tree/main/ssseg/modules/models/backbones/bricks/normalization) to check the source codes of each normalization layer.
+
+#### Add New Custom Normalization
+
+If the users want to add a new custom normalization layer, you should first create a new file in [`ssseg/modules/models/backbones/bricks/normalization` directory](https://github.com/SegmentationBLWX/sssegmentation/tree/main/ssseg/modules/models/backbones/bricks/normalization), *e.g.*, [`ssseg/modules/models/backbones/bricks/normalization/grn.py`](https://github.com/SegmentationBLWX/sssegmentation/blob/main/ssseg/modules/models/backbones/bricks/normalization/grn.py).
+
+Then, you can define the normalization layer in this file by yourselves, *e.g.*,
+
+```python
+import torch.nn as nn
+
+'''GRN'''
+class GRN(nn.Module):
+    def __init__(self, arg1, arg2):
+        pass
+    def forward(self, x):
+        pass
+```
+
+After that, you should add this custom normalization class in [`ssseg/modules/models/backbones/bricks/normalization/builder.py`](https://github.com/SegmentationBLWX/sssegmentation/blob/main/ssseg/modules/models/backbones/bricks/normalization/builder.py) if you want to use it by simply modifying `SEGMENTOR_CFG['norm_cfg']` or `SEGMENTOR_CFG['head']['norm_cfg']`.
+Of course, you can also register this custom normalization layer by the following codes,
+
+```python
+from ssseg.modules import NormalizationBuilder
+
+norm_builder = NormalizationBuilder()
+norm_builder.register('GRN', GRN)
+```
+
+From this, you can also call `norm_builder.build` to build your own defined normalization layers as well as the original supported normalization layers.
+
+Finally, the users could jump to the [`ssseg/modules/models/backbones/bricks/normalization` directory](https://github.com/SegmentationBLWX/sssegmentation/tree/main/ssseg/modules/models/backbones/bricks/normalization) in SSSegmentation to read more source codes of the supported normalization classes and thus better learn how to customize the normalization layers in SSSegmentation.
+
+
 ## Customize Activations
+
+Activation layer is linear or non linear equation which processes the output of a neuron and bound it into a limited range of values (*e.g.*, $[0, +\infinity]$).
+
+#### Activation Config Structure
+
+An example of activation config is as follows,
+
+```python
+SEGMENTOR_CFG['act_cfg'] = {'type': 'ReLU', 'inplace': True}
+```
+
+where `type` denotes the activation layer you want to employ. Now, SSSegmentation supports the following activation types,
+
+```python
+REGISTERED_MODULES = {
+    'ReLU': nn.ReLU, 'GELU': nn.GELU, 'ReLU6': nn.ReLU6, 'PReLU': nn.PReLU,
+    'Sigmoid': nn.Sigmoid, 'HardSwish': HardSwish, 'LeakyReLU': nn.LeakyReLU,
+    'HardSigmoid': HardSigmoid, 'Swish': Swish,
+}
+```
+
+The other arguments are set for instancing the corresponding activation layer.
+
+To learn more about how to set the specific arguments for each activation function, you can jump to [`ssseg/modules/models/backbones/bricks/activation` directory](https://github.com/SegmentationBLWX/sssegmentation/tree/main/ssseg/modules/models/backbones/bricks/activation) to check the source codes of each activation function.
+
+#### Add New Custom Activation
+
+If the users want to add a new custom activation layer, you should first create a new file in [`ssseg/modules/models/backbones/bricks/activation` directory](https://github.com/SegmentationBLWX/sssegmentation/tree/main/ssseg/modules/models/backbones/bricks/activation), *e.g.*, [`ssseg/modules/models/backbones/bricks/activation/hardsigmoid.py`](https://github.com/SegmentationBLWX/sssegmentation/blob/main/ssseg/modules/models/backbones/bricks/activation/hardsigmoid.py).
+
+Then, you can define the activation layer in this file by yourselves, *e.g.*,
+
+```python
+import torch.nn as nn
+
+'''HardSigmoid'''
+class HardSigmoid(nn.Module):
+    def __init__(self, arg1, arg2):
+        pass
+    def forward(self, x):
+        pass
+```
+
+After that, you should add this custom activation class in [`ssseg/modules/models/backbones/bricks/activation/builder.py`](https://github.com/SegmentationBLWX/sssegmentation/blob/main/ssseg/modules/models/backbones/bricks/activation/builder.py) if you want to use it by simply modifying `SEGMENTOR_CFG['act_cfg']` or `SEGMENTOR_CFG['head']['act_cfg']`.
+Of course, you can also register this custom activation layer by the following codes,
+
+```python
+from ssseg.modules import ActivationBuilder
+
+act_builder = ActivationBuilder()
+act_builder.register('HardSigmoid', HardSigmoid)
+```
+
+From this, you can also call `act_builder.build` to build your own defined activation layers as well as the original supported activation layers.
+
+Finally, the users could jump to the [`ssseg/modules/models/backbones/bricks/activation` directory](https://github.com/SegmentationBLWX/sssegmentation/tree/main/ssseg/modules/models/backbones/bricks/activation) in SSSegmentation to read more source codes of the supported activation classes and thus better learn how to customize the activation layers in SSSegmentation.
 
 
 ## Mixed Precision Training
