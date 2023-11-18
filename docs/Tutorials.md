@@ -334,7 +334,7 @@ class RGB2Gray(object):
 Then, import `DataTransformBuilder` and register this method,
 
 ```python
-from ssseg.modules.datasets import DataTransformBuilder
+from ssseg.modules import DataTransformBuilder
 
 data_transformer_builder = DataTransformBuilder()
 data_transformer_builder.register('RGB2Gray', RGB2Gray)
@@ -388,7 +388,7 @@ After that, you should add this custom dataset class in [`ssseg/modules/datasets
 Of course, you can also register this custom dataset by the following codes,
 
 ```python
-from ssseg.modules.datasets import DatasetBuilder
+from ssseg.modules import DatasetBuilder
 
 dataset_builder = DatasetBuilder()
 dataset_builder.register('SuperviselyDataset', SuperviselyDataset)
@@ -401,13 +401,166 @@ Finally, the users could jump to the [`ssseg/modules/datasets` directory](https:
 
 ## Customize Backbones
 
+Backbone is the image encoder that transforms an image to feature maps, such as a ResNet-50 without the last fully connected layer.
+
+#### Backbone Config Structure
+
+An example of backbone config is as follows,
+
+```python
+SEGMENTOR_CFG['backbone'] = {
+    'type': 'ResNet', 'depth': 101, 'structure_type': 'resnet101conv3x3stem',
+    'pretrained': True, 'outstride': 16, 'use_conv3x3_stem': True, 'selected_indices': (2, 3),
+}
+```
+
+where `type` denotes the backbone network you want to employ. Now, SSSegmentation supports the following backbone types,
+
+```python
+REGISTERED_MODULES = {
+    'UNet': UNet, 'BEiT': BEiT, 'CGNet': CGNet, 'HRNet': HRNet, 'MobileViT': MobileViT, 'MobileViTV2': MobileViTV2,
+    'ERFNet': ERFNet, 'ResNet': ResNet, 'ResNeSt': ResNeSt, 'PCPVT': PCPVT, 'MobileSAMTinyViT': MobileSAMTinyViT, 
+    'SVT': SVT, 'FastSCNN': FastSCNN, 'ConvNeXt': ConvNeXt, 'BiSeNetV1': BiSeNetV1, 'MAE': MAE, 'SAMViT': SAMViT,
+    'BiSeNetV2': BiSeNetV2, 'SwinTransformer': SwinTransformer, 'VisionTransformer': VisionTransformer,
+    'MixVisionTransformer': MixVisionTransformer, 'TIMMBackbone': TIMMBackbone, 'ConvNeXtV2': ConvNeXtV2,
+    'MobileNetV2': MobileNetV2, 'MobileNetV3': MobileNetV3, 
+}
+```
+
+The other arguments are set for instancing the corresponding backbone network. 
+
+Here we also list some common arguments and their explanation,
+
+- `structure_type`: The structure type of the specified backbone network, *e.g.*, `resnet101conv3x3stem` means ResNet-101 using three 3x3 convolutions as the stem layer, it is useful if you want to load the pretrained backbone weights automatically,
+- `pretrained`: Whether to load the pretrained backbone weights,
+- `pretrained_model_path`: If you set `pretrained_model_path` as `None` and `pretrained` as `True`, SSSegmentation will load the pretrained backbone weights automatically, otherwise, load the pretrained backbone weights from the path specified by `pretrained_model_path`,
+- `out_indices`: Generally, a backbone network can be divided into several stages, `out_indices` is used to specify whether return the feature maps outputted by the corresponding backbone stage,
+- `norm_cfg`: The config of normalization layer, it should be a `dict`, refer to [customize-normalizations](https://sssegmentation.readthedocs.io/en/latest/Tutorials.html#customize-normalizations) more details,
+- `act_cfg`: The config of activation layer, it should be a `dict`, refer to [customize-activations](https://sssegmentation.readthedocs.io/en/latest/Tutorials.html#customize-activations) more details.
+
+To learn more about how to set the specific arguments for each backbone type, you can jump to [`ssseg/modules/models/backbones` directory](https://github.com/SegmentationBLWX/sssegmentation/tree/main/ssseg/modules/models/backbones) to check the source codes of each backbone network.
+
+#### Add New Custom Backbone
+
+If the users want to add a new custom backbone, you should first create a new file in [`ssseg/modules/models/backbones` directory](https://github.com/SegmentationBLWX/sssegmentation/tree/main/ssseg/modules/models/backbones), *e.g.*, [`ssseg/modules/models/backbones/mobilenet.py`](https://github.com/SegmentationBLWX/sssegmentation/tree/main/ssseg/modules/models/backbones/mobilenet.py).
+
+Then, you can define the backbone module in this file by yourselves, *e.g.*,
+
+```python
+import torch.nn as nn
+
+'''MobileNet'''
+class MobileNet(nn.Module):
+    def __init__(self, arg1, arg2):
+        pass
+    def forward(self, x):
+        pass
+```
+
+After that, you should add this custom backbone class in [`ssseg/modules/models/backbones/builder.py`](https://github.com/SegmentationBLWX/sssegmentation/blob/main/ssseg/modules/models/backbones/builder.py) if you want to use it by simply modifying `SEGMENTOR_CFG['backbone']`.
+Of course, you can also register this custom backbone by the following codes,
+
+```python
+from ssseg.modules import BackboneBuilder
+
+backbone_builder = BackboneBuilder()
+backbone_builder.register('MobileNet', MobileNet)
+```
+
+From this, you can also call `backbone_builder.build` to build your own defined backbone class as well as the original supported backbone classes.
+
+Finally, the users could jump to the [`ssseg/modules/models/backbones` directory](https://github.com/SegmentationBLWX/sssegmentation/tree/main/ssseg/modules/models/backbones) in SSSegmentation to read more source codes of the supported backbone classes and thus better learn how to customize the backbone classes in SSSegmentation.
+
+
 ## Customize Losses
+
+Loss is utilized to define the objective functions for the segmentation framework, such as the [Cross Entropy Loss](https://en.wikipedia.org/wiki/Cross-entropy).
+
+#### Loss Config Structure
+
+An example of loss config is as follows,
+
+```python
+SEGMENTOR_CFG['losses'] = {
+    'loss_aux': {'CrossEntropyLoss': {'scale_factor': 0.4, 'ignore_index': 255, 'reduction': 'mean'}},
+    'loss_cls': {'CrossEntropyLoss': {'scale_factor': 1.0, 'ignore_index': 255, 'reduction': 'mean'}},
+}
+```
+
+where `type` denotes the objective function you want to adopt. Now, SSSegmentation supports the following loss types,
+
+```python
+REGISTERED_MODULES = {
+    'L1Loss': L1Loss, 'DiceLoss': DiceLoss, 'KLDivLoss': KLDivLoss, 'LovaszLoss': LovaszLoss,
+    'CrossEntropyLoss': CrossEntropyLoss, 'SigmoidFocalLoss': SigmoidFocalLoss,
+    'CosineSimilarityLoss': CosineSimilarityLoss, 'BinaryCrossEntropyLoss': BinaryCrossEntropyLoss,
+}
+```
+
+#### Add New Custom Loss
+
 
 ## Customize Optimizers
 
+Optimizer is used to define the process of adjusting model parameters to reduce model error in each training step, such as the [Stochastic Gradient Descent](https://en.wikipedia.org/wiki/Stochastic_gradient_descent).
+
+#### Optimizer Config Structure
+
+An example of optimizer config is as follows,
+
+```python
+SEGMENTOR_CFG['']['losses'] = {
+            'type': 'SGD', 'lr': 0.01, 'momentum': 0.9, 'weight_decay': 5e-4, 'params_rules': {},
+        }
+```
+
+#### Add New Custom Optimizer
+
+
 ## Customize Schedulers
 
-## Customize Segmentors
+Scheduler provides several methods to adjust the learning rate based on the number of epochs or iterations.
+
+#### Scheduler Config Structure
+
+An example of scheduler config is as follows,
+
+```python
+```
+
+#### Add New Custom Scheduler
+
+
+## Customize Heads
+
+Head is the image decoder that transforms feature maps to a predicted segmentation mask, such as [Deeplabv3](https://arxiv.org/pdf/1706.05587.pdf) and [IDRNet](https://arxiv.org/pdf/2310.10755.pdf).
+
+#### Head Config Structure
+
+An example of head config is as follows,
+
+```python
+```
+
+#### Add New Custom Head
+
+
+## Customize Auxiliary Heads
+
+Auxiliary head is also the image decoder that transforms the feature maps outputted by the shallow layers of the backbone network to a predicted segmentation mask.
+It is first introduced in [PSPNet](https://arxiv.org/pdf/1612.01105.pdf), which is used to help segmentation framework training.
+
+#### Auxiliary Head Config Structure
+
+#### Add New Custom Auxiliary Head
+
+The same as [Add New Custom Head](https://sssegmentation.readthedocs.io/en/latest/Tutorials.html#add-new-custom-head).
+
+
+## Customize Normalizations
+
+## Customize Activations
+
 
 ## Mixed Precision Training
 
