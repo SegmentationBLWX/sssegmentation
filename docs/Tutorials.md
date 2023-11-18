@@ -487,7 +487,13 @@ SEGMENTOR_CFG['losses'] = {
 }
 ```
 
-where `type` denotes the objective function you want to adopt. Now, SSSegmentation supports the following loss types,
+It is a `dict` including several keys like `loss_aux` and `loss_cls`, which is designed for distinguishing the loss config utilized in head or auxiliary head.
+The value corresponding to each key is also a `dict` and in this `dict`, `key` denotes the objective function type you want to adopt and the corresponding value denotes the arguments for instancing this objective function.
+
+In the example of loss config above, `SEGMENTOR_CFG['losses']['loss_cls']` is used to build losses in head and `SEGMENTOR_CFG['losses']['loss_aux']` is used to build losses in auxiliary head.
+`CrossEntropyLoss` represents the objective function type you want to adopt and `{'scale_factor': 1.0, 'ignore_index': 255, 'reduction': 'mean'}` contains the arguments for instancing the `CrossEntropyLoss`.
+
+Now, SSSegmentation supports the following loss types,
 
 ```python
 REGISTERED_MODULES = {
@@ -497,7 +503,38 @@ REGISTERED_MODULES = {
 }
 ```
 
+To learn more about how to set the specific arguments for each loss function, you can jump to [`ssseg/modules/models/losses` directory](https://github.com/SegmentationBLWX/sssegmentation/tree/main/ssseg/modules/models/losses) to check the source codes of each loss function.
+
 #### Add New Custom Loss
+
+If the users want to add a new custom loss, you should first create a new file in [`ssseg/modules/models/losses` directory](https://github.com/SegmentationBLWX/sssegmentation/tree/main/ssseg/modules/models/losses), *e.g.*, [`ssseg/modules/models/losses/klloss.py`](https://github.com/SegmentationBLWX/sssegmentation/blob/main/ssseg/modules/models/losses/klloss.py).
+
+Then, you can define the loss function in this file by yourselves, *e.g.*,
+
+```python
+import torch.nn as nn
+
+'''KLDivLoss'''
+class KLDivLoss(nn.Module):
+    def __init__(self, arg1, arg2):
+        pass
+    def forward(self, prediction, target):
+        pass
+```
+
+After that, you should add this custom loss class in [`ssseg/modules/models/losses/builder.py`](https://github.com/SegmentationBLWX/sssegmentation/blob/main/ssseg/modules/models/losses/builder.py) if you want to use it by simply modifying `SEGMENTOR_CFG['losses']`.
+Of course, you can also register this custom loss function by the following codes,
+
+```python
+from ssseg.modules import LossBuilder
+
+loss_builder = LossBuilder()
+loss_builder.register('KLDivLoss', KLDivLoss)
+```
+
+From this, you can also call `loss_builder.build` to build your own defined loss class as well as the original supported loss classes.
+
+Finally, the users could jump to the [`ssseg/modules/models/losses` directory](https://github.com/SegmentationBLWX/sssegmentation/tree/main/ssseg/modules/models/losses) in SSSegmentation to read more source codes of the supported loss classes and thus better learn how to customize the loss classes in SSSegmentation.
 
 
 ## Customize Optimizers
