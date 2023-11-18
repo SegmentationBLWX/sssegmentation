@@ -344,7 +344,7 @@ From this, you can call `data_transformer_builder.build` to build your own defin
 
 #### Add New Custom Dataset
 
-SSSegmentation provide `BaseDataset` class to help the users quickly add a new custom dataset. 
+SSSegmentation provides `BaseDataset` class to help the users quickly add a new custom dataset. 
 
 Specifically, you can directly inherit this class to define your own dataset class. Here is an example code to add `SuperviselyDataset` dataset in SSSegmentation [`ssseg/modules/datasets` directory](https://github.com/SegmentationBLWX/sssegmentation/tree/main/ssseg/modules/datasets) by using `BaseDataset`,
 
@@ -569,7 +569,7 @@ REGISTERED_MODULES = {
 ```
 
 The other arguments in `SEGMENTOR_CFG['scheduler']` are set for instancing the corresponding scheduler, where `SEGMENTOR_CFG['scheduler']['optimizer']` is the optimizer config used to build a optimizer for model training.
-The detailed instruction about building optimizer in SSSegmentation please refer to [`Customize Optimizer`](https://sssegmentation.readthedocs.io/en/latest/Tutorials.html#customize-optimizers).
+The detailed instruction about building optimizer in SSSegmentation please refer to [`Customize Optimizers`](https://sssegmentation.readthedocs.io/en/latest/Tutorials.html#customize-optimizers).
 
 To learn more about how to set the specific arguments for each scheduler, you can jump to [`ssseg/modules/models/schedulers` directory](https://github.com/SegmentationBLWX/sssegmentation/tree/main/ssseg/modules/models/schedulers) to check the source codes of each scheduler class.
 
@@ -611,8 +611,8 @@ And if you want to set the weight decay of some layers in the segmentor as zeros
 ```python
 SEGMENTOR_CFG['scheduler']['optimizer']['params_rules'] = {
     'absolute_pos_embed': dict(wd_multiplier=0.),
-	'relative_position_bias_table': dict(wd_multiplier=0.),
-	'norm': dict(wd_multiplier=0.),
+    'relative_position_bias_table': dict(wd_multiplier=0.),
+    'norm': dict(wd_multiplier=0.),
 }
 ```
 
@@ -642,7 +642,7 @@ From this, you can also call `optimizer_builder.build` to build your own defined
 
 #### Add New Custom Scheduler
 
-SSSegmentation provide `BaseScheduler` class to help the users quickly add a new custom scheduler.
+SSSegmentation provides `BaseScheduler` class to help the users quickly add a new custom scheduler.
 
 Specifically, if the users want to add a new custom scheduler, you should first create a new file in [`ssseg/modules/models/schedulers` directory](https://github.com/SegmentationBLWX/sssegmentation/tree/main/ssseg/modules/models/schedulers), *e.g.*, [`ssseg/modules/models/schedulers/polyscheduler.py`](https://github.com/SegmentationBLWX/sssegmentation/blob/main/ssseg/modules/models/schedulers/polyscheduler.py).
 
@@ -676,13 +676,11 @@ From this, you can also call `scheduler_builder.build` to build your own defined
 Finally, the users could jump to the [`ssseg/modules/models/schedulers` directory](https://github.com/SegmentationBLWX/sssegmentation/tree/main/ssseg/modules/models/schedulers) in SSSegmentation to read more source codes of the supported schedulers and thus better learn how to customize the schedulers in SSSegmentation.
 
 
-## Customize Heads
+## Customize Segmentors
 
-Head is the image decoder that transforms feature maps to a predicted segmentation mask, such as [Deeplabv3](https://arxiv.org/pdf/1706.05587.pdf) and [IDRNet](https://arxiv.org/pdf/2310.10755.pdf).
+Segmentor will process the feature maps outputted by the backbone network, and transforms the feature maps to a predicted segmentation mask using a decoder head (*e.g.*, [Deeplabv3](https://arxiv.org/pdf/1706.05587.pdf) and [IDRNet](https://arxiv.org/pdf/2310.10755.pdf)).
 
-#### Head Config Structure
-
-An example of head config is as follows,
+Here is an example of head config,
 
 ```python
 SEGMENTOR_CFG['head'] = {
@@ -707,14 +705,44 @@ REGISTERED_MODULES = {
 }
 ```
 
-To learn more about how to set the specific arguments for each segmentor, you can jump to [`ssseg/modules/models/backbones/bricks/normalization` directory](https://github.com/SegmentationBLWX/sssegmentation/tree/main/ssseg/modules/models/backbones/bricks/normalization) to check the source codes of each normalization layer.
+To learn more about how to set the specific arguments for each segmentor, you can jump to [`ssseg/modules/models/segmentors` directory](https://github.com/SegmentationBLWX/sssegmentation/tree/main/ssseg/modules/models/segmentors) to check the source codes of each segmentor.
 
-#### Add New Custom Head
+Also, SSSegmentation provides `BaseSegmentor` class to help the users quickly add a new custom segmentor.
+
+Specifically, if the users want to add a new custom segmentor, you should first create a new file in [`ssseg/modules/models/segmentors` directory](https://github.com/SegmentationBLWX/sssegmentation/tree/main/ssseg/modules/models/segmentors), *e.g.*, [`ssseg/modules/models/segmentors/fcn/fcn.py`](https://github.com/SegmentationBLWX/sssegmentation/blob/main/ssseg/modules/models/segmentors/fcn/fcn.py).
+
+Then, you can define the segmentor in this file by inheriting `BaseSegmentor`, *e.g.*,
+
+```python
+from ..base import BaseSegmentor
+
+'''FCN'''
+class FCN(BaseSegmentor):
+    def __init__(self, cfg, mode):
+        super(FCN, self).__init__(cfg, mode)
+	'''forward'''
+    def forward(self, x, targets=None):
+        pass
+```
+
+After that, you should add this custom segmentor class in [`ssseg/modules/models/segmentors/builder.py`](https://github.com/SegmentationBLWX/sssegmentation/blob/main/ssseg/modules/models/segmentors/builder.py) if you want to use it by simply modifying `SEGMENTOR_CFG`.
+Of course, you can also register this custom segmentor by the following codes,
+
+```python
+from ssseg.modules import SegmentorBuilder
+
+segmentor_builder = SegmentorBuilder()
+segmentor_builder.register('FCN', FCN)
+```
+
+From this, you can also call `segmentor_builder.build` to build your own defined segmentors as well as the original supported segmentors.
+
+Finally, the users could jump to the [`ssseg/modules/models/segmentors` directory](https://github.com/SegmentationBLWX/sssegmentation/tree/main/ssseg/modules/models/segmentors) in SSSegmentation to read more source codes of the supported segmentors and thus better learn how to customize the segmentors in SSSegmentation.
 
 
 ## Customize Auxiliary Heads
 
-Auxiliary head is also the image decoder that transforms the shallow feature maps to a predicted segmentation mask.
+Auxiliary head is the image decoder that transforms the shallow feature maps to a predicted segmentation mask.
 It is first introduced in [PSPNet](https://arxiv.org/pdf/1612.01105.pdf), which is used to help segmentation framework training.
 
 #### Auxiliary Head Config Structure
