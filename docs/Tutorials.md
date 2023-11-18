@@ -569,7 +569,7 @@ REGISTERED_MODULES = {
 ```
 
 The other arguments in `SEGMENTOR_CFG['scheduler']` are set for instancing the corresponding scheduler, where `SEGMENTOR_CFG['scheduler']['optimizer']` is the optimizer config used to build a optimizer for model training.
-The detailed instruction about building optimizer in SSSegmentation please refer to [`Customize Optimizer`](https://sssegmentation.readthedocs.io/en/latest/Tutorials.html#customize-optimizer).
+The detailed instruction about building optimizer in SSSegmentation please refer to [`Customize Optimizer`](https://sssegmentation.readthedocs.io/en/latest/Tutorials.html#customize-optimizers).
 
 To learn more about how to set the specific arguments for each scheduler, you can jump to [`ssseg/modules/models/schedulers` directory](https://github.com/SegmentationBLWX/sssegmentation/tree/main/ssseg/modules/models/schedulers) to check the source codes of each scheduler class.
 
