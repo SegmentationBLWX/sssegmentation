@@ -74,7 +74,6 @@ To help the users have a basic idea of a complete config and the modules in SSSe
 ```python
 import os
 
-
 # dataset configs
 DATASET_CFG_ADE20k_512x512 = {
     'type': 'ADE20kDataset', # the dataset type used to instance the specific dataset class in builder.py defined in "ssseg/modules/datasets/builder.py"
@@ -167,7 +166,80 @@ SEGMENTOR_CFG = {
 In the following sections, we will give more explanations and examples about each module specified in the config above.
 
 
-## Customize Data Pipelines
+## Customize Datasets
+
+Dataset classes in SSSegmentation have two functions: (1) load data information after data preparation and (2) construct `sample_meta` for the subsequent segmentor training and testing.
+
+The type of `sample_meta` is `dict` which includes several keys:
+
+- `image`: The loaded image data, 
+- `seg_target`: The loaded ground truth segmentation mask data,
+- `width` and `height`: The original size of the image (*i.e.*, the image size before pre-processing by the data transforms),
+- `id`: The image id of the loaded image data.
+
+Thanks to the modular design in SSSegmentation, we can simply modify the configs in `SEGMENTOR_CFG['dataset']` to train one segmentor on various datasets.
+
+#### Dataset Config Structure
+
+An example of dataset config is as follows,
+
+```python
+import os
+
+DATASET_CFG_ADE20k_512x512 = {
+    'type': 'ADE20kDataset',
+    'rootdir': os.path.join(os.getcwd(), 'ADE20k'),
+    'train': {
+        'set': 'train',
+        'data_pipelines': [
+            ('Resize', {'output_size': (2048, 512), 'keep_ratio': True, 'scale_range': (0.5, 2.0)}),
+            ('RandomCrop', {'crop_size': (512, 512), 'one_category_max_ratio': 0.75}),
+            ('RandomFlip', {'flip_prob': 0.5}),
+            ('PhotoMetricDistortion', {}),
+            ('Normalize', {'mean': [123.675, 116.28, 103.53], 'std': [58.395, 57.12, 57.375]}),
+            ('ToTensor', {}),
+            ('Padding', {'output_size': (512, 512), 'data_type': 'tensor'}),
+        ],
+    },
+    'test': {
+        'set': 'val',
+        'data_pipelines': [
+            ('Resize', {'output_size': (2048, 512), 'keep_ratio': True, 'scale_range': None}),
+            ('Normalize', {'mean': [123.675, 116.28, 103.53], 'std': [58.395, 57.12, 57.375]}),
+            ('ToTensor', {}),
+        ],
+    }
+}
+```
+
+where `type` denotes the dataset you want to train on. Now, SSSegmentation supports the following dataset types,
+
+```python
+REGISTERED_MODULES = {
+    'BaseDataset': BaseDataset, 'VOCDataset': VOCDataset, 'PascalContext59Dataset': PascalContext59Dataset, 'PascalContextDataset': PascalContextDataset,
+    'COCODataset': COCODataset, 'COCOStuff10kDataset': COCOStuff10kDataset, 'COCOStuffDataset': COCOStuffDataset, 'CIHPDataset': CIHPDataset,
+    'LIPDataset': LIPDataset, 'ATRDataset': ATRDataset, 'MHPv1Dataset': MHPv1Dataset, 'MHPv2Dataset': MHPv2Dataset, 'SuperviselyDataset': SuperviselyDataset,
+    'HRFDataset': HRFDataset, 'ChaseDB1Dataset': ChaseDB1Dataset, 'STAREDataset': STAREDataset, 'DRIVEDataset': DRIVEDataset, 'SBUShadowDataset': SBUShadowDataset,
+    'VSPWDataset': VSPWDataset, 'ADE20kDataset': ADE20kDataset, 'DarkZurichDataset': DarkZurichDataset, 'NighttimeDrivingDataset': NighttimeDrivingDataset,
+    'CityScapesDataset': CityScapesDataset,
+}
+```
+
+The keyword `rootdir` is used to specify the data set path. It is recommended to symlink the dataset root to `$SSSEGMENTATION/` or directly run `bash scripts/prepare_datasets.sh $DATASETNAME` in `$SSSEGMENTATION/` so that you don't need to modify the default `rootdir` for each dataset.
+
+The keyword `train` and `test` are used to specify the configs for model training and testing. 
+And the value type of `SEGMENTOR_CFG['dataset']['train']` and `SEGMENTOR_CFG['dataset']['test']` is `dict`.
+Specifically, `set` means a certain division of the data set, usually including train set (set as `train`), validation set (set as `val`) and test set (set as `test`). 
+`data_pipelines` is used to define data transforms to pre-process `sample_meta` before feeding into the models, more details please refer to [Customize Data Pipelines](https://sssegmentation.readthedocs.io/en/latest/Tutorials.html#customize-data-pipelines).
+
+The other arguments supported in `SEGMENTOR_CFG['dataset']` is listed as follows,
+
+- `repeat_times`: The default value is 1, if increase it in the config, the appeared times of one image in an epoch will increase accordingly,
+- `evalmode`: `local` or `server`, `server` denotes `seg_target` will be set as `None`.
+
+If the users want to learn more about this part, it is recommended that you could jump to the [`datasets directory`](https://github.com/SegmentationBLWX/sssegmentation/tree/main/ssseg/modules/datasets) in SSSegmentation to read the source codes of dataset classes.
+
+#### Customize Data Pipelines
 
 Constructing data pipelines is used to preprocess the input data (*e.g.*, images and segmentation masks) for the following training and testing of the segmentors.
 
@@ -199,7 +271,7 @@ And each item in the list should be a `tuple` or `dict`. For example, it could b
 {'type': 'Resize', 'output_size': (2048, 512), 'keep_ratio': True, 'scale_range': (0.5, 2.0)}
 ```
 
-where `Resize` means a data transform method defined in `ssseg/modules/datasets/pipelines/transforms.py` and other values denote for the arguments for the corresponding data transform method.
+where `Resize` means a data transform method defined in [`transforms.py`](https://github.com/SegmentationBLWX/sssegmentation/blob/main/ssseg/modules/datasets/pipelines/transforms.py) and other values denote for the arguments for instancing the corresponding data transform method.
 
 Here is a list of supported data transform methods,
 
@@ -212,7 +284,7 @@ REGISTERED_MODULES = {
 }
 ```
 
-To learn the functions of each data transform method, please check the source codes in `ssseg/modules/datasets/pipelines/transforms.py` by yourselves.
+To learn the functions of each data transform method, please check the source codes in [`transforms.py`](https://github.com/SegmentationBLWX/sssegmentation/blob/main/ssseg/modules/datasets/pipelines/transforms.py) by yourselves.
 
 It is worth mentioning that SSSegmentation provides `AlbumentationsWrapper` to make the users leverage the data augmentation algorithms implemented in [albumentations](https://albumentations.ai/docs/).
 Here is an example of calling `AlbumentationsWrapper`,
@@ -270,6 +342,69 @@ data_transformer_builder.register('RGB2Gray', RGB2Gray)
 
 From this, you can call `data_transformer_builder.build` to build your own defined transform algorithms as well as the original supported data transform methods.
 
+#### Add New Custom Dataset
 
-## Customize Datasets
+SSSegmentation provide `BaseDataset` class to help the users quickly add a new custom dataset. 
 
+Specifically, you can directly inherit this class to define your own dataset class. Here is an example code to add `SuperviselyDataset` dataset in SSSegmentation [`datasets directory`](https://github.com/SegmentationBLWX/sssegmentation/tree/main/ssseg/modules/datasets) by using `BaseDataset`,
+
+```
+import os
+import pandas as pd
+from .base import BaseDataset
+
+'''SuperviselyDataset'''
+class SuperviselyDataset(BaseDataset):
+    num_classes = 2
+    classnames = ['__background__', 'person']
+    palette = [(0, 0, 0), (255, 0, 0)]
+    clsid2label = {255: 1}
+    assert num_classes == len(classnames) and num_classes == len(palette)
+    def __init__(self, mode, logger_handle, dataset_cfg):
+        super(SuperviselyDataset, self).__init__(mode=mode, logger_handle=logger_handle, dataset_cfg=dataset_cfg)
+        # obtain the dirs
+        rootdir = dataset_cfg['rootdir']
+        self.image_dir = os.path.join(rootdir, 'Images', dataset_cfg['set'])
+        self.ann_dir = os.path.join(rootdir, 'Anno-Person', dataset_cfg['set'])
+        # obatin imageids
+        df = pd.read_csv(os.path.join(rootdir, dataset_cfg['set']+'.txt'), names=['imageids'])
+        self.imageids = df['imageids'].values
+        self.imageids = [str(_id) for _id in self.imageids]
+```
+
+In `__init__`, you are required to set some attributes including:
+
+- `image_dir`: Image file directory,
+- `ann_dir`: Annotation file directory (*i.e.*, the directory used to save ground truth segmentation masks),
+- `image_ext`: Image file extension, default value is `.jpg`,
+- `ann_ext`: Annotation file extension, default value is `.png`,
+- `imageids`: The image file names.
+
+Besides, `clsid2label` could be set for transferrin the label ids in ground truth segmentation mask to continuous training ids automatically during training. 
+For example, `clsid2label = {10: 1}` means if the class id in ground truth segmentation mask is 10, they will be set as class id 1 before feeding into the models.
+Other attributes `classnames` is used to set the class names in the dataset, `palette` is used to set the colors for each class during [Inference with Segmentors Integrated in SSSegmentation](https://sssegmentation.readthedocs.io/en/latest/QuickRun.html#inference-with-segmentors-integrated-in-sssegmentation) and `num_classes` represents the number of the classes existed in the dataset.
+
+After that, you should add this custom dataset class in [`dataset builder.py`](https://github.com/SegmentationBLWX/sssegmentation/blob/main/ssseg/modules/datasets/builder.py) if you want to use it by modifying `SEGMENTOR_CFG['dataset']`.
+Of course, you can also register this custom dataset by the following codes,
+
+```python
+from ssseg.modules.datasets import DatasetBuilder
+
+dataset_builder = DatasetBuilder()
+dataset_builder.register('SuperviselyDataset', SuperviselyDataset)
+```
+
+From this, you can also call `dataset_builder.build` to build your own defined dataset class as well as the original supported data classes.
+
+
+## Customize Backbones
+
+## Customize Losses
+
+## Customize Optimizers
+
+## Customize Schedulers
+
+## Customize Segmentors
+
+## Mixed Precision Training
