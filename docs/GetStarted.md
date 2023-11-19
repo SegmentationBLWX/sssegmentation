@@ -255,7 +255,7 @@ For windows users, you can download the corresponding software installation pack
 
 Besides, the windows users also need to install [Cmder](https://cmder.app/) to execute the provided script.
 
-After installing these prerequisites, you can using `scripts/prepare_datasets.sh` to prepare the supported benchmark datasets as following,
+After installing these prerequisites, you can use `scripts/prepare_datasets.sh` to prepare the supported benchmark datasets as following,
 
 ```sh
 ------------------------------------------------------------------------------------
