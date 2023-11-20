@@ -29,11 +29,17 @@ release = '1.4.1'
 # ones.
 extensions = [
 	'sphinx.ext.autodoc',
+    'sphinx.ext.doctest',
+    'sphinx.ext.intersphinx',
+    'sphinx.ext.todo',
+    'sphinx.ext.coverage',
     'sphinx.ext.napoleon',
     'sphinx.ext.viewcode',
+    'sphinx.ext.ifconfig',
     'recommonmark',
     'sphinx_markdown_tables',
-    'sphinxcontrib.katex'
+    'sphinx.ext.imgmath',
+    'sphinx.ext.githubpages',
 ]
 
 # Add any paths that contain templates here, relative to this directory.
