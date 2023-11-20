@@ -58,7 +58,7 @@ class NonLocalNet(BaseSegmentor):
         predictions = self.decoder(feats)
         # forward according to the mode
         if self.mode == 'TRAIN':
-            loss, losses_log_dict = self.forwardtrain(
+            loss, losses_log_dict = self.customizepredsandlosses(
                 predictions=predictions, targets=targets, backbone_outputs=backbone_outputs, losses_cfg=self.cfg['losses'], img_size=img_size,
             )
             return loss, losses_log_dict

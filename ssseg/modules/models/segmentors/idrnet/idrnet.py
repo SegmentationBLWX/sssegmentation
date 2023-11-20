@@ -245,7 +245,7 @@ class IDRNet(BaseSegmentor):
             momentum = self.cfg['head']['dlclsreps_momentum']
             self.updatedlclsreps(feats, targets['seg_target'], momentum, img_size)
             # --calculate losses
-            outputs_dict = self.forwardtrain(
+            outputs_dict = self.customizepredsandlosses(
                 predictions=preds_stage2, targets=targets, backbone_outputs=backbone_outputs, losses_cfg=self.cfg['losses'], img_size=img_size, auto_calc_loss=False,
             )
             preds_stage2 = outputs_dict.pop('loss_cls')

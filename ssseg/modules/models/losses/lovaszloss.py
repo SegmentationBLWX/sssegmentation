@@ -62,15 +62,9 @@ def LovaszHingeFlat(logits, labels):
 '''LovaszHingeLoss'''
 def LovaszHingeLoss(prediction, target, scale_factor=1.0, per_image=False, reduction='mean', ignore_index=255, lowest_loss_value=None):
     # calculate the loss
-    lovasz_cfg = {
-        'per_image': per_image,
-        'reduction': reduction,
-        'ignore_index': ignore_index,
-    }
+    lovasz_cfg = {'per_image': per_image, 'reduction': reduction, 'ignore_index': ignore_index}
     if lovasz_cfg['per_image']:
-        loss = [
-            LovaszHingeFlat(*FlattenBinaryLogits(logit.unsqueeze(0), label.unsqueeze(0), lovasz_cfg['ignore_index'])) for logit, label in zip(prediction, target)
-        ]
+        loss = [LovaszHingeFlat(*FlattenBinaryLogits(logit.unsqueeze(0), label.unsqueeze(0), lovasz_cfg['ignore_index'])) for logit, label in zip(prediction, target)]
         loss = torch.stack(loss)
     else:
         loss = LovaszHingeFlat(*FlattenBinaryLogits(prediction, target, lovasz_cfg['ignore_index']))
@@ -116,17 +110,9 @@ def LovaszSoftmaxFlat(probs, labels, classes='present', class_weight=None):
 def LovaszSoftmaxLoss(prediction, target, scale_factor=1.0, per_image=False, classes='present', reduction='mean', ignore_index=255, class_weight=None, lowest_loss_value=None):
     # calculate the loss
     prediction = F.softmax(prediction, dim=1)
-    lovasz_cfg = {
-        'per_image': per_image,
-        'classes': classes,
-        'reduction': reduction,
-        'ignore_index': ignore_index,
-        'class_weight': class_weight,
-    }
+    lovasz_cfg = {'per_image': per_image, 'classes': classes, 'reduction': reduction, 'ignore_index': ignore_index, 'class_weight': class_weight}
     if lovasz_cfg['per_image']:
-        loss = [
-            LovaszSoftmaxFlat(*FlattenProbs(prob.unsqueeze(0), label.unsqueeze(0), lovasz_cfg['ignore_index']), classes=lovasz_cfg['classes'], class_weight=lovasz_cfg['class_weight']) for prob, label in zip(prediction, target)
-        ]
+        loss = [LovaszSoftmaxFlat(*FlattenProbs(prob.unsqueeze(0), label.unsqueeze(0), lovasz_cfg['ignore_index']), classes=lovasz_cfg['classes'], class_weight=lovasz_cfg['class_weight']) for prob, label in zip(prediction, target)]
         loss = torch.stack(loss)
     else:
         loss = LovaszSoftmaxFlat(*FlattenProbs(prediction, target, lovasz_cfg['ignore_index']), classes=lovasz_cfg['classes'], class_weight=lovasz_cfg['class_weight'])
@@ -156,8 +142,7 @@ class LovaszLoss(nn.Module):
         mode = self.mode
         # supported modes
         supported_modes = {
-            'binary': LovaszHingeLoss,
-            'multi_class': LovaszSoftmaxLoss,
+            'binary': LovaszHingeLoss, 'multi_class': LovaszSoftmaxLoss,
         }
         # construct loss_cfg
         lovasz_args = self.loss_args.copy()

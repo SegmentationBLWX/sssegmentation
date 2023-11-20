@@ -99,15 +99,7 @@ class Inferencer():
                     forward_args = {cascade_cfg['key_for_pre_output']: sum(output_list) / len(output_list)}
                     if cascade_cfg['forward_default_args'] is not None: 
                         forward_args.update(cascade_cfg['forward_default_args'])
-                output_list = self.auginference(
-                    segmentor=segmentor,
-                    images=image_tensor,
-                    inference_cfg=inference_cfg,
-                    num_classes=cfg.SEGMENTOR_CFG['num_classes'],
-                    FloatTensor=FloatTensor,
-                    align_corners=segmentor.align_corners,
-                    forward_args=forward_args,
-                )
+                output_list = segmentor.auginference(image_tensor, forward_args)
             output_list = [
                 F.interpolate(output, size=(sample_meta['height'], sample_meta['width']), mode='bilinear', align_corners=segmentor.align_corners) for output in output_list
             ]
@@ -122,80 +114,6 @@ class Inferencer():
                 cv2.imwrite(os.path.join(cmd_args.outputdir, imagepath.split('/')[-1].split('.')[0] + '.png'), image)
             else:
                 cv2.imwrite(os.path.join(cfg.SEGMENTOR_CFG['work_dir'], imagepath.split('/')[-1].split('.')[0] + '.png'), image)
-    '''inference with augmentations'''
-    def auginference(self, segmentor, images, inference_cfg, num_classes, FloatTensor, align_corners, forward_args=None):
-        infer_tricks, outputs_list = inference_cfg['tricks'], []
-        for scale_factor in infer_tricks['multiscale']:
-            images_scale = F.interpolate(images, scale_factor=scale_factor, mode='bilinear', align_corners=align_corners)
-            outputs = self.inference(
-                segmentor=segmentor, 
-                images=images_scale.type(FloatTensor), 
-                inference_cfg=inference_cfg, 
-                num_classes=num_classes, 
-                forward_args=forward_args,
-            ).cpu()
-            outputs_list.append(outputs)
-            if infer_tricks['flip']:
-                images_flip = torch.from_numpy(np.flip(images_scale.cpu().numpy(), axis=3).copy())
-                outputs_flip = self.inference(
-                    segmentor=segmentor, 
-                    images=images_flip.type(FloatTensor), 
-                    inference_cfg=inference_cfg, 
-                    num_classes=num_classes, 
-                    forward_args=forward_args,
-                )
-                fixed_seg_target_pairs = inference_cfg.get('fixed_seg_target_pairs', None)
-                if fixed_seg_target_pairs is None:
-                    for data_pipeline in self.cfg.SEGMENTOR_CFG['dataset']['train']['data_pipelines']:
-                        if 'RandomFlip' in data_pipeline: 
-                            fixed_seg_target_pairs = data_pipeline[-1].get('fixed_seg_target_pairs', None)
-                if fixed_seg_target_pairs is not None:
-                    outputs_flip_clone = outputs_flip.data.clone()
-                    for (pair_a, pair_b) in fixed_seg_target_pairs:
-                        outputs_flip[:, pair_a, :, :] = outputs_flip_clone[:, pair_b, :, :]
-                        outputs_flip[:, pair_b, :, :] = outputs_flip_clone[:, pair_a, :, :]
-                outputs_flip = torch.from_numpy(np.flip(outputs_flip.cpu().numpy(), axis=3).copy()).type_as(outputs)
-                outputs_list.append(outputs_flip)
-        return outputs_list
-    '''inference'''
-    def inference(self, segmentor, images, inference_cfg, num_classes, forward_args=None):
-        assert inference_cfg['mode'] in ['whole', 'slide']
-        use_probs_before_resize = inference_cfg['tricks']['use_probs_before_resize']
-        if inference_cfg['mode'] == 'whole':
-            if forward_args is None:
-                outputs = segmentor(images)
-            else:
-                outputs = segmentor(images, **forward_args)
-            if use_probs_before_resize: 
-                outputs = F.softmax(outputs, dim=1)
-        else:
-            align_corners = segmentor.align_corners
-            opts = inference_cfg['opts']
-            stride_h, stride_w = opts['stride']
-            cropsize_h, cropsize_w = opts['cropsize']
-            batch_size, _, image_h, image_w = images.size()
-            num_grids_h = max(image_h - cropsize_h + stride_h - 1, 0) // stride_h + 1
-            num_grids_w = max(image_w - cropsize_w + stride_w - 1, 0) // stride_w + 1
-            outputs = images.new_zeros((batch_size, num_classes, image_h, image_w))
-            count_mat = images.new_zeros((batch_size, 1, image_h, image_w))
-            for h_idx in range(num_grids_h):
-                for w_idx in range(num_grids_w):
-                    x1, y1 = w_idx * stride_w, h_idx * stride_h
-                    x2, y2 = min(x1 + cropsize_w, image_w), min(y1 + cropsize_h, image_h)
-                    x1, y1 = max(x2 - cropsize_w, 0), max(y2 - cropsize_h, 0)
-                    crop_images = images[:, :, y1:y2, x1:x2]
-                    if forward_args is None:
-                        outputs_crop = segmentor(crop_images)
-                    else:
-                        outputs_crop = segmentor(crop_images, **forward_args)
-                    outputs_crop = F.interpolate(outputs_crop, size=crop_images.size()[2:], mode='bilinear', align_corners=align_corners)
-                    if use_probs_before_resize: 
-                        outputs_crop = F.softmax(outputs_crop, dim=1)
-                    outputs += F.pad(outputs_crop, (int(x1), int(outputs.shape[3] - x2), int(y1), int(outputs.shape[2] - y2)))
-                    count_mat[:, :, y1:y2, x1:x2] += 1
-            assert (count_mat == 0).sum() == 0
-            outputs = outputs / count_mat
-        return outputs
 
 
 '''debug'''

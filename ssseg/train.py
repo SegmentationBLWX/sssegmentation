@@ -8,7 +8,6 @@ import os
 import copy
 import torch
 import random
-import pickle
 import warnings
 import argparse
 import numpy as np
@@ -17,8 +16,8 @@ import torch.distributed as dist
 from tqdm import tqdm
 from configs import BuildConfig
 from modules import (
-    BuildDataset, BuildDistributedDataloader, BuildDistributedModel, BuildSegmentor, Logger, 
-    initslurm, touchdir, loadckpts, saveckpts, BuildOptimizer, BuildScheduler, judgefileexist
+    BuildDataset, BuildDistributedDataloader, BuildDistributedModel, BuildSegmentor, Logger, initslurm,
+    touchdir, loadckpts, saveckpts, BuildOptimizer, BuildScheduler, judgefileexist, postprocesspredgtpairs
 )
 warnings.filterwarnings('ignore')
 
@@ -203,42 +202,13 @@ class Trainer():
         segmentor.module.mode = 'TEST'
         inference_cfg, all_preds, all_gts = cfg.SEGMENTOR_CFG['inference'], [], []
         align_corners = segmentor.module.align_corners
-        FloatTensor = torch.cuda.FloatTensor
-        use_probs_before_resize = inference_cfg['tricks']['use_probs_before_resize']
-        assert inference_cfg['mode'] in ['whole', 'slide']
         with torch.no_grad():
             dataloader.sampler.set_epoch(0)
             pbar = tqdm(enumerate(dataloader))
             for batch_idx, samples_meta in pbar:
                 pbar.set_description('Processing %s/%s in rank %s' % (batch_idx+1, len(dataloader), rank_id))
-                imageids, images, widths, heights, gts = samples_meta['id'], samples_meta['image'].type(FloatTensor), samples_meta['width'], samples_meta['height'], samples_meta['seg_target']
-                if inference_cfg['mode'] == 'whole':
-                    outputs = segmentor(images)
-                    if use_probs_before_resize:
-                        outputs = F.softmax(outputs, dim=1)
-                else:
-                    opts = inference_cfg['opts']
-                    stride_h, stride_w = opts['stride']
-                    cropsize_h, cropsize_w = opts['cropsize']
-                    batch_size, _, image_h, image_w = images.size()
-                    num_grids_h = max(image_h - cropsize_h + stride_h - 1, 0) // stride_h + 1
-                    num_grids_w = max(image_w - cropsize_w + stride_w - 1, 0) // stride_w + 1
-                    outputs = images.new_zeros((batch_size, cfg.SEGMENTOR_CFG['num_classes'], image_h, image_w))
-                    count_mat = images.new_zeros((batch_size, 1, image_h, image_w))
-                    for h_idx in range(num_grids_h):
-                        for w_idx in range(num_grids_w):
-                            x1, y1 = w_idx * stride_w, h_idx * stride_h
-                            x2, y2 = min(x1 + cropsize_w, image_w), min(y1 + cropsize_h, image_h)
-                            x1, y1 = max(x2 - cropsize_w, 0), max(y2 - cropsize_h, 0)
-                            crop_images = images[:, :, y1:y2, x1:x2]
-                            outputs_crop = segmentor(crop_images)
-                            outputs_crop = F.interpolate(outputs_crop, size=crop_images.size()[2:], mode='bilinear', align_corners=align_corners)
-                            if use_probs_before_resize: 
-                                outputs_crop = F.softmax(outputs_crop, dim=1)
-                            outputs += F.pad(outputs_crop, (int(x1), int(outputs.shape[3] - x2), int(y1), int(outputs.shape[2] - y2)))
-                            count_mat[:, :, y1:y2, x1:x2] += 1
-                    assert (count_mat == 0).sum() == 0
-                    outputs = outputs / count_mat
+                imageids, images, widths, heights, gts = samples_meta['id'], samples_meta['image'], samples_meta['width'], samples_meta['height'], samples_meta['seg_target']
+                outputs = segmentor.module.inference(images)
                 for idx in range(len(outputs)):
                     output = F.interpolate(outputs[idx: idx+1], size=(heights[idx], widths[idx]), mode='bilinear', align_corners=align_corners)
                     pred = (torch.argmax(output[0], dim=0)).cpu().numpy().astype(np.int32)
@@ -246,39 +216,12 @@ class Trainer():
                     gt = gts[idx].cpu().numpy().astype(np.int32)
                     gt[gt >= dataset.num_classes] = -1
                     all_gts.append(gt)
-        # collect eval results and calculate the metric
-        filename = cfg.SEGMENTOR_CFG['resultsavepath'].split('/')[-1].split('.')[0] + f'_{rank_id}.' + cfg.SEGMENTOR_CFG['resultsavepath'].split('.')[-1]
-        with open(os.path.join(cfg.SEGMENTOR_CFG['work_dir'], filename), 'wb') as fp:
-            pickle.dump([all_preds, all_gts], fp)
-        rank = torch.tensor([rank_id], device='cuda')
-        rank_list = [rank.clone() for _ in range(ngpus_per_node)]
-        dist.all_gather(rank_list, rank)
-        logger_handle.info('Rank %s finished' % int(rank.item()))
+        # post process
+        all_preds, all_gts, all_ids = postprocesspredgtpairs(all_preds=all_preds, all_gts=all_gts, cmd_args=cmd_args, cfg=cfg, logger_handle=logger_handle)
         if rank_id == 0:
-            all_preds_gather, all_gts_gather = [], []
-            for rank in rank_list:
-                rank = str(int(rank.item()))
-                filename = cfg.SEGMENTOR_CFG['resultsavepath'].split('/')[-1].split('.')[0] + f'_{rank}.' + cfg.SEGMENTOR_CFG['resultsavepath'].split('.')[-1]
-                fp = open(os.path.join(cfg.SEGMENTOR_CFG['work_dir'], filename), 'rb')
-                all_preds, all_gts = pickle.load(fp)
-                all_preds_gather += all_preds
-                all_gts_gather += all_gts
-            all_preds, all_gts = all_preds_gather, all_gts_gather
-            all_preds_filtered, all_gts_filtered, all_ids = [], [], []
-            for idx, pred in enumerate(all_preds):
-                if pred[0] in all_ids: 
-                    continue
-                all_ids.append(pred[0])
-                all_preds_filtered.append(pred[1])
-                all_gts_filtered.append(all_gts[idx])
-            all_preds, all_gts = all_preds_filtered, all_gts_filtered
-            logger_handle.info('All Finished, all_preds: %s, all_gts: %s' % (len(all_preds), len(all_gts)))
             result = dataset.evaluate(
-                seg_preds=all_preds, 
-                seg_targets=all_gts, 
-                metric_list=inference_cfg.get('metric_list', ['iou', 'miou']),
-                num_classes=cfg.SEGMENTOR_CFG['num_classes'],
-                ignore_index=-1,
+                seg_preds=all_preds, seg_targets=all_gts, metric_list=inference_cfg.get('metric_list', ['iou', 'miou']),
+                num_classes=cfg.SEGMENTOR_CFG['num_classes'], ignore_index=-1,
             )
             logger_handle.info(result)
         segmentor.train()

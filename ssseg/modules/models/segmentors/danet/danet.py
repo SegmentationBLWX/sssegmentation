@@ -76,7 +76,7 @@ class DANet(BaseSegmentor):
         preds_pamcam = self.decoder_pamcam(feats_sum)
         # forward according to the mode
         if self.mode == 'TRAIN':
-            outputs_dict = self.forwardtrain(
+            outputs_dict = self.customizepredsandlosses(
                 predictions=preds_pamcam, targets=targets, backbone_outputs=backbone_outputs, losses_cfg=self.cfg['losses'], img_size=img_size, auto_calc_loss=False,
             )
             preds_pamcam = outputs_dict.pop('loss_cls')

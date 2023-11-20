@@ -73,7 +73,7 @@ class ENCNet(BaseSegmentor):
         # forward according to the mode
         if self.mode == 'TRAIN':
             # --base outputs
-            outputs_dict = self.forwardtrain(
+            outputs_dict = self.customizepredsandlosses(
                 predictions=predictions, targets=targets, backbone_outputs=backbone_outputs, losses_cfg=self.cfg['losses'], img_size=img_size, auto_calc_loss=False,
             )
             # --add se results

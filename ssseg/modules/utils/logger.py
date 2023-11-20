@@ -4,7 +4,6 @@ Function:
 Author:
     Zhenchao Jin
 '''
-import os
 import time
 
 
