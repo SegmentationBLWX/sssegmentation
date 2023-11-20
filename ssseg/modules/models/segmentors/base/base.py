@@ -10,7 +10,6 @@ import torch.nn as nn
 import torch.nn.functional as F
 import torch.distributed as dist
 from ...losses import BuildLoss
-from .utils import attrfetcher, attrjudger
 from ...backbones import BuildBackbone, BuildActivation, BuildNormalization, NormalizationBuilder
 
 
@@ -54,10 +53,10 @@ class BaseSegmentor(nn.Module):
     '''forward when mode = `TEST`'''
     def forwardtest(self):
         raise NotImplementedError('not to be implemented')
-    '''transform inputs'''
+    '''transforminputs'''
     def transforminputs(self, x_list, selected_indices=None):
         if selected_indices is None:
-            if self.cfg['backbone']['series'] in ['hrnet']:
+            if self.cfg['backbone']['type'] in ['HRNet']:
                 selected_indices = (0, 0, 0, 0)
             else:
                 selected_indices = (0, 1, 2, 3)
@@ -65,7 +64,7 @@ class BaseSegmentor(nn.Module):
         for idx in selected_indices:
             outs.append(x_list[idx])
         return outs
-    '''set auxiliary decoder as attribute'''
+    '''setauxiliarydecoder'''
     def setauxiliarydecoder(self, auxiliary_cfg):
         norm_cfg, act_cfg, num_classes = self.norm_cfg.copy(), self.act_cfg.copy(), self.cfg['num_classes']
         if auxiliary_cfg is None: return
@@ -95,13 +94,16 @@ class BaseSegmentor(nn.Module):
             self.auxiliary_decoder.append(dec)
         if len(self.auxiliary_decoder) == 1:
             self.auxiliary_decoder = self.auxiliary_decoder[0]
-    '''freeze normalization'''
-    def freezenormalization(self):
+    '''freezenormalization'''
+    def freezenormalization(self, norm_list=None):
+        if norm_list is None:
+            norm_list=(nn.BatchNorm1d, nn.BatchNorm2d, nn.BatchNorm3d, nn.SyncBatchNorm)
         for module in self.modules():
-            if NormalizationBuilder.isnorm(module, norm_list=(nn.BatchNorm1d, nn.BatchNorm2d, nn.BatchNorm3d, nn.SyncBatchNorm)):
+            if NormalizationBuilder.isnorm(module, norm_list):
                 module.eval()
-                for p in module.parameters(): p.requires_grad = False
-    '''calculate the losses'''
+                for p in module.parameters():
+                    p.requires_grad = False
+    '''calculatelosses'''
     def calculatelosses(self, predictions, targets, losses_cfg, map_preds_to_tgts_dict=None):
         # parse targets
         seg_target = targets['seg_target']
