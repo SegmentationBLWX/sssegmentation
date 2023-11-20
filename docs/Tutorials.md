@@ -858,7 +858,7 @@ Finally, the users could jump to the [`ssseg/modules/models/backbones/bricks/nor
 
 ## Customize Activations
 
-Activation layer is linear or non linear equation which processes the output of a neuron and bound it into a limited range of values (*e.g.*, :math:`[0, +\infinity]`).
+Activation layer is linear or non linear equation which processes the output of a neuron and bound it into a limited range of values (*e.g.*, `[0, +∞]`).
 
 #### Activation Config Structure
 
