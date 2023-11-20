@@ -32,11 +32,11 @@ SEGMENTOR_CFG['auxiliary'] = [
     {'in_channels': 128, 'out_channels': 1024, 'dropout': 0.1, 'num_convs': 2},
 ]
 SEGMENTOR_CFG['losses'] = {
-    'loss_aux1': {'CrossEntropyLoss': {'scale_factor': 1.0, 'ignore_index': 255, 'reduction': 'mean'}},
-    'loss_aux2': {'CrossEntropyLoss': {'scale_factor': 1.0, 'ignore_index': 255, 'reduction': 'mean'}},
-    'loss_aux3': {'CrossEntropyLoss': {'scale_factor': 1.0, 'ignore_index': 255, 'reduction': 'mean'}},
-    'loss_aux4': {'CrossEntropyLoss': {'scale_factor': 1.0, 'ignore_index': 255, 'reduction': 'mean'}},
-    'loss_cls': {'CrossEntropyLoss': {'scale_factor': 1.0, 'ignore_index': 255, 'reduction': 'mean'}},
+    'loss_aux1': {'type': 'CrossEntropyLoss', 'scale_factor': 1.0, 'ignore_index': 255, 'reduction': 'mean'},
+    'loss_aux2': {'type': 'CrossEntropyLoss', 'scale_factor': 1.0, 'ignore_index': 255, 'reduction': 'mean'},
+    'loss_aux3': {'type': 'CrossEntropyLoss', 'scale_factor': 1.0, 'ignore_index': 255, 'reduction': 'mean'},
+    'loss_aux4': {'type': 'CrossEntropyLoss', 'scale_factor': 1.0, 'ignore_index': 255, 'reduction': 'mean'},
+    'loss_cls': {'type': 'CrossEntropyLoss', 'scale_factor': 1.0, 'ignore_index': 255, 'reduction': 'mean'},
 }
 SEGMENTOR_CFG['work_dir'] = 'fcn_bisenetv2_cityscapes'
 SEGMENTOR_CFG['logfilepath'] = 'fcn_bisenetv2_cityscapes/fcn_bisenetv2_cityscapes.log'

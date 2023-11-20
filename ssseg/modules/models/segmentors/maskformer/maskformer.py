@@ -22,12 +22,8 @@ class MaskFormer(BaseSegmentor):
         align_corners, norm_cfg, act_cfg, head_cfg = self.align_corners, self.norm_cfg, self.act_cfg, cfg['head']
         # build pyramid pooling module
         ppm_cfg = {
-            'in_channels': head_cfg['in_channels_list'][-1],
-            'out_channels': head_cfg['feats_channels'],
-            'pool_scales': head_cfg['pool_scales'],
-            'align_corners': align_corners,
-            'norm_cfg': copy.deepcopy(norm_cfg),
-            'act_cfg': copy.deepcopy(act_cfg),
+            'in_channels': head_cfg['in_channels_list'][-1], 'out_channels': head_cfg['feats_channels'], 'pool_scales': head_cfg['pool_scales'],
+            'align_corners': align_corners, 'norm_cfg': copy.deepcopy(norm_cfg), 'act_cfg': copy.deepcopy(act_cfg),
         }
         self.ppm_net = PyramidPoolingModule(**ppm_cfg)
         # build lateral convs

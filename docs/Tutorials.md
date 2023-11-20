@@ -142,8 +142,8 @@ SEGMENTOR_CFG = {
         'in_channels': 1024, 'out_channels': 512, 'dropout': 0.1,
     }, # define auxiliary decoder, refer to "ssseg/modules/models/segmentors/base/base.py" for more details
     'losses': {
-        'loss_aux': {'CrossEntropyLoss': {'scale_factor': 0.4, 'ignore_index': 255, 'reduction': 'mean'}},
-        'loss_cls': {'CrossEntropyLoss': {'scale_factor': 1.0, 'ignore_index': 255, 'reduction': 'mean'}},
+        'loss_aux': {'type': 'CrossEntropyLoss', 'scale_factor': 0.4, 'ignore_index': 255, 'reduction': 'mean'},
+        'loss_cls': {'type': 'CrossEntropyLoss', 'scale_factor': 1.0, 'ignore_index': 255, 'reduction': 'mean'},
     }, # define objective functions, refer to "ssseg/modules/models/losses/builder.py" for more details
     'inference': {
         'mode': 'whole',
@@ -482,16 +482,24 @@ An example of loss config is as follows,
 
 ```python
 SEGMENTOR_CFG['losses'] = {
-    'loss_aux': {'CrossEntropyLoss': {'scale_factor': 0.4, 'ignore_index': 255, 'reduction': 'mean'}},
-    'loss_cls': {'CrossEntropyLoss': {'scale_factor': 1.0, 'ignore_index': 255, 'reduction': 'mean'}},
+    'loss_aux': {'type': 'CrossEntropyLoss', 'scale_factor': 0.4, 'ignore_index': 255, 'reduction': 'mean'},
+    'loss_cls': {'type': 'CrossEntropyLoss', 'scale_factor': 1.0, 'ignore_index': 255, 'reduction': 'mean'},
 }
 ```
 
 It is a `dict` including several keys like `loss_aux` and `loss_cls`, which is designed for distinguishing the loss config utilized in head or auxiliary head.
-The value corresponding to each key is also a `dict` and in this `dict`, `key` denotes the objective function type you want to adopt and the corresponding value denotes the arguments for instancing this objective function.
+The value corresponding to each key is also a `dict` or a list of `dict` and in each `dict`, `type` denotes the objective function type you want to adopt and the other arguments are set for instancing this objective function.
 
 In the example of loss config above, `SEGMENTOR_CFG['losses']['loss_cls']` is used to build losses in head and `SEGMENTOR_CFG['losses']['loss_aux']` is used to build losses in auxiliary head.
 `CrossEntropyLoss` represents the objective function type you want to adopt and `{'scale_factor': 1.0, 'ignore_index': 255, 'reduction': 'mean'}` contains the arguments for instancing the `CrossEntropyLoss`.
+
+And if `SEGMENTOR_CFG['losses']['loss_aux']` or `SEGMENTOR_CFG['losses']['loss_cls']` is a list of `dict`, the final loss will be calculated as,
+
+```python
+loss = 0
+for l_cfg in SEGMENTOR_CFG['losses']['loss_aux']:
+    loss = loss + BuildLoss(l_cfg)(prediction, target)
+```
 
 Now, SSSegmentation supports the following loss types,
 

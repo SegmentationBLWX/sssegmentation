@@ -4,7 +4,6 @@ Function:
 Author:
     Zhenchao Jin
 '''
-import torch
 import torch.nn as nn
 from ..base import BaseSegmentor
 from ...backbones import BuildActivation, BuildNormalization, DepthwiseSeparableConv2d
@@ -45,11 +44,7 @@ class FCN(BaseSegmentor):
         # forward according to the mode
         if self.mode == 'TRAIN':
             loss, losses_log_dict = self.forwardtrain(
-                predictions=predictions,
-                targets=targets,
-                backbone_outputs=backbone_outputs,
-                losses_cfg=self.cfg['losses'],
-                img_size=img_size,
+                predictions=predictions, targets=targets, backbone_outputs=backbone_outputs, losses_cfg=self.cfg['losses'], img_size=img_size,
             )
             return loss, losses_log_dict
         return predictions
@@ -65,23 +60,13 @@ class DepthwiseSeparableFCN(BaseSegmentor):
         for idx in range(head_cfg.get('num_convs', 2)):
             if idx == 0:
                 conv = DepthwiseSeparableConv2d(
-                    in_channels=head_cfg['in_channels'],
-                    out_channels=head_cfg['feats_channels'],
-                    kernel_size=3,
-                    stride=1,
-                    padding=1,
-                    norm_cfg=self.norm_cfg,
-                    act_cfg=self.act_cfg,
+                    in_channels=head_cfg['in_channels'], out_channels=head_cfg['feats_channels'], kernel_size=3, stride=1, padding=1,
+                    norm_cfg=self.norm_cfg, act_cfg=self.act_cfg,
                 )
             else:
                 conv = DepthwiseSeparableConv2d(
-                    in_channels=head_cfg['feats_channels'],
-                    out_channels=head_cfg['feats_channels'],
-                    kernel_size=3,
-                    stride=1,
-                    padding=1,
-                    norm_cfg=self.norm_cfg,
-                    act_cfg=self.act_cfg,
+                    in_channels=head_cfg['feats_channels'], out_channels=head_cfg['feats_channels'], kernel_size=3, stride=1, padding=1,
+                    norm_cfg=self.norm_cfg, act_cfg=self.act_cfg,
                 )
             convs.append(conv)
         convs.append(nn.Dropout2d(head_cfg['dropout']))
@@ -104,11 +89,7 @@ class DepthwiseSeparableFCN(BaseSegmentor):
         # forward according to the mode
         if self.mode == 'TRAIN':
             loss, losses_log_dict = self.forwardtrain(
-                predictions=predictions,
-                targets=targets,
-                backbone_outputs=backbone_outputs,
-                losses_cfg=self.cfg['losses'],
-                img_size=img_size,
+                predictions=predictions, targets=targets, backbone_outputs=backbone_outputs, losses_cfg=self.cfg['losses'], img_size=img_size,
             )
             return loss, losses_log_dict
         return predictions

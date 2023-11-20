@@ -18,21 +18,9 @@ class ImageLevelContext(nn.Module):
         self.align_corners = align_corners
         self.global_avgpool = nn.AdaptiveAvgPool2d((1, 1))
         self.correlate_net = SelfAttentionBlock(
-            key_in_channels=feats_channels * 2,
-            query_in_channels=feats_channels,
-            transform_channels=transform_channels,
-            out_channels=feats_channels,
-            share_key_query=False,
-            query_downsample=None,
-            key_downsample=None,
-            key_query_num_convs=2,
-            value_out_num_convs=1,
-            key_query_norm=True,
-            value_out_norm=True,
-            matmul_norm=True,
-            with_out_project=True,
-            norm_cfg=norm_cfg,
-            act_cfg=act_cfg,
+            key_in_channels=feats_channels * 2, query_in_channels=feats_channels, transform_channels=transform_channels, out_channels=feats_channels,
+            share_key_query=False, query_downsample=None, key_downsample=None, key_query_num_convs=2, value_out_num_convs=1, key_query_norm=True,
+            value_out_norm=True, matmul_norm=True, with_out_project=True, norm_cfg=norm_cfg, act_cfg=act_cfg,
         )
         if concat_input:
             self.bottleneck = nn.Sequential(

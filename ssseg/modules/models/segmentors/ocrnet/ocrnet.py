@@ -5,7 +5,6 @@ Author:
     Zhenchao Jin
 '''
 import copy
-import torch
 import torch.nn as nn
 import torch.nn.functional as F
 from ..base import BaseSegmentor
@@ -35,12 +34,8 @@ class OCRNet(BaseSegmentor):
         self.spatial_gather_module = SpatialGatherModule(**spatialgather_cfg)
         # build object context block
         self.object_context_block = ObjectContextBlock(
-            in_channels=head_cfg['feats_channels'], 
-            transform_channels=head_cfg['transform_channels'], 
-            scale=head_cfg['scale'],
-            align_corners=align_corners,
-            norm_cfg=copy.deepcopy(norm_cfg),
-            act_cfg=copy.deepcopy(act_cfg),
+            in_channels=head_cfg['feats_channels'], transform_channels=head_cfg['transform_channels'], scale=head_cfg['scale'],
+            align_corners=align_corners, norm_cfg=copy.deepcopy(norm_cfg), act_cfg=copy.deepcopy(act_cfg),
         )
         # build decoder
         self.decoder = nn.Sequential(
@@ -68,8 +63,6 @@ class OCRNet(BaseSegmentor):
             predictions = F.interpolate(predictions, size=img_size, mode='bilinear', align_corners=self.align_corners)
             predictions_aux = F.interpolate(predictions_aux, size=img_size, mode='bilinear', align_corners=self.align_corners)
             return self.calculatelosses(
-                predictions={'loss_cls': predictions, 'loss_aux': predictions_aux}, 
-                targets=targets, 
-                losses_cfg=self.cfg['losses']
+                predictions={'loss_cls': predictions, 'loss_aux': predictions_aux}, targets=targets, losses_cfg=self.cfg['losses']
             )
         return predictions

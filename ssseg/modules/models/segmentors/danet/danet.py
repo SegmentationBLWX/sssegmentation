@@ -4,7 +4,6 @@ Function:
 Author:
     Zhenchao Jin
 '''
-import torch
 import torch.nn as nn
 import torch.nn.functional as F
 from ..base import BaseSegmentor
@@ -78,12 +77,7 @@ class DANet(BaseSegmentor):
         # forward according to the mode
         if self.mode == 'TRAIN':
             outputs_dict = self.forwardtrain(
-                predictions=preds_pamcam,
-                targets=targets,
-                backbone_outputs=backbone_outputs,
-                losses_cfg=self.cfg['losses'],
-                img_size=img_size,
-                compute_loss=False,
+                predictions=preds_pamcam, targets=targets, backbone_outputs=backbone_outputs, losses_cfg=self.cfg['losses'], img_size=img_size, auto_calc_loss=False,
             )
             preds_pamcam = outputs_dict.pop('loss_cls')
             preds_pam = self.decoder_pam(feats_pam)
@@ -92,8 +86,6 @@ class DANet(BaseSegmentor):
             preds_cam = F.interpolate(preds_cam, size=img_size, mode='bilinear', align_corners=self.align_corners)
             outputs_dict.update({'loss_cls_pam': preds_pam, 'loss_cls_cam': preds_cam, 'loss_cls_pamcam': preds_pamcam})
             return self.calculatelosses(
-                predictions=outputs_dict, 
-                targets=targets, 
-                losses_cfg=self.cfg['losses']
+                predictions=outputs_dict, targets=targets, losses_cfg=self.cfg['losses']
             )
         return preds_pamcam

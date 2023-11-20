@@ -4,53 +4,57 @@ Function:
 Author:
     Zhenchao Jin
 '''
+import os
 import torch
 import warnings
 import numpy as np
 import torch.nn.functional as F
 from tqdm import tqdm
-from modules import *
-from sklearn.cluster import k_means_
+from sklearn.cluster import _kmeans
 from sklearn.preprocessing import StandardScaler
 from sklearn.metrics.pairwise import cosine_similarity, pairwise_distances
+from ssseg.modules import BuildDataset, BuildDistributedDataloader, BuildBackbone
 warnings.filterwarnings('ignore')
 
 
-'''define the cfg'''
-cfg = {
-    'dataset': {
-        'type': 'ade20k',
+'''configs'''
+DATASET_CFG_ADE20k_512x512 = {
+    'type': 'ADE20kDataset',
+    'rootdir': os.path.join(os.getcwd(), 'ADE20k'),
+    'train': {
         'set': 'train',
-        'rootdir': '/opt/tiger/vcsegmentation/ADE20k',
-        'aug_opts': [
+        'data_pipelines': [
+            ('Resize', {'output_size': (2048, 512), 'keep_ratio': True, 'scale_range': (0.5, 2.0)}),
+            ('RandomCrop', {'crop_size': (512, 512), 'one_category_max_ratio': 0.75}),
+            ('RandomFlip', {'flip_prob': 0.5}),
+            ('PhotoMetricDistortion', {}),
+            ('Normalize', {'mean': [123.675, 116.28, 103.53], 'std': [58.395, 57.12, 57.375]}),
+            ('ToTensor', {}),
+            ('Padding', {'output_size': (512, 512), 'data_type': 'tensor'}),
+        ],
+    },
+    'test': {
+        'set': 'val',
+        'data_pipelines': [
             ('Resize', {'output_size': (2048, 512), 'keep_ratio': True, 'scale_range': None}),
             ('Normalize', {'mean': [123.675, 116.28, 103.53], 'std': [58.395, 57.12, 57.375]}),
             ('ToTensor', {}),
         ],
-    },
-    'dataloader': {
-        'type': 'nondistributed',
-        'batch_size': 1,
-        'num_workers': 4,
-        'shuffle': True,
-        'pin_memory': True,
-        'drop_last': False,
-    },
+    }
+}
+DATALOADER_CFG_BS8 = {
+    'batch_size': 1, 'num_workers': 2, 'shuffle': True, 'pin_memory': True, 'drop_last': False,
+}
+CONFIG = {
+    'dataset': DATASET_CFG_ADE20k_512x512,
+    'dataloader': DATALOADER_CFG_BS8,
     'backbone': {
-        'type': 'resnet101',
-        'series': 'resnet',
-        'pretrained': True,
-        'outstride': 8,
-        'use_stem': True,
-        'norm_cfg': {'type': 'batchnorm2d', 'opts': {}},
+        'type': 'ResNet', 'depth': 101, 'structure_type': 'resnet101conv3x3stem',
+        'pretrained': True, 'outstride': 8, 'use_conv3x3_stem': True, 'selected_indices': (2, 3),
     },
     'memory': {
-        'num_feats_per_cls': 1,
-        'feats_len': 2048,
-        'ignore_index': 255,
-        'align_corners': False,
-        'savepath': 'init_memory.npy',
-        'type': ['random_select', 'clustering'][1],
+        'num_feats_per_cls': 1, 'feats_len': 2048, 'ignore_index': 255, 'align_corners': False,
+        'savepath': 'init_memory.npy', 'type': ['random_select', 'clustering'][1],
     }
 }
 
@@ -59,10 +63,10 @@ cfg = {
 def cluster(sparse_data, nclust=10):
     def euc_dist(X, Y=None, Y_norm_squared=None, squared=False):
         return cosine_similarity(X, Y)
-    k_means_.euclidean_distances = euc_dist
+    _kmeans.euclidean_distances = euc_dist
     scaler = StandardScaler(with_mean=False)
     sparse_data = scaler.fit_transform(sparse_data)
-    estimator = k_means_.KMeans(n_clusters=nclust, n_jobs=20)
+    estimator = _kmeans.KMeans(n_clusters=nclust)
     _ = estimator.fit(sparse_data)
     return estimator.cluster_centers_
 
@@ -70,29 +74,26 @@ def cluster(sparse_data, nclust=10):
 '''main'''
 def main():
     # instanced dataset and dataloader
-    dataset_cfg = {'train': cfg['dataset']}
-    dataset = BuildDataset(mode='TRAIN', logger_handle=None, dataset_cfg=dataset_cfg)
-    dataloader_cfg = {'train': cfg['dataloader']}
-    dataloader = BuildParallelDataloader(mode='TRAIN', dataset=dataset, cfg=dataloader_cfg)
+    dataset = BuildDataset(mode='TRAIN', logger_handle=None, dataset_cfg=CONFIG['dataset'])
+    dataloader = torch.utils.data.DataLoader(dataset, **CONFIG['dataloader'])
     # instanced backbone
-    backbone_cfg = cfg['backbone']
-    backbone_net = BuildBackbone(backbone_cfg)
+    backbone_net = BuildBackbone(CONFIG['backbone'])
     backbone_net = backbone_net.cuda()
     backbone_net.eval()
     # memory cfg
-    memory_cfg = cfg['memory']
+    memory_cfg = CONFIG['memory']
     assert memory_cfg['type'] in ['random_select', 'clustering']
     # extract feats
     feats_dict = {}
     FloatTensor = torch.cuda.FloatTensor
     pbar = tqdm(enumerate(dataloader))
     for batch_idx, samples in pbar:
-        pbar.set_description('Processing %s/%s...' % (batch_idx+1, len(dataloader)))
-        image, groundtruth = samples['image'], samples['segmentation']
+        pbar.set_description('Processing %s/%s' % (batch_idx+1, len(dataloader)))
+        image, groundtruth = samples['image'], samples['seg_target']
         image = image.type(FloatTensor)
         feats = backbone_net(image)[-1]
         gt = groundtruth[0]
-        feats = F.interpolate(feats, size=gt.shape, mode='bilinear', align_corners=memory_cfg['align_corners'])
+        feats = F.interpolate(feats.cpu().data, size=gt.shape, mode='bilinear', align_corners=memory_cfg['align_corners'])
         num_channels = feats.size(1)
         clsids = gt.unique()
         feats = feats.permute(0, 2, 3, 1).contiguous()

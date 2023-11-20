@@ -25,10 +25,7 @@ class ENCNet(BaseSegmentor):
             BuildActivation(act_cfg),
         )
         self.enc_module = ContextEncoding(
-            in_channels=head_cfg['feats_channels'],
-            num_codes=head_cfg['num_codes'],
-            norm_cfg=norm_cfg,
-            act_cfg=act_cfg,
+            in_channels=head_cfg['feats_channels'], num_codes=head_cfg['num_codes'], norm_cfg=norm_cfg, act_cfg=act_cfg,
         )
         # --extra structures
         extra_cfg = head_cfg['extra']
@@ -75,20 +72,21 @@ class ENCNet(BaseSegmentor):
         predictions = self.decoder(feats)
         # forward according to the mode
         if self.mode == 'TRAIN':
+            # --base outputs
             outputs_dict = self.forwardtrain(
-                predictions=predictions,
-                targets=targets,
-                backbone_outputs=backbone_outputs,
-                losses_cfg=self.cfg['losses'],
-                img_size=img_size,
-                compute_loss=False,
+                predictions=predictions, targets=targets, backbone_outputs=backbone_outputs, losses_cfg=self.cfg['losses'], img_size=img_size, auto_calc_loss=False,
             )
+            # --add se results
+            map_preds_to_tgts_dict = None
             if hasattr(self, 'se_layer'):
                 outputs_dict.update({'loss_se': predictions_se})
+                targets['seg_target_onehot'] = self.onehot(targets['seg_target'], self.cfg['num_classes'])
+                map_preds_to_tgts_dict = {
+                    'loss_aux': 'seg_target', 'loss_se': 'seg_target_onehot', 'loss_cls': 'seg_target',
+                }
+            # --calculate and return losses
             return self.calculatelosses(
-                predictions=outputs_dict, 
-                targets=targets, 
-                losses_cfg=self.cfg['losses']
+                predictions=outputs_dict, targets=targets, losses_cfg=self.cfg['losses'], map_preds_to_tgts_dict=map_preds_to_tgts_dict,
             )
         return predictions
     '''convert to onehot labels'''

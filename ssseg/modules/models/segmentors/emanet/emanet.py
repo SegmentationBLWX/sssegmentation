@@ -27,10 +27,7 @@ class EMANet(BaseSegmentor):
         for param in self.ema_mid_conv.parameters():
             param.requires_grad = False
         self.ema_module = EMAModule(
-            channels=head_cfg['feats_channels'],
-            num_bases=head_cfg['num_bases'],
-            num_stages=head_cfg['num_stages'],
-            momentum=head_cfg['momentum']
+            channels=head_cfg['feats_channels'], num_bases=head_cfg['num_bases'], num_stages=head_cfg['num_stages'], momentum=head_cfg['momentum']
         )
         self.ema_out_conv = nn.Sequential(
             nn.Conv2d(head_cfg['feats_channels'], head_cfg['feats_channels'], kernel_size=1, stride=1, padding=0, bias=False),
@@ -73,11 +70,7 @@ class EMANet(BaseSegmentor):
         # forward according to the mode
         if self.mode == 'TRAIN':
             loss, losses_log_dict = self.forwardtrain(
-                predictions=predictions,
-                targets=targets,
-                backbone_outputs=backbone_outputs,
-                losses_cfg=self.cfg['losses'],
-                img_size=img_size,
+                predictions=predictions, targets=targets, backbone_outputs=backbone_outputs, losses_cfg=self.cfg['losses'], img_size=img_size,
             )
             return loss, losses_log_dict
         return predictions

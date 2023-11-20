@@ -49,11 +49,7 @@ class Segformer(BaseSegmentor):
         # forward according to the mode
         if self.mode == 'TRAIN':
             loss, losses_log_dict = self.forwardtrain(
-                predictions=predictions,
-                targets=targets,
-                backbone_outputs=backbone_outputs,
-                losses_cfg=self.cfg['losses'],
-                img_size=img_size,
+                predictions=predictions, targets=targets, backbone_outputs=backbone_outputs, losses_cfg=self.cfg['losses'], img_size=img_size,
             )
             return loss, losses_log_dict
         return predictions

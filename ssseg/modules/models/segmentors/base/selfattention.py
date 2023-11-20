@@ -18,12 +18,8 @@ class SelfAttentionBlock(nn.Module):
         super(SelfAttentionBlock, self).__init__()
         # key project
         self.key_project = self.buildproject(
-            in_channels=key_in_channels,
-            out_channels=transform_channels,
-            num_convs=key_query_num_convs,
-            use_norm=key_query_norm,
-            norm_cfg=norm_cfg,
-            act_cfg=act_cfg,
+            in_channels=key_in_channels, out_channels=transform_channels, num_convs=key_query_num_convs,
+            use_norm=key_query_norm, norm_cfg=norm_cfg, act_cfg=act_cfg,
         )
         # query project
         if share_key_query:
@@ -31,32 +27,20 @@ class SelfAttentionBlock(nn.Module):
             self.query_project = self.key_project
         else:
             self.query_project = self.buildproject(
-                in_channels=query_in_channels,
-                out_channels=transform_channels,
-                num_convs=key_query_num_convs,
-                use_norm=key_query_norm,
-                norm_cfg=norm_cfg,
-                act_cfg=act_cfg,
+                in_channels=query_in_channels, out_channels=transform_channels, num_convs=key_query_num_convs,
+                use_norm=key_query_norm, norm_cfg=norm_cfg, act_cfg=act_cfg,
             )
         # value project
         self.value_project = self.buildproject(
-            in_channels=key_in_channels,
-            out_channels=transform_channels if with_out_project else out_channels,
-            num_convs=value_out_num_convs,
-            use_norm=value_out_norm,
-            norm_cfg=norm_cfg,
-            act_cfg=act_cfg,
+            in_channels=key_in_channels, out_channels=transform_channels if with_out_project else out_channels, num_convs=value_out_num_convs,
+            use_norm=value_out_norm, norm_cfg=norm_cfg, act_cfg=act_cfg,
         )
         # out project
         self.out_project = None
         if with_out_project:
             self.out_project = self.buildproject(
-                in_channels=transform_channels,
-                out_channels=out_channels,
-                num_convs=value_out_num_convs,
-                use_norm=value_out_norm,
-                norm_cfg=norm_cfg,
-                act_cfg=act_cfg,
+                in_channels=transform_channels, out_channels=out_channels, num_convs=value_out_num_convs,
+                use_norm=value_out_norm, norm_cfg=norm_cfg, act_cfg=act_cfg,
             )
         # downsample
         self.query_downsample = query_downsample

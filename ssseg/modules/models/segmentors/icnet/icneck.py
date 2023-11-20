@@ -4,7 +4,6 @@ Function:
 Author:
     Zhenchao Jin
 '''
-import torch
 import torch.nn as nn
 import torch.nn.functional as F
 from ...backbones import BuildNormalization, BuildActivation
@@ -47,20 +46,12 @@ class ICNeck(nn.Module):
         self.align_corners = align_corners
         # define modules
         self.cff_24 = CascadeFeatureFusion(
-            low_channels=in_channels_list[2],
-            high_channels=in_channels_list[1],
-            out_channels=out_channels,
-            norm_cfg=norm_cfg,
-            act_cfg=act_cfg,
-            align_corners=align_corners,
+            low_channels=in_channels_list[2], high_channels=in_channels_list[1], out_channels=out_channels,
+            norm_cfg=norm_cfg, act_cfg=act_cfg, align_corners=align_corners,
         )
         self.cff_12 = CascadeFeatureFusion(
-            low_channels=out_channels,
-            high_channels=in_channels_list[0],
-            out_channels=out_channels,
-            norm_cfg=norm_cfg,
-            act_cfg=act_cfg,
-            align_corners=align_corners,
+            low_channels=out_channels, high_channels=in_channels_list[0], out_channels=out_channels,
+            norm_cfg=norm_cfg, act_cfg=act_cfg, align_corners=align_corners,
         )
     '''forward'''
     def forward(self, inputs):

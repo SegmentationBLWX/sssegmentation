@@ -24,12 +24,8 @@ class GCNet(BaseSegmentor):
             BuildActivation(act_cfg),
         )
         self.contextblock_net = ContextBlock(
-            in_channels=head_cfg['feats_channels'],
-            ratio=head_cfg['ratio'],
-            pooling_type=head_cfg['pooling_type'],
-            fusion_types=head_cfg['fusion_types'],
-            norm_cfg=head_cfg.get('norm_cfg', copy.deepcopy(norm_cfg)),
-            act_cfg=head_cfg.get('act_cfg', copy.deepcopy(act_cfg)),
+            in_channels=head_cfg['feats_channels'], ratio=head_cfg['ratio'], pooling_type=head_cfg['pooling_type'], fusion_types=head_cfg['fusion_types'],
+            norm_cfg=head_cfg.get('norm_cfg', copy.deepcopy(norm_cfg)), act_cfg=head_cfg.get('act_cfg', copy.deepcopy(act_cfg)),
         )
         self.conv_after_cb = nn.Sequential(
             nn.Conv2d(head_cfg['feats_channels'], head_cfg['feats_channels'], kernel_size=3, stride=1, padding=1, bias=False),
@@ -63,11 +59,7 @@ class GCNet(BaseSegmentor):
         # forward according to the mode
         if self.mode == 'TRAIN':
             loss, losses_log_dict = self.forwardtrain(
-                predictions=predictions,
-                targets=targets,
-                backbone_outputs=backbone_outputs,
-                losses_cfg=self.cfg['losses'],
-                img_size=img_size,
+                predictions=predictions, targets=targets, backbone_outputs=backbone_outputs, losses_cfg=self.cfg['losses'], img_size=img_size,
             )
             return loss, losses_log_dict
         return predictions

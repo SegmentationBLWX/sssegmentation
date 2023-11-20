@@ -37,16 +37,8 @@ class Predictor(nn.Module):
         self.pe_layer = PositionEmbeddingSine(hidden_dim // 2, apply_normalize=True)
         # transformer
         self.transformer = Transformer(
-            d_model=hidden_dim, 
-            nhead=nheads, 
-            num_encoder_layers=enc_layers, 
-            num_decoder_layers=dec_layers, 
-            dim_feedforward=dim_feedforward, 
-            dropout=dropout, 
-            norm_before=pre_norm, 
-            return_intermediate_dec=deep_supervision,
-            act_cfg=act_cfg,
-            norm_cfg=norm_cfg,
+            d_model=hidden_dim, nhead=nheads, num_encoder_layers=enc_layers, num_decoder_layers=dec_layers, dim_feedforward=dim_feedforward, 
+            dropout=dropout, norm_before=pre_norm, return_intermediate_dec=deep_supervision, act_cfg=act_cfg, norm_cfg=norm_cfg,
         )
         hidden_dim = self.transformer.d_model
         # query embed
@@ -80,7 +72,7 @@ class Predictor(nn.Module):
         else:
             mask_embed = self.mask_embed(hs[-1])
             outputs_seg_masks = torch.einsum('bqc,bchw->bqhw', mask_embed, mask_features)
-            out['pred_masks'] = outputs_seg_masks
+            outputs['pred_masks'] = outputs_seg_masks
         return outputs
     '''setauxloss'''
     @torch.jit.unused

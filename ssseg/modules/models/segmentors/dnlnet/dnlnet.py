@@ -24,13 +24,8 @@ class DNLNet(BaseSegmentor):
             BuildActivation(act_cfg),
         )
         self.dnl_block = DisentangledNonLocal2d(
-            in_channels=head_cfg['feats_channels'],
-            reduction=head_cfg['reduction'],
-            use_scale=head_cfg['use_scale'],
-            mode=head_cfg['mode'],
-            temperature=head_cfg['temperature'],
-            norm_cfg=copy.deepcopy(norm_cfg),
-            act_cfg=copy.deepcopy(act_cfg),
+            in_channels=head_cfg['feats_channels'], reduction=head_cfg['reduction'], use_scale=head_cfg['use_scale'], mode=head_cfg['mode'], 
+            temperature=head_cfg['temperature'], norm_cfg=copy.deepcopy(norm_cfg), act_cfg=copy.deepcopy(act_cfg),
         )
         self.conv_after_dnl = nn.Sequential(
             nn.Conv2d(head_cfg['feats_channels'], head_cfg['feats_channels'], kernel_size=3, stride=1, padding=1, bias=False),
@@ -64,11 +59,7 @@ class DNLNet(BaseSegmentor):
         # forward according to the mode
         if self.mode == 'TRAIN':
             loss, losses_log_dict = self.forwardtrain(
-                predictions=predictions,
-                targets=targets,
-                backbone_outputs=backbone_outputs,
-                losses_cfg=self.cfg['losses'],
-                img_size=img_size,
+                predictions=predictions, targets=targets, backbone_outputs=backbone_outputs, losses_cfg=self.cfg['losses'], img_size=img_size,
             )
             return loss, losses_log_dict
         return predictions

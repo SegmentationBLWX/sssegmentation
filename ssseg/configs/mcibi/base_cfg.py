@@ -21,7 +21,7 @@ SEGMENTOR_CFG = {
         'downsample_backbone': {'kernel_size': 3, 'stride': 1, 'padding': 1, 'bias': False},
         'context_within_image': {'is_on': True, 'type': ['ppm', 'aspp'][1], 'cfg': {'dilations': [1, 12, 24, 36]}},
         'use_hard_aggregate': False, 'in_channels': 2048, 'feats_channels': 512, 'transform_channels': 256,
-        'out_channels': 512, 'num_feats_per_cls': 1, 'use_loss': True, 'loss_cfg': {'CrossEntropyLoss': {'scale_factor': 1.0, 'reduction': 'mean'}},
+        'out_channels': 512, 'num_feats_per_cls': 1, 'use_loss': True, 'loss_cfg': {'type': 'CrossEntropyLoss', 'scale_factor': 1.0, 'reduction': 'mean'},
         'update_cfg': {
             'strategy': 'cosine_similarity', 'ignore_index': 255,
             'momentum_cfg': {'base_momentum': 0.9, 'base_lr': 0.01, 'adjust_by_learning_rate': True}
@@ -32,9 +32,9 @@ SEGMENTOR_CFG = {
         'in_channels': 1024, 'out_channels': 512, 'dropout': 0.1,
     },
     'losses': {
-        'loss_aux': {'CrossEntropyLoss': {'scale_factor': 0.4, 'ignore_index': 255, 'reduction': 'mean'}},
-        'loss_cls_stage1': {'CrossEntropyLoss': {'scale_factor': 0.4, 'ignore_index': 255, 'reduction': 'mean'}},
-        'loss_cls_stage2': {'CrossEntropyLoss': {'scale_factor': 1.0, 'ignore_index': 255, 'reduction': 'mean'}},
+        'loss_aux': {'type': 'CrossEntropyLoss', 'scale_factor': 0.4, 'ignore_index': 255, 'reduction': 'mean'},
+        'loss_cls_stage1': {'type': 'CrossEntropyLoss', 'scale_factor': 0.4, 'ignore_index': 255, 'reduction': 'mean'},
+        'loss_cls_stage2': {'type': 'CrossEntropyLoss', 'scale_factor': 1.0, 'ignore_index': 255, 'reduction': 'mean'},
     },
     'inference': {
         'mode': 'whole',

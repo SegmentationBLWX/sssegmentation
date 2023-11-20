@@ -19,11 +19,7 @@ class SemanticFPN(BaseSegmentor):
         align_corners, norm_cfg, act_cfg, head_cfg = self.align_corners, self.norm_cfg, self.act_cfg, cfg['head']
         # build fpn
         self.fpn_neck = FPN(
-            in_channels_list=head_cfg['in_channels_list'],
-            out_channels=head_cfg['feats_channels'],
-            upsample_cfg=head_cfg['upsample_cfg'],
-            norm_cfg=norm_cfg,
-            act_cfg=act_cfg,
+            in_channels_list=head_cfg['in_channels_list'], out_channels=head_cfg['feats_channels'], upsample_cfg=head_cfg['upsample_cfg'], norm_cfg=norm_cfg, act_cfg=act_cfg,
         )
         self.scale_heads, feature_stride_list = nn.ModuleList(), head_cfg['feature_stride_list']
         for i in range(len(feature_stride_list)):
@@ -36,9 +32,7 @@ class SemanticFPN(BaseSegmentor):
                     BuildActivation(act_cfg),
                 ))
                 if feature_stride_list[i] != feature_stride_list[0]:
-                    scale_head.append(
-                        nn.Upsample(scale_factor=2, mode='bilinear', align_corners=align_corners)
-                    )
+                    scale_head.append(nn.Upsample(scale_factor=2, mode='bilinear', align_corners=align_corners))
             self.scale_heads.append(nn.Sequential(*scale_head))
         # build decoder
         self.decoder = nn.Sequential(
@@ -62,11 +56,7 @@ class SemanticFPN(BaseSegmentor):
         # forward according to the mode
         if self.mode == 'TRAIN':
             loss, losses_log_dict = self.forwardtrain(
-                predictions=predictions,
-                targets=targets,
-                backbone_outputs=backbone_outputs,
-                losses_cfg=self.cfg['losses'],
-                img_size=img_size,
+                predictions=predictions, targets=targets, backbone_outputs=backbone_outputs, losses_cfg=self.cfg['losses'], img_size=img_size,
             )
             return loss, losses_log_dict
         return predictions

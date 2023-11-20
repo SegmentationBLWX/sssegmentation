@@ -21,22 +21,14 @@ class CE2P(BaseSegmentor):
         align_corners, norm_cfg, act_cfg, head_cfg = self.align_corners, self.norm_cfg, self.act_cfg, cfg['head']
         # build pyramid pooling module
         ppm_cfg = {
-            'in_channels': head_cfg['in_channels_list'][-1],
-            'out_channels': head_cfg['feats_channels'],
-            'pool_scales': head_cfg['pool_scales'],
-            'align_corners': align_corners,
-            'norm_cfg': copy.deepcopy(norm_cfg),
-            'act_cfg': copy.deepcopy(act_cfg),
+            'in_channels': head_cfg['in_channels_list'][-1], 'out_channels': head_cfg['feats_channels'], 'pool_scales': head_cfg['pool_scales'],
+            'align_corners': align_corners, 'norm_cfg': copy.deepcopy(norm_cfg), 'act_cfg': copy.deepcopy(act_cfg),
         }
         self.ppm_net = PyramidPoolingModule(**ppm_cfg)
         # build edge perceiving module
         epm_cfg = {
-            'in_channels_list': head_cfg['in_channels_list'][:-1],
-            'hidden_channels': head_cfg['epm_hidden_channels'],
-            'out_channels': head_cfg['epm_out_channels'],
-            'align_corners': align_corners,
-            'norm_cfg': copy.deepcopy(norm_cfg),
-            'act_cfg': copy.deepcopy(act_cfg),
+            'in_channels_list': head_cfg['in_channels_list'][:-1], 'hidden_channels': head_cfg['epm_hidden_channels'], 'out_channels': head_cfg['epm_out_channels'],
+            'align_corners': align_corners, 'norm_cfg': copy.deepcopy(norm_cfg), 'act_cfg': copy.deepcopy(act_cfg),
         }
         self.edge_net = EdgePerceivingModule(**epm_cfg)
         # build shortcut
@@ -93,9 +85,20 @@ class CE2P(BaseSegmentor):
             preds_stage1 = self.decoder_stage1[-1](feats_stage1)
             preds_stage1 = F.interpolate(preds_stage1, size=img_size, mode='bilinear', align_corners=self.align_corners)
             preds_stage2 = F.interpolate(preds_stage2, size=img_size, mode='bilinear', align_corners=self.align_corners)
+            edge_target, losses_cfg = targets['edge_target'], copy.deepcopy(self.cfg['losses'])
+            num_neg_edge, num_pos_edge = torch.sum(edge_target == 0, dtype=torch.float), torch.sum(edge_target == 1, dtype=torch.float)
+            weight_pos_edge, weight_neg_edge = num_neg_edge / (num_pos_edge + num_neg_edge), num_pos_edge / (num_pos_edge + num_neg_edge)
+            cls_weight_edge = torch.Tensor([weight_neg_edge, weight_pos_edge]).type_as(edge_target)
+            for loss_name in list(losses_cfg.keys()):
+                if 'edge' in loss_name:
+                    if isinstance(losses_cfg[loss_name], list):
+                        for loss_idx in range(len(losses_cfg[loss_name])):
+                            losses_cfg[loss_name][loss_idx]['weight'] = cls_weight_edge
+                    else:
+                        assert isinstance(losses_cfg[loss_name], dict)
+                        losses_cfg[loss_name]['weight'] = cls_weight_edge
             return self.calculatelosses(
-                predictions={'loss_cls_stage1': preds_stage1, 'loss_cls_stage2': preds_stage2, 'loss_edge': edge}, 
-                targets=targets, 
-                losses_cfg=self.cfg['losses'],
+                predictions={'loss_cls_stage1': preds_stage1, 'loss_cls_stage2': preds_stage2, 'loss_edge': edge}, targets=targets, losses_cfg=losses_cfg,
+                map_preds_to_tgts_dict={'loss_cls_stage1': 'seg_target', 'loss_cls_stage2': 'seg_target', 'loss_edge': 'edge_target'},
             )
         return preds_stage2

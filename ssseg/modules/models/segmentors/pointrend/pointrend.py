@@ -23,11 +23,8 @@ class PointRend(BaseSegmentor):
         align_corners, norm_cfg, act_cfg, head_cfg = self.align_corners, self.norm_cfg, self.act_cfg, cfg['head']
         # build fpn
         self.fpn_neck = FPN(
-            in_channels_list=head_cfg['fpn_in_channels_list'],
-            out_channels=head_cfg['feats_channels'],
-            upsample_cfg=head_cfg['upsample_cfg'],
-            norm_cfg=norm_cfg,
-            act_cfg=act_cfg,
+            in_channels_list=head_cfg['fpn_in_channels_list'], out_channels=head_cfg['feats_channels'], upsample_cfg=head_cfg['upsample_cfg'],
+            norm_cfg=norm_cfg, act_cfg=act_cfg,
         )
         self.scale_heads, feature_stride_list = nn.ModuleList(), head_cfg['feature_stride_list']
         for i in range(len(feature_stride_list)):
@@ -40,9 +37,7 @@ class PointRend(BaseSegmentor):
                     BuildActivation(act_cfg),
                 ))
                 if feature_stride_list[i] != feature_stride_list[0]:
-                    scale_head.append(
-                        nn.Upsample(scale_factor=2, mode='bilinear', align_corners=align_corners)
-                    )
+                    scale_head.append(nn.Upsample(scale_factor=2, mode='bilinear', align_corners=align_corners))
             self.scale_heads.append(nn.Sequential(*scale_head))
         # point rend
         self.num_fcs, self.coarse_pred_each_layer = head_cfg['num_fcs'], head_cfg['coarse_pred_each_layer']
@@ -98,19 +93,13 @@ class PointRend(BaseSegmentor):
             targets['point_labels'] = point_labels
             predictions_aux = F.interpolate(predictions_aux, size=img_size, mode='bilinear', align_corners=self.align_corners)
             return self.calculatelosses(
-                predictions={'loss_cls': predictions, 'loss_aux': predictions_aux}, 
-                targets=targets,
-                losses_cfg=self.cfg['losses'],
-                map_preds_to_tgts_dict={'loss_cls': 'point_labels', 'loss_aux': 'seg_target'}
+                predictions={'loss_cls': predictions, 'loss_aux': predictions_aux}, targets=targets, losses_cfg=self.cfg['losses'], map_preds_to_tgts_dict={'loss_cls': 'point_labels', 'loss_aux': 'seg_target'}
             )
         # if mode is TEST
         refined_seg_logits = predictions_aux.clone()
         for _ in range(self.cfg['head']['test']['subdivision_steps']):
             refined_seg_logits = F.interpolate(
-                input=refined_seg_logits, 
-                scale_factor=self.cfg['head']['test']['scale_factor'],
-                mode='bilinear',
-                align_corners=self.align_corners
+                input=refined_seg_logits, scale_factor=self.cfg['head']['test']['scale_factor'], mode='bilinear', align_corners=self.align_corners
             )
             batch_size, channels, height, width = refined_seg_logits.shape
             point_indices, points = self.getpointstest(refined_seg_logits, self.calculateuncertainty, cfg=self.cfg['head']['test'])

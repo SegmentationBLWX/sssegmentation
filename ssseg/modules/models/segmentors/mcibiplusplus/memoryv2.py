@@ -5,7 +5,6 @@ Author:
     Zhenchao Jin
 '''
 import torch
-import numpy as np
 import torch.nn as nn
 import torch.nn.functional as F
 import torch.distributed as dist
@@ -37,21 +36,9 @@ class FeaturesMemoryV2(nn.Module):
         ], dim=1), requires_grad=False)
         # define self_attention module
         self.self_attention = SelfAttentionBlock(
-            key_in_channels=feats_channels,
-            query_in_channels=feats_channels,
-            transform_channels=transform_channels,
-            out_channels=feats_channels,
-            share_key_query=False,
-            query_downsample=None,
-            key_downsample=None,
-            key_query_num_convs=2,
-            value_out_num_convs=1,
-            key_query_norm=True,
-            value_out_norm=True,
-            matmul_norm=True,
-            with_out_project=True,
-            norm_cfg=norm_cfg,
-            act_cfg=act_cfg,
+            key_in_channels=feats_channels, query_in_channels=feats_channels, transform_channels=transform_channels, out_channels=feats_channels,
+            share_key_query=False, query_downsample=None, key_downsample=None, key_query_num_convs=2, value_out_num_convs=1, key_query_norm=True,
+            value_out_norm=True, matmul_norm=True, with_out_project=True, norm_cfg=norm_cfg, act_cfg=act_cfg,
         )
         # bottleneck used to fuse feats and selected_memory
         self.bottleneck = nn.Sequential(
@@ -124,7 +111,6 @@ class FeaturesMemoryV2(nn.Module):
             self.memory[clsid][0] = (1 - momentum) * self.memory[clsid][0].data + momentum * mean
             self.memory[clsid][1] = (1 - momentum) * self.memory[clsid][1].data + momentum * std
         # syn the memory
-        if dist.is_available() and dist.is_initialized():
-            memory = self.memory.data.clone()
-            dist.all_reduce(memory.div_(dist.get_world_size()))
-            self.memory = nn.Parameter(memory, requires_grad=False)
+        memory = self.memory.data.clone()
+        dist.all_reduce(memory.div_(dist.get_world_size()))
+        self.memory = nn.Parameter(memory, requires_grad=False)

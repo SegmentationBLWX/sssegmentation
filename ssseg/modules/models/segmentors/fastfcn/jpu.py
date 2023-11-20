@@ -4,7 +4,6 @@ Function:
 Author:
     Zhenchao Jin
 '''
-import copy
 import torch
 import torch.nn as nn
 import torch.nn.functional as F
@@ -40,16 +39,9 @@ class JPU(nn.Module):
             self.conv_layers.append(conv_layer)
         for idx in range(len(dilations)):
             dilation_layer = DepthwiseSeparableConv2d(
-                in_channels=(self.backbone_end_level - self.start_level) * self.mid_channels,
-                out_channels=self.mid_channels,
-                kernel_size=3,
-                stride=1,
-                padding=dilations[idx],
-                dilation=dilations[idx],
-                dw_norm_cfg=norm_cfg,
-                dw_act_cfg=None,
-                pw_norm_cfg=norm_cfg,
-                pw_act_cfg=act_cfg,
+                in_channels=(self.backbone_end_level - self.start_level) * self.mid_channels, out_channels=self.mid_channels,
+                kernel_size=3, stride=1, padding=dilations[idx], dilation=dilations[idx], dw_norm_cfg=norm_cfg, dw_act_cfg=None,
+                pw_norm_cfg=norm_cfg, pw_act_cfg=act_cfg,
             )
             self.dilation_layers.append(dilation_layer)
     '''forward'''

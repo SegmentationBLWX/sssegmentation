@@ -40,15 +40,11 @@ class MCIBI(BaseSegmentor):
         if context_within_image_cfg['is_on']:
             cwi_cfg = context_within_image_cfg['cfg']
             cwi_cfg.update({
-                'in_channels': head_cfg['in_channels'],
-                'out_channels': head_cfg['feats_channels'],
-                'align_corners': align_corners,
-                'norm_cfg': copy.deepcopy(norm_cfg),
-                'act_cfg': copy.deepcopy(act_cfg),
+                'in_channels': head_cfg['in_channels'], 'out_channels': head_cfg['feats_channels'], 'align_corners': align_corners,
+                'norm_cfg': copy.deepcopy(norm_cfg), 'act_cfg': copy.deepcopy(act_cfg),
             })
             supported_context_modules = {
-                'aspp': ASPP,
-                'ppm': PyramidPoolingModule,
+                'aspp': ASPP, 'ppm': PyramidPoolingModule,
             }
             self.context_within_image_module = supported_context_modules[context_within_image_cfg['type']](**cwi_cfg)
         self.bottleneck = nn.Sequential(
@@ -57,15 +53,9 @@ class MCIBI(BaseSegmentor):
             BuildActivation(act_cfg),
         )
         self.memory_module = FeaturesMemory(
-            num_classes=cfg['num_classes'], 
-            feats_channels=head_cfg['feats_channels'], 
-            transform_channels=head_cfg['transform_channels'],
-            num_feats_per_cls=head_cfg['num_feats_per_cls'],
-            out_channels=head_cfg['out_channels'],
-            use_context_within_image=context_within_image_cfg['is_on'],
-            use_hard_aggregate=head_cfg['use_hard_aggregate'],
-            norm_cfg=copy.deepcopy(norm_cfg),
-            act_cfg=copy.deepcopy(act_cfg),
+            num_classes=cfg['num_classes'], feats_channels=head_cfg['feats_channels'], transform_channels=head_cfg['transform_channels'], num_feats_per_cls=head_cfg['num_feats_per_cls'],
+            out_channels=head_cfg['out_channels'], use_context_within_image=context_within_image_cfg['is_on'], use_hard_aggregate=head_cfg['use_hard_aggregate'],
+            norm_cfg=copy.deepcopy(norm_cfg), act_cfg=copy.deepcopy(act_cfg),
         )
         # build decoder
         self.decoder_stage1 = nn.Sequential(
@@ -109,12 +99,7 @@ class MCIBI(BaseSegmentor):
         # forward according to the mode
         if self.mode == 'TRAIN':
             outputs_dict = self.forwardtrain(
-                predictions=preds_stage2,
-                targets=targets,
-                backbone_outputs=backbone_outputs,
-                losses_cfg=self.cfg['losses'],
-                img_size=img_size,
-                compute_loss=False,
+                predictions=preds_stage2, targets=targets, backbone_outputs=backbone_outputs, losses_cfg=self.cfg['losses'], img_size=img_size, auto_calc_loss=False,
             )
             preds_stage2 = outputs_dict.pop('loss_cls')
             preds_stage1 = F.interpolate(preds_stage1, size=img_size, mode='bilinear', align_corners=self.align_corners)
@@ -122,14 +107,10 @@ class MCIBI(BaseSegmentor):
             with torch.no_grad():
                 self.memory_module.update(
                     features=F.interpolate(memory_input, size=img_size, mode='bilinear', align_corners=self.align_corners), 
-                    segmentation=targets['seg_target'],
-                    learning_rate=kwargs['learning_rate'],
-                    **self.cfg['head']['update_cfg']
+                    segmentation=targets['seg_target'], learning_rate=kwargs['learning_rate'], **self.cfg['head']['update_cfg']
                 )
             loss, losses_log_dict = self.calculatelosses(
-                predictions=outputs_dict, 
-                targets=targets, 
-                losses_cfg=self.cfg['losses']
+                predictions=outputs_dict, targets=targets, losses_cfg=self.cfg['losses']
             )
             if (kwargs['epoch'] > 1) and self.cfg['head']['use_loss']:
                 loss_memory, loss_memory_log = self.calculatememoryloss(stored_memory)
@@ -139,14 +120,14 @@ class MCIBI(BaseSegmentor):
                 losses_log_dict['total'] = total
             return loss, losses_log_dict
         return preds_stage2
-    '''norm layer'''
+    '''norm'''
     def norm(self, x, norm_layer):
         n, c, h, w = x.shape
         x = x.reshape(n, c, h * w).transpose(2, 1).contiguous()
         x = norm_layer(x)
         x = x.transpose(1, 2).reshape(n, c, h, w).contiguous()
         return x
-    '''calculate memory loss'''
+    '''calculatememoryloss'''
     def calculatememoryloss(self, stored_memory):
         num_classes, num_feats_per_cls, feats_channels = stored_memory.size()
         stored_memory = stored_memory.reshape(num_classes * num_feats_per_cls, feats_channels, 1, 1)
@@ -154,9 +135,6 @@ class MCIBI(BaseSegmentor):
         target = torch.range(0, num_classes - 1).type_as(stored_memory).long()
         target = target.unsqueeze(1).repeat(1, num_feats_per_cls).view(-1)
         loss_memory = self.calculateloss(preds_memory, target, self.cfg['head']['loss_cfg'])
-        if dist.is_available() and dist.is_initialized():
-            value = loss_memory.data.clone()
-            dist.all_reduce(value.div_(dist.get_world_size()))
-        else:
-            value = torch.Tensor([loss_memory.item()]).type_as(stored_memory)
-        return loss_memory, value
+        loss_memory_log = loss_memory.data.clone()
+        dist.all_reduce(loss_memory_log.div_(dist.get_world_size()))
+        return loss_memory, loss_memory_log

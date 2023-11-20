@@ -5,7 +5,6 @@ Author:
     Zhenchao Jin
 '''
 import copy
-import torch
 import torch.nn as nn
 from .afnblock import AFNBlock
 from .apnblock import APNBlock
@@ -20,24 +19,14 @@ class ANNNet(BaseSegmentor):
         align_corners, norm_cfg, act_cfg, head_cfg = self.align_corners, self.norm_cfg, self.act_cfg, cfg['head']
         # build AFNBlock
         self.afn_block = AFNBlock(
-            low_in_channels=head_cfg['in_channels_list'][0],
-            high_in_channels=head_cfg['in_channels_list'][1], 
-            transform_channels=head_cfg['transform_channels'], 
-            out_channels=head_cfg['in_channels_list'][1], 
-            query_scales=head_cfg['query_scales'], 
-            key_pool_scales=head_cfg['key_pool_scales'],
-            norm_cfg=copy.deepcopy(norm_cfg),
-            act_cfg=copy.deepcopy(act_cfg),
+            low_in_channels=head_cfg['in_channels_list'][0], high_in_channels=head_cfg['in_channels_list'][1], transform_channels=head_cfg['transform_channels'], 
+            out_channels=head_cfg['in_channels_list'][1], query_scales=head_cfg['query_scales'], key_pool_scales=head_cfg['key_pool_scales'],
+            norm_cfg=copy.deepcopy(norm_cfg), act_cfg=copy.deepcopy(act_cfg),
         )
         # build APNBlock
         self.apn_block = APNBlock(
-            in_channels=head_cfg['feats_channels'], 
-            transform_channels=head_cfg['transform_channels'], 
-            out_channels=head_cfg['feats_channels'], 
-            query_scales=head_cfg['query_scales'], 
-            key_pool_scales=head_cfg['key_pool_scales'],
-            norm_cfg=copy.deepcopy(norm_cfg),
-            act_cfg=copy.deepcopy(act_cfg),
+            in_channels=head_cfg['feats_channels'], transform_channels=head_cfg['transform_channels'], out_channels=head_cfg['feats_channels'], 
+            query_scales=head_cfg['query_scales'], key_pool_scales=head_cfg['key_pool_scales'], norm_cfg=copy.deepcopy(norm_cfg), act_cfg=copy.deepcopy(act_cfg),
         )
         # build bottleneck
         self.bottleneck = nn.Sequential(
@@ -72,11 +61,7 @@ class ANNNet(BaseSegmentor):
         # forward according to the mode
         if self.mode == 'TRAIN':
             loss, losses_log_dict = self.forwardtrain(
-                predictions=predictions,
-                targets=targets,
-                backbone_outputs=backbone_outputs,
-                losses_cfg=self.cfg['losses'],
-                img_size=img_size,
+                predictions=predictions, targets=targets, backbone_outputs=backbone_outputs, losses_cfg=self.cfg['losses'], img_size=img_size,
             )
             return loss, losses_log_dict
         return predictions

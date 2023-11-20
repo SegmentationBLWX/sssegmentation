@@ -20,17 +20,13 @@ class LRASPPNet(BaseSegmentor):
         self.branch_convs, self.branch_ups = nn.Sequential(), nn.Sequential()
         for idx, branch_channels in enumerate(head_cfg['branch_channels_list']):
             self.branch_convs.add_module(
-                f'conv{idx}', 
-                nn.Conv2d(head_cfg['in_channels_list'][idx], branch_channels, kernel_size=1, stride=1, padding=0, bias=False)
+                f'conv{idx}', nn.Conv2d(head_cfg['in_channels_list'][idx], branch_channels, kernel_size=1, stride=1, padding=0, bias=False)
             )
-            self.branch_ups.add_module(
-                f'conv{idx}', 
-                nn.Sequential(
-                    nn.Conv2d(head_cfg['feats_channels'] + branch_channels, head_cfg['feats_channels'], kernel_size=1, stride=1, padding=0, bias=False),
-                    BuildNormalization(placeholder=head_cfg['feats_channels'], norm_cfg=norm_cfg),
-                    BuildActivation(act_cfg),
-                )
-            )
+            self.branch_ups.add_module(f'conv{idx}', nn.Sequential(
+                nn.Conv2d(head_cfg['feats_channels'] + branch_channels, head_cfg['feats_channels'], kernel_size=1, stride=1, padding=0, bias=False),
+                BuildNormalization(placeholder=head_cfg['feats_channels'], norm_cfg=norm_cfg),
+                BuildActivation(act_cfg),
+            ))
         self.aspp_conv = nn.Sequential(
             nn.Conv2d(head_cfg['in_channels_list'][-1], head_cfg['feats_channels'], kernel_size=1, stride=1, padding=0, bias=False),
             BuildNormalization(placeholder=head_cfg['feats_channels'], norm_cfg=norm_cfg),
@@ -67,11 +63,7 @@ class LRASPPNet(BaseSegmentor):
         # return according to the mode
         if self.mode == 'TRAIN':
             loss, losses_log_dict = self.forwardtrain(
-                predictions=predictions,
-                targets=targets,
-                backbone_outputs=backbone_outputs,
-                losses_cfg=self.cfg['losses'],
-                img_size=img_size,
+                predictions=predictions, targets=targets, backbone_outputs=backbone_outputs, losses_cfg=self.cfg['losses'], img_size=img_size,
             )
             return loss, losses_log_dict
         return predictions

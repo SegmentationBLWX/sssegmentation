@@ -5,7 +5,6 @@ Author:
     Zhenchao Jin
 '''
 import copy
-import torch
 import torch.nn as nn
 from ..base import BaseSegmentor
 from .ppm import PyramidPoolingModule
@@ -18,12 +17,8 @@ class PSPNet(BaseSegmentor):
         align_corners, norm_cfg, act_cfg, head_cfg = self.align_corners, self.norm_cfg, self.act_cfg, cfg['head']
         # build pyramid pooling module
         ppm_cfg = {
-            'in_channels': head_cfg['in_channels'],
-            'out_channels': head_cfg['feats_channels'],
-            'pool_scales': head_cfg['pool_scales'],
-            'align_corners': align_corners,
-            'norm_cfg': copy.deepcopy(norm_cfg),
-            'act_cfg': copy.deepcopy(act_cfg),
+            'in_channels': head_cfg['in_channels'], 'out_channels': head_cfg['feats_channels'], 'pool_scales': head_cfg['pool_scales'],
+            'align_corners': align_corners, 'norm_cfg': copy.deepcopy(norm_cfg), 'act_cfg': copy.deepcopy(act_cfg),
         }
         self.ppm_net = PyramidPoolingModule(**ppm_cfg)
         # build decoder
@@ -47,11 +42,7 @@ class PSPNet(BaseSegmentor):
         # forward according to the mode
         if self.mode == 'TRAIN':
             loss, losses_log_dict = self.forwardtrain(
-                predictions=predictions,
-                targets=targets,
-                backbone_outputs=backbone_outputs,
-                losses_cfg=self.cfg['losses'],
-                img_size=img_size,
+                predictions=predictions, targets=targets, backbone_outputs=backbone_outputs, losses_cfg=self.cfg['losses'], img_size=img_size,
             )
             return loss, losses_log_dict
         return predictions

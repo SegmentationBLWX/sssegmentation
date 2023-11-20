@@ -8,7 +8,6 @@ import torch
 import torch.nn as nn
 import torch.nn.functional as F
 from ...backbones import Scale
-from ..base import SelfAttentionBlock
 
 
 '''ChannelAttentionModule'''

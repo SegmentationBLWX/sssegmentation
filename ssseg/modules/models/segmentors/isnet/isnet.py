@@ -27,21 +27,14 @@ class ISNet(BaseSegmentor):
         )
         # build image-level context module
         ilc_cfg = {
-            'feats_channels': head_cfg['feats_channels'],
-            'transform_channels': head_cfg['transform_channels'],
-            'concat_input': head_cfg['concat_input'],
-            'norm_cfg': copy.deepcopy(norm_cfg),
-            'act_cfg': copy.deepcopy(act_cfg),
-            'align_corners': align_corners,
+            'feats_channels': head_cfg['feats_channels'], 'transform_channels': head_cfg['transform_channels'], 'concat_input': head_cfg['concat_input'],
+            'norm_cfg': copy.deepcopy(norm_cfg), 'act_cfg': copy.deepcopy(act_cfg), 'align_corners': align_corners,
         }
         self.ilc_net = ImageLevelContext(**ilc_cfg)
         # build semantic-level context module
         slc_cfg = {
-            'feats_channels': head_cfg['feats_channels'],
-            'transform_channels': head_cfg['transform_channels'],
-            'concat_input': head_cfg['concat_input'],
-            'norm_cfg': copy.deepcopy(norm_cfg),
-            'act_cfg': copy.deepcopy(act_cfg),
+            'feats_channels': head_cfg['feats_channels'], 'transform_channels': head_cfg['transform_channels'], 'concat_input': head_cfg['concat_input'],
+            'norm_cfg': copy.deepcopy(norm_cfg), 'act_cfg': copy.deepcopy(act_cfg),
         }
         self.slc_net = SemanticLevelContext(**slc_cfg)
         # build decoder
@@ -99,19 +92,12 @@ class ISNet(BaseSegmentor):
         # return according to the mode
         if self.mode == 'TRAIN':
             outputs_dict = self.forwardtrain(
-                predictions=preds_stage2,
-                targets=targets,
-                backbone_outputs=backbone_outputs,
-                losses_cfg=self.cfg['losses'],
-                img_size=img_size,
-                compute_loss=False,
+                predictions=preds_stage2, targets=targets, backbone_outputs=backbone_outputs, losses_cfg=self.cfg['losses'], img_size=img_size, auto_calc_loss=False,
             )
             preds_stage2 = outputs_dict.pop('loss_cls')
             preds_stage1 = F.interpolate(preds_stage1, size=img_size, mode='bilinear', align_corners=self.align_corners)
             outputs_dict.update({'loss_cls_stage1': preds_stage1, 'loss_cls_stage2': preds_stage2})
             return self.calculatelosses(
-                predictions=outputs_dict, 
-                targets=targets, 
-                losses_cfg=self.cfg['losses']
+                predictions=outputs_dict, targets=targets, losses_cfg=self.cfg['losses']
             )
         return preds_stage2

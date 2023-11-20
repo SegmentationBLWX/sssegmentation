@@ -246,20 +246,13 @@ class IDRNet(BaseSegmentor):
             self.updatedlclsreps(feats, targets['seg_target'], momentum, img_size)
             # --calculate losses
             outputs_dict = self.forwardtrain(
-                predictions=preds_stage2,
-                targets=targets,
-                backbone_outputs=backbone_outputs,
-                losses_cfg=self.cfg['losses'],
-                img_size=img_size,
-                compute_loss=False,
+                predictions=preds_stage2, targets=targets, backbone_outputs=backbone_outputs, losses_cfg=self.cfg['losses'], img_size=img_size, auto_calc_loss=False,
             )
             preds_stage2 = outputs_dict.pop('loss_cls')
             preds_stage1 = F.interpolate(preds_stage1, size=img_size, mode='bilinear', align_corners=self.align_corners)
             outputs_dict.update({'loss_cls_stage1': preds_stage1, 'loss_cls_stage2': preds_stage2})
             loss, losses_log_dict = self.calculatelosses(
-                predictions=outputs_dict,
-                targets=targets,
-                losses_cfg=self.cfg['losses'],
+                predictions=outputs_dict, targets=targets, losses_cfg=self.cfg['losses'],
             )
             return loss, losses_log_dict
         return preds_stage2
@@ -352,7 +345,6 @@ class IDRNet(BaseSegmentor):
     '''update dl_cls_representations'''
     def updatedlclsreps(self, feats, gts, momentum, img_size):
         with torch.no_grad():
-            batch_size, num_channels, feats_h, feats_w = feats.size()
             # feats: (B, H, W, C)
             feats = F.interpolate(feats, size=img_size, mode='bilinear', align_corners=self.align_corners)
             feats = feats.permute(0, 2, 3, 1).contiguous()

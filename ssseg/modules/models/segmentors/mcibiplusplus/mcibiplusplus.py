@@ -26,15 +26,11 @@ class MCIBIPlusPlus(BaseSegmentor):
         if context_within_image_cfg['is_on']:
             cwi_cfg = context_within_image_cfg['cfg']
             cwi_cfg.update({
-                'in_channels': head_cfg['in_channels'],
-                'out_channels': head_cfg['feats_channels'],
-                'align_corners': align_corners,
-                'norm_cfg': copy.deepcopy(norm_cfg),
-                'act_cfg': copy.deepcopy(act_cfg),
+                'in_channels': head_cfg['in_channels'], 'out_channels': head_cfg['feats_channels'], 'align_corners': align_corners,
+                'norm_cfg': copy.deepcopy(norm_cfg), 'act_cfg': copy.deepcopy(act_cfg),
             })
             supported_context_modules = {
-                'aspp': ASPP,
-                'ppm': PyramidPoolingModule,
+                'aspp': ASPP, 'ppm': PyramidPoolingModule,
             }
             if context_within_image_cfg['type'] == 'aspp':
                 cwi_cfg.pop('pool_scales')
@@ -53,14 +49,8 @@ class MCIBIPlusPlus(BaseSegmentor):
             BuildActivation(act_cfg),
         )
         self.memory_module = FeaturesMemoryV2(
-            num_classes=cfg['num_classes'], 
-            feats_channels=head_cfg['feats_channels'], 
-            transform_channels=head_cfg['transform_channels'],
-            out_channels=head_cfg['out_channels'],
-            use_hard_aggregate=head_cfg['use_hard_aggregate'],
-            downsample_before_sa=head_cfg['downsample_before_sa'],
-            norm_cfg=copy.deepcopy(norm_cfg),
-            act_cfg=copy.deepcopy(act_cfg),
+            num_classes=cfg['num_classes'], feats_channels=head_cfg['feats_channels'], transform_channels=head_cfg['transform_channels'], out_channels=head_cfg['out_channels'], 
+            use_hard_aggregate=head_cfg['use_hard_aggregate'], downsample_before_sa=head_cfg['downsample_before_sa'], norm_cfg=copy.deepcopy(norm_cfg), act_cfg=copy.deepcopy(act_cfg),
             align_corners=align_corners,
         )
         # build fpn
@@ -156,18 +146,12 @@ class MCIBIPlusPlus(BaseSegmentor):
         # forward according to the mode
         if self.mode == 'TRAIN':
             outputs_dict = self.forwardtrain(
-                predictions=preds_cls,
-                targets=targets,
-                backbone_outputs=backbone_outputs,
-                losses_cfg=self.cfg['losses'],
-                img_size=img_size,
-                compute_loss=False,
+                predictions=preds_cls, targets=targets, backbone_outputs=backbone_outputs, losses_cfg=self.cfg['losses'], img_size=img_size, auto_calc_loss=False,
             )
             preds_cls = outputs_dict.pop('loss_cls')
             preds_pr = F.interpolate(preds_pr, size=img_size, mode='bilinear', align_corners=self.align_corners)
             outputs_dict.update({
-                'loss_pr': preds_pr, 
-                'loss_cls': preds_cls,
+                'loss_pr': preds_pr, 'loss_cls': preds_cls,
             })
             if hasattr(self, 'context_within_image_module') and hasattr(self, 'decoder_cwi'): 
                 preds_cwi = F.interpolate(preds_cwi, size=img_size, mode='bilinear', align_corners=self.align_corners)
@@ -175,14 +159,10 @@ class MCIBIPlusPlus(BaseSegmentor):
             with torch.no_grad():
                 self.memory_module.update(
                     features=F.interpolate(pixel_representations, size=img_size, mode='bilinear', align_corners=self.align_corners), 
-                    segmentation=targets['seg_target'],
-                    learning_rate=kwargs['learning_rate'],
-                    **self.cfg['head']['update_cfg']
+                    segmentation=targets['seg_target'], learning_rate=kwargs['learning_rate'], **self.cfg['head']['update_cfg']
                 )
             loss, losses_log_dict = self.calculatelosses(
-                predictions=outputs_dict, 
-                targets=targets, 
-                losses_cfg=self.cfg['losses'],
+                predictions=outputs_dict, targets=targets, losses_cfg=self.cfg['losses'],
             )
             return loss, losses_log_dict
         return preds_cls

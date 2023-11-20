@@ -5,7 +5,6 @@ Author:
     Zhenchao Jin
 '''
 import copy
-import torch
 import torch.nn as nn
 import torch.nn.functional as F
 from ..pspnet import PyramidPoolingModule
@@ -24,12 +23,8 @@ class ICNetEncoder(nn.Module):
         self.backbone_net = BuildBackbone(backbone_cfg)
         self.backbone_net.maxpool = nn.MaxPool2d(kernel_size=3, stride=2, padding=1, ceil_mode=True)
         self.ppm_net = PyramidPoolingModule(
-            pool_scales=pool_scales,
-            in_channels=layer_channels_list[1],
-            out_channels=psp_out_channels,
-            norm_cfg=norm_cfg,
-            act_cfg=act_cfg,
-            align_corners=align_corners,
+            pool_scales=pool_scales, in_channels=layer_channels_list[1], out_channels=psp_out_channels,
+            norm_cfg=norm_cfg, act_cfg=act_cfg, align_corners=align_corners,
         )
         self.conv_sub1 = nn.Sequential(
             nn.Conv2d(in_channels, light_branch_middle_channels, kernel_size=3, stride=2, padding=1, bias=False),

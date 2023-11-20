@@ -22,9 +22,9 @@ SEGMENTOR_CFG = {
         'epm_hidden_channels': 256, 'shortcut_feats_channels': 48, 'epm_out_channels': 2, 'dropout_stage1': 0, 'dropout_stage2': 0.1,
     },
     'losses': {
-        'loss_cls_stage1': {'CrossEntropyLoss': {'scale_factor': 1.0, 'ignore_index': 255, 'reduction': 'mean'}},
-        'loss_cls_stage2': {'CrossEntropyLoss': {'scale_factor': 1.0, 'ignore_index': 255, 'reduction': 'mean'}},
-        'loss_edge': {'CrossEntropyLoss': {'scale_factor': 1.0, 'ignore_index': 255, 'reduction': 'mean'}}
+        'loss_cls_stage1': {'type': 'CrossEntropyLoss', 'scale_factor': 1.0, 'ignore_index': 255, 'reduction': 'mean'},
+        'loss_cls_stage2': {'type': 'CrossEntropyLoss', 'scale_factor': 1.0, 'ignore_index': 255, 'reduction': 'mean'},
+        'loss_edge': {'type': 'CrossEntropyLoss', 'scale_factor': 1.0, 'ignore_index': 255, 'reduction': 'mean'}
     },
     'inference': {
         'mode': 'whole',

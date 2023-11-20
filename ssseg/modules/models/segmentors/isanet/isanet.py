@@ -18,29 +18,12 @@ from ...backbones import BuildActivation, BuildNormalization
 class SelfAttentionBlock(_SelfAttentionBlock):
     def __init__(self, in_channels, feats_channels, norm_cfg, act_cfg):
         super(SelfAttentionBlock, self).__init__(
-            key_in_channels=in_channels,
-            query_in_channels=in_channels,
-            transform_channels=feats_channels,
-            out_channels=in_channels,
-            share_key_query=False,
-            query_downsample=None,
-            key_downsample=None,
-            key_query_num_convs=2,
-            key_query_norm=True,
-            value_out_num_convs=1,
-            value_out_norm=False,
-            matmul_norm=True,
-            with_out_project=False,
-            norm_cfg=copy.deepcopy(norm_cfg),
-            act_cfg=copy.deepcopy(act_cfg)
+            key_in_channels=in_channels, query_in_channels=in_channels, transform_channels=feats_channels, out_channels=in_channels, share_key_query=False,
+            query_downsample=None, key_downsample=None, key_query_num_convs=2, key_query_norm=True, value_out_num_convs=1, value_out_norm=False,
+            matmul_norm=True, with_out_project=False, norm_cfg=copy.deepcopy(norm_cfg), act_cfg=copy.deepcopy(act_cfg)
         )
         self.output_project = self.buildproject(
-            in_channels=in_channels,
-            out_channels=in_channels,
-            num_convs=1,
-            use_norm=True,
-            norm_cfg=copy.deepcopy(norm_cfg),
-            act_cfg=copy.deepcopy(act_cfg),
+            in_channels=in_channels, out_channels=in_channels, num_convs=1, use_norm=True, norm_cfg=copy.deepcopy(norm_cfg), act_cfg=copy.deepcopy(act_cfg),
         )
     '''forward'''
     def forward(self, x):
@@ -61,16 +44,10 @@ class ISANet(BaseSegmentor):
             BuildActivation(act_cfg),
         )
         self.global_relation = SelfAttentionBlock(
-            in_channels=head_cfg['feats_channels'],
-            feats_channels=head_cfg['isa_channels'],
-            norm_cfg=copy.deepcopy(norm_cfg),
-            act_cfg=copy.deepcopy(act_cfg)
+            in_channels=head_cfg['feats_channels'], feats_channels=head_cfg['isa_channels'], norm_cfg=copy.deepcopy(norm_cfg), act_cfg=copy.deepcopy(act_cfg)
         )
         self.local_relation = SelfAttentionBlock(
-            in_channels=head_cfg['feats_channels'],
-            feats_channels=head_cfg['isa_channels'],
-            norm_cfg=copy.deepcopy(norm_cfg),
-            act_cfg=copy.deepcopy(act_cfg)
+            in_channels=head_cfg['feats_channels'], feats_channels=head_cfg['isa_channels'], norm_cfg=copy.deepcopy(norm_cfg), act_cfg=copy.deepcopy(act_cfg)
         )
         self.out_conv = nn.Sequential(
             nn.Conv2d(head_cfg['feats_channels'] * 2, head_cfg['feats_channels'], kernel_size=3, stride=1, padding=1, bias=False),
@@ -127,11 +104,7 @@ class ISANet(BaseSegmentor):
         # return according to the mode
         if self.mode == 'TRAIN':
             loss, losses_log_dict = self.forwardtrain(
-                predictions=predictions,
-                targets=targets,
-                backbone_outputs=backbone_outputs,
-                losses_cfg=self.cfg['losses'],
-                img_size=img_size,
+                predictions=predictions, targets=targets, backbone_outputs=backbone_outputs, losses_cfg=self.cfg['losses'], img_size=img_size,
             )
             return loss, losses_log_dict
         return predictions

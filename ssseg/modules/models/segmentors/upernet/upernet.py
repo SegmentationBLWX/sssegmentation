@@ -25,12 +25,8 @@ class UPerNet(BaseSegmentor):
             self.feats_to_pyramid_net = Feature2Pyramid(**head_cfg['feature2pyramid'])
         # build pyramid pooling module
         ppm_cfg = {
-            'in_channels': head_cfg['in_channels_list'][-1],
-            'out_channels': head_cfg['feats_channels'],
-            'pool_scales': head_cfg['pool_scales'],
-            'align_corners': align_corners,
-            'norm_cfg': copy.deepcopy(norm_cfg),
-            'act_cfg': copy.deepcopy(act_cfg),
+            'in_channels': head_cfg['in_channels_list'][-1], 'out_channels': head_cfg['feats_channels'], 'pool_scales': head_cfg['pool_scales'],
+            'align_corners': align_corners, 'norm_cfg': copy.deepcopy(norm_cfg), 'act_cfg': copy.deepcopy(act_cfg),
         }
         self.ppm_net = PyramidPoolingModule(**ppm_cfg)
         # build lateral convs
@@ -88,11 +84,7 @@ class UPerNet(BaseSegmentor):
         # forward according to the mode
         if self.mode == 'TRAIN':
             loss, losses_log_dict = self.forwardtrain(
-                predictions=predictions,
-                targets=targets,
-                backbone_outputs=backbone_outputs,
-                losses_cfg=self.cfg['losses'],
-                img_size=img_size,
+                predictions=predictions, targets=targets, backbone_outputs=backbone_outputs, losses_cfg=self.cfg['losses'], img_size=img_size,
             )
             return loss, losses_log_dict
         return predictions

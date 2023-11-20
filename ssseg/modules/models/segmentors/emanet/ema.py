@@ -29,7 +29,7 @@ class EMAModule(nn.Module):
         feats = x.view(batch_size, channels, height * width)
         bases = self.bases.repeat(batch_size, 1, 1)
         with torch.no_grad():
-            for i in range(self.num_stages):
+            for _ in range(self.num_stages):
                 attention = torch.einsum('bcn,bck->bnk', feats, bases)
                 attention = F.softmax(attention, dim=2)
                 attention_normed = F.normalize(attention, dim=1, p=1)

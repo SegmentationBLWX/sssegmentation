@@ -17,12 +17,8 @@ class Deeplabv3(BaseSegmentor):
         align_corners, norm_cfg, act_cfg, head_cfg = self.align_corners, self.norm_cfg, self.act_cfg, cfg['head']
         # build aspp net
         aspp_cfg = {
-            'in_channels': head_cfg['in_channels'],
-            'out_channels': head_cfg['feats_channels'],
-            'dilations': head_cfg['dilations'],
-            'align_corners': align_corners,
-            'norm_cfg': copy.deepcopy(norm_cfg),
-            'act_cfg': copy.deepcopy(act_cfg),
+            'in_channels': head_cfg['in_channels'], 'out_channels': head_cfg['feats_channels'], 'dilations': head_cfg['dilations'],
+            'align_corners': align_corners, 'norm_cfg': copy.deepcopy(norm_cfg), 'act_cfg': copy.deepcopy(act_cfg),
         }
         self.aspp_net = ASPP(**aspp_cfg)
         # build decoder
@@ -46,11 +42,7 @@ class Deeplabv3(BaseSegmentor):
         # forward according to the mode
         if self.mode == 'TRAIN':
             loss, losses_log_dict = self.forwardtrain(
-                predictions=predictions,
-                targets=targets,
-                backbone_outputs=backbone_outputs,
-                losses_cfg=self.cfg['losses'],
-                img_size=img_size,
+                predictions=predictions, targets=targets, backbone_outputs=backbone_outputs, losses_cfg=self.cfg['losses'], img_size=img_size,
             )
             return loss, losses_log_dict
         return predictions

@@ -19,10 +19,7 @@ class FastFCN(nn.Module):
         self.align_corners, self.norm_cfg, self.act_cfg, head_cfg = cfg['align_corners'], cfg['norm_cfg'], cfg['act_cfg'], cfg['head']
         # build segmentor
         supported_models = {
-            'FCN': FCN,
-            'ENCNet': ENCNet,
-            'PSPNet': PSPNet,
-            'Deeplabv3': Deeplabv3,
+            'FCN': FCN, 'ENCNet': ENCNet, 'PSPNet': PSPNet, 'Deeplabv3': Deeplabv3,
         }
         model_type = cfg['segmentor']
         assert model_type in supported_models, 'unsupport model_type %s' % model_type

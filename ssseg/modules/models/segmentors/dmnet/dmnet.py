@@ -20,12 +20,8 @@ class DMNet(BaseSegmentor):
         self.dcm_modules = nn.ModuleList()
         for filter_size in head_cfg['filter_sizes']:
             self.dcm_modules.append(DynamicConvolutionalModule(
-                filter_size=filter_size,
-                is_fusion=head_cfg['is_fusion'],
-                in_channels=head_cfg['in_channels'],
-                out_channels=head_cfg['feats_channels'],
-                norm_cfg=norm_cfg,
-                act_cfg=act_cfg,
+                filter_size=filter_size, is_fusion=head_cfg['is_fusion'], in_channels=head_cfg['in_channels'],
+                out_channels=head_cfg['feats_channels'], norm_cfg=norm_cfg, act_cfg=act_cfg,
             ))
         # build decoder
         self.decoder = nn.Sequential(
@@ -54,11 +50,7 @@ class DMNet(BaseSegmentor):
         # forward according to the mode
         if self.mode == 'TRAIN':
             loss, losses_log_dict = self.forwardtrain(
-                predictions=predictions,
-                targets=targets,
-                backbone_outputs=backbone_outputs,
-                losses_cfg=self.cfg['losses'],
-                img_size=img_size,
+                predictions=predictions, targets=targets, backbone_outputs=backbone_outputs, losses_cfg=self.cfg['losses'], img_size=img_size,
             )
             return loss, losses_log_dict
         return predictions

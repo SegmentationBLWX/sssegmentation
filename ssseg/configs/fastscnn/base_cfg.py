@@ -24,9 +24,9 @@ SEGMENTOR_CFG = {
         {'in_channels': 128, 'out_channels': 32, 'dropout': 0.1,},
     ],
     'losses': {
-        'loss_aux1': {'BinaryCrossEntropyLoss': {'scale_factor': 0.4, 'ignore_index': 255, 'reduction': 'mean'}},
-        'loss_aux2': {'BinaryCrossEntropyLoss': {'scale_factor': 0.4, 'ignore_index': 255, 'reduction': 'mean'}},
-        'loss_cls': {'BinaryCrossEntropyLoss': {'scale_factor': 1.0, 'ignore_index': 255, 'reduction': 'mean'}},
+        'loss_aux1': {'type': 'BinaryCrossEntropyLoss', 'scale_factor': 0.4, 'ignore_index': 255, 'reduction': 'mean'},
+        'loss_aux2': {'type': 'BinaryCrossEntropyLoss', 'scale_factor': 0.4, 'ignore_index': 255, 'reduction': 'mean'},
+        'loss_cls': {'type': 'BinaryCrossEntropyLoss', 'scale_factor': 1.0, 'ignore_index': 255, 'reduction': 'mean'},
     },
     'inference': {
         'mode': 'whole',

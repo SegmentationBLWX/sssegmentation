@@ -21,10 +21,6 @@ class HungarianMatcher(nn.Module):
     @torch.no_grad()
     def memoryefficientforward(self, outputs, targets):
         bs, num_queries = outputs['pred_logits'].shape[:2]
-        # work out the mask padding size
-        masks = [v['masks'] for v in targets]
-        h_max = max([m.shape[1] for m in masks])
-        w_max = max([m.shape[2] for m in masks])
         # iterate through batch size
         indices = []
         for b in range(bs):

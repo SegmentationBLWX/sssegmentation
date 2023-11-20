@@ -4,7 +4,6 @@ Function:
 Author:
     Zhenchao Jin
 '''
-import torch
 import torch.nn as nn
 from .icneck import ICNeck
 from ..base import BaseSegmentor
@@ -27,11 +26,8 @@ class ICNet(BaseSegmentor):
         self.backbone_net = ICNetEncoder(**encoder_cfg)
         # build neck
         neck_cfg = {
-            'in_channels_list': head_cfg['in_channels_list'],
-            'out_channels': head_cfg['feats_channels'],
-            'act_cfg': act_cfg.copy(),
-            'norm_cfg': norm_cfg.copy(),
-            'align_corners': align_corners,
+            'in_channels_list': head_cfg['in_channels_list'], 'out_channels': head_cfg['feats_channels'], 'act_cfg': act_cfg.copy(),
+            'norm_cfg': norm_cfg.copy(), 'align_corners': align_corners,
         }
         self.neck = ICNeck(**neck_cfg)
         # build decoder
@@ -58,11 +54,7 @@ class ICNet(BaseSegmentor):
         # forward according to the mode
         if self.mode == 'TRAIN':
             loss, losses_log_dict = self.forwardtrain(
-                predictions=predictions,
-                targets=targets,
-                backbone_outputs=backbone_outputs,
-                losses_cfg=self.cfg['losses'],
-                img_size=img_size,
+                predictions=predictions, targets=targets, backbone_outputs=backbone_outputs, losses_cfg=self.cfg['losses'], img_size=img_size,
             )
             return loss, losses_log_dict
         return predictions

@@ -25,12 +25,8 @@ class SETRUP(BaseSegmentor):
             self.norm_layers.append(norm_layer)
         # build decoder
         self.decoder = self.builddecoder({
-            'in_channels': head_cfg['in_channels_list'][-1],
-            'out_channels': head_cfg['feats_channels'],
-            'kernel_size': head_cfg['kernel_size'],
-            'scale_factor': head_cfg['scale_factor'],
-            'dropout': head_cfg['dropout'],
-            'num_convs': head_cfg['num_convs'],
+            'in_channels': head_cfg['in_channels_list'][-1], 'out_channels': head_cfg['feats_channels'], 'kernel_size': head_cfg['kernel_size'],
+            'scale_factor': head_cfg['scale_factor'], 'dropout': head_cfg['dropout'], 'num_convs': head_cfg['num_convs'],
         })
         # build auxiliary decoder
         auxiliary_cfg_list = cfg['auxiliary']
@@ -62,9 +58,7 @@ class SETRUP(BaseSegmentor):
                 predictions_aux = F.interpolate(predictions_aux, size=img_size, mode='bilinear', align_corners=self.align_corners)
                 outputs_dict[f'loss_aux{idx+1}'] = predictions_aux
             return self.calculatelosses(
-                predictions=outputs_dict, 
-                targets=targets, 
-                losses_cfg=self.cfg['losses']
+                predictions=outputs_dict, targets=targets, losses_cfg=self.cfg['losses']
             )
         return predictions
     '''norm layer'''
@@ -102,11 +96,7 @@ class SETRMLA(BaseSegmentor):
             norm_layer = BuildNormalization(placeholder=in_channels, norm_cfg=norm_cfg_copy)
             norm_layers.append(norm_layer)
         self.mla_neck = MLANeck(
-            in_channels_list=head_cfg['in_channels_list'], 
-            out_channels=head_cfg['mla_feats_channels'], 
-            norm_layers=norm_layers, 
-            norm_cfg=norm_cfg, 
-            act_cfg=act_cfg,
+            in_channels_list=head_cfg['in_channels_list'], out_channels=head_cfg['mla_feats_channels'], norm_layers=norm_layers, norm_cfg=norm_cfg, act_cfg=act_cfg,
         )
         # build upsample convs and decoder
         assert head_cfg['mla_up_channels'] * len(head_cfg['in_channels_list']) == head_cfg['feats_channels']
@@ -158,9 +148,7 @@ class SETRMLA(BaseSegmentor):
                 predictions_aux = F.interpolate(predictions_aux, size=img_size, mode='bilinear', align_corners=self.align_corners)
                 outputs_dict[f'loss_aux{idx+1}'] = predictions_aux
             return self.calculatelosses(
-                predictions=outputs_dict, 
-                targets=targets, 
-                losses_cfg=self.cfg['losses']
+                predictions=outputs_dict, targets=targets, losses_cfg=self.cfg['losses']
             )
         return predictions
     '''build decoder'''
