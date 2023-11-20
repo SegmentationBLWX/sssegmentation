@@ -20,7 +20,7 @@
 project = 'SSSegmentation'
 copyright = '2020-2023, Zhenchao Jin'
 author = 'Zhenchao Jin'
-release = '1.4.0'
+release = '1.4.1'
 
 # -- General configuration ---------------------------------------------------
 
@@ -33,9 +33,8 @@ extensions = [
     'sphinx.ext.viewcode',
     'recommonmark',
     'sphinx_markdown_tables',
-    'sphinx.ext.mathjax',
+    'sphinxcontrib.katex'
 ]
-mathjax_path = 'https://cdn.mathjax.org/mathjax/latest/MathJax.js?config=TeX-AMS-MML_HTMLorMML'
 
 # Add any paths that contain templates here, relative to this directory.
 templates_path = ['_templates']
