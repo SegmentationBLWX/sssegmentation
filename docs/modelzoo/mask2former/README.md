@@ -39,6 +39,7 @@
 | Mask2Former    | ImageNet-22k-384x384   | Swin-B               | 512x1024   | LR/POLICY/BS/EPOCH: 0.0001/poly/16/500  | train/val       |        | [cfg](https://raw.githubusercontent.com/SegmentationBLWX/sssegmentation/main/ssseg/configs/mask2former/mask2former_swinbase_cityscapes.py) &#124; [model](https://github.com/SegmentationBLWX/modelstore/releases/download/ssseg_mask2former/mask2former_swinbase_cityscapes.pth) &#124; [log](https://github.com/SegmentationBLWX/modelstore/releases/download/ssseg_mask2former/mask2former_swinbase_cityscapes.log)    |
 | Mask2Former    | ImageNet-22k-384x384   | Swin-L               | 512x1024   | LR/POLICY/BS/EPOCH: 0.0001/poly/16/500  | train/val       | 83.79% | [cfg](https://raw.githubusercontent.com/SegmentationBLWX/sssegmentation/main/ssseg/configs/mask2former/mask2former_swinlarge_cityscapes.py) &#124; [model](https://github.com/SegmentationBLWX/modelstore/releases/download/ssseg_mask2former/mask2former_swinlarge_cityscapes.pth) &#124; [log](https://github.com/SegmentationBLWX/modelstore/releases/download/ssseg_mask2former/mask2former_swinlarge_cityscapes.log) |
 
+
 ## More
 
 You can also download the model weights from following sources:

@@ -23,11 +23,14 @@
 ## Results
 
 #### ADE20k
+
 | Segmentor     | Pretrain               | Backbone              | Crop Size  | Schedule                             | Train/Eval Set  | mIoU   | Download                                                                                                                                                                                                                                                                                                                                                                      |
 | :-:           | :-:                    | :-:                   | :-:        | :-:                                  | :-:             | :-:    | :-:                                                                                                                                                                                                                                                                                                                                                                           |
 | UperNet       | ImageNet-1k-224x224    | MAE-Vit-B             | 512x512    | LR/POLICY/BS/EPOCH: 1e-4/poly/16/130 | train/val       | 48.20% | [cfg](https://raw.githubusercontent.com/SegmentationBLWX/sssegmentation/main/ssseg/configs/mae/upernet_maevitbase_ade20k.py) &#124; [model](https://github.com/SegmentationBLWX/modelstore/releases/download/ssseg_mae/upernet_maevitbase_ade20k.pth) &#124; [log](https://github.com/SegmentationBLWX/modelstore/releases/download/ssseg_mae/upernet_maevitbase_ade20k.log)  |
 
 
 ## More
+
 You can also download the model weights from following sources:
+
 - BaiduNetdisk: https://pan.baidu.com/s/1gD-NJJWOtaHCtB0qHE79rA with access code **s757**
