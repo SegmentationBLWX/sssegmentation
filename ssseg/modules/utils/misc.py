@@ -53,5 +53,7 @@ def postprocesspredgtpairs(all_preds, all_gts, cmd_args, cfg, logger_handle):
             all_gts_filtered.append(all_gts[idx])
         all_preds, all_gts = all_preds_filtered, all_gts_filtered
         logger_handle.info('All Finished, all_preds: %s, all_gts: %s' % (len(all_preds), len(all_gts)))
+    else:
+        all_preds, all_gts, all_ids = [], [], []
     # return
     return all_preds, all_gts, all_ids
