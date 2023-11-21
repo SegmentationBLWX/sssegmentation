@@ -314,4 +314,4 @@ class SVT(PCPVT):
                     )
         # load pretrained weights
         if pretrained:
-            self.initweights(structure_type, pretrained_model_path)
+            self.loadpretrainedweights(structure_type, pretrained_model_path)
