@@ -16,6 +16,8 @@ from ..deeplabv3 import Deeplabv3
 class FastFCN(nn.Module):
     def __init__(self, cfg, mode):
         super(FastFCN, self).__init__()
+        self.cfg = cfg
+        self.mode = mode
         self.align_corners, self.norm_cfg, self.act_cfg, head_cfg = cfg['align_corners'], cfg['norm_cfg'], cfg['act_cfg'], cfg['head']
         # build segmentor
         supported_models = {
@@ -26,6 +28,7 @@ class FastFCN(nn.Module):
         self.segmentor = supported_models[model_type](cfg, mode)
         setattr(self, 'inference', self.segmentor.inference)
         setattr(self, 'auginference', self.segmentor.auginference)
+        setattr(self, 'freezenormalization', self.segmentor.freezenormalization)
         # build jpu neck
         jpu_cfg = head_cfg['jpu']
         if 'act_cfg' not in jpu_cfg: jpu_cfg.update({'act_cfg': self.act_cfg})
@@ -41,7 +44,7 @@ class FastFCN(nn.Module):
     '''transforminputs'''
     def transforminputs(self, x_list, selected_indices=None):
         if selected_indices is None:
-            if self.cfg['backbone']['series'] in ['hrnet']:
+            if self.cfg['backbone']['type'] in ['HRNet']:
                 selected_indices = (0, 0, 0, 0)
             else:
                 selected_indices = (0, 1, 2, 3)
