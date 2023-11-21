@@ -65,6 +65,10 @@ class BinaryCrossEntropyLoss(nn.Module):
         # expand onehot labels to match the size of prediction
         if prediction.dim() != target.dim():
             assert (prediction.dim() == 2 and target.dim() == 1) or (prediction.dim() == 4 and target.dim() == 3)
+            if prediction.dim() == 4:
+                prediction = prediction.permute(0, 2, 3, 1).contiguous()
+                prediction = prediction.reshape(-1, prediction.shape[-1])
+                target = target.reshape(-1)
             target_binary = target.new_zeros(prediction.shape).type_as(prediction)
             valid_mask = (target >= 0) & (target != ignore_index)
             idxs = torch.nonzero(valid_mask, as_tuple=True)
