@@ -150,7 +150,7 @@ class PointRend(BaseSegmentor):
         num_random_points = num_points - num_uncertain_points
         idx = torch.topk(point_uncertainties[:, 0, :], k=num_uncertain_points, dim=1)[1]
         shift = num_sampled * torch.arange(batch_size, dtype=torch.long, device=seg_logits.device)
-        idx += shift[:, None]
+        idx = idx + shift[:, None]
         point_coords = point_coords.view(-1, 2)[idx.view(-1), :].view(batch_size, num_uncertain_points, 2)
         if num_random_points > 0:
             rand_point_coords = torch.rand(batch_size, num_random_points, 2, device=seg_logits.device)
