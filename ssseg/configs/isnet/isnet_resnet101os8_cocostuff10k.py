@@ -33,7 +33,7 @@ SEGMENTOR_CFG['inference'] = {
     'tricks': {
         'multiscale': [0.5, 0.75, 1.0, 1.25, 1.5],
         'flip': True,
-        'use_probs_before_resize': True
+        'use_probs_before_resize': False
     }
 }
 '''
