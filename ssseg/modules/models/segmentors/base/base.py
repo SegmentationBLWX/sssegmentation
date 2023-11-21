@@ -51,7 +51,7 @@ class BaseSegmentor(nn.Module):
         if not auto_calc_loss: return outputs_dict
         return self.calculatelosses(predictions=outputs_dict, targets=targets, losses_cfg=losses_cfg, map_preds_to_tgts_dict=map_preds_to_tgts_dict)
     '''inference'''
-    def inference(self, images, forward_args):
+    def inference(self, images, forward_args=None):
         # assert and initialize
         inference_cfg = self.cfg['inference']
         assert inference_cfg['mode'] in ['whole', 'slide']
@@ -88,7 +88,7 @@ class BaseSegmentor(nn.Module):
         # return outputs
         return outputs
     '''auginference'''
-    def auginference(self, images, forward_args):
+    def auginference(self, images, forward_args=None):
         # initialize
         inference_cfg = self.cfg['inference']
         infer_tricks, outputs_list = inference_cfg['tricks'], []
