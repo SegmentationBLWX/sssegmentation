@@ -1,6 +1,6 @@
 '''
 Function:
-    Implementation of Feature Pyramid Network
+    Implementation of FPN
 Author:
     Zhenchao Jin
 '''
@@ -9,7 +9,7 @@ import torch.nn.functional as F
 from ...backbones import BuildActivation, BuildNormalization
 
 
-'''Feature Pyramid Network'''
+'''FPN'''
 class FPN(nn.Module):
     def __init__(self, in_channels_list, out_channels, upsample_cfg=dict(mode='nearest'), norm_cfg=None, act_cfg=None):
         super(FPN, self).__init__()
@@ -40,7 +40,7 @@ class FPN(nn.Module):
         used_backbone_levels = len(laterals)
         for i in range(used_backbone_levels - 1, 0, -1):
             prev_shape = laterals[i - 1].shape[2:]
-            laterals[i - 1] += F.interpolate(laterals[i], size=prev_shape, **self.upsample_cfg)
+            laterals[i - 1] = laterals[i - 1] + F.interpolate(laterals[i], size=prev_shape, **self.upsample_cfg)
         # build outputs
         outs = [self.fpn_convs[i](laterals[i]) for i in range(used_backbone_levels)]
         # return
