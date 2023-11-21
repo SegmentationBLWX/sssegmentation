@@ -77,8 +77,8 @@ class BaseSegmentor(nn.Module):
                     x2, y2 = min(x1 + cropsize_w, image_w), min(y1 + cropsize_h, image_h)
                     x1, y1 = max(x2 - cropsize_w, 0), max(y2 - cropsize_h, 0)
                     crop_images = images[:, :, y1:y2, x1:x2]
-                    if forward_args is None: outputs = self(crop_images)
-                    else: outputs = self(crop_images, **forward_args)
+                    if forward_args is None: outputs_crop = self(crop_images)
+                    else: outputs_crop = self(crop_images, **forward_args)
                     outputs_crop = F.interpolate(outputs_crop, size=crop_images.size()[2:], mode='bilinear', align_corners=self.align_corners)
                     if use_probs_before_resize: outputs_crop = F.softmax(outputs_crop, dim=1)
                     outputs += F.pad(outputs_crop, (int(x1), int(outputs.shape[3] - x2), int(y1), int(outputs.shape[2] - y2)))
