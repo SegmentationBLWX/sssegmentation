@@ -24,6 +24,8 @@ class FastFCN(nn.Module):
         model_type = cfg['segmentor']
         assert model_type in supported_models, 'unsupport model_type %s' % model_type
         self.segmentor = supported_models[model_type](cfg, mode)
+        setattr(self, 'inference', self.segmentor.inference)
+        setattr(self, 'auginference', self.segmentor.auginference)
         # build jpu neck
         jpu_cfg = head_cfg['jpu']
         if 'act_cfg' not in jpu_cfg: jpu_cfg.update({'act_cfg': self.act_cfg})
@@ -36,7 +38,7 @@ class FastFCN(nn.Module):
     '''forward'''
     def forward(self, x, targets=None, **kwargs):
         return self.segmentor(x, targets, **kwargs)
-    '''transform inputs'''
+    '''transforminputs'''
     def transforminputs(self, x_list, selected_indices=None):
         if selected_indices is None:
             if self.cfg['backbone']['series'] in ['hrnet']:
