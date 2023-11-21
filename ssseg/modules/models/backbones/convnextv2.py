@@ -74,7 +74,7 @@ class LayerNorm(nn.Module):
 
 '''BuildNormalization'''
 BuildNormalization = NormalizationBuilder(
-    requires_renew_modules={'LayerNorm': LayerNorm}
+    requires_register_modules={'LayerNormConvNeXtV2': LayerNorm}
 ).build
 
 
@@ -116,7 +116,7 @@ class ConvNeXtV2(nn.Module):
         'large': {'depths': [3, 3, 27, 3], 'dims': [192, 384, 768, 1536]},
         'huge': {'depths': [3, 3, 27, 3], 'dims': [352, 704, 1408, 2816]},
     }
-    def __init__(self, structure_type, in_channels=3, arch='tiny', drop_path_rate=0., out_indices=(0, 1, 2, 3), norm_cfg={'type': 'LayerNorm', 'eps': 1e-6}, 
+    def __init__(self, structure_type, in_channels=3, arch='tiny', drop_path_rate=0., out_indices=(0, 1, 2, 3), norm_cfg={'type': 'LayerNormConvNeXtV2', 'eps': 1e-6}, 
                  act_cfg={'type': 'GELU'}, pretrained=True, pretrained_model_path=''):
         super(ConvNeXtV2, self).__init__()
         assert arch in self.arch_settings
