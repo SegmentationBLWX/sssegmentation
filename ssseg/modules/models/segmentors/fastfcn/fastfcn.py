@@ -10,6 +10,7 @@ from ..fcn import FCN
 from ..encnet import ENCNet
 from ..pspnet import PSPNet
 from ..deeplabv3 import Deeplabv3
+from ...backbones import NormalizationBuilder
 
 
 '''FastFCN'''
@@ -28,7 +29,6 @@ class FastFCN(nn.Module):
         self.segmentor = supported_models[model_type](cfg, mode)
         setattr(self, 'inference', self.segmentor.inference)
         setattr(self, 'auginference', self.segmentor.auginference)
-        setattr(self, 'freezenormalization', self.segmentor.freezenormalization)
         # build jpu neck
         jpu_cfg = head_cfg['jpu']
         if 'act_cfg' not in jpu_cfg: jpu_cfg.update({'act_cfg': self.act_cfg})
@@ -53,3 +53,12 @@ class FastFCN(nn.Module):
             outs.append(x_list[idx])
         outs = self.jpu_neck(outs)
         return outs
+    '''freezenormalization'''
+    def freezenormalization(self, norm_list=None):
+        if norm_list is None:
+            norm_list=(nn.BatchNorm1d, nn.BatchNorm2d, nn.BatchNorm3d, nn.SyncBatchNorm)
+        for module in self.modules():
+            if NormalizationBuilder.isnorm(module, norm_list):
+                module.eval()
+                for p in module.parameters():
+                    p.requires_grad = False
