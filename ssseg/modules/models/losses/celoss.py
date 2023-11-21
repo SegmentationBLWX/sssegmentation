@@ -11,7 +11,7 @@ import torch.nn.functional as F
 
 '''CrossEntropyLoss'''
 class CrossEntropyLoss(nn.Module):
-    def __init__(self, scale_factor=1.0, weight=None, ignore_index=255, reduction='mean', lowest_loss_value=None, label_smoothing=None):
+    def __init__(self, scale_factor=1.0, weight=None, ignore_index=255, reduction='mean', lowest_loss_value=None, label_smoothing=None, force_target_as_long=True):
         super(CrossEntropyLoss, self).__init__()
         self.weight = weight
         self.reduction = reduction
@@ -19,17 +19,23 @@ class CrossEntropyLoss(nn.Module):
         self.scale_factor = scale_factor
         self.label_smoothing = label_smoothing
         self.lowest_loss_value = lowest_loss_value
+        self.force_target_as_long = force_target_as_long
     '''forward'''
     def forward(self, prediction, target):
         # fetch attributes
         weight, reduction, ignore_index = self.weight, self.reduction, self.ignore_index
         scale_factor, label_smoothing, lowest_loss_value = self.scale_factor, self.label_smoothing, self.lowest_loss_value
+        if (weight is not None) and isinstance(weight, torch.Tensor):
+            weight = weight.type_as(prediction)
         # construct loss_cfg
         ce_args = {'weight': weight, 'ignore_index': ignore_index, 'reduction': reduction}
         if label_smoothing is not None:
             ce_args.update({'label_smoothing': label_smoothing})
         # calculate loss
-        loss = F.cross_entropy(prediction, target.long(), **ce_args)
+        if self.force_target_as_long:
+            loss = F.cross_entropy(prediction, target.long(), **ce_args)
+        else:
+            loss = F.cross_entropy(prediction, target, **ce_args)
         loss = loss * scale_factor
         if lowest_loss_value is not None:
             loss = torch.abs(loss - lowest_loss_value) + lowest_loss_value
@@ -52,6 +58,10 @@ class BinaryCrossEntropyLoss(nn.Module):
         # fetch attributes
         weight, reduction, ignore_index = self.weight, self.reduction, self.ignore_index
         scale_factor, pos_weight, lowest_loss_value = self.scale_factor, self.pos_weight, self.lowest_loss_value
+        if (weight is not None) and isinstance(weight, torch.Tensor):
+            weight = weight.type_as(prediction)
+        if (pos_weight is not None) and isinstance(pos_weight, torch.Tensor):
+            pos_weight = pos_weight.type_as(prediction)
         # expand onehot labels to match the size of prediction
         if prediction.dim() != target.dim():
             assert (prediction.dim() == 2 and target.dim() == 1) or (prediction.dim() == 4 and target.dim() == 3)

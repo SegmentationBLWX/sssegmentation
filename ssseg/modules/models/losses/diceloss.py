@@ -26,13 +26,13 @@ class DiceLoss(nn.Module):
         smooth, exponent, reduction, ignore_index = self.smooth, self.exponent, self.reduction, self.ignore_index
         class_weight, scale_factor, lowest_loss_value = self.class_weight, self.scale_factor, self.lowest_loss_value
         # construct loss_cfg
+        if self.class_weight is not None:
+            class_weight = prediction.new_tensor(self.class_weight)
+        else:
+            class_weight = None
         dice_cfg = {
             'smooth': smooth, 'exponent': exponent, 'reduction': reduction, 'class_weight': class_weight, 'ignore_index': ignore_index,
         }
-        if dice_cfg['class_weight'] is not None:
-            class_weight = prediction.new_tensor(dice_cfg['class_weight'])
-        else:
-            class_weight = None
         # calculate loss
         prediction = F.softmax(prediction, dim=1)
         num_classes = prediction.shape[1]

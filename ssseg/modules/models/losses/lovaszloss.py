@@ -110,6 +110,8 @@ def LovaszSoftmaxFlat(probs, labels, classes='present', class_weight=None):
 def LovaszSoftmaxLoss(prediction, target, scale_factor=1.0, per_image=False, classes='present', reduction='mean', ignore_index=255, class_weight=None, lowest_loss_value=None):
     # calculate the loss
     prediction = F.softmax(prediction, dim=1)
+    if class_weight is not None:
+        class_weight = class_weight.type_as(prediction)
     lovasz_cfg = {'per_image': per_image, 'classes': classes, 'reduction': reduction, 'ignore_index': ignore_index, 'class_weight': class_weight}
     if lovasz_cfg['per_image']:
         loss = [LovaszSoftmaxFlat(*FlattenProbs(prob.unsqueeze(0), label.unsqueeze(0), lovasz_cfg['ignore_index']), classes=lovasz_cfg['classes'], class_weight=lovasz_cfg['class_weight']) for prob, label in zip(prediction, target)]
