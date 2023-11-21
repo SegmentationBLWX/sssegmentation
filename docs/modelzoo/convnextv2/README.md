@@ -23,10 +23,13 @@
 ## Results
 
 #### ADE20k
+
 | Segmentor     | Pretrain               | Backbone              | Crop Size  | Schedule                               | Train/Eval Set  | mIoU   | Download                                                                                                                                                                                                                                                                                                                                                                                                         |
 | :-:           | :-:                    | :-:                   | :-:        | :-:                                    | :-:             | :-:    | :-:                                                                                                                                                                                                                                                                                                                                                                                                              |
 
 
 ## More
+
 You can also download the model weights from following sources:
+
 - BaiduNetdisk: https://pan.baidu.com/s/1gD-NJJWOtaHCtB0qHE79rA with access code **s757**
