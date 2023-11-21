@@ -20,7 +20,7 @@
 project = 'SSSegmentation'
 copyright = '2020-2023, Zhenchao Jin'
 author = 'Zhenchao Jin'
-release = '1.4.1'
+release = '1.5.0'
 
 # -- General configuration ---------------------------------------------------
 

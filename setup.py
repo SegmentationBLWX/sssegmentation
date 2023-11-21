@@ -1,6 +1,6 @@
 '''
 Function:
-    Implementation of SSSegmentation-setup
+    Implementation of SETUP for SSSegmentation
 Author:
     Zhenchao Jin
 '''
