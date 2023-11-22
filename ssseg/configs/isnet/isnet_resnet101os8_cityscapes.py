@@ -17,3 +17,20 @@ SEGMENTOR_CFG['num_classes'] = 19
 SEGMENTOR_CFG['work_dir'] = 'isnet_resnet101os8_cityscapes'
 SEGMENTOR_CFG['logfilepath'] = 'isnet_resnet101os8_cityscapes/isnet_resnet101os8_cityscapes.log'
 SEGMENTOR_CFG['resultsavepath'] = 'isnet_resnet101os8_cityscapes/isnet_resnet101os8_cityscapes_results.pkl'
+
+
+# modify inference config
+# --single-scale
+SEGMENTOR_CFG['inference'] = SEGMENTOR_CFG['inference'].copy()
+# --multi-scale with flipping
+'''
+SEGMENTOR_CFG['inference'] = {
+    'mode': 'slide',
+    'opts': {'cropsize': (1024, 512), 'stride': (341, 341)}, 
+    'tricks': {
+        'multiscale': [0.5, 0.75, 1.0, 1.25, 1.5, 1.75],
+        'flip': True,
+        'use_probs_before_resize': False,
+    }
+}
+'''
