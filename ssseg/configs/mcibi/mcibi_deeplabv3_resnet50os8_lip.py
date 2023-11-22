@@ -23,3 +23,20 @@ SEGMENTOR_CFG['head']['use_loss'] = False
 SEGMENTOR_CFG['work_dir'] = 'mcibi_deeplabv3_resnet50os8_lip'
 SEGMENTOR_CFG['logfilepath'] = 'mcibi_deeplabv3_resnet50os8_lip/mcibi_deeplabv3_resnet50os8_lip.log'
 SEGMENTOR_CFG['resultsavepath'] = 'mcibi_deeplabv3_resnet50os8_lip/mcibi_deeplabv3_resnet50os8_lip_results.pkl'
+
+
+# modify inference config
+# --single-scale
+SEGMENTOR_CFG['inference'] = SEGMENTOR_CFG['inference'].copy()
+# --single-scale with flipping
+'''
+SEGMENTOR_CFG['inference'] = {
+    'mode': 'whole',
+    'opts': {}, 
+    'tricks': {
+        'multiscale': [1],
+        'flip': True,
+        'use_probs_before_resize': False
+    }
+}
+'''
