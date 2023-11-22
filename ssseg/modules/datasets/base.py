@@ -122,7 +122,7 @@ class BaseDataset(torch.utils.data.Dataset):
         if self.mode == 'TEST':
             seg_target = sample_meta.pop('seg_target')
         sample_meta = self.transforms(sample_meta)
-        if self.mode == 'TEST':
+        if (self.mode == 'TEST') and (seg_target is not None):
             sample_meta['seg_target'] = seg_target
         return sample_meta
     '''randompalette'''
