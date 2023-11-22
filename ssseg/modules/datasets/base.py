@@ -121,8 +121,11 @@ class BaseDataset(torch.utils.data.Dataset):
     def synctransforms(self, sample_meta):
         if self.mode == 'TEST':
             seg_target = sample_meta.pop('seg_target')
+            if seg_target is None:
+                assert self.dataset_cfg.get('evalmode', 'local') == 'server'
+                seg_target = torch.zeros((sample_meta['height'], sample_meta['width']))
         sample_meta = self.transforms(sample_meta)
-        if (self.mode == 'TEST') and (seg_target is not None):
+        if self.mode == 'TEST':
             sample_meta['seg_target'] = seg_target
         return sample_meta
     '''randompalette'''
