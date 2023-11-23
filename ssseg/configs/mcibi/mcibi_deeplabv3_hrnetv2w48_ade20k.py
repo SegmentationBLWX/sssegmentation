@@ -27,3 +27,20 @@ SEGMENTOR_CFG['losses'].pop('loss_aux')
 SEGMENTOR_CFG['work_dir'] = 'mcibi_deeplabv3_hrnetv2w48_ade20k'
 SEGMENTOR_CFG['logfilepath'] = 'mcibi_deeplabv3_hrnetv2w48_ade20k/mcibi_deeplabv3_hrnetv2w48_ade20k.log'
 SEGMENTOR_CFG['resultsavepath'] = 'mcibi_deeplabv3_hrnetv2w48_ade20k/mcibi_deeplabv3_hrnetv2w48_ade20k_results.pkl'
+
+
+# modify inference config
+# --single-scale
+SEGMENTOR_CFG['inference'] = SEGMENTOR_CFG['inference'].copy()
+# --multi-scale with flipping
+'''
+SEGMENTOR_CFG['inference'] = {
+    'mode': 'slide',
+    'opts': {'cropsize': (512, 512), 'stride': (341, 341)}, 
+    'tricks': {
+        'multiscale': [0.5, 0.75, 1.0, 1.25, 1.5, 1.75],
+        'flip': True,
+        'use_probs_before_resize': True
+    }
+}
+'''
