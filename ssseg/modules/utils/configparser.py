@@ -7,35 +7,28 @@ Author:
 import os
 import sys
 import importlib
+import importlib.util
 import dill as pickle
 from .io import touchdir
 
 
 '''ConfigParser'''
 class ConfigParser():
-    def __init__(self, library_root='ssseg'):
-        self.library_root = self.preparelibraryroot(library_root)
-    '''preparelibraryroot'''
-    def preparelibraryroot(self, library_root):
-        if not library_root.startswith('/'):
-            library_root = '/' + library_root
-        if not library_root.endswith('/'):
-            library_root = library_root + '/'
-        return library_root
+    def __init__(self, library_name='ssseg'):
+        self.library_name = library_name
     '''parsefrompy'''
     def parsefrompy(self, cfg_file_path):
         # assert
         assert cfg_file_path.endswith('.py')
-        assert self.library_root in cfg_file_path, f'cfg_file_path should contain {self.library_root}'
         # obtain module path
         module_path = cfg_file_path[len(os.getcwd()):].replace('\\', '/')
         module_path = module_path.replace('/', '.')
         module_path = module_path.strip('.')[:-3]
-        try:
-            cfg = importlib.import_module(module_path, __package__)
-        except:
-            sys.path.insert(0, '.')
-            cfg = importlib.import_module(module_path, __package__)
+        # load cfg
+        spec = importlib.util.spec_from_file_location(module_path, cfg_file_path)
+        cfg = importlib.util.module_from_spec(spec)
+        sys.modules[module_path] = cfg
+        spec.loader.exec_module(cfg)
         # return cfg
         return cfg, cfg_file_path
     '''parsefrompkl'''
