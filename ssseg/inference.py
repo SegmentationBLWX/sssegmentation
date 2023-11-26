@@ -13,9 +13,8 @@ import argparse
 import numpy as np
 import torch.nn.functional as F
 from tqdm import tqdm
-from configs import BuildConfig
 from modules import (
-    BuildDataset, BuildSegmentor, Logger, touchdir, loadckpts
+    BuildDataset, BuildSegmentor, Logger, ConfigParser, touchdir, loadckpts
 )
 warnings.filterwarnings('ignore')
 
@@ -36,7 +35,7 @@ def parsecmdargs():
 class Inferencer():
     def __init__(self):
         self.cmd_args = parsecmdargs()
-        self.cfg, self.cfg_file_path = BuildConfig(self.cmd_args.cfgfilepath)
+        self.cfg, self.cfg_file_path = ConfigParser()(self.cmd_args.cfgfilepath)
         assert self.cmd_args.imagepath or self.cmd_args.imagedir, 'imagepath or imagedir should be specified'
         # open full fp32
         torch.backends.cuda.matmul.allow_tf32 = False

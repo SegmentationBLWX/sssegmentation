@@ -14,10 +14,9 @@ import numpy as np
 import torch.nn.functional as F
 import torch.distributed as dist
 from tqdm import tqdm
-from configs import BuildConfig
 from modules import (
-    BuildDataset, BuildDistributedDataloader, BuildDistributedModel, BuildSegmentor, Logger, initslurm,
-    touchdir, loadckpts, saveckpts, BuildOptimizer, BuildScheduler, judgefileexist, postprocesspredgtpairs
+    BuildDistributedDataloader, BuildDistributedModel, touchdir, loadckpts, saveckpts, judgefileexist, postprocesspredgtpairs, initslurm,
+    BuildDataset,  BuildSegmentor, BuildOptimizer, BuildScheduler, Logger, ConfigParser
 )
 warnings.filterwarnings('ignore')
 
@@ -30,11 +29,11 @@ def parsecmdargs():
     parser.add_argument('--cfgfilepath', dest='cfgfilepath', help='config file path you want to use', type=str, required=True)
     parser.add_argument('--ckptspath', dest='ckptspath', help='checkpoints you want to resume from', default='', type=str)
     parser.add_argument('--slurm', dest='slurm', help='please add --slurm if you are using slurm', default=False, action='store_true')
-    args = parser.parse_args()
+    cmd_args = parser.parse_args()
     if torch.__version__.startswith('2.'):
-        args.local_rank = int(os.environ['LOCAL_RANK'])
-    if args.slurm: initslurm(args, str(8888 + random.randint(0, 1000)))
-    return args
+        cmd_args.local_rank = int(os.environ['LOCAL_RANK'])
+    if cmd_args.slurm: initslurm(cmd_args, str(8888 + random.randint(0, 1000)))
+    return cmd_args
 
 
 '''Trainer'''
@@ -231,20 +230,21 @@ class Trainer():
 '''main'''
 def main():
     # parse arguments
-    args = parsecmdargs()
-    cfg, cfg_file_path = BuildConfig(args.cfgfilepath)
+    cmd_args, config_parser = parsecmdargs(), ConfigParser()
+    cfg, cfg_file_path = config_parser(cmd_args.cfgfilepath)
     # touch work dir
     touchdir(cfg.SEGMENTOR_CFG['work_dir'])
+    config_parser.save(cfg.SEGMENTOR_CFG['work_dir'])
     # initialize logger_handle
     logger_handle = Logger(cfg.SEGMENTOR_CFG['logfilepath'])
     # number of gpus, for distribued training, only support a process for a GPU
     ngpus_per_node = torch.cuda.device_count()
-    if ngpus_per_node != args.nproc_per_node:
-        if (args.local_rank == 0) and (int(os.environ.get('SLURM_PROCID', 0)) == 0): 
+    if ngpus_per_node != cmd_args.nproc_per_node:
+        if (cmd_args.local_rank == 0) and (int(os.environ.get('SLURM_PROCID', 0)) == 0): 
             logger_handle.warning('ngpus_per_node is not equal to nproc_per_node, force ngpus_per_node = nproc_per_node by default')
-        ngpus_per_node = args.nproc_per_node
+        ngpus_per_node = cmd_args.nproc_per_node
     # instanced Trainer
-    client = Trainer(cfg=cfg, ngpus_per_node=ngpus_per_node, logger_handle=logger_handle, cmd_args=args, cfg_file_path=cfg_file_path)
+    client = Trainer(cfg=cfg, ngpus_per_node=ngpus_per_node, logger_handle=logger_handle, cmd_args=cmd_args, cfg_file_path=cfg_file_path)
     client.start()
 
 

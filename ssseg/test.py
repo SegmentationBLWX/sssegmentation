@@ -14,9 +14,9 @@ import numpy as np
 import torch.nn.functional as F
 import torch.distributed as dist
 from tqdm import tqdm
-from configs import BuildConfig
 from modules import (
-    BuildDataset, BuildDistributedDataloader, BuildDistributedModel, BuildSegmentor, Logger, initslurm, touchdir, loadckpts, postprocesspredgtpairs
+    initslurm, touchdir, loadckpts, postprocesspredgtpairs, BuildDistributedDataloader, BuildDistributedModel,
+    BuildDataset, BuildSegmentor, Logger, ConfigParser
 )
 warnings.filterwarnings('ignore')
 
@@ -116,7 +116,7 @@ class Tester():
 def main():
     # parse arguments
     args = parsecmdargs()
-    cfg, cfg_file_path = BuildConfig(args.cfgfilepath)
+    cfg, cfg_file_path = ConfigParser()(args.cfgfilepath)
     # touch work dir
     touchdir(cfg.SEGMENTOR_CFG['work_dir'])
     # initialize logger_handle
