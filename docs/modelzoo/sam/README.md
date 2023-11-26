@@ -35,9 +35,10 @@ The model can take as input both point and box prompts, as well as masks from th
 Install sssegmentation:
 
 ```sh
-git clone https://github.com/SegmentationBLWX/sssegmentation
-cd sssegmentation
-pip install -r requirements.txt # install dependencies refer to https://sssegmentation.readthedocs.io/en/latest/GetStarted.html#prerequisites
+# from pypi
+pip install SSSegmentation
+# from Github repository
+pip install git+https://github.com/CharlesPikachu/sssegmentation.git
 ```
 
 Download images:
@@ -563,9 +564,10 @@ Additional options allow for further improvement of mask quality and quantity, s
 Install sssegmentation:
 
 ```sh
-git clone https://github.com/SegmentationBLWX/sssegmentation
-cd sssegmentation
-pip install -r requirements.txt # install dependencies refer to https://sssegmentation.readthedocs.io/en/latest/GetStarted.html#prerequisites
+# from pypi
+pip install SSSegmentation
+# from Github repository
+pip install git+https://github.com/CharlesPikachu/sssegmentation.git
 ```
 
 Download images:

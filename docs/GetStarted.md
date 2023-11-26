@@ -43,6 +43,8 @@ git clone https://github.com/CharlesPikachu/sssegmentation
 cd sssegmentation
 # install some essential requirements
 pip install -r requirements.txt
+# install ssseg with develop mode
+python setup.py develop
 ```
 
 With the above commands, these python packages will be installed,
