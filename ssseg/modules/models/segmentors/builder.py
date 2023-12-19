@@ -24,6 +24,7 @@ from .psanet import PSANet
 from .ocrnet import OCRNet
 from .dnlnet import DNLNet
 from .annnet import ANNNet
+from .edgesam import EdgeSAM
 from .fastfcn import FastFCN
 from .upernet import UPerNet
 from .mobilesam import MobileSAM
@@ -49,7 +50,7 @@ class SegmentorBuilder(BaseModuleBuilder):
         'GCNet': GCNet, 'DMNet': DMNet, 'ISANet': ISANet, 'ENCNet': ENCNet, 'APCNet': APCNet, 'SAM': SAM,
         'EMANet': EMANet, 'PSPNet': PSPNet, 'PSANet': PSANet, 'OCRNet': OCRNet, 'DNLNet': DNLNet,
         'ANNNet': ANNNet, 'SETRUP': SETRUP, 'SETRMLA': SETRMLA, 'FastFCN': FastFCN, 'UPerNet': UPerNet,
-        'Segformer': Segformer, 'MCIBI': MCIBI, 'PointRend': PointRend, 'Deeplabv3': Deeplabv3,
+        'Segformer': Segformer, 'MCIBI': MCIBI, 'PointRend': PointRend, 'Deeplabv3': Deeplabv3, 'EdgeSAM': EdgeSAM,
         'LRASPPNet': LRASPPNet, 'MaskFormer': MaskFormer, 'MCIBIPlusPlus': MCIBIPlusPlus, 'SemanticFPN': SemanticFPN,
         'NonLocalNet': NonLocalNet, 'Deeplabv3Plus': Deeplabv3Plus, 'DepthwiseSeparableFCN': DepthwiseSeparableFCN,
         'MobileSAM': MobileSAM, 'IDRNet': IDRNet, 'Mask2Former': Mask2Former,

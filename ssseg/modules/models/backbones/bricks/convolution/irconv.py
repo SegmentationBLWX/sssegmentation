@@ -4,7 +4,6 @@ Function:
 Author:
     Zhenchao Jin
 '''
-import torch
 import torch.nn as nn
 from ..activation import BuildActivation
 from .apconv import AdptivePaddingConv2d

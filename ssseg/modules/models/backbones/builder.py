@@ -13,6 +13,7 @@ from .hrnet import HRNet
 from .erfnet import ERFNet
 from .resnet import ResNet
 from .samvit import SAMViT
+from .repvit import RepViT
 from .resnest import ResNeSt
 from .twins import PCPVT, SVT
 from .fastscnn import FastSCNN
@@ -36,7 +37,7 @@ class BackboneBuilder(BaseModuleBuilder):
         'UNet': UNet, 'BEiT': BEiT, 'CGNet': CGNet, 'HRNet': HRNet, 'MobileViT': MobileViT, 'MobileViTV2': MobileViTV2,
         'ERFNet': ERFNet, 'ResNet': ResNet, 'ResNeSt': ResNeSt, 'PCPVT': PCPVT, 'MobileSAMTinyViT': MobileSAMTinyViT, 
         'SVT': SVT, 'FastSCNN': FastSCNN, 'ConvNeXt': ConvNeXt, 'BiSeNetV1': BiSeNetV1, 'MAE': MAE, 'SAMViT': SAMViT,
-        'BiSeNetV2': BiSeNetV2, 'SwinTransformer': SwinTransformer, 'VisionTransformer': VisionTransformer,
+        'BiSeNetV2': BiSeNetV2, 'SwinTransformer': SwinTransformer, 'VisionTransformer': VisionTransformer, 'RepViT': RepViT,
         'MixVisionTransformer': MixVisionTransformer, 'TIMMBackbone': TIMMBackbone, 'ConvNeXtV2': ConvNeXtV2,
         'MobileNetV2': MobileNetV2, 'MobileNetV3': MobileNetV3, 
     }

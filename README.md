@@ -17,6 +17,7 @@ Documents: https://sssegmentation.readthedocs.io/en/latest/
 
 ## What's New
 
+- **2023-12-20**: Support [EdgeSAM](https://arxiv.org/pdf/2312.06660.pdf), refer to [Results and Models for EdgeSAM](./docs/modelzoo/edgesam) for more details.
 - **2023-10-25**: Support [ConvNeXtV2](https://arxiv.org/pdf/2301.00808.pdf), refer to [Results and Models for ConvNeXtV2](./docs/modelzoo/convnextv2) for more details.
 - **2023-10-23**: Support [MobileViT](https://arxiv.org/pdf/2110.02178.pdf) and [MobileViTV2](https://arxiv.org/pdf/2206.02680.pdf), refer to [Results and Models for MobileViT](./docs/modelzoo/mobilevit) for more details.
 - **2023-10-18**: Support [Mask2Former](https://arxiv.org/pdf/2112.01527.pdf), refer to [Results and Models for Mask2Former](./docs/modelzoo/mask2former) for more details.
@@ -78,6 +79,7 @@ You can star this repository to keep track of the project if it's helpful for yo
 
 | Segmentor                         | Model Zoo                                    | Paper Link                                                                                                                                              | Code Snippet                                                                |
 | :-:                               | :-:                                          | :-:                                                                                                                                                     | :-:                                                                         |
+| EdgeSAM                           | [Click](./docs/modelzoo/edgesam)             | [ArXiv 2023](https://arxiv.org/pdf/2312.06660.pdf)                                                                                                      | [Click](./ssseg/modules/models/segmentors/edgesam/edgesam.py)               |
 | IDRNet                            | [Click](./docs/modelzoo/idrnet)              | [NeurIPS 2023](https://arxiv.org/pdf/2310.10755.pdf)                                                                                                    | [Click](./ssseg/modules/models/segmentors/idrnet/idrnet.py)                 |
 | MobileSAM                         | [Click](./docs/modelzoo/mobilesam)           | [ArXiv 2023](https://arxiv.org/pdf/2306.14289.pdf)                                                                                                      | [Click](./ssseg/modules/models/segmentors/mobilesam/mobilesam.py)           |
 | SAM                               | [Click](./docs/modelzoo/sam)                 | [ArXiv 2023](https://arxiv.org/pdf/2304.02643.pdf)                                                                                                      | [Click](./ssseg/modules/models/segmentors/sam/sam.py)                       |
@@ -199,3 +201,4 @@ We are very grateful to the following projects for their help in building SSSegm
 - [VSPW_code](https://github.com/VSPW-dataset/VSPW_code)
 - [MMPreTrain](https://github.com/open-mmlab/mmpretrain)
 - [PyTorch Image Models](https://github.com/huggingface/pytorch-image-models)
+- [EdgeSAM](https://github.com/chongzhou96/EdgeSAM)

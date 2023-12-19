@@ -41,5 +41,5 @@ predictor = MobileSAMPredictor(use_default_sam_t_5m=True, device='cuda')
 mask_generator = MobileSAMAutomaticMaskGenerator(use_default_sam_t_5m=True, device='cuda')
 ```
 
-By the way, you can refer to [This Link](https://sssegmentation.readthedocs.io/en/latest/AdvancedAPI.html#inference-with-sam) to learn about how to use SAM with sssegmenation.
-Also, you can refer to [This Link](https://github.com/ChaoningZhang/MobileSAM) to compare our implemented MobileSAM with official version.
+By the way, you can refer to [inference-with-sam](https://sssegmentation.readthedocs.io/en/latest/AdvancedAPI.html#inference-with-sam) to learn about how to use SAM with sssegmenation.
+Also, you can refer to [MobileSAM Official Repo](https://github.com/ChaoningZhang/MobileSAM) to compare our implemented MobileSAM with official version.
