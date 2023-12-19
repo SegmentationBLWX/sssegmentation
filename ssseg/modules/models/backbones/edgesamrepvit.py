@@ -1,6 +1,6 @@
 '''
 Function:
-    Implementation of RepViT
+    Implementation of EdgeSAMRepViT
 Author:
     Zhenchao Jin
 '''
@@ -104,7 +104,7 @@ class RepViTBlock(nn.Module):
                 stride = 1
             self.token_mixer = nn.Sequential(
                 Conv2dBN(inp, inp, kernel_size, stride, (kernel_size - 1) // 2, groups=inp),
-                SqueezeExcitationConv2d(inp, 4, act_cfgs=[{'type': 'ReLU', 'inplace': True}, {'type': 'Sigmoid'}], makedivisible_args={'min_value': 1}) if use_se else nn.Identity(),
+                SqueezeExcitationConv2d(inp, 4, act_cfgs=[{'type': 'ReLU', 'inplace': True}, {'type': 'Sigmoid'}], makedivisible_args={'divisor': 1}) if use_se else nn.Identity(),
                 Conv2dBN(inp, oup, ks=1, stride=1, pad=0)
             )
             self.channel_mixer = Residual(nn.Sequential(
@@ -116,7 +116,7 @@ class RepViTBlock(nn.Module):
             assert (self.identity)
             self.token_mixer = nn.Sequential(
                 RepVGGDW(inp),
-                SqueezeExcitationConv2d(inp, 4, act_cfgs=[{'type': 'ReLU', 'inplace': True}, {'type': 'Sigmoid'}], makedivisible_args={'min_value': 1}) if use_se else nn.Identity(),
+                SqueezeExcitationConv2d(inp, 4, act_cfgs=[{'type': 'ReLU', 'inplace': True}, {'type': 'Sigmoid'}], makedivisible_args={'divisor': 1}) if use_se else nn.Identity(),
             )
             self.channel_mixer = Residual(nn.Sequential(
                 Conv2dBN(inp, hidden_dim, 1, 1, 0),
@@ -128,8 +128,8 @@ class RepViTBlock(nn.Module):
         return self.channel_mixer(self.token_mixer(x))
 
 
-'''RepViT'''
-class RepViT(nn.Module):
+'''EdgeSAMRepViT'''
+class EdgeSAMRepViT(nn.Module):
     arch_settings = {
         'm1': [
             [3, 2, 48, 1, 0, 1], [3, 2, 48, 0, 0, 1], [3, 2, 48, 0, 0, 1], [3, 2, 96, 0, 0, 2], [3, 2, 96, 1, 0, 1], [3, 2, 96, 0, 0, 1], [3, 2, 96, 0, 0, 1], 

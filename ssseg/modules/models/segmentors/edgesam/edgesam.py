@@ -21,7 +21,7 @@ class EdgeSAMPredictor(SAMPredictor):
         if sam_cfg is None:
             sam_cfg = {
                 'backbone': {
-                    'structure_type': 'repvit_m1', 'arch': 'm1', 'img_size': 1024, 'upsample_mode': 'bicubic',
+                    'type': 'EdgeSAMRepViT', 'structure_type': 'repvit_m1', 'arch': 'm1', 'img_size': 1024, 'upsample_mode': 'bicubic',
                 },
                 'prompt': {
                     'embed_dim': 256, 'image_embedding_size': (1024//16, 1024//16), 'input_image_size': (1024, 1024), 'mask_in_chans': 16,

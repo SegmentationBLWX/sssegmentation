@@ -677,5 +677,31 @@ predictor = MobileSAMPredictor(use_default_sam_t_5m=True, device='cuda')
 mask_generator = MobileSAMAutomaticMaskGenerator(use_default_sam_t_5m=True, device='cuda')
 ```
 
-By the way, you can refer to [This Link](https://sssegmentation.readthedocs.io/en/latest/AdvancedAPI.html#inference-with-sam) to learn about how to use SAM with sssegmenation.
-Also, you can refer to [This Link](https://github.com/ChaoningZhang/MobileSAM) to compare our implemented MobileSAM with official version.
+By the way, you can refer to [inference-with-sam](https://sssegmentation.readthedocs.io/en/latest/AdvancedAPI.html#inference-with-sam) to learn about how to use SAM with sssegmenation.
+Also, you can refer to [MobileSAM Official Repo](https://github.com/ChaoningZhang/MobileSAM) to compare our implemented MobileSAM with official version.
+
+
+## Inference with EdgeSAM
+
+The usage of EdgeSAM in sssegmenation is exactly the same as SAM by replacing
+
+- `SAM`: `EdgeSAM`,
+- `SAMPredictor`: `EdgeSAMPredictor`,
+- `SAMAutomaticMaskGenerator`: `EdgeSAMAutomaticMaskGenerator`.
+
+Specifically, you can import the three classes by
+
+```python
+from ssseg.modules.models.segmentors.edgesam import EdgeSAM
+from ssseg.modules.models.segmentors.edgesam import EdgeSAMPredictor
+from ssseg.modules.models.segmentors.edgesam import EdgeSAMAutomaticMaskGenerator
+
+# predictor could be EdgeSAMPredictor(use_default_edgesam=True, device='cuda') or EdgeSAMPredictor(use_default_edgesam_3x=True, device='cuda')
+predictor = EdgeSAMPredictor(use_default_edgesam=True, device='cuda')
+
+# mask_generator could be EdgeSAMAutomaticMaskGenerator(use_default_edgesam=True, device='cuda') or EdgeSAMAutomaticMaskGenerator(use_default_edgesam_3x=True, device='cuda')
+mask_generator = EdgeSAMAutomaticMaskGenerator(use_default_edgesam=True, device='cuda')
+```
+
+By the way, you can refer to [inference-with-sam](https://sssegmentation.readthedocs.io/en/latest/AdvancedAPI.html#inference-with-sam) to learn about how to use SAM with sssegmenation.
+Also, you can refer to [EdgeSAM Official Repo](https://github.com/chongzhou96/EdgeSAM) to compare our implemented EdgeSAM with official version.
