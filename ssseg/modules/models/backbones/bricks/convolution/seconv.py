@@ -11,7 +11,7 @@ from ..activation import BuildActivation
 
 '''SqueezeExcitationConv2d'''
 class SqueezeExcitationConv2d(nn.Module):
-    def __init__(self, channels, ratio=16, act_cfgs=None, makedivisible_args={'min_value': 8}):
+    def __init__(self, channels, ratio=16, act_cfgs=None, makedivisible_args={'divisor': 8}):
         super(SqueezeExcitationConv2d, self).__init__()
         assert act_cfgs is not None, 'argument act_cfgs should be given'
         assert len(act_cfgs) == 2, 'length of act_cfgs should be equal to 2'

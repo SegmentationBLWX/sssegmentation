@@ -84,7 +84,7 @@ class MaskDecoder(nn.Module):
         # upscale mask embeddings and predict masks using the mask tokens
         src = src.transpose(1, 2).view(b, c, h, w)
         upscaled_embedding = self.output_upscaling(src)
-        hyper_in_list: List[torch.Tensor] = []
+        hyper_in_list = []
         for i in range(self.num_mask_tokens):
             hyper_in_list.append(self.output_hypernetworks_mlps[i](mask_tokens_out[:, i, :]))
         hyper_in = torch.stack(hyper_in_list, dim=1)

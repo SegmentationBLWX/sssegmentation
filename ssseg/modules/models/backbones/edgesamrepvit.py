@@ -9,7 +9,7 @@ import torch.nn as nn
 import torch.nn.functional as F
 from .samvit import LayerNorm2d
 from .mobilesamtinyvit import Conv2dBN as _Conv2dBN
-from .bricks import makedivisible, SqueezeExcitationConv2d
+from .bricks import makedivisible, BuildActivation, BuildNormalization
 
 
 '''DEFAULT_MODEL_URLS'''
@@ -18,8 +18,34 @@ DEFAULT_MODEL_URLS = {}
 AUTO_ASSERT_STRUCTURE_TYPES = {}
 
 
+'''SqueezeExcite'''
+class SqueezeExcite(nn.Module):
+    def __init__(self, channels, rd_ratio=1. / 16, rd_channels=None, rd_divisor=8, add_maxpool=False, bias=True, act_cfg={'type': 'ReLU', 'inplace': True}, norm_cfg=None, gate_act_cfg={'type': 'Sigmoid'}):
+        super(SqueezeExcite, self).__init__()
+        self.add_maxpool = add_maxpool
+        if not rd_channels: rd_channels = makedivisible(channels * rd_ratio, rd_divisor, min_ratio=0.)
+        self.fc1 = nn.Conv2d(channels, rd_channels, kernel_size=1, bias=bias)
+        self.bn = BuildNormalization(placeholder=rd_channels, norm_cfg=norm_cfg) if norm_cfg else nn.Identity()
+        self.act = BuildActivation(act_cfg)
+        self.fc2 = nn.Conv2d(rd_channels, channels, kernel_size=1, bias=bias)
+        self.gate = BuildActivation(gate_act_cfg)
+    '''forward'''
+    def forward(self, x):
+        x_se = x.mean((2, 3), keepdim=True)
+        if self.add_maxpool:
+            x_se = 0.5 * x_se + 0.5 * x.amax((2, 3), keepdim=True)
+        x_se = self.fc1(x_se)
+        x_se = self.act(self.bn(x_se))
+        x_se = self.fc2(x_se)
+        return x * self.gate(x_se)
+
+
 '''Conv2dBN'''
 class Conv2dBN(_Conv2dBN):
+    def __init__(self, in_chans, out_chans, kernel_size=1, stride=1, padding=0, dilation=1, groups=1, bn_weight_init=1.0):
+        super(Conv2dBN, self).__init__(in_chans, out_chans, kernel_size, stride, padding, dilation, groups)
+        nn.init.constant_(self.bn.weight, bn_weight_init)
+        nn.init.constant_(self.bn.bias, 0)
     @torch.no_grad()
     def fuse(self):
         c, bn = self._modules.values()
@@ -104,8 +130,8 @@ class RepViTBlock(nn.Module):
                 stride = 1
             self.token_mixer = nn.Sequential(
                 Conv2dBN(inp, inp, kernel_size, stride, (kernel_size - 1) // 2, groups=inp),
-                SqueezeExcitationConv2d(inp, 4, act_cfgs=[{'type': 'ReLU', 'inplace': True}, {'type': 'Sigmoid'}], makedivisible_args={'divisor': 1}) if use_se else nn.Identity(),
-                Conv2dBN(inp, oup, ks=1, stride=1, pad=0)
+                SqueezeExcite(inp, 0.25) if use_se else nn.Identity(),
+                Conv2dBN(inp, oup, kernel_size=1, stride=1, padding=0)
             )
             self.channel_mixer = Residual(nn.Sequential(
                 Conv2dBN(oup, 2 * oup, 1, 1, 0),
@@ -116,7 +142,7 @@ class RepViTBlock(nn.Module):
             assert (self.identity)
             self.token_mixer = nn.Sequential(
                 RepVGGDW(inp),
-                SqueezeExcitationConv2d(inp, 4, act_cfgs=[{'type': 'ReLU', 'inplace': True}, {'type': 'Sigmoid'}], makedivisible_args={'divisor': 1}) if use_se else nn.Identity(),
+                SqueezeExcite(inp, 0.25) if use_se else nn.Identity(),
             )
             self.channel_mixer = Residual(nn.Sequential(
                 Conv2dBN(inp, hidden_dim, 1, 1, 0),
@@ -152,7 +178,7 @@ class EdgeSAMRepViT(nn.Module):
         ],
     }
     def __init__(self, structure_type, arch, img_size=1024, upsample_mode='bicubic', pretrained=False, pretrained_model_path=''):
-        super(RepViT, self).__init__()
+        super(EdgeSAMRepViT, self).__init__()
         # set attributes
         self.arch = arch
         self.cfgs = self.arch_settings[arch]
@@ -190,7 +216,8 @@ class EdgeSAMRepViT(nn.Module):
         stage2_channels = makedivisible(self.cfgs[self.stage_idx[2]][2], 8)
         stage3_channels = makedivisible(self.cfgs[self.stage_idx[3]][2], 8)
         self.fuse_stage2 = nn.Conv2d(stage2_channels, 256, kernel_size=1, bias=False)
-        self.fuse_stage3 = nn.Sequential(nn.Conv2d(stage3_channels, 256, kernel_size=1, bias=False))
+        self.fuse_stage3 = nn.Sequential()
+        self.fuse_stage3.add_module('op_list', nn.Sequential(nn.Conv2d(stage3_channels, 256, kernel_size=1, bias=False)))
         # build neck
         self.neck = nn.Sequential(
             nn.Conv2d(256, 256, kernel_size=1, bias=False), LayerNorm2d(256), nn.Conv2d(256, 256, kernel_size=3, padding=1, bias=False), LayerNorm2d(256),

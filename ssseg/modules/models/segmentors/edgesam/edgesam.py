@@ -4,6 +4,9 @@ Function:
 Author:
     Zhenchao Jin
 '''
+import torch
+from .maskdecoder import MaskDecoder
+from ..sam.amg import calculatestabilityscore
 from ..sam import SAM, SAMPredictor, SAMAutomaticMaskGenerator
 
 
@@ -13,11 +16,12 @@ class EdgeSAM(SAM):
     image_format = 'RGB'
     def __init__(self, cfg, mode):
         super(EdgeSAM, self).__init__(cfg=cfg, mode=mode)
+        self.mask_decoder = MaskDecoder(**cfg['head'])
 
 
 '''EdgeSAMPredictor'''
 class EdgeSAMPredictor(SAMPredictor):
-    def __init__(self, sam_cfg=None, use_default_edgesam=False, use_default_edgesam_3x=False, device='cuda', load_ckpt_strict=False):
+    def __init__(self, sam_cfg=None, use_default_edgesam=False, use_default_edgesam_3x=False, device='cuda', load_ckpt_strict=True, stability_score_offset=1.0):
         if sam_cfg is None:
             sam_cfg = {
                 'backbone': {
@@ -43,12 +47,69 @@ class EdgeSAMPredictor(SAMPredictor):
             use_default_sam_h=False, use_default_sam_l=False, use_default_sam_b=False, sam_cfg=sam_cfg, device=device, load_ckpt_strict=load_ckpt_strict,
         )
         self.model.eval()
+        self.stability_score_offset = stability_score_offset
     '''buildsam'''
     def buildsam(self, sam_cfg, device):
         sam_model = EdgeSAM(sam_cfg, mode='TEST')
         sam_model.to(device=device)
         sam_model.eval()
         return sam_model
+    '''predict'''
+    def predict(self, point_coords=None, point_labels=None, box=None, mask_input=None, num_multimask_outputs=3, return_logits=False, use_stability_score=False):
+        if not self.is_image_set:
+            raise RuntimeError('an image must be set with .set_image(...) before mask prediction')
+        # transform input prompts
+        coords_torch, labels_torch, box_torch, mask_input_torch = None, None, None, None
+        if point_coords is not None:
+            assert point_labels is not None, 'point_labels must be supplied if point_coords is supplied.'
+            point_coords = self.transform.applycoords(point_coords, self.original_size)
+            coords_torch = torch.as_tensor(point_coords, dtype=torch.float, device=self.device)
+            labels_torch = torch.as_tensor(point_labels, dtype=torch.int, device=self.device)
+            coords_torch, labels_torch = coords_torch[None, :, :], labels_torch[None, :]
+        if box is not None:
+            box = self.transform.applyboxes(box, self.original_size)
+            box_torch = torch.as_tensor(box, dtype=torch.float, device=self.device)
+            box_torch = box_torch[None, :]
+        if mask_input is not None:
+            mask_input_torch = torch.as_tensor(mask_input, dtype=torch.float, device=self.device)
+            mask_input_torch = mask_input_torch[None, :, :, :]
+        # predict
+        masks, iou_predictions, low_res_masks = self.predicttorch(
+            coords_torch, labels_torch, box_torch, mask_input_torch, num_multimask_outputs, return_logits=return_logits, use_stability_score=use_stability_score,
+        )
+        # return result
+        masks_np = masks[0].detach().cpu().numpy()
+        iou_predictions_np = iou_predictions[0].detach().cpu().numpy()
+        low_res_masks_np = low_res_masks[0].detach().cpu().numpy()
+        return masks_np, iou_predictions_np, low_res_masks_np
+    '''predicttorch'''
+    @torch.no_grad()
+    def predicttorch(self, point_coords, point_labels, boxes=None, mask_input=None, num_multimask_outputs=3, return_logits=False, use_stability_score=True):
+        if not self.is_image_set:
+            raise RuntimeError("an image must be set with .set_image(...) before mask prediction.")
+        if point_coords is not None:
+            points = (point_coords, point_labels)
+        else:
+            points = None
+        # embed prompts
+        sparse_embeddings, dense_embeddings = self.model.prompt_encoder(
+            points=points, boxes=boxes, masks=mask_input,
+        )
+        # predict masks
+        low_res_masks, iou_predictions = self.model.mask_decoder(
+            image_embeddings=self.features, image_pe=self.model.prompt_encoder.getdensepe(), sparse_prompt_embeddings=sparse_embeddings,
+            dense_prompt_embeddings=dense_embeddings, num_multimask_outputs=num_multimask_outputs,
+        )
+        if use_stability_score:
+            iou_predictions = calculatestabilityscore(
+                low_res_masks, self.model.mask_threshold, self.stability_score_offset
+            )
+        # upscale the masks to the original image resolution
+        masks = self.model.postprocessmasks(low_res_masks, self.input_size, self.original_size)
+        if not return_logits:
+            masks = masks > self.model.mask_threshold
+        # return
+        return masks, iou_predictions, low_res_masks
 
 
 '''EdgeSAMAutomaticMaskGenerator'''

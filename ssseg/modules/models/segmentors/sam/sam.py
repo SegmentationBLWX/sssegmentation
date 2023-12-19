@@ -190,9 +190,11 @@ class SAMPredictor(nn.Module):
         if mask_input is not None:
             mask_input_torch = torch.as_tensor(mask_input, dtype=torch.float, device=self.device)
             mask_input_torch = mask_input_torch[None, :, :, :]
+        # predict
         masks, iou_predictions, low_res_masks = self.predicttorch(
             coords_torch, labels_torch, box_torch, mask_input_torch, multimask_output, return_logits=return_logits,
         )
+        # return result
         masks_np = masks[0].detach().cpu().numpy()
         iou_predictions_np = iou_predictions[0].detach().cpu().numpy()
         low_res_masks_np = low_res_masks[0].detach().cpu().numpy()
