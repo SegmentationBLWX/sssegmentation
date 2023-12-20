@@ -62,7 +62,7 @@ masks, scores, logits = predictor.predict(
 )
 # show results
 for i, (mask, score) in enumerate(zip(masks, scores)):
-    plt.figure(figsize=(10,10))
+    plt.figure(figsize=(10, 10))
     plt.imshow(image)
     showmask(mask, plt.gca())
     showpoints(input_point, input_label, plt.gca())
@@ -113,7 +113,7 @@ masks, _, _ = predictor.predict(
     multimask_output=False,
 )
 # show results
-plt.figure(figsize=(10,10))
+plt.figure(figsize=(10, 10))
 plt.imshow(image)
 showmask(masks, plt.gca())
 showpoints(input_point, input_label, plt.gca())
@@ -158,7 +158,7 @@ masks, _, _ = predictor.predict(
     multimask_output=False,
 )
 # show results
-plt.figure(figsize=(10,10))
+plt.figure(figsize=(10, 10))
 plt.imshow(image)
 showmask(masks, plt.gca())
 showpoints(input_point, input_label, plt.gca())
