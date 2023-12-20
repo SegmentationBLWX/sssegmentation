@@ -57,13 +57,13 @@ class Attention(nn.Module):
 
 '''TwoWayAttentionBlock'''
 class TwoWayAttentionBlock(nn.Module):
-    def __init__(self, embedding_dim, num_heads, mlp_dim=2048, activation=nn.ReLU, attention_downsample_rate=2, skip_first_layer_pe=False):
+    def __init__(self, embedding_dim, num_heads, mlp_dim=2048, act_cfg={'type': 'ReLU'}, attention_downsample_rate=2, skip_first_layer_pe=False):
         super(TwoWayAttentionBlock, self).__init__()
         self.self_attn = Attention(embedding_dim, num_heads)
         self.norm1 = nn.LayerNorm(embedding_dim)
         self.cross_attn_token_to_image = Attention(embedding_dim, num_heads, downsample_rate=attention_downsample_rate)
         self.norm2 = nn.LayerNorm(embedding_dim)
-        self.mlp = MLPBlock(embedding_dim, mlp_dim, activation)
+        self.mlp = MLPBlock(embedding_dim, mlp_dim, act_cfg)
         self.norm3 = nn.LayerNorm(embedding_dim)
         self.norm4 = nn.LayerNorm(embedding_dim)
         self.cross_attn_image_to_token = Attention(embedding_dim, num_heads, downsample_rate=attention_downsample_rate)
@@ -100,7 +100,7 @@ class TwoWayAttentionBlock(nn.Module):
 
 '''TwoWayTransformer'''
 class TwoWayTransformer(nn.Module):
-    def __init__(self, depth, embedding_dim, num_heads, mlp_dim, activation=nn.ReLU, attention_downsample_rate=2):
+    def __init__(self, depth, embedding_dim, num_heads, mlp_dim, act_cfg={'type': 'ReLU'}, attention_downsample_rate=2):
         super(TwoWayTransformer, self).__init__()
         self.depth = depth
         self.embedding_dim = embedding_dim
@@ -109,7 +109,7 @@ class TwoWayTransformer(nn.Module):
         self.layers = nn.ModuleList()
         for i in range(depth):
             self.layers.append(TwoWayAttentionBlock(
-                embedding_dim=embedding_dim, num_heads=num_heads, mlp_dim=mlp_dim, activation=activation, 
+                embedding_dim=embedding_dim, num_heads=num_heads, mlp_dim=mlp_dim, act_cfg=act_cfg, 
                 attention_downsample_rate=attention_downsample_rate, skip_first_layer_pe=(i == 0),
             ))
         self.final_attn_token_to_image = Attention(embedding_dim, num_heads, downsample_rate=attention_downsample_rate)

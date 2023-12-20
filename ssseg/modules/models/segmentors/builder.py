@@ -14,6 +14,7 @@ from .danet import DANet
 from .gcnet import GCNet
 from .dmnet import DMNet
 from .mcibi import MCIBI
+from .samhq import SAMHQ
 from .idrnet import IDRNet
 from .isanet import ISANet
 from .encnet import ENCNet
@@ -46,7 +47,7 @@ from .fcn import FCN, DepthwiseSeparableFCN
 '''SegmentorBuilder'''
 class SegmentorBuilder(BaseModuleBuilder):
     REGISTERED_MODULES = {
-        'FCN': FCN, 'CE2P': CE2P, 'ICNet': ICNet, 'ISNet': ISNet, 'CCNet': CCNet, 'DANet': DANet,
+        'FCN': FCN, 'CE2P': CE2P, 'ICNet': ICNet, 'ISNet': ISNet, 'CCNet': CCNet, 'DANet': DANet, 'SAMHQ': SAMHQ,
         'GCNet': GCNet, 'DMNet': DMNet, 'ISANet': ISANet, 'ENCNet': ENCNet, 'APCNet': APCNet, 'SAM': SAM,
         'EMANet': EMANet, 'PSPNet': PSPNet, 'PSANet': PSANet, 'OCRNet': OCRNet, 'DNLNet': DNLNet,
         'ANNNet': ANNNet, 'SETRUP': SETRUP, 'SETRMLA': SETRMLA, 'FastFCN': FastFCN, 'UPerNet': UPerNet,

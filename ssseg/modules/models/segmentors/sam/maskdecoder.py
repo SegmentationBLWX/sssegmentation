@@ -7,6 +7,7 @@ Author:
 import torch
 from torch import nn
 from torch.nn import functional as F
+from ...backbones import BuildActivation
 from .transformer import TwoWayTransformer
 from ...backbones.samvit import LayerNorm2d
 
@@ -30,7 +31,7 @@ class MLP(nn.Module):
 
 '''MaskDecoder'''
 class MaskDecoder(nn.Module):
-    def __init__(self, transformer_dim, transformer_cfg, num_multimask_outputs=3, activation=nn.GELU, iou_head_depth=3, iou_head_hidden_dim=256):
+    def __init__(self, transformer_dim, transformer_cfg, num_multimask_outputs=3, act_cfg={'type': 'GELU'}, iou_head_depth=3, iou_head_hidden_dim=256):
         super(MaskDecoder, self).__init__()
         self.transformer_dim = transformer_dim
         self.transformer = TwoWayTransformer(**transformer_cfg)
@@ -41,9 +42,9 @@ class MaskDecoder(nn.Module):
         self.output_upscaling = nn.Sequential(
             nn.ConvTranspose2d(transformer_dim, transformer_dim // 4, kernel_size=2, stride=2),
             LayerNorm2d(transformer_dim // 4),
-            activation(),
+            BuildActivation(act_cfg=act_cfg),
             nn.ConvTranspose2d(transformer_dim // 4, transformer_dim // 8, kernel_size=2, stride=2),
-            activation(),
+            BuildActivation(act_cfg=act_cfg),
         )
         self.output_hypernetworks_mlps = nn.ModuleList([
             MLP(transformer_dim, transformer_dim, transformer_dim // 8, 3) for i in range(self.num_mask_tokens)

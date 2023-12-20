@@ -9,6 +9,7 @@ import torch.nn as nn
 import torch.nn.functional as F
 from .samvit import LayerNorm2d
 from .mobilesamtinyvit import Conv2dBN as _Conv2dBN
+from ...utils import loadpretrainedweights
 from .bricks import makedivisible, BuildActivation, BuildNormalization
 
 
@@ -222,6 +223,12 @@ class EdgeSAMRepViT(nn.Module):
         self.neck = nn.Sequential(
             nn.Conv2d(256, 256, kernel_size=1, bias=False), LayerNorm2d(256), nn.Conv2d(256, 256, kernel_size=3, padding=1, bias=False), LayerNorm2d(256),
         )
+        # load pretrained weights
+        if pretrained:
+            state_dict = loadpretrainedweights(
+                structure_type=structure_type, pretrained_model_path=pretrained_model_path, default_model_urls=DEFAULT_MODEL_URLS
+            )
+            self.load_state_dict(state_dict, strict=False)
     '''forward'''
     def forward(self, x):
         counter = 0

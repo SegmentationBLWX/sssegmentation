@@ -10,6 +10,7 @@ import torch.nn as nn
 import torch.nn.functional as F
 import torch.utils.checkpoint as checkpoint
 from .samvit import LayerNorm2d
+from .bricks import BuildActivation
 from ...utils import loadpretrainedweights
 from .bricks.dropout.droppath import DropPath
 
@@ -58,7 +59,7 @@ class Conv2dBN(nn.Sequential):
 
 '''MBConv'''
 class MBConv(nn.Module):
-    def __init__(self, in_chans, out_chans, expand_ratio, act_layer, drop_path):
+    def __init__(self, in_chans, out_chans, expand_ratio, act_cfg={'type': 'GELU'}, drop_path=0.0):
         super(MBConv, self).__init__()
         # set attributes
         self.in_chans = in_chans
@@ -66,11 +67,11 @@ class MBConv(nn.Module):
         self.hidden_chans = int(in_chans * expand_ratio)
         # build layers
         self.conv1 = Conv2dBN(in_chans, self.hidden_chans, kernel_size=1, stride=1, padding=0)
-        self.act1 = act_layer()
+        self.act1 = BuildActivation(act_cfg=act_cfg)
         self.conv2 = Conv2dBN(self.hidden_chans, self.hidden_chans, kernel_size=3, stride=1, padding=1, groups=self.hidden_chans)
-        self.act2 = act_layer()
+        self.act2 = BuildActivation(act_cfg=act_cfg)
         self.conv3 = Conv2dBN(self.hidden_chans, out_chans, kernel_size=1, stride=1, padding=0)
-        self.act3 = act_layer()
+        self.act3 = BuildActivation(act_cfg=act_cfg)
         self.drop_path = DropPath(drop_path) if drop_path > 0. else nn.Identity()
     '''forward'''
     def forward(self, x):
@@ -88,7 +89,7 @@ class MBConv(nn.Module):
 
 '''ConvLayer'''
 class ConvLayer(nn.Module):
-    def __init__(self, dim, input_resolution, depth, act_layer, drop_path=0., downsample=None, use_checkpoint=False, out_dim=None, conv_expand_ratio=4.):
+    def __init__(self, dim, input_resolution, depth, act_cfg={'type': 'GELU'}, drop_path=0., downsample=None, use_checkpoint=False, out_dim=None, conv_expand_ratio=4.):
         super(ConvLayer, self).__init__()
         # set attributes
         self.dim = dim
@@ -97,11 +98,11 @@ class ConvLayer(nn.Module):
         self.input_resolution = PatchEmbed.totuple(input_resolution)
         # build blocks
         self.blocks = nn.ModuleList([
-            MBConv(dim, dim, conv_expand_ratio, act_layer, drop_path[i] if isinstance(drop_path, list) else drop_path) for i in range(depth)
+            MBConv(dim, dim, conv_expand_ratio, act_cfg, drop_path[i] if isinstance(drop_path, list) else drop_path) for i in range(depth)
         ])
         # patch merging layer
         if downsample is not None:
-            self.downsample = downsample(input_resolution, dim=dim, out_dim=out_dim, act_layer=act_layer)
+            self.downsample = downsample(input_resolution, dim=dim, out_dim=out_dim, act_cfg=act_cfg)
         else:
             self.downsample = None
     '''forward'''
@@ -118,14 +119,14 @@ class ConvLayer(nn.Module):
 
 '''MLP'''
 class MLP(nn.Module):
-    def __init__(self, in_features, hidden_features=None, out_features=None, act_layer=nn.GELU, drop=0.):
+    def __init__(self, in_features, hidden_features=None, out_features=None, act_cfg={'type': 'GELU'}, drop=0.):
         super(MLP, self).__init__()
         out_features = out_features or in_features
         hidden_features = hidden_features or in_features
         self.norm = nn.LayerNorm(in_features)
         self.fc1 = nn.Linear(in_features, hidden_features)
         self.fc2 = nn.Linear(hidden_features, out_features)
-        self.act = act_layer()
+        self.act = BuildActivation(act_cfg=act_cfg)
         self.drop = nn.Dropout(drop)
     '''forward'''
     def forward(self, x):
@@ -140,7 +141,7 @@ class MLP(nn.Module):
 
 '''PatchEmbed'''
 class PatchEmbed(nn.Module):
-    def __init__(self, in_chans, embed_dim, resolution, act_layer):
+    def __init__(self, in_chans, embed_dim, resolution, act_cfg={'type': 'GELU'}):
         super(PatchEmbed, self).__init__()
         img_size = self.totuple(resolution)
         # set attributes
@@ -151,7 +152,7 @@ class PatchEmbed(nn.Module):
         # build seq
         self.seq = nn.Sequential(
             Conv2dBN(in_chans, embed_dim // 2, kernel_size=3, stride=2, padding=1),
-            act_layer(),
+            BuildActivation(act_cfg=act_cfg),
             Conv2dBN(embed_dim // 2, embed_dim, kernel_size=3, stride=2, padding=1),
         )
     '''forward'''
@@ -167,11 +168,11 @@ class PatchEmbed(nn.Module):
 
 '''PatchMerging'''
 class PatchMerging(nn.Module):
-    def __init__(self, input_resolution, dim, out_dim, act_layer):
+    def __init__(self, input_resolution, dim, out_dim, act_cfg={'type': 'GELU'}):
         super(PatchMerging, self).__init__()
         # set attributes
         self.dim = dim
-        self.act = act_layer()
+        self.act = BuildActivation(act_cfg=act_cfg)
         self.out_dim = out_dim
         self.input_resolution = PatchEmbed.totuple(input_resolution)
         # build layers
@@ -247,7 +248,7 @@ class Attention(nn.Module):
 
 '''TinyViTBlock'''
 class TinyViTBlock(nn.Module):
-    def __init__(self, dim, input_resolution, num_heads, window_size=7, mlp_ratio=4., drop=0., drop_path=0., local_conv_size=3, act_layer=nn.GELU):
+    def __init__(self, dim, input_resolution, num_heads, window_size=7, mlp_ratio=4., drop=0., drop_path=0., local_conv_size=3, act_cfg={'type': 'GELU'}):
         super(TinyViTBlock, self).__init__()
         # assert
         assert window_size > 0, 'window_size must be greater than 0'
@@ -261,7 +262,7 @@ class TinyViTBlock(nn.Module):
         # build layers
         self.drop_path = DropPath(drop_path) if drop_path > 0. else nn.Identity()
         self.attn = Attention(dim, dim // num_heads, num_heads, attn_ratio=1, resolution=PatchEmbed.totuple(window_size))
-        self.mlp = MLP(in_features=dim, hidden_features=int(dim * mlp_ratio), act_layer=act_layer, drop=drop)
+        self.mlp = MLP(in_features=dim, hidden_features=int(dim * mlp_ratio), act_cfg=act_cfg, drop=drop)
         self.local_conv = Conv2dBN(dim, dim, kernel_size=local_conv_size, stride=1, padding=local_conv_size // 2, groups=dim)
     '''forward'''
     def forward(self, x):
@@ -299,7 +300,7 @@ class TinyViTBlock(nn.Module):
 
 '''BasicLayer'''
 class BasicLayer(nn.Module):
-    def __init__(self, dim, input_resolution, depth, num_heads, window_size, mlp_ratio=4., drop=0., drop_path=0., downsample=None, use_checkpoint=False, local_conv_size=3, act_layer=nn.GELU, out_dim=None):
+    def __init__(self, dim, input_resolution, depth, num_heads, window_size, mlp_ratio=4., drop=0., drop_path=0., downsample=None, use_checkpoint=False, local_conv_size=3, act_cfg={'type': 'GELU'}, out_dim=None):
         super(BasicLayer, self).__init__()
         # set attributes
         self.dim = dim
@@ -309,11 +310,11 @@ class BasicLayer(nn.Module):
         # build blocks
         self.blocks = nn.ModuleList([TinyViTBlock(
             dim=dim, input_resolution=input_resolution, num_heads=num_heads, window_size=window_size, mlp_ratio=mlp_ratio, drop=drop,
-            drop_path=drop_path[i] if isinstance(drop_path, list) else drop_path, local_conv_size=local_conv_size, act_layer=act_layer,
+            drop_path=drop_path[i] if isinstance(drop_path, list) else drop_path, local_conv_size=local_conv_size, act_cfg=act_cfg,
         ) for i in range(depth)])
         # patch merging layer
         if downsample is not None:
-            self.downsample = downsample(input_resolution, dim=dim, out_dim=out_dim, act_layer=act_layer)
+            self.downsample = downsample(input_resolution, dim=dim, out_dim=out_dim, act_cfg=act_cfg)
         else:
             self.downsample = None
     '''forward'''
@@ -331,11 +332,11 @@ class BasicLayer(nn.Module):
 '''MobileSAMTinyViT'''
 class MobileSAMTinyViT(nn.Module):
     def __init__(self, structure_type, img_size=224, in_chans=3, embed_dims=[96, 192, 384, 768], depths=[2, 2, 6, 2], num_heads=[3, 6, 12, 24], window_sizes=[7, 7, 14, 7], 
-                 mlp_ratio=4., drop_rate=0., drop_path_rate=0.1, use_checkpoint=False, mbconv_expand_ratio=4.0, local_conv_size=3, pretrained=False, pretrained_model_path=''):
+                 mlp_ratio=4., drop_rate=0., drop_path_rate=0.1, use_checkpoint=False, mbconv_expand_ratio=4.0, local_conv_size=3, act_cfg={'type': 'GELU'}, pretrained=False, 
+                 pretrained_model_path=''):
         super(MobileSAMTinyViT, self).__init__()
         # build patch_embed
-        act_layer = nn.GELU
-        self.patch_embed = PatchEmbed(in_chans=in_chans, embed_dim=embed_dims[0], resolution=img_size, act_layer=act_layer)
+        self.patch_embed = PatchEmbed(in_chans=in_chans, embed_dim=embed_dims[0], resolution=img_size, act_cfg=act_cfg)
         # set attributes
         self.depths = depths
         self.img_size=img_size
@@ -366,7 +367,7 @@ class MobileSAMTinyViT(nn.Module):
             kwargs = dict(
                 dim=embed_dims[layer_idx], depth=depths[layer_idx], drop_path=dpr[sum(depths[:layer_idx]): sum(depths[:layer_idx+1])], downsample=PatchMerging if (layer_idx < self.num_layers - 1) else None,
                 input_resolution=(patches_resolution[0] // (2 ** (layer_idx-1 if layer_idx == 3 else layer_idx)), patches_resolution[1] // (2 ** (layer_idx-1 if layer_idx == 3 else layer_idx))),
-                use_checkpoint=use_checkpoint, out_dim=embed_dims[min(layer_idx + 1, len(embed_dims) - 1)], act_layer=act_layer,
+                use_checkpoint=use_checkpoint, out_dim=embed_dims[min(layer_idx + 1, len(embed_dims) - 1)], act_cfg=act_cfg,
             )
             if layer_idx == 0:
                 layer = ConvLayer(conv_expand_ratio=mbconv_expand_ratio, **kwargs)
@@ -387,11 +388,16 @@ class MobileSAMTinyViT(nn.Module):
             )
             self.load_state_dict(state_dict, strict=False)
     '''forward'''
-    def forward(self, x):
+    def forward(self, x, return_interm_embeddings=False):
         x = self.patch_embed(x)
-        for layer in self.layers:
+        interm_embeddings = []
+        for idx, layer in enumerate(self.layers):
             x = layer(x)
+            if idx == 1:
+                interm_embeddings.append(x.view(x.shape[0], 64, 64, -1))
         x = x.view(x.shape[0], 64, 64, x.shape[-1])
         x = x.permute(0, 3, 1, 2)
         x = self.neck(x)
+        if return_interm_embeddings:
+            return x, interm_embeddings
         return x

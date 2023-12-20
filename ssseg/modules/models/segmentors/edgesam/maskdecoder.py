@@ -9,6 +9,7 @@ from ..sam.maskdecoder import MaskDecoder as _MaskDecoder
 
 '''MaskDecoder'''
 class MaskDecoder(_MaskDecoder):
+    '''forward'''
     def forward(self, image_embeddings, image_pe, sparse_prompt_embeddings, dense_prompt_embeddings, num_multimask_outputs):
         assert num_multimask_outputs in [1, 3, 4]
         masks, iou_pred = self.predictmasks(

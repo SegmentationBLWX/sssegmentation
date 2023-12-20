@@ -5,13 +5,11 @@ Author:
     Zhenchao Jin
 '''
 import os
-import cv2
 import torch
 import numpy as np
 import torch.nn as nn
 import torch.nn.functional as F
 import torch.utils.model_zoo as model_zoo
-from functools import partial
 from .maskdecoder import MaskDecoder
 from ...backbones import BuildBackbone
 from .promptencoder import PromptEncoder
@@ -97,7 +95,7 @@ class SAMPredictor(nn.Module):
         if sam_cfg is None:
             sam_cfg = {
                 'backbone': {
-                    'depth': None, 'embed_dim': None, 'img_size': 1024, 'mlp_ratio': 4, 'norm_layer': partial(torch.nn.LayerNorm, eps=1e-6), 'num_heads': None, 
+                    'depth': None, 'embed_dim': None, 'img_size': 1024, 'mlp_ratio': 4, 'norm_cfg': {'type': 'LayerNorm', 'eps': 1e-6}, 'num_heads': None, 
                     'patch_size': 16, 'qkv_bias': True, 'use_rel_pos': True, 'global_attn_indexes': None, 'window_size': 14, 'out_chans': 256, 'type': 'SAMViT'
                 },
                 'prompt': {

@@ -7,6 +7,7 @@ Author:
 import torch
 import numpy as np
 from torch import nn
+from ...backbones import BuildActivation
 from ...backbones.samvit import LayerNorm2d
 
 
@@ -46,7 +47,7 @@ class PositionEmbeddingRandom(nn.Module):
 
 '''PromptEncoder'''
 class PromptEncoder(nn.Module):
-    def __init__(self, embed_dim, image_embedding_size, input_image_size, mask_in_chans, activation=nn.GELU):
+    def __init__(self, embed_dim, image_embedding_size, input_image_size, mask_in_chans, act_cfg={'type': 'GELU'}):
         super(PromptEncoder, self).__init__()
         self.embed_dim = embed_dim
         self.input_image_size = input_image_size
@@ -60,10 +61,10 @@ class PromptEncoder(nn.Module):
         self.mask_downscaling = nn.Sequential(
             nn.Conv2d(1, mask_in_chans // 4, kernel_size=2, stride=2),
             LayerNorm2d(mask_in_chans // 4),
-            activation(),
+            BuildActivation(act_cfg=act_cfg),
             nn.Conv2d(mask_in_chans // 4, mask_in_chans, kernel_size=2, stride=2),
             LayerNorm2d(mask_in_chans),
-            activation(),
+            BuildActivation(act_cfg=act_cfg),
             nn.Conv2d(mask_in_chans, embed_dim, kernel_size=1),
         )
         self.no_mask_embed = nn.Embedding(1, embed_dim)

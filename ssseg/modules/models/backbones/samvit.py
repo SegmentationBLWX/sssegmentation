@@ -7,6 +7,7 @@ Author:
 import torch
 import torch.nn as nn
 import torch.nn.functional as F
+from .bricks import BuildActivation, BuildNormalization
 
 
 '''DEFAULT_MODEL_URLS'''
@@ -17,11 +18,11 @@ AUTO_ASSERT_STRUCTURE_TYPES = {}
 
 '''MLPBlock'''
 class MLPBlock(nn.Module):
-    def __init__(self, embedding_dim, mlp_dim, act=nn.GELU):
+    def __init__(self, embedding_dim, mlp_dim, act_cfg={'type': 'GELU'}):
         super(MLPBlock, self).__init__()
         self.lin1 = nn.Linear(embedding_dim, mlp_dim)
         self.lin2 = nn.Linear(mlp_dim, embedding_dim)
-        self.act = act()
+        self.act = BuildActivation(act_cfg=act_cfg)
     '''forward'''
     def forward(self, x):
         return self.lin2(self.act(self.lin1(x)))
@@ -105,14 +106,15 @@ class Attention(nn.Module):
 
 '''Block'''
 class Block(nn.Module):
-    def __init__(self, dim, num_heads, mlp_ratio=4.0, qkv_bias=True, norm_layer=nn.LayerNorm, act_layer=nn.GELU, use_rel_pos=False, rel_pos_zero_init=True, window_size=0, input_size=None):
+    def __init__(self, dim, num_heads, mlp_ratio=4.0, qkv_bias=True, norm_cfg={'type': 'LayerNorm', 'eps': 1e-6}, act_cfg={'type': 'GELU'}, use_rel_pos=False, 
+                 rel_pos_zero_init=True, window_size=0, input_size=None):
         super(Block, self).__init__()
-        self.norm1 = norm_layer(dim)
+        self.norm1 = BuildNormalization(placeholder=dim, norm_cfg=norm_cfg)
         self.attn = Attention(
             dim=dim, num_heads=num_heads, qkv_bias=qkv_bias, use_rel_pos=use_rel_pos, rel_pos_zero_init=rel_pos_zero_init, input_size=input_size if window_size == 0 else (window_size, window_size),
         )
-        self.norm2 = norm_layer(dim)
-        self.mlp = MLPBlock(embedding_dim=dim, mlp_dim=int(dim * mlp_ratio), act=act_layer)
+        self.norm2 = BuildNormalization(placeholder=dim, norm_cfg=norm_cfg)
+        self.mlp = MLPBlock(embedding_dim=dim, mlp_dim=int(dim * mlp_ratio), act_cfg=act_cfg)
         self.window_size = window_size
     '''forward'''
     def forward(self, x):
@@ -170,8 +172,8 @@ class PatchEmbed(nn.Module):
 '''SAMViT'''
 class SAMViT(nn.Module):
     def __init__(
-        self, img_size=1024, patch_size=16, in_chans=3, embed_dim=768, depth=12, num_heads=12, mlp_ratio=4.0, out_chans=256, qkv_bias=True, norm_layer=nn.LayerNorm, 
-        act_layer=nn.GELU, use_abs_pos=True, use_rel_pos=False, rel_pos_zero_init=True, window_size=0, global_attn_indexes=(),
+        self, img_size=1024, patch_size=16, in_chans=3, embed_dim=768, depth=12, num_heads=12, mlp_ratio=4.0, out_chans=256, qkv_bias=True, norm_cfg={'type': 'LayerNorm', 'eps': 1e-6},
+        act_cfg={'type': 'GELU'}, use_abs_pos=True, use_rel_pos=False, rel_pos_zero_init=True, window_size=0, global_attn_indexes=(),
     ):
         super(SAMViT, self).__init__()
         self.img_size = img_size
@@ -185,7 +187,7 @@ class SAMViT(nn.Module):
         self.blocks = nn.ModuleList()
         for i in range(depth):
             block = Block(
-                dim=embed_dim, num_heads=num_heads, mlp_ratio=mlp_ratio, qkv_bias=qkv_bias, norm_layer=norm_layer, act_layer=act_layer, use_rel_pos=use_rel_pos,
+                dim=embed_dim, num_heads=num_heads, mlp_ratio=mlp_ratio, qkv_bias=qkv_bias, norm_cfg=norm_cfg, act_cfg=act_cfg, use_rel_pos=use_rel_pos,
                 rel_pos_zero_init=rel_pos_zero_init, window_size=window_size if i not in global_attn_indexes else 0, input_size=(img_size // patch_size, img_size // patch_size),
             )
             self.blocks.append(block)
@@ -196,11 +198,16 @@ class SAMViT(nn.Module):
             LayerNorm2d(out_chans),
         )
     '''forward'''
-    def forward(self, x):
+    def forward(self, x, return_interm_embeddings=False):
         x = self.patch_embed(x)
         if self.pos_embed is not None:
             x = x + self.pos_embed
+        interm_embeddings = []
         for blk in self.blocks:
             x = blk(x)
+            if blk.window_size == 0:
+                interm_embeddings.append(x)
         x = self.neck(x.permute(0, 3, 1, 2))
+        if return_interm_embeddings:
+            return x, interm_embeddings
         return x
