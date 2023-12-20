@@ -729,7 +729,7 @@ masks, scores, logits = predictor.predicttorch(
 plt.figure(figsize=(10, 10))
 plt.imshow(image)
 for i, (mask, score) in enumerate(zip(masks, scores)):
-    showmask(mask.cpu().numpy(), plt.gca())
+    showmask(mask.cpu().numpy(), plt.gca(), random_color=True)
     showbox(input_boxes[i].cpu().numpy(), plt.gca())
     plt.axis('off')
 plt.savefig(f'mask.png')
