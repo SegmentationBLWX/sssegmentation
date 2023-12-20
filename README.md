@@ -203,3 +203,4 @@ We are very grateful to the following projects for their help in building SSSegm
 - [MMPreTrain](https://github.com/open-mmlab/mmpretrain)
 - [PyTorch Image Models](https://github.com/huggingface/pytorch-image-models)
 - [EdgeSAM](https://github.com/chongzhou96/EdgeSAM)
+- [sam-hq](https://github.com/SysCV/sam-hq)

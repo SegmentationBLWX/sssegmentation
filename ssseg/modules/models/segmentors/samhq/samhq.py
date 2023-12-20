@@ -14,7 +14,9 @@ class SAMHQ(SAM):
     mask_threshold = 0.0
     image_format = 'RGB'
     def __init__(self, cfg, mode):
+        vit_dim = cfg['head'].pop('vit_dim')
         super(SAMHQ, self).__init__(cfg=cfg, mode=mode)
+        cfg['head']['vit_dim'] = vit_dim
         self.mask_decoder = MaskDecoderHQ(**cfg['head'])
     '''inference'''
     @torch.no_grad()
