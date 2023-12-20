@@ -86,7 +86,7 @@ for i, (mask, score) in enumerate(zip(masks, scores)):
     showpoints(input_point, input_label, plt.gca())
     plt.title(f"Mask {i+1}, Score: {score:.3f}", fontsize=18)
     plt.axis('off')
-    plt.show()
+    plt.savefig(f'mask_{i}.png')
 ```
 
 #### Specifying a specific object with additional points
@@ -136,7 +136,7 @@ plt.imshow(image)
 showmask(masks, plt.gca())
 showpoints(input_point, input_label, plt.gca())
 plt.axis('off')
-plt.show()
+plt.savefig('mask.png')
 ```
 
 To exclude the car and specify just the window, a background point (with label 0, here shown in red) can be supplied.
@@ -181,7 +181,7 @@ plt.imshow(image)
 showmask(masks, plt.gca())
 showpoints(input_point, input_label, plt.gca())
 plt.axis('off')
-plt.show()
+plt.savefig('mask.png')
 ```
 
 #### Specifying a specific object with a box
@@ -217,7 +217,7 @@ plt.imshow(image)
 showmask(masks[0], plt.gca())
 showbox(input_box, plt.gca())
 plt.axis('off')
-plt.show()
+plt.savefig('mask.png')
 ```
 
 #### Combining points and boxes
@@ -256,7 +256,7 @@ showmask(masks[0], plt.gca())
 showbox(input_box, plt.gca())
 showpoints(input_point, input_label, plt.gca())
 plt.axis('off')
-plt.show()
+plt.savefig('mask.png')
 ```
 
 #### Batched prompt inputs
@@ -301,7 +301,7 @@ for mask in masks:
 for box in input_boxes:
     showbox(box.cpu().numpy(), plt.gca())
 plt.axis('off')
-plt.show()
+plt.savefig('mask.png')
 ```
 
 #### End-to-end batched inference
@@ -359,16 +359,16 @@ image2_boxes = torch.tensor([
 ], device=sam.device)
 # set batched_input
 batched_input = [
-     {
-         'image': prepareimage(image1, resize_transform, sam),
-         'boxes': resize_transform.applyboxestorch(image1_boxes, image1.shape[:2]),
-         'original_size': image1.shape[:2]
-     },
-     {
-         'image': prepareimage(image2, resize_transform, sam),
-         'boxes': resize_transform.applyboxestorch(image2_boxes, image2.shape[:2]),
-         'original_size': image2.shape[:2]
-     }
+    {
+        'image': prepareimage(image1, resize_transform, sam),
+        'boxes': resize_transform.applyboxestorch(image1_boxes, image1.shape[:2]),
+        'original_size': image1.shape[:2]
+    },
+    {
+        'image': prepareimage(image2, resize_transform, sam),
+        'boxes': resize_transform.applyboxestorch(image2_boxes, image2.shape[:2]),
+        'original_size': image2.shape[:2]
+    }
 ]
 # inference
 batched_output = sam.inference(batched_input, multimask_output=False)
@@ -387,7 +387,7 @@ for box in image2_boxes:
     showbox(box.cpu().numpy(), ax[1])
 ax[1].axis('off')
 plt.tight_layout()
-plt.show()
+plt.savefig('mask.png')
 ```
 
 The output is a list over results for each input image, where list elements are dictionaries with the following keys:
@@ -448,7 +448,7 @@ plt.figure(figsize=(20,20))
 plt.imshow(image)
 showanns(masks)
 plt.axis('off')
-plt.show()
+plt.savefig('mask.png')
 ```
 
 Mask generation returns a list over masks, where each mask is a dictionary containing various data about the mask. These keys are:
@@ -489,5 +489,5 @@ plt.figure(figsize=(20,20))
 plt.imshow(image)
 showanns(masks)
 plt.axis('off')
-plt.show()
+plt.savefig('mask.png')
 ```

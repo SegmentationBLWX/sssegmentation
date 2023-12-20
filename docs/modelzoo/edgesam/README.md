@@ -336,7 +336,7 @@ plt.savefig(f'mask.png')
 
 ### Automatically generating object masks with EdgeSAM
 
-The usage of EdgeSAMAutomaticMaskGenerator in EdgeSAM is exactly the same as SAM by replacing,
+The usage of `EdgeSAMAutomaticMaskGenerator` in EdgeSAM is exactly the same as SAM by replacing,
 
 - `SAMAutomaticMaskGenerator`: `EdgeSAMAutomaticMaskGenerator`.
 
