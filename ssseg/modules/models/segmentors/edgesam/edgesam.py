@@ -146,8 +146,8 @@ class EdgeSAMPredictor(SAMPredictor):
 class EdgeSAMAutomaticMaskGenerator(SAMAutomaticMaskGenerator):
     def __init__(self, points_per_side=32, points_per_batch=64, pred_iou_thresh=0.88, stability_score_thresh=0.95, stability_score_offset=1.0, device='cuda',
                  box_nms_thresh=0.7, crop_n_layers=0, crop_nms_thresh=0.7, crop_overlap_ratio=512/1500, crop_n_points_downscale_factor=1, point_grids=None,
-                 min_mask_region_area=0, output_mode='binary_mask', sam_cfg=None, use_default_sam_t_5m=False, load_ckpt_strict=False):
-        user_defined_sam_predictor = EdgeSAMPredictor(sam_cfg=sam_cfg, use_default_sam_t_5m=use_default_sam_t_5m, device=device, load_ckpt_strict=load_ckpt_strict)
+                 min_mask_region_area=0, output_mode='binary_mask', sam_cfg=None, use_default_edgesam=False, use_default_edgesam_3x=False, load_ckpt_strict=True):
+        user_defined_sam_predictor = EdgeSAMPredictor(sam_cfg=sam_cfg, use_default_edgesam=use_default_edgesam, use_default_edgesam_3x=use_default_edgesam_3x, device=device, load_ckpt_strict=load_ckpt_strict)
         super(EdgeSAMAutomaticMaskGenerator, self).__init__(
             points_per_side=points_per_side, points_per_batch=points_per_batch, pred_iou_thresh=pred_iou_thresh, stability_score_thresh=stability_score_thresh, 
             stability_score_offset=stability_score_offset, device=device, box_nms_thresh=box_nms_thresh, crop_n_layers=crop_n_layers, crop_nms_thresh=crop_nms_thresh, 
