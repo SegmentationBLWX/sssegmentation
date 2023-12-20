@@ -17,11 +17,40 @@ class EdgeSAM(SAM):
     def __init__(self, cfg, mode):
         super(EdgeSAM, self).__init__(cfg=cfg, mode=mode)
         self.mask_decoder = MaskDecoder(**cfg['head'])
+        self.stability_score_offset = cfg.get('stability_score_offset', 1.0)
+    '''inference'''
+    @torch.no_grad()
+    def inference(self, batched_input, num_multimask_outputs=1, use_stability_score=False):
+        input_images = torch.stack([self.preprocess(x['image']) for x in batched_input], dim=0)
+        image_embeddings = self.image_encoder(input_images)
+        outputs = []
+        for image_record, curr_embedding in zip(batched_input, image_embeddings):
+            if 'point_coords' in image_record:
+                points = (image_record['point_coords'], image_record['point_labels'])
+            else:
+                points = None
+            sparse_embeddings, dense_embeddings = self.prompt_encoder(
+                points=points, boxes=image_record.get('boxes', None), masks=image_record.get('mask_inputs', None),
+            )
+            low_res_masks, iou_predictions = self.mask_decoder(
+                image_embeddings=curr_embedding.unsqueeze(0), image_pe=self.prompt_encoder.getdensepe(), sparse_prompt_embeddings=sparse_embeddings,
+                dense_prompt_embeddings=dense_embeddings, num_multimask_outputs=num_multimask_outputs,
+            )
+            if use_stability_score:
+                iou_predictions = calculatestabilityscore(low_res_masks, self.mask_threshold, self.stability_score_offset)
+            masks = self.postprocessmasks(
+                low_res_masks, input_size=image_record['image'].shape[-2:], original_size=image_record['original_size'],
+            )
+            masks = masks > self.mask_threshold
+            outputs.append({
+                'masks': masks, 'iou_predictions': iou_predictions, 'low_res_logits': low_res_masks,
+            })
+        return outputs
 
 
 '''EdgeSAMPredictor'''
 class EdgeSAMPredictor(SAMPredictor):
-    def __init__(self, sam_cfg=None, use_default_edgesam=False, use_default_edgesam_3x=False, device='cuda', load_ckpt_strict=True, stability_score_offset=1.0):
+    def __init__(self, sam_cfg=None, use_default_edgesam=False, use_default_edgesam_3x=False, device='cuda', load_ckpt_strict=True):
         if sam_cfg is None:
             sam_cfg = {
                 'backbone': {
@@ -34,6 +63,7 @@ class EdgeSAMPredictor(SAMPredictor):
                     'num_multimask_outputs': 3, 'transformer_cfg': {'depth': 2, 'embedding_dim': 256, 'mlp_dim': 2048, 'num_heads': 8}, 
                     'transformer_dim': 256, 'iou_head_depth': 3, 'iou_head_hidden_dim': 256,
                 },
+                'stability_score_offset': 1.0,
             }
             if use_default_edgesam:
                 assert (not use_default_edgesam_3x)
@@ -47,7 +77,7 @@ class EdgeSAMPredictor(SAMPredictor):
             use_default_sam_h=False, use_default_sam_l=False, use_default_sam_b=False, sam_cfg=sam_cfg, device=device, load_ckpt_strict=load_ckpt_strict,
         )
         self.model.eval()
-        self.stability_score_offset = stability_score_offset
+        self.stability_score_offset = sam_cfg.get('stability_score_offset', 1.0)
     '''buildsam'''
     def buildsam(self, sam_cfg, device):
         sam_model = EdgeSAM(sam_cfg, mode='TEST')
