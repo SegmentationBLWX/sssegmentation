@@ -56,9 +56,7 @@ input_label = np.array([1])
 input_point = np.array([[500, 375]])
 # inference
 masks, scores, logits = predictor.predict(
-    point_coords=input_point,
-    point_labels=input_label,
-    multimask_output=True,
+    point_coords=input_point, point_labels=input_label, multimask_output=True,
 )
 # show results
 for i, (mask, score) in enumerate(zip(masks, scores)):
@@ -97,9 +95,7 @@ input_label = np.array([1])
 input_point = np.array([[500, 375]])
 # inference
 masks, scores, logits = predictor.predict(
-    point_coords=input_point,
-    point_labels=input_label,
-    multimask_output=True,
+    point_coords=input_point, point_labels=input_label, multimask_output=True,
 )
 # set prompt for the second time
 input_label = np.array([1, 1])
@@ -107,10 +103,7 @@ input_point = np.array([[500, 375], [1125, 625]])
 # inference for the second time
 mask_input = logits[np.argmax(scores), :, :]
 masks, _, _ = predictor.predict(
-    point_coords=input_point,
-    point_labels=input_label,
-    mask_input=mask_input[None, :, :],
-    multimask_output=False,
+    point_coords=input_point, point_labels=input_label, mask_input=mask_input[None, :, :], multimask_output=False,
 )
 # show results
 plt.figure(figsize=(10, 10))
@@ -142,9 +135,7 @@ input_label = np.array([1])
 input_point = np.array([[500, 375]])
 # inference
 masks, scores, logits = predictor.predict(
-    point_coords=input_point,
-    point_labels=input_label,
-    multimask_output=True,
+    point_coords=input_point, point_labels=input_label, multimask_output=True,
 )
 # set prompt for the second time
 input_label = np.array([1, 0])
@@ -152,10 +143,7 @@ input_point = np.array([[500, 375], [1125, 625]])
 # inference for the second time
 mask_input = logits[np.argmax(scores), :, :]
 masks, _, _ = predictor.predict(
-    point_coords=input_point,
-    point_labels=input_label,
-    mask_input=mask_input[None, :, :],
-    multimask_output=False,
+    point_coords=input_point, point_labels=input_label, mask_input=mask_input[None, :, :], multimask_output=False,
 )
 # show results
 plt.figure(figsize=(10, 10))
@@ -188,10 +176,7 @@ predictor.setimage(image)
 input_box = np.array([425, 600, 700, 875])
 # inference
 masks, _, _ = predictor.predict(
-    point_coords=None,
-    point_labels=None,
-    box=input_box[None, :],
-    multimask_output=False,
+    point_coords=None, point_labels=None, box=input_box[None, :], multimask_output=False,
 )
 # show results
 plt.figure(figsize=(10, 10))
@@ -226,10 +211,7 @@ input_point = np.array([[575, 750]])
 input_box = np.array([425, 600, 700, 875])
 # inference
 masks, _, _ = predictor.predict(
-    point_coords=input_point,
-    point_labels=input_label,
-    box=input_box,
-    multimask_output=False,
+    point_coords=input_point, point_labels=input_label, box=input_box, multimask_output=False,
 )
 # show results
 plt.figure(figsize=(10, 10))
@@ -262,18 +244,12 @@ predictor = SAMPredictor(use_default_sam_h=True)
 predictor.setimage(image)
 # set prompt
 input_boxes = torch.tensor([
-    [75, 275, 1725, 850],
-    [425, 600, 700, 875],
-    [1375, 550, 1650, 800],
-    [1240, 675, 1400, 750],
+    [75, 275, 1725, 850], [425, 600, 700, 875], [1375, 550, 1650, 800], [1240, 675, 1400, 750],
 ], device=predictor.device)
 transformed_boxes = predictor.transform.applyboxestorch(input_boxes, image.shape[:2])
 # inference
 masks, _, _ = predictor.predicttorch(
-    point_coords=None,
-    point_labels=None,
-    boxes=transformed_boxes,
-    multimask_output=False,
+    point_coords=None, point_labels=None, boxes=transformed_boxes, multimask_output=False,
 )
 # show results
 plt.figure(figsize=(10, 10))
@@ -328,16 +304,10 @@ image2 = cv2.imread('images/groceries.jpg')
 image2 = cv2.cvtColor(image2, cv2.COLOR_BGR2RGB)
 # set prompt
 image1_boxes = torch.tensor([
-    [75, 275, 1725, 850],
-    [425, 600, 700, 875],
-    [1375, 550, 1650, 800],
-    [1240, 675, 1400, 750],
+    [75, 275, 1725, 850], [425, 600, 700, 875], [1375, 550, 1650, 800], [1240, 675, 1400, 750],
 ], device=sam.device)
 image2_boxes = torch.tensor([
-    [450, 170, 520, 350],
-    [350, 190, 450, 350],
-    [500, 170, 580, 350],
-    [580, 170, 640, 350],
+    [450, 170, 520, 350], [350, 190, 450, 350], [500, 170, 580, 350], [580, 170, 640, 350],
 ], device=sam.device)
 # set batched_input
 batched_input = [
@@ -426,7 +396,7 @@ mask_generator = SAMAutomaticMaskGenerator(use_default_sam_h=True, device='cuda'
 # generate masks on an image
 masks = mask_generator.generate(image)
 # show all the masks overlayed on the image
-plt.figure(figsize=(20,20))
+plt.figure(figsize=(20, 20))
 plt.imshow(image)
 showanns(masks)
 plt.axis('off')
@@ -467,7 +437,7 @@ mask_generator = SAMAutomaticMaskGenerator(
 # generate masks on an image
 masks = mask_generator.generate(image)
 # show all the masks overlayed on the image
-plt.figure(figsize=(20,20))
+plt.figure(figsize=(20, 20))
 plt.imshow(image)
 showanns(masks)
 plt.axis('off')
