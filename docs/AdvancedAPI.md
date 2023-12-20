@@ -691,15 +691,13 @@ masks, scores, logits = predictor.predict(
     point_coords=input_point, point_labels=input_label, box=input_box, num_multimask_outputs=1
 )
 # show results
-for i, (mask, score) in enumerate(zip(masks, scores)):
-    plt.figure(figsize=(10, 10))
-    plt.imshow(image)
-    showmask(mask, plt.gca())
-    showbox(input_box, plt.gca())
-    showpoints(input_point, input_label, plt.gca())
-    plt.title(f"Mask {i+1}, Score: {score:.3f}", fontsize=18)
-    plt.axis('off')
-    plt.savefig(f'mask_{i}.png')
+plt.figure(figsize=(10, 10))
+plt.imshow(image)
+showmask(masks, plt.gca())
+showbox(input_box, plt.gca())
+showpoints(input_point, input_label, plt.gca())
+plt.axis('off')
+plt.savefig(f'mask.png')
 ```
 
 #### Batched prompt inputs

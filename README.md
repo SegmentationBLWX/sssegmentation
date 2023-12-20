@@ -17,7 +17,7 @@ Documents: https://sssegmentation.readthedocs.io/en/latest/
 
 ## What's New
 
-- **2023-12-20**: Support [EdgeSAM](https://arxiv.org/pdf/2312.06660.pdf), refer to [Results and Models for EdgeSAM](./docs/modelzoo/edgesam) for more details.
+- **2023-12-20**: Support [EdgeSAM](https://arxiv.org/pdf/2312.06660.pdf), refer to [inference-with-edgesam](https://sssegmentation.readthedocs.io/en/latest/AdvancedAPI.html#inference-with-edgesam) for more details.
 - **2023-10-25**: Support [ConvNeXtV2](https://arxiv.org/pdf/2301.00808.pdf), refer to [Results and Models for ConvNeXtV2](./docs/modelzoo/convnextv2) for more details.
 - **2023-10-23**: Support [MobileViT](https://arxiv.org/pdf/2110.02178.pdf) and [MobileViTV2](https://arxiv.org/pdf/2206.02680.pdf), refer to [Results and Models for MobileViT](./docs/modelzoo/mobilevit) for more details.
 - **2023-10-18**: Support [Mask2Former](https://arxiv.org/pdf/2112.01527.pdf), refer to [Results and Models for Mask2Former](./docs/modelzoo/mask2former) for more details.
