@@ -250,7 +250,6 @@ class SAMAutomaticMaskGenerator(nn.Module):
                  min_mask_region_area=0, output_mode='binary_mask', sam_cfg=None, use_default_sam_h=False, use_default_sam_l=False, use_default_sam_b=False,
                  user_defined_sam_predictor=None, load_ckpt_strict=True):
         super(SAMAutomaticMaskGenerator, self).__init__()
-        from pycocotools import mask as mask_utils
         # assert arguments
         assert (points_per_side is None) != (point_grids is None), 'exactly one of points_per_side or point_grid must be provided.'
         assert output_mode in ['binary_mask', 'uncompressed_rle', 'coco_rle'], f'unknown output_mode {output_mode}.'

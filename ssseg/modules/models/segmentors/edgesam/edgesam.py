@@ -6,8 +6,8 @@ Author:
 '''
 import torch
 from .maskdecoder import MaskDecoder
-from ..sam.amg import calculatestabilityscore
 from ..sam import SAM, SAMPredictor, SAMAutomaticMaskGenerator
+from ..sam.amg import calculatestabilityscore, batchedmasktobox, isboxnearcropedge, uncropmasks, masktorlepytorch, MaskData
 
 
 '''EdgeSAM'''
@@ -155,3 +155,42 @@ class EdgeSAMAutomaticMaskGenerator(SAMAutomaticMaskGenerator):
             output_mode=output_mode, sam_cfg=None, use_default_sam_h=False, use_default_sam_l=False, use_default_sam_b=False, user_defined_sam_predictor=user_defined_sam_predictor,
             load_ckpt_strict=load_ckpt_strict,
         )
+    '''processbatch'''
+    def processbatch(self, points, im_size, crop_box, orig_size):
+        orig_h, orig_w = orig_size
+        # run model on this batch
+        transformed_points = self.predictor.transform.applycoords(points, im_size)
+        in_points = torch.as_tensor(transformed_points, device=self.predictor.device)
+        in_labels = torch.ones(in_points.shape[0], dtype=torch.int, device=in_points.device)
+        masks, iou_preds, _ = self.predictor.predicttorch(in_points[:, None, :], in_labels[:, None], num_multimask_outputs=3, return_logits=True)
+        # serialize predictions and store in MaskData
+        data = MaskData(
+            masks=masks.flatten(0, 1),
+            iou_preds=iou_preds.flatten(0, 1),
+            points=torch.as_tensor(points.repeat(masks.shape[1], axis=0)),
+        )
+        del masks
+        # filter by predicted IoU
+        if self.pred_iou_thresh > 0.0:
+            keep_mask = data['iou_preds'] > self.pred_iou_thresh
+            data.filter(keep_mask)
+        # calculate stability score
+        data['stability_score'] = calculatestabilityscore(
+            data['masks'], self.predictor.model.mask_threshold, self.stability_score_offset
+        )
+        if self.stability_score_thresh > 0.0:
+            keep_mask = data['stability_score'] >= self.stability_score_thresh
+            data.filter(keep_mask)
+        # threshold masks and calculate boxes
+        data['masks'] = data['masks'] > self.predictor.model.mask_threshold
+        data['boxes'] = batchedmasktobox(data['masks'])
+        # filter boxes that touch crop boundaries
+        keep_mask = ~isboxnearcropedge(data['boxes'], crop_box, [0, 0, orig_w, orig_h])
+        if not torch.all(keep_mask):
+            data.filter(keep_mask)
+        # compress to RLE
+        data['masks'] = uncropmasks(data['masks'], crop_box, orig_h, orig_w)
+        data['rles'] = masktorlepytorch(data['masks'])
+        del data['masks']
+        # return
+        return data
