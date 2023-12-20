@@ -21,6 +21,8 @@
 
 ## Inference with EdgeSAM
 
+### Object masks from prompts with EdgeSAM
+
 #### Environment Set-up
 
 Install sssegmentation:
@@ -332,7 +334,7 @@ plt.tight_layout()
 plt.savefig(f'mask.png')
 ```
 
-#### Automatic mask generation
+### Automatically generating object masks with EdgeSAM
 
 The usage of EdgeSAMAutomaticMaskGenerator in EdgeSAM is exactly the same as SAM by replacing,
 
