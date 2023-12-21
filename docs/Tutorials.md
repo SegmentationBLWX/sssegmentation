@@ -841,7 +841,7 @@ class GRN(nn.Module):
         pass
 ```
 
-After that, you should add this custom normalization class in [`ssseg/modules/models/backbones/bricks/normalization/builder.py`](https://github.com/SegmentationBLWX/sssegmentation/blob/main/ssseg/modules/models/backbones/bricks/normalization/builder.py) if you want to use it by simply modifying `SEGMENTOR_CFG['norm_cfg']` or `SEGMENTOR_CFG['head']['norm_cfg']`.
+After that, you should add this custom normalization class in [`ssseg/modules/models/backbones/bricks/normalization/builder.py`](https://github.com/SegmentationBLWX/sssegmentation/blob/main/ssseg/modules/models/backbones/bricks/normalization/builder.py) if you want to use it by simply modifying `SEGMENTOR_CFG['norm_cfg']` or `SEGMENTOR_CFG['backbone']['norm_cfg']`.
 Of course, you can also register this custom normalization layer by the following codes,
 
 ```python
@@ -899,7 +899,7 @@ class HardSigmoid(nn.Module):
         pass
 ```
 
-After that, you should add this custom activation class in [`ssseg/modules/models/backbones/bricks/activation/builder.py`](https://github.com/SegmentationBLWX/sssegmentation/blob/main/ssseg/modules/models/backbones/bricks/activation/builder.py) if you want to use it by simply modifying `SEGMENTOR_CFG['act_cfg']` or `SEGMENTOR_CFG['head']['act_cfg']`.
+After that, you should add this custom activation class in [`ssseg/modules/models/backbones/bricks/activation/builder.py`](https://github.com/SegmentationBLWX/sssegmentation/blob/main/ssseg/modules/models/backbones/bricks/activation/builder.py) if you want to use it by simply modifying `SEGMENTOR_CFG['act_cfg']` or `SEGMENTOR_CFG['backbone']['act_cfg']`.
 Of course, you can also register this custom activation layer by the following codes,
 
 ```python
