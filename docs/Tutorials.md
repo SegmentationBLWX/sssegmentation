@@ -791,8 +791,8 @@ class Deeplabv3(BaseSegmentor):
         pass
     def forward(self, x, targets=None):
         pass
-	def setauxiliarydecoder(self, auxiliary_cfg):
-	    pass
+    def setauxiliarydecoder(self, auxiliary_cfg):
+        pass
 ```
 
 And the arguments in `SEGMENTOR_CFG['auxiliary']` could be changed according to the new defined `setauxiliarydecoder` function.
