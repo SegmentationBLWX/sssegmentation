@@ -1123,6 +1123,8 @@ from ssseg.modules.models.segmentors.samhq import SAMHQAutomaticMaskGenerator
 
 # mask_generator could be SAMHQAutomaticMaskGenerator(use_default_samhq_t_5m=True, device='cuda') or SAMHQAutomaticMaskGenerator(use_default_samhq_b=True, device='cuda') or SAMHQAutomaticMaskGenerator(use_default_samhq_l=True, device='cuda') or SAMHQAutomaticMaskGenerator(use_default_samhq_h=True, device='cuda')
 mask_generator = SAMHQAutomaticMaskGenerator(use_default_samhq_l=True, device='cuda')
+# generate masks on an image
+masks = mask_generator.generate(image, hq_token_only=True)
 ```
 
 By the way, you can refer to [inference-with-sam](https://sssegmentation.readthedocs.io/en/latest/AdvancedAPI.html#inference-with-sam) to learn about how to use SAM with sssegmenation.

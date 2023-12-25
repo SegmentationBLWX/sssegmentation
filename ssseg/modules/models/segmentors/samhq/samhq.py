@@ -5,8 +5,13 @@ Author:
     Zhenchao Jin
 '''
 import torch
+import numpy as np
 from .maskdecoder import MaskDecoderHQ
+from torchvision.ops.boxes import batched_nms, box_area
 from ..sam import SAM, SAMPredictor, SAMAutomaticMaskGenerator
+from ..sam.amg import (
+    isboxnearcropedge, batchiterator, masktorlepytorch, calculatestabilityscore, generatecropboxes, uncropboxesxyxy, uncroppoints, uncropmasks, batchedmasktobox, MaskData
+)
 
 
 '''SAMHQ'''
@@ -193,3 +198,87 @@ class SAMHQAutomaticMaskGenerator(SAMAutomaticMaskGenerator):
             output_mode=output_mode, sam_cfg=None, use_default_sam_h=False, use_default_sam_l=False, use_default_sam_b=False, user_defined_sam_predictor=user_defined_sam_predictor,
             load_ckpt_strict=load_ckpt_strict,
         )
+    '''generatemasks'''
+    def generatemasks(self, image, hq_token_only=False):
+        orig_size = image.shape[:2]
+        crop_boxes, layer_idxs = generatecropboxes(orig_size, self.crop_n_layers, self.crop_overlap_ratio)
+        # iterate over image crops
+        data = MaskData()
+        for crop_box, layer_idx in zip(crop_boxes, layer_idxs):
+            crop_data = self.processcrop(image, crop_box, layer_idx, orig_size, hq_token_only)
+            data.cat(crop_data)
+        # remove duplicate masks between crops
+        if len(crop_boxes) > 1:
+            # prefer masks from smaller crops
+            scores = 1 / box_area(data['crop_boxes'])
+            scores = scores.to(data['boxes'].device)
+            keep_by_nms = batched_nms(data['boxes'].float(), scores, torch.zeros_like(data['boxes'][:, 0]), iou_threshold=self.crop_nms_thresh)
+            data.filter(keep_by_nms)
+        # return
+        data.tonumpy()
+        return data
+    '''processcrop'''
+    def processcrop(self, image, crop_box, crop_layer_idx, orig_size, hq_token_only):
+        # crop the image and calculate embeddings
+        x0, y0, x1, y1 = crop_box
+        cropped_im = image[y0:y1, x0:x1, :]
+        cropped_im_size = cropped_im.shape[:2]
+        self.predictor.setimage(cropped_im)
+        # get points for this crop
+        points_scale = np.array(cropped_im_size)[None, ::-1]
+        points_for_image = self.point_grids[crop_layer_idx] * points_scale
+        # generate masks for this crop in batches
+        data = MaskData()
+        for (points,) in batchiterator(self.points_per_batch, points_for_image):
+            batch_data = self.processbatch(points, cropped_im_size, crop_box, orig_size, hq_token_only)
+            data.cat(batch_data)
+            del batch_data
+        self.predictor.resetimage()
+        # remove duplicates within this crop.
+        keep_by_nms = batched_nms(data['boxes'].float(), data['iou_preds'], torch.zeros_like(data['boxes'][:, 0]), iou_threshold=self.box_nms_thresh)
+        data.filter(keep_by_nms)
+        # return to the original image frame
+        data['boxes'] = uncropboxesxyxy(data['boxes'], crop_box)
+        data['points'] = uncroppoints(data['points'], crop_box)
+        data['crop_boxes'] = torch.tensor([crop_box for _ in range(len(data['rles']))])
+        # return
+        return data
+    '''processbatch'''
+    def processbatch(self, points, im_size, crop_box, orig_size, hq_token_only):
+        orig_h, orig_w = orig_size
+        # run model on this batch
+        transformed_points = self.predictor.transform.applycoords(points, im_size)
+        in_points = torch.as_tensor(transformed_points, device=self.predictor.device)
+        in_labels = torch.ones(in_points.shape[0], dtype=torch.int, device=in_points.device)
+        masks, iou_preds, _ = self.predictor.predicttorch(in_points[:, None, :], in_labels[:, None], multimask_output=True, return_logits=True, hq_token_only=hq_token_only)
+        # serialize predictions and store in MaskData
+        data = MaskData(
+            masks=masks.flatten(0, 1),
+            iou_preds=iou_preds.flatten(0, 1),
+            points=torch.as_tensor(points.repeat(masks.shape[1], axis=0)),
+        )
+        del masks
+        # filter by predicted IoU
+        if self.pred_iou_thresh > 0.0:
+            keep_mask = data['iou_preds'] > self.pred_iou_thresh
+            data.filter(keep_mask)
+        # calculate stability score
+        data['stability_score'] = calculatestabilityscore(
+            data['masks'], self.predictor.model.mask_threshold, self.stability_score_offset
+        )
+        if self.stability_score_thresh > 0.0:
+            keep_mask = data['stability_score'] >= self.stability_score_thresh
+            data.filter(keep_mask)
+        # threshold masks and calculate boxes
+        data['masks'] = data['masks'] > self.predictor.model.mask_threshold
+        data['boxes'] = batchedmasktobox(data['masks'])
+        # filter boxes that touch crop boundaries
+        keep_mask = ~isboxnearcropedge(data['boxes'], crop_box, [0, 0, orig_w, orig_h])
+        if not torch.all(keep_mask):
+            data.filter(keep_mask)
+        # compress to RLE
+        data['masks'] = uncropmasks(data['masks'], crop_box, orig_h, orig_w)
+        data['rles'] = masktorlepytorch(data['masks'])
+        del data['masks']
+        # return
+        return data
