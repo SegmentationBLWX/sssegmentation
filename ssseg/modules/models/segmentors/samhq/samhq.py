@@ -10,7 +10,8 @@ from .maskdecoder import MaskDecoderHQ
 from torchvision.ops.boxes import batched_nms, box_area
 from ..sam import SAM, SAMPredictor, SAMAutomaticMaskGenerator
 from ..sam.amg import (
-    isboxnearcropedge, batchiterator, masktorlepytorch, calculatestabilityscore, generatecropboxes, uncropboxesxyxy, uncroppoints, uncropmasks, batchedmasktobox, MaskData
+    MaskData, isboxnearcropedge, boxxyxytoxywh, batchiterator, masktorlepytorch, rletomask, areafromrle, calculatestabilityscore, 
+    generatecropboxes, uncropboxesxyxy, uncroppoints, uncropmasks, cocoencoderle, batchedmasktobox
 )
 
 
@@ -198,6 +199,35 @@ class SAMHQAutomaticMaskGenerator(SAMAutomaticMaskGenerator):
             output_mode=output_mode, sam_cfg=None, use_default_sam_h=False, use_default_sam_l=False, use_default_sam_b=False, user_defined_sam_predictor=user_defined_sam_predictor,
             load_ckpt_strict=load_ckpt_strict,
         )
+    '''generate'''
+    @torch.no_grad()
+    def generate(self, image, hq_token_only=False):
+        # generate masks
+        mask_data = self.generatemasks(image, hq_token_only)
+        # filter small disconnected regions and holes in masks
+        if self.min_mask_region_area > 0:
+            mask_data = self.postprocesssmallregions(mask_data, self.min_mask_region_area, max(self.box_nms_thresh, self.crop_nms_thresh))
+        # encode masks
+        if self.output_mode == 'coco_rle':
+            mask_data['segmentations'] = [cocoencoderle(rle) for rle in mask_data['rles']]
+        elif self.output_mode == 'binary_mask':
+            mask_data['segmentations'] = [rletomask(rle) for rle in mask_data['rles']]
+        else:
+            mask_data['segmentations'] = mask_data['rles']
+        # write mask records
+        curr_anns = []
+        for idx in range(len(mask_data['segmentations'])):
+            ann = {
+                'segmentation': mask_data['segmentations'][idx], 'area': areafromrle(mask_data['rles'][idx]),
+                'bbox': boxxyxytoxywh(mask_data['boxes'][idx]).tolist(),
+                'predicted_iou': mask_data['iou_preds'][idx].item(),
+                'point_coords': [mask_data['points'][idx].tolist()],
+                'stability_score': mask_data['stability_score'][idx].item(),
+                'crop_box': boxxyxytoxywh(mask_data['crop_boxes'][idx]).tolist(),
+            }
+            curr_anns.append(ann)
+        # return
+        return curr_anns
     '''generatemasks'''
     def generatemasks(self, image, hq_token_only=False):
         orig_size = image.shape[:2]
