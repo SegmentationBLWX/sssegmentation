@@ -97,6 +97,7 @@ class SAMHQPredictor(SAMPredictor):
                 }
                 sam_cfg['head']['vit_dim'] = 160
                 sam_cfg['ckptpath'] = 'https://huggingface.co/lkeab/hq-sam/resolve/main/sam_hq_vit_tiny.pth'
+                load_ckpt_strict = False
         else:
             assert (not use_default_samhq_b) and (not use_default_samhq_l) and (not use_default_samhq_h) and (not use_default_samhq_t_5m)
         super(SAMHQPredictor, self).__init__(
