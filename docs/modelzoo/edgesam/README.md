@@ -31,7 +31,7 @@ Install sssegmentation:
 # from pypi
 pip install SSSegmentation
 # from Github repository
-pip install git+https://github.com/CharlesPikachu/sssegmentation.git
+pip install git+https://github.com/SegmentationBLWX/sssegmentation.git
 ```
 
 Download images:
