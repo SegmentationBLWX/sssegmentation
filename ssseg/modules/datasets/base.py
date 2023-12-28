@@ -11,8 +11,11 @@ import numpy as np
 import collections
 import scipy.io as sio
 from PIL import Image
-from chainercv.evaluations import eval_semantic_segmentation
-from .pipelines import Evaluation, BuildDataTransform, DataTransformBuilder, Compose
+try:
+    from chainercv.evaluations import eval_semantic_segmentation
+except:
+    eval_semantic_segmentation = None
+from .pipelines import Evaluation, DataTransformBuilder, Compose, BuildDataTransform
 
 
 '''BaseDataset'''
@@ -77,7 +80,10 @@ class BaseDataset(torch.utils.data.Dataset):
     '''evaluate'''
     def evaluate(self, seg_preds, seg_targets, metric_list=['iou', 'miou'], num_classes=None, ignore_index=-1, nan_to_num=None, beta=1.0):
         # basic evaluation
-        result = eval_semantic_segmentation(seg_preds, seg_targets)
+        if eval_semantic_segmentation is None:
+            result = {}
+        else:
+            result = eval_semantic_segmentation(seg_preds, seg_targets)
         # selected result
         selected_result, eval_client = {}, None
         for metric in metric_list:
