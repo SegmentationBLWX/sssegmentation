@@ -10,7 +10,7 @@ SEGMENTOR_CFG = {
     'save_interval_epochs': 1,
     'evaluate_results_filename': '',
     'logger_handle_cfg': {'type': 'LocalLoggerHandle', 'logfilepath': ''},
-    'training_logging_manager_cfg': {'log_interval_iter': 50},
+    'training_logging_manager_cfg': {'log_interval_iters': 50},
     'norm_cfg': {'type': 'SyncBatchNorm'},
     'act_cfg': {'type': 'ReLU', 'inplace': True},
     'backbone': {
