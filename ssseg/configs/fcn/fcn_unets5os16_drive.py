@@ -1,4 +1,5 @@
 '''fcn_unets5os16_drive'''
+import os
 import copy
 from .base_cfg import SEGMENTOR_CFG
 from .._base_ import DATASET_CFG_DRIVE_64x64, DATALOADER_CFG_BS16
@@ -31,6 +32,6 @@ SEGMENTOR_CFG['inference'] = {
     },
     'metric_list': ['dice', 'mdice'],
 }
-SEGMENTOR_CFG['work_dir'] = 'fcn_unets5os16_drive'
-SEGMENTOR_CFG['logfilepath'] = 'fcn_unets5os16_drive/fcn_unets5os16_drive.log'
-SEGMENTOR_CFG['resultsavepath'] = 'fcn_unets5os16_drive/fcn_unets5os16_drive_results.pkl'
+SEGMENTOR_CFG['work_dir'] = os.path.split(__file__)[-1].split('.')[0]
+SEGMENTOR_CFG['evaluate_results_filename'] = f"{os.path.split(__file__)[-1].split('.')[0]}.pkl"
+SEGMENTOR_CFG['logger_handle_cfg']['logfilepath'] = os.path.join(SEGMENTOR_CFG['work_dir'], f"{os.path.split(__file__)[-1].split('.')[0]}.log")

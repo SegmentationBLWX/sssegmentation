@@ -1,4 +1,5 @@
 '''fcn_bisenetv1_resnet18os32_cityscapes'''
+import os
 import copy
 from .base_cfg import SEGMENTOR_CFG
 from .._base_ import DATASET_CFG_CITYSCAPES_1024x1024, DATALOADER_CFG_BS16
@@ -36,6 +37,6 @@ SEGMENTOR_CFG['losses'] = {
     'loss_aux2': {'type': 'CrossEntropyLoss', 'scale_factor': 1.0, 'ignore_index': 255, 'reduction': 'mean'},
     'loss_cls': {'type': 'CrossEntropyLoss', 'scale_factor': 1.0, 'ignore_index': 255, 'reduction': 'mean'},
 }
-SEGMENTOR_CFG['work_dir'] = 'fcn_bisenetv1_resnet18os32_cityscapes'
-SEGMENTOR_CFG['logfilepath'] = 'fcn_bisenetv1_resnet18os32_cityscapes/fcn_bisenetv1_resnet18os32_cityscapes.log'
-SEGMENTOR_CFG['resultsavepath'] = 'fcn_bisenetv1_resnet18os32_cityscapes/fcn_bisenetv1_resnet18os32_cityscapes_results.pkl'
+SEGMENTOR_CFG['work_dir'] = os.path.split(__file__)[-1].split('.')[0]
+SEGMENTOR_CFG['evaluate_results_filename'] = f"{os.path.split(__file__)[-1].split('.')[0]}.pkl"
+SEGMENTOR_CFG['logger_handle_cfg']['logfilepath'] = os.path.join(SEGMENTOR_CFG['work_dir'], f"{os.path.split(__file__)[-1].split('.')[0]}.log")

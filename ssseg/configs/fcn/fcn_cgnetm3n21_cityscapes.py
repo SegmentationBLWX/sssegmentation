@@ -1,4 +1,5 @@
 '''fcn_cgnetm3n21_cityscapes'''
+import os
 import copy
 import torch
 from .base_cfg import SEGMENTOR_CFG
@@ -46,6 +47,6 @@ SEGMENTOR_CFG['losses'] = {
         'weight': torch.tensor([2.5959933, 6.7415504, 3.5354059, 9.8663225, 9.690899, 9.369352, 10.289121, 9.953208, 4.3097677, 9.490387, 7.674431, 9.396905, 10.347791, 6.3927646, 10.226669, 10.241062, 10.280587, 10.396974, 10.055647]),
     },
 }
-SEGMENTOR_CFG['work_dir'] = 'fcn_cgnetm3n21_cityscapes'
-SEGMENTOR_CFG['logfilepath'] = 'fcn_cgnetm3n21_cityscapes/fcn_cgnetm3n21_cityscapes.log'
-SEGMENTOR_CFG['resultsavepath'] = 'fcn_cgnetm3n21_cityscapes/fcn_cgnetm3n21_cityscapes_results.pkl'
+SEGMENTOR_CFG['work_dir'] = os.path.split(__file__)[-1].split('.')[0]
+SEGMENTOR_CFG['evaluate_results_filename'] = f"{os.path.split(__file__)[-1].split('.')[0]}.pkl"
+SEGMENTOR_CFG['logger_handle_cfg']['logfilepath'] = os.path.join(SEGMENTOR_CFG['work_dir'], f"{os.path.split(__file__)[-1].split('.')[0]}.log")
