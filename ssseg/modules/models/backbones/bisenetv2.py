@@ -17,7 +17,7 @@ DEFAULT_MODEL_URLS = {}
 AUTO_ASSERT_STRUCTURE_TYPES = {}
 
 
-'''Detail Branch with wide channels and shallow layers to capture low-level details and generate high-resolution feature representation'''
+'''DetailBranch'''
 class DetailBranch(nn.Module):
     def __init__(self, detail_channels=(64, 64, 128), in_channels=3, norm_cfg=None, act_cfg=None):
         super(DetailBranch, self).__init__()
@@ -52,7 +52,7 @@ class DetailBranch(nn.Module):
         return x
 
 
-'''Stem Block at the beginning of Semantic Branch'''
+'''StemBlock'''
 class StemBlock(nn.Module):
     def __init__(self, in_channels=3, out_channels=16, norm_cfg=None, act_cfg=None):
         super(StemBlock, self).__init__()
@@ -84,7 +84,7 @@ class StemBlock(nn.Module):
         return x
 
 
-'''Gather-and-Expansion Layer'''
+'''GELayer'''
 class GELayer(nn.Module):
     def __init__(self, in_channels, out_channels, exp_ratio=6, stride=1, norm_cfg=None, act_cfg=None):
         super(GELayer, self).__init__()
@@ -110,15 +110,8 @@ class GELayer(nn.Module):
                 BuildActivation(act_cfg),
             )
             self.shortcut = nn.Sequential(DepthwiseSeparableConv2d(
-                in_channels=in_channels,
-                out_channels=out_channels,
-                kernel_size=3,
-                stride=stride,
-                padding=1,
-                dw_norm_cfg=norm_cfg,
-                dw_act_cfg=None,
-                pw_norm_cfg=norm_cfg,
-                pw_act_cfg=None,
+                in_channels=in_channels, out_channels=out_channels, kernel_size=3, stride=stride, padding=1,
+                dw_norm_cfg=norm_cfg, dw_act_cfg=None, pw_norm_cfg=norm_cfg, pw_act_cfg=None,
             ))
         self.conv2 = nn.Sequential(
             nn.Conv2d(mid_channel, out_channels, kernel_size=1, stride=1, padding=0, bias=False),
@@ -140,7 +133,7 @@ class GELayer(nn.Module):
         return x
 
 
-'''Context Embedding Block for large receptive filed in Semantic Branch'''
+'''CEBlock'''
 class CEBlock(nn.Module):
     def __init__(self, in_channels=3, out_channels=16, norm_cfg=None, act_cfg=None):
         super(CEBlock, self).__init__()
@@ -172,7 +165,7 @@ class CEBlock(nn.Module):
         return x
 
 
-'''Semantic Branch which is lightweight with narrow channels and deep layers to obtain high-level semantic context'''
+'''SemanticBranch'''
 class SemanticBranch(nn.Module):
     def __init__(self, semantic_channels=(16, 32, 64, 128), in_channels=3, exp_ratio=6, norm_cfg=None, act_cfg=None):
         super(SemanticBranch, self).__init__()
@@ -187,25 +180,18 @@ class SemanticBranch(nn.Module):
             if i == 0:
                 self.add_module(stage_name, StemBlock(in_channels, semantic_channels[i], norm_cfg=norm_cfg, act_cfg=act_cfg))
             elif i == (len(semantic_channels) - 1):
-                self.add_module(
-                    stage_name, 
-                    nn.Sequential(
-                        GELayer(semantic_channels[i - 1], semantic_channels[i], exp_ratio, 2, norm_cfg=norm_cfg, act_cfg=act_cfg),
-                        GELayer(semantic_channels[i], semantic_channels[i], exp_ratio, 1, norm_cfg=norm_cfg, act_cfg=act_cfg),
-                        GELayer(semantic_channels[i], semantic_channels[i], exp_ratio, 1, norm_cfg=norm_cfg, act_cfg=act_cfg),
-                        GELayer(semantic_channels[i], semantic_channels[i], exp_ratio, 1, norm_cfg=norm_cfg, act_cfg=act_cfg),
-                    )
-                )
+                self.add_module(stage_name, nn.Sequential(
+                    GELayer(semantic_channels[i - 1], semantic_channels[i], exp_ratio, 2, norm_cfg=norm_cfg, act_cfg=act_cfg),
+                    GELayer(semantic_channels[i], semantic_channels[i], exp_ratio, 1, norm_cfg=norm_cfg, act_cfg=act_cfg),
+                    GELayer(semantic_channels[i], semantic_channels[i], exp_ratio, 1, norm_cfg=norm_cfg, act_cfg=act_cfg),
+                    GELayer(semantic_channels[i], semantic_channels[i], exp_ratio, 1, norm_cfg=norm_cfg, act_cfg=act_cfg),
+                ))
             else:
-                self.add_module(
-                    stage_name,
-                    nn.Sequential(
-                        GELayer(semantic_channels[i - 1], semantic_channels[i], exp_ratio, 2, norm_cfg=norm_cfg, act_cfg=act_cfg),
-                        GELayer(semantic_channels[i], semantic_channels[i], exp_ratio, 1, norm_cfg=norm_cfg, act_cfg=act_cfg)
-                    )
-                )
-        self.add_module(
-            f'stage{len(semantic_channels)}_CEBlock',
+                self.add_module(stage_name, nn.Sequential(
+                    GELayer(semantic_channels[i - 1], semantic_channels[i], exp_ratio, 2, norm_cfg=norm_cfg, act_cfg=act_cfg),
+                    GELayer(semantic_channels[i], semantic_channels[i], exp_ratio, 1, norm_cfg=norm_cfg, act_cfg=act_cfg)
+                ))
+        self.add_module(f'stage{len(semantic_channels)}_CEBlock',
             CEBlock(semantic_channels[-1], semantic_channels[-1], norm_cfg=norm_cfg, act_cfg=act_cfg),
         )
         self.semantic_stages.append(f'stage{len(semantic_channels)}_CEBlock')
@@ -219,7 +205,7 @@ class SemanticBranch(nn.Module):
         return semantic_outs
 
 
-'''Bilateral Guided Aggregation Layer to fuse the complementary information from both Detail Branch and Semantic Branch'''
+'''BGALayer'''
 class BGALayer(nn.Module):
     def __init__(self, out_channels=128, align_corners=False, norm_cfg=None, act_cfg=None):
         super(BGALayer, self).__init__()
@@ -228,15 +214,8 @@ class BGALayer(nn.Module):
         self.align_corners = align_corners
         # define modules
         self.detail_dwconv = nn.Sequential(DepthwiseSeparableConv2d(
-            in_channels=out_channels,
-            out_channels=out_channels,
-            kernel_size=3,
-            stride=1,
-            padding=1,
-            dw_norm_cfg=norm_cfg,
-            dw_act_cfg=None,
-            pw_norm_cfg=None,
-            pw_act_cfg=None,
+            in_channels=out_channels, out_channels=out_channels, kernel_size=3, stride=1, padding=1,
+            dw_norm_cfg=norm_cfg, dw_act_cfg=None, pw_norm_cfg=None, pw_act_cfg=None,
         ))
         self.detail_down = nn.Sequential(
             nn.Conv2d(out_channels, out_channels, kernel_size=3, stride=2, padding=1, bias=False),
@@ -248,15 +227,8 @@ class BGALayer(nn.Module):
             BuildNormalization(placeholder=out_channels, norm_cfg=norm_cfg),
         )
         self.semantic_dwconv = nn.Sequential(DepthwiseSeparableConv2d(
-            in_channels=out_channels,
-            out_channels=out_channels,
-            kernel_size=3,
-            stride=1,
-            padding=1,
-            dw_norm_cfg=norm_cfg,
-            dw_act_cfg=None,
-            pw_norm_cfg=None,
-            pw_act_cfg=None,
+            in_channels=out_channels, out_channels=out_channels, kernel_size=3, stride=1, padding=1,
+            dw_norm_cfg=norm_cfg, dw_act_cfg=None, pw_norm_cfg=None, pw_act_cfg=None,
         ))
         self.conv = nn.Sequential(
             nn.Conv2d(out_channels, out_channels, kernel_size=3, stride=1, padding=1, bias=False),
@@ -269,14 +241,10 @@ class BGALayer(nn.Module):
         detail_down = self.detail_down(x_d)
         semantic_conv = self.semantic_conv(x_s)
         semantic_dwconv = self.semantic_dwconv(x_s)
-        semantic_conv = F.interpolate(
-            semantic_conv, size=detail_dwconv.shape[2:], mode='bilinear', align_corners=self.align_corners,
-        )
+        semantic_conv = F.interpolate(semantic_conv, size=detail_dwconv.shape[2:], mode='bilinear', align_corners=self.align_corners)
         fuse_1 = detail_dwconv * torch.sigmoid(semantic_conv)
         fuse_2 = detail_down * torch.sigmoid(semantic_dwconv)
-        fuse_2 = F.interpolate(
-            fuse_2, size=fuse_1.shape[2:], mode='bilinear', align_corners=self.align_corners
-        )
+        fuse_2 = F.interpolate(fuse_2, size=fuse_1.shape[2:], mode='bilinear', align_corners=self.align_corners)
         output = self.conv(fuse_1 + fuse_2)
         return output
 

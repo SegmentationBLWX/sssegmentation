@@ -17,7 +17,7 @@ DEFAULT_MODEL_URLS = {}
 AUTO_ASSERT_STRUCTURE_TYPES = {}
 
 
-'''Pooling Pyramid Module used in PSPNet'''
+'''PoolingPyramidModule'''
 class PoolingPyramidModule(nn.ModuleList):
     def __init__(self, pool_scales, in_channels, out_channels, norm_cfg, act_cfg, align_corners):
         super(PoolingPyramidModule, self).__init__()
@@ -39,17 +39,12 @@ class PoolingPyramidModule(nn.ModuleList):
         ppm_outs = []
         for ppm in self:
             ppm_out = ppm(x)
-            upsampled_ppm_out = F.interpolate(
-                input=ppm_out,
-                size=x.shape[2:],
-                mode='bilinear',
-                align_corners=self.align_corners
-            )
+            upsampled_ppm_out = F.interpolate(input=ppm_out, size=x.shape[2:], mode='bilinear', align_corners=self.align_corners)
             ppm_outs.append(upsampled_ppm_out)
         return ppm_outs
 
 
-'''Learning to downsample module'''
+'''LearningToDownsample'''
 class LearningToDownsample(nn.Module):
     def __init__(self, in_channels, dw_channels, out_channels, norm_cfg=None, act_cfg=None, dw_act_cfg=None):
         super(LearningToDownsample, self).__init__()
@@ -63,24 +58,12 @@ class LearningToDownsample(nn.Module):
             BuildActivation(act_cfg),
         )
         self.dsconv1 = DepthwiseSeparableConv2d(
-            in_channels=dw_channels1,
-            out_channels=dw_channels2,
-            kernel_size=3, 
-            stride=2, 
-            padding=1,
-            norm_cfg=self.norm_cfg,
-            act_cfg=self.act_cfg,
-            dw_act_cfg=self.dw_act_cfg,
+            in_channels=dw_channels1, out_channels=dw_channels2, kernel_size=3, stride=2, padding=1,
+            norm_cfg=self.norm_cfg, act_cfg=self.act_cfg, dw_act_cfg=self.dw_act_cfg,
         )
         self.dsconv2 = DepthwiseSeparableConv2d(
-            in_channels=dw_channels2,
-            out_channels=out_channels,
-            kernel_size=3, 
-            stride=2, 
-            padding=1,
-            norm_cfg=self.norm_cfg,
-            act_cfg=self.act_cfg,
-            dw_act_cfg=self.dw_act_cfg,
+            in_channels=dw_channels2, out_channels=out_channels, kernel_size=3, stride=2, padding=1,
+            norm_cfg=self.norm_cfg, act_cfg=self.act_cfg, dw_act_cfg=self.dw_act_cfg,
         )
     '''forward'''
     def forward(self, x):
@@ -90,7 +73,7 @@ class LearningToDownsample(nn.Module):
         return x
 
 
-'''Global feature extractor module'''
+'''GlobalFeatureExtractor'''
 class GlobalFeatureExtractor(nn.Module):
     def __init__(self, in_channels=64, block_channels=(64, 96, 128), out_channels=128, expand_ratio=6, num_blocks=(3, 3, 3), strides=(2, 2, 1),
                  pool_scales=(1, 2, 3, 6), norm_cfg=None, act_cfg=None, align_corners=False):
@@ -109,15 +92,11 @@ class GlobalFeatureExtractor(nn.Module):
             BuildNormalization(placeholder=out_channels, norm_cfg=norm_cfg),
             BuildActivation(act_cfg),
         )
-    '''make layer'''
+    '''makelayer'''
     def makelayer(self, in_channels, out_channels, blocks, stride=1, expand_ratio=6):
-        layers = [
-            InvertedResidual(in_channels, out_channels, stride, expand_ratio, norm_cfg=self.norm_cfg, act_cfg=self.act_cfg)
-        ]
-        for i in range(1, blocks):
-            layers.append(
-                InvertedResidual(out_channels, out_channels, 1, expand_ratio, norm_cfg=self.norm_cfg, act_cfg=self.act_cfg)
-            )
+        layers = [InvertedResidual(in_channels, out_channels, stride, expand_ratio, norm_cfg=self.norm_cfg, act_cfg=self.act_cfg)]
+        for _ in range(1, blocks):
+            layers.append(InvertedResidual(out_channels, out_channels, 1, expand_ratio, norm_cfg=self.norm_cfg, act_cfg=self.act_cfg))
         return nn.Sequential(*layers)
     '''forward'''
     def forward(self, x):
@@ -129,7 +108,7 @@ class GlobalFeatureExtractor(nn.Module):
         return x
 
 
-'''Feature fusion module'''
+'''FeatureFusionModule'''
 class FeatureFusionModule(nn.Module):
     def __init__(self, higher_in_channels, lower_in_channels, out_channels, norm_cfg=None, dwconv_act_cfg=None, conv_act_cfg=None, align_corners=False):
         super(FeatureFusionModule, self).__init__()
@@ -198,30 +177,16 @@ class FastSCNN(nn.Module):
                 assert hasattr(self, key) and (getattr(self, key) == value)
         # set modules
         self.learning_to_downsample = LearningToDownsample(
-            in_channels=in_channels, 
-            dw_channels=downsample_dw_channels, 
-            out_channels=global_in_channels,
-            norm_cfg=self.norm_cfg,
-            act_cfg=self.act_cfg,
-            dw_act_cfg=self.dw_act_cfg
+            in_channels=in_channels, dw_channels=downsample_dw_channels, out_channels=global_in_channels,
+            norm_cfg=self.norm_cfg, act_cfg=self.act_cfg, dw_act_cfg=self.dw_act_cfg
         )
         self.global_feature_extractor = GlobalFeatureExtractor(
-            in_channels=global_in_channels, 
-            block_channels=global_block_channels, 
-            out_channels=global_out_channels, 
-            strides=self.global_block_strides,
-            norm_cfg=self.norm_cfg,
-            act_cfg=self.act_cfg,
-            align_corners=self.align_corners,
+            in_channels=global_in_channels, block_channels=global_block_channels, out_channels=global_out_channels, strides=self.global_block_strides,
+            norm_cfg=self.norm_cfg, act_cfg=self.act_cfg, align_corners=self.align_corners,
         )
         self.feature_fusion = FeatureFusionModule(
-            higher_in_channels=higher_in_channels, 
-            lower_in_channels=lower_in_channels, 
-            out_channels=fusion_out_channels, 
-            norm_cfg=self.norm_cfg, 
-            dwconv_act_cfg=self.act_cfg, 
-            conv_act_cfg=self.act_cfg, 
-            align_corners=self.align_corners,
+            higher_in_channels=higher_in_channels, lower_in_channels=lower_in_channels, out_channels=fusion_out_channels, 
+            norm_cfg=self.norm_cfg, dwconv_act_cfg=self.act_cfg, conv_act_cfg=self.act_cfg, align_corners=self.align_corners,
         )
         # load pretrained weights
         if pretrained:

@@ -1,6 +1,6 @@
 '''
 Function:
-    Implementation of ICNet-Encoder
+    Implementation of ICNetEncoder
 Author:
     Zhenchao Jin
 '''
@@ -11,7 +11,7 @@ from ..pspnet import PyramidPoolingModule
 from ...backbones import BuildNormalization, BuildActivation, BuildBackbone
 
 
-'''ICNet-Encoder'''
+'''ICNetEncoder'''
 class ICNetEncoder(nn.Module):
     def __init__(self, backbone_cfg=None, in_channels=3, layer_channels_list=(512, 2048), light_branch_middle_channels=32, psp_out_channels=512, 
                  out_channels_list=(64, 256, 256), pool_scales=(1, 2, 3, 6), norm_cfg=None, act_cfg=None, align_corners=False):

@@ -17,7 +17,7 @@ DEFAULT_MODEL_URLS = {}
 AUTO_ASSERT_STRUCTURE_TYPES = {}
 
 
-'''Spatial Path to preserve the spatial size of the original input image and encode affluent spatial information'''
+'''SpatialPath'''
 class SpatialPath(nn.Module):
     def __init__(self, in_channels=3, num_channels_list=(64, 64, 64, 128), norm_cfg=None, act_cfg=None):
         super(SpatialPath, self).__init__()
@@ -53,7 +53,7 @@ class SpatialPath(nn.Module):
         return x
 
 
-'''Attention Refinement Module (ARM) to refine the features of each stage'''
+'''AttentionRefinementModule'''
 class AttentionRefinementModule(nn.Module):
     def __init__(self, in_channels, out_channels, norm_cfg=None, act_cfg=None):
         super(AttentionRefinementModule, self).__init__()
@@ -76,7 +76,7 @@ class AttentionRefinementModule(nn.Module):
         return x_out
 
 
-'''Context Path to provide sufficient receptive field'''
+'''ContextPath'''
 class ContextPath(nn.Module):
     def __init__(self, backbone_cfg, context_channels_list=(128, 256, 512), norm_cfg=None, act_cfg=None):
         super(ContextPath, self).__init__()
@@ -125,7 +125,7 @@ class ContextPath(nn.Module):
         return supported_backbones[backbone_type](**cfg)
 
 
-'''Feature Fusion Module to fuse low level output feature of Spatial Path and high level output feature of Context Path'''
+'''FeatureFusionModule'''
 class FeatureFusionModule(nn.Module):
     def __init__(self, in_channels, out_channels, norm_cfg=None, act_cfg=None):
         super(FeatureFusionModule, self).__init__()

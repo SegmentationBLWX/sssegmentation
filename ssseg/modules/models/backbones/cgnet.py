@@ -16,7 +16,7 @@ DEFAULT_MODEL_URLS = {}
 AUTO_ASSERT_STRUCTURE_TYPES = {}
 
 
-'''Global Context Extractor for CGNet'''
+'''GlobalContextExtractor'''
 class GlobalContextExtractor(nn.Module):
     def __init__(self, channels, reduction=16):
         super(GlobalContextExtractor, self).__init__()
@@ -38,7 +38,7 @@ class GlobalContextExtractor(nn.Module):
         return x * y
 
 
-'''Context Guided Block for CGNet'''
+'''ContextGuidedBlock'''
 class ContextGuidedBlock(nn.Module):
     def __init__(self, in_channels, out_channels, dilation=2, reduction=16, skip_connect=True, downsample=False, norm_cfg=None, act_cfg=None):
         super(ContextGuidedBlock, self).__init__()
@@ -80,7 +80,7 @@ class ContextGuidedBlock(nn.Module):
         return out
 
 
-'''Downsampling module for CGNet'''
+'''InputInjection'''
 class InputInjection(nn.Module):
     def __init__(self, num_downsamplings):
         super(InputInjection, self).__init__()
@@ -144,14 +144,8 @@ class CGNet(nn.Module):
         self.level1 = nn.ModuleList()
         for i in range(num_blocks[0]):
             self.level1.append(ContextGuidedBlock(
-                in_channels=cur_channels if i == 0 else num_channels[1], 
-                out_channels=num_channels[1], 
-                dilation=dilations[0], 
-                reduction=reductions[0], 
-                skip_connect=True, 
-                downsample=(i == 0), 
-                norm_cfg=norm_cfg, 
-                act_cfg=act_cfg,
+                in_channels=cur_channels if i == 0 else num_channels[1], out_channels=num_channels[1], dilation=dilations[0], 
+                reduction=reductions[0], skip_connect=True, downsample=(i == 0), norm_cfg=norm_cfg, act_cfg=act_cfg,
             ))
         cur_channels = 2 * num_channels[1] + in_channels
         self.norm_prelu_1 = nn.Sequential(
@@ -162,14 +156,8 @@ class CGNet(nn.Module):
         self.level2 = nn.ModuleList()
         for i in range(num_blocks[1]):
             self.level2.append(ContextGuidedBlock(
-                in_channels=cur_channels if i == 0 else num_channels[2],
-                out_channels=num_channels[2],
-                dilation=dilations[1],
-                reduction=reductions[1],
-                skip_connect=True, 
-                downsample=(i == 0), 
-                norm_cfg=norm_cfg, 
-                act_cfg=act_cfg,
+                in_channels=cur_channels if i == 0 else num_channels[2], out_channels=num_channels[2], dilation=dilations[1],
+                reduction=reductions[1], skip_connect=True, downsample=(i == 0), norm_cfg=norm_cfg, act_cfg=act_cfg,
             ))
         cur_channels = 2 * num_channels[2]
         self.norm_prelu_2 = nn.Sequential(

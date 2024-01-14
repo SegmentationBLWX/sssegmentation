@@ -95,9 +95,7 @@ class BEiTAttention(nn.Module):
         if self.relative_position_bias_table is not None:
             Wh = self.window_size[0]
             Ww = self.window_size[1]
-            relative_position_bias = self.relative_position_bias_table[
-                self.relative_position_index.view(-1)
-            ].view(Wh * Ww + 1, Wh * Ww + 1, -1)
+            relative_position_bias = self.relative_position_bias_table[self.relative_position_index.view(-1)].view(Wh * Ww + 1, Wh * Ww + 1, -1)
             relative_position_bias = relative_position_bias.permute(2, 0, 1).contiguous()
             attn = attn + relative_position_bias.unsqueeze(0)
         attn = attn.softmax(dim=-1)
@@ -122,13 +120,8 @@ class BEiTTransformerEncoderLayer(VisionTransformerEncoderLayer):
         self.gamma_1 = nn.Parameter(init_values * torch.ones((embed_dims)), requires_grad=True)
         self.gamma_2 = nn.Parameter(init_values * torch.ones((embed_dims)), requires_grad=True)
         attn_cfg.update(dict(
-            window_size=window_size,
-            qk_scale=None,
-            embed_dims=embed_dims,
-            num_heads=num_heads,
-            attn_drop_rate=attn_drop_rate,
-            proj_drop_rate=0.,
-            bias=bias,
+            window_size=window_size, qk_scale=None, embed_dims=embed_dims, num_heads=num_heads,
+            attn_drop_rate=attn_drop_rate, proj_drop_rate=0., bias=bias,
         ))
         self.attn = BEiTAttention(**attn_cfg)
     '''forward'''

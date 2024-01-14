@@ -112,23 +112,14 @@ class TransformerEncoderLayer(nn.Module):
         super(TransformerEncoderLayer, self).__init__()
         self.norm1 = BuildNormalization(placeholder=embed_dims, norm_cfg=norm_cfg)
         self.attn = EfficientMultiheadAttention(
-            embed_dims=embed_dims,
-            num_heads=num_heads,
-            attn_drop=attn_drop_rate,
-            proj_drop=drop_rate,
-            dropout_cfg={'type': 'DropPath', 'drop_prob': drop_path_rate},
-            batch_first=batch_first,
-            qkv_bias=qkv_bias,
-            norm_cfg=norm_cfg,
-            sr_ratio=sr_ratio
+            embed_dims=embed_dims, num_heads=num_heads, attn_drop=attn_drop_rate, proj_drop=drop_rate,
+            dropout_cfg={'type': 'DropPath', 'drop_prob': drop_path_rate}, batch_first=batch_first,
+            qkv_bias=qkv_bias, norm_cfg=norm_cfg, sr_ratio=sr_ratio
         )
         self.norm2 = BuildNormalization(placeholder=embed_dims, norm_cfg=norm_cfg)
         self.ffn = MixFFN(
-            embed_dims=embed_dims,
-            feedforward_channels=feedforward_channels,
-            ffn_drop=drop_rate,
-            dropout_cfg={'type': 'DropPath', 'drop_prob': drop_path_rate},
-            act_cfg=act_cfg
+            embed_dims=embed_dims, feedforward_channels=feedforward_channels, ffn_drop=drop_rate,
+            dropout_cfg={'type': 'DropPath', 'drop_prob': drop_path_rate}, act_cfg=act_cfg
         )
         self.use_checkpoint = use_checkpoint
     '''forward'''
@@ -184,25 +175,12 @@ class MixVisionTransformer(nn.Module):
         for i, num_layer in enumerate(num_layers):
             embed_dims_i = embed_dims * num_heads[i]
             patch_embed = PatchEmbed(
-                in_channels=in_channels,
-                embed_dims=embed_dims_i,
-                kernel_size=patch_sizes[i],
-                stride=strides[i],
-                padding=patch_sizes[i] // 2,
-                norm_cfg=norm_cfg
+                in_channels=in_channels, embed_dims=embed_dims_i, kernel_size=patch_sizes[i], stride=strides[i], padding=patch_sizes[i] // 2, norm_cfg=norm_cfg
             )
             layer = nn.ModuleList([TransformerEncoderLayer(
-                embed_dims=embed_dims_i,
-                num_heads=num_heads[i],
-                feedforward_channels=mlp_ratio * embed_dims_i,
-                drop_rate=drop_rate,
-                attn_drop_rate=attn_drop_rate,
-                drop_path_rate=dpr[cur + idx],
-                qkv_bias=qkv_bias,
-                act_cfg=act_cfg,
-                norm_cfg=norm_cfg,
-                use_checkpoint=use_checkpoint,
-                sr_ratio=sr_ratios[i]) for idx in range(num_layer)
+                embed_dims=embed_dims_i, num_heads=num_heads[i], feedforward_channels=mlp_ratio * embed_dims_i, drop_rate=drop_rate,
+                attn_drop_rate=attn_drop_rate, drop_path_rate=dpr[cur + idx], qkv_bias=qkv_bias, act_cfg=act_cfg, norm_cfg=norm_cfg,
+                use_checkpoint=use_checkpoint, sr_ratio=sr_ratios[i]) for idx in range(num_layer)
             ])
             in_channels = embed_dims_i
             norm = BuildNormalization(placeholder=embed_dims_i, norm_cfg=norm_cfg)
