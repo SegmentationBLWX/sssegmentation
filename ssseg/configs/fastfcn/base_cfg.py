@@ -1,11 +1,11 @@
 '''SEGMENTOR_CFG for FastFCN'''
 SEGMENTOR_CFG = {
     'work_dir': 'ckpts',
-    'logfilepath': '',
-    'log_interval_iterations': 50,
     'eval_interval_epochs': 10,
     'save_interval_epochs': 1,
-    'resultsavepath': '',
+    'evaluate_results_filename': '',
+    'logger_handle_cfg': {'type': 'LocalLoggerHandle', 'logfilepath': ''},
+    'training_logging_manager_cfg': {'log_interval_iters': 50},
     'losses': {
         'loss_aux': {'type': 'CrossEntropyLoss', 'scale_factor': 0.4, 'ignore_index': 255, 'reduction': 'mean'},
         'loss_cls': {'type': 'CrossEntropyLoss', 'scale_factor': 1.0, 'ignore_index': 255, 'reduction': 'mean'},

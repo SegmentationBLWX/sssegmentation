@@ -1,4 +1,5 @@
 '''fastfcn_deeplabv3_resnet50os32_cityscapes'''
+import os
 import copy
 from .base_cfg import SEGMENTOR_CFG
 from .._base_ import DATASET_CFG_CITYSCAPES_512x1024, DATALOADER_CFG_BS8
@@ -34,6 +35,6 @@ SEGMENTOR_CFG.update({
         'in_channels': 1024, 'out_channels': 512, 'dropout': 0.1,
     }
 })
-SEGMENTOR_CFG['work_dir'] = 'fastfcn_deeplabv3_resnet50os32_cityscapes'
-SEGMENTOR_CFG['logfilepath'] = 'fastfcn_deeplabv3_resnet50os32_cityscapes/fastfcn_deeplabv3_resnet50os32_cityscapes.log'
-SEGMENTOR_CFG['resultsavepath'] = 'fastfcn_deeplabv3_resnet50os32_cityscapes/fastfcn_deeplabv3_resnet50os32_cityscapes_results.pkl'
+SEGMENTOR_CFG['work_dir'] = os.path.split(__file__)[-1].split('.')[0]
+SEGMENTOR_CFG['evaluate_results_filename'] = f"{os.path.split(__file__)[-1].split('.')[0]}.pkl"
+SEGMENTOR_CFG['logger_handle_cfg']['logfilepath'] = os.path.join(SEGMENTOR_CFG['work_dir'], f"{os.path.split(__file__)[-1].split('.')[0]}.log")
