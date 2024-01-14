@@ -1,4 +1,5 @@
 '''idrnet_upernet_swinlarge_pascalcontext59'''
+import os
 import copy
 from .base_cfg import SEGMENTOR_CFG
 from .._base_ import DATASET_CFG_PASCALCONTEXT59_640x640, DATALOADER_CFG_BS16
@@ -40,9 +41,9 @@ SEGMENTOR_CFG['head']['use_sa_on_coarsecontext_before'] = False
 SEGMENTOR_CFG['head']['use_sa_on_coarsecontext_after'] = True
 SEGMENTOR_CFG['head']['coarse_context'] = {'type': 'aspp', 'dilations': (1, 12, 24, 36)}
 SEGMENTOR_CFG['head']['fpn'] = {'in_channels_list': [192, 384, 768, 1536], 'feats_channels': 1024, 'out_channels': 1024}
-SEGMENTOR_CFG['work_dir'] = 'idrnet_upernet_swinlarge_pascalcontext59'
-SEGMENTOR_CFG['logfilepath'] = 'idrnet_upernet_swinlarge_pascalcontext59/idrnet_upernet_swinlarge_pascalcontext59.log'
-SEGMENTOR_CFG['resultsavepath'] = 'idrnet_upernet_swinlarge_pascalcontext59/idrnet_upernet_swinlarge_pascalcontext59_results.pkl'
+SEGMENTOR_CFG['work_dir'] = os.path.split(__file__)[-1].split('.')[0]
+SEGMENTOR_CFG['evaluate_results_filename'] = f"{os.path.split(__file__)[-1].split('.')[0]}.pkl"
+SEGMENTOR_CFG['logger_handle_cfg']['logfilepath'] = os.path.join(SEGMENTOR_CFG['work_dir'], f"{os.path.split(__file__)[-1].split('.')[0]}.log")
 
 
 # modify inference config

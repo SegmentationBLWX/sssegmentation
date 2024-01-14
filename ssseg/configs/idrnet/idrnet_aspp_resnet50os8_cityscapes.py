@@ -1,4 +1,5 @@
 '''idrnet_aspp_resnet50os8_cityscapes'''
+import os
 import copy
 from .base_cfg import SEGMENTOR_CFG
 from .._base_ import DATASET_CFG_CITYSCAPES_512x1024, DATALOADER_CFG_BS8
@@ -23,6 +24,6 @@ SEGMENTOR_CFG['head']['use_fpn_after'] = True
 SEGMENTOR_CFG['head']['use_sa_on_coarsecontext_before'] = False
 SEGMENTOR_CFG['head']['use_sa_on_coarsecontext_after'] = True
 SEGMENTOR_CFG['head']['coarse_context'] = {'type': 'aspp', 'dilations': (1, 12, 24, 36)}
-SEGMENTOR_CFG['work_dir'] = 'idrnet_aspp_resnet50os8_cityscapes'
-SEGMENTOR_CFG['logfilepath'] = 'idrnet_aspp_resnet50os8_cityscapes/idrnet_aspp_resnet50os8_cityscapes.log'
-SEGMENTOR_CFG['resultsavepath'] = 'idrnet_aspp_resnet50os8_cityscapes/idrnet_aspp_resnet50os8_cityscapes_results.pkl'
+SEGMENTOR_CFG['work_dir'] = os.path.split(__file__)[-1].split('.')[0]
+SEGMENTOR_CFG['evaluate_results_filename'] = f"{os.path.split(__file__)[-1].split('.')[0]}.pkl"
+SEGMENTOR_CFG['logger_handle_cfg']['logfilepath'] = os.path.join(SEGMENTOR_CFG['work_dir'], f"{os.path.split(__file__)[-1].split('.')[0]}.log")
