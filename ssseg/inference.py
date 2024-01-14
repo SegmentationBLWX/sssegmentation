@@ -14,7 +14,7 @@ import numpy as np
 import torch.nn.functional as F
 from tqdm import tqdm
 from modules import (
-    BuildDataset, BuildSegmentor, Logger, ConfigParser, touchdir, loadckpts
+    BuildDataset, BuildSegmentor, BuildLoggerHandle, ConfigParser, touchdir, loadckpts
 )
 warnings.filterwarnings('ignore')
 
@@ -49,7 +49,7 @@ class Inferencer():
         # cuda detect
         use_cuda = torch.cuda.is_available()
         # initialize logger_handle
-        logger_handle = Logger(cfg.SEGMENTOR_CFG['logfilepath'])
+        logger_handle = BuildLoggerHandle(cfg.SEGMENTOR_CFG['logger_handle_cfg'])
         # build segmentor
         cfg.SEGMENTOR_CFG['backbone']['pretrained'] = False
         segmentor = BuildSegmentor(segmentor_cfg=cfg.SEGMENTOR_CFG, mode='TEST')

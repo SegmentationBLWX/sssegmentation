@@ -26,7 +26,7 @@ def postprocesspredgtpairs(all_preds, all_gts, cmd_args, cfg, logger_handle):
     rank_id = int(os.environ['SLURM_PROCID']) if 'SLURM_PROCID' in os.environ else cmd_args.local_rank
     # save results
     work_dir = cfg.SEGMENTOR_CFG['work_dir']
-    filename = cfg.SEGMENTOR_CFG['resultsavepath'].split('/')[-1].split('.')[0] + f'_{rank_id}.' + cfg.SEGMENTOR_CFG['resultsavepath'].split('.')[-1]
+    filename = cfg.SEGMENTOR_CFG['evaluate_results_filename'].split('.')[0] + f'_{rank_id}.' + cfg.SEGMENTOR_CFG['evaluate_results_filename'].split('.')[-1]
     with open(os.path.join(work_dir, filename), 'wb') as fp:
         pickle.dump([all_preds, all_gts], fp)
     rank = torch.tensor([rank_id], device='cuda')
@@ -38,7 +38,7 @@ def postprocesspredgtpairs(all_preds, all_gts, cmd_args, cfg, logger_handle):
         all_preds_gather, all_gts_gather = [], []
         for rank in rank_list:
             rank = str(int(rank.item()))
-            filename = cfg.SEGMENTOR_CFG['resultsavepath'].split('/')[-1].split('.')[0] + f'_{rank}.' + cfg.SEGMENTOR_CFG['resultsavepath'].split('.')[-1]
+            filename = cfg.SEGMENTOR_CFG['evaluate_results_filename'].split('.')[0] + f'_{rank}.' + cfg.SEGMENTOR_CFG['evaluate_results_filename'].split('.')[-1]
             fp = open(os.path.join(work_dir, filename), 'rb')
             all_preds, all_gts = pickle.load(fp)
             all_preds_gather += all_preds

@@ -16,12 +16,12 @@ import torch.distributed as dist
 from tqdm import tqdm
 from modules import (
     BuildDistributedDataloader, BuildDistributedModel, touchdir, loadckpts, saveckpts, judgefileexist, postprocesspredgtpairs, initslurm,
-    BuildDataset,  BuildSegmentor, BuildOptimizer, BuildScheduler, Logger, ConfigParser
+    BuildDataset,  BuildSegmentor, BuildOptimizer, BuildScheduler, BuildLoggerHandle, TrainingLoggingManager, ConfigParser
 )
 warnings.filterwarnings('ignore')
 
 
-'''parse arguments in command line'''
+'''parsecmdargs'''
 def parsecmdargs():
     parser = argparse.ArgumentParser(description='SSSegmentation is an open source supervised semantic segmentation toolbox based on PyTorch')
     parser.add_argument('--local_rank', '--local-rank', dest='local_rank', help='node rank for distributed training', default=0, type=int)
@@ -38,13 +38,14 @@ def parsecmdargs():
 
 '''Trainer'''
 class Trainer():
-    def __init__(self, cfg, ngpus_per_node, logger_handle, cmd_args, cfg_file_path):
+    def __init__(self, cfg, ngpus_per_node, logger_handle, cmd_args, cfg_file_path, training_logging_manager):
         # set attribute
         self.cfg = cfg
         self.ngpus_per_node = ngpus_per_node
         self.logger_handle = logger_handle
         self.cmd_args = cmd_args
         self.cfg_file_path = cfg_file_path
+        self.training_logging_manager = training_logging_manager
         assert torch.cuda.is_available(), 'cuda is not available'
         # init distributed training
         dist.init_process_group(backend=self.cfg.SEGMENTOR_CFG.get('backend', 'nccl'))
@@ -53,7 +54,7 @@ class Trainer():
         torch.backends.cudnn.allow_tf32 = False
     '''start trainer'''
     def start(self):
-        cfg, ngpus_per_node, logger_handle, cmd_args, cfg_file_path = self.cfg, self.ngpus_per_node, self.logger_handle, self.cmd_args, self.cfg_file_path
+        cfg, ngpus_per_node, logger_handle, cmd_args, cfg_file_path, training_logging_manager = self.cfg, self.ngpus_per_node, self.logger_handle, self.cmd_args, self.cfg_file_path, self.training_logging_manager
         # build dataset and dataloader
         dataset = BuildDataset(mode='TRAIN', logger_handle=logger_handle, dataset_cfg=cfg.SEGMENTOR_CFG['dataset'])
         assert dataset.num_classes == cfg.SEGMENTOR_CFG['num_classes'], 'parsed config file %s error' % cfg_file_path
@@ -126,7 +127,6 @@ class Trainer():
             logger_handle.info(f'Config details: \n{cfg.SEGMENTOR_CFG}')
             logger_handle.info(f'Resume from: {cmd_args.ckptspath}')
         # start to train the segmentor
-        FloatTensor, losses_log_dict_memory = torch.cuda.FloatTensor, {}
         for epoch in range(start_epoch, end_epoch+1):
             # --set train
             segmentor.train()
@@ -134,9 +134,9 @@ class Trainer():
             # --train epoch
             for batch_idx, samples_meta in enumerate(dataloader):
                 learning_rate = scheduler.updatelr()
-                images = samples_meta['image'].type(FloatTensor)
-                targets = {'seg_target': samples_meta['seg_target'].type(FloatTensor)}
-                if 'edge_target' in samples_meta: targets['edge_target'] = samples_meta['edge_target'].type(FloatTensor)
+                images = samples_meta['image'].type(torch.cuda.FloatTensor)
+                targets = {'seg_target': samples_meta['seg_target'].type(torch.cuda.FloatTensor)}
+                if 'edge_target' in samples_meta: targets['edge_target'] = samples_meta['edge_target'].type(torch.cuda.FloatTensor)
                 optimizer.zero_grad()
                 forward_kwargs = {'learning_rate': learning_rate, 'epoch': epoch} if cfg.SEGMENTOR_CFG['type'] in ['MCIBI', 'MCIBIPlusPlus'] else {}
                 if fp16_type in ['pytorch']:
@@ -144,11 +144,6 @@ class Trainer():
                         loss, losses_log_dict = segmentor(images, targets, **forward_kwargs)
                 else:
                     loss, losses_log_dict = segmentor(images, targets, **forward_kwargs)
-                for key, value in losses_log_dict.items():
-                    if key in losses_log_dict_memory: 
-                        losses_log_dict_memory[key].append(value)
-                    else: 
-                        losses_log_dict_memory[key] = [value]
                 if fp16_type in ['apex']:
                     with apex.amp.scale_loss(loss, optimizer, **fp16_cfg['scale_loss']) as scaled_loss:
                         scaled_loss.backward()
@@ -157,17 +152,14 @@ class Trainer():
                 else:
                     loss.backward()
                 scheduler.step(grad_scaler=grad_scaler)
-                if (cmd_args.local_rank == 0) and (scheduler.cur_iter % cfg.SEGMENTOR_CFG['log_interval_iterations'] == 0) and (int(os.environ.get('SLURM_PROCID', 0)) == 0):
-                    print_log = {
-                        'cur_epoch': epoch, 'max_epochs': end_epoch, 'cur_iter': scheduler.cur_iter, 'max_iters': scheduler.max_iters,
-                        'cur_iter_in_cur_epoch': batch_idx+1, 'max_iters_in_cur_epoch': len(dataloader), 'segmentor': cfg.SEGMENTOR_CFG['type'], 
-                        'backbone': cfg.SEGMENTOR_CFG['backbone']['structure_type'], 'dataset': cfg.SEGMENTOR_CFG['dataset']['type'], 
-                        'learning_rate': learning_rate,
-                    }
-                    for key in list(losses_log_dict_memory.keys()):
-                        print_log[key] = sum(losses_log_dict_memory[key]) / len(losses_log_dict_memory[key])
-                    logger_handle.info(print_log)
-                    losses_log_dict_memory = dict()
+                basic_log_dict = {
+                    'cur_epoch': epoch, 'max_epochs': end_epoch, 'cur_iter': scheduler.cur_iter, 'max_iters': scheduler.max_iters,
+                    'cur_iter_in_cur_epoch': batch_idx+1, 'max_iters_in_cur_epoch': len(dataloader), 'segmentor': cfg.SEGMENTOR_CFG['type'], 
+                    'backbone': cfg.SEGMENTOR_CFG['backbone']['structure_type'], 'dataset': cfg.SEGMENTOR_CFG['dataset']['type'], 
+                    'learning_rate': learning_rate,
+                }
+                training_logging_manager.update(basic_log_dict, losses_log_dict)
+                training_logging_manager.autolog(cmd_args.local_rank)
             scheduler.cur_epoch = epoch
             # --save ckpts
             if (epoch % cfg.SEGMENTOR_CFG['save_interval_epochs'] == 0) or (epoch == end_epoch):
@@ -235,8 +227,12 @@ def main():
     # touch work dir
     touchdir(cfg.SEGMENTOR_CFG['work_dir'])
     config_parser.save(cfg.SEGMENTOR_CFG['work_dir'])
-    # initialize logger_handle
-    logger_handle = Logger(cfg.SEGMENTOR_CFG['logfilepath'])
+    # initialize logger_handle and training_logging_manager
+    logger_handle = BuildLoggerHandle(cfg.SEGMENTOR_CFG['logger_handle_cfg'])
+    training_logging_manager_cfg = cfg.SEGMENTOR_CFG['training_logging_manager_cfg']
+    if ('logger_handle_cfg' not in training_logging_manager_cfg) and ('logger_handle' not in training_logging_manager_cfg):
+        training_logging_manager_cfg['logger_handle'] = logger_handle
+    training_logging_manager = TrainingLoggingManager(**training_logging_manager_cfg)
     # number of gpus, for distribued training, only support a process for a GPU
     ngpus_per_node = torch.cuda.device_count()
     if ngpus_per_node != cmd_args.nproc_per_node:
@@ -244,7 +240,10 @@ def main():
             logger_handle.warning('ngpus_per_node is not equal to nproc_per_node, force ngpus_per_node = nproc_per_node by default')
         ngpus_per_node = cmd_args.nproc_per_node
     # instanced Trainer
-    client = Trainer(cfg=cfg, ngpus_per_node=ngpus_per_node, logger_handle=logger_handle, cmd_args=cmd_args, cfg_file_path=cfg_file_path)
+    client = Trainer(
+        cfg=cfg, ngpus_per_node=ngpus_per_node, logger_handle=logger_handle, cmd_args=cmd_args, cfg_file_path=cfg_file_path,
+        training_logging_manager=training_logging_manager, 
+    )
     client.start()
 
 

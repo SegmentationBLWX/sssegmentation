@@ -16,7 +16,7 @@ import torch.distributed as dist
 from tqdm import tqdm
 from modules import (
     initslurm, touchdir, loadckpts, postprocesspredgtpairs, BuildDistributedDataloader, BuildDistributedModel,
-    BuildDataset, BuildSegmentor, Logger, ConfigParser
+    BuildDataset, BuildSegmentor, BuildLoggerHandle, ConfigParser
 )
 warnings.filterwarnings('ignore')
 
@@ -120,7 +120,7 @@ def main():
     # touch work dir
     touchdir(cfg.SEGMENTOR_CFG['work_dir'])
     # initialize logger_handle
-    logger_handle = Logger(cfg.SEGMENTOR_CFG['logfilepath'])
+    logger_handle = BuildLoggerHandle(cfg.SEGMENTOR_CFG['logger_handle_cfg'])
     # number of gpus, for distribued testing, only support a process for a GPU
     ngpus_per_node = torch.cuda.device_count()
     if ngpus_per_node != args.nproc_per_node:
