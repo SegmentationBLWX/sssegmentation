@@ -124,11 +124,11 @@ SEGMENTOR_CFG = {
     'align_corners': False, # align_corners in torch.nn.functional.interpolate
     'backend': 'nccl', # backend for DDP training and testing
     'work_dir': 'ckpts', # directory used to save checkpoints and training and testing logs
-    'logfilepath': '', # file path to record the training and testing logs
-    'log_interval_iterations': 50, # print training log after "log_interval_iterations" iterations
     'eval_interval_epochs': 10, # evaluate models after "eval_interval_epochs" epochs
     'save_interval_epochs': 1, # save the checkpoints of models after "save_interval_epochs" epochs
-    'resultsavepath': '', # path used to save the testing results used in "ssseg/test.py"
+    'evaluate_results_filename': '', # path used to save the testing results used in `ssseg/test.py`
+    'logger_handle_cfg': {'type': 'LocalLoggerHandle', 'logfilepath': ''}, # config used to instance logger_handle, which is used to print and save logs
+    'training_logging_manager_cfg': {'log_interval_iters': 50}, # config used to instance training_logging_manager, which is used to manage training logs
     'norm_cfg': {'type': 'SyncBatchNorm'}, # config for normalization layer in the segmentor
     'act_cfg': {'type': 'ReLU', 'inplace': True}, # config for activation layer in the segmentor
     'backbone': {
