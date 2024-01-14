@@ -22,12 +22,10 @@ class BaseSegmentor(nn.Module):
         self.mode = mode
         assert self.mode in ['TRAIN', 'TEST']
         # parse align_corners, normalization layer and activation layer cfg
-        self.align_corners, self.norm_cfg, self.act_cfg = cfg['align_corners'], cfg['norm_cfg'], cfg['act_cfg']
+        for key in ['align_corners', 'norm_cfg', 'act_cfg']:
+            if key in cfg: setattr(self, key, cfg[key])
         # build backbone
-        backbone_cfg = copy.deepcopy(cfg['backbone'])
-        if 'norm_cfg' not in backbone_cfg:
-            backbone_cfg.update({'norm_cfg': copy.deepcopy(self.norm_cfg)})
-        self.backbone_net = BuildBackbone(backbone_cfg)
+        self.setbackbone(cfg=cfg)            
     '''forward'''
     def forward(self, x, targets=None):
         raise NotImplementedError('not to be implemented')
@@ -155,10 +153,17 @@ class BaseSegmentor(nn.Module):
             self.auxiliary_decoder.append(dec)
         if len(self.auxiliary_decoder) == 1:
             self.auxiliary_decoder = self.auxiliary_decoder[0]
+    '''setbackbone'''
+    def setbackbone(self, cfg):
+        if 'backbone' not in cfg: return
+        backbone_cfg = copy.deepcopy(cfg['backbone'])
+        if 'norm_cfg' not in backbone_cfg:
+            backbone_cfg.update({'norm_cfg': copy.deepcopy(self.norm_cfg)})
+        self.backbone_net = BuildBackbone(backbone_cfg)
     '''freezenormalization'''
     def freezenormalization(self, norm_list=None):
         if norm_list is None:
-            norm_list=(nn.BatchNorm1d, nn.BatchNorm2d, nn.BatchNorm3d, nn.SyncBatchNorm)
+            norm_list = (nn.BatchNorm1d, nn.BatchNorm2d, nn.BatchNorm3d, nn.SyncBatchNorm)
         for module in self.modules():
             if NormalizationBuilder.isnorm(module, norm_list):
                 module.eval()
@@ -201,3 +206,11 @@ class BaseSegmentor(nn.Module):
                 loss = loss + BuildLoss(l_cfg)(prediction, target)
         # return the loss
         return loss
+    '''train'''
+    def train(self, mode=True):
+        self.mode = 'TRAIN' if mode else 'TEST'
+        return super().train(mode)
+    '''eval'''
+    def eval(self):
+        self.mode = 'TEST'
+        return super().eval()

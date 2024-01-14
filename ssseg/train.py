@@ -190,7 +190,6 @@ class Trainer():
         dataloader = BuildDistributedDataloader(dataset=dataset, dataloader_cfg=dataloader_cfg['test'])
         # start to eval
         segmentor.eval()
-        segmentor.module.mode = 'TEST'
         inference_cfg, all_preds, all_gts = cfg.SEGMENTOR_CFG['inference'], [], []
         align_corners = segmentor.module.align_corners
         with torch.no_grad():
@@ -216,7 +215,6 @@ class Trainer():
             )
             logger_handle.info(result)
         segmentor.train()
-        segmentor.module.mode = 'TRAIN'
 
 
 '''main'''

@@ -10,6 +10,7 @@ import numpy as np
 import torch.nn as nn
 import torch.nn.functional as F
 import torch.utils.model_zoo as model_zoo
+from ..base import BaseSegmentor
 from .maskdecoder import MaskDecoder
 from ...backbones import BuildBackbone
 from .promptencoder import PromptEncoder
@@ -22,11 +23,11 @@ from .amg import (
 
 
 '''SAM'''
-class SAM(nn.Module):
+class SAM(BaseSegmentor):
     mask_threshold = 0.0
     image_format = 'RGB'
     def __init__(self, cfg, mode):
-        super(SAM, self).__init__()
+        super(SAM, self).__init__(cfg=cfg, mode=mode)
         assert mode in ['TEST'], f'only support test mode for {self.__class__.__name__} now'
         pixel_mean = cfg.get('pixel_mean', [123.675, 116.28, 103.53])
         pixel_std = cfg.get('pixel_std', [58.395, 57.12, 57.375])
@@ -86,6 +87,14 @@ class SAM(nn.Module):
         padw = self.image_encoder.img_size - w
         x = F.pad(x, (0, padw, 0, padh))
         return x
+    '''train'''
+    def train(self, mode=True):
+        self.mode = 'TRAIN' if mode else 'TEST'
+        return super().train(mode)
+    '''eval'''
+    def eval(self):
+        self.mode = 'TEST'
+        return super().eval()
 
 
 '''SAMPredictor'''

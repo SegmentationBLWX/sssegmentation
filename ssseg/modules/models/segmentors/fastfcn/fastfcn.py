@@ -4,22 +4,19 @@ Function:
 Author:
     Zhenchao Jin
 '''
-import torch.nn as nn
 from .jpu import JPU
 from ..fcn import FCN
 from ..encnet import ENCNet
 from ..pspnet import PSPNet
+from ..base import BaseSegmentor
 from ..deeplabv3 import Deeplabv3
-from ...backbones import NormalizationBuilder
 
 
 '''FastFCN'''
-class FastFCN(nn.Module):
+class FastFCN(BaseSegmentor):
     def __init__(self, cfg, mode):
-        super(FastFCN, self).__init__()
-        self.cfg = cfg
-        self.mode = mode
-        self.align_corners, self.norm_cfg, self.act_cfg, head_cfg = cfg['align_corners'], cfg['norm_cfg'], cfg['act_cfg'], cfg['head']
+        super(FastFCN, self).__init__(cfg=cfg, mode=mode)
+        align_corners, norm_cfg, act_cfg, head_cfg = self.align_corners, self.norm_cfg, self.act_cfg, cfg['head']
         # build segmentor
         supported_models = {
             'FCN': FCN, 'ENCNet': ENCNet, 'PSPNet': PSPNet, 'Deeplabv3': Deeplabv3,
@@ -27,8 +24,6 @@ class FastFCN(nn.Module):
         model_type = cfg['segmentor']
         assert model_type in supported_models, 'unsupport model_type %s' % model_type
         self.segmentor = supported_models[model_type](cfg, mode)
-        setattr(self, 'inference', self.segmentor.inference)
-        setattr(self, 'auginference', self.segmentor.auginference)
         # build jpu neck
         jpu_cfg = head_cfg['jpu']
         if 'act_cfg' not in jpu_cfg: jpu_cfg.update({'act_cfg': self.act_cfg})
@@ -40,7 +35,6 @@ class FastFCN(nn.Module):
         if cfg.get('is_freeze_norm', False): self.freezenormalization()
     '''forward'''
     def forward(self, x, targets=None, **kwargs):
-        self.segmentor.mode = self.mode
         return self.segmentor(x, targets, **kwargs)
     '''transforminputs'''
     def transforminputs(self, x_list, selected_indices=None):
@@ -54,12 +48,3 @@ class FastFCN(nn.Module):
             outs.append(x_list[idx])
         outs = self.jpu_neck(outs)
         return outs
-    '''freezenormalization'''
-    def freezenormalization(self, norm_list=None):
-        if norm_list is None:
-            norm_list=(nn.BatchNorm1d, nn.BatchNorm2d, nn.BatchNorm3d, nn.SyncBatchNorm)
-        for module in self.modules():
-            if NormalizationBuilder.isnorm(module, norm_list):
-                module.eval()
-                for p in module.parameters():
-                    p.requires_grad = False

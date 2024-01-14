@@ -70,12 +70,13 @@ class Mask2Former(BaseSegmentor):
                 else:
                     losses_dict.pop(k)
             loss, losses_log_dict = 0, {}
-            for key, value in losses_dict.items():
-                loss += value
-                value = value.data.clone()
-                dist.all_reduce(value.div_(dist.get_world_size()))
-                losses_log_dict[key] = value.item()
-            losses_log_dict['total'] = sum(losses_log_dict.values())
+            for loss_key, loss_value in losses_log_dict.items():
+                loss_value = loss_value.mean()
+                loss = loss + loss_value
+                loss_value = loss_value.data.clone()
+                dist.all_reduce(loss_value.div_(dist.get_world_size()))
+                losses_log_dict[loss_key] = loss_value.item()
+            losses_log_dict.update({'loss_total': sum(losses_log_dict.values())})
             return loss, losses_log_dict
         mask_cls_results = predictions['pred_logits']
         mask_pred_results = predictions['pred_masks']
