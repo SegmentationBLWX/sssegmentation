@@ -83,7 +83,7 @@ class TrainingLoggingManager():
     def getlogdict(self):
         log_dict = self.basic_log_dict.copy()
         for key in list(self.history_losses_log_dict.keys()):
-            log_dict[key] = sum(log_dict[key]) / len(log_dict[key])
+            log_dict[key] = sum(self.history_losses_log_dict[key]) / len(self.history_losses_log_dict[key])
         return log_dict
     '''clear'''
     def clear(self):
