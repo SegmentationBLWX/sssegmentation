@@ -1,4 +1,5 @@
 '''pspnet_unets5os16_chasedb1'''
+import os
 import copy
 from .base_cfg import SEGMENTOR_CFG
 from .._base_ import DATASET_CFG_CHASEDB1_128x128, DATALOADER_CFG_BS16
@@ -31,6 +32,6 @@ SEGMENTOR_CFG['inference'] = {
     },
     'metric_list': ['dice', 'mdice'],
 }
-SEGMENTOR_CFG['work_dir'] = 'pspnet_unets5os16_chasedb1'
-SEGMENTOR_CFG['logfilepath'] = 'pspnet_unets5os16_chasedb1/pspnet_unets5os16_chasedb1.log'
-SEGMENTOR_CFG['resultsavepath'] = 'pspnet_unets5os16_chasedb1/pspnet_unets5os16_chasedb1_results.pkl'
+SEGMENTOR_CFG['work_dir'] = os.path.split(__file__)[-1].split('.')[0]
+SEGMENTOR_CFG['evaluate_results_filename'] = f"{os.path.split(__file__)[-1].split('.')[0]}.pkl"
+SEGMENTOR_CFG['logger_handle_cfg']['logfilepath'] = os.path.join(SEGMENTOR_CFG['work_dir'], f"{os.path.split(__file__)[-1].split('.')[0]}.log")
