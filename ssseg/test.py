@@ -21,7 +21,7 @@ from modules import (
 warnings.filterwarnings('ignore')
 
 
-'''parse arguments in command line'''
+'''parsecmdargs'''
 def parsecmdargs():
     parser = argparse.ArgumentParser(description='SSSegmentation is an open source supervised semantic segmentation toolbox based on PyTorch')
     parser.add_argument('--local_rank', '--local-rank', dest='local_rank', help='node rank for distributed testing', default=0, type=int)

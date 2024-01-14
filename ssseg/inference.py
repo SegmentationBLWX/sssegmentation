@@ -19,7 +19,7 @@ from modules import (
 warnings.filterwarnings('ignore')
 
 
-'''parse arguments in command line'''
+'''parsecmdargs'''
 def parsecmdargs():
     parser = argparse.ArgumentParser(description='SSSegmentation is an open source supervised semantic segmentation toolbox based on PyTorch')
     parser.add_argument('--imagedir', dest='imagedir', help='image directory, which means we let the segmentor inference on the images existed in the given image directory', type=str)

@@ -27,7 +27,9 @@ class SAM(BaseSegmentor):
     mask_threshold = 0.0
     image_format = 'RGB'
     def __init__(self, cfg, mode):
+        backbone = cfg.pop('backbone')
         super(SAM, self).__init__(cfg=cfg, mode=mode)
+        cfg['backbone'] = backbone
         assert mode in ['TEST'], f'only support test mode for {self.__class__.__name__} now'
         pixel_mean = cfg.get('pixel_mean', [123.675, 116.28, 103.53])
         pixel_std = cfg.get('pixel_std', [58.395, 57.12, 57.375])
