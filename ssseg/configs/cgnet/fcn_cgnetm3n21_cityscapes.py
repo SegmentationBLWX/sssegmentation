@@ -29,18 +29,8 @@ SEGMENTOR_CFG['dataloader'] = DATALOADER_CFG_BS16.copy()
 # modify scheduler config
 SEGMENTOR_CFG['scheduler']['max_epochs'] = 340
 SEGMENTOR_CFG['scheduler']['min_lr'] = 1e-4
-SEGMENTOR_CFG['scheduler']['optimizer'] = {
-    'type': 'Adam', 'lr': 0.001, 'eps': 1e-08, 'weight_decay': 5e-4, 'params_rules': {},
-}
 # modify other segmentor configs
 SEGMENTOR_CFG['num_classes'] = 19
-SEGMENTOR_CFG['backbone'] = {
-    'type': 'CGNet', 'structure_type': 'cgnetm3n21', 'pretrained': False, 'selected_indices': (1, 2),
-}
-SEGMENTOR_CFG['head'] = {
-    'in_channels': 256, 'feats_channels': 256, 'dropout': 0, 'num_convs': 0,
-}
-SEGMENTOR_CFG['auxiliary'] = None
 SEGMENTOR_CFG['losses'] = {
     'loss_cls': {
         'type': 'CrossEntropyLoss', 'scale_factor': 1.0, 'ignore_index': 255, 'reduction': 'mean', 
