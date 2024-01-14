@@ -96,7 +96,7 @@ class MaskFormer(BaseSegmentor):
                 else:
                     losses_dict.pop(k)
             loss, losses_log_dict = 0, {}
-            for loss_key, loss_value in losses_log_dict.items():
+            for loss_key, loss_value in losses_dict.items():
                 loss_value = loss_value.mean()
                 loss = loss + loss_value
                 loss_value = loss_value.data.clone()
