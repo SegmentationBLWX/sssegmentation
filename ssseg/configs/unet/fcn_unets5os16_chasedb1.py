@@ -1,4 +1,4 @@
-'''pspnet_unets5os16_chasedb1'''
+'''fcn_unets5os16_chasedb1'''
 import os
 import copy
 from .base_cfg import SEGMENTOR_CFG
@@ -15,15 +15,6 @@ SEGMENTOR_CFG['dataloader'] = DATALOADER_CFG_BS16.copy()
 SEGMENTOR_CFG['scheduler']['max_epochs'] = 1
 # modify other segmentor configs
 SEGMENTOR_CFG['num_classes'] = 2
-SEGMENTOR_CFG['backbone'] = {
-    'type': 'UNet', 'structure_type': 'unets5os16', 'pretrained': False, 'selected_indices': (3, 4),
-}
-SEGMENTOR_CFG['head'] = {
-    'in_channels': 64, 'feats_channels': 16, 'pool_scales': [1, 2, 3, 6], 'dropout': 0.1,
-}
-SEGMENTOR_CFG['auxiliary'] = {
-    'in_channels': 128, 'out_channels': 64, 'dropout': 0.1,
-}
 SEGMENTOR_CFG['inference'] = {
     'mode': 'slide',
     'opts': {'cropsize': (128, 128), 'stride': (85, 85)}, 
