@@ -89,14 +89,6 @@ class SAM(BaseSegmentor):
         padw = self.image_encoder.img_size - w
         x = F.pad(x, (0, padw, 0, padh))
         return x
-    '''train'''
-    def train(self, mode=True):
-        self.mode = 'TRAIN' if mode else 'TEST'
-        return super().train(mode)
-    '''eval'''
-    def eval(self):
-        self.mode = 'TEST'
-        return super().eval()
 
 
 '''SAMPredictor'''
