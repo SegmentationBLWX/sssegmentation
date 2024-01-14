@@ -1,4 +1,5 @@
 '''mcibiplusplus_ppm_resnet50os8_cityscapes'''
+import os
 import copy
 from .base_cfg import SEGMENTOR_CFG
 from .._base_ import DATASET_CFG_CITYSCAPES_512x1024, DATALOADER_CFG_BS8
@@ -26,6 +27,6 @@ SEGMENTOR_CFG['head']['decoder'] = {
 SEGMENTOR_CFG['head']['context_within_image']['type'] = 'ppm'
 SEGMENTOR_CFG['head']['context_within_image']['is_on'] = True
 SEGMENTOR_CFG['head']['context_within_image']['use_self_attention'] = False
-SEGMENTOR_CFG['work_dir'] = 'mcibiplusplus_ppm_resnet50os8_cityscapes'
-SEGMENTOR_CFG['logfilepath'] = 'mcibiplusplus_ppm_resnet50os8_cityscapes/mcibiplusplus_ppm_resnet50os8_cityscapes.log'
-SEGMENTOR_CFG['resultsavepath'] = 'mcibiplusplus_ppm_resnet50os8_cityscapes/mcibiplusplus_ppm_resnet50os8_cityscapes_results.pkl'
+SEGMENTOR_CFG['work_dir'] = os.path.split(__file__)[-1].split('.')[0]
+SEGMENTOR_CFG['evaluate_results_filename'] = f"{os.path.split(__file__)[-1].split('.')[0]}.pkl"
+SEGMENTOR_CFG['logger_handle_cfg']['logfilepath'] = os.path.join(SEGMENTOR_CFG['work_dir'], f"{os.path.split(__file__)[-1].split('.')[0]}.log")

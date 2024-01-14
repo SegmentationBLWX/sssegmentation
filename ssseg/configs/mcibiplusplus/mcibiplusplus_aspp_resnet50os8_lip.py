@@ -1,4 +1,5 @@
 '''mcibiplusplus_aspp_resnet50os8_lip'''
+import os
 import copy
 from .base_cfg import SEGMENTOR_CFG
 from .._base_ import DATASET_CFG_LIP_473x473, DATALOADER_CFG_BS32
@@ -24,6 +25,6 @@ SEGMENTOR_CFG['head']['decoder'] = {
     'cls': {'in_channels': 1024, 'out_channels': 512, 'dropout': 0.1},
 }
 SEGMENTOR_CFG['head']['context_within_image']['is_on'] = True
-SEGMENTOR_CFG['work_dir'] = 'mcibiplusplus_aspp_resnet50os8_lip'
-SEGMENTOR_CFG['logfilepath'] = 'mcibiplusplus_aspp_resnet50os8_lip/mcibiplusplus_aspp_resnet50os8_lip.log'
-SEGMENTOR_CFG['resultsavepath'] = 'mcibiplusplus_aspp_resnet50os8_lip/mcibiplusplus_aspp_resnet50os8_lip_results.pkl'
+SEGMENTOR_CFG['work_dir'] = os.path.split(__file__)[-1].split('.')[0]
+SEGMENTOR_CFG['evaluate_results_filename'] = f"{os.path.split(__file__)[-1].split('.')[0]}.pkl"
+SEGMENTOR_CFG['logger_handle_cfg']['logfilepath'] = os.path.join(SEGMENTOR_CFG['work_dir'], f"{os.path.split(__file__)[-1].split('.')[0]}.log")

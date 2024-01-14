@@ -1,4 +1,5 @@
 '''mcibiplusplus_upernet_resnest101os8_pascalcontext59'''
+import os
 import copy
 from .base_cfg import SEGMENTOR_CFG
 from .._base_ import DATASET_CFG_PASCALCONTEXT59_480x480, DATALOADER_CFG_BS16
@@ -37,9 +38,9 @@ SEGMENTOR_CFG['inference'] = {
         'multiscale': [1], 'flip': False, 'use_probs_before_resize': True,
     }
 }
-SEGMENTOR_CFG['work_dir'] = 'mcibiplusplus_upernet_resnest101os8_pascalcontext59'
-SEGMENTOR_CFG['logfilepath'] = 'mcibiplusplus_upernet_resnest101os8_pascalcontext59/mcibiplusplus_upernet_resnest101os8_pascalcontext59.log'
-SEGMENTOR_CFG['resultsavepath'] = 'mcibiplusplus_upernet_resnest101os8_pascalcontext59/mcibiplusplus_upernet_resnest101os8_pascalcontext59_results.pkl'
+SEGMENTOR_CFG['work_dir'] = os.path.split(__file__)[-1].split('.')[0]
+SEGMENTOR_CFG['evaluate_results_filename'] = f"{os.path.split(__file__)[-1].split('.')[0]}.pkl"
+SEGMENTOR_CFG['logger_handle_cfg']['logfilepath'] = os.path.join(SEGMENTOR_CFG['work_dir'], f"{os.path.split(__file__)[-1].split('.')[0]}.log")
 
 
 # modify inference config
