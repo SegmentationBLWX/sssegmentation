@@ -1,4 +1,5 @@
 '''isnet_resnest101os8_cocostuff10k'''
+import os
 import copy
 from .base_cfg import SEGMENTOR_CFG
 from .._base_ import DATASET_CFG_COCOStuff10k_512x512, DATALOADER_CFG_BS32
@@ -21,9 +22,9 @@ SEGMENTOR_CFG['num_classes'] = 182
 SEGMENTOR_CFG['backbone'] = {
     'type': 'ResNeSt', 'depth': 101, 'structure_type': 'resnest101', 'pretrained': True, 'outstride': 8, 'selected_indices': (0, 1, 2, 3),
 }
-SEGMENTOR_CFG['work_dir'] = 'isnet_resnest101os8_cocostuff10k'
-SEGMENTOR_CFG['logfilepath'] = 'isnet_resnest101os8_cocostuff10k/isnet_resnest101os8_cocostuff10k.log'
-SEGMENTOR_CFG['resultsavepath'] = 'isnet_resnest101os8_cocostuff10k/isnet_resnest101os8_cocostuff10k_results.pkl'
+SEGMENTOR_CFG['work_dir'] = os.path.split(__file__)[-1].split('.')[0]
+SEGMENTOR_CFG['evaluate_results_filename'] = f"{os.path.split(__file__)[-1].split('.')[0]}.pkl"
+SEGMENTOR_CFG['logger_handle_cfg']['logfilepath'] = os.path.join(SEGMENTOR_CFG['work_dir'], f"{os.path.split(__file__)[-1].split('.')[0]}.log")
 
 
 # modify inference config
