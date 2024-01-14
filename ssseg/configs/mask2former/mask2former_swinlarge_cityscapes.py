@@ -1,4 +1,5 @@
 '''mask2former_swinlarge_cityscapes'''
+import os
 import copy
 from .base_cfg import SEGMENTOR_CFG
 from .._base_ import DATASET_CFG_CITYSCAPES_512x1024, DATALOADER_CFG_BS16
@@ -31,9 +32,9 @@ SEGMENTOR_CFG['backbone'] = {
     'drop_rate': 0., 'attn_drop_rate': 0., 'drop_path_rate': 0.3, 'use_abs_pos_embed': False,
 }
 SEGMENTOR_CFG['head']['pixel_decoder']['input_shape']['in_channels'] = [192, 384, 768, 1536]
-SEGMENTOR_CFG['work_dir'] = 'mask2former_swinlarge_cityscapes'
-SEGMENTOR_CFG['logfilepath'] = 'mask2former_swinlarge_cityscapes/mask2former_swinlarge_cityscapes.log'
-SEGMENTOR_CFG['resultsavepath'] = 'mask2former_swinlarge_cityscapes/mask2former_swinlarge_cityscapes_results.pkl'
+SEGMENTOR_CFG['work_dir'] = os.path.split(__file__)[-1].split('.')[0]
+SEGMENTOR_CFG['evaluate_results_filename'] = f"{os.path.split(__file__)[-1].split('.')[0]}.pkl"
+SEGMENTOR_CFG['logger_handle_cfg']['logfilepath'] = os.path.join(SEGMENTOR_CFG['work_dir'], f"{os.path.split(__file__)[-1].split('.')[0]}.log")
 # modify training tricks in scheduler config
 SEGMENTOR_CFG['scheduler']['optimizer']['params_rules'] = {
     'base_setting': dict(norm_wd_multiplier=0.0),
