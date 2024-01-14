@@ -1,4 +1,5 @@
 '''annnet_resnet50os16_cityscapes'''
+import os
 import copy
 from .base_cfg import SEGMENTOR_CFG
 from .._base_ import DATASET_CFG_CITYSCAPES_512x1024, DATALOADER_CFG_BS8
@@ -18,6 +19,6 @@ SEGMENTOR_CFG['backbone'] = {
     'type': 'ResNet', 'depth': 50, 'structure_type': 'resnet50conv3x3stem',
     'pretrained': True, 'outstride': 16, 'use_conv3x3_stem': True, 'selected_indices': (2, 3),
 }
-SEGMENTOR_CFG['work_dir'] = 'annnet_resnet50os16_cityscapes'
-SEGMENTOR_CFG['logfilepath'] = 'annnet_resnet50os16_cityscapes/annnet_resnet50os16_cityscapes.log'
-SEGMENTOR_CFG['resultsavepath'] = 'annnet_resnet50os16_cityscapes/annnet_resnet50os16_cityscapes_results.pkl'
+SEGMENTOR_CFG['work_dir'] = os.path.split(__file__)[-1].split('.')[0]
+SEGMENTOR_CFG['evaluate_results_filename'] = f"{os.path.split(__file__)[-1].split('.')[0]}.pkl"
+SEGMENTOR_CFG['logger_handle_cfg']['logfilepath'] = os.path.join(SEGMENTOR_CFG['work_dir'], f"{os.path.split(__file__)[-1].split('.')[0]}.log")
