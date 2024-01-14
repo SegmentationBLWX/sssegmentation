@@ -1,4 +1,5 @@
 '''lrasppnet_mobilenetv3sos8_cityscapes'''
+import os
 import copy
 from .base_cfg import SEGMENTOR_CFG
 from .._base_ import DATASET_CFG_CITYSCAPES_512x1024, DATALOADER_CFG_BS16
@@ -21,6 +22,6 @@ SEGMENTOR_CFG['backbone'] = {
 SEGMENTOR_CFG['head'] = {
     'in_channels_list': [16, 16, 576], 'branch_channels_list': [32, 64], 'feats_channels': 128, 'dropout': 0.1,
 }
-SEGMENTOR_CFG['work_dir'] = 'lrasppnet_mobilenetv3sos8_cityscapes'
-SEGMENTOR_CFG['logfilepath'] = 'lrasppnet_mobilenetv3sos8_cityscapes/lrasppnet_mobilenetv3sos8_cityscapes.log'
-SEGMENTOR_CFG['resultsavepath'] = 'lrasppnet_mobilenetv3sos8_cityscapes/lrasppnet_mobilenetv3sos8_cityscapes_results.pkl'
+SEGMENTOR_CFG['work_dir'] = os.path.split(__file__)[-1].split('.')[0]
+SEGMENTOR_CFG['evaluate_results_filename'] = f"{os.path.split(__file__)[-1].split('.')[0]}.pkl"
+SEGMENTOR_CFG['logger_handle_cfg']['logfilepath'] = os.path.join(SEGMENTOR_CFG['work_dir'], f"{os.path.split(__file__)[-1].split('.')[0]}.log")
