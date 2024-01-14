@@ -1,4 +1,5 @@
 '''deeplabv3_resnet50os8_cityscapes'''
+import os
 import copy
 from .base_cfg import SEGMENTOR_CFG
 from .._base_ import DATASET_CFG_CITYSCAPES_512x1024, DATALOADER_CFG_BS8
@@ -21,6 +22,6 @@ SEGMENTOR_CFG['backbone'] = {
 SEGMENTOR_CFG['head'] = {
     'in_channels': 2048, 'feats_channels': 512, 'dilations': [1, 12, 24, 36], 'dropout': 0.1,
 }
-SEGMENTOR_CFG['work_dir'] = 'deeplabv3_resnet50os8_cityscapes'
-SEGMENTOR_CFG['logfilepath'] = 'deeplabv3_resnet50os8_cityscapes/deeplabv3_resnet50os8_cityscapes.log'
-SEGMENTOR_CFG['resultsavepath'] = 'deeplabv3_resnet50os8_cityscapes/deeplabv3_resnet50os8_cityscapes_results.pkl'
+SEGMENTOR_CFG['work_dir'] = os.path.split(__file__)[-1].split('.')[0]
+SEGMENTOR_CFG['evaluate_results_filename'] = f"{os.path.split(__file__)[-1].split('.')[0]}.pkl"
+SEGMENTOR_CFG['logger_handle_cfg']['logfilepath'] = os.path.join(SEGMENTOR_CFG['work_dir'], f"{os.path.split(__file__)[-1].split('.')[0]}.log")

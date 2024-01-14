@@ -1,4 +1,5 @@
 '''deeplabv3_resnet101os8_voc'''
+import os
 import copy
 from .base_cfg import SEGMENTOR_CFG
 from .._base_ import DATASET_CFG_VOCAUG_512x512, DATALOADER_CFG_BS16
@@ -17,6 +18,6 @@ SEGMENTOR_CFG['num_classes'] = 21
 SEGMENTOR_CFG['head'] = {
     'in_channels': 2048, 'feats_channels': 512, 'dilations': [1, 12, 24, 36], 'dropout': 0.1,
 }
-SEGMENTOR_CFG['work_dir'] = 'deeplabv3_resnet101os8_voc'
-SEGMENTOR_CFG['logfilepath'] = 'deeplabv3_resnet101os8_voc/deeplabv3_resnet101os8_voc.log'
-SEGMENTOR_CFG['resultsavepath'] = 'deeplabv3_resnet101os8_voc/deeplabv3_resnet101os8_voc_results.pkl'
+SEGMENTOR_CFG['work_dir'] = os.path.split(__file__)[-1].split('.')[0]
+SEGMENTOR_CFG['evaluate_results_filename'] = f"{os.path.split(__file__)[-1].split('.')[0]}.pkl"
+SEGMENTOR_CFG['logger_handle_cfg']['logfilepath'] = os.path.join(SEGMENTOR_CFG['work_dir'], f"{os.path.split(__file__)[-1].split('.')[0]}.log")
