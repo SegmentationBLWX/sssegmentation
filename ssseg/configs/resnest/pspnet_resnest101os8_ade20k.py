@@ -1,4 +1,4 @@
-'''fcn_resnest101os8_ade20k'''
+'''pspnet_resnest101os8_ade20k'''
 import os
 import copy
 from .base_cfg import SEGMENTOR_CFG
@@ -14,10 +14,8 @@ SEGMENTOR_CFG['dataloader'] = DATALOADER_CFG_BS16.copy()
 # modify scheduler config
 SEGMENTOR_CFG['scheduler']['max_epochs'] = 130
 # modify other segmentor configs
+SEGMENTOR_CFG['type'] = 'PSPNet'
 SEGMENTOR_CFG['num_classes'] = 150
-SEGMENTOR_CFG['backbone'] = {
-    'type': 'ResNeSt', 'depth': 101, 'structure_type': 'resnest101', 'pretrained': True, 'outstride': 8, 'selected_indices': (2, 3),
-}
 SEGMENTOR_CFG['work_dir'] = os.path.split(__file__)[-1].split('.')[0]
 SEGMENTOR_CFG['evaluate_results_filename'] = f"{os.path.split(__file__)[-1].split('.')[0]}.pkl"
 SEGMENTOR_CFG['logger_handle_cfg']['logfilepath'] = os.path.join(SEGMENTOR_CFG['work_dir'], f"{os.path.split(__file__)[-1].split('.')[0]}.log")

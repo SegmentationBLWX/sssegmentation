@@ -1,4 +1,4 @@
-'''pspnet_resnest101os8_ade20k'''
+'''deeplabv3_resnest101os8_ade20k'''
 import os
 import copy
 from .base_cfg import SEGMENTOR_CFG
@@ -14,9 +14,10 @@ SEGMENTOR_CFG['dataloader'] = DATALOADER_CFG_BS16.copy()
 # modify scheduler config
 SEGMENTOR_CFG['scheduler']['max_epochs'] = 130
 # modify other segmentor configs
+SEGMENTOR_CFG['type'] = 'Deeplabv3'
 SEGMENTOR_CFG['num_classes'] = 150
-SEGMENTOR_CFG['backbone'] = {
-    'type': 'ResNeSt', 'depth': 101, 'structure_type': 'resnest101', 'pretrained': True, 'outstride': 8, 'selected_indices': (2, 3),
+SEGMENTOR_CFG['head'] = {
+    'in_channels': 2048, 'feats_channels': 512, 'dilations': [1, 12, 24, 36], 'dropout': 0.1,
 }
 SEGMENTOR_CFG['work_dir'] = os.path.split(__file__)[-1].split('.')[0]
 SEGMENTOR_CFG['evaluate_results_filename'] = f"{os.path.split(__file__)[-1].split('.')[0]}.pkl"

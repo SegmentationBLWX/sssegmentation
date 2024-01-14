@@ -1,4 +1,4 @@
-'''SEGMENTOR_CFG for UNet'''
+'''SEGMENTOR_CFG for ResNeSt'''
 SEGMENTOR_CFG = {
     'type': 'FCN',
     'num_classes': -1,
@@ -14,13 +14,13 @@ SEGMENTOR_CFG = {
     'norm_cfg': {'type': 'SyncBatchNorm'},
     'act_cfg': {'type': 'ReLU', 'inplace': True},
     'backbone': {
-        'type': 'UNet', 'structure_type': 'unets5os16', 'pretrained': False, 'selected_indices': (3, 4),
+        'type': 'ResNeSt', 'depth': 101, 'structure_type': 'resnest101', 'pretrained': True, 'outstride': 8, 'selected_indices': (0, 1, 2, 3),
     },
     'head': {
-        'in_channels': 64, 'feats_channels': 64, 'dropout': 0.1,
+        'in_channels': 2048, 'feats_channels': 512, 'dropout': 0.1,
     },
     'auxiliary': {
-        'in_channels': 128, 'out_channels': 64, 'dropout': 0.1,
+        'in_channels': 1024, 'out_channels': 512, 'dropout': 0.1,
     },
     'losses': {
         'loss_aux': {'type': 'CrossEntropyLoss', 'scale_factor': 0.4, 'ignore_index': 255, 'reduction': 'mean'},
