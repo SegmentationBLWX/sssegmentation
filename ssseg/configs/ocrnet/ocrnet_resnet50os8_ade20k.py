@@ -1,4 +1,5 @@
 '''ocrnet_resnet50os8_ade20k'''
+import os
 import copy
 from .base_cfg import SEGMENTOR_CFG
 from .._base_ import DATASET_CFG_ADE20k_512x512, DATALOADER_CFG_BS16
@@ -24,6 +25,6 @@ SEGMENTOR_CFG['head'] = {
 SEGMENTOR_CFG['auxiliary'] = {
     'in_channels': 1024, 'out_channels': 512, 'dropout': 0,
 }
-SEGMENTOR_CFG['work_dir'] = 'ocrnet_resnet50os8_ade20k'
-SEGMENTOR_CFG['logfilepath'] = 'ocrnet_resnet50os8_ade20k/ocrnet_resnet50os8_ade20k.log'
-SEGMENTOR_CFG['resultsavepath'] = 'ocrnet_resnet50os8_ade20k/ocrnet_resnet50os8_ade20k_results.pkl'
+SEGMENTOR_CFG['work_dir'] = os.path.split(__file__)[-1].split('.')[0]
+SEGMENTOR_CFG['evaluate_results_filename'] = f"{os.path.split(__file__)[-1].split('.')[0]}.pkl"
+SEGMENTOR_CFG['logger_handle_cfg']['logfilepath'] = os.path.join(SEGMENTOR_CFG['work_dir'], f"{os.path.split(__file__)[-1].split('.')[0]}.log")
