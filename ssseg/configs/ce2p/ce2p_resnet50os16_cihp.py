@@ -1,4 +1,5 @@
 '''ce2p_resnet50os16_cihp'''
+import os
 import copy
 from .base_cfg import SEGMENTOR_CFG
 from .._base_ import DATASET_CFG_CIHP_473x473, DATALOADER_CFG_BS32
@@ -18,6 +19,6 @@ SEGMENTOR_CFG['backbone'] = {
     'type': 'ResNet', 'depth': 50, 'structure_type': 'resnet50conv3x3stem',
     'pretrained': True, 'outstride': 16, 'use_conv3x3_stem': True, 'selected_indices': (0, 1, 2, 3),
 }
-SEGMENTOR_CFG['work_dir'] = 'ce2p_resnet50os16_cihp'
-SEGMENTOR_CFG['logfilepath'] = 'ce2p_resnet50os16_cihp/ce2p_resnet50os16_cihp.log'
-SEGMENTOR_CFG['resultsavepath'] = 'ce2p_resnet50os16_cihp/ce2p_resnet50os16_cihp_results.pkl'
+SEGMENTOR_CFG['work_dir'] = os.path.split(__file__)[-1].split('.')[0]
+SEGMENTOR_CFG['evaluate_results_filename'] = f"{os.path.split(__file__)[-1].split('.')[0]}.pkl"
+SEGMENTOR_CFG['logger_handle_cfg']['logfilepath'] = os.path.join(SEGMENTOR_CFG['work_dir'], f"{os.path.split(__file__)[-1].split('.')[0]}.log")

@@ -1,4 +1,5 @@
 '''ce2p_resnet101os8_lip'''
+import os
 import copy
 from .base_cfg import SEGMENTOR_CFG
 from .._base_ import DATASET_CFG_LIP_473x473, DATALOADER_CFG_BS32
@@ -14,6 +15,6 @@ SEGMENTOR_CFG['dataloader'] = DATALOADER_CFG_BS32.copy()
 SEGMENTOR_CFG['scheduler']['max_epochs'] = 150
 # modify other segmentor configs
 SEGMENTOR_CFG['num_classes'] = 20
-SEGMENTOR_CFG['work_dir'] = 'ce2p_resnet101os8_lip'
-SEGMENTOR_CFG['logfilepath'] = 'ce2p_resnet101os8_lip/ce2p_resnet101os8_lip.log'
-SEGMENTOR_CFG['resultsavepath'] = 'ce2p_resnet101os8_lip/ce2p_resnet101os8_lip_results.pkl'
+SEGMENTOR_CFG['work_dir'] = os.path.split(__file__)[-1].split('.')[0]
+SEGMENTOR_CFG['evaluate_results_filename'] = f"{os.path.split(__file__)[-1].split('.')[0]}.pkl"
+SEGMENTOR_CFG['logger_handle_cfg']['logfilepath'] = os.path.join(SEGMENTOR_CFG['work_dir'], f"{os.path.split(__file__)[-1].split('.')[0]}.log")
