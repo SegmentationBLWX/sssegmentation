@@ -1,4 +1,5 @@
 '''mcibi_deeplabv3_hrnetv2w48_lip'''
+import os
 import copy
 from .base_cfg import SEGMENTOR_CFG
 from .._base_ import DATASET_CFG_LIP_473x473, DATALOADER_CFG_BS40
@@ -26,9 +27,9 @@ SEGMENTOR_CFG['head']['in_channels'] = sum([48, 96, 192, 384])
 SEGMENTOR_CFG['head']['update_cfg']['momentum_cfg']['base_lr'] = 0.007
 SEGMENTOR_CFG['auxiliary'] = None
 SEGMENTOR_CFG['losses'].pop('loss_aux')
-SEGMENTOR_CFG['work_dir'] = 'mcibi_deeplabv3_hrnetv2w48_lip'
-SEGMENTOR_CFG['logfilepath'] = 'mcibi_deeplabv3_hrnetv2w48_lip/mcibi_deeplabv3_hrnetv2w48_lip.log'
-SEGMENTOR_CFG['resultsavepath'] = 'mcibi_deeplabv3_hrnetv2w48_lip/mcibi_deeplabv3_hrnetv2w48_lip_results.pkl'
+SEGMENTOR_CFG['work_dir'] = os.path.split(__file__)[-1].split('.')[0]
+SEGMENTOR_CFG['evaluate_results_filename'] = f"{os.path.split(__file__)[-1].split('.')[0]}.pkl"
+SEGMENTOR_CFG['logger_handle_cfg']['logfilepath'] = os.path.join(SEGMENTOR_CFG['work_dir'], f"{os.path.split(__file__)[-1].split('.')[0]}.log")
 
 
 # modify inference config
