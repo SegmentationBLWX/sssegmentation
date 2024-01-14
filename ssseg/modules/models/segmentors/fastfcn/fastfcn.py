@@ -15,15 +15,15 @@ from ..deeplabv3 import Deeplabv3
 '''FastFCN'''
 class FastFCN(BaseSegmentor):
     def __init__(self, cfg, mode):
+        backbone = cfg.pop('backbone')
         super(FastFCN, self).__init__(cfg=cfg, mode=mode)
+        cfg['backbone'] = backbone
         align_corners, norm_cfg, act_cfg, head_cfg = self.align_corners, self.norm_cfg, self.act_cfg, cfg['head']
         # build segmentor
-        supported_models = {
+        supported_segmentors = {
             'FCN': FCN, 'ENCNet': ENCNet, 'PSPNet': PSPNet, 'Deeplabv3': Deeplabv3,
         }
-        model_type = cfg['segmentor']
-        assert model_type in supported_models, 'unsupport model_type %s' % model_type
-        self.segmentor = supported_models[model_type](cfg, mode)
+        self.segmentor = supported_segmentors[cfg['segmentor']](cfg, mode)
         # build jpu neck
         jpu_cfg = head_cfg['jpu']
         if 'act_cfg' not in jpu_cfg: jpu_cfg.update({'act_cfg': self.act_cfg})
