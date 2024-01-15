@@ -24,7 +24,7 @@ DEFAULT_MODEL_URLS = {
 AUTO_ASSERT_STRUCTURE_TYPES = {}
 
 
-'''Radix Softmax module'''
+'''RSoftmax'''
 class RSoftmax(nn.Module):
     def __init__(self, radix, groups):
         super(RSoftmax, self).__init__()
@@ -42,7 +42,7 @@ class RSoftmax(nn.Module):
         return x
 
 
-'''Split-Attention Conv2d in ResNeSt'''
+'''SplitAttentionConv2d'''
 class SplitAttentionConv2d(nn.Module):
     def __init__(self, in_channels, channels, kernel_size, stride=1, padding=0, dilation=1, groups=1, radix=2, reduction_factor=4, norm_cfg=None, act_cfg=None):
         super(SplitAttentionConv2d, self).__init__()
@@ -81,7 +81,7 @@ class SplitAttentionConv2d(nn.Module):
         return out.contiguous()
 
 
-'''Bottleneck block for ResNeSt'''
+'''Bottleneck'''
 class Bottleneck(_Bottleneck):
     expansion = 4
     def __init__(self, inplanes, planes, groups=1, base_width=4, base_channels=64, radix=2, reduction_factor=4, use_avg_after_block_conv2=True,
@@ -93,17 +93,8 @@ class Bottleneck(_Bottleneck):
         self.conv1 = nn.Conv2d(inplanes, width, kernel_size=1, stride=1, padding=0, bias=False)
         self.bn1 = BuildNormalization(placeholder=width, norm_cfg=norm_cfg)
         self.conv2 = SplitAttentionConv2d(
-            in_channels=width, 
-            channels=width, 
-            kernel_size=3, 
-            stride=1 if self.use_avg_after_block_conv2 else self.stride, 
-            padding=dilation,
-            dilation=dilation,
-            groups=groups,
-            radix=radix,
-            reduction_factor=reduction_factor,
-            norm_cfg=norm_cfg,
-            act_cfg=act_cfg,
+            in_channels=width, channels=width, kernel_size=3, stride=1 if self.use_avg_after_block_conv2 else self.stride, padding=dilation,
+            dilation=dilation, groups=groups, radix=radix, reduction_factor=reduction_factor, norm_cfg=norm_cfg, act_cfg=act_cfg,
         )
         delattr(self, 'bn2')
         self.conv3 = nn.Conv2d(width, planes * self.expansion, kernel_size=1, stride=1, padding=0, bias=False)
@@ -141,11 +132,7 @@ class ResNeSt(ResNet):
                  out_indices=(0, 1, 2, 3), use_avg_for_downsample=True, norm_cfg={'type': 'SyncBatchNorm'}, act_cfg={'type': 'ReLU', 'inplace': True}, 
                  pretrained=True, pretrained_model_path=''):
         self.extra_args_for_makelayer = {
-            'radix': radix,
-            'groups': groups,
-            'base_width': base_width,
-            'reduction_factor': reduction_factor,
-            'base_channels': base_channels,
+            'radix': radix, 'groups': groups, 'base_width': base_width, 'reduction_factor': reduction_factor, 'base_channels': base_channels, 
             'use_avg_after_block_conv2': use_avg_after_block_conv2,
         }
         super(ResNeSt, self).__init__(structure_type, in_channels, base_channels, stem_channels, depth, outstride, contract_dilation, use_conv3x3_stem, out_indices, use_avg_for_downsample, norm_cfg, act_cfg, False, '')

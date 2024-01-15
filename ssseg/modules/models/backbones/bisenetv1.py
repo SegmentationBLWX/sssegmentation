@@ -114,7 +114,7 @@ class ContextPath(nn.Module):
         x_16_up = F.interpolate(input=x_16_sum, size=x_8.shape[2:], mode='nearest')
         x_16_up = self.conv_head16(x_16_up)
         return x_16_up, x_32_up
-    '''build the backbone'''
+    '''buildbackbone'''
     def buildbackbone(self, cfg):
         from .resnet import ResNet
         supported_backbones = {

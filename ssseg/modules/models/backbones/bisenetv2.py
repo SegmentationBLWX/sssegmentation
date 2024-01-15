@@ -249,7 +249,7 @@ class BGALayer(nn.Module):
         return output
 
 
-'''BiSeNetV2: Bilateral Network with Guided Aggregation for Real-time Semantic Segmentation'''
+'''BiSeNetV2'''
 class BiSeNetV2(nn.Module):
     def __init__(self, structure_type, in_channels=3, detail_channels=(64, 64, 128), semantic_channels=(16, 32, 64, 128), 
                  semantic_expansion_ratio=6, bga_channels=128, out_indices=(0, 1, 2, 3, 4), align_corners=False, norm_cfg={'type': 'SyncBatchNorm'}, 

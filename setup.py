@@ -16,10 +16,10 @@ with open('README.md', 'r', encoding='utf-8') as f:
     long_description = f.read()
 
 
-'''parse the package dependencies listed in a requirements file but strips specific versioning information'''
+'''parserequirements'''
 def parserequirements(fname='requirements.txt', with_version=True):
     require_fpath = fname
-    '''parse information from a line in a requirements text file'''
+    '''parseline'''
     def parseline(line):
         if line.startswith('-r '):
             target = line.split(' ')[1]
@@ -45,7 +45,7 @@ def parserequirements(fname='requirements.txt', with_version=True):
                         version = rest
                     info['version'] = (op, version)
             yield info
-    '''parse require file'''
+    '''parserequirefile'''
     def parserequirefile(fpath):
         with open(fpath, 'r') as f:
             for line in f.readlines():
@@ -53,7 +53,7 @@ def parserequirements(fname='requirements.txt', with_version=True):
                 if line and not line.startswith('#'):
                     for info in parseline(line):
                         yield info
-    '''gen packages items'''
+    '''genpackagesitems'''
     def genpackagesitems():
         if os.path.exists(require_fpath):
             for info in parserequirefile(require_fpath):

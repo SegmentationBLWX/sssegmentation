@@ -74,7 +74,7 @@ class WindowMSA(nn.Module):
         self.num_heads = num_heads
         head_embed_dims = embed_dims // num_heads
         self.scale = qk_scale or head_embed_dims**-0.5
-        # define a parameter table of relative position bias
+        # a parameter table of relative position bias
         self.relative_position_bias_table = nn.Parameter(torch.zeros((2 * window_size[0] - 1) * (2 * window_size[1] - 1), num_heads))
         Wh, Ww = self.window_size
         rel_index_coords = self.doublestepseq(2 * Ww - 1, Wh, 1, Ww)
@@ -93,9 +93,7 @@ class WindowMSA(nn.Module):
         q, k, v = qkv[0], qkv[1], qkv[2]
         q = q * self.scale
         attn = (q @ k.transpose(-2, -1))
-        relative_position_bias = self.relative_position_bias_table[
-            self.relative_position_index.view(-1)
-        ].view(self.window_size[0] * self.window_size[1], self.window_size[0] * self.window_size[1], -1)
+        relative_position_bias = self.relative_position_bias_table[self.relative_position_index.view(-1)].view(self.window_size[0] * self.window_size[1], self.window_size[0] * self.window_size[1], -1)
         relative_position_bias = relative_position_bias.permute(2, 0, 1).contiguous()
         attn = attn + relative_position_bias.unsqueeze(0)
         if mask is not None:
@@ -108,7 +106,7 @@ class WindowMSA(nn.Module):
         x = self.proj(x)
         x = self.proj_drop(x)
         return x
-    '''double step seq'''
+    '''doublestepseq'''
     @staticmethod
     def doublestepseq(step1, len1, step2, len2):
         seq1 = torch.arange(0, step1 * len1, step1)
@@ -124,13 +122,8 @@ class ShiftWindowMSA(nn.Module):
         self.shift_size = shift_size
         assert 0 <= self.shift_size < self.window_size
         self.w_msa = WindowMSA(
-            embed_dims=embed_dims,
-            num_heads=num_heads,
-            window_size=(window_size, window_size),
-            qkv_bias=qkv_bias,
-            qk_scale=qk_scale,
-            attn_drop_rate=attn_drop_rate,
-            proj_drop_rate=proj_drop_rate,
+            embed_dims=embed_dims, num_heads=num_heads, window_size=(window_size, window_size), qkv_bias=qkv_bias,
+            qk_scale=qk_scale, attn_drop_rate=attn_drop_rate, proj_drop_rate=proj_drop_rate,
         )
         self.drop = BuildDropout(dropout_cfg)
     '''forward'''
@@ -184,14 +177,14 @@ class ShiftWindowMSA(nn.Module):
         x = x.view(B, H * W, C)
         x = self.drop(x)
         return x
-    '''window reverse'''
+    '''windowreverse'''
     def windowreverse(self, windows, H, W):
         window_size = self.window_size
         B = int(windows.shape[0] / (H * W / window_size / window_size))
         x = windows.view(B, H // window_size, W // window_size, window_size, window_size, -1)
         x = x.permute(0, 1, 3, 2, 4, 5).contiguous().view(B, H, W, -1)
         return x
-    '''window partition'''
+    '''windowpartition'''
     def windowpartition(self, x):
         B, H, W, C = x.shape
         window_size = self.window_size
@@ -302,12 +295,7 @@ class SwinTransformer(nn.Module):
         self.pretrain_img_size = pretrain_img_size
         # patch embedding
         self.patch_embed = PatchEmbed(
-            in_channels=in_channels,
-            embed_dims=embed_dims,
-            kernel_size=patch_size,
-            stride=strides[0],
-            padding='corner',
-            norm_cfg=norm_cfg if patch_norm else None,
+            in_channels=in_channels, embed_dims=embed_dims, kernel_size=patch_size, stride=strides[0], padding='corner', norm_cfg=norm_cfg if patch_norm else None,
         )
         if self.use_abs_pos_embed:
             patch_row = pretrain_img_size[0] // patch_size
@@ -324,10 +312,7 @@ class SwinTransformer(nn.Module):
         for i in range(num_layers):
             if i < num_layers - 1:
                 downsample = PatchMerging(
-                    in_channels=in_channels,
-                    out_channels=2 * in_channels,
-                    stride=strides[i + 1],
-                    norm_cfg=norm_cfg if patch_norm else None,
+                    in_channels=in_channels, out_channels=2 * in_channels, stride=strides[i + 1], norm_cfg=norm_cfg if patch_norm else None,
                 )
             else:
                 downsample = None

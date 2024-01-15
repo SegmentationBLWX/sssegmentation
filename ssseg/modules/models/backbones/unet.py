@@ -16,7 +16,7 @@ DEFAULT_MODEL_URLS = {}
 AUTO_ASSERT_STRUCTURE_TYPES = {}
 
 
-'''Basic convolutional block for UNet'''
+'''BasicConvBlock'''
 class BasicConvBlock(nn.Module):
     def __init__(self, in_channels, out_channels, num_convs=2, stride=1, dilation=1, norm_cfg=None, act_cfg=None):
         super(BasicConvBlock, self).__init__()
@@ -37,7 +37,7 @@ class BasicConvBlock(nn.Module):
         return out
 
 
-'''Deconvolution upsample module in decoder for UNet (2X upsample)'''
+'''DeconvModule'''
 class DeconvModule(nn.Module):
     def __init__(self, in_channels, out_channels, norm_cfg=None, act_cfg=None, kernel_size=4, scale_factor=2):
         super(DeconvModule, self).__init__()
@@ -53,7 +53,7 @@ class DeconvModule(nn.Module):
         return out
 
 
-'''Interpolation upsample module in decoder for UNet'''
+'''InterpConv'''
 class InterpConv(nn.Module):
     def __init__(self, in_channels, out_channels, norm_cfg=None, act_cfg=None, conv_first=False, kernel_size=1, stride=1, padding=0, 
                  upsample_cfg=dict(scale_factor=2, mode='bilinear', align_corners=False)):
@@ -74,32 +74,21 @@ class InterpConv(nn.Module):
         return out
 
 
-'''Upsample convolution block in decoder for UNet'''
+'''UpConvBlock'''
 class UpConvBlock(nn.Module):
     def __init__(self, conv_block, in_channels, skip_channels, out_channels, num_convs=2, stride=1, dilation=1,
                  norm_cfg=None, act_cfg=None, upsample_type='InterpConv'):
         super(UpConvBlock, self).__init__()
         supported_upsamples = {
-            'InterpConv': InterpConv,
-            'DeconvModule': DeconvModule,
+            'InterpConv': InterpConv, 'DeconvModule': DeconvModule,
         }
         self.conv_block = conv_block(
-            in_channels=2 * skip_channels,
-            out_channels=out_channels,
-            num_convs=num_convs,
-            stride=stride,
-            dilation=dilation,
-            norm_cfg=norm_cfg,
-            act_cfg=act_cfg
+            in_channels=2 * skip_channels, out_channels=out_channels, num_convs=num_convs, stride=stride,
+            dilation=dilation, norm_cfg=norm_cfg, act_cfg=act_cfg
         )
         if upsample_type is not None:
             assert upsample_type in supported_upsamples, 'unsupport upsample_type %s' % upsample_type
-            self.upsample = supported_upsamples[upsample_type](
-                in_channels=in_channels,
-                out_channels=skip_channels,
-                norm_cfg=norm_cfg,
-                act_cfg=act_cfg,
-            )
+            self.upsample = supported_upsamples[upsample_type](in_channels=in_channels, out_channels=skip_channels, norm_cfg=norm_cfg, act_cfg=act_cfg)
         else:
             self.upsample = nn.Sequential(
                 nn.Conv2d(in_channels, skip_channels, kernel_size=1, stride=1, padding=0, bias=False),
@@ -114,7 +103,7 @@ class UpConvBlock(nn.Module):
         return out
 
 
-'''UNet backbone'''
+'''UNet'''
 class UNet(nn.Module):
     def __init__(self, structure_type, in_channels=3, base_channels=64, num_stages=5, strides=(1, 1, 1, 1, 1), enc_num_convs=(2, 2, 2, 2, 2), dec_num_convs=(2, 2, 2, 2),
                  downsamples=(True, True, True, True), enc_dilations=(1, 1, 1, 1, 1), dec_dilations=(1, 1, 1, 1), norm_cfg={'type': 'SyncBatchNorm'}, 
@@ -153,25 +142,13 @@ class UNet(nn.Module):
                     enc_conv_block.append(nn.MaxPool2d(kernel_size=2))
                 upsample = (strides[i] != 1 or downsamples[i - 1])
                 self.decoder.append(UpConvBlock(
-                    conv_block=BasicConvBlock,
-                    in_channels=base_channels * 2**i,
-                    skip_channels=base_channels * 2**(i - 1),
-                    out_channels=base_channels * 2**(i - 1),
-                    num_convs=dec_num_convs[i - 1],
-                    stride=1,
-                    dilation=dec_dilations[i - 1],
-                    norm_cfg=norm_cfg,
-                    act_cfg=act_cfg,
-                    upsample_type=upsample_type if upsample else None,
+                    conv_block=BasicConvBlock, in_channels=base_channels * 2**i, skip_channels=base_channels * 2**(i - 1), 
+                    out_channels=base_channels * 2**(i - 1), num_convs=dec_num_convs[i - 1], stride=1, dilation=dec_dilations[i - 1], 
+                    norm_cfg=norm_cfg, act_cfg=act_cfg, upsample_type=upsample_type if upsample else None,
                 ))
             enc_conv_block.append(BasicConvBlock(
-                in_channels=in_channels,
-                out_channels=base_channels * 2**i,
-                num_convs=enc_num_convs[i],
-                stride=strides[i],
-                dilation=enc_dilations[i],
-                norm_cfg=norm_cfg,
-                act_cfg=act_cfg,
+                in_channels=in_channels, out_channels=base_channels * 2**i, num_convs=enc_num_convs[i], stride=strides[i],
+                dilation=enc_dilations[i], norm_cfg=norm_cfg, act_cfg=act_cfg,
             ))
             self.encoder.append((nn.Sequential(*enc_conv_block)))
             in_channels = base_channels * 2**i

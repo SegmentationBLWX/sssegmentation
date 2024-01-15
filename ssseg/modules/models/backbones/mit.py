@@ -203,7 +203,7 @@ class MixVisionTransformer(nn.Module):
             state_dict = checkpoint
         state_dict = self.mitconvert(state_dict)
         self.load_state_dict(state_dict, strict=False)
-    '''mit convert'''
+    '''mitconvert'''
     @staticmethod
     def mitconvert(ckpt):
         from collections import OrderedDict

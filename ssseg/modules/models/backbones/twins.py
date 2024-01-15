@@ -140,7 +140,7 @@ class LSAEncoderLayer(nn.Module):
         return x
 
 
-'''The Conditional Position Encoding (CPE) module'''
+'''ConditionalPositionEncoding'''
 class ConditionalPositionEncoding(nn.Module):
     def __init__(self, in_channels, embed_dims=768, stride=1):
         super(ConditionalPositionEncoding, self).__init__()

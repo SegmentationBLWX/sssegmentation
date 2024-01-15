@@ -96,7 +96,7 @@ class MobileNetV2(nn.Module):
             if idx in self.out_indices:
                 outs.append(x)
         return tuple(outs)
-    '''make layer'''
+    '''makelayer'''
     def makelayer(self, out_channels, num_blocks, stride, dilation, expand_ratio, norm_cfg=None, act_cfg=None):
         if act_cfg is None: act_cfg = {'type': 'ReLU6', 'inplace': True}
         layers = []

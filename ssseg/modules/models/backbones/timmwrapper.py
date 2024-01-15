@@ -19,12 +19,7 @@ class TIMMBackbone(nn.Module):
         super(TIMMBackbone, self).__init__()
         import timm
         self.timm_model = timm.create_model(
-            model_name=model_name,
-            features_only=features_only,
-            pretrained=pretrained,
-            in_chans=in_channels,
-            checkpoint_path=pretrained_model_path,
-            **extra_args,
+            model_name=model_name, features_only=features_only, pretrained=pretrained, in_chans=in_channels, checkpoint_path=pretrained_model_path, **extra_args,
         )
         self.timm_model.global_pool = None
         self.timm_model.fc = None

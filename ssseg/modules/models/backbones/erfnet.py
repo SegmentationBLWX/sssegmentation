@@ -17,7 +17,7 @@ DEFAULT_MODEL_URLS = {}
 AUTO_ASSERT_STRUCTURE_TYPES = {}
 
 
-'''Downsampler block of ERFNet'''
+'''DownsamplerBlock'''
 class DownsamplerBlock(nn.Module):
     def __init__(self, in_channels, out_channels, norm_cfg=None, act_cfg=None):
         super(DownsamplerBlock, self).__init__()
@@ -36,7 +36,7 @@ class DownsamplerBlock(nn.Module):
         return output
 
 
-'''Non-bottleneck block of ERFNet'''
+'''NonBottleneck1d'''
 class NonBottleneck1d(nn.Module):
     def __init__(self, channels, drop_rate=0, dilation=1, num_conv_layer=2, norm_cfg=None, act_cfg=None):
         super(NonBottleneck1d, self).__init__()
@@ -63,7 +63,7 @@ class NonBottleneck1d(nn.Module):
         return output
 
 
-'''Upsampler block of ERFNet'''
+'''UpsamplerBlock'''
 class UpsamplerBlock(nn.Module):
     def __init__(self, in_channels, out_channels, norm_cfg=None, act_cfg=None):
         super(UpsamplerBlock, self).__init__()

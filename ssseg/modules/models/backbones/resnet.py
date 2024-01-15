@@ -147,52 +147,23 @@ class ResNet(nn.Module):
         self.maxpool = nn.MaxPool2d(kernel_size=3, stride=2, padding=1)
         # make layers
         self.layer1 = self.makelayer(
-            block=block, 
-            inplanes=stem_channels, 
-            planes=base_channels, 
-            num_blocks=num_blocks_list[0], 
-            stride=stride_list[0], 
-            dilation=dilation_list[0], 
-            contract_dilation=contract_dilation, 
-            use_avg_for_downsample=use_avg_for_downsample,
-            norm_cfg=norm_cfg, 
-            act_cfg=act_cfg,
+            block=block, inplanes=stem_channels, planes=base_channels, num_blocks=num_blocks_list[0], stride=stride_list[0], dilation=dilation_list[0], 
+            contract_dilation=contract_dilation, use_avg_for_downsample=use_avg_for_downsample, norm_cfg=norm_cfg, act_cfg=act_cfg,
         )
         self.layer2 = self.makelayer(
-            block=block, 
-            inplanes=base_channels * 4 if depth >= 50 else base_channels, 
-            planes=base_channels * 2, 
-            num_blocks=num_blocks_list[1], 
-            stride=stride_list[1], 
-            dilation=dilation_list[1], 
-            contract_dilation=contract_dilation, 
-            use_avg_for_downsample=use_avg_for_downsample,
-            norm_cfg=norm_cfg, 
-            act_cfg=act_cfg,
+            block=block, inplanes=base_channels * 4 if depth >= 50 else base_channels, planes=base_channels * 2, num_blocks=num_blocks_list[1], 
+            stride=stride_list[1], dilation=dilation_list[1], contract_dilation=contract_dilation, use_avg_for_downsample=use_avg_for_downsample,
+            norm_cfg=norm_cfg, act_cfg=act_cfg,
         )
         self.layer3 = self.makelayer(
-            block=block, 
-            inplanes=base_channels * 8 if depth >= 50 else base_channels * 2, 
-            planes=base_channels * 4, 
-            num_blocks=num_blocks_list[2], 
-            stride=stride_list[2], 
-            dilation=dilation_list[2], 
-            contract_dilation=contract_dilation, 
-            use_avg_for_downsample=use_avg_for_downsample,
-            norm_cfg=norm_cfg, 
-            act_cfg=act_cfg,
+            block=block, inplanes=base_channels * 8 if depth >= 50 else base_channels * 2, planes=base_channels * 4, num_blocks=num_blocks_list[2], 
+            stride=stride_list[2], dilation=dilation_list[2], contract_dilation=contract_dilation, use_avg_for_downsample=use_avg_for_downsample,
+            norm_cfg=norm_cfg, act_cfg=act_cfg,
         )
         self.layer4 = self.makelayer(
-            block=block, 
-            inplanes=base_channels * 16 if depth >= 50 else base_channels * 4,  
-            planes=base_channels * 8, 
-            num_blocks=num_blocks_list[3], 
-            stride=stride_list[3], 
-            dilation=dilation_list[3], 
-            contract_dilation=contract_dilation, 
-            use_avg_for_downsample=use_avg_for_downsample,
-            norm_cfg=norm_cfg, 
-            act_cfg=act_cfg,
+            block=block, inplanes=base_channels * 16 if depth >= 50 else base_channels * 4, planes=base_channels * 8, num_blocks=num_blocks_list[3], 
+            stride=stride_list[3], dilation=dilation_list[3], contract_dilation=contract_dilation, use_avg_for_downsample=use_avg_for_downsample,
+            norm_cfg=norm_cfg, act_cfg=act_cfg,
         )
         # load pretrained weights
         if pretrained:

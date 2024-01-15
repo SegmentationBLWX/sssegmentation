@@ -35,23 +35,14 @@ class TransformerEncoderLayer(nn.Module):
         super(TransformerEncoderLayer, self).__init__()
         self.ln1 = BuildNormalization(placeholder=embed_dims, norm_cfg=norm_cfg)
         attn_cfg.update(dict(
-            embed_dims=embed_dims,
-            num_heads=num_heads,
-            attn_drop=attn_drop_rate,
-            proj_drop=drop_rate,
-            dropout_cfg={'type': 'DropPath', 'drop_prob': drop_path_rate},
-            batch_first=batch_first,
-            bias=qkv_bias,
+            embed_dims=embed_dims, num_heads=num_heads, attn_drop=attn_drop_rate, proj_drop=drop_rate, 
+            dropout_cfg={'type': 'DropPath', 'drop_prob': drop_path_rate}, batch_first=batch_first, bias=qkv_bias,
         ))
         self.attn = MultiheadAttention(**attn_cfg)
         self.ln2 = BuildNormalization(placeholder=embed_dims, norm_cfg=norm_cfg)
         ffn_cfg.update(dict(
-            embed_dims=embed_dims,
-            feedforward_channels=feedforward_channels,
-            num_fcs=num_fcs,
-            ffn_drop=drop_rate,
-            dropout_cfg={'type': 'DropPath', 'drop_prob': drop_path_rate},
-            act_cfg=act_cfg,
+            embed_dims=embed_dims, feedforward_channels=feedforward_channels, num_fcs=num_fcs, ffn_drop=drop_rate,
+            dropout_cfg={'type': 'DropPath', 'drop_prob': drop_path_rate}, act_cfg=act_cfg,
         ))
         self.ffn = FFN(**ffn_cfg)
         self.use_checkpoint = use_checkpoint
@@ -108,12 +99,8 @@ class VisionTransformer(nn.Module):
         self.img_size = img_size
         # Image to Patch Embedding
         self.patch_embed = PatchEmbed(
-            in_channels=in_channels,
-            embed_dims=embed_dims,
-            kernel_size=patch_size,
-            stride=patch_size,
-            padding='corner',
-            norm_cfg=norm_cfg if patch_norm else None,
+            in_channels=in_channels, embed_dims=embed_dims, kernel_size=patch_size, stride=patch_size,
+            padding='corner', norm_cfg=norm_cfg if patch_norm else None,
         )
         num_patches = (img_size[0] // patch_size) * (img_size[1] // patch_size)
         self.cls_token = nn.Parameter(torch.zeros(1, 1, embed_dims))
@@ -132,18 +119,9 @@ class VisionTransformer(nn.Module):
         self.layers = nn.ModuleList()
         for i in range(num_layers):
             self.layers.append(TransformerEncoderLayer(
-                embed_dims=embed_dims,
-                num_heads=num_heads,
-                feedforward_channels=mlp_ratio * embed_dims,
-                attn_drop_rate=attn_drop_rate,
-                drop_rate=drop_rate,
-                drop_path_rate=dpr[i],
-                num_fcs=num_fcs,
-                qkv_bias=qkv_bias,
-                act_cfg=act_cfg,
-                norm_cfg=norm_cfg,
-                batch_first=True,
-                use_checkpoint=use_checkpoint,
+                embed_dims=embed_dims, num_heads=num_heads, feedforward_channels=mlp_ratio * embed_dims, attn_drop_rate=attn_drop_rate,
+                drop_rate=drop_rate, drop_path_rate=dpr[i], num_fcs=num_fcs, qkv_bias=qkv_bias, act_cfg=act_cfg, norm_cfg=norm_cfg,
+                batch_first=True, use_checkpoint=use_checkpoint,
             ))
         
         if final_norm:
@@ -168,12 +146,7 @@ class VisionTransformer(nn.Module):
             if self.pos_embed.shape != state_dict['pos_embed'].shape:
                 h, w = self.img_size
                 pos_size = int(math.sqrt(state_dict['pos_embed'].shape[1] - 1))
-                state_dict['pos_embed'] = self.resizeposembed(
-                    state_dict['pos_embed'], 
-                    (h // self.patch_size, w // self.patch_size),
-                    (pos_size, pos_size), 
-                    self.interpolate_mode
-                )
+                state_dict['pos_embed'] = self.resizeposembed(state_dict['pos_embed'], (h // self.patch_size, w // self.patch_size), (pos_size, pos_size), self.interpolate_mode)
         self.load_state_dict(state_dict, strict=False)
     '''vit convert'''
     @staticmethod
