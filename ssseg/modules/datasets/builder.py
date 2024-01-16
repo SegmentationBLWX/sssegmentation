@@ -62,12 +62,13 @@ class MultipleDataset(BaseDataset):
             else:
                 pointer += len(dataset)
         assert sample_meta is not None
-        # remapper seg_target
+        # remap seg_target
         if 'seg_target' in sample_meta and sample_meta['seg_target'] is not None:
             seg_target = sample_meta['seg_target']
             seg_target_remapper = list(self.dataset_cfg.values())[dataset_idx]['seg_target_remapper']
             for src_label, tgt_label in seg_target_remapper.items():
                 seg_target[seg_target == src_label] = tgt_label
+            sample_meta['seg_target'] = seg_target
         # return
         return sample_meta
     '''len'''

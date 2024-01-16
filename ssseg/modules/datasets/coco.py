@@ -60,7 +60,7 @@ class COCOVOCSUBDataset(BaseDataset):
         seg_target = self.getsegtarget(seg_target, image_meta['height'], image_meta['width'])
         # construct sample_meta
         sample_meta = {'image': image, 'seg_target': seg_target, 'width': image.shape[1], 'height': image.shape[0]}
-        sample_meta.update({'id': imageid})
+        sample_meta.update({'id': str(imageid)})
         # synctransforms
         sample_meta = self.synctransforms(sample_meta)
         # return
@@ -168,7 +168,7 @@ class COCOStuffDataset(BaseDataset):
         annpath = imagepath.replace('jpg', 'png')
         sample_meta = self.read(imagepath, annpath)
         # add image id
-        sample_meta.update({'id': imageid})
+        sample_meta.update({'id': str(imageid)})
         # synctransforms
         sample_meta = self.synctransforms(sample_meta)
         # return
