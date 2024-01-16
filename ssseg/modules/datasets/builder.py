@@ -54,7 +54,7 @@ class MultipleDataset(BaseDataset):
     '''getitem'''
     def __getitem__(self, index):
         # obtain sample_meta
-        pointer, sample_meta, dataset_idx = 0, None
+        pointer, sample_meta = 0, None
         for dataset_idx, dataset in enumerate(self.datasets):
             if index < len(dataset) + pointer:
                 sample_meta = dataset[index - pointer]
