@@ -7,12 +7,13 @@ Author:
 import copy
 from ...utils import BaseModuleBuilder
 from .polyscheduler import PolyScheduler
+from .cosinescheduler import CosineScheduler
 
 
 '''SchedulerBuilder'''
 class SchedulerBuilder(BaseModuleBuilder):
     REGISTERED_MODULES = {
-        'PolyScheduler': PolyScheduler,
+        'PolyScheduler': PolyScheduler, 'CosineScheduler': CosineScheduler,
     }
     '''build'''
     def build(self, optimizer, scheduler_cfg):

@@ -217,11 +217,11 @@ where `type` denotes the dataset you want to train on. Now, SSSegmentation suppo
 ```python
 REGISTERED_MODULES = {
     'BaseDataset': BaseDataset, 'VOCDataset': VOCDataset, 'PascalContext59Dataset': PascalContext59Dataset, 'PascalContextDataset': PascalContextDataset,
-    'COCODataset': COCODataset, 'COCOStuff10kDataset': COCOStuff10kDataset, 'COCOStuffDataset': COCOStuffDataset, 'CIHPDataset': CIHPDataset,
+    'COCOVOCSUBDataset': COCOVOCSUBDataset, 'COCOStuff10kDataset': COCOStuff10kDataset, 'COCOStuffDataset': COCOStuffDataset, 'CIHPDataset': CIHPDataset,
     'LIPDataset': LIPDataset, 'ATRDataset': ATRDataset, 'MHPv1Dataset': MHPv1Dataset, 'MHPv2Dataset': MHPv2Dataset, 'SuperviselyDataset': SuperviselyDataset,
     'HRFDataset': HRFDataset, 'ChaseDB1Dataset': ChaseDB1Dataset, 'STAREDataset': STAREDataset, 'DRIVEDataset': DRIVEDataset, 'SBUShadowDataset': SBUShadowDataset,
     'VSPWDataset': VSPWDataset, 'ADE20kDataset': ADE20kDataset, 'DarkZurichDataset': DarkZurichDataset, 'NighttimeDrivingDataset': NighttimeDrivingDataset,
-    'CityScapesDataset': CityScapesDataset,
+    'CityScapesDataset': CityScapesDataset, 'MultipleDataset': MultipleDataset,
 }
 ```
 
@@ -572,7 +572,7 @@ where `type` denotes the scheduler you want to utilize during training. Now, SSS
 
 ```python
 REGISTERED_MODULES = {
-    'PolyScheduler': PolyScheduler,
+    'PolyScheduler': PolyScheduler, 'CosineScheduler': CosineScheduler,
 }
 ```
 

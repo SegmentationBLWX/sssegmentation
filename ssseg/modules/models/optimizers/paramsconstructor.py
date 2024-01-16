@@ -148,12 +148,7 @@ class LearningRateDecayParamsConstructor(DefaultParamsConstructor):
             if group_name not in parameter_groups:
                 scale = decay_rate**(num_layers - layer_id - 1)
                 parameter_groups[group_name] = {
-                    'weight_decay': this_weight_decay,
-                    'params': [],
-                    'param_names': [],
-                    'lr_scale': scale,
-                    'group_name': group_name,
-                    'lr': scale * base_lr,
+                    'weight_decay': this_weight_decay, 'params': [], 'param_names': [], 'lr_multiplier': scale, 'group_name': group_name, 'lr': scale * base_lr,
                 }
             parameter_groups[group_name]['params'].append(param)
             parameter_groups[group_name]['param_names'].append(name)

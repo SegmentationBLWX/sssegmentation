@@ -33,10 +33,10 @@ class BaseScheduler():
             grad_scaler.step(self.optimizer)
             grad_scaler.update()
         self.cur_iter += 1
-    '''update lr'''
+    '''updatelr'''
     def updatelr(self):
         raise NotImplementedError('not to be implemented')
-    '''get warmup lr'''
+    '''getwarmuplr'''
     def getwarmuplr(self, cur_iter, warmup_cfg, regular_lr):
         warmup_type, warmup_ratio, warmup_iters = warmup_cfg['type'], warmup_cfg['ratio'], warmup_cfg['iters']
         if warmup_type == 'constant':
@@ -48,7 +48,7 @@ class BaseScheduler():
             k = warmup_ratio**(1 - cur_iter / warmup_iters)
             warmup_lr = k * regular_lr
         return warmup_lr
-    '''clip gradients'''
+    '''clipgradients'''
     def clipgradients(self, params, max_norm=35, norm_type=2):
         params = list(filter(lambda p: p.requires_grad and p.grad is not None, params))
         if len(params) > 0:

@@ -10,6 +10,7 @@ from .ade20k_512x512 import DATASET_CFG_ADE20k_512x512
 from .ade20k_640x640 import DATASET_CFG_ADE20k_640x640
 from .vocaug_512x512 import DATASET_CFG_VOCAUG_512x512
 from .chasedb1_128x128 import DATASET_CFG_CHASEDB1_128x128
+from .cocovocsub_512x512 import DATASET_CFG_COCOVOCSUB_512x512
 from .cityscapes_832x832 import DATASET_CFG_CITYSCAPES_832x832
 from .cityscapes_512x1024 import DATASET_CFG_CITYSCAPES_512x1024
 from .cocostuff10k_512x512 import DATASET_CFG_COCOStuff10k_512x512

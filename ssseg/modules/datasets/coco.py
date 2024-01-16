@@ -1,18 +1,19 @@
 '''
 Function:
-    Implementation of COCODataset, COCOStuff10kDataset and COCOStuffDataset
+    Implementation of COCOVOCSUBDataset, COCOStuff10kDataset and COCOStuffDataset
 Author:
     Zhenchao Jin
 '''
 import os
 import cv2
+import numpy as np
 import pandas as pd
 from tqdm import tqdm
 from .base import BaseDataset
 
 
-'''COCODataset'''
-class COCODataset(BaseDataset):
+'''COCOVOCSUBDataset'''
+class COCOVOCSUBDataset(BaseDataset):
     num_classes = 21
     classnames = [
         '__background__', 'airplane', 'bicycle', 'bird', 'boat', 'bottle', 'bus', 'car', 
@@ -27,7 +28,7 @@ class COCODataset(BaseDataset):
     valid_clsids = [0, 5, 2, 16, 9, 44, 6, 3, 17, 62, 21, 67, 18, 19, 4, 1, 64, 20, 63, 7, 72]
     assert num_classes == len(classnames) and num_classes == len(palette)
     def __init__(self, mode, logger_handle, dataset_cfg):
-        super(COCODataset, self).__init__(mode=mode, logger_handle=logger_handle, dataset_cfg=dataset_cfg)
+        super(COCOVOCSUBDataset, self).__init__(mode=mode, logger_handle=logger_handle, dataset_cfg=dataset_cfg)
         from pycocotools import mask
         from pycocotools.coco import COCO
         # obtain the dirs
@@ -44,7 +45,7 @@ class COCODataset(BaseDataset):
             target = self.coco_api.loadAnns(self.coco_api.getAnnIds(imgIds=imageid))
             image_meta = self.coco_api.loadImgs(imageid)[0]
             seg_target = self.getsegtarget(target, image_meta['height'], image_meta['width'])
-            if (seg_target > 0).sum() > 1000:
+            if (seg_target > 0).sum() > 100:
                 self.imageids.append(imageid)
     '''getitem'''
     def __getitem__(self, index):

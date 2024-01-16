@@ -34,9 +34,12 @@ SEGMENTOR_CFG = {
         }
     },
     'scheduler': {
-        'type': 'PolyScheduler', 'max_epochs': 0, 'power': 0.9,
+        'type': 'CosineScheduler', 'max_epochs': 0, 'by_epoch': True, 'min_lr': 1.e-6, 'warmup_cfg': {'type': 'linear', 'ratio': 1e-6, 'iters': 500},
         'optimizer': {
-            'type': 'SGD', 'lr': 0.01, 'momentum': 0.9, 'weight_decay': 5e-4, 'params_rules': {},
+            'type': 'AdamW', 'lr': 0.0009, 'betas': (0.9, 0.999), 'weight_decay': 0.01,
+            'params_rules': {
+                'norm': dict(wd_multiplier=0.),
+            },
         }
     },
     'dataset': None,
