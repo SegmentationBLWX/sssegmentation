@@ -18,7 +18,7 @@ SEGMENTOR_CFG['dataset'] = {
         'VOCDataset': DATASET_CFG_VOCAUG_512x512.copy(),
         'COCOVOCSUBDataset': DATASET_CFG_COCOVOCSUB_512x512.copy(),
     },
-    'val': {
+    'test': {
         'VOCDataset': DATASET_CFG_VOCAUG_512x512.copy(),
     }
 }
