@@ -30,7 +30,7 @@ class BaseDataset(torch.utils.data.Dataset):
         self.dataset_cfg = dataset_cfg
         self.logger_handle = logger_handle
         self.repeat_times = dataset_cfg.get('repeat_times', 1)
-        self.transforms = self.constructtransforms(self.dataset_cfg['data_pipelines'])
+        self.transforms = self.constructtransforms(self.dataset_cfg.get('data_pipelines', []))
     '''getitem'''
     def __getitem__(self, index):
         # imageid
