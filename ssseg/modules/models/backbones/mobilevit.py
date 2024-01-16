@@ -128,7 +128,7 @@ class MobileViT(nn.Module):
             ['mobilevit', 64, 2, 80, 160, 4, 2], ['mobilevit', 80, 2, 96, 192, 3, 2],
         ],
     }
-    def __init__(self, structure_type, arch='small', in_channels=3, stem_channels=16, last_exp_factor=4, out_indices=(4, ), norm_cfg=dict(type='SyncBatchNorm'), 
+    def __init__(self, structure_type, arch='small', in_channels=3, stem_channels=16, last_exp_factor=4, out_indices=(0, 1, 2, 3, 4), norm_cfg=dict(type='SyncBatchNorm'), 
                  act_cfg=dict(type='Swish'), pretrained=True, pretrained_model_path=''):
         super(MobileViT, self).__init__()
         # assert

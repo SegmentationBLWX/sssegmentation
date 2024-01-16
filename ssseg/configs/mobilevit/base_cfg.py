@@ -1,0 +1,44 @@
+'''SEGMENTOR_CFG for MobileViT'''
+SEGMENTOR_CFG = {
+    'benchmark': True,
+    'num_classes': -1,
+    'align_corners': False,
+    'type': 'Deeplabv3',
+    'backend': 'nccl',
+    'work_dir': 'ckpts',
+    'eval_interval_epochs': 10,
+    'save_interval_epochs': 1,
+    'evaluate_results_filename': '',
+    'logger_handle_cfg': {'type': 'LocalLoggerHandle', 'logfilepath': ''},
+    'training_logging_manager_cfg': {'log_interval_iters': 50},
+    'norm_cfg': {'type': 'SyncBatchNorm'},
+    'act_cfg': {'type': 'ReLU', 'inplace': True},
+    'backbone': {
+        'type': 'MobileViT', 'structure_type': 'mobilevit-small', 'pretrained': True, 'selected_indices': (3, 4),
+    },
+    'head': {
+        'in_channels': 480, 'feats_channels': 512, 'dilations': [1, 12, 24, 36], 'dropout': 0.1,
+    },
+    'auxiliary': {
+        'in_channels': 480, 'out_channels': 512, 'dropout': 0.1,
+    },
+    'losses': {
+        'loss_aux': {'type': 'CrossEntropyLoss', 'scale_factor': 0.4, 'ignore_index': 255, 'reduction': 'mean'},
+        'loss_cls': {'type': 'CrossEntropyLoss', 'scale_factor': 1.0, 'ignore_index': 255, 'reduction': 'mean'},
+    },
+    'inference': {
+        'mode': 'whole',
+        'opts': {}, 
+        'tricks': {
+            'multiscale': [1], 'flip': False, 'use_probs_before_resize': False,
+        }
+    },
+    'scheduler': {
+        'type': 'PolyScheduler', 'max_epochs': 0, 'power': 0.9,
+        'optimizer': {
+            'type': 'SGD', 'lr': 0.01, 'momentum': 0.9, 'weight_decay': 5e-4, 'params_rules': {},
+        }
+    },
+    'dataset': None,
+    'dataloader': None,
+}
