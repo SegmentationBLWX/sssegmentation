@@ -45,7 +45,7 @@ class COCOVOCSUBDataset(BaseDataset):
             target = self.coco_api.loadAnns(self.coco_api.getAnnIds(imgIds=imageid))
             image_meta = self.coco_api.loadImgs(imageid)[0]
             seg_target = self.getsegtarget(target, image_meta['height'], image_meta['width'])
-            if (seg_target > 0).sum() > 100:
+            if (seg_target > 0).sum() > 1000:
                 self.imageids.append(imageid)
     '''getitem'''
     def __getitem__(self, index):
