@@ -34,9 +34,23 @@ class MultipleDataset(BaseDataset):
                 dataset_cfg.pop(key)
         super(MultipleDataset, self).__init__(mode, logger_handle, list(dataset_cfg.values())[0])
         self.datasets = []
+        self.num_classes = 0
+        self.classnames = []
+        self.clsid2clsnames = {}
         self.dataset_cfg = dataset_cfg
+        # build all datasets
         for dataset_cfg_item in list(dataset_cfg.values()):
             self.datasets.append(BuildDataset(mode=mode, logger_handle=logger_handle, dataset_cfg=dataset_cfg_item))
+            seg_target_remapper = dataset_cfg_item['seg_target_remapper']
+            for src_label, tgt_label in seg_target_remapper.items():
+                self.clsid2clsnames[tgt_label] = self.datasets[-1].classnames[src_label]
+                self.num_classes = max(self.num_classes, tgt_label)
+        # auto fill some necessary attributes
+        self.num_classes += 1
+        for clsid in range(self.num_classes):
+            self.classnames[self.clsid2clsnames[clsid]]
+        self.palette = BaseDataset.randompalette(self.num_classes)
+        assert self.num_classes == len(self.classnames) and self.num_classes == len(self.palette)
     '''getitem'''
     def __getitem__(self, index):
         # obtain sample_meta
@@ -52,8 +66,8 @@ class MultipleDataset(BaseDataset):
         if 'seg_target' in sample_meta and sample_meta['seg_target'] is not None:
             seg_target = sample_meta['seg_target']
             seg_target_remapper = list(self.dataset_cfg.values())[dataset_idx]['seg_target_remapper']
-            for key, value in seg_target_remapper.items():
-                seg_target[seg_target == key] = value
+            for src_label, tgt_label in seg_target_remapper.items():
+                seg_target[seg_target == src_label] = tgt_label
         # return
         return sample_meta
     '''len'''
