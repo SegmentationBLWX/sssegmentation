@@ -48,7 +48,7 @@ class MultipleDataset(BaseDataset):
         # auto fill some necessary attributes
         self.num_classes += 1
         for clsid in range(self.num_classes):
-            self.classnames[self.clsid2clsnames[clsid]]
+            self.classnames.append(self.clsid2clsnames[clsid])
         self.palette = BaseDataset.randompalette(self.num_classes)
         assert self.num_classes == len(self.classnames) and self.num_classes == len(self.palette)
     '''getitem'''
