@@ -69,6 +69,9 @@ class MultipleDataset(BaseDataset):
             for src_label, tgt_label in seg_target_remapper.items():
                 seg_target[seg_target == src_label] = tgt_label
             sample_meta['seg_target'] = seg_target
+        # format data
+        if 'id' in sample_meta:
+            sample_meta['id'] = str(sample_meta['id'])
         # return
         return sample_meta
     '''len'''
