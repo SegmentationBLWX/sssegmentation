@@ -17,10 +17,10 @@ SEGMENTOR_CFG = {
         'type': 'MobileViT', 'structure_type': 'mobilevit-small', 'pretrained': True, 'selected_indices': (3, 4),
     },
     'head': {
-        'in_channels': 480, 'feats_channels': 512, 'dilations': [1, 12, 24, 36], 'dropout': 0.1,
+        'in_channels': 640, 'feats_channels': 512, 'dilations': [1, 12, 24, 36], 'dropout': 0.1,
     },
     'auxiliary': {
-        'in_channels': 480, 'out_channels': 512, 'dropout': 0.1,
+        'in_channels': 128, 'out_channels': 512, 'dropout': 0.1,
     },
     'losses': {
         'loss_aux': {'type': 'CrossEntropyLoss', 'scale_factor': 0.4, 'ignore_index': 255, 'reduction': 'mean'},
