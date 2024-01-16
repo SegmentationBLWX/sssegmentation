@@ -1,4 +1,4 @@
-'''deeplabv3_mobilevits_voccocosubvoc'''
+'''deeplabv3_mobilevits_voc-cocosubvoc'''
 import os
 import copy
 from .base_cfg import SEGMENTOR_CFG
