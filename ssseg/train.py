@@ -89,6 +89,7 @@ class Trainer():
         # build ema
         ema_cfg = self.cfg.SEGMENTOR_CFG.get('ema_cfg', {'momentum': None, 'device': 'cpu'})
         if ema_cfg['momentum'] is not None:
+            logger_handle.info('Enabling EMASegmentor')
             segmentor_ema = EMASegmentor(segmentor=segmentor, **ema_cfg)
         # build scheduler
         scheduler_cfg = copy.deepcopy(cfg.SEGMENTOR_CFG['scheduler'])
@@ -164,7 +165,7 @@ class Trainer():
                     'cur_epoch': epoch, 'max_epochs': end_epoch, 'cur_iter': scheduler.cur_iter, 'max_iters': scheduler.max_iters,
                     'cur_iter_in_cur_epoch': batch_idx+1, 'max_iters_in_cur_epoch': len(dataloader), 'segmentor': cfg.SEGMENTOR_CFG['type'], 
                     'backbone': cfg.SEGMENTOR_CFG['backbone']['structure_type'], 'dataset': cfg.SEGMENTOR_CFG['dataset']['type'], 
-                    'learning_rate': learning_rate,
+                    'learning_rate': learning_rate, 'ema': ema_cfg['momentum'] is not None, 'fp16': fp16_type is not None,
                 }
                 training_logging_manager.update(basic_log_dict, losses_log_dict)
                 training_logging_manager.autolog(cmd_args.local_rank)
