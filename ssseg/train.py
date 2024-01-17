@@ -16,7 +16,7 @@ import torch.distributed as dist
 from tqdm import tqdm
 from modules import (
     BuildDistributedDataloader, BuildDistributedModel, touchdir, loadckpts, saveckpts, judgefileexist, postprocesspredgtpairs, initslurm,
-    BuildDataset,  BuildSegmentor, BuildOptimizer, BuildScheduler, BuildLoggerHandle, TrainingLoggingManager, ConfigParser
+    BuildDataset,  BuildSegmentor, BuildOptimizer, BuildScheduler, BuildLoggerHandle, TrainingLoggingManager, ConfigParser, EMASegmentor
 )
 warnings.filterwarnings('ignore')
 
@@ -86,6 +86,10 @@ class Trainer():
             from torch.cuda.amp import GradScaler
             from torch.distributed.algorithms.ddp_comm_hooks import default as comm_hooks
             grad_scaler = GradScaler(**fp16_cfg['grad_scaler'])
+        # build ema
+        ema_cfg = self.cfg.SEGMENTOR_CFG.get('ema_cfg', {'momentum': None, 'device': 'cpu'})
+        if ema_cfg['momentum'] is not None:
+            segmentor_ema = EMASegmentor(segmentor=segmentor, **ema_cfg)
         # build scheduler
         scheduler_cfg = copy.deepcopy(cfg.SEGMENTOR_CFG['scheduler'])
         scheduler_cfg.update({
@@ -113,6 +117,8 @@ class Trainer():
                 apex.amp.load_state_dict(ckpts['amp'])
             if 'grad_scaler' in ckpts and fp16_type in ['pytorch']:
                 grad_scaler.load_state_dict(ckpts['grad_scaler'])
+            if 'model_ema' in ckpts and ema_cfg['momentum'] is not None:
+                segmentor_ema.setstate(ckpts['model_ema'], strict=True)
         else:
             cmd_args.ckptspath = ''
         # parallel segmentor
@@ -152,6 +158,8 @@ class Trainer():
                 else:
                     loss.backward()
                 scheduler.step(grad_scaler=grad_scaler)
+                if ema_cfg['momentum'] is not None:
+                    segmentor_ema.update(segmentor=segmentor)
                 basic_log_dict = {
                     'cur_epoch': epoch, 'max_epochs': end_epoch, 'cur_iter': scheduler.cur_iter, 'max_iters': scheduler.max_iters,
                     'cur_iter_in_cur_epoch': batch_idx+1, 'max_iters_in_cur_epoch': len(dataloader), 'segmentor': cfg.SEGMENTOR_CFG['type'], 
@@ -165,6 +173,8 @@ class Trainer():
             if (epoch % cfg.SEGMENTOR_CFG['save_interval_epochs'] == 0) or (epoch == end_epoch):
                 state_dict = scheduler.state()
                 state_dict['model'] = segmentor.module.state_dict()
+                if ema_cfg['momentum'] is not None:
+                    state_dict['model_ema'] = segmentor_ema.state()
                 if fp16_type in ['apex']:
                     state_dict['amp'] = apex.amp.state_dict()
                 elif fp16_type in ['pytorch']:
@@ -174,9 +184,13 @@ class Trainer():
                     saveckpts(state_dict, savepath)
             # --eval ckpts
             if (epoch % cfg.SEGMENTOR_CFG['eval_interval_epochs'] == 0) or (epoch == end_epoch):
-                if (cmd_args.local_rank == 0) and (int(os.environ.get('SLURM_PROCID', 0)) == 0): 
+                if (cmd_args.local_rank == 0) and (int(os.environ.get('SLURM_PROCID', 0)) == 0):
                     self.logger_handle.info(f'Evaluate {cfg.SEGMENTOR_CFG["type"]} at epoch {epoch}')
                 self.evaluate(segmentor)
+                if ema_cfg['momentum'] is not None:
+                    if (cmd_args.local_rank == 0) and (int(os.environ.get('SLURM_PROCID', 0)) == 0):
+                        self.logger_handle.info(f'Evaluate EMA of {cfg.SEGMENTOR_CFG["type"]} at epoch {epoch}')
+                    self.evaluate(segmentor_ema.segmentor_ema.cuda(cmd_args.local_rank))
     '''evaluate'''
     def evaluate(self, segmentor):
         cfg, ngpus_per_node, logger_handle, cmd_args, cfg_file_path = self.cfg, self.ngpus_per_node, self.logger_handle, self.cmd_args, self.cfg_file_path

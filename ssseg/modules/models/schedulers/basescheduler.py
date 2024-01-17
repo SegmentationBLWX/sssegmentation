@@ -64,3 +64,6 @@ class BaseScheduler():
     def setstate(self, state_dict):
         self.cur_epoch = state_dict['cur_epoch']
         self.cur_iter = state_dict['cur_iter']
+    '''zerograd'''
+    def zerograd(self):
+        return self.optimizer.zero_grad()

@@ -447,7 +447,7 @@ class MobileViTV2(nn.Module):
             ['mobilevitv2', 768, 2, 0.5, 4, 1, 2, 2], ['mobilevitv2', 1024, 2, 0.5, 3, 1, 2, 2],
         ], 64],
     }
-    def __init__(self, structure_type, arch='mobilevitv2_050', in_channels=3, out_indices=(4, ), norm_cfg=dict(type='SyncBatchNorm'), 
+    def __init__(self, structure_type, arch='mobilevitv2_050', in_channels=3, out_indices=(0, 1, 2, 3, 4), norm_cfg=dict(type='SyncBatchNorm'), 
                  act_cfg=dict(type='SiLU', inplace=True), pretrained=True, pretrained_model_path=''):
         super(MobileViTV2, self).__init__()
         # assert
