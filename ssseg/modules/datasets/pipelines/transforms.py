@@ -529,6 +529,7 @@ class RandomGaussianBlur(object):
         sample_meta = self.gaussianblur('image', sample_meta, self.kernel_size, sigma)
         return sample_meta
     '''gaussianblur'''
+    @staticmethod
     def gaussianblur(key, sample_meta, kernel_size, sigma):
         if key not in sample_meta: return sample_meta
         sample_meta[key] = cv2.GaussianBlur(sample_meta[key], kernel_size, sigma)
