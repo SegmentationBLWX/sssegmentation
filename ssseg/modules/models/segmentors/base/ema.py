@@ -30,6 +30,7 @@ class EMASegmentor(object):
         return self.segmentor_ema.load_state_dict(state_dict, strict=strict)
     '''update'''
     def update(self, segmentor):
+        if self.device: self.segmentor_ema.to(device=self.device)
         if hasattr(segmentor, 'module'): segmentor = segmentor.module
         with torch.no_grad():
             state_dict = segmentor.state_dict()
