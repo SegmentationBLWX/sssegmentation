@@ -27,6 +27,7 @@ def parsecmdargs():
     parser.add_argument('--outputdir', dest='outputdir', help='directory to save output image(s)', type=str, default='inference_outputs')
     parser.add_argument('--cfgfilepath', dest='cfgfilepath', help='config file path you want to use', type=str, required=True)
     parser.add_argument('--ckptspath', dest='ckptspath', help='checkpoints you want to resume from', type=str, required=True)
+    parser.add_argument('--ema', dest='ema', help='please add --ema if you want to load ema weights for segmentors', default=False, action='store_true')
     args = parser.parse_args()
     return args
 
@@ -63,10 +64,10 @@ class Inferencer():
         cmd_args.local_rank = 0
         ckpts = loadckpts(cmd_args.ckptspath)
         try:
-            segmentor.load_state_dict(ckpts['model'])
+            segmentor.load_state_dict(ckpts['model'] if cmd_args.ema else ckpts['model_ema'])
         except Exception as e:
             logger_handle.warning(str(e) + '\n' + 'Try to load ckpts by using strict=False')
-            segmentor.load_state_dict(ckpts['model'], strict=False)
+            segmentor.load_state_dict(ckpts['model'] if cmd_args.ema else ckpts['model_ema'], strict=False)
         # set eval
         segmentor.eval()
         # start to test

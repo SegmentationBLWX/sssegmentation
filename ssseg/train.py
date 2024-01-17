@@ -75,7 +75,7 @@ class Trainer():
         # build optimizer
         optimizer = BuildOptimizer(segmentor, cfg.SEGMENTOR_CFG['scheduler']['optimizer'])
         # build fp16
-        fp16_cfg = self.cfg.SEGMENTOR_CFG.get('fp16_cfg', {'type': None})
+        fp16_cfg = copy.deepcopy(self.cfg.SEGMENTOR_CFG.get('fp16_cfg', {'type': None}))
         fp16_type, grad_scaler = fp16_cfg.pop('type'), None
         assert fp16_type in [None, 'apex', 'pytorch']
         if fp16_type in ['apex']:
@@ -87,9 +87,8 @@ class Trainer():
             from torch.distributed.algorithms.ddp_comm_hooks import default as comm_hooks
             grad_scaler = GradScaler(**fp16_cfg['grad_scaler'])
         # build ema
-        ema_cfg = self.cfg.SEGMENTOR_CFG.get('ema_cfg', {'momentum': None, 'device': 'cpu'})
+        ema_cfg = copy.deepcopy(self.cfg.SEGMENTOR_CFG.get('ema_cfg', {'momentum': None, 'device': 'cpu'}))
         if ema_cfg['momentum'] is not None:
-            logger_handle.info('Enabling EMASegmentor')
             segmentor_ema = EMASegmentor(segmentor=segmentor, **ema_cfg)
         # build scheduler
         scheduler_cfg = copy.deepcopy(cfg.SEGMENTOR_CFG['scheduler'])
@@ -123,7 +122,7 @@ class Trainer():
         else:
             cmd_args.ckptspath = ''
         # parallel segmentor
-        build_dist_model_cfg = self.cfg.SEGMENTOR_CFG.get('build_dist_model_cfg', {})
+        build_dist_model_cfg = copy.deepcopy(self.cfg.SEGMENTOR_CFG.get('build_dist_model_cfg', {}))
         build_dist_model_cfg.update({'device_ids': [cmd_args.local_rank]})
         segmentor = BuildDistributedModel(segmentor, build_dist_model_cfg)
         if fp16_type in ['pytorch']:
@@ -206,14 +205,14 @@ class Trainer():
         # start to eval
         segmentor.eval()
         inference_cfg, all_preds, all_gts = cfg.SEGMENTOR_CFG['inference'], [], []
-        align_corners = segmentor.module.align_corners
+        align_corners = segmentor.module.align_corners if hasattr(segmentor, 'module') else segmentor.align_corners
         with torch.no_grad():
             dataloader.sampler.set_epoch(0)
             pbar = tqdm(enumerate(dataloader))
             for batch_idx, samples_meta in pbar:
                 pbar.set_description('Processing %s/%s in rank %s' % (batch_idx+1, len(dataloader), rank_id))
                 imageids, images, widths, heights, gts = samples_meta['id'], samples_meta['image'], samples_meta['width'], samples_meta['height'], samples_meta['seg_target']
-                outputs = segmentor.module.inference(images)
+                outputs = segmentor.module.inference(images) if hasattr(segmentor, 'module') else segmentor.inference(images)
                 for idx in range(len(outputs)):
                     output = F.interpolate(outputs[idx: idx+1], size=(heights[idx], widths[idx]), mode='bilinear', align_corners=align_corners)
                     pred = (torch.argmax(output[0], dim=0)).cpu().numpy().astype(np.int32)
@@ -242,7 +241,7 @@ def main():
     config_parser.save(cfg.SEGMENTOR_CFG['work_dir'])
     # initialize logger_handle and training_logging_manager
     logger_handle = BuildLoggerHandle(cfg.SEGMENTOR_CFG['logger_handle_cfg'])
-    training_logging_manager_cfg = cfg.SEGMENTOR_CFG['training_logging_manager_cfg']
+    training_logging_manager_cfg = copy.deepcopy(cfg.SEGMENTOR_CFG['training_logging_manager_cfg'])
     if ('logger_handle_cfg' not in training_logging_manager_cfg) and ('logger_handle' not in training_logging_manager_cfg):
         training_logging_manager_cfg['logger_handle'] = logger_handle
     training_logging_manager = TrainingLoggingManager(**training_logging_manager_cfg)

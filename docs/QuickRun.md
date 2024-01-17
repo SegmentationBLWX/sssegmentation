@@ -52,7 +52,8 @@ This script accepts several optional arguments, including:
 - `${CFGFILEPATH}`: The config file path which is used to customize segmentors,
 - `${CKPTSPATH}`: Checkpoints you want to resume from,
 - `--evalmode`: Used to specify evaluate mode, support server mode (only save the test results which could be submitted to the corresponding dataset's official website to obtain the segmentation performance) and local mode (the default mode, test segmentors with the local images and annotations provided by the corresponding dataset),
-- `--slurm`: Please add `--slurm` if you are using slurm to spawn testing jobs.
+- `--slurm`: Please add `--slurm` if you are using slurm to spawn testing jobs,
+- `--ema`: Please add `--ema` if you want to load ema weights for segmentors.
 
 Here, we provide some examples about testing a segmentor on a single machine,
 
@@ -108,12 +109,13 @@ This script accepts several optional arguments, including:
 - `${CFGFILEPATH}`: The config file path which is used to customize segmentors,
 - `${CKPTSPATH}`: Checkpoints you want to resume from,
 - `--evalmode`: Used to specify evaluate mode, support server mode (only save the test results which could be submitted to the corresponding dataset's official website to obtain the segmentation performance) and local mode (the default mode, test segmentors with the local images and annotations provided by the corresponding dataset),
-- `--slurm`: Please add `--slurm` if you are using slurm to spawn testing jobs.
+- `--slurm`: Please add `--slurm` if you are using slurm to spawn testing jobs,
+- `--ema`: Please add `--ema` if you want to load ema weights for segmentors.
 
 Here is an example of using 16 GPUs to test PSPNet on Slurm partition named *dev*,
 
 ```sh
-bash scripts/slurm_test.sh dev pspnet 16 ssseg/configs/pspnet/pspnet_resnet101os8_ade20k.py pspnet_resnet101os8_ade20k/epoch_130.pth
+bash scripts/slurm_test.sh dev pspnet 16 ssseg/configs/pspnet/pspnet_resnet101os8_ade20k.py pspnet_resnet101os8_ade20k/epoch_130.pth --slurm
 ```
 
 Also, `--slurm` is required to set for slurm environment initialization.
@@ -136,7 +138,8 @@ This script accepts several optional arguments, including:
 - `${CKPTSPATH}`: Checkpoints you want to resume from,
 - `--outputdir`: The directory used to save output image(s),
 - `--imagepath`: Image path, which means we let the segmentor inference on the given image,
-- `--imagedir`: Image directory, which means we let the segmentor inference on the images existed in the given image directory.
+- `--imagedir`: Image directory, which means we let the segmentor inference on the images existed in the given image directory,
+- `--ema`: Please add `--ema` if you want to load ema weights for segmentors.
 
 Here are some example commands,
 

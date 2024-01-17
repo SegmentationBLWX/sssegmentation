@@ -30,6 +30,7 @@ def parsecmdargs():
     parser.add_argument('--evalmode', dest='evalmode', help='evaluate mode, support server and local', default='local', type=str, choices=['server', 'local'])
     parser.add_argument('--ckptspath', dest='ckptspath', help='checkpoints you want to resume from', type=str, required=True)
     parser.add_argument('--slurm', dest='slurm', help='please add --slurm if you are using slurm', default=False, action='store_true')
+    parser.add_argument('--ema', dest='ema', help='please add --ema if you want to load ema weights for segmentors', default=False, action='store_true')
     args = parser.parse_args()
     if torch.__version__.startswith('2.'):
         args.local_rank = int(os.environ['LOCAL_RANK'])
@@ -71,10 +72,10 @@ class Tester():
         # load ckpts
         ckpts = loadckpts(cmd_args.ckptspath)
         try:
-            segmentor.load_state_dict(ckpts['model'])
+            segmentor.load_state_dict(ckpts['model'] if cmd_args.ema else ckpts['model_ema'])
         except Exception as e:
             logger_handle.warning(str(e) + '\n' + 'Try to load ckpts by using strict=False')
-            segmentor.load_state_dict(ckpts['model'], strict=False)
+            segmentor.load_state_dict(ckpts['model'] if cmd_args.ema else ckpts['model_ema'], strict=False)
         # parallel
         segmentor = BuildDistributedModel(segmentor, {'device_ids': [cmd_args.local_rank]})
         # print information
