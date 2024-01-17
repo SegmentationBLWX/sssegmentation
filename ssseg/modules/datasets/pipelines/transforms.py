@@ -7,6 +7,7 @@ Author:
 import cv2
 import copy
 import torch
+import numbers
 import collections
 import numpy as np
 import torch.nn.functional as F
@@ -513,6 +514,27 @@ class RandomRotation(object):
         return sample_meta
 
 
+'''RandomGaussianBlur'''
+class RandomGaussianBlur(object):
+    def __init__(self, prob=0.5, sigma=[0., 1.0], kernel_size=3):
+        super(RandomGaussianBlur, self).__init__()
+        assert (isinstance(kernel_size, collections.abc.Sequence) and (len(kernel_size) == 2)) or isinstance(kernel_size, numbers.Number)
+        self.prob = prob
+        self.sigma = sigma
+        self.kernel_size = (kernel_size, kernel_size) if isinstance(kernel_size, numbers.Number) else kernel_size
+    '''call'''
+    def __call__(self, sample_meta):
+        if np.random.rand() > self.prob: return sample_meta
+        sigma = np.random.uniform(self.sigma[0], self.sigma[1])
+        sample_meta = self.gaussianblur('image', sample_meta, self.kernel_size, sigma)
+        return sample_meta
+    '''gaussianblur'''
+    def gaussianblur(key, sample_meta, kernel_size, sigma):
+        if key not in sample_meta: return sample_meta
+        sample_meta[key] = cv2.GaussianBlur(sample_meta[key], kernel_size, sigma)
+        return sample_meta
+
+
 '''EdgeExtractor'''
 class EdgeExtractor(object):
     def __init__(self, edge_width=3, ignore_index=255):
@@ -664,7 +686,7 @@ class DataTransformBuilder(BaseModuleBuilder):
         'Resize': Resize, 'RandomCrop': RandomCrop, 'RandomFlip': RandomFlip, 'RandomRotation': RandomRotation, 'EdgeExtractor': EdgeExtractor,
         'PhotoMetricDistortion': PhotoMetricDistortion, 'Padding': Padding, 'ToTensor': ToTensor, 'ResizeShortestEdge': ResizeShortestEdge,
         'Normalize': Normalize, 'RandomChoiceResize': RandomChoiceResize, 'Rerange': Rerange, 'CLAHE': CLAHE, 'RandomCutOut': RandomCutOut, 
-        'AlbumentationsWrapper': AlbumentationsWrapper, 'RGB2Gray': RGB2Gray, 'AdjustGamma': AdjustGamma,
+        'AlbumentationsWrapper': AlbumentationsWrapper, 'RGB2Gray': RGB2Gray, 'AdjustGamma': AdjustGamma, 'RandomGaussianBlur': RandomGaussianBlur,
     }
     '''build'''
     def build(self, transform_cfg):
