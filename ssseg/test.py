@@ -72,10 +72,10 @@ class Tester():
         # load ckpts
         ckpts = loadckpts(cmd_args.ckptspath)
         try:
-            segmentor.load_state_dict(ckpts['model'] if cmd_args.ema else ckpts['model_ema'])
+            segmentor.load_state_dict(ckpts['model'] if not cmd_args.ema else ckpts['model_ema'])
         except Exception as e:
             logger_handle.warning(str(e) + '\n' + 'Try to load ckpts by using strict=False')
-            segmentor.load_state_dict(ckpts['model'] if cmd_args.ema else ckpts['model_ema'], strict=False)
+            segmentor.load_state_dict(ckpts['model'] if not cmd_args.ema else ckpts['model_ema'], strict=False)
         # parallel
         segmentor = BuildDistributedModel(segmentor, {'device_ids': [cmd_args.local_rank]})
         # print information
