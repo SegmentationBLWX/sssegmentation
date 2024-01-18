@@ -6,10 +6,11 @@ Author:
 '''
 import copy
 import torch
+import torch.nn as nn
 
 
 '''EMASegmentor'''
-class EMASegmentor(object):
+class EMASegmentor(nn.Module):
     def __init__(self, segmentor, momentum=0.0005, device='cpu'):
         # set attributes
         self.device = device
@@ -22,6 +23,9 @@ class EMASegmentor(object):
         self.segmentor_ema.eval()
         for param in self.segmentor_ema.parameters():
             param.requires_grad = False
+    '''forward'''
+    def forward(self, x, targets, **kwargs):
+        return self.segmentor_ema(x, targets, **kwargs)
     '''state'''
     def state(self):
         return self.segmentor_ema.state_dict()
