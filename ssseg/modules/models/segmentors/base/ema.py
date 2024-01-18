@@ -12,6 +12,7 @@ import torch.nn as nn
 '''EMASegmentor'''
 class EMASegmentor(nn.Module):
     def __init__(self, segmentor, momentum=0.0005, device='cpu'):
+        super(EMASegmentor, self).__init__()
         # set attributes
         self.device = device
         self.momentum = momentum
