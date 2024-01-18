@@ -919,6 +919,8 @@ Finally, the users could jump to the [`ssseg/modules/models/backbones/bricks/act
 Mixed precision methods combine the use of different numerical formats in one computational workload.
 It offers significant computational speedup by performing operations in half-precision format, while storing minimal information in single-precision to retain as much information as possible in critical parts of the network.
 
+For more technical details, please refer to [Mixed Precision Training](https://arxiv.org/abs/1710.03740).
+
 SSSegmentation supports two types of mixed precision training, *i.e.*,
 
 - `apex`: Mixed precision training implemented by using the third-party python package `apex` supported by NVIDIA,
@@ -950,3 +952,27 @@ Of course, you can also choose to adopt the mixed precision training supported b
 The detailed usage and the explanations of each argument please refer to [Pytorch Official Document](https://pytorch.org/docs/stable/amp.html#module-torch.amp).
 
 Finally, if you want turn off the mixed precision training in SSSegmentation, just delete `fp16_cfg` in `SEGMENTOR_CFG` or set `SEGMENTOR_CFG['fp16_cfg']['type']` as `None`.
+
+
+## Exponential Moving Average (EMA)
+
+Exponential moving average is a neural network training trick that sometimes improves the model accuracy. 
+Concretely, instead of using the optimized parameters from the final training iteration (parameter update step) as the final parameters for the model, the exponential moving average of the parameters over the course of all the training iterations are used.
+
+When training a model, it is often beneficial to maintain moving averages of the trained parameters. Evaluations that use averaged parameters sometimes produce significantly better results than the final trained values.
+
+You can refer to [Exponential-Moving-Average](https://leimao.github.io/blog/Exponential-Moving-Average/) for more technical details.
+
+To turn on EMA in SSSegmentation, you could modify the corresponding config file with the following codes,
+
+```
+SEGMENTOR_CFG['ema_cfg'] = {'momentum': 0.0005, 'device': 'cpu'}
+```
+
+where `device` denotes perform EMA on CPU or GPU, `momentum` is the moving average weight which is used in the following codes,
+
+```
+ema_v * (1.0 - momentum)) + (momentum * cur_v)
+```
+
+Finally, if you want turn off EMA in SSSegmentation, just delete `ema_cfg` in `SEGMENTOR_CFG` or set `SEGMENTOR_CFG['ema_cfg']['momentum']` as `None`.
