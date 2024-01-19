@@ -138,7 +138,7 @@ class ResizeShortestEdge(object):
         return (new_w, new_h)
     '''resize'''
     @staticmethod
-    def resize(sample_meta, getoutputshape_func, resize_kwargs):
+    def resize(sample_meta, getoutputshape_func, **resize_kwargs):
         resize_kwargs.update({'output_size': getoutputshape_func(sample_meta['image']), 'keep_ratio': True, 'scale_range': None})
         resize_transform = Resize(**resize_kwargs)
         return resize_transform(sample_meta)
