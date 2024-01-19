@@ -9,7 +9,7 @@ DATASET_CFG_COCOVOCSUB_MOBILEVIT_512x512 = {
     'train': {
         'set': 'train',
         'data_pipelines': [
-            ('RandomChoiceResize', {'scales': [int(512 * x * 0.1) for x in range(5, 21)], 'resize_type': 'ResizeShortestEdge', 'max_size': 2048}),
+            ('RandomShortestEdgeResize', {'short_edge_range': (256, 768), 'max_size': 1024}),
             ('RandomCrop', {'crop_size': (512, 512), 'one_category_max_ratio': 0.75}),
             ('RandomFlip', {'flip_prob': 0.5}),
             ('RandomRotation', {'angle_upper': 10, 'rotation_prob': 0.5}),

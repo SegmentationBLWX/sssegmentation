@@ -107,13 +107,14 @@ class RandomCrop(object):
 
 '''ResizeShortestEdge'''
 class ResizeShortestEdge(object):
-    def __init__(self, short_edge_length, max_size):
+    def __init__(self, short_edge_length, max_size, **resize_kwargs):
         # set attributes
         self.max_size = max_size
+        self.resize_kwargs = resize_kwargs
         self.short_edge_length = short_edge_length
     '''call'''
     def __call__(self, sample_meta):
-        return self.resize(sample_meta, self.getoutputshape)
+        return self.resize(sample_meta, self.getoutputshape, **self.resize_kwargs)
     '''getoutputshape'''
     def getoutputshape(self, image):
         h, w = image.shape[:2]
@@ -137,10 +138,26 @@ class ResizeShortestEdge(object):
         return (new_w, new_h)
     '''resize'''
     @staticmethod
-    def resize(sample_meta, getoutputshape_func):
-        kwargs = {'output_size': getoutputshape_func(sample_meta['image']), 'keep_ratio': True, 'scale_range': None}
-        resize_transform = Resize(**kwargs)
+    def resize(sample_meta, getoutputshape_func, resize_kwargs):
+        resize_kwargs.update({'output_size': getoutputshape_func(sample_meta['image']), 'keep_ratio': True, 'scale_range': None})
+        resize_transform = Resize(**resize_kwargs)
         return resize_transform(sample_meta)
+
+
+'''RandomShortestEdgeResize'''
+class RandomShortestEdgeResize(object):
+    def __init__(self, short_edge_range, max_size, **resize_kwargs):
+        # assert
+        assert isinstance(short_edge_range, collections.abc.Sequence) and len(short_edge_range) == 2
+        # set attributes
+        self.max_size = max_size
+        self.resize_kwargs = resize_kwargs
+        self.short_edge_range = short_edge_range
+    '''call'''
+    def __call__(self, sample_meta):
+        short_edge_length = np.random.randint(*self.short_edge_range)
+        sample_meta = ResizeShortestEdge(short_edge_length, self.max_size, **self.resize_kwargs)(sample_meta)
+        return sample_meta
 
 
 '''RandomChoiceResize'''
@@ -688,6 +705,7 @@ class DataTransformBuilder(BaseModuleBuilder):
         'PhotoMetricDistortion': PhotoMetricDistortion, 'Padding': Padding, 'ToTensor': ToTensor, 'ResizeShortestEdge': ResizeShortestEdge,
         'Normalize': Normalize, 'RandomChoiceResize': RandomChoiceResize, 'Rerange': Rerange, 'CLAHE': CLAHE, 'RandomCutOut': RandomCutOut, 
         'AlbumentationsWrapper': AlbumentationsWrapper, 'RGB2Gray': RGB2Gray, 'AdjustGamma': AdjustGamma, 'RandomGaussianBlur': RandomGaussianBlur,
+        'RandomShortestEdgeResize': RandomShortestEdgeResize,
     }
     '''build'''
     def build(self, transform_cfg):
