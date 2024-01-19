@@ -1,5 +1,6 @@
 '''initialize'''
 from .slurm import initslurm
+from .env import EnvironmentCollector
 from .configparser import ConfigParser
 from .modulebuilder import BaseModuleBuilder
 from .misc import setrandomseed, postprocesspredgtpairs

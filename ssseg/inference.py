@@ -13,9 +13,14 @@ import argparse
 import numpy as np
 import torch.nn.functional as F
 from tqdm import tqdm
-from modules import (
-    BuildDataset, BuildSegmentor, BuildLoggerHandle, ConfigParser, touchdir, loadckpts
-)
+try:
+    from modules import (
+        BuildDataset, BuildSegmentor, BuildLoggerHandle, ConfigParser, touchdir, loadckpts
+    )
+except:
+    from .modules import (
+        BuildDataset, BuildSegmentor, BuildLoggerHandle, ConfigParser, touchdir, loadckpts
+    )
 warnings.filterwarnings('ignore')
 
 

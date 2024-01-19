@@ -14,10 +14,16 @@ import numpy as np
 import torch.nn.functional as F
 import torch.distributed as dist
 from tqdm import tqdm
-from modules import (
-    initslurm, touchdir, loadckpts, postprocesspredgtpairs, BuildDistributedDataloader, BuildDistributedModel,
-    BuildDataset, BuildSegmentor, BuildLoggerHandle, ConfigParser
-)
+try:
+    from modules import (
+        initslurm, touchdir, loadckpts, postprocesspredgtpairs, BuildDistributedDataloader, BuildDistributedModel,
+        BuildDataset, BuildSegmentor, BuildLoggerHandle, ConfigParser
+    )
+except:
+    from .modules import (
+        initslurm, touchdir, loadckpts, postprocesspredgtpairs, BuildDistributedDataloader, BuildDistributedModel,
+        BuildDataset, BuildSegmentor, BuildLoggerHandle, ConfigParser
+    )
 warnings.filterwarnings('ignore')
 
 
