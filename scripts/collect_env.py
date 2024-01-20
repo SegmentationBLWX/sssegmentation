@@ -4,7 +4,7 @@ Function:
 Author:
     Zhenchao Jin
 '''
-from ssseg import EnvironmentCollector
+from ssseg.modules import EnvironmentCollector
 
 
 '''run'''

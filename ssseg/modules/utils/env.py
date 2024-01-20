@@ -72,6 +72,21 @@ class EnvironmentCollector():
                 except subprocess.SubprocessError:
                     mcc = 'Not Available'
                 env_info['MCC'] = mcc
+        # pytorch
+        env_info['PyTorch'] = torch.__version__
+        env_info['PyTorch Compiling Details'] = self.getpytorchbuildconfig()
+        # torchvision
+        try:
+            import torchvision
+            env_info['TorchVision'] = torchvision.__version__
+        except ModuleNotFoundError:
+            pass
+        # cv2
+        try:
+            import cv2
+            env_info['OpenCV'] = cv2.__version__
+        except ImportError:
+            pass
         # c++ compiler
         try:
             import io
@@ -94,21 +109,6 @@ class EnvironmentCollector():
             env_info['GCC'] = 'n/a'
         except io.UnsupportedOperation as e:
             env_info['MSVC'] = f'n/a, reason: {str(e)}'
-        # pytorch
-        env_info['PyTorch'] = torch.__version__
-        env_info['PyTorch Compiling Details'] = self.getpytorchbuildconfig()
-        # torchvision
-        try:
-            import torchvision
-            env_info['TorchVision'] = torchvision.__version__
-        except ModuleNotFoundError:
-            pass
-        # cv2
-        try:
-            import cv2
-            env_info['OpenCV'] = cv2.__version__
-        except ImportError:
-            pass
         # filter
         if self.filter_env_keys is not None:
             for key in self.filter_env_keys:
