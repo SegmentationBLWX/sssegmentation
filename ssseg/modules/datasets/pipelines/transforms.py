@@ -11,6 +11,7 @@ import numbers
 import collections
 import numpy as np
 import torch.nn.functional as F
+from PIL import ImageFilter, Image
 from ...utils import BaseModuleBuilder
 
 
@@ -424,7 +425,7 @@ class RandomFlip(object):
     '''call'''
     def __call__(self, sample_meta):
         # flip
-        if np.random.rand() > self.flip_prob: return sample_meta
+        if np.random.rand() < self.flip_prob: return sample_meta
         sample_meta = self.flip('image', sample_meta)
         sample_meta = self.flip('seg_target', sample_meta)
         # fix some seg_target pairs (used in some human parsing datasets)
@@ -514,7 +515,7 @@ class RandomRotation(object):
     '''call'''
     def __call__(self, sample_meta):
         # prepare
-        if np.random.rand() > self.rotation_prob: return sample_meta
+        if np.random.rand() < self.rotation_prob: return sample_meta
         h_ori, w_ori = sample_meta['image'].shape[:2]
         rand_angle = np.random.randint(-self.angle_upper, self.angle_upper)
         matrix = cv2.getRotationMatrix2D(center=(w_ori / 2, h_ori / 2), angle=rand_angle, scale=1)
@@ -535,13 +536,14 @@ class RandomRotation(object):
 class RandomGaussianBlur(object):
     def __init__(self, prob=0.5, sigma=[0., 1.0], kernel_size=3):
         super(RandomGaussianBlur, self).__init__()
+        assert (isinstance(sigma, collections.abc.Sequence) and (len(sigma) == 2)) or isinstance(sigma, numbers.Number)
         assert (isinstance(kernel_size, collections.abc.Sequence) and (len(kernel_size) == 2)) or isinstance(kernel_size, numbers.Number)
         self.prob = prob
-        self.sigma = sigma
+        self.sigma = sigma if isinstance(sigma, collections.abc.Sequence) else [sigma, sigma]
         self.kernel_size = (kernel_size, kernel_size) if isinstance(kernel_size, numbers.Number) else kernel_size
     '''call'''
     def __call__(self, sample_meta):
-        if np.random.rand() > self.prob: return sample_meta
+        if np.random.rand() < self.prob: return sample_meta
         sigma = np.random.uniform(self.sigma[0], self.sigma[1])
         sample_meta = self.gaussianblur('image', sample_meta, self.kernel_size, sigma)
         return sample_meta
@@ -550,6 +552,34 @@ class RandomGaussianBlur(object):
     def gaussianblur(key, sample_meta, kernel_size, sigma):
         if key not in sample_meta: return sample_meta
         sample_meta[key] = cv2.GaussianBlur(sample_meta[key], kernel_size, sigma)
+        return sample_meta
+
+
+'''PILRandomGaussianBlur'''
+class PILRandomGaussianBlur(object):
+    def __init__(self, prob=0.5, radius=[0., 1.0]):
+        super(PILRandomGaussianBlur, self).__init__()
+        assert (isinstance(radius, collections.abc.Sequence) and (len(radius) == 2)) or isinstance(radius, numbers.Number)
+        self.prob = prob
+        self.radius = radius if isinstance(radius, collections.abc.Sequence) else [radius, radius]
+    '''call'''
+    def __call__(self, sample_meta):
+        if np.random.rand() < self.prob: return sample_meta
+        radius = np.random.uniform(self.radius[0], self.radius[1])
+        sample_meta = self.gaussianblur('image', sample_meta, radius)
+        return sample_meta
+    '''gaussianblur'''
+    @staticmethod
+    def gaussianblur(key, sample_meta, radius):
+        if key not in sample_meta: return sample_meta
+        # convert to pillow style
+        sample_meta[key] = cv2.cvtColor(sample_meta[key], cv2.COLOR_BGR2RGB)
+        sample_meta[key] = Image.fromarray(sample_meta[key])
+        # perform gaussian filter
+        sample_meta[key] = sample_meta[key].filter(ImageFilter.GaussianBlur(radius=radius))
+        # convert return to cv2 style
+        sample_meta[key] = np.array(sample_meta[key])[:, :, ::-1]
+        # return
         return sample_meta
 
 
@@ -705,7 +735,7 @@ class DataTransformBuilder(BaseModuleBuilder):
         'PhotoMetricDistortion': PhotoMetricDistortion, 'Padding': Padding, 'ToTensor': ToTensor, 'ResizeShortestEdge': ResizeShortestEdge,
         'Normalize': Normalize, 'RandomChoiceResize': RandomChoiceResize, 'Rerange': Rerange, 'CLAHE': CLAHE, 'RandomCutOut': RandomCutOut, 
         'AlbumentationsWrapper': AlbumentationsWrapper, 'RGB2Gray': RGB2Gray, 'AdjustGamma': AdjustGamma, 'RandomGaussianBlur': RandomGaussianBlur,
-        'RandomShortestEdgeResize': RandomShortestEdgeResize,
+        'RandomShortestEdgeResize': RandomShortestEdgeResize, 'PILRandomGaussianBlur': PILRandomGaussianBlur,
     }
     '''build'''
     def build(self, transform_cfg):

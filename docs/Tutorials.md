@@ -281,7 +281,7 @@ REGISTERED_MODULES = {
     'PhotoMetricDistortion': PhotoMetricDistortion, 'Padding': Padding, 'ToTensor': ToTensor, 'ResizeShortestEdge': ResizeShortestEdge,
     'Normalize': Normalize, 'RandomChoiceResize': RandomChoiceResize, 'Rerange': Rerange, 'CLAHE': CLAHE, 'RandomCutOut': RandomCutOut, 
     'AlbumentationsWrapper': AlbumentationsWrapper, 'RGB2Gray': RGB2Gray, 'AdjustGamma': AdjustGamma, 'RandomGaussianBlur': RandomGaussianBlur,
-    'RandomShortestEdgeResize': RandomShortestEdgeResize,
+    'RandomShortestEdgeResize': RandomShortestEdgeResize, 'PILRandomGaussianBlur': PILRandomGaussianBlur,
 }
 ```
 
