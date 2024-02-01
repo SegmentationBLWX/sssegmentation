@@ -74,7 +74,7 @@ class EnvironmentCollector():
                 env_info['MCC'] = mcc
         # pytorch
         env_info['PyTorch'] = torch.__version__
-        env_info['PyTorch Compiling Details'] = self.getpytorchbuildconfig()
+        env_info['PyTorch Compiling Details'] = self.getpytorchbuildconfig().strip('\n').strip(' ')
         # torchvision
         try:
             import torchvision
