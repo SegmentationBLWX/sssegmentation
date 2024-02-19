@@ -6,7 +6,7 @@
 [![docs](https://img.shields.io/badge/docs-latest-blue)](https://sssegmentation.readthedocs.io/en/latest/)
 [![PyPI - Python Version](https://img.shields.io/pypi/pyversions/sssegmentation)](https://pypi.org/project/sssegmentation/)
 [![PyPI](https://img.shields.io/pypi/v/sssegmentation)](https://pypi.org/project/sssegmentation)
-[![license](https://img.shields.io/github/license/SegmentationBLWX/sssegmentation.svg)](https://github.com/SegmentationBLWX/sssegmentation/blob/master/LICENSE)
+[![license](https://img.shields.io/github/license/SegmentationBLWX/sssegmentation.svg)](https://github.com/SegmentationBLWX/sssegmentation/blob/main/LICENSE)
 [![PyPI - Downloads](https://pepy.tech/badge/sssegmentation)](https://pypi.org/project/sssegmentation/)
 [![PyPI - Downloads](https://img.shields.io/pypi/dm/sssegmentation?style=flat-square)](https://pypi.org/project/sssegmentation/)
 [![issue resolution](https://isitmaintained.com/badge/resolution/SegmentationBLWX/sssegmentation.svg)](https://github.com/SegmentationBLWX/sssegmentation/issues)
