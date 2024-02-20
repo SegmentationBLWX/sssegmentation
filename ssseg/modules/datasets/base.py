@@ -30,7 +30,7 @@ class BaseDataset(torch.utils.data.Dataset):
         self.dataset_cfg = dataset_cfg
         self.logger_handle = logger_handle
         self.repeat_times = dataset_cfg.get('repeat_times', 1)
-        self.transforms = self.constructtransforms(self.dataset_cfg.get('data_pipelines', []))
+        self.transforms = self.constructtransforms(self.dataset_cfg.get('data_pipelines', []), self.dataset_cfg.get('record_img2aug_pos_mapper', False))
     '''getitem'''
     def __getitem__(self, index):
         # imageid
@@ -107,7 +107,7 @@ class BaseDataset(torch.utils.data.Dataset):
         # return
         return selected_result      
     '''constructtransforms'''
-    def constructtransforms(self, data_pipelines):
+    def constructtransforms(self, data_pipelines, record_img2aug_pos_mapper=False):
         transforms = []
         for data_pipeline in data_pipelines:
             if isinstance(data_pipeline, collections.abc.Sequence):
@@ -120,7 +120,7 @@ class BaseDataset(torch.utils.data.Dataset):
                 assert isinstance(data_pipeline, dict)
                 transform = BuildDataTransform(data_pipeline)
             transforms.append(transform)
-        transforms = Compose(transforms)
+        transforms = Compose(transforms, record_img2aug_pos_mapper)
         # return
         return transforms
     '''synctransforms'''

@@ -24,7 +24,7 @@ _INTERPOLATION_CV2_CONVERTOR = {
 
 '''Resize'''
 class Resize(object):
-    def __init__(self, output_size, keep_ratio=True, min_size=None, scale_range=(0.5, 2.0), image_interpolation='bilinear', seg_target_interpolation='nearest'):
+    def __init__(self, output_size, keep_ratio=True, min_size=None, scale_range=(0.5, 2.0), image_interpolation='bilinear', seg_target_interpolation='nearest', img2aug_pos_mapper_interpolation='nearest'):
         # assert
         assert isinstance(scale_range, collections.abc.Sequence) or scale_range is None
         assert isinstance(output_size, int) or (isinstance(output_size, collections.abc.Sequence) and len(output_size) == 2)
@@ -34,6 +34,7 @@ class Resize(object):
         self.scale_range = scale_range
         self.image_interpolation = _INTERPOLATION_CV2_CONVERTOR[image_interpolation]
         self.seg_target_interpolation = _INTERPOLATION_CV2_CONVERTOR[seg_target_interpolation]
+        self.img2aug_pos_mapper_interpolation = _INTERPOLATION_CV2_CONVERTOR[img2aug_pos_mapper_interpolation]
         self.output_size = (output_size, output_size) if isinstance(output_size, int) else output_size
     '''call'''
     def __call__(self, sample_meta):
@@ -58,6 +59,7 @@ class Resize(object):
         # resize
         sample_meta = self.resize('image', sample_meta, dsize, self.image_interpolation)
         sample_meta = self.resize('seg_target', sample_meta, dsize, self.seg_target_interpolation)
+        sample_meta = self.resize('img2aug_pos_mapper', sample_meta, dsize, self.img2aug_pos_mapper_interpolation)
         # return
         return sample_meta
     '''resize'''
@@ -89,6 +91,9 @@ class RandomCrop(object):
             top, left = np.random.randint(0, h_ori - h_out + 1), np.random.randint(0, w_ori - w_out + 1)
             image = self.crop(image, top, left, h_out, w_out)
             seg_target = self.crop(seg_target, top, left, h_out, w_out)
+            if 'img2aug_pos_mapper' in sample_meta:
+                img2aug_pos_mapper = sample_meta['img2aug_pos_mapper'].copy()
+                img2aug_pos_mapper = self.crop(img2aug_pos_mapper, top, left, h_out, w_out)
             # --judge
             labels, counts = np.unique(seg_target, return_counts=True)
             counts = counts[labels != self.ignore_index]
@@ -97,6 +102,8 @@ class RandomCrop(object):
         # update
         if len(counts) == 0: return sample_meta
         sample_meta['image'], sample_meta['seg_target'] = image, seg_target
+        if 'img2aug_pos_mapper' in sample_meta:
+            sample_meta['img2aug_pos_mapper'] = img2aug_pos_mapper
         # return
         return sample_meta
     '''crop'''
@@ -317,7 +324,7 @@ class RGB2Gray(object):
 
 '''RandomCutOut'''
 class RandomCutOut(object):
-    def __init__(self, prob, n_holes, cutout_shape=None, cutout_ratio=None, image_fill_value=(0, 0, 0), seg_target_fill_value=255):
+    def __init__(self, prob, n_holes, cutout_shape=None, cutout_ratio=None, image_fill_value=(0, 0, 0), seg_target_fill_value=255, img2aug_pos_mapper_fill_value=-1):
         # assert
         assert 0 <= prob and prob <= 1
         assert (cutout_shape is None) ^ (cutout_ratio is None), 'either cutout_shape or cutout_ratio should be specified'
@@ -333,6 +340,7 @@ class RandomCutOut(object):
         self.n_holes = n_holes
         self.image_fill_value = image_fill_value
         self.seg_target_fill_value = seg_target_fill_value
+        self.img2aug_pos_mapper_fill_value = img2aug_pos_mapper_fill_value
         self.with_ratio = cutout_ratio is not None
         self.candidates = cutout_ratio if self.with_ratio else cutout_shape
         if not isinstance(self.candidates, collections.abc.Sequence): self.candidates = [self.candidates]
@@ -352,6 +360,7 @@ class RandomCutOut(object):
                 y2 = np.clip(y1 + cutout_h, 0, h)
                 sample_meta = self.cutout('image', sample_meta, x1, y1, x2, y2, self.image_fill_value)
                 sample_meta = self.cutout('seg_target', sample_meta, x1, y1, x2, y2, self.seg_target_fill_value)
+                sample_meta = self.cutout('img2aug_pos_mapper', sample_meta, x1, y1, x2, y2, self.img2aug_pos_mapper_fill_value)
         return sample_meta
     '''docutout'''
     def docutout(self):
@@ -428,6 +437,7 @@ class RandomFlip(object):
         if np.random.rand() < self.flip_prob: return sample_meta
         sample_meta = self.flip('image', sample_meta)
         sample_meta = self.flip('seg_target', sample_meta)
+        sample_meta = self.flip('img2aug_pos_mapper', sample_meta)
         # fix some seg_target pairs (used in some human parsing datasets)
         if self.fixed_seg_target_pairs:
             for (pair_a, pair_b) in self.fixed_seg_target_pairs:
@@ -502,7 +512,7 @@ class PhotoMetricDistortion(object):
 
 '''RandomRotation'''
 class RandomRotation(object):
-    def __init__(self, rotation_prob=0.5, angle_upper=30, image_fill_value=0.0, seg_target_fill_value=255, image_interpolation='bicubic', seg_target_interpolation='nearest'):
+    def __init__(self, rotation_prob=0.5, angle_upper=30, image_fill_value=0.0, seg_target_fill_value=255, image_interpolation='bicubic', seg_target_interpolation='nearest', img2aug_pos_mapper_fill_value=-1, img2aug_pos_mapper_interpolation='nearest'):
         # assert
         assert isinstance(rotation_prob, float)
         # set attributes
@@ -510,8 +520,10 @@ class RandomRotation(object):
         self.angle_upper = angle_upper
         self.image_fill_value = image_fill_value
         self.seg_target_fill_value = seg_target_fill_value
+        self.img2aug_pos_mapper_fill_value = img2aug_pos_mapper_fill_value
         self.image_interpolation = _INTERPOLATION_CV2_CONVERTOR[image_interpolation]
         self.seg_target_interpolation = _INTERPOLATION_CV2_CONVERTOR[seg_target_interpolation]
+        self.img2aug_pos_mapper_interpolation = _INTERPOLATION_CV2_CONVERTOR[img2aug_pos_mapper_interpolation]
     '''call'''
     def __call__(self, sample_meta):
         # prepare
@@ -522,6 +534,7 @@ class RandomRotation(object):
         # rotate
         sample_meta = self.rotate('image', sample_meta, matrix, w_ori, h_ori, self.image_interpolation, self.image_fill_value)
         sample_meta = self.rotate('seg_target', sample_meta, matrix, w_ori, h_ori, self.seg_target_interpolation, self.seg_target_fill_value)
+        sample_meta = self.rotate('img2aug_pos_mapper', sample_meta, matrix, w_ori, h_ori, self.img2aug_pos_mapper_interpolation, self.img2aug_pos_mapper_fill_value)
         # return
         return sample_meta
     '''rotate'''
@@ -719,10 +732,13 @@ class ToTensor(object):
 
 '''Compose'''
 class Compose(object):
-    def __init__(self, transforms):
+    def __init__(self, transforms, record_img2aug_pos_mapper=False):
         self.transforms = transforms
+        self.record_img2aug_pos_mapper = record_img2aug_pos_mapper
     '''call'''
     def __call__(self, sample_meta):
+        if 'img2aug_pos_mapper' not in sample_meta:
+            sample_meta['img2aug_pos_mapper'] = np.arange(0, sample_meta['height'] * sample_meta['width']).reshape(sample_meta['height'], sample_meta['width']),
         for transform in self.transforms:
             sample_meta = transform(sample_meta)
         return sample_meta
