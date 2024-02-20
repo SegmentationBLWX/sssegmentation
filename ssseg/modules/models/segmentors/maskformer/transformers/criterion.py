@@ -39,7 +39,7 @@ class SetCriterion(nn.Module):
         empty_weight = torch.ones(self.num_classes + 1)
         empty_weight[-1] = self.eos_coef
         self.register_buffer('empty_weight', empty_weight)
-    '''loss labels'''
+    '''losslabels'''
     def losslabels(self, outputs, targets, indices, num_masks):
         assert 'pred_logits' in outputs
         src_logits = outputs['pred_logits']
@@ -49,7 +49,7 @@ class SetCriterion(nn.Module):
         target_classes[idx] = target_classes_o
         loss_ce = F.cross_entropy(src_logits.transpose(1, 2), target_classes, self.empty_weight)
         return {'loss_ce': loss_ce}
-    '''loss masks'''
+    '''lossmasks'''
     def lossmasks(self, outputs, targets, indices, num_masks):
         assert 'pred_masks' in outputs
         src_idx = self.getsrcpermutationidx(indices)
@@ -69,21 +69,21 @@ class SetCriterion(nn.Module):
             'loss_dice': self.diceloss(src_masks, target_masks, num_masks),
         }
         return losses
-    '''get src permutation idx'''
+    '''getsrcpermutationidx'''
     def getsrcpermutationidx(self, indices):
         batch_idx = torch.cat([torch.full_like(src, i) for i, (src, _) in enumerate(indices)])
         src_idx = torch.cat([src for (src, _) in indices])
         return batch_idx, src_idx
-    '''get tgt permutation idx'''
+    '''gettgtpermutationidx'''
     def gettgtpermutationidx(self, indices):
         batch_idx = torch.cat([torch.full_like(tgt, i) for i, (_, tgt) in enumerate(indices)])
         tgt_idx = torch.cat([tgt for (_, tgt) in indices])
         return batch_idx, tgt_idx
-    '''get loss'''
+    '''getloss'''
     def getloss(self, loss_type, outputs, targets, indices, num_masks):
         loss_map = {'labels': self.losslabels, 'masks': self.lossmasks}
         return loss_map[loss_type](outputs, targets, indices, num_masks)
-    '''format targets'''
+    '''formattargets'''
     def formattargets(self, seg, ignore_index=255, background_idx=0):
         labels, masks = [], []
         for label in torch.unique(seg):
@@ -128,7 +128,7 @@ class SetCriterion(nn.Module):
                     l_dict = {k + f'_{i}': v for k, v in l_dict.items()}
                     losses.update(l_dict)
         return losses
-    '''nested tensor from tensor list'''
+    '''nestedtensorfromtensorlist'''
     def nestedtensorfromtensorlist(self, tensor_list):
         def maxbyaxis(the_list):
             maxes = the_list[0]
@@ -148,7 +148,7 @@ class SetCriterion(nn.Module):
             pad_img[:img.shape[0], :img.shape[1], :img.shape[2]].copy_(img)
             m[:img.shape[1], :img.shape[2]] = False
         return NestedTensor(tensor, mask)
-    '''onnx nested tensor from tensor list'''
+    '''onnxnestedtensorfromtensorlist'''
     @torch.jit.unused
     def onnxnestedtensorfromtensorlist(self, tensor_list):
         max_size = []
@@ -165,11 +165,11 @@ class SetCriterion(nn.Module):
             padded_masks.append(padded_mask.to(torch.bool))
         tensor, mask = torch.stack(padded_imgs), torch.stack(padded_masks)
         return NestedTensor(tensor, mask=mask)
-    '''get world size'''
+    '''getworldsize'''
     def getworldsize(self):
         if (not dist.is_available()) or (not dist.is_initialized()): return 1
         return dist.get_world_size()
-    '''dice loss'''
+    '''diceloss'''
     def diceloss(self, inputs, targets, num_masks):
         inputs = inputs.sigmoid()
         inputs = inputs.flatten(1)
@@ -177,7 +177,7 @@ class SetCriterion(nn.Module):
         denominator = inputs.sum(-1) + targets.sum(-1)
         loss = 1 - (numerator + 1) / (denominator + 1)
         return loss.sum() / num_masks
-    '''sigmoid focal loss'''
+    '''sigmoidfocalloss'''
     def sigmoidfocalloss(self, inputs, targets, num_masks, alpha=0.25, gamma=2):
         prob = inputs.sigmoid()
         ce_loss = F.binary_cross_entropy_with_logits(inputs, targets, reduction='none')
