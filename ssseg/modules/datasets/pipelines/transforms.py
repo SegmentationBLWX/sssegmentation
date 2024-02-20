@@ -741,7 +741,7 @@ class Compose(object):
     '''call'''
     def __call__(self, sample_meta):
         if 'img2aug_pos_mapper' not in sample_meta:
-            sample_meta['img2aug_pos_mapper'] = np.arange(0, sample_meta['height'] * sample_meta['width']).reshape(sample_meta['height'], sample_meta['width']),
+            sample_meta['img2aug_pos_mapper'] = np.arange(0, sample_meta['height'] * sample_meta['width']).reshape(sample_meta['height'], sample_meta['width'])
         for transform in self.transforms:
             sample_meta = transform(sample_meta)
         return sample_meta
