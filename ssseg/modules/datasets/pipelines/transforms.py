@@ -654,7 +654,7 @@ class Normalize(object):
 
 '''Padding'''
 class Padding(object):
-    def __init__(self, output_size, data_type='numpy', image_fill_value=0, seg_target_fill_value=255, edge_target_fill_value=255, output_size_auto_adaptive=True):
+    def __init__(self, output_size, data_type='numpy', image_fill_value=0, seg_target_fill_value=255, edge_target_fill_value=255, img2aug_pos_mapper_fill_value=-1, output_size_auto_adaptive=True):
         # assert
         assert data_type in ['numpy', 'tensor']
         assert isinstance(output_size, int) or (isinstance(output_size, collections.abc.Sequence) and len(output_size) == 2)
@@ -663,6 +663,7 @@ class Padding(object):
         self.image_fill_value = image_fill_value
         self.seg_target_fill_value = seg_target_fill_value
         self.edge_target_fill_value = edge_target_fill_value
+        self.img2aug_pos_mapper_fill_value = img2aug_pos_mapper_fill_value
         self.output_size_auto_adaptive = output_size_auto_adaptive
         self.output_size = (output_size, output_size) if isinstance(output_size, int) else output_size
     '''call'''
@@ -687,7 +688,7 @@ class Padding(object):
         left = (output_size[1] - w_ori) // 2
         right = output_size[1] - w_ori - left
         # padding
-        for key in ['image', 'seg_target', 'edge_target']:
+        for key in ['image', 'seg_target', 'edge_target', 'img2aug_pos_mapper']:
             sample_meta = self.padding(key, sample_meta, top, bottom, left, right, getattr(self, f'{key}_fill_value'), self.data_type)
         # return
         return sample_meta
@@ -726,6 +727,8 @@ class ToTensor(object):
             sample_meta['edge_target'] = torch.from_numpy(sample_meta['edge_target'].astype(np.float32))
         if 'seg_target' in sample_meta:
             sample_meta['seg_target'] = torch.from_numpy(sample_meta['seg_target'].astype(np.float32))
+        if 'img2aug_pos_mapper' in sample_meta:
+            sample_meta['img2aug_pos_mapper'] = torch.from_numpy(sample_meta['img2aug_pos_mapper'].astype(np.float32))
         # return
         return sample_meta
 
