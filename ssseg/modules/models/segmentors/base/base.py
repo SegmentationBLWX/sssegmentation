@@ -11,6 +11,7 @@ import torch.nn as nn
 import torch.nn.functional as F
 import torch.distributed as dist
 from ...losses import BuildLoss
+from ...samplers import BuildPixelSampler
 from ...backbones import BuildBackbone, BuildActivation, BuildNormalization, NormalizationBuilder
 
 
@@ -172,6 +173,17 @@ class BaseSegmentor(nn.Module):
     '''calculatelosses'''
     def calculatelosses(self, predictions, targets, losses_cfg, map_preds_to_tgts_dict=None):
         assert len(predictions) == len(losses_cfg), 'length of losses_cfg should be equal to the one of predictions'
+        # apply pixel sampler
+        if 'pixelsampler' in self.cfg['head']:
+            predictions_new, targets_new, map_preds_to_tgts_dict_new = {}, {}, {}
+            pixelsampler = BuildPixelSampler(self.cfg['head']['pixelsampler'])
+            for key in predictions.keys():
+                if map_preds_to_tgts_dict is None:
+                    predictions_new[key], targets_new[key] = pixelsampler.sample(predictions[key], targets['seg_target'])
+                else:
+                    predictions_new[key], targets_new[key] = pixelsampler.sample(predictions[key], targets[map_preds_to_tgts_dict[key]])
+                map_preds_to_tgts_dict_new[key] = key
+            predictions, targets, map_preds_to_tgts_dict = predictions_new, targets_new, map_preds_to_tgts_dict_new
         # calculate loss according to losses_cfg
         losses_log_dict = {}
         for loss_name, loss_cfg in losses_cfg.items():

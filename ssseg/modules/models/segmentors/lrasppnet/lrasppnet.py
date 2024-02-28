@@ -59,11 +59,11 @@ class LRASPPNet(BaseSegmentor):
             feats = torch.cat([feats, self.branch_convs[idx](backbone_outputs[idx])], dim=1)
             feats = self.branch_ups[idx](feats)
         # feed to decoder
-        predictions = self.decoder(feats)
+        seg_logits = self.decoder(feats)
         # return according to the mode
         if self.mode == 'TRAIN':
             loss, losses_log_dict = self.customizepredsandlosses(
-                predictions=predictions, targets=targets, backbone_outputs=backbone_outputs, losses_cfg=self.cfg['losses'], img_size=img_size,
+                predictions=seg_logits, targets=targets, backbone_outputs=backbone_outputs, losses_cfg=self.cfg['losses'], img_size=img_size,
             )
             return loss, losses_log_dict
-        return predictions
+        return seg_logits

@@ -74,29 +74,29 @@ class PointRend(BaseSegmentor):
         for i in range(1, len(self.cfg['head']['feature_stride_list'])):
             feats = feats + F.interpolate(self.scale_heads[i](fpn_outs[i]), size=feats.shape[2:], mode='bilinear', align_corners=self.align_corners)
         # feed to auxiliary decoder
-        predictions_aux = self.auxiliary_decoder(feats)
+        seg_logits_aux = self.auxiliary_decoder(feats)
         feats = fpn_outs[0]
         # if mode is TRAIN
         if self.mode == 'TRAIN':
             with torch.no_grad():
-                points = self.getpointstrain(predictions_aux, self.calculateuncertainty, cfg=self.cfg['head']['train'])
+                points = self.getpointstrain(seg_logits_aux, self.calculateuncertainty, cfg=self.cfg['head']['train'])
             fine_grained_point_feats = self.getfinegrainedpointfeats([feats], points)
-            coarse_point_feats = self.getcoarsepointfeats(predictions_aux, points)
+            coarse_point_feats = self.getcoarsepointfeats(seg_logits_aux, points)
             outputs = torch.cat([fine_grained_point_feats, coarse_point_feats], dim=1)
             for fc in self.fcs:
                 outputs = fc(outputs)
                 if self.coarse_pred_each_layer:
                     outputs = torch.cat([outputs, coarse_point_feats], dim=1)
-            predictions = self.decoder(outputs)
+            seg_logits = self.decoder(outputs)
             point_labels = PointSample(targets['seg_target'].unsqueeze(1).float(), points, mode='nearest', align_corners=self.align_corners)
             point_labels = point_labels.squeeze(1).long()
             targets['point_labels'] = point_labels
-            predictions_aux = F.interpolate(predictions_aux, size=img_size, mode='bilinear', align_corners=self.align_corners)
+            seg_logits_aux = F.interpolate(seg_logits_aux, size=img_size, mode='bilinear', align_corners=self.align_corners)
             return self.calculatelosses(
-                predictions={'loss_cls': predictions, 'loss_aux': predictions_aux}, targets=targets, losses_cfg=self.cfg['losses'], map_preds_to_tgts_dict={'loss_cls': 'point_labels', 'loss_aux': 'seg_target'}
+                predictions={'loss_cls': seg_logits, 'loss_aux': seg_logits_aux}, targets=targets, losses_cfg=self.cfg['losses'], map_preds_to_tgts_dict={'loss_cls': 'point_labels', 'loss_aux': 'seg_target'}
             )
         # if mode is TEST
-        refined_seg_logits = predictions_aux.clone()
+        refined_seg_logits = seg_logits_aux.clone()
         for _ in range(self.cfg['head']['test']['subdivision_steps']):
             refined_seg_logits = F.interpolate(
                 input=refined_seg_logits, scale_factor=self.cfg['head']['test']['scale_factor'], mode='bilinear', align_corners=self.align_corners
@@ -104,16 +104,16 @@ class PointRend(BaseSegmentor):
             batch_size, channels, height, width = refined_seg_logits.shape
             point_indices, points = self.getpointstest(refined_seg_logits, self.calculateuncertainty, cfg=self.cfg['head']['test'])
             fine_grained_point_feats = self.getfinegrainedpointfeats([feats], points)
-            coarse_point_feats = self.getcoarsepointfeats(predictions_aux, points)
+            coarse_point_feats = self.getcoarsepointfeats(seg_logits_aux, points)
             outputs = torch.cat([fine_grained_point_feats, coarse_point_feats], dim=1)
             for fc in self.fcs:
                 outputs = fc(outputs)
                 if self.coarse_pred_each_layer:
                     outputs = torch.cat([outputs, coarse_point_feats], dim=1)
-            predictions = self.decoder(outputs)
+            seg_logits = self.decoder(outputs)
             point_indices = point_indices.unsqueeze(1).expand(-1, channels, -1)
             refined_seg_logits = refined_seg_logits.reshape(batch_size, channels, height * width)
-            refined_seg_logits = refined_seg_logits.scatter_(2, point_indices, predictions)
+            refined_seg_logits = refined_seg_logits.scatter_(2, point_indices, seg_logits)
             refined_seg_logits = refined_seg_logits.view(batch_size, channels, height, width)
         return refined_seg_logits
     '''sample from coarse grained features'''

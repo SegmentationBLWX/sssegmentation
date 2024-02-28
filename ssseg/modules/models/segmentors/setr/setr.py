@@ -47,20 +47,20 @@ class SETRUP(BaseSegmentor):
         for idx in range(len(backbone_outputs)):
             backbone_outputs[idx] = self.norm(backbone_outputs[idx], self.norm_layers[idx])
         # feed to decoder
-        predictions = self.decoder(backbone_outputs[-1])
+        seg_logits = self.decoder(backbone_outputs[-1])
         # forward according to the mode
         if self.mode == 'TRAIN':
-            predictions = F.interpolate(predictions, size=img_size, mode='bilinear', align_corners=self.align_corners)
-            outputs_dict = {'loss_cls': predictions}
+            seg_logits = F.interpolate(seg_logits, size=img_size, mode='bilinear', align_corners=self.align_corners)
+            outputs_dict = {'loss_cls': seg_logits}
             backbone_outputs = backbone_outputs[:-1]
             for idx, (out, dec) in enumerate(zip(backbone_outputs, self.auxiliary_decoders)):
-                predictions_aux = dec(out)
-                predictions_aux = F.interpolate(predictions_aux, size=img_size, mode='bilinear', align_corners=self.align_corners)
-                outputs_dict[f'loss_aux{idx+1}'] = predictions_aux
+                seg_logits_aux = dec(out)
+                seg_logits_aux = F.interpolate(seg_logits_aux, size=img_size, mode='bilinear', align_corners=self.align_corners)
+                outputs_dict[f'loss_aux{idx+1}'] = seg_logits_aux
             return self.calculatelosses(
                 predictions=outputs_dict, targets=targets, losses_cfg=self.cfg['losses']
             )
-        return predictions
+        return seg_logits
     '''norm layer'''
     def norm(self, x, norm_layer):
         n, c, h, w = x.shape
@@ -137,20 +137,20 @@ class SETRMLA(BaseSegmentor):
         for feats, up_conv in zip(feats_list, self.up_convs):
             outputs.append(up_conv(feats))
         outputs = torch.cat(outputs, dim=1)
-        predictions = self.decoder(outputs)
+        seg_logits = self.decoder(outputs)
         # forward according to the mode
         if self.mode == 'TRAIN':
-            predictions = F.interpolate(predictions, size=img_size, mode='bilinear', align_corners=self.align_corners)
-            outputs_dict = {'loss_cls': predictions}
+            seg_logits = F.interpolate(seg_logits, size=img_size, mode='bilinear', align_corners=self.align_corners)
+            outputs_dict = {'loss_cls': seg_logits}
             feats_list = feats_list[-len(self.auxiliary_decoders):]
             for idx, (out, dec) in enumerate(zip(feats_list, self.auxiliary_decoders)):
-                predictions_aux = dec(out)
-                predictions_aux = F.interpolate(predictions_aux, size=img_size, mode='bilinear', align_corners=self.align_corners)
-                outputs_dict[f'loss_aux{idx+1}'] = predictions_aux
+                seg_logits_aux = dec(out)
+                seg_logits_aux = F.interpolate(seg_logits_aux, size=img_size, mode='bilinear', align_corners=self.align_corners)
+                outputs_dict[f'loss_aux{idx+1}'] = seg_logits_aux
             return self.calculatelosses(
                 predictions=outputs_dict, targets=targets, losses_cfg=self.cfg['losses']
             )
-        return predictions
+        return seg_logits
     '''build decoder'''
     def builddecoder(self, decoder_cfg):
         layers, norm_cfg, act_cfg, num_classes, align_corners, kernel_size = [], self.norm_cfg.copy(), self.act_cfg.copy(), self.cfg['num_classes'], self.align_corners, decoder_cfg['kernel_size']

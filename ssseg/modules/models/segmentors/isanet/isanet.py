@@ -100,11 +100,11 @@ class ISANet(BaseSegmentor):
             feats = feats[:, :, pad_h//2: pad_h//2+h, pad_w//2: pad_w//2+w]
         feats = self.out_conv(torch.cat([feats, residual], dim=1))
         # feed to decoder
-        predictions = self.decoder(feats)
+        seg_logits = self.decoder(feats)
         # return according to the mode
         if self.mode == 'TRAIN':
             loss, losses_log_dict = self.customizepredsandlosses(
-                predictions=predictions, targets=targets, backbone_outputs=backbone_outputs, losses_cfg=self.cfg['losses'], img_size=img_size,
+                predictions=seg_logits, targets=targets, backbone_outputs=backbone_outputs, losses_cfg=self.cfg['losses'], img_size=img_size,
             )
             return loss, losses_log_dict
-        return predictions
+        return seg_logits

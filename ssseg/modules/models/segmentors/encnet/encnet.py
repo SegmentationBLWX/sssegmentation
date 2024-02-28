@@ -67,19 +67,19 @@ class ENCNet(BaseSegmentor):
             feats = self.fusion(torch.cat([feats, *lateral_outs], dim=1))
         encode_feats, feats = self.enc_module(feats)
         if hasattr(self, 'se_layer'):
-            predictions_se = self.se_layer(encode_feats)
+            seg_logits_se = self.se_layer(encode_feats)
         # feed to decoder
-        predictions = self.decoder(feats)
+        seg_logits = self.decoder(feats)
         # forward according to the mode
         if self.mode == 'TRAIN':
             # --base outputs
             outputs_dict = self.customizepredsandlosses(
-                predictions=predictions, targets=targets, backbone_outputs=backbone_outputs, losses_cfg=self.cfg['losses'], img_size=img_size, auto_calc_loss=False,
+                predictions=seg_logits, targets=targets, backbone_outputs=backbone_outputs, losses_cfg=self.cfg['losses'], img_size=img_size, auto_calc_loss=False,
             )
             # --add se results
             map_preds_to_tgts_dict = None
             if hasattr(self, 'se_layer'):
-                outputs_dict.update({'loss_se': predictions_se})
+                outputs_dict.update({'loss_se': seg_logits_se})
                 targets['seg_target_onehot'] = self.onehot(targets['seg_target'], self.cfg['num_classes'])
                 map_preds_to_tgts_dict = {
                     'loss_aux': 'seg_target', 'loss_se': 'seg_target_onehot', 'loss_cls': 'seg_target',
@@ -88,7 +88,7 @@ class ENCNet(BaseSegmentor):
             return self.calculatelosses(
                 predictions=outputs_dict, targets=targets, losses_cfg=self.cfg['losses'], map_preds_to_tgts_dict=map_preds_to_tgts_dict,
             )
-        return predictions
+        return seg_logits
     '''convert to onehot labels'''
     def onehot(self, labels, num_classes):
         batch_size = labels.size(0)

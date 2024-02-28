@@ -40,14 +40,14 @@ class FCN(BaseSegmentor):
         # feed to backbone network
         backbone_outputs = self.transforminputs(self.backbone_net(x), selected_indices=self.cfg['backbone'].get('selected_indices'))
         # feed to decoder
-        predictions = self.decoder(backbone_outputs[-1])
+        seg_logits = self.decoder(backbone_outputs[-1])
         # forward according to the mode
         if self.mode == 'TRAIN':
             loss, losses_log_dict = self.customizepredsandlosses(
-                predictions=predictions, targets=targets, backbone_outputs=backbone_outputs, losses_cfg=self.cfg['losses'], img_size=img_size,
+                predictions=seg_logits, targets=targets, backbone_outputs=backbone_outputs, losses_cfg=self.cfg['losses'], img_size=img_size,
             )
             return loss, losses_log_dict
-        return predictions
+        return seg_logits
 
 
 '''DepthwiseSeparableFCN'''
@@ -85,11 +85,11 @@ class DepthwiseSeparableFCN(BaseSegmentor):
         # feed to backbone network
         backbone_outputs = self.transforminputs(self.backbone_net(x), selected_indices=self.cfg['backbone'].get('selected_indices'))
         # feed to decoder
-        predictions = self.decoder(backbone_outputs[-1])
+        seg_logits = self.decoder(backbone_outputs[-1])
         # forward according to the mode
         if self.mode == 'TRAIN':
             loss, losses_log_dict = self.customizepredsandlosses(
-                predictions=predictions, targets=targets, backbone_outputs=backbone_outputs, losses_cfg=self.cfg['losses'], img_size=img_size,
+                predictions=seg_logits, targets=targets, backbone_outputs=backbone_outputs, losses_cfg=self.cfg['losses'], img_size=img_size,
             )
             return loss, losses_log_dict
-        return predictions
+        return seg_logits

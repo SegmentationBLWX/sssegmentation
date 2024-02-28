@@ -50,19 +50,19 @@ class OCRNet(BaseSegmentor):
         # feed to backbone network
         backbone_outputs = self.transforminputs(self.backbone_net(x), selected_indices=self.cfg['backbone'].get('selected_indices'))
         # feed to auxiliary decoder
-        predictions_aux = self.auxiliary_decoder(backbone_outputs[-2])
+        seg_logits_aux = self.auxiliary_decoder(backbone_outputs[-2])
         # feed to bottleneck
         feats = self.bottleneck(backbone_outputs[-1])
         # feed to ocr module
-        context = self.spatial_gather_module(feats, predictions_aux)
+        context = self.spatial_gather_module(feats, seg_logits_aux)
         feats = self.object_context_block(feats, context)
         # feed to decoder
-        predictions = self.decoder(feats)
+        seg_logits = self.decoder(feats)
         # return according to the mode
         if self.mode == 'TRAIN':
-            predictions = F.interpolate(predictions, size=img_size, mode='bilinear', align_corners=self.align_corners)
-            predictions_aux = F.interpolate(predictions_aux, size=img_size, mode='bilinear', align_corners=self.align_corners)
+            seg_logits = F.interpolate(seg_logits, size=img_size, mode='bilinear', align_corners=self.align_corners)
+            seg_logits_aux = F.interpolate(seg_logits_aux, size=img_size, mode='bilinear', align_corners=self.align_corners)
             return self.calculatelosses(
-                predictions={'loss_cls': predictions, 'loss_aux': predictions_aux}, targets=targets, losses_cfg=self.cfg['losses']
+                predictions={'loss_cls': seg_logits, 'loss_aux': seg_logits_aux}, targets=targets, losses_cfg=self.cfg['losses']
             )
-        return predictions
+        return seg_logits

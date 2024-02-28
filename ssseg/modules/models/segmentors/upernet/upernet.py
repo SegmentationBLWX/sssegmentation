@@ -80,11 +80,11 @@ class UPerNet(BaseSegmentor):
         fpn_outputs = [F.interpolate(out, size=fpn_outputs[0].size()[2:], mode='bilinear', align_corners=self.align_corners) for out in fpn_outputs]
         fpn_out = torch.cat(fpn_outputs, dim=1)
         # feed to decoder
-        predictions = self.decoder(fpn_out)
+        seg_logits = self.decoder(fpn_out)
         # forward according to the mode
         if self.mode == 'TRAIN':
             loss, losses_log_dict = self.customizepredsandlosses(
-                predictions=predictions, targets=targets, backbone_outputs=backbone_outputs, losses_cfg=self.cfg['losses'], img_size=img_size,
+                predictions=seg_logits, targets=targets, backbone_outputs=backbone_outputs, losses_cfg=self.cfg['losses'], img_size=img_size,
             )
             return loss, losses_log_dict
-        return predictions
+        return seg_logits

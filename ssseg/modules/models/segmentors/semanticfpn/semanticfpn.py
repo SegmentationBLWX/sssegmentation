@@ -52,11 +52,11 @@ class SemanticFPN(BaseSegmentor):
         for i in range(1, len(self.cfg['head']['feature_stride_list'])):
             feats = feats + F.interpolate(self.scale_heads[i](fpn_outs[i]), size=feats.shape[2:], mode='bilinear', align_corners=self.align_corners)
         # feed to decoder
-        predictions = self.decoder(feats)
+        seg_logits = self.decoder(feats)
         # forward according to the mode
         if self.mode == 'TRAIN':
             loss, losses_log_dict = self.customizepredsandlosses(
-                predictions=predictions, targets=targets, backbone_outputs=backbone_outputs, losses_cfg=self.cfg['losses'], img_size=img_size,
+                predictions=seg_logits, targets=targets, backbone_outputs=backbone_outputs, losses_cfg=self.cfg['losses'], img_size=img_size,
             )
             return loss, losses_log_dict
-        return predictions
+        return seg_logits

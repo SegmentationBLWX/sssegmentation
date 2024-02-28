@@ -11,6 +11,6 @@ import torch.nn as nn
 class BasePixelSampler(nn.Module):
     def __init__(self):
         pass
-    '''placeholder for sample function'''
-    def sample(self, seg_logit, seg_label):
+    '''sample'''
+    def sample(self, seg_logits, seg_targets):
         raise NotImplementedError('not to be implemented')
