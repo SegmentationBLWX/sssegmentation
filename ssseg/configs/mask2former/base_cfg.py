@@ -36,7 +36,7 @@ SEGMENTOR_CFG = {
             'num_points': 12544, 'cost_class': 2.0, 'cost_mask': 5.0, 'cost_dice': 5.0,
         },
         'criterion': {
-            'num_points': 12544, 'eos_coef': 0.1, 'losses': ['labels', 'masks'], 'oversample_ratio': 3.0, 'importance_sample_ratio': 0.75,
+            'eos_coef': 0.1, 'losses': ['labels', 'masks'], 'pixelsampler_cfg': {'type': 'UGSampler', 'oversample_ratio': 3.0, 'importance_sample_ratio': 0.75, 'num_points': 12544},
         },
     },
     'auxiliary': None,

@@ -4,6 +4,7 @@ Function:
 Author:
     Zhenchao Jin
 '''
+from .ugsampler import UGSampler
 from ...utils import BaseModuleBuilder
 from .ohempixelsampler import OHEMPixelSampler
 
@@ -11,7 +12,7 @@ from .ohempixelsampler import OHEMPixelSampler
 '''PixelSamplerBuilder'''
 class PixelSamplerBuilder(BaseModuleBuilder):
     REGISTERED_MODULES = {
-        'OHEMPixelSampler': OHEMPixelSampler,
+        'OHEMPixelSampler': OHEMPixelSampler, 'UGSampler': UGSampler,
     }
     '''build'''
     def build(self, pixelsampler_cfg):

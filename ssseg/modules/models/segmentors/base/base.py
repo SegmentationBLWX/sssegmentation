@@ -26,7 +26,9 @@ class BaseSegmentor(nn.Module):
         for key in ['align_corners', 'norm_cfg', 'act_cfg']:
             if key in cfg: setattr(self, key, cfg[key])
         # build backbone
-        self.setbackbone(cfg=cfg)            
+        self.setbackbone(cfg=cfg)
+        # build pixel sampler
+        self.setpixelsampler(cfg=cfg)
     '''forward'''
     def forward(self, x, targets=None):
         raise NotImplementedError('not to be implemented')
@@ -161,6 +163,12 @@ class BaseSegmentor(nn.Module):
         if 'norm_cfg' not in backbone_cfg:
             backbone_cfg.update({'norm_cfg': copy.deepcopy(self.norm_cfg)})
         self.backbone_net = BuildBackbone(backbone_cfg)
+    '''setpixelsampler'''
+    def setpixelsampler(self, cfg):
+        if 'pixelsampler' in cfg['head']:
+            self.pixelsampler = BuildPixelSampler(cfg['head']['pixelsampler'])
+        else:
+            self.pixelsampler = None
     '''freezenormalization'''
     def freezenormalization(self, norm_list=None):
         if norm_list is None:
@@ -174,14 +182,13 @@ class BaseSegmentor(nn.Module):
     def calculatelosses(self, predictions, targets, losses_cfg, map_preds_to_tgts_dict=None):
         assert len(predictions) == len(losses_cfg), 'length of losses_cfg should be equal to the one of predictions'
         # apply pixel sampler
-        if 'pixelsampler' in self.cfg['head']:
+        if hasattr(self, 'pixelsampler') and self.pixelsampler is not None:
             predictions_new, targets_new, map_preds_to_tgts_dict_new = {}, {}, {}
-            pixelsampler = BuildPixelSampler(self.cfg['head']['pixelsampler'])
             for key in predictions.keys():
                 if map_preds_to_tgts_dict is None:
-                    predictions_new[key], targets_new[key] = pixelsampler.sample(predictions[key], targets['seg_target'])
+                    predictions_new[key], targets_new[key] = self.pixelsampler.sample(predictions[key], targets['seg_target'])
                 else:
-                    predictions_new[key], targets_new[key] = pixelsampler.sample(predictions[key], targets[map_preds_to_tgts_dict[key]])
+                    predictions_new[key], targets_new[key] = self.pixelsampler.sample(predictions[key], targets[map_preds_to_tgts_dict[key]])
                 map_preds_to_tgts_dict_new[key] = key
             predictions, targets, map_preds_to_tgts_dict = predictions_new, targets_new, map_preds_to_tgts_dict_new
         # calculate loss according to losses_cfg

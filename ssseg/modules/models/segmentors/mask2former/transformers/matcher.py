@@ -7,7 +7,7 @@ Author:
 import torch
 import torch.nn as nn
 import torch.nn.functional as F
-from .misc import pointsample
+from ....samplers.ugsampler import UGSampler
 from scipy.optimize import linear_sum_assignment
 
 
@@ -62,8 +62,8 @@ class HungarianMatcher(nn.Module):
             # all masks share the same set of points for efficient matching!
             point_coords = torch.rand(1, self.num_points, 2, device=out_mask.device)
             # get gt labels
-            tgt_mask = pointsample(tgt_mask, point_coords.repeat(tgt_mask.shape[0], 1, 1), align_corners=False).squeeze(1)
-            out_mask = pointsample(out_mask, point_coords.repeat(out_mask.shape[0], 1, 1), align_corners=False).squeeze(1)
+            tgt_mask = UGSampler.pointsample(tgt_mask, point_coords.repeat(tgt_mask.shape[0], 1, 1), align_corners=False).squeeze(1)
+            out_mask = UGSampler.pointsample(out_mask, point_coords.repeat(out_mask.shape[0], 1, 1), align_corners=False).squeeze(1)
             # disable autocast
             with autocast(enabled=False):
                 out_mask = out_mask.float()
