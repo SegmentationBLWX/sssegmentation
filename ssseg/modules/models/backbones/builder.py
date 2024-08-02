@@ -24,6 +24,7 @@ from .convnextv2 import ConvNeXtV2
 from .vit import VisionTransformer
 from .mit import MixVisionTransformer
 from .timmwrapper import TIMMBackbone
+from .hiera import Hiera, HieraWithFPN
 from ...utils import BaseModuleBuilder
 from .edgesamrepvit import EdgeSAMRepViT
 from .mobilevit import MobileViT, MobileViTV2
@@ -38,8 +39,8 @@ class BackboneBuilder(BaseModuleBuilder):
         'ERFNet': ERFNet, 'ResNet': ResNet, 'ResNeSt': ResNeSt, 'PCPVT': PCPVT, 'MobileSAMTinyViT': MobileSAMTinyViT, 
         'SVT': SVT, 'FastSCNN': FastSCNN, 'ConvNeXt': ConvNeXt, 'BiSeNetV1': BiSeNetV1, 'MAE': MAE, 'SAMViT': SAMViT,
         'SwinTransformer': SwinTransformer, 'VisionTransformer': VisionTransformer, 'EdgeSAMRepViT': EdgeSAMRepViT,
-        'MixVisionTransformer': MixVisionTransformer, 'TIMMBackbone': TIMMBackbone, 'ConvNeXtV2': ConvNeXtV2,
-        'MobileNetV2': MobileNetV2, 'MobileNetV3': MobileNetV3, 'BiSeNetV2': BiSeNetV2, 
+        'MixVisionTransformer': MixVisionTransformer, 'TIMMBackbone': TIMMBackbone, 'ConvNeXtV2': ConvNeXtV2, 'Hiera': Hiera,
+        'MobileNetV2': MobileNetV2, 'MobileNetV3': MobileNetV3, 'BiSeNetV2': BiSeNetV2, 'HieraWithFPN': HieraWithFPN,
     }
     '''build'''
     def build(self, backbone_cfg):
