@@ -15,6 +15,7 @@ from .gcnet import GCNet
 from .dmnet import DMNet
 from .mcibi import MCIBI
 from .samhq import SAMHQ
+from .samv2 import SAMV2
 from .idrnet import IDRNet
 from .isanet import ISANet
 from .encnet import ENCNet
@@ -48,13 +49,13 @@ from .fcn import FCN, DepthwiseSeparableFCN
 class SegmentorBuilder(BaseModuleBuilder):
     REGISTERED_MODULES = {
         'FCN': FCN, 'CE2P': CE2P, 'ICNet': ICNet, 'ISNet': ISNet, 'CCNet': CCNet, 'DANet': DANet, 'SAMHQ': SAMHQ,
-        'GCNet': GCNet, 'DMNet': DMNet, 'ISANet': ISANet, 'ENCNet': ENCNet, 'APCNet': APCNet, 'SAM': SAM,
-        'EMANet': EMANet, 'PSPNet': PSPNet, 'PSANet': PSANet, 'OCRNet': OCRNet, 'DNLNet': DNLNet,
-        'ANNNet': ANNNet, 'SETRUP': SETRUP, 'SETRMLA': SETRMLA, 'FastFCN': FastFCN, 'UPerNet': UPerNet,
+        'GCNet': GCNet, 'DMNet': DMNet, 'ISANet': ISANet, 'ENCNet': ENCNet, 'APCNet': APCNet, 'SAM': SAM, 'SAMV2': SAMV2,
+        'EMANet': EMANet, 'PSPNet': PSPNet, 'PSANet': PSANet, 'OCRNet': OCRNet, 'DNLNet': DNLNet, 'Mask2Former': Mask2Former,
+        'ANNNet': ANNNet, 'SETRUP': SETRUP, 'SETRMLA': SETRMLA, 'FastFCN': FastFCN, 'UPerNet': UPerNet, 'IDRNet': IDRNet, 
         'Segformer': Segformer, 'MCIBI': MCIBI, 'PointRend': PointRend, 'Deeplabv3': Deeplabv3, 'EdgeSAM': EdgeSAM,
         'LRASPPNet': LRASPPNet, 'MaskFormer': MaskFormer, 'MCIBIPlusPlus': MCIBIPlusPlus, 'SemanticFPN': SemanticFPN,
         'NonLocalNet': NonLocalNet, 'Deeplabv3Plus': Deeplabv3Plus, 'DepthwiseSeparableFCN': DepthwiseSeparableFCN,
-        'MobileSAM': MobileSAM, 'IDRNet': IDRNet, 'Mask2Former': Mask2Former,
+        'MobileSAM': MobileSAM, 
     }
     '''build'''
     def build(self, segmentor_cfg, mode):

@@ -9,6 +9,7 @@ import re
 import sys
 import ssseg
 from setuptools import setup, find_packages
+from torch.utils.cpp_extension import BuildExtension, CUDAExtension
 
 
 '''readme'''
@@ -71,6 +72,16 @@ def parserequirements(fname='requirements.txt', with_version=True):
     return packages
 
 
+'''getextensions'''
+def getextensions():
+    srcs = ["ssseg/modules/models/segmentors/samv2/connected_components.cu"]
+    compile_args = {
+        'cxx': [], 'nvcc': ['-DCUDA_HAS_FP16=1', '-D__CUDA_NO_HALF_OPERATORS__', '-D__CUDA_NO_HALF_CONVERSIONS__', '-D__CUDA_NO_HALF2_OPERATORS__'],
+    }
+    ext_modules = [CUDAExtension('ssseg._C', srcs, extra_compile_args=compile_args)]
+    return ext_modules
+
+
 '''setup'''
 setup(
     name=ssseg.__title__,
@@ -91,5 +102,6 @@ setup(
     include_package_data=True,
     install_requires=parserequirements('requirements.txt'),
     zip_safe=True,
+    ext_modules=getextensions(),
     packages=find_packages()
 )

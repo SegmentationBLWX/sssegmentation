@@ -8,6 +8,7 @@ import torch
 import torch.nn as nn
 import torch.nn.functional as F
 from .bricks import BuildActivation, BuildNormalization
+from ...models.segmentors.samv2.positionencoding import BuildPE
 
 
 '''DEFAULT_MODEL_URLS'''
@@ -267,14 +268,14 @@ class Hiera(nn.Module):
 
 '''FPNNeck'''
 class FPNNeck(nn.Module):
-    def __init__(self, position_encoding, d_model, backbone_channel_list, kernel_size=1, stride=1, padding=0, fpn_interp_model="bilinear", fuse_type="sum", fpn_top_down_levels=None):
+    def __init__(self, position_encoding_cfg, d_model, backbone_channel_list, kernel_size=1, stride=1, padding=0, fpn_interp_model="bilinear", fuse_type="sum", fpn_top_down_levels=None):
         super(FPNNeck, self).__init__()
         # assert
         assert fuse_type in ['sum', 'avg']
         # set attributes
         self.fuse_type = fuse_type
         self.fpn_interp_model = fpn_interp_model
-        self.position_encoding = position_encoding
+        self.position_encoding = BuildPE(position_encoding_cfg)
         self.backbone_channel_list = backbone_channel_list
         # build layers
         self.convs = nn.ModuleList()

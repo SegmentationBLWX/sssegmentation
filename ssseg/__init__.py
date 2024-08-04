@@ -1,5 +1,5 @@
 '''version'''
-__version__ = '1.5.3'
+__version__ = '1.5.4'
 '''author'''
 __author__ = 'Zhenchao Jin'
 '''title'''
