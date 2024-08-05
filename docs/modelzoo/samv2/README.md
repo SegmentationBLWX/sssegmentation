@@ -303,3 +303,170 @@ You can also access the example code from [examples/samv2/image/combiningpointsa
 
 #### Batched prompt inputs
 
+`SAMV2ImagePredictor` can take multiple input prompts for the same image, using predict method. For example, imagine we have several box outputs from an object detector.
+
+```python
+'''
+Function:
+    SAMV2 examples: Batched prompt inputs
+Author:
+    Zhenchao Jin
+'''
+import torch
+import numpy as np
+import matplotlib.pyplot as plt
+from PIL import Image
+from ssseg.modules.models.segmentors.samv2 import SAMV2ImagePredictor
+from ssseg.modules.models.segmentors.samv2.visualization import showmask, showpoints, showbox, showmasks
+
+
+# initialize environment
+torch.autocast(device_type="cuda", dtype=torch.bfloat16).__enter__()
+if torch.cuda.get_device_properties(0).major >= 8:
+    torch.backends.cuda.matmul.allow_tf32 = True
+    torch.backends.cudnn.allow_tf32 = True
+
+
+# read image
+image = Image.open('images/truck.jpg')
+image = np.array(image.convert("RGB"))
+
+
+# predictor could be SAMV2ImagePredictor(use_default_samv2_t=True) or SAMV2ImagePredictor(use_default_samv2_s=True) or SAMV2ImagePredictor(use_default_samv2_bplus=True) or SAMV2ImagePredictor(use_default_samv2_l=True)
+predictor = SAMV2ImagePredictor(use_default_samv2_l=True, device='cuda')
+# set image
+predictor.setimage(image)
+# set prompt
+input_boxes = np.array([[75, 275, 1725, 850], [425, 600, 700, 875], [1375, 550, 1650, 800], [1240, 675, 1400, 750]])
+# inference
+masks, scores, _ = predictor.predict(point_coords=None, point_labels=None, box=input_boxes, multimask_output=False)
+# show results
+plt.figure(figsize=(10, 10))
+plt.imshow(image)
+for mask in masks:
+    showmask(mask.squeeze(0), plt.gca(), random_color=True)
+for box in input_boxes:
+    showbox(box, plt.gca())
+plt.axis('off')
+plt.savefig('output.png')
+```
+
+You can also access the example code from [examples/samv2/image/batchedpromptinputs.py](https://github.com/SegmentationBLWX/sssegmentation/blob/main/examples/samv2/image/batchedpromptinputs.py).
+
+#### End-to-end batched inference
+
+If all prompts are available in advance, it is possible to run SAM 2 directly in an end-to-end fashion. This also allows batching over images.
+
+```python
+'''
+Function:
+    SAMV2 examples: End-to-end batched inference
+Author:
+    Zhenchao Jin
+'''
+import torch
+import numpy as np
+import matplotlib.pyplot as plt
+from PIL import Image
+from ssseg.modules.models.segmentors.samv2 import SAMV2ImagePredictor
+from ssseg.modules.models.segmentors.samv2.visualization import showmask, showpoints, showbox, showmasks
+
+
+# initialize environment
+torch.autocast(device_type="cuda", dtype=torch.bfloat16).__enter__()
+if torch.cuda.get_device_properties(0).major >= 8:
+    torch.backends.cuda.matmul.allow_tf32 = True
+    torch.backends.cudnn.allow_tf32 = True
+
+
+# read image
+image1 = Image.open('images/truck.jpg')
+image1 = np.array(image1.convert("RGB"))
+image2 = Image.open('images/groceries.jpg')
+image2 = np.array(image2.convert("RGB"))
+img_batch = [image1, image2]
+
+
+# predictor could be SAMV2ImagePredictor(use_default_samv2_t=True) or SAMV2ImagePredictor(use_default_samv2_s=True) or SAMV2ImagePredictor(use_default_samv2_bplus=True) or SAMV2ImagePredictor(use_default_samv2_l=True)
+predictor = SAMV2ImagePredictor(use_default_samv2_l=True, device='cuda')
+# set prompt
+image1_boxes = np.array([[75, 275, 1725, 850], [425, 600, 700, 875], [1375, 550, 1650, 800], [1240, 675, 1400, 750]])
+image2_boxes = np.array([[450, 170, 520, 350], [350, 190, 450, 350], [500, 170, 580, 350], [580, 170, 640, 350]])
+boxes_batch = [image1_boxes, image2_boxes]
+# set image
+predictor.setimagebatch(img_batch)
+# inference
+masks_batch, scores_batch, _ = predictor.predictbatch(None, None, box_batch=boxes_batch, multimask_output=False)
+# show results
+for idx, (image, boxes, masks) in enumerate(zip(img_batch, boxes_batch, masks_batch)):
+    plt.figure(figsize=(10, 10))
+    plt.imshow(image)   
+    for mask in masks:
+        showmask(mask.squeeze(0), plt.gca(), random_color=True)
+    for box in boxes:
+        showbox(box, plt.gca())
+    plt.savefig(f'output_{idx}.png')
+```
+
+You can also access the example code from [examples/samv2/image/endtoendbatchedinference1.py](https://github.com/SegmentationBLWX/sssegmentation/blob/main/examples/samv2/image/endtoendbatchedinference1.py).
+
+Similarly, we can have a batch of point prompts defined over a batch of images.
+
+```python
+'''
+Function:
+    SAMV2 examples: End-to-end batched inference
+Author:
+    Zhenchao Jin
+'''
+import torch
+import numpy as np
+import matplotlib.pyplot as plt
+from PIL import Image
+from ssseg.modules.models.segmentors.samv2 import SAMV2ImagePredictor
+from ssseg.modules.models.segmentors.samv2.visualization import showmask, showpoints, showbox, showmasks
+
+
+# initialize environment
+torch.autocast(device_type="cuda", dtype=torch.bfloat16).__enter__()
+if torch.cuda.get_device_properties(0).major >= 8:
+    torch.backends.cuda.matmul.allow_tf32 = True
+    torch.backends.cudnn.allow_tf32 = True
+
+
+# read image
+image1 = Image.open('images/truck.jpg')
+image1 = np.array(image1.convert("RGB"))
+image2 = Image.open('images/groceries.jpg')
+image2 = np.array(image2.convert("RGB"))
+img_batch = [image1, image2]
+
+
+# predictor could be SAMV2ImagePredictor(use_default_samv2_t=True) or SAMV2ImagePredictor(use_default_samv2_s=True) or SAMV2ImagePredictor(use_default_samv2_bplus=True) or SAMV2ImagePredictor(use_default_samv2_l=True)
+predictor = SAMV2ImagePredictor(use_default_samv2_l=True, device='cuda')
+# set prompt
+image1_pts = np.array([[[500, 375]], [[650, 750]]])
+image1_labels = np.array([[1], [1]])
+image2_pts = np.array([[[400, 300]], [[630, 300]]])
+image2_labels = np.array([[1], [1]])
+pts_batch = [image1_pts, image2_pts]
+labels_batch = [image1_labels, image2_labels]
+# set image
+predictor.setimagebatch(img_batch)
+# inference
+masks_batch, scores_batch, _ = predictor.predictbatch(pts_batch, labels_batch, box_batch=None, multimask_output=True)
+# select the best single mask per object
+best_masks = []
+for masks, scores in zip(masks_batch, scores_batch):
+    best_masks.append(masks[range(len(masks)), np.argmax(scores, axis=-1)])
+# show results
+for idx, (image, points, labels, masks) in enumerate(zip(img_batch, pts_batch, labels_batch, best_masks)):
+    plt.figure(figsize=(10, 10))
+    plt.imshow(image)   
+    for mask in masks:
+        showmask(mask, plt.gca(), random_color=True)
+    showpoints(points, labels, plt.gca())
+    plt.savefig(f'output_{idx}.png')
+```
+
+You can also access the example code from [examples/samv2/image/endtoendbatchedinference2.py](https://github.com/SegmentationBLWX/sssegmentation/blob/main/examples/samv2/image/endtoendbatchedinference2.py).
