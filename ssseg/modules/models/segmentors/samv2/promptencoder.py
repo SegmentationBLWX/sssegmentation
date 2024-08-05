@@ -8,7 +8,7 @@ import torch
 import torch.nn as nn
 from ...backbones import BuildActivation
 from ...backbones.samvit import LayerNorm2d
-from .positionencoding import PositionEmbeddingRandom
+from ...backbones.hiera import PositionEmbeddingRandom
 
 
 '''PromptEncoder'''

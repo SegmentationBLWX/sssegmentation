@@ -10,10 +10,9 @@ import warnings
 import torch.nn as nn
 import torch.nn.functional as F
 from functools import partial
-from .misc import getsdpasettings
 from ...backbones.hiera import MLP
 from ....utils import BaseModuleBuilder
-from .positionencoding import applyrotaryenc, computeaxialcis
+from .misc import getsdpasettings, applyrotaryenc, computeaxialcis
 warnings.simplefilter(action="ignore", category=FutureWarning)
 OLD_GPU, USE_FLASH_ATTN, MATH_KERNEL_ON = getsdpasettings()
 

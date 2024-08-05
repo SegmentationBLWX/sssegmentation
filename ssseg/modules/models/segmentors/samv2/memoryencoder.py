@@ -8,10 +8,9 @@ import math
 import torch
 import torch.nn as nn
 import torch.nn.functional as F
-from .positionencoding import BuildPE
-from ...backbones.hiera import DropPath
 from ...backbones import BuildActivation
 from ...backbones.samvit import LayerNorm2d
+from ...backbones.hiera import DropPath, BuildPE
 from ..mask2former.transformers.misc import getclones
 
 
