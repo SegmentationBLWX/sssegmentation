@@ -437,7 +437,7 @@ class HieraWithFPN(nn.Module):
         super(HieraWithFPN, self).__init__()
         self.trunk = Hiera(**hiera_cfg)
         self.neck = FPNNeck(**fpn_cfg)
-        self.scalp = scalp
+        self.scalp = int(scalp)
         assert self.trunk.channel_list == self.neck.backbone_channel_list, f"Channel dims of trunk and neck do not match. Trunk: {self.trunk.channel_list}, neck: {self.neck.backbone_channel_list}"
     '''forward'''
     def forward(self, sample):
