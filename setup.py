@@ -103,5 +103,6 @@ setup(
     install_requires=parserequirements('requirements.txt'),
     zip_safe=True,
     ext_modules=getextensions(),
-    packages=find_packages()
+    packages=find_packages(),
+    cmdclass={"build_ext": BuildExtension.with_options(no_python_abi_suffix=True)},
 )

@@ -4,7 +4,6 @@ Function:
 Author:
     Zhenchao Jin
 '''
-import copy
 import math
 import torch
 import numpy as np

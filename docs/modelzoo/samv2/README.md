@@ -29,3 +29,16 @@ The `SAMV2ImagePredictor` class provides an easy interface to the model for prom
 
 #### Environment Set-up
 
+Install sssegmentation:
+
+```sh
+# from pypi
+pip install SSSegmentation
+# from Github repository
+pip install git+https://github.com/SegmentationBLWX/sssegmentation.git
+# locally install
+git clone https://github.com/SegmentationBLWX/sssegmentation
+cd sssegmentation
+pip install -e .
+```
+
