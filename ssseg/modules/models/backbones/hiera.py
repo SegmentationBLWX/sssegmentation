@@ -159,7 +159,7 @@ def windowunpartition(windows, window_size, pad_hw, hw):
 
 
 '''dopool'''
-def dopool(x, pool, norm):
+def dopool(x, pool, norm=None):
     # None, direct return
     if pool is None: return x
     # (B, H, W, C) -> (B, C, H, W)
