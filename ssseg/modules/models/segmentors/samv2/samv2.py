@@ -493,7 +493,7 @@ class SAMV2ImagePredictor(nn.Module):
                 state_dict = model_zoo.load_url(samv2_cfg['ckptpath'], map_location='cpu')
             else:
                 raise ValueError('ckptpath %s could not be loaded.' % samv2_cfg['ckptpath'])
-            self.model.load_state_dict(state_dict, strict=load_ckpt_strict)
+            self.model.load_state_dict(state_dict['model'], strict=load_ckpt_strict)
         # build transforms
         self._transforms = SAMV2Transforms(resolution=self.model.image_size, mask_threshold=mask_threshold, max_hole_area=max_hole_area, max_sprinkle_area=max_sprinkle_area)
         # predictor state

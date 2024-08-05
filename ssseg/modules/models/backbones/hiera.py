@@ -370,7 +370,7 @@ class Hiera(nn.Module):
         # x: (B, H, W, C)
         x = self.patch_embed(x)
         # add pos embed
-        x = x + self._get_pos_embed(x.shape[1:3])
+        x = x + self.getposembed(x.shape[1:3])
         # get outputs
         outputs = []
         for i, blk in enumerate(self.blocks):
