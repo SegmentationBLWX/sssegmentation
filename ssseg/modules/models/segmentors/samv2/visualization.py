@@ -54,4 +54,4 @@ def showmasks(image, masks, scores, point_coords=None, box_coords=None, input_la
         if len(scores) > 1:
             plt.title(f"Mask {i+1}, Score: {score:.3f}", fontsize=18)
         plt.axis('off')
-        plt.show()
+        plt.savefig(f'mask_{i}.png')
