@@ -445,6 +445,11 @@ plt.savefig('mask.png')
 ```
 
 
+## Inference with SAMV2
+
+
+
+
 ## Inference with MobileSAM
 
 The usage of MobileSAM in sssegmenation is exactly the same as SAM by replacing

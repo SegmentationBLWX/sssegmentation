@@ -17,7 +17,7 @@ from ...backbones.hiera import MLP
 from collections import OrderedDict
 from .maskdecoder import MaskDecoder
 from ...backbones import BuildBackbone
-from .transforms import SAM2Transforms
+from .transforms import SAMV2Transforms
 from .memoryencoder import MemoryEncoder
 from .promptencoder import PromptEncoder
 from .transformer import TwoWayTransformer
@@ -416,14 +416,14 @@ class SAMV2(BaseSegmentor):
         return pred_masks
 
 
-'''SAM2ImagePredictor'''
-class SAM2ImagePredictor(nn.Module):
-    def __init__(self, sam2_cfg=None, use_default_sam2_t=False, use_default_sam2_s=False, use_default_sam2_bplus=False, use_default_sam2_l=True,
+'''SAMV2ImagePredictor'''
+class SAMV2ImagePredictor(nn.Module):
+    def __init__(self, samv2_cfg=None, use_default_samv2_t=False, use_default_samv2_s=False, use_default_samv2_bplus=False, use_default_samv2_l=True,
                  device='cuda', load_ckpt_strict=True, mask_threshold=0.0, max_hole_area=0.0, max_sprinkle_area=0.0):
-        super(SAM2ImagePredictor, self).__init__()
+        super(SAMV2ImagePredictor, self).__init__()
         # build sam model
-        if sam2_cfg is None:
-            sam2_cfg = {
+        if samv2_cfg is None:
+            samv2_cfg = {
                 'backbone': {
                     'type': 'HieraWithFPN', 'scalp': 1.0,
                     'hiera_cfg': {
@@ -455,47 +455,47 @@ class SAM2ImagePredictor(nn.Module):
                     'soft_no_obj_ptr': False, 'use_mlp_for_obj_ptr_proj': True, 'sam_mask_decoder_extra_args': None, 'compile_image_encoder': False,
                 },
             }
-            if use_default_sam2_l:
-                assert (not use_default_sam2_t) and (not use_default_sam2_s) and (not use_default_sam2_bplus)
-                sam2_cfg['ckptpath'] = 'https://dl.fbaipublicfiles.com/segment_anything_2/072824/sam2_hiera_large.pt'
-            elif use_default_sam2_bplus:
-                assert (not use_default_sam2_t) and (not use_default_sam2_s) and (not use_default_sam2_l)
-                sam2_cfg['backbone']['hiera_cfg'] = dict(embed_dim=112, num_heads=2)
-                sam2_cfg['backbone']['fpn_cfg'] = dict(
+            if use_default_samv2_l:
+                assert (not use_default_samv2_t) and (not use_default_samv2_s) and (not use_default_samv2_bplus)
+                samv2_cfg['ckptpath'] = 'https://dl.fbaipublicfiles.com/segment_anything_2/072824/sam2_hiera_large.pt'
+            elif use_default_samv2_bplus:
+                assert (not use_default_samv2_t) and (not use_default_samv2_s) and (not use_default_samv2_l)
+                samv2_cfg['backbone']['hiera_cfg'] = dict(embed_dim=112, num_heads=2)
+                samv2_cfg['backbone']['fpn_cfg'] = dict(
                     position_encoding_cfg=dict(num_pos_feats=256, normalize=True, scale=None, temperature=10000, type='PositionEmbeddingSine'), 
                     d_model=256, backbone_channel_list=[896, 448, 224, 112], fpn_top_down_levels=[2, 3], fpn_interp_model='nearest',
                 )
-                sam2_cfg['ckptpath'] = 'https://dl.fbaipublicfiles.com/segment_anything_2/072824/sam2_hiera_base_plus.pt'
-            elif use_default_sam2_s:
-                assert (not use_default_sam2_t) and (not use_default_sam2_bplus) and (not use_default_sam2_l)
-                sam2_cfg['backbone']['hiera_cfg'] = dict(embed_dim=96, num_heads=1, stages=[1, 2, 11, 2], global_att_blocks=[7, 10, 13], window_pos_embed_bkg_spatial_size=[7, 7])
-                sam2_cfg['backbone']['fpn_cfg'] = dict(
+                samv2_cfg['ckptpath'] = 'https://dl.fbaipublicfiles.com/segment_anything_2/072824/sam2_hiera_base_plus.pt'
+            elif use_default_samv2_s:
+                assert (not use_default_samv2_t) and (not use_default_samv2_bplus) and (not use_default_samv2_l)
+                samv2_cfg['backbone']['hiera_cfg'] = dict(embed_dim=96, num_heads=1, stages=[1, 2, 11, 2], global_att_blocks=[7, 10, 13], window_pos_embed_bkg_spatial_size=[7, 7])
+                samv2_cfg['backbone']['fpn_cfg'] = dict(
                     position_encoding_cfg=dict(num_pos_feats=256, normalize=True, scale=None, temperature=10000, type='PositionEmbeddingSine'), 
                     d_model=256, backbone_channel_list=[768, 384, 192, 96], fpn_top_down_levels=[2, 3], fpn_interp_model='nearest',
                 )
-                sam2_cfg['ckptpath'] = 'https://dl.fbaipublicfiles.com/segment_anything_2/072824/sam2_hiera_small.pt'
-            elif use_default_sam2_t:
-                assert (not use_default_sam2_s) and (not use_default_sam2_bplus) and (not use_default_sam2_l)
-                sam2_cfg['backbone']['hiera_cfg'] = dict(embed_dim=96, num_heads=1, stages=[1, 2, 7, 2], global_att_blocks=[5, 7, 9], window_pos_embed_bkg_spatial_size=[7, 7])
-                sam2_cfg['backbone']['fpn_cfg'] = dict(
+                samv2_cfg['ckptpath'] = 'https://dl.fbaipublicfiles.com/segment_anything_2/072824/sam2_hiera_small.pt'
+            elif use_default_samv2_t:
+                assert (not use_default_samv2_s) and (not use_default_samv2_bplus) and (not use_default_samv2_l)
+                samv2_cfg['backbone']['hiera_cfg'] = dict(embed_dim=96, num_heads=1, stages=[1, 2, 7, 2], global_att_blocks=[5, 7, 9], window_pos_embed_bkg_spatial_size=[7, 7])
+                samv2_cfg['backbone']['fpn_cfg'] = dict(
                     position_encoding_cfg=dict(num_pos_feats=256, normalize=True, scale=None, temperature=10000, type='PositionEmbeddingSine'), 
                     d_model=256, backbone_channel_list=[768, 384, 192, 96], fpn_top_down_levels=[2, 3], fpn_interp_model='nearest',
                 )
-                sam2_cfg['ckptpath'] = 'https://dl.fbaipublicfiles.com/segment_anything_2/072824/sam2_hiera_tiny.pt'
+                samv2_cfg['ckptpath'] = 'https://dl.fbaipublicfiles.com/segment_anything_2/072824/sam2_hiera_tiny.pt'
         else:
-            assert (not use_default_sam2_t) and (not use_default_sam2_s) and (not use_default_sam2_bplus) and (not use_default_sam2_l)
-        self.model = self.buildsam2(sam2_cfg=sam2_cfg, device=device)
-        if 'ckptpath' in sam2_cfg and (os.path.exists(sam2_cfg['ckptpath']) or sam2_cfg['ckptpath'].startswith('https')):
-            if os.path.exists(sam2_cfg['ckptpath']):
-                with open(sam2_cfg['ckptpath'], 'rb') as fp:
+            assert (not use_default_samv2_t) and (not use_default_samv2_s) and (not use_default_samv2_bplus) and (not use_default_samv2_l)
+        self.model = self.buildsamv2(samv2_cfg=samv2_cfg, device=device)
+        if 'ckptpath' in samv2_cfg and (os.path.exists(samv2_cfg['ckptpath']) or samv2_cfg['ckptpath'].startswith('https')):
+            if os.path.exists(samv2_cfg['ckptpath']):
+                with open(samv2_cfg['ckptpath'], 'rb') as fp:
                     state_dict = torch.load(fp, map_location='cpu')
-            elif sam2_cfg['ckptpath'].startswith('https'):
-                state_dict = model_zoo.load_url(sam2_cfg['ckptpath'], map_location='cpu')
+            elif samv2_cfg['ckptpath'].startswith('https'):
+                state_dict = model_zoo.load_url(samv2_cfg['ckptpath'], map_location='cpu')
             else:
-                raise ValueError('ckptpath %s could not be loaded.' % sam2_cfg['ckptpath'])
+                raise ValueError('ckptpath %s could not be loaded.' % samv2_cfg['ckptpath'])
             self.model.load_state_dict(state_dict, strict=load_ckpt_strict)
         # build transforms
-        self._transforms = SAM2Transforms(resolution=self.model.image_size, mask_threshold=mask_threshold, max_hole_area=max_hole_area, max_sprinkle_area=max_sprinkle_area)
+        self._transforms = SAMV2Transforms(resolution=self.model.image_size, mask_threshold=mask_threshold, max_hole_area=max_hole_area, max_sprinkle_area=max_sprinkle_area)
         # predictor state
         self._is_image_set = False
         self._features = None
@@ -506,12 +506,12 @@ class SAM2ImagePredictor(nn.Module):
         self.mask_threshold = mask_threshold
         # spatial dim for backbone feature maps
         self._bb_feat_sizes = [(256, 256), (128, 128), (64, 64)]
-    '''buildsam2'''
-    def buildsam2(self, sam2_cfg, device):
-        sam2_model = SAMV2(cfg=sam2_cfg, mode='TEST')
-        sam2_model.to(device=device)
-        sam2_model.eval()
-        return sam2_model
+    '''buildsamv2'''
+    def buildsamv2(self, samv2_cfg, device):
+        samv2_model = SAMV2(cfg=samv2_cfg, mode='TEST')
+        samv2_model.to(device=device)
+        samv2_model.eval()
+        return samv2_model
     '''setimage'''
     @torch.no_grad()
     def setimage(self, image):
@@ -674,12 +674,12 @@ class SAM2ImagePredictor(nn.Module):
         self._is_batch = False
 
 
-'''SAM2AutomaticMaskGenerator'''
-class SAM2AutomaticMaskGenerator(nn.Module):
+'''SAMV2AutomaticMaskGenerator'''
+class SAMV2AutomaticMaskGenerator(nn.Module):
     def __init__(self, points_per_side=32, points_per_batch=64, pred_iou_thresh=0.8, stability_score_thresh=0.95, stability_score_offset=1.0, mask_threshold=0.0, box_nms_thresh=0.7, crop_n_layers=0, crop_nms_thresh=0.7, 
-                 crop_overlap_ratio=512/1500, crop_n_points_downscale_factor=1, point_grids=None, min_mask_region_area=0, output_mode="binary_mask", use_m2m=False, multimask_output=True, sam2_cfg=None, use_default_sam2_t=False,
-                 use_default_sam2_s=False, use_default_sam2_bplus=False, use_default_sam2_l=True, device='cuda', load_ckpt_strict=True):
-        super(SAM2AutomaticMaskGenerator, self).__init__()
+                 crop_overlap_ratio=512/1500, crop_n_points_downscale_factor=1, point_grids=None, min_mask_region_area=0, output_mode="binary_mask", use_m2m=False, multimask_output=True, samv2_cfg=None, use_default_samv2_t=False,
+                 use_default_samv2_s=False, use_default_samv2_bplus=False, use_default_samv2_l=True, device='cuda', load_ckpt_strict=True):
+        super(SAMV2AutomaticMaskGenerator, self).__init__()
         # deal with points_per_side and point_grids
         assert (points_per_side is None) != (point_grids is None), "exactly one of points_per_side or point_grid must be provided."
         if points_per_side is not None:
@@ -697,8 +697,8 @@ class SAM2AutomaticMaskGenerator(nn.Module):
                 print("please install pycocotools")
                 raise e
         # predictor
-        self.predictor = SAM2ImagePredictor(
-            sam2_cfg=sam2_cfg, use_default_sam2_l=use_default_sam2_l, use_default_sam2_bplus=use_default_sam2_bplus, use_default_sam2_s=use_default_sam2_s, use_default_sam2_t=use_default_sam2_t, 
+        self.predictor = SAMV2ImagePredictor(
+            samv2_cfg=samv2_cfg, use_default_samv2_l=use_default_samv2_l, use_default_samv2_bplus=use_default_samv2_bplus, use_default_samv2_s=use_default_samv2_s, use_default_samv2_t=use_default_samv2_t, 
             device=device, load_ckpt_strict=load_ckpt_strict, max_hole_area=min_mask_region_area, max_sprinkle_area=min_mask_region_area,
         )
         # set attributes
@@ -870,10 +870,10 @@ class SAM2AutomaticMaskGenerator(nn.Module):
         return masks, torch.cat(new_iou_preds, dim=0)
 
 
-'''SAM2VideoPredictor'''
-class SAM2VideoPredictor(SAMV2):
+'''SAMV2VideoPredictor'''
+class SAMV2VideoPredictor(SAMV2):
     def __init__(self, fill_hole_area=0, non_overlap_masks=False, clear_non_cond_mem_around_input=False, clear_non_cond_mem_for_multi_obj=False, **kwargs):
-        super(SAM2VideoPredictor, self).__init__(**kwargs)
+        super(SAMV2VideoPredictor, self).__init__(**kwargs)
         self.fill_hole_area = fill_hole_area
         self.non_overlap_masks = non_overlap_masks
         self.clear_non_cond_mem_around_input = clear_non_cond_mem_around_input

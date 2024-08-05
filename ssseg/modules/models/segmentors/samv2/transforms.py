@@ -1,6 +1,6 @@
 '''
 Function:
-    Implementation of SAM2Transforms
+    Implementation of SAMV2Transforms
 Author:
     Zhenchao Jin
 '''
@@ -10,10 +10,10 @@ import torch.nn.functional as F
 from torchvision.transforms import Normalize, Resize, ToTensor
 
 
-'''SAM2Transforms'''
-class SAM2Transforms(nn.Module):
+'''SAMV2Transforms'''
+class SAMV2Transforms(nn.Module):
     def __init__(self, resolution, mask_threshold, max_hole_area=0.0, max_sprinkle_area=0.0):
-        super(SAM2Transforms, self).__init__()
+        super(SAMV2Transforms, self).__init__()
         self.resolution = resolution
         self.mask_threshold = mask_threshold
         self.max_hole_area = max_hole_area
