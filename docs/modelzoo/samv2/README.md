@@ -29,7 +29,7 @@ The `SAMV2ImagePredictor` class provides an easy interface to the model for prom
 
 #### Environment Set-up
 
-To use SAMV2 in sssegmenation, python>=3.10, as well as torch>=2.3.1 and torchvision>=0.18.1 are required. 
+To use SAMV2 in sssegmenation, `python>=3.10`, as well as `torch>=2.3.1` and `torchvision>=0.18.1` are required. 
 After installing the correct versions of python and torch components, you can install sssegmenation with SAMV2 on a GPU machine using the following commands:
 
 ```sh
@@ -479,7 +479,7 @@ Additional options allow for further improvement of mask quality and quantity, s
 
 #### Environment Set-up
 
-To use SAMV2 in sssegmenation, python>=3.10, as well as torch>=2.3.1 and torchvision>=0.18.1 are required. 
+To use SAMV2 in sssegmenation, `python>=3.10`, as well as `torch>=2.3.1` and `torchvision>=0.18.1` are required. 
 After installing the correct versions of python and torch components, you can install sssegmenation with SAMV2 on a GPU machine using the following commands:
 
 ```sh
@@ -618,7 +618,7 @@ We use the terms *segment* or *mask* to refer to the model prediction for an obj
 
 #### Environment Set-up
 
-To use SAMV2 in sssegmenation, python>=3.10, as well as torch>=2.3.1 and torchvision>=0.18.1 are required. 
+To use SAMV2 in sssegmenation, `python>=3.10`, as well as `torch>=2.3.1` and `torchvision>=0.18.1` are required. 
 After installing the correct versions of python and torch components, you can install sssegmenation with SAMV2 on a GPU machine using the following commands:
 
 ```sh
