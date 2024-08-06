@@ -418,7 +418,7 @@ class SAMV2(BaseSegmentor):
 
 '''SAMV2ImagePredictor'''
 class SAMV2ImagePredictor(nn.Module):
-    def __init__(self, samv2_cfg=None, use_default_samv2_t=False, use_default_samv2_s=False, use_default_samv2_bplus=False, use_default_samv2_l=True,
+    def __init__(self, samv2_cfg=None, use_default_samv2_t=False, use_default_samv2_s=False, use_default_samv2_bplus=False, use_default_samv2_l=False,
                  device='cuda', load_ckpt_strict=True, mask_threshold=0.0, max_hole_area=0.0, max_sprinkle_area=0.0, apply_postprocessing=True):
         super(SAMV2ImagePredictor, self).__init__()
         # build sam model
@@ -877,7 +877,7 @@ class SAMV2AutomaticMaskGenerator(nn.Module):
 
 
 '''SAMV2VideoPredictor'''
-class SAMV2VideoPredictor(SAMV2):
+class SAMV2VideoPredictor(SAMV2ImagePredictor):
     def __init__(self, fill_hole_area=0, non_overlap_masks=False, clear_non_cond_mem_around_input=False, clear_non_cond_mem_for_multi_obj=False, **kwargs):
         self.fill_hole_area = fill_hole_area
         self.non_overlap_masks = non_overlap_masks
@@ -985,7 +985,7 @@ class SAMV2VideoPredictor(SAMV2):
             video_H = inference_state["video_height"]
             video_W = inference_state["video_width"]
             points = points / torch.tensor([video_W, video_H]).to(points.device)
-        points = points * self.image_size
+        points = points * self.model.image_size
         points = points.to(inference_state["device"])
         labels = labels.to(inference_state["device"])
         if not clear_old_points:
@@ -1002,7 +1002,7 @@ class SAMV2VideoPredictor(SAMV2):
             reverse = inference_state["frames_already_tracked"][frame_idx]["reverse"]
         obj_output_dict = inference_state["output_dict_per_obj"][obj_idx]
         obj_temp_output_dict = inference_state["temp_output_dict_per_obj"][obj_idx]
-        is_cond = is_init_cond_frame or self.add_all_frames_to_correct_as_cond
+        is_cond = is_init_cond_frame or self.model.add_all_frames_to_correct_as_cond
         storage_key = "cond_frame_outputs" if is_cond else "non_cond_frame_outputs"
         prev_sam_mask_logits = None
         prev_out = obj_temp_output_dict[storage_key].get(frame_idx)
@@ -1033,8 +1033,8 @@ class SAMV2VideoPredictor(SAMV2):
         mask_H, mask_W = mask.shape
         mask_inputs_orig = mask[None, None]
         mask_inputs_orig = mask_inputs_orig.float().to(inference_state["device"])
-        if mask_H != self.image_size or mask_W != self.image_size:
-            mask_inputs = F.interpolate(mask_inputs_orig, size=(self.image_size, self.image_size), align_corners=False, mode="bilinear", antialias=True)
+        if mask_H != self.model.image_size or mask_W != self.model.image_size:
+            mask_inputs = F.interpolate(mask_inputs_orig, size=(self.model.image_size, self.model.image_size), align_corners=False, mode="bilinear", antialias=True)
             mask_inputs = (mask_inputs >= 0.5).float()
         else:
             mask_inputs = mask_inputs_orig
@@ -1047,7 +1047,7 @@ class SAMV2VideoPredictor(SAMV2):
             reverse = inference_state["frames_already_tracked"][frame_idx]["reverse"]
         obj_output_dict = inference_state["output_dict_per_obj"][obj_idx]
         obj_temp_output_dict = inference_state["temp_output_dict_per_obj"][obj_idx]
-        is_cond = is_init_cond_frame or self.add_all_frames_to_correct_as_cond
+        is_cond = is_init_cond_frame or self.model.add_all_frames_to_correct_as_cond
         storage_key = "cond_frame_outputs" if is_cond else "non_cond_frame_outputs"
         current_out, _ = self.runsingleframeinference(
             inference_state=inference_state, output_dict=obj_output_dict, frame_idx=frame_idx, batch_size=1, is_init_cond_frame=is_init_cond_frame, point_inputs=None, mask_inputs=mask_inputs, reverse=reverse, run_mem_encoder=False,
@@ -1068,7 +1068,7 @@ class SAMV2VideoPredictor(SAMV2):
         else:
             video_res_masks = F.interpolate(any_res_masks, size=(video_H, video_W), mode="bilinear", align_corners=False)
         if self.non_overlap_masks:
-            video_res_masks = self.applynonoverlappingconstraints(video_res_masks)
+            video_res_masks = self.model.applynonoverlappingconstraints(video_res_masks)
         return any_res_masks, video_res_masks
     '''consolidatetempoutputacrossobj'''
     def consolidatetempoutputacrossobj(self, inference_state, frame_idx, is_cond, run_mem_encoder, consolidate_at_video_res=False):
@@ -1080,10 +1080,10 @@ class SAMV2VideoPredictor(SAMV2):
             consolidated_W = inference_state["video_width"]
             consolidated_mask_key = "pred_masks_video_res"
         else:
-            consolidated_H = consolidated_W = self.image_size // 4
+            consolidated_H = consolidated_W = self.model.image_size // 4
             consolidated_mask_key = "pred_masks"
         consolidated_out = {
-            "maskmem_features": None, "maskmem_pos_enc": None, "obj_ptr": torch.full(size=(batch_size, self.hidden_dim), fill_value=NO_OBJ_SCORE, dtype=torch.float32, device=inference_state["device"]),
+            "maskmem_features": None, "maskmem_pos_enc": None, "obj_ptr": torch.full(size=(batch_size, self.model.hidden_dim), fill_value=NO_OBJ_SCORE, dtype=torch.float32, device=inference_state["device"]),
             consolidated_mask_key: torch.full(size=(batch_size, 1, consolidated_H, consolidated_W), fill_value=NO_OBJ_SCORE, dtype=torch.float32, device=inference_state["storage_device"]),
         }
         empty_mask_ptr = None
@@ -1110,9 +1110,9 @@ class SAMV2VideoPredictor(SAMV2):
             consolidated_out["obj_ptr"][obj_idx : obj_idx + 1] = out["obj_ptr"]
         if run_mem_encoder:
             device = inference_state["device"]
-            high_res_masks = F.interpolate(consolidated_out["pred_masks"].to(device, non_blocking=True), size=(self.image_size, self.image_size), mode="bilinear", align_corners=False)
-            if self.non_overlap_masks_for_mem_enc:
-                high_res_masks = self.applynonoverlappingconstraints(high_res_masks)
+            high_res_masks = F.interpolate(consolidated_out["pred_masks"].to(device, non_blocking=True), size=(self.model.image_size, self.model.image_size), mode="bilinear", align_corners=False)
+            if self.model.non_overlap_masks_for_mem_enc:
+                high_res_masks = self.model.applynonoverlappingconstraints(high_res_masks)
             maskmem_features, maskmem_pos_enc = self.runmemoryencoder(inference_state=inference_state, frame_idx=frame_idx, batch_size=batch_size, high_res_masks=high_res_masks, is_mask_from_pts=True)
             consolidated_out["maskmem_features"] = maskmem_features
             consolidated_out["maskmem_pos_enc"] = maskmem_pos_enc
@@ -1120,9 +1120,9 @@ class SAMV2VideoPredictor(SAMV2):
     '''getemptymaskptr'''
     def getemptymaskptr(self, inference_state, frame_idx):
         batch_size = 1
-        mask_inputs = torch.zeros((batch_size, 1, self.image_size, self.image_size), dtype=torch.float32, device=inference_state["device"])
+        mask_inputs = torch.zeros((batch_size, 1, self.model.image_size, self.model.image_size), dtype=torch.float32, device=inference_state["device"])
         _, _, current_vision_feats, current_vision_pos_embeds, feat_sizes = self.getimagefeature(inference_state, frame_idx, batch_size)
-        current_out = self.trackstep(
+        current_out = self.model.trackstep(
             frame_idx=frame_idx, is_init_cond_frame=True, current_vision_feats=current_vision_feats, current_vision_pos_embeds=current_vision_pos_embeds, feat_sizes=feat_sizes,
             point_inputs=None, mask_inputs=mask_inputs, output_dict={}, num_frames=inference_state["num_frames"], track_in_reverse=False, run_mem_encoder=False, prev_sam_mask_logits=None,
         )
@@ -1260,7 +1260,7 @@ class SAMV2VideoPredictor(SAMV2):
         image, backbone_out = inference_state["cached_features"].get(frame_idx, (None, None))
         if backbone_out is None:
             image = inference_state["images"][frame_idx].cuda().float().unsqueeze(0)
-            backbone_out = self.forwardimage(image)
+            backbone_out = self.model.forwardimage(image)
             inference_state["cached_features"] = {frame_idx: (image, backbone_out)}
         expanded_image = image.expand(batch_size, -1, -1, -1)
         expanded_backbone_out = {"backbone_fpn": backbone_out["backbone_fpn"].copy(), "vision_pos_enc": backbone_out["vision_pos_enc"].copy()}
@@ -1269,7 +1269,7 @@ class SAMV2VideoPredictor(SAMV2):
         for i, pos in enumerate(expanded_backbone_out["vision_pos_enc"]):
             pos = pos.expand(batch_size, -1, -1, -1)
             expanded_backbone_out["vision_pos_enc"][i] = pos
-        features = self.preparebackbonefeatures(expanded_backbone_out)
+        features = self.model.preparebackbonefeatures(expanded_backbone_out)
         features = (expanded_image,) + features
         return features
     '''runsingleframeinference'''
@@ -1278,7 +1278,7 @@ class SAMV2VideoPredictor(SAMV2):
         _, _, current_vision_feats, current_vision_pos_embeds, feat_sizes = self.getimagefeature(inference_state, frame_idx, batch_size)
         # point and mask should not appear as input simultaneously on the same frame
         assert point_inputs is None or mask_inputs is None
-        current_out = self.trackstep(
+        current_out = self.model.trackstep(
             frame_idx=frame_idx, is_init_cond_frame=is_init_cond_frame, current_vision_feats=current_vision_feats, current_vision_pos_embeds=current_vision_pos_embeds,
             feat_sizes=feat_sizes, point_inputs=point_inputs, mask_inputs=mask_inputs, output_dict=output_dict, num_frames=inference_state["num_frames"], track_in_reverse=reverse,
             run_mem_encoder=run_mem_encoder, prev_sam_mask_logits=prev_sam_mask_logits,
@@ -1305,7 +1305,7 @@ class SAMV2VideoPredictor(SAMV2):
     '''runmemoryencoder'''
     def runmemoryencoder(self, inference_state, frame_idx, batch_size, high_res_masks, is_mask_from_pts):
         _, _, current_vision_feats, _, feat_sizes = self.getimagefeature(inference_state, frame_idx, batch_size)
-        maskmem_features, maskmem_pos_enc = self.encodenewmemory(current_vision_feats=current_vision_feats, feat_sizes=feat_sizes, pred_masks_high_res=high_res_masks, is_mask_from_pts=is_mask_from_pts)
+        maskmem_features, maskmem_pos_enc = self.model.encodenewmemory(current_vision_feats=current_vision_feats, feat_sizes=feat_sizes, pred_masks_high_res=high_res_masks, is_mask_from_pts=is_mask_from_pts)
         # optionally offload the output to CPU memory to save GPU space
         storage_device = inference_state["storage_device"]
         maskmem_features = maskmem_features.to(torch.bfloat16)
@@ -1332,9 +1332,9 @@ class SAMV2VideoPredictor(SAMV2):
         return expanded_maskmem_pos_enc
     '''clearnoncondmemaroundinput'''
     def clearnoncondmemaroundinput(self, inference_state, frame_idx):
-        r = self.memory_temporal_stride_for_eval
-        frame_idx_begin = frame_idx - r * self.num_maskmem
-        frame_idx_end = frame_idx + r * self.num_maskmem
+        r = self.model.memory_temporal_stride_for_eval
+        frame_idx_begin = frame_idx - r * self.model.num_maskmem
+        frame_idx_end = frame_idx + r * self.model.num_maskmem
         output_dict = inference_state["output_dict"]
         non_cond_frame_outputs = output_dict["non_cond_frame_outputs"]
         for t in range(frame_idx_begin, frame_idx_end + 1):
