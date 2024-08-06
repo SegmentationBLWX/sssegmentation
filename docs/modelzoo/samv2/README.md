@@ -36,7 +36,7 @@ After installing the correct versions of python and torch components, you can in
 git clone https://github.com/SegmentationBLWX/sssegmentation
 cd sssegmentation
 export COMPILE_SAMV2=1
-pip install -e .
+python setup.py develop
 ```
 
 Download images:
@@ -486,7 +486,7 @@ After installing the correct versions of python and torch components, you can in
 git clone https://github.com/SegmentationBLWX/sssegmentation
 cd sssegmentation
 export COMPILE_SAMV2=1
-pip install -e .
+python setup.py develop
 ```
 
 Download images:
@@ -605,3 +605,11 @@ plt.savefig('output.png')
 ```
 
 ### Video segmentation with SAMV2
+
+This section shows how to use SAMV2 for interactive segmentation in videos. It will cover the following:
+
+- adding clicks on a frame to get and refine *masklets* (spatio-temporal masks),
+- propagating clicks to get *masklets* throughout the video,
+- segmenting and tracking multiple objects at the same time.
+
+We use the terms *segment* or *mask* to refer to the model prediction for an object on a single frame, and *masklet* to refer to the spatio-temporal masks across the entire video.

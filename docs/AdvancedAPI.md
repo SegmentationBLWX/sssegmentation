@@ -462,7 +462,7 @@ After installing the correct versions of python and torch components, you can in
 git clone https://github.com/SegmentationBLWX/sssegmentation
 cd sssegmentation
 export COMPILE_SAMV2=1
-pip install -e .
+python setup.py develop
 ```
 
 Download images:
@@ -912,7 +912,7 @@ After installing the correct versions of python and torch components, you can in
 git clone https://github.com/SegmentationBLWX/sssegmentation
 cd sssegmentation
 export COMPILE_SAMV2=1
-pip install -e .
+python setup.py develop
 ```
 
 Download images:
