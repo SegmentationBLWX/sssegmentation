@@ -887,7 +887,7 @@ class SAMV2VideoPredictor(SAMV2ImagePredictor):
     '''initstate'''
     @torch.inference_mode()
     def initstate(self, video_path, offload_video_to_cpu=False, offload_state_to_cpu=False, async_loading_frames=False):
-        images, video_height, video_width = loadvideoframes(video_path=video_path, image_size=self.image_size, offload_video_to_cpu=offload_video_to_cpu, async_loading_frames=async_loading_frames)
+        images, video_height, video_width = loadvideoframes(video_path=video_path, image_size=self.model.image_size, offload_video_to_cpu=offload_video_to_cpu, async_loading_frames=async_loading_frames)
         inference_state = {}
         inference_state["images"] = images
         inference_state["num_frames"] = len(images)
