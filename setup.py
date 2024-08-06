@@ -9,7 +9,10 @@ import re
 import sys
 import ssseg
 from setuptools import setup, find_packages
-from torch.utils.cpp_extension import BuildExtension, CUDAExtension
+try:
+    from torch.utils.cpp_extension import BuildExtension, CUDAExtension
+except:
+    BuildExtension, CUDAExtension = None, None
 
 
 '''compile_samv2'''
