@@ -684,7 +684,7 @@ class SAMV2ImagePredictor(nn.Module):
 class SAMV2AutomaticMaskGenerator(nn.Module):
     def __init__(self, points_per_side=32, points_per_batch=64, pred_iou_thresh=0.8, stability_score_thresh=0.95, stability_score_offset=1.0, mask_threshold=0.0, box_nms_thresh=0.7, crop_n_layers=0, crop_nms_thresh=0.7, 
                  crop_overlap_ratio=512/1500, crop_n_points_downscale_factor=1, point_grids=None, min_mask_region_area=0, output_mode="binary_mask", use_m2m=False, multimask_output=True, samv2_cfg=None, use_default_samv2_t=False,
-                 use_default_samv2_s=False, use_default_samv2_bplus=False, use_default_samv2_l=True, device='cuda', load_ckpt_strict=True):
+                 use_default_samv2_s=False, use_default_samv2_bplus=False, use_default_samv2_l=True, device='cuda', load_ckpt_strict=True, apply_postprocessing=False):
         super(SAMV2AutomaticMaskGenerator, self).__init__()
         # deal with points_per_side and point_grids
         assert (points_per_side is None) != (point_grids is None), "exactly one of points_per_side or point_grid must be provided."
@@ -705,7 +705,7 @@ class SAMV2AutomaticMaskGenerator(nn.Module):
         # predictor
         self.predictor = SAMV2ImagePredictor(
             samv2_cfg=samv2_cfg, use_default_samv2_l=use_default_samv2_l, use_default_samv2_bplus=use_default_samv2_bplus, use_default_samv2_s=use_default_samv2_s, use_default_samv2_t=use_default_samv2_t, 
-            device=device, load_ckpt_strict=load_ckpt_strict, max_hole_area=min_mask_region_area, max_sprinkle_area=min_mask_region_area,
+            device=device, load_ckpt_strict=load_ckpt_strict, max_hole_area=min_mask_region_area, max_sprinkle_area=min_mask_region_area, apply_postprocessing=apply_postprocessing,
         )
         # set attributes
         self.points_per_batch = points_per_batch

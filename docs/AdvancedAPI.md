@@ -781,7 +781,7 @@ You can also access the example code from [examples/samv2/image/batchedpromptinp
 
 #### End-to-end batched inference
 
-If all prompts are available in advance, it is possible to run SAM 2 directly in an end-to-end fashion. This also allows batching over images.
+If all prompts are available in advance, it is possible to run SAMV2 directly in an end-to-end fashion. This also allows batching over images.
 
 ```python
 '''
