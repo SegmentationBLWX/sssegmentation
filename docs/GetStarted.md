@@ -23,7 +23,7 @@ If you have any questions about installing Anaconda, you can refer to the [offic
 After installing Anaconda, you can create a conda environment for SSSegmentation and activate it, *e.g.*,
 
 ```sh
-conda create --name ssseg python=3.8 -y
+conda create --name ssseg python=3.10 -y
 conda activate ssseg
 ```
 
@@ -55,12 +55,17 @@ With the above commands, these python packages will be installed,
 - `pillow`: set in requirements/io.txt,
 - `pandas`: set in requirements/io.txt,
 - `opencv-python`: set in requirements/io.txt,
+- `iopath`: set in requirements/io.txt,
 - `numpy`: set in requirements/science.txt,
 - `scipy`: set in requirements/science.txt,
 - `tqdm`: set in requirements/terminal.txt,
 - `argparse`: set in requirements/terminal.txt,
-- `cython`: set in requirements/misc.txt.
-- `fvcore`: set in requirements/misc.txt.
+- `matplotlib`: set in requirements/visualization.txt,
+- `cython`: set in requirements/misc.txt,
+- `fvcore`: set in requirements/misc.txt,
+- `black`: set in requirements/misc.txt,
+- `usort`: set in requirements/misc.txt,
+- `ufmt`: set in requirements/misc.txt.
 
 All requirements are also summarized at our [official repository](https://github.com/SegmentationBLWX/sssegmentation/tree/main/requirements).
 

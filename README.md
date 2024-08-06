@@ -17,7 +17,7 @@ Documents: https://sssegmentation.readthedocs.io/en/latest/
 
 ## What's New
 
-- **2024-08-05**: Support [SAM v2](https://arxiv.org/pdf/2408.00714.pdf), refer to [inference-with-samv2](https://sssegmentation.readthedocs.io/en/latest/AdvancedAPI.html#inference-with-samv2) for more details.
+- **2024-08-05**: Support [SAMV2](https://arxiv.org/pdf/2408.00714.pdf), refer to [inference-with-samv2](https://sssegmentation.readthedocs.io/en/latest/AdvancedAPI.html#inference-with-samv2) for more details.
 - **2023-12-20**: Support [EdgeSAM](https://arxiv.org/pdf/2312.06660.pdf) and [SAMHQ](https://arxiv.org/pdf/2306.01567.pdf), refer to [inference-with-edgesam](https://sssegmentation.readthedocs.io/en/latest/AdvancedAPI.html#inference-with-edgesam) and [inference-with-samhq](https://sssegmentation.readthedocs.io/en/latest/AdvancedAPI.html#inference-with-samhq) for more details.
 - **2023-10-25**: Support [ConvNeXtV2](https://arxiv.org/pdf/2301.00808.pdf), refer to [Results and Models for ConvNeXtV2](./docs/modelzoo/convnextv2) for more details.
 - **2023-10-23**: Support [MobileViT](https://arxiv.org/pdf/2110.02178.pdf) and [MobileViTV2](https://arxiv.org/pdf/2206.02680.pdf), refer to [Results and Models for MobileViT](./docs/modelzoo/mobilevit) for more details.

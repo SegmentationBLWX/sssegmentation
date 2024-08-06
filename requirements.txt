@@ -3,3 +3,4 @@
 -r requirements/science.txt
 -r requirements/evaluate.txt
 -r requirements/terminal.txt
+-r requirements/visualization.txt

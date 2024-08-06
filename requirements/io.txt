@@ -2,3 +2,4 @@ pillow
 pandas
 opencv-python
 dill
+iopath

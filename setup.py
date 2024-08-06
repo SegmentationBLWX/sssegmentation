@@ -12,6 +12,10 @@ from setuptools import setup, find_packages
 from torch.utils.cpp_extension import BuildExtension, CUDAExtension
 
 
+'''compile_samv2'''
+compile_samv2 = os.getenv('COMPILE_SAMV2', '0') == '1'
+
+
 '''readme'''
 with open('README.md', 'r', encoding='utf-8') as f:
     long_description = f.read()
@@ -74,11 +78,13 @@ def parserequirements(fname='requirements.txt', with_version=True):
 
 '''getextensions'''
 def getextensions():
-    srcs = ["ssseg/modules/models/segmentors/samv2/connected_components.cu"]
-    compile_args = {
-        'cxx': [], 'nvcc': ['-DCUDA_HAS_FP16=1', '-D__CUDA_NO_HALF_OPERATORS__', '-D__CUDA_NO_HALF_CONVERSIONS__', '-D__CUDA_NO_HALF2_OPERATORS__'],
-    }
-    ext_modules = [CUDAExtension('ssseg._C', srcs, extra_compile_args=compile_args)]
+    ext_modules = []
+    if compile_samv2:
+        srcs = ["ssseg/modules/models/segmentors/samv2/connected_components.cu"]
+        compile_args = {
+            'cxx': [], 'nvcc': ['-DCUDA_HAS_FP16=1', '-D__CUDA_NO_HALF_OPERATORS__', '-D__CUDA_NO_HALF_CONVERSIONS__', '-D__CUDA_NO_HALF2_OPERATORS__'],
+        }
+        ext_modules.append(CUDAExtension('ssseg._C', srcs, extra_compile_args=compile_args))
     return ext_modules
 
 
