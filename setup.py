@@ -11,7 +11,9 @@ import ssseg
 from setuptools import setup, find_packages
 try:
     from torch.utils.cpp_extension import BuildExtension, CUDAExtension
-except:
+except ImportError as err:
+    print(err)
+    print('BuildExtension, CUDAExtension could not be imported, please install `torch` and `torchvision` if you want to setup with `ext_modules`')
     BuildExtension, CUDAExtension = None, None
 
 
@@ -113,5 +115,5 @@ setup(
     zip_safe=True,
     ext_modules=getextensions(),
     packages=find_packages(),
-    cmdclass={"build_ext": BuildExtension.with_options(no_python_abi_suffix=True)},
+    cmdclass={"build_ext": BuildExtension.with_options(no_python_abi_suffix=True)} if BuildExtension is not None else {},
 )
