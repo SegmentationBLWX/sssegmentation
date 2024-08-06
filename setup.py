@@ -78,13 +78,11 @@ def parserequirements(fname='requirements.txt', with_version=True):
     # parse and return
     packages = list(genpackagesitems())
     if 'chainercv' in packages:
-        entered_text = input('Do you want to use chainercv to evaluate model performance? (Yes/no): ')
-        if 'yes' in entered_text.lower():
-            try:
-                import numpy as np
-            except:
-                raise ImportError('numpy with version being lower than 2.0.0 should be installed, e.g., pip install numpy==1.26.4')
-            assert np.__version__ < '2.0.0', 'numpy version should be lower than 2.0.0 if you want to utilize chainercv, e.g., pip install numpy==1.26.4'
+        try:
+            import numpy as np
+        except:
+            raise ImportError('To install ssseg with chainercv, numpy with version being lower than 2.0.0 should be installed, e.g., pip install numpy==1.26.4')
+        assert np.__version__ < '2.0.0', 'numpy version should be lower than 2.0.0 if you want to utilize chainercv, e.g., pip install numpy==1.26.4'
     return packages
 
 
