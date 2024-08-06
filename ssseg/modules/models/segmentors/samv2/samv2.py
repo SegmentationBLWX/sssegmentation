@@ -419,7 +419,7 @@ class SAMV2(BaseSegmentor):
 '''SAMV2ImagePredictor'''
 class SAMV2ImagePredictor(nn.Module):
     def __init__(self, samv2_cfg=None, use_default_samv2_t=False, use_default_samv2_s=False, use_default_samv2_bplus=False, use_default_samv2_l=True,
-                 device='cuda', load_ckpt_strict=True, mask_threshold=0.0, max_hole_area=0.0, max_sprinkle_area=0.0):
+                 device='cuda', load_ckpt_strict=True, mask_threshold=0.0, max_hole_area=0.0, max_sprinkle_area=0.0, apply_postprocessing=True):
         super(SAMV2ImagePredictor, self).__init__()
         # build sam model
         if samv2_cfg is None:
@@ -484,7 +484,7 @@ class SAMV2ImagePredictor(nn.Module):
                 samv2_cfg['ckptpath'] = 'https://dl.fbaipublicfiles.com/segment_anything_2/072824/sam2_hiera_tiny.pt'
         else:
             assert (not use_default_samv2_t) and (not use_default_samv2_s) and (not use_default_samv2_bplus) and (not use_default_samv2_l)
-        self.model = self.buildsamv2(samv2_cfg=samv2_cfg, device=device)
+        self.model = self.buildsamv2(samv2_cfg=samv2_cfg, device=device, apply_postprocessing=apply_postprocessing)
         if 'ckptpath' in samv2_cfg and (os.path.exists(samv2_cfg['ckptpath']) or samv2_cfg['ckptpath'].startswith('https')):
             if os.path.exists(samv2_cfg['ckptpath']):
                 with open(samv2_cfg['ckptpath'], 'rb') as fp:
@@ -507,7 +507,13 @@ class SAMV2ImagePredictor(nn.Module):
         # spatial dim for backbone feature maps
         self._bb_feat_sizes = [(256, 256), (128, 128), (64, 64)]
     '''buildsamv2'''
-    def buildsamv2(self, samv2_cfg, device):
+    def buildsamv2(self, samv2_cfg, device, apply_postprocessing=True):
+        if apply_postprocessing:
+            samv2_cfg['head']['sam_mask_decoder_extra_args'] = {
+                'dynamic_multimask_via_stability': True,
+                'dynamic_multimask_stability_delta': 0.05,
+                'dynamic_multimask_stability_thresh': 0.98,
+            }
         samv2_model = SAMV2(cfg=samv2_cfg, mode='TEST')
         samv2_model.to(device=device)
         samv2_model.eval()
@@ -873,11 +879,11 @@ class SAMV2AutomaticMaskGenerator(nn.Module):
 '''SAMV2VideoPredictor'''
 class SAMV2VideoPredictor(SAMV2):
     def __init__(self, fill_hole_area=0, non_overlap_masks=False, clear_non_cond_mem_around_input=False, clear_non_cond_mem_for_multi_obj=False, **kwargs):
-        super(SAMV2VideoPredictor, self).__init__(**kwargs)
         self.fill_hole_area = fill_hole_area
         self.non_overlap_masks = non_overlap_masks
         self.clear_non_cond_mem_around_input = clear_non_cond_mem_around_input
         self.clear_non_cond_mem_for_multi_obj = clear_non_cond_mem_for_multi_obj
+        super(SAMV2VideoPredictor, self).__init__(**kwargs)
     '''initstate'''
     @torch.inference_mode()
     def initstate(self, video_path, offload_video_to_cpu=False, offload_state_to_cpu=False, async_loading_frames=False):
@@ -923,6 +929,20 @@ class SAMV2VideoPredictor(SAMV2):
         self.getimagefeature(inference_state, frame_idx=0, batch_size=1)
         # return
         return inference_state
+    '''buildsamv2'''
+    def buildsamv2(self, samv2_cfg, device, apply_postprocessing=True):
+        if apply_postprocessing:
+            samv2_cfg['head']['sam_mask_decoder_extra_args'] = {
+                'dynamic_multimask_via_stability': True,
+                'dynamic_multimask_stability_delta': 0.05,
+                'dynamic_multimask_stability_thresh': 0.98,
+            }
+            samv2_cfg['head']['binarize_mask_from_pts_for_mem_enc'] = True
+            self.fill_hole_area = 8
+        samv2_model = SAMV2(cfg=samv2_cfg, mode='TEST')
+        samv2_model.to(device=device)
+        samv2_model.eval()
+        return samv2_model
     '''objidtoidx'''
     def objidtoidx(self, inference_state, obj_id):
         obj_idx = inference_state["obj_id_to_idx"].get(obj_id, None)
