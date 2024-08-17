@@ -12,7 +12,7 @@ from setuptools import setup, find_packages
 try:
     from torch.utils.cpp_extension import BuildExtension, CUDAExtension
 except ImportError as err:
-    print('BuildExtension, CUDAExtension could not be imported, please install `torch` and `torchvision` if you want to setup with `ext_modules`')
+    print('WARNING: BuildExtension, CUDAExtension could not be imported, please install `torch` and `torchvision` if you want to setup with `ext_modules`')
     BuildExtension, CUDAExtension = None, None
 
 
