@@ -1,3 +1,0 @@
-chainercv
-cityscapesscripts
-pycocotools

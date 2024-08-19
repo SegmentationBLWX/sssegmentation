@@ -33,46 +33,10 @@ For more advanced usages of Anaconda, please also refer to the [official documen
 
 Now, we can install the necessary requirements in the created environment `ssseg`.
 
-**Step 1: Install Basic Requirements (Necessary)**
+**Step 1: Install PyTorch and Torchvision (Necessary)**
 
-Specifically, we can first install some essential third-party packages, 
-
-```sh
-# clone the source codes from official repository
-git clone https://github.com/CharlesPikachu/sssegmentation
-cd sssegmentation
-# install some essential requirements
-pip install -r requirements.txt
-# install ssseg with develop mode
-python setup.py develop
-```
-
-With the above commands, these python packages will be installed,
-
-- `chainercv`: set in requirements/evaluate.txt,
-- `cityscapesscripts`: set in requirements/evaluate.txt,
-- `pycocotools`: set in requirements/evaluate.txt,
-- `pillow`: set in requirements/io.txt,
-- `pandas`: set in requirements/io.txt,
-- `opencv-python`: set in requirements/io.txt,
-- `iopath`: set in requirements/io.txt,
-- `numpy`: set in requirements/science.txt,
-- `scipy`: set in requirements/science.txt,
-- `tqdm`: set in requirements/terminal.txt,
-- `argparse`: set in requirements/terminal.txt,
-- `matplotlib`: set in requirements/visualization.txt,
-- `cython`: set in requirements/misc.txt,
-- `fvcore`: set in requirements/misc.txt,
-- `black`: set in requirements/misc.txt,
-- `usort`: set in requirements/misc.txt,
-- `ufmt`: set in requirements/misc.txt.
-
-All requirements are also summarized at our [official repository](https://github.com/SegmentationBLWX/sssegmentation/tree/main/requirements).
-
-**Step 2: Install PyTorch and Torchvision (Necessary)**
-
-Next, it is imperative to install PyTorch and torchvision, which is "Tensors and Dynamic neural networks in Python with strong GPU acceleration". 
-Particularly, we recommend the users to follow the [official instructions](https://pytorch.org/get-started/previous-versions/) to install them.
+First, it is imperative to install PyTorch and torchvision, which is "Tensors and Dynamic neural networks in Python with strong GPU acceleration". 
+Specifically, we recommend the users to follow the [official instructions](https://pytorch.org/get-started/previous-versions/) to install them.
 
 Here, we also provide some example commands about installing PyTorch and Torchvision,
 
@@ -98,6 +62,53 @@ pip install torch==1.13.0+cpu torchvision==0.14.0+cpu torchaudio==0.13.0 --extra
 ```
 
 Please note that, SSSegmentation requires `torch.cuda.is_available()` to be `True` and thus, does not support the cpu-only version' pytorch and torchvision now.
+
+**Step 2: Install Other Basic Requirements (Necessary)**
+
+Next, we should install some other essential third-party packages, 
+
+```sh
+# clone the source codes from official repository
+git clone https://github.com/CharlesPikachu/sssegmentation
+cd sssegmentation
+# optional, setting SSSEG_WITH_OPS to 1 will compile the necessary extension modules for some algorithms (such as SAMV2) during installation
+export SSSEG_WITH_OPS=1
+# install some essential requirements
+pip install -r requirements.txt
+# install ssseg with develop mode
+python setup.py develop
+```
+
+With the above commands, these python packages will be installed,
+
+- `cython`: set in requirements/basic.txt,
+- `fvcore`: set in requirements/basic.txt,
+- `black`: set in requirements/basic.txt,
+- `usort`: set in requirements/basic.txt,
+- `ufmt`: set in requirements/basic.txt,
+- `cityscapesscripts`: set in requirements/basic.txt,
+- `pycocotools`: set in requirements/basic.txt,
+- `pillow`: set in requirements/basic.txt,
+- `pandas`: set in requirements/basic.txt,
+- `opencv-python`: set in requirements/basic.txt,
+- `dill`: set in requirements/basic.txt,
+- `iopath`: set in requirements/basic.txt,
+- `matplotlib`: set in requirements/basic.txt,
+- `tqdm`: set in requirements/basic.txt,
+- `argparse`: set in requirements/basic.txt,
+- `numpy`: set in requirements/basic.txt,
+- `scipy`: set in requirements/basic.txt,
+- `chainercv`: set in requirements/optional.txt.
+
+Since the performance of all models in ssseg is evaluated and reported using `chainercv`, we require the installation of this library in the requirements by default.
+However, since this library has not been updated for a long time, some of the latest versions of the dependencies it requires, particularly `numpy`, are not compatible with `chainercv`.
+Therefore, you might encounter installation failures at this step. In such cases, there are two possible solutions:
+
+- The first solution is to downgrade `numpy` in your environment to version 1.x, *e.g.*, `pip install numpy==1.26.4`,
+- The second solution is to manually remove `chainercv` from the requirements.txt.
+
+It is important to note that using the second solution will involve using our custom-defined `Evaluation` class for model performance testing. 
+The results may have slight differences compared to those from `chainercv`, but these differences are generally negligible.
 
 **Step 3: Install MMCV (Optional)**
 
@@ -192,6 +203,8 @@ For more details, you can refer to [Albumentations official repository](https://
 If the users just want to use SSSegmentation as a dependency or third-party package, you can install SSSegmentation with pip as following,
 
 ```sh
+# optional, setting SSSEG_WITH_OPS to 1 will compile the necessary extension modules for some algorithms (such as SAMV2) during installation
+export SSSEG_WITH_OPS=1
 # from pypi
 pip install SSSegmentation
 # from Github repository

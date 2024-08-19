@@ -1,0 +1,17 @@
+cython
+fvcore
+black
+usort
+ufmt
+cityscapesscripts
+pycocotools
+pillow
+pandas
+opencv-python
+dill
+iopath
+matplotlib
+tqdm
+argparse
+numpy
+scipy

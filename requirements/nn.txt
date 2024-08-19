@@ -1,5 +1,0 @@
-torch
-timm
-mmcv-full
-torchvision
-apex

@@ -16,8 +16,9 @@ except ImportError as err:
     BuildExtension, CUDAExtension = None, None
 
 
-'''compile_samv2'''
-compile_samv2 = os.getenv('COMPILE_SAMV2', '0') == '1'
+'''SSSEG_WITH_OPS'''
+SSSEG_WITH_OPS = os.getenv('SSSEG_WITH_OPS', '0') == '1'
+if BuildExtension is None: assert not SSSEG_WITH_OPS
 
 
 '''readme'''
@@ -89,7 +90,7 @@ def parserequirements(fname='requirements.txt', with_version=True):
 '''getextensions'''
 def getextensions():
     ext_modules = []
-    if compile_samv2:
+    if SSSEG_WITH_OPS:
         srcs = ["ssseg/modules/models/segmentors/samv2/connected_components.cu"]
         compile_args = {
             'cxx': [], 'nvcc': ['-DCUDA_HAS_FP16=1', '-D__CUDA_NO_HALF_OPERATORS__', '-D__CUDA_NO_HALF_CONVERSIONS__', '-D__CUDA_NO_HALF2_OPERATORS__'],
@@ -105,11 +106,13 @@ setup(
     description=ssseg.__description__,
     long_description=long_description,
     long_description_content_type='text/markdown',
+    keywords='semantic segmentation',
     classifiers=[
         'License :: OSI Approved :: Apache Software License',
         'Programming Language :: Python :: 3',
         'Intended Audience :: Developers',
-        'Operating System :: OS Independent'
+        'Operating System :: OS Independent',
+        'Topic :: Utilities',
     ],
     author=ssseg.__author__,
     url=ssseg.__url__,
@@ -117,7 +120,8 @@ setup(
     license=ssseg.__license__,
     include_package_data=True,
     install_requires=parserequirements('requirements.txt'),
-    zip_safe=True,
+    zip_safe=False,
+    python_requires='>=3.7',
     ext_modules=getextensions(),
     packages=find_packages(),
     cmdclass={"build_ext": BuildExtension.with_options(no_python_abi_suffix=True)} if BuildExtension is not None else {},

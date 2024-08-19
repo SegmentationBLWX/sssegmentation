@@ -35,7 +35,7 @@ After installing the correct versions of python and torch components, you can in
 ```sh
 git clone https://github.com/SegmentationBLWX/sssegmentation
 cd sssegmentation
-export COMPILE_SAMV2=1
+export SSSEG_WITH_OPS=1
 python setup.py develop
 ```
 
@@ -485,7 +485,7 @@ After installing the correct versions of python and torch components, you can in
 ```sh
 git clone https://github.com/SegmentationBLWX/sssegmentation
 cd sssegmentation
-export COMPILE_SAMV2=1
+export SSSEG_WITH_OPS=1
 python setup.py develop
 ```
 
@@ -624,7 +624,7 @@ After installing the correct versions of python and torch components, you can in
 ```sh
 git clone https://github.com/SegmentationBLWX/sssegmentation
 cd sssegmentation
-export COMPILE_SAMV2=1
+export SSSEG_WITH_OPS=1
 python setup.py develop
 ```
 
