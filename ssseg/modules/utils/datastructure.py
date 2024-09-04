@@ -86,3 +86,4 @@ class SSSegInputStructure:
             targets.update({'seg_targets': self.seg_targets})
         if self.edge_targets is not None:
             targets.update({'edge_targets': self.edge_targets})
+        return targets
