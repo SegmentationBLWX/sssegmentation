@@ -87,7 +87,7 @@ class EdgeSAMPredictor(SAMPredictor):
     '''predict'''
     def predict(self, point_coords=None, point_labels=None, box=None, mask_input=None, num_multimask_outputs=3, return_logits=False, use_stability_score=False):
         if not self.is_image_set:
-            raise RuntimeError('an image must be set with .set_image(...) before mask prediction')
+            raise RuntimeError('an image must be set with .setimage(...) before mask prediction')
         # transform input prompts
         coords_torch, labels_torch, box_torch, mask_input_torch = None, None, None, None
         if point_coords is not None:
@@ -116,7 +116,7 @@ class EdgeSAMPredictor(SAMPredictor):
     @torch.no_grad()
     def predicttorch(self, point_coords, point_labels, boxes=None, mask_input=None, num_multimask_outputs=3, return_logits=False, use_stability_score=True):
         if not self.is_image_set:
-            raise RuntimeError("an image must be set with .set_image(...) before mask prediction.")
+            raise RuntimeError("an image must be set with .setimage(...) before mask prediction.")
         if point_coords is not None:
             points = (point_coords, point_labels)
         else:

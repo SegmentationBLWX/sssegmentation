@@ -40,7 +40,7 @@ class SAMV2(BaseSegmentor):
         backbone = cfg.pop('backbone')
         super(SAMV2, self).__init__(cfg=cfg, mode=mode)
         cfg['backbone'] = backbone
-        assert mode in ['TEST'], f'only support test mode for {self.__class__.__name__} now'
+        assert mode in ['TEST'], f'only support TEST mode for {self.__class__.__name__}'
         # Part 1: the image backbone
         self.image_encoder = BuildBackbone(cfg['backbone'])
         # use level 0, 1, 2 for high-res setting, or just level 2 for the default setting
@@ -116,8 +116,8 @@ class SAMV2(BaseSegmentor):
     def device(self):
         return next(self.parameters()).device
     '''forward'''
-    def forward(self, *args, **kwargs):
-        raise NotImplementedError('not to be implemented.')
+    def forward(self, data_meta):
+        raise NotImplementedError(f'train {self.__class__.__name__} not to be implemented')
     '''buildsamheads'''
     def buildsamheads(self):
         self.sam_prompt_embed_dim = self.hidden_dim

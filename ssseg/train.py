@@ -17,12 +17,12 @@ from tqdm import tqdm
 try:
     from modules import (
         BuildDistributedDataloader, BuildDistributedModel, touchdir, loadckpts, saveckpts, judgefileexist, postprocesspredgtpairs, initslurm,
-        BuildDataset,  BuildSegmentor, BuildOptimizer, BuildScheduler, BuildLoggerHandle, TrainingLoggingManager, ConfigParser, EMASegmentor
+        BuildDataset,  BuildSegmentor, BuildOptimizer, BuildScheduler, BuildLoggerHandle, TrainingLoggingManager, ConfigParser, EMASegmentor, SSSegInputStructure
     )
 except:
     from .modules import (
         BuildDistributedDataloader, BuildDistributedModel, touchdir, loadckpts, saveckpts, judgefileexist, postprocesspredgtpairs, initslurm,
-        BuildDataset,  BuildSegmentor, BuildOptimizer, BuildScheduler, BuildLoggerHandle, TrainingLoggingManager, ConfigParser, EMASegmentor
+        BuildDataset,  BuildSegmentor, BuildOptimizer, BuildScheduler, BuildLoggerHandle, TrainingLoggingManager, ConfigParser, EMASegmentor, SSSegInputStructure
     )
 warnings.filterwarnings('ignore')
 
@@ -146,17 +146,18 @@ class Trainer():
             # --train epoch
             for batch_idx, samples_meta in enumerate(dataloader):
                 learning_rate = scheduler.updatelr()
-                images = samples_meta['image'].type(torch.cuda.FloatTensor)
-                targets = {'seg_target': samples_meta['seg_target'].type(torch.cuda.FloatTensor)}
-                if 'edge_target' in samples_meta: targets['edge_target'] = samples_meta['edge_target'].type(torch.cuda.FloatTensor)
-                if 'img2aug_pos_mapper' in samples_meta: targets['img2aug_pos_mapper'] = samples_meta['img2aug_pos_mapper'].type(torch.cuda.FloatTensor)
+                data_meta = SSSegInputStructure(
+                    mode='TRAIN', images=samples_meta['image'].type(torch.cuda.FloatTensor), seg_targets=samples_meta['seg_target'].type(torch.cuda.FloatTensor),
+                    edge_targets=samples_meta['edge_target'].type(torch.cuda.FloatTensor) if 'edge_target' in samples_meta else None,
+                    img2aug_pos_mapper=samples_meta['img2aug_pos_mapper'].type(torch.cuda.FloatTensor) if 'img2aug_pos_mapper' in samples_meta else None,
+                )
                 optimizer.zero_grad()
                 forward_kwargs = {'learning_rate': learning_rate, 'epoch': epoch} if cfg.SEGMENTOR_CFG['type'] in ['MCIBI', 'MCIBIPlusPlus'] else {}
                 if fp16_type in ['pytorch']:
                     with autocast(**fp16_cfg['autocast']):
-                        loss, losses_log_dict = segmentor(images, targets, **forward_kwargs)
+                        loss, losses_log_dict = segmentor(data_meta, **forward_kwargs).getsetvariables().values()
                 else:
-                    loss, losses_log_dict = segmentor(images, targets, **forward_kwargs)
+                    loss, losses_log_dict = segmentor(data_meta, **forward_kwargs).getsetvariables().values()
                 if fp16_type in ['apex']:
                     with apex.amp.scale_loss(loss, optimizer, **fp16_cfg['scale_loss']) as scaled_loss:
                         scaled_loss.backward()

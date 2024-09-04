@@ -8,6 +8,7 @@ import copy
 import torch.nn as nn
 import torch.nn.functional as F
 from ..base import BaseSegmentor
+from ....utils import SSSegOutputStructure
 from .objectcontext import ObjectContextBlock
 from .spatialgather import SpatialGatherModule
 from ...backbones import BuildActivation, BuildNormalization
@@ -45,10 +46,10 @@ class OCRNet(BaseSegmentor):
         # freeze normalization layer if necessary
         if cfg.get('is_freeze_norm', False): self.freezenormalization()
     '''forward'''
-    def forward(self, x, targets=None):
-        img_size = x.size(2), x.size(3)
+    def forward(self, data_meta):
+        img_size = data_meta.images.size(2), data_meta.images.size(3)
         # feed to backbone network
-        backbone_outputs = self.transforminputs(self.backbone_net(x), selected_indices=self.cfg['backbone'].get('selected_indices'))
+        backbone_outputs = self.transforminputs(self.backbone_net(data_meta.images), selected_indices=self.cfg['backbone'].get('selected_indices'))
         # feed to auxiliary decoder
         seg_logits_aux = self.auxiliary_decoder(backbone_outputs[-2])
         # feed to bottleneck
@@ -59,10 +60,13 @@ class OCRNet(BaseSegmentor):
         # feed to decoder
         seg_logits = self.decoder(feats)
         # return according to the mode
-        if self.mode == 'TRAIN':
+        if self.mode in ['TRAIN', 'TRAIN_DEVELOP']:
             seg_logits = F.interpolate(seg_logits, size=img_size, mode='bilinear', align_corners=self.align_corners)
             seg_logits_aux = F.interpolate(seg_logits_aux, size=img_size, mode='bilinear', align_corners=self.align_corners)
-            return self.calculatelosses(
-                predictions={'loss_cls': seg_logits, 'loss_aux': seg_logits_aux}, targets=targets, losses_cfg=self.cfg['losses']
+            loss, losses_log_dict = self.calculatelosses(
+                predictions={'loss_cls': seg_logits, 'loss_aux': seg_logits_aux}, targets=data_meta.gettargets(), losses_cfg=self.cfg['losses']
             )
-        return seg_logits
+            outputs = SSSegOutputStructure(mode=self.mode, loss=loss, losses_log_dict=losses_log_dict) if self.mode == 'TRAIN' else SSSegOutputStructure(mode=self.mode, loss=loss, losses_log_dict=losses_log_dict, seg_logits=seg_logits)
+        else:
+            outputs = SSSegOutputStructure(mode=self.mode, seg_logits=seg_logits)
+        return outputs

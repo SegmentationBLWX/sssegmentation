@@ -100,7 +100,7 @@ class SetCriterion(nn.Module):
     '''forward'''
     def forward(self, outputs, targets):
         # format targets
-        segs = targets['seg_target']
+        segs = targets['seg_targets']
         batch_size, targets_format = segs.shape[0], []
         for idx in range(batch_size):
             masks, labels = self.formattargets(segs[idx])

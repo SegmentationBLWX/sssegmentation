@@ -10,6 +10,7 @@ import torch
 import torch.nn as nn
 import torch.nn.functional as F
 from ..base import BaseSegmentor
+from ....utils import SSSegOutputStructure
 from ..base import SelfAttentionBlock as _SelfAttentionBlock
 from ...backbones import BuildActivation, BuildNormalization
 
@@ -64,10 +65,10 @@ class ISANet(BaseSegmentor):
         # freeze normalization layer if necessary
         if cfg.get('is_freeze_norm', False): self.freezenormalization()
     '''forward'''
-    def forward(self, x, targets=None):
-        img_size = x.size(2), x.size(3)
+    def forward(self, data_meta):
+        img_size = data_meta.images.size(2), data_meta.images.size(3)
         # feed to backbone network
-        backbone_outputs = self.transforminputs(self.backbone_net(x), selected_indices=self.cfg['backbone'].get('selected_indices'))
+        backbone_outputs = self.transforminputs(self.backbone_net(data_meta.images), selected_indices=self.cfg['backbone'].get('selected_indices'))
         # feed to isa module
         feats = self.in_conv(backbone_outputs[-1])
         residual = feats
@@ -102,9 +103,11 @@ class ISANet(BaseSegmentor):
         # feed to decoder
         seg_logits = self.decoder(feats)
         # return according to the mode
-        if self.mode == 'TRAIN':
+        if self.mode in ['TRAIN', 'TRAIN_DEVELOP']:
             loss, losses_log_dict = self.customizepredsandlosses(
-                predictions=seg_logits, targets=targets, backbone_outputs=backbone_outputs, losses_cfg=self.cfg['losses'], img_size=img_size,
+                seg_logits=seg_logits, targets=data_meta.gettargets(), backbone_outputs=backbone_outputs, losses_cfg=self.cfg['losses'], img_size=img_size,
             )
-            return loss, losses_log_dict
-        return seg_logits
+            outputs = SSSegOutputStructure(mode=self.mode, loss=loss, losses_log_dict=losses_log_dict) if self.mode == 'TRAIN' else SSSegOutputStructure(mode=self.mode, loss=loss, losses_log_dict=losses_log_dict, seg_logits=seg_logits)
+        else:
+            outputs = SSSegOutputStructure(mode=self.mode, seg_logits=seg_logits)
+        return outputs

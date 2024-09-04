@@ -9,6 +9,7 @@ import torch.nn.functional as F
 from ..base import BaseSegmentor
 from .cam import ChannelAttentionModule
 from .pam import PositionAttentionModule
+from ....utils import SSSegOutputStructure
 from ...backbones import BuildActivation, BuildNormalization
 
 
@@ -59,10 +60,10 @@ class DANet(BaseSegmentor):
         # freeze normalization layer if necessary
         if cfg.get('is_freeze_norm', False): self.freezenormalization()
     '''forward'''
-    def forward(self, x, targets=None):
-        img_size = x.size(2), x.size(3)
+    def forward(self, data_meta):
+        img_size = data_meta.images.size(2), data_meta.images.size(3)
         # feed to backbone network
-        backbone_outputs = self.transforminputs(self.backbone_net(x), selected_indices=self.cfg['backbone'].get('selected_indices'))
+        backbone_outputs = self.transforminputs(self.backbone_net(data_meta.images), selected_indices=self.cfg['backbone'].get('selected_indices'))
         # feed to pam
         feats_pam = self.pam_in_conv(backbone_outputs[-1])
         feats_pam = self.pam_net(feats_pam)
@@ -75,9 +76,9 @@ class DANet(BaseSegmentor):
         feats_sum = feats_pam + feats_cam
         preds_pamcam = self.decoder_pamcam(feats_sum)
         # forward according to the mode
-        if self.mode == 'TRAIN':
+        if self.mode in ['TRAIN', 'TRAIN_DEVELOP']:
             outputs_dict = self.customizepredsandlosses(
-                predictions=preds_pamcam, targets=targets, backbone_outputs=backbone_outputs, losses_cfg=self.cfg['losses'], img_size=img_size, auto_calc_loss=False,
+                seg_logits=preds_pamcam, targets=data_meta.gettargets(), backbone_outputs=backbone_outputs, losses_cfg=self.cfg['losses'], img_size=img_size, auto_calc_loss=False,
             )
             preds_pamcam = outputs_dict.pop('loss_cls')
             preds_pam = self.decoder_pam(feats_pam)
@@ -85,7 +86,10 @@ class DANet(BaseSegmentor):
             preds_cam = self.decoder_cam(feats_cam)
             preds_cam = F.interpolate(preds_cam, size=img_size, mode='bilinear', align_corners=self.align_corners)
             outputs_dict.update({'loss_cls_pam': preds_pam, 'loss_cls_cam': preds_cam, 'loss_cls_pamcam': preds_pamcam})
-            return self.calculatelosses(
-                predictions=outputs_dict, targets=targets, losses_cfg=self.cfg['losses']
+            loss, losses_log_dict = self.calculatelosses(
+                predictions=outputs_dict, targets=data_meta.gettargets(), losses_cfg=self.cfg['losses']
             )
-        return preds_pamcam
+            outputs = SSSegOutputStructure(mode=self.mode, loss=loss, losses_log_dict=losses_log_dict) if self.mode == 'TRAIN' else SSSegOutputStructure(mode=self.mode, loss=loss, losses_log_dict=losses_log_dict, seg_logits=preds_pamcam)
+        else:
+            outputs = SSSegOutputStructure(mode=self.mode, seg_logits=preds_pamcam)
+        return outputs

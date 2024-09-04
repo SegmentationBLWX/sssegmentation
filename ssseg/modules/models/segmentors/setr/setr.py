@@ -9,6 +9,7 @@ import torch.nn as nn
 import torch.nn.functional as F
 from .mla import MLANeck
 from ..base import BaseSegmentor
+from ....utils import SSSegOutputStructure
 from ...backbones import BuildActivation, BuildNormalization
 
 
@@ -38,10 +39,10 @@ class SETRUP(BaseSegmentor):
         # freeze normalization layer if necessary
         if cfg.get('is_freeze_norm', False): self.freezenormalization()
     '''forward'''
-    def forward(self, x, targets=None):
-        img_size = x.size(2), x.size(3)
+    def forward(self, data_meta):
+        img_size = data_meta.images.size(2), data_meta.images.size(3)
         # feed to backbone network
-        backbone_outputs = self.transforminputs(self.backbone_net(x), selected_indices=self.cfg['backbone'].get('selected_indices'))
+        backbone_outputs = self.transforminputs(self.backbone_net(data_meta.images), selected_indices=self.cfg['backbone'].get('selected_indices'))
         # feed to norm layer
         assert len(backbone_outputs) == len(self.norm_layers)
         for idx in range(len(backbone_outputs)):
@@ -49,7 +50,7 @@ class SETRUP(BaseSegmentor):
         # feed to decoder
         seg_logits = self.decoder(backbone_outputs[-1])
         # forward according to the mode
-        if self.mode == 'TRAIN':
+        if self.mode in ['TRAIN', 'TRAIN_DEVELOP']:
             seg_logits = F.interpolate(seg_logits, size=img_size, mode='bilinear', align_corners=self.align_corners)
             outputs_dict = {'loss_cls': seg_logits}
             backbone_outputs = backbone_outputs[:-1]
@@ -57,10 +58,11 @@ class SETRUP(BaseSegmentor):
                 seg_logits_aux = dec(out)
                 seg_logits_aux = F.interpolate(seg_logits_aux, size=img_size, mode='bilinear', align_corners=self.align_corners)
                 outputs_dict[f'loss_aux{idx+1}'] = seg_logits_aux
-            return self.calculatelosses(
-                predictions=outputs_dict, targets=targets, losses_cfg=self.cfg['losses']
-            )
-        return seg_logits
+            loss, losses_log_dict = self.calculatelosses(predictions=outputs_dict, targets=data_meta.gettargets(), losses_cfg=self.cfg['losses'])
+            outputs = SSSegOutputStructure(mode=self.mode, loss=loss, losses_log_dict=losses_log_dict) if self.mode == 'TRAIN' else SSSegOutputStructure(mode=self.mode, loss=loss, losses_log_dict=losses_log_dict, seg_logits=seg_logits)
+        else:
+            outputs = SSSegOutputStructure(mode=self.mode, seg_logits=seg_logits)
+        return outputs
     '''norm layer'''
     def norm(self, x, norm_layer):
         n, c, h, w = x.shape
@@ -125,21 +127,21 @@ class SETRMLA(BaseSegmentor):
         # freeze normalization layer if necessary
         if cfg.get('is_freeze_norm', False): self.freezenormalization()
     '''forward'''
-    def forward(self, x, targets=None):
-        img_size = x.size(2), x.size(3)
+    def forward(self, data_meta):
+        img_size = data_meta.images.size(2), data_meta.images.size(3)
         # feed to backbone network
-        backbone_outputs = self.transforminputs(self.backbone_net(x), selected_indices=self.cfg['backbone'].get('selected_indices'))
+        backbone_outputs = self.transforminputs(self.backbone_net(data_meta.images), selected_indices=self.cfg['backbone'].get('selected_indices'))
         # feed to mla neck
         feats_list = self.mla_neck(list(backbone_outputs))
         # feed to decoder
-        outputs = []
+        feats_outputs = []
         assert len(feats_list) == len(self.up_convs)
         for feats, up_conv in zip(feats_list, self.up_convs):
-            outputs.append(up_conv(feats))
-        outputs = torch.cat(outputs, dim=1)
-        seg_logits = self.decoder(outputs)
+            feats_outputs.append(up_conv(feats))
+        feats_outputs = torch.cat(feats_outputs, dim=1)
+        seg_logits = self.decoder(feats_outputs)
         # forward according to the mode
-        if self.mode == 'TRAIN':
+        if self.mode in ['TRAIN', 'TRAIN_DEVELOP']:
             seg_logits = F.interpolate(seg_logits, size=img_size, mode='bilinear', align_corners=self.align_corners)
             outputs_dict = {'loss_cls': seg_logits}
             feats_list = feats_list[-len(self.auxiliary_decoders):]
@@ -147,10 +149,11 @@ class SETRMLA(BaseSegmentor):
                 seg_logits_aux = dec(out)
                 seg_logits_aux = F.interpolate(seg_logits_aux, size=img_size, mode='bilinear', align_corners=self.align_corners)
                 outputs_dict[f'loss_aux{idx+1}'] = seg_logits_aux
-            return self.calculatelosses(
-                predictions=outputs_dict, targets=targets, losses_cfg=self.cfg['losses']
-            )
-        return seg_logits
+            loss, losses_log_dict = self.calculatelosses(predictions=outputs_dict, targets=data_meta.gettargets(), losses_cfg=self.cfg['losses'])
+            outputs = SSSegOutputStructure(mode=self.mode, loss=loss, losses_log_dict=losses_log_dict) if self.mode == 'TRAIN' else SSSegOutputStructure(mode=self.mode, loss=loss, losses_log_dict=losses_log_dict, seg_logits=seg_logits)
+        else:
+            outputs = SSSegOutputStructure(mode=self.mode, seg_logits=seg_logits)
+        return outputs
     '''build decoder'''
     def builddecoder(self, decoder_cfg):
         layers, norm_cfg, act_cfg, num_classes, align_corners, kernel_size = [], self.norm_cfg.copy(), self.act_cfg.copy(), self.cfg['num_classes'], self.align_corners, decoder_cfg['kernel_size']

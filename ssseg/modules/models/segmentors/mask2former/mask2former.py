@@ -9,6 +9,7 @@ import torch
 import torch.nn.functional as F
 import torch.distributed as dist
 from ..base import BaseSegmentor
+from ....utils import SSSegOutputStructure
 from .transformers import MultiScaleMaskedTransformerDecoder, MSDeformAttnPixelDecoder, SetCriterion, HungarianMatcher
 
 
@@ -47,11 +48,11 @@ class Mask2Former(BaseSegmentor):
         # freeze normalization layer if necessary
         if cfg.get('is_freeze_norm', False): self.freezenormalization()
     '''forward'''
-    def forward(self, x, targets=None):
+    def forward(self, data_meta):
         from torch.cuda.amp import autocast
-        img_size = x.shape[-2:]
+        img_size = data_meta.images.size(2), data_meta.images.size(3)
         # feed to backbone network
-        backbone_outputs = self.transforminputs(self.backbone_net(x), selected_indices=self.cfg['backbone'].get('selected_indices'))
+        backbone_outputs = self.transforminputs(self.backbone_net(data_meta.images), selected_indices=self.cfg['backbone'].get('selected_indices'))
         # feed to pixel decoder
         assert len(backbone_outputs) == 4
         features = {
@@ -62,8 +63,9 @@ class Mask2Former(BaseSegmentor):
         # feed to predictor
         predictions = self.predictor(multi_scale_features, mask_features, None)
         # forward according to the mode
-        if self.mode == 'TRAIN':
-            losses_dict = self.criterion(predictions, targets)
+        outputs = SSSegOutputStructure(mode=self.mode, auto_validate=False)
+        if self.mode in ['TRAIN', 'TRAIN_DEVELOP']:
+            losses_dict = self.criterion(predictions, data_meta.gettargets())
             for k in list(losses_dict.keys()):
                 if k in self.criterion.weight_dict:
                     losses_dict[k] *= self.criterion.weight_dict[k]
@@ -77,7 +79,9 @@ class Mask2Former(BaseSegmentor):
                 dist.all_reduce(loss_value.div_(dist.get_world_size()))
                 losses_log_dict[loss_key] = loss_value.item()
             losses_log_dict.update({'loss_total': sum(losses_log_dict.values())})
-            return loss, losses_log_dict
+            outputs.setvariable('loss', loss)
+            outputs.setvariable('losses_log_dict', losses_log_dict)
+            if self.mode in ['TRAIN']: return outputs
         mask_cls_results = predictions['pred_logits']
         mask_pred_results = predictions['pred_masks']
         mask_pred_results = F.interpolate(mask_pred_results, size=img_size, mode='bilinear', align_corners=self.align_corners)
@@ -87,5 +91,6 @@ class Mask2Former(BaseSegmentor):
             mask_pred = mask_pred.sigmoid()
             semseg = torch.einsum('qc,qhw->chw', mask_cls, mask_pred)
             predictions.append(semseg.unsqueeze(0))
-        predictions = torch.cat(predictions, dim=0)
-        return predictions
+        seg_logits = torch.cat(predictions, dim=0)
+        outputs.setvariable('seg_logits', seg_logits)            
+        return outputs

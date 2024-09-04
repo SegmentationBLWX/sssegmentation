@@ -10,6 +10,7 @@ import torch.nn as nn
 import torch.nn.functional as F
 from ..base import BaseSegmentor
 from .imagelevel import ImageLevelContext
+from ....utils import SSSegOutputStructure
 from .semanticlevel import SemanticLevelContext
 from ...backbones import BuildActivation, BuildNormalization
 
@@ -68,10 +69,10 @@ class ISNet(BaseSegmentor):
         # freeze normalization layer if necessary
         if cfg.get('is_freeze_norm', False): self.freezenormalization()
     '''forward'''
-    def forward(self, x, targets=None):
-        img_size = x.size(2), x.size(3)
+    def forward(self, data_meta):
+        img_size = data_meta.images.size(2), data_meta.images.size(3)
         # feed to backbone network
-        backbone_outputs = self.transforminputs(self.backbone_net(x), selected_indices=self.cfg['backbone'].get('selected_indices'))
+        backbone_outputs = self.transforminputs(self.backbone_net(data_meta.images), selected_indices=self.cfg['backbone'].get('selected_indices'))
         # feed to bottleneck
         feats = self.bottleneck(backbone_outputs[-1])
         # feed to image-level context module
@@ -90,14 +91,17 @@ class ISNet(BaseSegmentor):
             feats_sl = torch.cat([feats_sl, shortcut_out], dim=1)
         preds_stage2 = self.decoder_stage2(feats_sl)
         # return according to the mode
-        if self.mode == 'TRAIN':
+        if self.mode in ['TRAIN', 'TRAIN_DEVELOP']:
             outputs_dict = self.customizepredsandlosses(
-                predictions=preds_stage2, targets=targets, backbone_outputs=backbone_outputs, losses_cfg=self.cfg['losses'], img_size=img_size, auto_calc_loss=False,
+                seg_logits=preds_stage2, targets=data_meta.gettargets(), backbone_outputs=backbone_outputs, losses_cfg=self.cfg['losses'], img_size=img_size, auto_calc_loss=False,
             )
             preds_stage2 = outputs_dict.pop('loss_cls')
             preds_stage1 = F.interpolate(preds_stage1, size=img_size, mode='bilinear', align_corners=self.align_corners)
             outputs_dict.update({'loss_cls_stage1': preds_stage1, 'loss_cls_stage2': preds_stage2})
-            return self.calculatelosses(
-                predictions=outputs_dict, targets=targets, losses_cfg=self.cfg['losses']
+            loss, losses_log_dict = self.calculatelosses(
+                predictions=outputs_dict, targets=data_meta.gettargets(), losses_cfg=self.cfg['losses']
             )
-        return preds_stage2
+            outputs = SSSegOutputStructure(mode=self.mode, loss=loss, losses_log_dict=losses_log_dict) if self.mode == 'TRAIN' else SSSegOutputStructure(mode=self.mode, loss=loss, losses_log_dict=losses_log_dict, seg_logits=preds_stage2)
+        else:
+            outputs = SSSegOutputStructure(mode=self.mode, seg_logits=preds_stage2)
+        return outputs

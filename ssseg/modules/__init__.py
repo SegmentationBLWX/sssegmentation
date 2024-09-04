@@ -12,5 +12,6 @@ from .models import (
 )
 from .utils import (
     initslurm, setrandomseed, touchdir, loadckpts, saveckpts, loadpretrainedweights, symlink, judgefileexist, postprocesspredgtpairs,
-    LoggerHandleBuilder, BuildLoggerHandle, TrainingLoggingManager, BaseModuleBuilder, ConfigParser, EnvironmentCollector
+    LoggerHandleBuilder, BuildLoggerHandle, TrainingLoggingManager, BaseModuleBuilder, ConfigParser, EnvironmentCollector, SSSegInputStructure,
+    SSSegOutputStructure,
 )

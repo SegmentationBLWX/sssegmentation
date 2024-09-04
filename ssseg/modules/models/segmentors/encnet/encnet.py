@@ -8,6 +8,7 @@ import torch
 import torch.nn as nn
 import torch.nn.functional as F
 from ..base import BaseSegmentor
+from ....utils import SSSegOutputStructure
 from .contextencoding import ContextEncoding
 from ...backbones import BuildActivation, BuildNormalization
 
@@ -20,50 +21,42 @@ class ENCNet(BaseSegmentor):
         # build encoding
         # --base structurs
         self.bottleneck = nn.Sequential(
-            nn.Conv2d(head_cfg['in_channels_list'][-1], head_cfg['feats_channels'], kernel_size=3, stride=1, padding=1, bias=False),
-            BuildNormalization(placeholder=head_cfg['feats_channels'], norm_cfg=norm_cfg),
-            BuildActivation(act_cfg),
+            nn.Conv2d(head_cfg['in_channels_list'][-1], head_cfg['feats_channels'], kernel_size=3, stride=1, padding=1, bias=False), 
+            BuildNormalization(placeholder=head_cfg['feats_channels'], norm_cfg=norm_cfg), BuildActivation(act_cfg),
         )
-        self.enc_module = ContextEncoding(
-            in_channels=head_cfg['feats_channels'], num_codes=head_cfg['num_codes'], norm_cfg=norm_cfg, act_cfg=act_cfg,
-        )
+        self.enc_module = ContextEncoding(in_channels=head_cfg['feats_channels'], num_codes=head_cfg['num_codes'], norm_cfg=norm_cfg, act_cfg=act_cfg)
         # --extra structures
         extra_cfg = head_cfg['extra']
         if extra_cfg['add_lateral']:
             self.lateral_convs = nn.ModuleList()
             for in_channels in head_cfg['in_channels_list'][:-1]:
                 self.lateral_convs.append(
-                    nn.Conv2d(in_channels, head_cfg['feats_channels'], kernel_size=1, stride=1, padding=0),
-                    BuildNormalization(placeholder=head_cfg['feats_channels'], norm_cfg=norm_cfg),
-                    BuildActivation(act_cfg),
+                    nn.Conv2d(in_channels, head_cfg['feats_channels'], kernel_size=1, stride=1, padding=0), 
+                    BuildNormalization(placeholder=head_cfg['feats_channels'], norm_cfg=norm_cfg), BuildActivation(act_cfg),
                 )
             self.fusion = nn.Sequential(
-                nn.Conv2d(len(head_cfg['in_channels_list']) * head_cfg['feats_channels'], head_cfg['feats_channels'], kernel_size=3, stride=1, padding=1),
-                BuildNormalization(placeholder=head_cfg['feats_channels'], norm_cfg=norm_cfg),
-                BuildActivation(act_cfg),
+                nn.Conv2d(len(head_cfg['in_channels_list']) * head_cfg['feats_channels'], head_cfg['feats_channels'], kernel_size=3, stride=1, padding=1), 
+                BuildNormalization(placeholder=head_cfg['feats_channels'], norm_cfg=norm_cfg), BuildActivation(act_cfg),
             )
         if extra_cfg['use_se_loss']:
             self.se_layer = nn.Linear(head_cfg['feats_channels'], cfg['num_classes'])
         # build decoder
         self.decoder = nn.Sequential(
-            nn.Dropout2d(head_cfg['dropout']),
-            nn.Conv2d(head_cfg['feats_channels'], cfg['num_classes'], kernel_size=1, stride=1, padding=0)
+            nn.Dropout2d(head_cfg['dropout']), nn.Conv2d(head_cfg['feats_channels'], cfg['num_classes'], kernel_size=1, stride=1, padding=0)
         )
         # build auxiliary decoder
         self.setauxiliarydecoder(cfg['auxiliary'])
         # freeze normalization layer if necessary
         if cfg.get('is_freeze_norm', False): self.freezenormalization()
     '''forward'''
-    def forward(self, x, targets=None):
-        img_size = x.size(2), x.size(3)
+    def forward(self, data_meta):
+        img_size = data_meta.images.size(2), data_meta.images.size(3)
         # feed to backbone network
-        backbone_outputs = self.transforminputs(self.backbone_net(x), selected_indices=self.cfg['backbone'].get('selected_indices'))
+        backbone_outputs = self.transforminputs(self.backbone_net(data_meta.images), selected_indices=self.cfg['backbone'].get('selected_indices'))
         # feed to context encoding
         feats = self.bottleneck(backbone_outputs[-1])
         if hasattr(self, 'lateral_convs'):
-            lateral_outs = [
-                F.interpolate(lateral_conv(backbone_outputs[idx]), size=feats.shape[2:], mode='bilinear', align_corners=self.align_corners) for idx, lateral_conv in enumerate(self.lateral_convs)
-            ]
+            lateral_outs = [F.interpolate(lateral_conv(backbone_outputs[idx]), size=feats.shape[2:], mode='bilinear', align_corners=self.align_corners) for idx, lateral_conv in enumerate(self.lateral_convs)]
             feats = self.fusion(torch.cat([feats, *lateral_outs], dim=1))
         encode_feats, feats = self.enc_module(feats)
         if hasattr(self, 'se_layer'):
@@ -71,24 +64,22 @@ class ENCNet(BaseSegmentor):
         # feed to decoder
         seg_logits = self.decoder(feats)
         # forward according to the mode
-        if self.mode == 'TRAIN':
-            # --base outputs
+        if self.mode in ['TRAIN', 'TRAIN_DEVELOP']:
             outputs_dict = self.customizepredsandlosses(
-                predictions=seg_logits, targets=targets, backbone_outputs=backbone_outputs, losses_cfg=self.cfg['losses'], img_size=img_size, auto_calc_loss=False,
+                seg_logits=seg_logits, targets=data_meta.gettargets(), backbone_outputs=backbone_outputs, losses_cfg=self.cfg['losses'], img_size=img_size, auto_calc_loss=False,
             )
-            # --add se results
-            map_preds_to_tgts_dict = None
+            map_preds_to_tgts_dict, targets = None, data_meta.gettargets()
             if hasattr(self, 'se_layer'):
                 outputs_dict.update({'loss_se': seg_logits_se})
-                targets['seg_target_onehot'] = self.onehot(targets['seg_target'], self.cfg['num_classes'])
-                map_preds_to_tgts_dict = {
-                    'loss_aux': 'seg_target', 'loss_se': 'seg_target_onehot', 'loss_cls': 'seg_target',
-                }
-            # --calculate and return losses
-            return self.calculatelosses(
+                targets['seg_targets_onehot'] = self.onehot(targets['seg_targets'], self.cfg['num_classes'])
+                map_preds_to_tgts_dict = {'loss_aux': 'seg_targets', 'loss_se': 'seg_targets_onehot', 'loss_cls': 'seg_targets'}
+            loss, losses_log_dict = self.calculatelosses(
                 predictions=outputs_dict, targets=targets, losses_cfg=self.cfg['losses'], map_preds_to_tgts_dict=map_preds_to_tgts_dict,
             )
-        return seg_logits
+            outputs = SSSegOutputStructure(mode=self.mode, loss=loss, losses_log_dict=losses_log_dict) if self.mode == 'TRAIN' else SSSegOutputStructure(mode=self.mode, loss=loss, losses_log_dict=losses_log_dict, seg_logits=seg_logits)
+        else:
+            outputs = SSSegOutputStructure(mode=self.mode, seg_logits=seg_logits)
+        return outputs
     '''convert to onehot labels'''
     def onehot(self, labels, num_classes):
         batch_size = labels.size(0)

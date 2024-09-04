@@ -13,6 +13,7 @@ from ..base import BaseSegmentor
 from ..base import SelfAttentionBlock
 from .memoryv2 import FeaturesMemoryV2
 from ..pspnet import PyramidPoolingModule
+from ....utils import SSSegOutputStructure
 from ...backbones import BuildActivation, BuildNormalization
 
 
@@ -86,10 +87,10 @@ class MCIBIPlusPlus(BaseSegmentor):
         # freeze normalization layer if necessary
         if cfg.get('is_freeze_norm', False): self.freezenormalization()
     '''forward'''
-    def forward(self, x, targets=None, **kwargs):
-        img_size = x.size(2), x.size(3)
+    def forward(self, data_meta, **kwargs):
+        img_size = data_meta.images.size(2), data_meta.images.size(3)
         # feed to backbone network
-        backbone_outputs = self.transforminputs(self.backbone_net(x), selected_indices=self.cfg['backbone'].get('selected_indices'))
+        backbone_outputs = self.transforminputs(self.backbone_net(data_meta.images), selected_indices=self.cfg['backbone'].get('selected_indices'))
         # feed to context within image module
         if hasattr(self, 'context_within_image_module'):
             feats_cwi = self.context_within_image_module(backbone_outputs[-1])
@@ -105,9 +106,9 @@ class MCIBIPlusPlus(BaseSegmentor):
         assert memory_input.shape[2:] == memory_gather_logits.shape[2:]
         if (self.mode == 'TRAIN') and (kwargs['epoch'] < self.cfg['head'].get('warmup_epoch', 0)):
             with torch.no_grad():
-                gt = targets['seg_target']
+                gt = data_meta.gettargets()['seg_targets']
                 gt = F.interpolate(gt.unsqueeze(1), size=memory_gather_logits.shape[2:], mode='nearest')[:, 0, :, :]
-                assert len(gt.shape) == 3, 'seg_target format error'
+                assert len(gt.shape) == 3, 'seg_targets format error'
                 preds_gt = gt.new_zeros(memory_gather_logits.shape).type_as(memory_gather_logits)
                 valid_mask = (gt >= 0) & (gt < self.cfg['num_classes'])
                 idxs = torch.nonzero(valid_mask, as_tuple=True)
@@ -144,25 +145,25 @@ class MCIBIPlusPlus(BaseSegmentor):
                 memory_output = torch.cat([memory_output, feats_cwi], dim=1)
         preds_cls = self.decoder_cls(memory_output)
         # forward according to the mode
-        if self.mode == 'TRAIN':
+        if self.mode in ['TRAIN', 'TRAIN_DEVELOP']:
             outputs_dict = self.customizepredsandlosses(
-                predictions=preds_cls, targets=targets, backbone_outputs=backbone_outputs, losses_cfg=self.cfg['losses'], img_size=img_size, auto_calc_loss=False,
+                seg_logits=preds_cls, targets=data_meta.gettargets(), backbone_outputs=backbone_outputs, losses_cfg=self.cfg['losses'], img_size=img_size, auto_calc_loss=False,
             )
             preds_cls = outputs_dict.pop('loss_cls')
             preds_pr = F.interpolate(preds_pr, size=img_size, mode='bilinear', align_corners=self.align_corners)
-            outputs_dict.update({
-                'loss_pr': preds_pr, 'loss_cls': preds_cls,
-            })
+            outputs_dict.update({'loss_pr': preds_pr, 'loss_cls': preds_cls})
             if hasattr(self, 'context_within_image_module') and hasattr(self, 'decoder_cwi'): 
                 preds_cwi = F.interpolate(preds_cwi, size=img_size, mode='bilinear', align_corners=self.align_corners)
                 outputs_dict.update({'loss_cwi': preds_cwi})
             with torch.no_grad():
                 self.memory_module.update(
                     features=F.interpolate(pixel_representations, size=img_size, mode='bilinear', align_corners=self.align_corners), 
-                    segmentation=targets['seg_target'], learning_rate=kwargs['learning_rate'], **self.cfg['head']['update_cfg']
+                    segmentation=data_meta.gettargets()['seg_targets'], learning_rate=kwargs['learning_rate'], **self.cfg['head']['update_cfg']
                 )
             loss, losses_log_dict = self.calculatelosses(
-                predictions=outputs_dict, targets=targets, losses_cfg=self.cfg['losses'],
+                predictions=outputs_dict, targets=data_meta.gettargets(), losses_cfg=self.cfg['losses'],
             )
-            return loss, losses_log_dict
-        return preds_cls
+            outputs = SSSegOutputStructure(mode=self.mode, loss=loss, losses_log_dict=losses_log_dict) if self.mode == 'TRAIN' else SSSegOutputStructure(mode=self.mode, loss=loss, losses_log_dict=losses_log_dict, seg_logits=preds_cls)
+        else:
+            outputs = SSSegOutputStructure(mode=self.mode, seg_logits=preds_cls)
+        return outputs

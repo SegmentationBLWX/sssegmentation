@@ -30,7 +30,7 @@ class SAM(BaseSegmentor):
         backbone = cfg.pop('backbone')
         super(SAM, self).__init__(cfg=cfg, mode=mode)
         cfg['backbone'] = backbone
-        assert mode in ['TEST'], f'only support test mode for {self.__class__.__name__} now'
+        assert mode in ['TEST'], f'only support TEST mode for {self.__class__.__name__}'
         pixel_mean = cfg.get('pixel_mean', [123.675, 116.28, 103.53])
         pixel_std = cfg.get('pixel_std', [58.395, 57.12, 57.375])
         self.image_encoder = BuildBackbone(cfg['backbone'])
@@ -43,7 +43,7 @@ class SAM(BaseSegmentor):
     def device(self):
         return self.pixel_mean.device
     '''forward'''
-    def forward(self, x, targets=None):
+    def forward(self, data_meta):
         raise NotImplementedError(f'train {self.__class__.__name__} not to be implemented')
     '''inference'''
     @torch.no_grad()

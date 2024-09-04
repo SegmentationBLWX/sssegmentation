@@ -13,6 +13,7 @@ from ..deeplabv3 import ASPP
 from ..base import BaseSegmentor
 from .memory import FeaturesMemory
 from ..pspnet import PyramidPoolingModule
+from ....utils import SSSegOutputStructure
 from ...backbones import BuildActivation, BuildNormalization
 
 
@@ -77,10 +78,10 @@ class MCIBI(BaseSegmentor):
         # freeze normalization layer if necessary
         if cfg.get('is_freeze_norm', False): self.freezenormalization()
     '''forward'''
-    def forward(self, x, targets=None, **kwargs):
-        img_size = x.size(2), x.size(3)
+    def forward(self, data_meta, **kwargs):
+        img_size = data_meta.images.size(2), data_meta.images.size(3)
         # feed to backbone network
-        backbone_outputs = self.transforminputs(self.backbone_net(x), selected_indices=self.cfg['backbone'].get('selected_indices'))
+        backbone_outputs = self.transforminputs(self.backbone_net(data_meta.images), selected_indices=self.cfg['backbone'].get('selected_indices'))
         if hasattr(self, 'norm_layers'):
             assert len(backbone_outputs) == len(self.norm_layers)
             for idx in range(len(backbone_outputs)):
@@ -97,9 +98,9 @@ class MCIBI(BaseSegmentor):
         # feed to decoder
         preds_stage2 = self.decoder_stage2(memory_output)
         # forward according to the mode
-        if self.mode == 'TRAIN':
+        if self.mode in ['TRAIN', 'TRAIN_DEVELOP']:
             outputs_dict = self.customizepredsandlosses(
-                predictions=preds_stage2, targets=targets, backbone_outputs=backbone_outputs, losses_cfg=self.cfg['losses'], img_size=img_size, auto_calc_loss=False,
+                seg_logits=preds_stage2, targets=data_meta.gettargets(), backbone_outputs=backbone_outputs, losses_cfg=self.cfg['losses'], img_size=img_size, auto_calc_loss=False,
             )
             preds_stage2 = outputs_dict.pop('loss_cls')
             preds_stage1 = F.interpolate(preds_stage1, size=img_size, mode='bilinear', align_corners=self.align_corners)
@@ -107,10 +108,10 @@ class MCIBI(BaseSegmentor):
             with torch.no_grad():
                 self.memory_module.update(
                     features=F.interpolate(memory_input, size=img_size, mode='bilinear', align_corners=self.align_corners), 
-                    segmentation=targets['seg_target'], learning_rate=kwargs['learning_rate'], **self.cfg['head']['update_cfg']
+                    segmentation=data_meta.gettargets()['seg_targets'], learning_rate=kwargs['learning_rate'], **self.cfg['head']['update_cfg']
                 )
             loss, losses_log_dict = self.calculatelosses(
-                predictions=outputs_dict, targets=targets, losses_cfg=self.cfg['losses']
+                predictions=outputs_dict, targets=data_meta.gettargets(), losses_cfg=self.cfg['losses']
             )
             if (kwargs['epoch'] > 1) and self.cfg['head']['use_loss']:
                 loss_memory, loss_memory_log = self.calculatememoryloss(stored_memory)
@@ -118,8 +119,10 @@ class MCIBI(BaseSegmentor):
                 losses_log_dict['loss_memory'] = loss_memory_log
                 total = losses_log_dict.pop('total') + losses_log_dict['loss_memory']
                 losses_log_dict['total'] = total
-            return loss, losses_log_dict
-        return preds_stage2
+            outputs = SSSegOutputStructure(mode=self.mode, loss=loss, losses_log_dict=losses_log_dict) if self.mode == 'TRAIN' else SSSegOutputStructure(mode=self.mode, loss=loss, losses_log_dict=losses_log_dict, seg_logits=preds_stage2)
+        else:
+            outputs = SSSegOutputStructure(mode=self.mode, seg_logits=preds_stage2)
+        return outputs
     '''norm'''
     def norm(self, x, norm_layer):
         n, c, h, w = x.shape

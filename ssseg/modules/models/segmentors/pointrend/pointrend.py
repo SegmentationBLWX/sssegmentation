@@ -9,11 +9,12 @@ import numpy as np
 import torch.nn as nn
 import torch.nn.functional as F
 from ..base import FPN, BaseSegmentor
+from ....utils import SSSegOutputStructure
+from ...backbones import BuildActivation, BuildNormalization
 try:
     from mmcv.ops import point_sample as PointSample
 except:
     PointSample = None
-from ...backbones import BuildActivation, BuildNormalization
 
 
 '''PointRend'''
@@ -64,10 +65,10 @@ class PointRend(BaseSegmentor):
         # freeze normalization layer if necessary
         if cfg.get('is_freeze_norm', False): self.freezenormalization()
     '''forward'''
-    def forward(self, x, targets=None):
-        img_size = x.size(2), x.size(3)
+    def forward(self, data_meta):
+        img_size = data_meta.images.size(2), data_meta.images.size(3)
         # feed to backbone network
-        backbone_outputs = self.transforminputs(self.backbone_net(x), selected_indices=self.cfg['backbone'].get('selected_indices'))
+        backbone_outputs = self.transforminputs(self.backbone_net(data_meta.images), selected_indices=self.cfg['backbone'].get('selected_indices'))
         # feed to fpn
         fpn_outs = self.fpn_neck(list(backbone_outputs))
         feats = self.scale_heads[0](fpn_outs[0])
@@ -76,25 +77,30 @@ class PointRend(BaseSegmentor):
         # feed to auxiliary decoder
         seg_logits_aux = self.auxiliary_decoder(feats)
         feats = fpn_outs[0]
-        # if mode is TRAIN
-        if self.mode == 'TRAIN':
+        # if mode is TRAIN or TRAIN_DEVELOP
+        outputs = SSSegOutputStructure(mode=self.mode, auto_validate=False)
+        if self.mode in ['TRAIN', 'TRAIN_DEVELOP']:
             with torch.no_grad():
                 points = self.getpointstrain(seg_logits_aux, self.calculateuncertainty, cfg=self.cfg['head']['train'])
             fine_grained_point_feats = self.getfinegrainedpointfeats([feats], points)
             coarse_point_feats = self.getcoarsepointfeats(seg_logits_aux, points)
-            outputs = torch.cat([fine_grained_point_feats, coarse_point_feats], dim=1)
+            feats_outputs = torch.cat([fine_grained_point_feats, coarse_point_feats], dim=1)
             for fc in self.fcs:
-                outputs = fc(outputs)
+                feats_outputs = fc(feats_outputs)
                 if self.coarse_pred_each_layer:
-                    outputs = torch.cat([outputs, coarse_point_feats], dim=1)
-            seg_logits = self.decoder(outputs)
-            point_labels = PointSample(targets['seg_target'].unsqueeze(1).float(), points, mode='nearest', align_corners=self.align_corners)
+                    feats_outputs = torch.cat([feats_outputs, coarse_point_feats], dim=1)
+            seg_logits = self.decoder(feats_outputs)
+            point_labels = PointSample(data_meta.gettargets()['seg_targets'].unsqueeze(1).float(), points, mode='nearest', align_corners=self.align_corners)
             point_labels = point_labels.squeeze(1).long()
+            targets = data_meta.gettargets()
             targets['point_labels'] = point_labels
             seg_logits_aux = F.interpolate(seg_logits_aux, size=img_size, mode='bilinear', align_corners=self.align_corners)
-            return self.calculatelosses(
-                predictions={'loss_cls': seg_logits, 'loss_aux': seg_logits_aux}, targets=targets, losses_cfg=self.cfg['losses'], map_preds_to_tgts_dict={'loss_cls': 'point_labels', 'loss_aux': 'seg_target'}
+            loss, losses_log_dict = self.calculatelosses(
+                predictions={'loss_cls': seg_logits, 'loss_aux': seg_logits_aux}, targets=targets, losses_cfg=self.cfg['losses'], map_preds_to_tgts_dict={'loss_cls': 'point_labels', 'loss_aux': 'seg_targets'}
             )
+            outputs.setvariable('loss', loss)
+            outputs.setvariable('losses_log_dict', losses_log_dict)
+            if self.mode in ['TRAIN']: return outputs
         # if mode is TEST
         refined_seg_logits = seg_logits_aux.clone()
         for _ in range(self.cfg['head']['test']['subdivision_steps']):
@@ -115,7 +121,8 @@ class PointRend(BaseSegmentor):
             refined_seg_logits = refined_seg_logits.reshape(batch_size, channels, height * width)
             refined_seg_logits = refined_seg_logits.scatter_(2, point_indices, seg_logits)
             refined_seg_logits = refined_seg_logits.view(batch_size, channels, height, width)
-        return refined_seg_logits
+        outputs.setvariable('seg_logits', refined_seg_logits)
+        return outputs
     '''sample from coarse grained features'''
     def getcoarsepointfeats(self, seg_logits, points):
         coarse_feats = PointSample(seg_logits, points, align_corners=self.align_corners)

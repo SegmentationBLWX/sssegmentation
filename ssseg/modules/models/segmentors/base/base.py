@@ -11,6 +11,7 @@ import torch.nn as nn
 import torch.nn.functional as F
 import torch.distributed as dist
 from ...losses import BuildLoss
+from ....utils import SSSegInputStructure
 from ...samplers import BuildPixelSampler
 from ...backbones import BuildBackbone, BuildActivation, BuildNormalization, NormalizationBuilder
 
@@ -21,7 +22,7 @@ class BaseSegmentor(nn.Module):
         super(BaseSegmentor, self).__init__()
         self.cfg = cfg
         self.mode = mode
-        assert self.mode in ['TRAIN', 'TEST']
+        assert self.mode in ['TRAIN', 'TEST', 'TRAIN_DEVELOP']
         # parse align_corners, normalization layer and activation layer cfg
         for key in ['align_corners', 'norm_cfg', 'act_cfg']:
             if key in cfg: setattr(self, key, cfg[key])
@@ -30,25 +31,25 @@ class BaseSegmentor(nn.Module):
         # build pixel sampler
         self.setpixelsampler(cfg=cfg)
     '''forward'''
-    def forward(self, x, targets=None):
+    def forward(self, data_meta):
         raise NotImplementedError('not to be implemented')
     '''customizepredsandlosses'''
-    def customizepredsandlosses(self, predictions, targets, backbone_outputs, losses_cfg, img_size, auto_calc_loss=True, map_preds_to_tgts_dict=None):
-        predictions = F.interpolate(predictions, size=img_size, mode='bilinear', align_corners=self.align_corners)
-        outputs_dict = {'loss_cls': predictions}
+    def customizepredsandlosses(self, seg_logits, targets, backbone_outputs, losses_cfg, img_size, auto_calc_loss=True, map_preds_to_tgts_dict=None):
+        seg_logits = F.interpolate(seg_logits, size=img_size, mode='bilinear', align_corners=self.align_corners)
+        outputs_dict = {'loss_cls': seg_logits}
         if hasattr(self, 'auxiliary_decoder'):
             backbone_outputs = backbone_outputs[:-1]
             if isinstance(self.auxiliary_decoder, nn.ModuleList):
                 assert len(backbone_outputs) >= len(self.auxiliary_decoder)
                 backbone_outputs = backbone_outputs[-len(self.auxiliary_decoder):]
                 for idx, (out, dec) in enumerate(zip(backbone_outputs, self.auxiliary_decoder)):
-                    predictions_aux = dec(out)
-                    predictions_aux = F.interpolate(predictions_aux, size=img_size, mode='bilinear', align_corners=self.align_corners)
-                    outputs_dict[f'loss_aux{idx+1}'] = predictions_aux
+                    seg_logits_aux = dec(out)
+                    seg_logits_aux = F.interpolate(seg_logits_aux, size=img_size, mode='bilinear', align_corners=self.align_corners)
+                    outputs_dict[f'loss_aux{idx+1}'] = seg_logits_aux
             else:
-                predictions_aux = self.auxiliary_decoder(backbone_outputs[-1])
-                predictions_aux = F.interpolate(predictions_aux, size=img_size, mode='bilinear', align_corners=self.align_corners)
-                outputs_dict = {'loss_cls': predictions, 'loss_aux': predictions_aux}
+                seg_logits_aux = self.auxiliary_decoder(backbone_outputs[-1])
+                seg_logits_aux = F.interpolate(seg_logits_aux, size=img_size, mode='bilinear', align_corners=self.align_corners)
+                outputs_dict = {'loss_cls': seg_logits, 'loss_aux': seg_logits_aux}
         if not auto_calc_loss: return outputs_dict
         return self.calculatelosses(predictions=outputs_dict, targets=targets, losses_cfg=losses_cfg, map_preds_to_tgts_dict=map_preds_to_tgts_dict)
     '''inference'''
@@ -60,8 +61,8 @@ class BaseSegmentor(nn.Module):
         images = images.type(torch.cuda.FloatTensor if torch.cuda.is_available() else torch.FloatTensor)
         # inference
         if inference_cfg['mode'] == 'whole':
-            if forward_args is None: outputs = self(images)
-            else: outputs = self(images, **forward_args)
+            if forward_args is None: outputs = self(SSSegInputStructure(images=images)).seg_logits
+            else: outputs = self(SSSegInputStructure(images=images), **forward_args).seg_logits
             if use_probs_before_resize: outputs = F.softmax(outputs, dim=1)
         else:
             opts = inference_cfg['opts']
@@ -78,8 +79,8 @@ class BaseSegmentor(nn.Module):
                     x2, y2 = min(x1 + cropsize_w, image_w), min(y1 + cropsize_h, image_h)
                     x1, y1 = max(x2 - cropsize_w, 0), max(y2 - cropsize_h, 0)
                     crop_images = images[:, :, y1:y2, x1:x2]
-                    if forward_args is None: outputs_crop = self(crop_images)
-                    else: outputs_crop = self(crop_images, **forward_args)
+                    if forward_args is None: outputs_crop = self(SSSegInputStructure(images=crop_images)).seg_logits
+                    else: outputs_crop = self(SSSegInputStructure(images=crop_images), **forward_args).seg_logits
                     outputs_crop = F.interpolate(outputs_crop, size=crop_images.size()[2:], mode='bilinear', align_corners=self.align_corners)
                     if use_probs_before_resize: outputs_crop = F.softmax(outputs_crop, dim=1)
                     outputs += F.pad(outputs_crop, (int(x1), int(outputs.shape[3] - x2), int(y1), int(outputs.shape[2] - y2)))
@@ -186,7 +187,7 @@ class BaseSegmentor(nn.Module):
             predictions_new, targets_new, map_preds_to_tgts_dict_new = {}, {}, {}
             for key in predictions.keys():
                 if map_preds_to_tgts_dict is None:
-                    predictions_new[key], targets_new[key] = self.pixel_sampler.sample(predictions[key], targets['seg_target'])
+                    predictions_new[key], targets_new[key] = self.pixel_sampler.sample(predictions[key], targets['seg_targets'])
                 else:
                     predictions_new[key], targets_new[key] = self.pixel_sampler.sample(predictions[key], targets[map_preds_to_tgts_dict[key]])
                 map_preds_to_tgts_dict_new[key] = key
@@ -196,7 +197,7 @@ class BaseSegmentor(nn.Module):
         for loss_name, loss_cfg in losses_cfg.items():
             if map_preds_to_tgts_dict is None:
                 losses_log_dict[loss_name] = self.calculateloss(
-                    prediction=predictions[loss_name], target=targets['seg_target'], loss_cfg=loss_cfg,
+                    prediction=predictions[loss_name], target=targets['seg_targets'], loss_cfg=loss_cfg,
                 )
             else:
                 losses_log_dict[loss_name] = self.calculateloss(

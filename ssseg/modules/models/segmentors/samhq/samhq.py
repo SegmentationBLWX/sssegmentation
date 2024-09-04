@@ -131,7 +131,7 @@ class SAMHQPredictor(SAMPredictor):
     '''predict'''
     def predict(self, point_coords=None, point_labels=None, box=None, mask_input=None, multimask_output=True, return_logits=False, hq_token_only=False):
         if not self.is_image_set:
-            raise RuntimeError('an image must be set with .set_image(...) before mask prediction')
+            raise RuntimeError('an image must be set with .setimage(...) before mask prediction')
         # transform input prompts
         coords_torch, labels_torch, box_torch, mask_input_torch = None, None, None, None
         if point_coords is not None:
@@ -160,7 +160,7 @@ class SAMHQPredictor(SAMPredictor):
     @torch.no_grad()
     def predicttorch(self, point_coords, point_labels, boxes=None, mask_input=None, multimask_output=True, return_logits=False, hq_token_only=False):
         if not self.is_image_set:
-            raise RuntimeError("an image must be set with .set_image(...) before mask prediction.")
+            raise RuntimeError("an image must be set with .setimage(...) before mask prediction.")
         if point_coords is not None:
             points = (point_coords, point_labels)
         else:
