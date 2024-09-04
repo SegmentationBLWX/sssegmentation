@@ -61,8 +61,8 @@ class BaseSegmentor(nn.Module):
         images = images.type(torch.cuda.FloatTensor if torch.cuda.is_available() else torch.FloatTensor)
         # inference
         if inference_cfg['mode'] == 'whole':
-            if forward_args is None: seg_logits = self(SSSegInputStructure(images=images)).seg_logits
-            else: seg_logits = self(SSSegInputStructure(images=images), **forward_args).seg_logits
+            if forward_args is None: seg_logits = self(SSSegInputStructure(images=images, mode=self.mode)).seg_logits
+            else: seg_logits = self(SSSegInputStructure(images=images, mode=self.mode), **forward_args).seg_logits
             if use_probs_before_resize: seg_logits = F.softmax(seg_logits, dim=1)
         else:
             opts = inference_cfg['opts']
@@ -79,8 +79,8 @@ class BaseSegmentor(nn.Module):
                     x2, y2 = min(x1 + cropsize_w, image_w), min(y1 + cropsize_h, image_h)
                     x1, y1 = max(x2 - cropsize_w, 0), max(y2 - cropsize_h, 0)
                     crop_images = images[:, :, y1:y2, x1:x2]
-                    if forward_args is None: seg_logits_crop = self(SSSegInputStructure(images=crop_images)).seg_logits
-                    else: seg_logits_crop = self(SSSegInputStructure(images=crop_images), **forward_args).seg_logits
+                    if forward_args is None: seg_logits_crop = self(SSSegInputStructure(images=crop_images, mode=self.mode)).seg_logits
+                    else: seg_logits_crop = self(SSSegInputStructure(images=crop_images, mode=self.mode), **forward_args).seg_logits
                     seg_logits_crop = F.interpolate(seg_logits_crop, size=crop_images.size()[2:], mode='bilinear', align_corners=self.align_corners)
                     if use_probs_before_resize: seg_logits_crop = F.softmax(seg_logits_crop, dim=1)
                     seg_logits += F.pad(seg_logits_crop, (int(x1), int(seg_logits.shape[3] - x2), int(y1), int(seg_logits.shape[2] - y2)))
