@@ -146,24 +146,24 @@ class MCIBIPlusPlus(BaseSegmentor):
         preds_cls = self.decoder_cls(memory_output)
         # forward according to the mode
         if self.mode in ['TRAIN', 'TRAIN_DEVELOP']:
-            outputs_dict = self.customizepredsandlosses(
+            predictions = self.customizepredsandlosses(
                 seg_logits=preds_cls, targets=data_meta.gettargets(), backbone_outputs=backbone_outputs, losses_cfg=self.cfg['losses'], img_size=img_size, auto_calc_loss=False,
             )
-            preds_cls = outputs_dict.pop('loss_cls')
+            preds_cls = predictions.pop('loss_cls')
             preds_pr = F.interpolate(preds_pr, size=img_size, mode='bilinear', align_corners=self.align_corners)
-            outputs_dict.update({'loss_pr': preds_pr, 'loss_cls': preds_cls})
+            predictions.update({'loss_pr': preds_pr, 'loss_cls': preds_cls})
             if hasattr(self, 'context_within_image_module') and hasattr(self, 'decoder_cwi'): 
                 preds_cwi = F.interpolate(preds_cwi, size=img_size, mode='bilinear', align_corners=self.align_corners)
-                outputs_dict.update({'loss_cwi': preds_cwi})
+                predictions.update({'loss_cwi': preds_cwi})
             with torch.no_grad():
                 self.memory_module.update(
                     features=F.interpolate(pixel_representations, size=img_size, mode='bilinear', align_corners=self.align_corners), 
                     segmentation=data_meta.gettargets()['seg_targets'], learning_rate=kwargs['learning_rate'], **self.cfg['head']['update_cfg']
                 )
             loss, losses_log_dict = self.calculatelosses(
-                predictions=outputs_dict, targets=data_meta.gettargets(), losses_cfg=self.cfg['losses'],
+                predictions=predictions, targets=data_meta.gettargets(), losses_cfg=self.cfg['losses'],
             )
-            outputs = SSSegOutputStructure(mode=self.mode, loss=loss, losses_log_dict=losses_log_dict) if self.mode == 'TRAIN' else SSSegOutputStructure(mode=self.mode, loss=loss, losses_log_dict=losses_log_dict, seg_logits=preds_cls)
+            ssseg_outputs = SSSegOutputStructure(mode=self.mode, loss=loss, losses_log_dict=losses_log_dict) if self.mode == 'TRAIN' else SSSegOutputStructure(mode=self.mode, loss=loss, losses_log_dict=losses_log_dict, seg_logits=preds_cls)
         else:
-            outputs = SSSegOutputStructure(mode=self.mode, seg_logits=preds_cls)
-        return outputs
+            ssseg_outputs = SSSegOutputStructure(mode=self.mode, seg_logits=preds_cls)
+        return ssseg_outputs

@@ -36,7 +36,7 @@ class BaseSegmentor(nn.Module):
     '''customizepredsandlosses'''
     def customizepredsandlosses(self, seg_logits, targets, backbone_outputs, losses_cfg, img_size, auto_calc_loss=True, map_preds_to_tgts_dict=None):
         seg_logits = F.interpolate(seg_logits, size=img_size, mode='bilinear', align_corners=self.align_corners)
-        outputs_dict = {'loss_cls': seg_logits}
+        predictions = {'loss_cls': seg_logits}
         if hasattr(self, 'auxiliary_decoder'):
             backbone_outputs = backbone_outputs[:-1]
             if isinstance(self.auxiliary_decoder, nn.ModuleList):
@@ -45,13 +45,13 @@ class BaseSegmentor(nn.Module):
                 for idx, (out, dec) in enumerate(zip(backbone_outputs, self.auxiliary_decoder)):
                     seg_logits_aux = dec(out)
                     seg_logits_aux = F.interpolate(seg_logits_aux, size=img_size, mode='bilinear', align_corners=self.align_corners)
-                    outputs_dict[f'loss_aux{idx+1}'] = seg_logits_aux
+                    predictions[f'loss_aux{idx+1}'] = seg_logits_aux
             else:
                 seg_logits_aux = self.auxiliary_decoder(backbone_outputs[-1])
                 seg_logits_aux = F.interpolate(seg_logits_aux, size=img_size, mode='bilinear', align_corners=self.align_corners)
-                outputs_dict = {'loss_cls': seg_logits, 'loss_aux': seg_logits_aux}
-        if not auto_calc_loss: return outputs_dict
-        return self.calculatelosses(predictions=outputs_dict, targets=targets, losses_cfg=losses_cfg, map_preds_to_tgts_dict=map_preds_to_tgts_dict)
+                predictions = {'loss_cls': seg_logits, 'loss_aux': seg_logits_aux}
+        if not auto_calc_loss: return predictions
+        return self.calculatelosses(predictions=predictions, targets=targets, losses_cfg=losses_cfg, map_preds_to_tgts_dict=map_preds_to_tgts_dict)
     '''inference'''
     def inference(self, images, forward_args=None):
         # assert and initialize
@@ -61,9 +61,9 @@ class BaseSegmentor(nn.Module):
         images = images.type(torch.cuda.FloatTensor if torch.cuda.is_available() else torch.FloatTensor)
         # inference
         if inference_cfg['mode'] == 'whole':
-            if forward_args is None: outputs = self(SSSegInputStructure(images=images)).seg_logits
-            else: outputs = self(SSSegInputStructure(images=images), **forward_args).seg_logits
-            if use_probs_before_resize: outputs = F.softmax(outputs, dim=1)
+            if forward_args is None: seg_logits = self(SSSegInputStructure(images=images)).seg_logits
+            else: seg_logits = self(SSSegInputStructure(images=images), **forward_args).seg_logits
+            if use_probs_before_resize: seg_logits = F.softmax(seg_logits, dim=1)
         else:
             opts = inference_cfg['opts']
             stride_h, stride_w = opts['stride']
@@ -71,7 +71,7 @@ class BaseSegmentor(nn.Module):
             batch_size, _, image_h, image_w = images.size()
             num_grids_h = max(image_h - cropsize_h + stride_h - 1, 0) // stride_h + 1
             num_grids_w = max(image_w - cropsize_w + stride_w - 1, 0) // stride_w + 1
-            outputs = images.new_zeros((batch_size, self.cfg['num_classes'], image_h, image_w))
+            seg_logits = images.new_zeros((batch_size, self.cfg['num_classes'], image_h, image_w))
             count_mat = images.new_zeros((batch_size, 1, image_h, image_w))
             for h_idx in range(num_grids_h):
                 for w_idx in range(num_grids_w):
@@ -79,43 +79,46 @@ class BaseSegmentor(nn.Module):
                     x2, y2 = min(x1 + cropsize_w, image_w), min(y1 + cropsize_h, image_h)
                     x1, y1 = max(x2 - cropsize_w, 0), max(y2 - cropsize_h, 0)
                     crop_images = images[:, :, y1:y2, x1:x2]
-                    if forward_args is None: outputs_crop = self(SSSegInputStructure(images=crop_images)).seg_logits
-                    else: outputs_crop = self(SSSegInputStructure(images=crop_images), **forward_args).seg_logits
-                    outputs_crop = F.interpolate(outputs_crop, size=crop_images.size()[2:], mode='bilinear', align_corners=self.align_corners)
-                    if use_probs_before_resize: outputs_crop = F.softmax(outputs_crop, dim=1)
-                    outputs += F.pad(outputs_crop, (int(x1), int(outputs.shape[3] - x2), int(y1), int(outputs.shape[2] - y2)))
+                    if forward_args is None: seg_logits_crop = self(SSSegInputStructure(images=crop_images)).seg_logits
+                    else: seg_logits_crop = self(SSSegInputStructure(images=crop_images), **forward_args).seg_logits
+                    seg_logits_crop = F.interpolate(seg_logits_crop, size=crop_images.size()[2:], mode='bilinear', align_corners=self.align_corners)
+                    if use_probs_before_resize: seg_logits_crop = F.softmax(seg_logits_crop, dim=1)
+                    seg_logits += F.pad(seg_logits_crop, (int(x1), int(seg_logits.shape[3] - x2), int(y1), int(seg_logits.shape[2] - y2)))
                     count_mat[:, :, y1:y2, x1:x2] += 1
             assert (count_mat == 0).sum() == 0
-            outputs = outputs / count_mat
-        # return outputs
-        return outputs
+            seg_logits = seg_logits / count_mat
+        # return seg_logits
+        return seg_logits
     '''auginference'''
     def auginference(self, images, forward_args=None):
         # initialize
         inference_cfg = self.cfg['inference']
-        infer_tricks, outputs_list = inference_cfg['tricks'], []
+        infer_tricks, seg_logits_list = inference_cfg['tricks'], []
         # iter to inference
         for scale_factor in infer_tricks['multiscale']:
             images_scale = F.interpolate(images, scale_factor=scale_factor, mode='bilinear', align_corners=self.align_corners)
-            outputs = self.inference(images=images_scale, forward_args=forward_args).cpu()
-            outputs_list.append(outputs)
+            seg_logits = self.inference(images=images_scale, forward_args=forward_args).cpu()
+            seg_logits_list.append(seg_logits)
             if infer_tricks['flip']:
                 images_scale_flip = torch.from_numpy(np.flip(images_scale.cpu().numpy(), axis=3).copy())
-                outputs_flip = self.inference(images=images_scale_flip, forward_args=forward_args)
+                seg_logits_flip = self.inference(images=images_scale_flip, forward_args=forward_args)
                 fixed_seg_target_pairs = inference_cfg.get('fixed_seg_target_pairs', None)
                 if fixed_seg_target_pairs is None:
                     for data_pipeline in self.cfg['dataset']['train']['data_pipelines']:
                         if 'RandomFlip' in data_pipeline:
-                            fixed_seg_target_pairs = data_pipeline[-1].get('fixed_seg_target_pairs', None)
+                            if isinstance(data_pipeline, dict):
+                                fixed_seg_target_pairs = data_pipeline['RandomFlip'].get('fixed_seg_target_pairs', None)
+                            else:
+                                fixed_seg_target_pairs = data_pipeline[-1].get('fixed_seg_target_pairs', None)
                 if fixed_seg_target_pairs is not None:
-                    outputs_flip_clone = outputs_flip.data.clone()
+                    seg_logits_flip_clone = seg_logits_flip.data.clone()
                     for (pair_a, pair_b) in fixed_seg_target_pairs:
-                        outputs_flip[:, pair_a, :, :] = outputs_flip_clone[:, pair_b, :, :]
-                        outputs_flip[:, pair_b, :, :] = outputs_flip_clone[:, pair_a, :, :]
-                outputs_flip = torch.from_numpy(np.flip(outputs_flip.cpu().numpy(), axis=3).copy()).type_as(outputs)
-                outputs_list.append(outputs_flip)
-        # return outputs
-        return outputs_list
+                        seg_logits_flip[:, pair_a, :, :] = seg_logits_flip_clone[:, pair_b, :, :]
+                        seg_logits_flip[:, pair_b, :, :] = seg_logits_flip_clone[:, pair_a, :, :]
+                seg_logits_flip = torch.from_numpy(np.flip(seg_logits_flip.cpu().numpy(), axis=3).copy()).type_as(seg_logits)
+                seg_logits_list.append(seg_logits_flip)
+        # return seg_logits_list
+        return seg_logits_list
     '''transforminputs'''
     def transforminputs(self, x_list, selected_indices=None):
         if selected_indices is None:

@@ -52,17 +52,17 @@ class SETRUP(BaseSegmentor):
         # forward according to the mode
         if self.mode in ['TRAIN', 'TRAIN_DEVELOP']:
             seg_logits = F.interpolate(seg_logits, size=img_size, mode='bilinear', align_corners=self.align_corners)
-            outputs_dict = {'loss_cls': seg_logits}
+            predictions = {'loss_cls': seg_logits}
             backbone_outputs = backbone_outputs[:-1]
             for idx, (out, dec) in enumerate(zip(backbone_outputs, self.auxiliary_decoders)):
                 seg_logits_aux = dec(out)
                 seg_logits_aux = F.interpolate(seg_logits_aux, size=img_size, mode='bilinear', align_corners=self.align_corners)
-                outputs_dict[f'loss_aux{idx+1}'] = seg_logits_aux
-            loss, losses_log_dict = self.calculatelosses(predictions=outputs_dict, targets=data_meta.gettargets(), losses_cfg=self.cfg['losses'])
-            outputs = SSSegOutputStructure(mode=self.mode, loss=loss, losses_log_dict=losses_log_dict) if self.mode == 'TRAIN' else SSSegOutputStructure(mode=self.mode, loss=loss, losses_log_dict=losses_log_dict, seg_logits=seg_logits)
+                predictions[f'loss_aux{idx+1}'] = seg_logits_aux
+            loss, losses_log_dict = self.calculatelosses(predictions=predictions, targets=data_meta.gettargets(), losses_cfg=self.cfg['losses'])
+            ssseg_outputs = SSSegOutputStructure(mode=self.mode, loss=loss, losses_log_dict=losses_log_dict) if self.mode == 'TRAIN' else SSSegOutputStructure(mode=self.mode, loss=loss, losses_log_dict=losses_log_dict, seg_logits=seg_logits)
         else:
-            outputs = SSSegOutputStructure(mode=self.mode, seg_logits=seg_logits)
-        return outputs
+            ssseg_outputs = SSSegOutputStructure(mode=self.mode, seg_logits=seg_logits)
+        return ssseg_outputs
     '''norm layer'''
     def norm(self, x, norm_layer):
         n, c, h, w = x.shape
@@ -143,17 +143,17 @@ class SETRMLA(BaseSegmentor):
         # forward according to the mode
         if self.mode in ['TRAIN', 'TRAIN_DEVELOP']:
             seg_logits = F.interpolate(seg_logits, size=img_size, mode='bilinear', align_corners=self.align_corners)
-            outputs_dict = {'loss_cls': seg_logits}
+            predictions = {'loss_cls': seg_logits}
             feats_list = feats_list[-len(self.auxiliary_decoders):]
             for idx, (out, dec) in enumerate(zip(feats_list, self.auxiliary_decoders)):
                 seg_logits_aux = dec(out)
                 seg_logits_aux = F.interpolate(seg_logits_aux, size=img_size, mode='bilinear', align_corners=self.align_corners)
-                outputs_dict[f'loss_aux{idx+1}'] = seg_logits_aux
-            loss, losses_log_dict = self.calculatelosses(predictions=outputs_dict, targets=data_meta.gettargets(), losses_cfg=self.cfg['losses'])
-            outputs = SSSegOutputStructure(mode=self.mode, loss=loss, losses_log_dict=losses_log_dict) if self.mode == 'TRAIN' else SSSegOutputStructure(mode=self.mode, loss=loss, losses_log_dict=losses_log_dict, seg_logits=seg_logits)
+                predictions[f'loss_aux{idx+1}'] = seg_logits_aux
+            loss, losses_log_dict = self.calculatelosses(predictions=predictions, targets=data_meta.gettargets(), losses_cfg=self.cfg['losses'])
+            ssseg_outputs = SSSegOutputStructure(mode=self.mode, loss=loss, losses_log_dict=losses_log_dict) if self.mode == 'TRAIN' else SSSegOutputStructure(mode=self.mode, loss=loss, losses_log_dict=losses_log_dict, seg_logits=seg_logits)
         else:
-            outputs = SSSegOutputStructure(mode=self.mode, seg_logits=seg_logits)
-        return outputs
+            ssseg_outputs = SSSegOutputStructure(mode=self.mode, seg_logits=seg_logits)
+        return ssseg_outputs
     '''build decoder'''
     def builddecoder(self, decoder_cfg):
         layers, norm_cfg, act_cfg, num_classes, align_corners, kernel_size = [], self.norm_cfg.copy(), self.act_cfg.copy(), self.cfg['num_classes'], self.align_corners, decoder_cfg['kernel_size']

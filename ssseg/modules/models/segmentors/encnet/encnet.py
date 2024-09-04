@@ -65,21 +65,21 @@ class ENCNet(BaseSegmentor):
         seg_logits = self.decoder(feats)
         # forward according to the mode
         if self.mode in ['TRAIN', 'TRAIN_DEVELOP']:
-            outputs_dict = self.customizepredsandlosses(
+            predictions = self.customizepredsandlosses(
                 seg_logits=seg_logits, targets=data_meta.gettargets(), backbone_outputs=backbone_outputs, losses_cfg=self.cfg['losses'], img_size=img_size, auto_calc_loss=False,
             )
             map_preds_to_tgts_dict, targets = None, data_meta.gettargets()
             if hasattr(self, 'se_layer'):
-                outputs_dict.update({'loss_se': seg_logits_se})
+                predictions.update({'loss_se': seg_logits_se})
                 targets['seg_targets_onehot'] = self.onehot(targets['seg_targets'], self.cfg['num_classes'])
                 map_preds_to_tgts_dict = {'loss_aux': 'seg_targets', 'loss_se': 'seg_targets_onehot', 'loss_cls': 'seg_targets'}
             loss, losses_log_dict = self.calculatelosses(
-                predictions=outputs_dict, targets=targets, losses_cfg=self.cfg['losses'], map_preds_to_tgts_dict=map_preds_to_tgts_dict,
+                predictions=predictions, targets=targets, losses_cfg=self.cfg['losses'], map_preds_to_tgts_dict=map_preds_to_tgts_dict,
             )
-            outputs = SSSegOutputStructure(mode=self.mode, loss=loss, losses_log_dict=losses_log_dict) if self.mode == 'TRAIN' else SSSegOutputStructure(mode=self.mode, loss=loss, losses_log_dict=losses_log_dict, seg_logits=seg_logits)
+            ssseg_outputs = SSSegOutputStructure(mode=self.mode, loss=loss, losses_log_dict=losses_log_dict) if self.mode == 'TRAIN' else SSSegOutputStructure(mode=self.mode, loss=loss, losses_log_dict=losses_log_dict, seg_logits=seg_logits)
         else:
-            outputs = SSSegOutputStructure(mode=self.mode, seg_logits=seg_logits)
-        return outputs
+            ssseg_outputs = SSSegOutputStructure(mode=self.mode, seg_logits=seg_logits)
+        return ssseg_outputs
     '''convert to onehot labels'''
     def onehot(self, labels, num_classes):
         batch_size = labels.size(0)

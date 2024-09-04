@@ -77,19 +77,19 @@ class DANet(BaseSegmentor):
         preds_pamcam = self.decoder_pamcam(feats_sum)
         # forward according to the mode
         if self.mode in ['TRAIN', 'TRAIN_DEVELOP']:
-            outputs_dict = self.customizepredsandlosses(
+            predictions = self.customizepredsandlosses(
                 seg_logits=preds_pamcam, targets=data_meta.gettargets(), backbone_outputs=backbone_outputs, losses_cfg=self.cfg['losses'], img_size=img_size, auto_calc_loss=False,
             )
-            preds_pamcam = outputs_dict.pop('loss_cls')
+            preds_pamcam = predictions.pop('loss_cls')
             preds_pam = self.decoder_pam(feats_pam)
             preds_pam = F.interpolate(preds_pam, size=img_size, mode='bilinear', align_corners=self.align_corners)
             preds_cam = self.decoder_cam(feats_cam)
             preds_cam = F.interpolate(preds_cam, size=img_size, mode='bilinear', align_corners=self.align_corners)
-            outputs_dict.update({'loss_cls_pam': preds_pam, 'loss_cls_cam': preds_cam, 'loss_cls_pamcam': preds_pamcam})
+            predictions.update({'loss_cls_pam': preds_pam, 'loss_cls_cam': preds_cam, 'loss_cls_pamcam': preds_pamcam})
             loss, losses_log_dict = self.calculatelosses(
-                predictions=outputs_dict, targets=data_meta.gettargets(), losses_cfg=self.cfg['losses']
+                predictions=predictions, targets=data_meta.gettargets(), losses_cfg=self.cfg['losses']
             )
-            outputs = SSSegOutputStructure(mode=self.mode, loss=loss, losses_log_dict=losses_log_dict) if self.mode == 'TRAIN' else SSSegOutputStructure(mode=self.mode, loss=loss, losses_log_dict=losses_log_dict, seg_logits=preds_pamcam)
+            ssseg_outputs = SSSegOutputStructure(mode=self.mode, loss=loss, losses_log_dict=losses_log_dict) if self.mode == 'TRAIN' else SSSegOutputStructure(mode=self.mode, loss=loss, losses_log_dict=losses_log_dict, seg_logits=preds_pamcam)
         else:
-            outputs = SSSegOutputStructure(mode=self.mode, seg_logits=preds_pamcam)
-        return outputs
+            ssseg_outputs = SSSegOutputStructure(mode=self.mode, seg_logits=preds_pamcam)
+        return ssseg_outputs

@@ -66,7 +66,7 @@ class OCRNet(BaseSegmentor):
             loss, losses_log_dict = self.calculatelosses(
                 predictions={'loss_cls': seg_logits, 'loss_aux': seg_logits_aux}, targets=data_meta.gettargets(), losses_cfg=self.cfg['losses']
             )
-            outputs = SSSegOutputStructure(mode=self.mode, loss=loss, losses_log_dict=losses_log_dict) if self.mode == 'TRAIN' else SSSegOutputStructure(mode=self.mode, loss=loss, losses_log_dict=losses_log_dict, seg_logits=seg_logits)
+            ssseg_outputs = SSSegOutputStructure(mode=self.mode, loss=loss, losses_log_dict=losses_log_dict) if self.mode == 'TRAIN' else SSSegOutputStructure(mode=self.mode, loss=loss, losses_log_dict=losses_log_dict, seg_logits=seg_logits)
         else:
-            outputs = SSSegOutputStructure(mode=self.mode, seg_logits=seg_logits)
-        return outputs
+            ssseg_outputs = SSSegOutputStructure(mode=self.mode, seg_logits=seg_logits)
+        return ssseg_outputs

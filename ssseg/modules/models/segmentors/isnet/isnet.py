@@ -92,16 +92,16 @@ class ISNet(BaseSegmentor):
         preds_stage2 = self.decoder_stage2(feats_sl)
         # return according to the mode
         if self.mode in ['TRAIN', 'TRAIN_DEVELOP']:
-            outputs_dict = self.customizepredsandlosses(
+            predictions = self.customizepredsandlosses(
                 seg_logits=preds_stage2, targets=data_meta.gettargets(), backbone_outputs=backbone_outputs, losses_cfg=self.cfg['losses'], img_size=img_size, auto_calc_loss=False,
             )
-            preds_stage2 = outputs_dict.pop('loss_cls')
+            preds_stage2 = predictions.pop('loss_cls')
             preds_stage1 = F.interpolate(preds_stage1, size=img_size, mode='bilinear', align_corners=self.align_corners)
-            outputs_dict.update({'loss_cls_stage1': preds_stage1, 'loss_cls_stage2': preds_stage2})
+            predictions.update({'loss_cls_stage1': preds_stage1, 'loss_cls_stage2': preds_stage2})
             loss, losses_log_dict = self.calculatelosses(
-                predictions=outputs_dict, targets=data_meta.gettargets(), losses_cfg=self.cfg['losses']
+                predictions=predictions, targets=data_meta.gettargets(), losses_cfg=self.cfg['losses']
             )
-            outputs = SSSegOutputStructure(mode=self.mode, loss=loss, losses_log_dict=losses_log_dict) if self.mode == 'TRAIN' else SSSegOutputStructure(mode=self.mode, loss=loss, losses_log_dict=losses_log_dict, seg_logits=preds_stage2)
+            ssseg_outputs = SSSegOutputStructure(mode=self.mode, loss=loss, losses_log_dict=losses_log_dict) if self.mode == 'TRAIN' else SSSegOutputStructure(mode=self.mode, loss=loss, losses_log_dict=losses_log_dict, seg_logits=preds_stage2)
         else:
-            outputs = SSSegOutputStructure(mode=self.mode, seg_logits=preds_stage2)
-        return outputs
+            ssseg_outputs = SSSegOutputStructure(mode=self.mode, seg_logits=preds_stage2)
+        return ssseg_outputs

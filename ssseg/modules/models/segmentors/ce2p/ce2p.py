@@ -102,7 +102,7 @@ class CE2P(BaseSegmentor):
                 predictions={'loss_cls_stage1': preds_stage1, 'loss_cls_stage2': preds_stage2, 'loss_edge': edge}, targets=data_meta.gettargets(), losses_cfg=losses_cfg,
                 map_preds_to_tgts_dict={'loss_cls_stage1': 'seg_targets', 'loss_cls_stage2': 'seg_targets', 'loss_edge': 'edge_targets'},
             )
-            outputs = SSSegOutputStructure(mode=self.mode, loss=loss, losses_log_dict=losses_log_dict) if self.mode == 'TRAIN' else SSSegOutputStructure(mode=self.mode, loss=loss, losses_log_dict=losses_log_dict, seg_logits=preds_stage2)
+            ssseg_outputs = SSSegOutputStructure(mode=self.mode, loss=loss, losses_log_dict=losses_log_dict) if self.mode == 'TRAIN' else SSSegOutputStructure(mode=self.mode, loss=loss, losses_log_dict=losses_log_dict, seg_logits=preds_stage2)
         else:
-            outputs = SSSegOutputStructure(mode=self.mode, seg_logits=preds_stage2)
-        return outputs
+            ssseg_outputs = SSSegOutputStructure(mode=self.mode, seg_logits=preds_stage2)
+        return ssseg_outputs

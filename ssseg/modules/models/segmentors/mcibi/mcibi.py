@@ -99,19 +99,19 @@ class MCIBI(BaseSegmentor):
         preds_stage2 = self.decoder_stage2(memory_output)
         # forward according to the mode
         if self.mode in ['TRAIN', 'TRAIN_DEVELOP']:
-            outputs_dict = self.customizepredsandlosses(
+            predictions = self.customizepredsandlosses(
                 seg_logits=preds_stage2, targets=data_meta.gettargets(), backbone_outputs=backbone_outputs, losses_cfg=self.cfg['losses'], img_size=img_size, auto_calc_loss=False,
             )
-            preds_stage2 = outputs_dict.pop('loss_cls')
+            preds_stage2 = predictions.pop('loss_cls')
             preds_stage1 = F.interpolate(preds_stage1, size=img_size, mode='bilinear', align_corners=self.align_corners)
-            outputs_dict.update({'loss_cls_stage1': preds_stage1, 'loss_cls_stage2': preds_stage2})
+            predictions.update({'loss_cls_stage1': preds_stage1, 'loss_cls_stage2': preds_stage2})
             with torch.no_grad():
                 self.memory_module.update(
                     features=F.interpolate(memory_input, size=img_size, mode='bilinear', align_corners=self.align_corners), 
                     segmentation=data_meta.gettargets()['seg_targets'], learning_rate=kwargs['learning_rate'], **self.cfg['head']['update_cfg']
                 )
             loss, losses_log_dict = self.calculatelosses(
-                predictions=outputs_dict, targets=data_meta.gettargets(), losses_cfg=self.cfg['losses']
+                predictions=predictions, targets=data_meta.gettargets(), losses_cfg=self.cfg['losses']
             )
             if (kwargs['epoch'] > 1) and self.cfg['head']['use_loss']:
                 loss_memory, loss_memory_log = self.calculatememoryloss(stored_memory)
@@ -119,10 +119,10 @@ class MCIBI(BaseSegmentor):
                 losses_log_dict['loss_memory'] = loss_memory_log
                 total = losses_log_dict.pop('total') + losses_log_dict['loss_memory']
                 losses_log_dict['total'] = total
-            outputs = SSSegOutputStructure(mode=self.mode, loss=loss, losses_log_dict=losses_log_dict) if self.mode == 'TRAIN' else SSSegOutputStructure(mode=self.mode, loss=loss, losses_log_dict=losses_log_dict, seg_logits=preds_stage2)
+            ssseg_outputs = SSSegOutputStructure(mode=self.mode, loss=loss, losses_log_dict=losses_log_dict) if self.mode == 'TRAIN' else SSSegOutputStructure(mode=self.mode, loss=loss, losses_log_dict=losses_log_dict, seg_logits=preds_stage2)
         else:
-            outputs = SSSegOutputStructure(mode=self.mode, seg_logits=preds_stage2)
-        return outputs
+            ssseg_outputs = SSSegOutputStructure(mode=self.mode, seg_logits=preds_stage2)
+        return ssseg_outputs
     '''norm'''
     def norm(self, x, norm_layer):
         n, c, h, w = x.shape
