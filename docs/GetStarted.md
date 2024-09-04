@@ -100,7 +100,7 @@ With the above commands, these python packages will be installed,
 - `scipy`: set in requirements/basic.txt,
 - `chainercv`: set in requirements/optional.txt.
 
-Since the performance of all models in ssseg is evaluated and reported using `chainercv`, we require the installation of this library in the requirements by default.
+Since the performance of all models in SSSegmentation is evaluated and reported using `chainercv`, we require the installation of this library in the requirements by default.
 However, since this library has not been updated for a long time, some of the latest versions of the dependencies it requires, particularly `numpy`, are not compatible with `chainercv`.
 Therefore, you might encounter installation failures at this step. In such cases, there are two possible solutions:
 

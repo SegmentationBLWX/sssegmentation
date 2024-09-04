@@ -14,4 +14,5 @@ Welcome to SSSegmentation's documentation!
 	Tutorials.md
 	ModelZoo.md
 	AdvancedAPI.md
+	FQA.md
 	Citations.md
