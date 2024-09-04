@@ -45,7 +45,7 @@ class SSSegOutputStructure:
         self.validate()
     '''getsetvariables'''
     def getsetvariables(self):
-        return {k: v for k, v in self.__dict__.items() if v is not None and k != 'mode'}
+        return {k: v for k, v in self.__dict__.items() if v is not None and k not in ['mode', 'auto_validate']}
 
 
 '''SSSegInputStructure'''
@@ -78,7 +78,7 @@ class SSSegInputStructure:
         self.validate()
     '''getsetvariables'''
     def getsetvariables(self):
-        return {k: v for k, v in self.__dict__.items() if v is not None and k != 'mode'}
+        return {k: v for k, v in self.__dict__.items() if v is not None and k not in ['mode', 'auto_validate']}
     '''gettargets'''
     def gettargets(self):
         targets = {}
