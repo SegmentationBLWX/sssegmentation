@@ -1,4 +1,4 @@
-'''semanticfpn_resnet50_voc'''
+'''semanticfpn_resnet50os32_voc'''
 import os
 import copy
 from .base_cfg import SEGMENTOR_CFG
