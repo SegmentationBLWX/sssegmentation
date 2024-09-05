@@ -1,4 +1,4 @@
-'''pointrend_resnet101_ade20k'''
+'''pointrend_resnet101os32_ade20k'''
 import os
 import copy
 from .base_cfg import SEGMENTOR_CFG

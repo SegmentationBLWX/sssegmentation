@@ -1,4 +1,4 @@
-'''pointrend_resnet50_cityscapes'''
+'''pointrend_resnet50os32_cityscapes'''
 import os
 import copy
 from .base_cfg import SEGMENTOR_CFG
