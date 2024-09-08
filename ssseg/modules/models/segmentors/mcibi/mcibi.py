@@ -139,5 +139,6 @@ class MCIBI(BaseSegmentor):
         target = target.unsqueeze(1).repeat(1, num_feats_per_cls).view(-1)
         loss_memory = self.calculateloss(preds_memory, target, self.cfg['head']['loss_cfg'])
         loss_memory_log = loss_memory.data.clone()
-        dist.all_reduce(loss_memory_log.div_(dist.get_world_size()))
+        if dist.is_available() and dist.is_initialized():
+            dist.all_reduce(loss_memory_log.div_(dist.get_world_size()), op=dist.ReduceOp.SUM)
         return loss_memory, loss_memory_log

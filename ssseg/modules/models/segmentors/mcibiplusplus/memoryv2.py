@@ -112,5 +112,6 @@ class FeaturesMemoryV2(nn.Module):
             self.memory[clsid][1] = (1 - momentum) * self.memory[clsid][1].data + momentum * std
         # syn the memory
         memory = self.memory.data.clone()
-        dist.all_reduce(memory.div_(dist.get_world_size()))
+        if dist.is_available() and dist.is_initialized():
+            dist.all_reduce(memory.div_(dist.get_world_size()), op=dist.ReduceOp.SUM)
         self.memory = nn.Parameter(memory, requires_grad=False)

@@ -76,7 +76,8 @@ class Mask2Former(BaseSegmentor):
                 loss_value = loss_value.mean()
                 loss = loss + loss_value
                 loss_value = loss_value.data.clone()
-                dist.all_reduce(loss_value.div_(dist.get_world_size()))
+                if dist.is_available() and dist.is_initialized():
+                    dist.all_reduce(loss_value.div_(dist.get_world_size()), op=dist.ReduceOp.SUM)
                 losses_log_dict[loss_key] = loss_value.item()
             losses_log_dict.update({'loss_total': sum(losses_log_dict.values())})
             ssseg_outputs.setvariable('loss', loss)

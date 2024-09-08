@@ -115,7 +115,7 @@ class SetCriterion(nn.Module):
         num_masks = sum(len(t['labels']) for t in targets)
         num_masks = torch.as_tensor([num_masks], dtype=torch.float, device=next(iter(outputs.values())).device)
         if dist.is_available() and dist.is_initialized():
-            torch.distributed.all_reduce(num_masks)
+            dist.all_reduce(num_masks, op=dist.ReduceOp.SUM)
         num_masks = torch.clamp(num_masks / self.getworldsize(), min=1).item()
         # losses
         losses = {}

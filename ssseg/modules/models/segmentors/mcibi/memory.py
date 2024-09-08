@@ -204,5 +204,5 @@ class FeaturesMemory(nn.Module):
         # syn the memory
         if dist.is_available() and dist.is_initialized():
             memory = self.memory.data.clone()
-            dist.all_reduce(memory.div_(dist.get_world_size()))
+            dist.all_reduce(memory.div_(dist.get_world_size()), op=dist.ReduceOp.SUM)
             self.memory = nn.Parameter(memory, requires_grad=False)

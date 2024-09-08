@@ -240,7 +240,7 @@ class IDRNet(BaseSegmentor):
                     syn_list = ['class_relations_mean', 'class_relations_var', 'selected_classes_counter']
                     for syn in syn_list:
                         attr = getattr(self, syn).data.clone()
-                        dist.all_reduce(attr.div_(dist.get_world_size()))
+                        dist.all_reduce(attr.div_(dist.get_world_size()), op=dist.ReduceOp.SUM)
                         setattr(self, syn, nn.Parameter(attr, requires_grad=False))
             # --update dl_cls_representations
             momentum = self.cfg['head']['dlclsreps_momentum']
@@ -363,5 +363,5 @@ class IDRNet(BaseSegmentor):
             # sync
             if dist.is_available() and dist.is_initialized():
                 dl_cls_representations = self.dl_cls_representations.data.clone()
-                dist.all_reduce(dl_cls_representations.div_(dist.get_world_size()))
+                dist.all_reduce(dl_cls_representations.div_(dist.get_world_size()), op=dist.ReduceOp.SUM)
                 self.dl_cls_representations = nn.Parameter(dl_cls_representations, requires_grad=False)
