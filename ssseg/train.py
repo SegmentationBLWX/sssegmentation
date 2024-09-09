@@ -74,7 +74,7 @@ class Trainer():
         assert expected_total_train_bs_for_assert == dataloader_cfg['train']['batch_size'] * ngpus_per_node
         dataloader = BuildDistributedDataloader(dataset=dataset, dataloader_cfg=dataloader_cfg['train'])
         # build segmentor
-        segmentor = BuildSegmentor(segmentor_cfg=copy.deepcopy(cfg.SEGMENTOR_CFG), mode='TRAIN')
+        segmentor = BuildSegmentor(segmentor_cfg=cfg.SEGMENTOR_CFG, mode='TRAIN')
         torch.cuda.set_device(cmd_args.local_rank)
         segmentor.cuda(cmd_args.local_rank)
         torch.backends.cudnn.benchmark = cfg.SEGMENTOR_CFG['benchmark']

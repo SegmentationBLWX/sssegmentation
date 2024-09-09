@@ -72,7 +72,7 @@ class Tester():
         dataloader = BuildDistributedDataloader(dataset=dataset, dataloader_cfg=dataloader_cfg['test'])
         # build segmentor
         cfg.SEGMENTOR_CFG['backbone']['pretrained'] = False
-        segmentor = BuildSegmentor(segmentor_cfg=copy.deepcopy(cfg.SEGMENTOR_CFG), mode='TEST')
+        segmentor = BuildSegmentor(segmentor_cfg=cfg.SEGMENTOR_CFG, mode='TEST')
         torch.cuda.set_device(cmd_args.local_rank)
         segmentor.cuda(cmd_args.local_rank)
         # load ckpts
