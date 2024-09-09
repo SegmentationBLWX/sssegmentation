@@ -15,6 +15,9 @@ class OptimizerBuilder(BaseModuleBuilder):
     REGISTERED_MODULES = {
         'SGD': optim.SGD, 'Adam': optim.Adam, 'AdamW': optim.AdamW, 'Adadelta': optim.Adadelta,
     }
+    for optim_type in ['Adagrad', 'SparseAdam', 'Adamax', 'ASGD', 'LBFGS', 'NAdam', 'RAdam', 'RMSprop', 'Rprop']:
+        if hasattr(optim, optim_type):
+            REGISTERED_MODULES[optim_type] = getattr(optim, optim_type)
     '''build'''
     def build(self, model, optimizer_cfg):
         # parse config
