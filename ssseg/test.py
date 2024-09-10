@@ -37,17 +37,29 @@ def parsecmdargs():
     parser.add_argument('--ckptspath', dest='ckptspath', help='checkpoints you want to resume from', type=str, required=True)
     parser.add_argument('--slurm', dest='slurm', help='please add --slurm if you are using slurm', default=False, action='store_true')
     parser.add_argument('--ema', dest='ema', help='please add --ema if you want to load ema weights for segmentors', default=False, action='store_true')
-    args = parser.parse_args()
+    cmd_args = parser.parse_args()
     if torch.__version__.startswith('2.'):
-        args.local_rank = int(os.environ['LOCAL_RANK'])
-    if args.slurm: initslurm(args, str(6666 + random.randint(0, 1000)))
-    return args
+        cmd_args.local_rank = int(os.environ['LOCAL_RANK'])
+    if cmd_args.slurm: initslurm(cmd_args, str(6666 + random.randint(0, 1000)))
+    return cmd_args
 
 
 '''Tester'''
 class Tester():
-    def __init__(self, cfg, ngpus_per_node, logger_handle, cmd_args, cfg_file_path):
-        # set attribute
+    def __init__(self, cmd_args):
+        # parse config file
+        cfg, cfg_file_path = ConfigParser()(cmd_args.cfgfilepath)
+        # touch work dir
+        touchdir(cfg.SEGMENTOR_CFG['work_dir'])
+        # initialize logger_handle
+        logger_handle = BuildLoggerHandle(cfg.SEGMENTOR_CFG['logger_handle_cfg'])
+        # number of gpus per node, for distribued testing, only support a process for a GPU
+        ngpus_per_node = torch.cuda.device_count()
+        if ngpus_per_node != cmd_args.nproc_per_node:
+            if (cmd_args.local_rank == 0) and (int(os.environ.get('SLURM_PROCID', 0)) == 0):
+                logger_handle.warning('ngpus_per_node is not equal to nproc_per_node, force ngpus_per_node = nproc_per_node by default')
+            ngpus_per_node = cmd_args.nproc_per_node
+        # set attributes
         self.cfg = cfg
         self.ngpus_per_node = ngpus_per_node
         self.logger_handle = logger_handle
@@ -60,7 +72,9 @@ class Tester():
         torch.backends.cuda.matmul.allow_tf32 = False
         torch.backends.cudnn.allow_tf32 = False
     '''start tester'''
-    def start(self, all_preds, all_gts):
+    def start(self):
+        # initialize necessary variables
+        all_preds, all_gts = [], []
         cfg, ngpus_per_node, logger_handle, cmd_args, cfg_file_path = self.cfg, self.ngpus_per_node, self.logger_handle, self.cmd_args, self.cfg_file_path
         rank_id = int(os.environ['SLURM_PROCID']) if 'SLURM_PROCID' in os.environ else cmd_args.local_rank
         # build dataset and dataloader
@@ -117,43 +131,27 @@ class Tester():
                     gt = gts[idx].cpu().numpy().astype(np.int32)
                     gt[gt >= dataset.num_classes] = -1
                     all_gts.append(gt)
+        # post process
+        all_preds, all_gts, all_ids = postprocesspredgtpairs(all_preds=all_preds, all_gts=all_gts, cmd_args=cmd_args, cfg=cfg, logger_handle=logger_handle)
+        # evaluate
+        if (cmd_args.local_rank == 0) and (int(os.environ.get('SLURM_PROCID', 0)) == 0):
+            dataset = BuildDataset(mode='TEST', logger_handle=logger_handle, dataset_cfg=cfg.SEGMENTOR_CFG['dataset'])
+            if cmd_args.evalmode == 'local':
+                result = dataset.evaluate(
+                    seg_preds=all_preds, seg_targets=all_gts, metric_list=cfg.SEGMENTOR_CFG['inference'].get('metric_list', ['iou', 'miou']),
+                    num_classes=cfg.SEGMENTOR_CFG['num_classes'], ignore_index=-1,
+                )
+                logger_handle.info(result)
+            else:
+                dataset.formatresults(all_preds, all_ids, savedir=os.path.join(cfg.SEGMENTOR_CFG['work_dir'], 'results'))
 
 
-'''main'''
-def main():
-    # parse arguments
-    args = parsecmdargs()
-    cfg, cfg_file_path = ConfigParser()(args.cfgfilepath)
-    # touch work dir
-    touchdir(cfg.SEGMENTOR_CFG['work_dir'])
-    # initialize logger_handle
-    logger_handle = BuildLoggerHandle(cfg.SEGMENTOR_CFG['logger_handle_cfg'])
-    # number of gpus, for distribued testing, only support a process for a GPU
-    ngpus_per_node = torch.cuda.device_count()
-    if ngpus_per_node != args.nproc_per_node:
-        if (args.local_rank == 0) and (int(os.environ.get('SLURM_PROCID', 0)) == 0):
-            logger_handle.warning('ngpus_per_node is not equal to nproc_per_node, force ngpus_per_node = nproc_per_node by default')
-        ngpus_per_node = args.nproc_per_node
-    # instanced Tester
-    all_preds, all_gts = [], []
-    client = Tester(cfg=cfg, ngpus_per_node=ngpus_per_node, logger_handle=logger_handle, cmd_args=args, cfg_file_path=cfg_file_path)
-    client.start(all_preds, all_gts)
-    # post process
-    all_preds, all_gts, all_ids = postprocesspredgtpairs(all_preds=all_preds, all_gts=all_gts, cmd_args=args, cfg=cfg, logger_handle=logger_handle)
-    # evaluate
-    if (args.local_rank == 0) and (int(os.environ.get('SLURM_PROCID', 0)) == 0):
-        dataset = BuildDataset(mode='TEST', logger_handle=logger_handle, dataset_cfg=cfg.SEGMENTOR_CFG['dataset'])
-        if args.evalmode == 'local':
-            result = dataset.evaluate(
-                seg_preds=all_preds, seg_targets=all_gts, metric_list=cfg.SEGMENTOR_CFG['inference'].get('metric_list', ['iou', 'miou']),
-                num_classes=cfg.SEGMENTOR_CFG['num_classes'], ignore_index=-1,
-            )
-            logger_handle.info(result)
-        else:
-            dataset.formatresults(all_preds, all_ids, savedir=os.path.join(cfg.SEGMENTOR_CFG['work_dir'], 'results'))
-
-
-'''debug'''
+'''run'''
 if __name__ == '__main__':
     with torch.no_grad():
-        main()
+        # parse arguments
+        cmd_args = parsecmdargs()
+        # instanced Tester
+        client = Tester(cmd_args=cmd_args)
+        # start
+        client.start()

@@ -44,8 +44,26 @@ def parsecmdargs():
 
 '''Trainer'''
 class Trainer():
-    def __init__(self, cfg, ngpus_per_node, logger_handle, cmd_args, cfg_file_path, training_logging_manager):
-        # set attribute
+    def __init__(self, cmd_args):
+        # parse config file
+        config_parser = ConfigParser()
+        cfg, cfg_file_path = config_parser(cmd_args.cfgfilepath)
+        # touch work dir
+        touchdir(cfg.SEGMENTOR_CFG['work_dir'])
+        config_parser.save(cfg.SEGMENTOR_CFG['work_dir'])
+        # initialize logger_handle and training_logging_manager
+        logger_handle = BuildLoggerHandle(cfg.SEGMENTOR_CFG['logger_handle_cfg'])
+        training_logging_manager_cfg = copy.deepcopy(cfg.SEGMENTOR_CFG['training_logging_manager_cfg'])
+        if ('logger_handle_cfg' not in training_logging_manager_cfg) and ('logger_handle' not in training_logging_manager_cfg):
+            training_logging_manager_cfg['logger_handle'] = logger_handle
+        training_logging_manager = TrainingLoggingManager(**training_logging_manager_cfg)
+        # number of gpus per node, for distribued training, only support a process for a GPU
+        ngpus_per_node = torch.cuda.device_count()
+        if ngpus_per_node != cmd_args.nproc_per_node:
+            if (cmd_args.local_rank == 0) and (int(os.environ.get('SLURM_PROCID', 0)) == 0): 
+                logger_handle.warning('ngpus_per_node is not equal to nproc_per_node, force ngpus_per_node = nproc_per_node by default')
+            ngpus_per_node = cmd_args.nproc_per_node
+        # set attributes
         self.cfg = cfg
         self.ngpus_per_node = ngpus_per_node
         self.logger_handle = logger_handle
@@ -60,6 +78,7 @@ class Trainer():
         torch.backends.cudnn.allow_tf32 = False
     '''start trainer'''
     def start(self):
+        # initialize necessary variables
         cfg, ngpus_per_node, logger_handle, cmd_args, cfg_file_path, training_logging_manager = self.cfg, self.ngpus_per_node, self.logger_handle, self.cmd_args, self.cfg_file_path, self.training_logging_manager
         # build dataset and dataloader
         dataset = BuildDataset(mode='TRAIN', logger_handle=logger_handle, dataset_cfg=cfg.SEGMENTOR_CFG['dataset'])
@@ -239,34 +258,11 @@ class Trainer():
         segmentor.train()
 
 
-'''main'''
-def main():
-    # parse arguments
-    cmd_args, config_parser = parsecmdargs(), ConfigParser()
-    cfg, cfg_file_path = config_parser(cmd_args.cfgfilepath)
-    # touch work dir
-    touchdir(cfg.SEGMENTOR_CFG['work_dir'])
-    config_parser.save(cfg.SEGMENTOR_CFG['work_dir'])
-    # initialize logger_handle and training_logging_manager
-    logger_handle = BuildLoggerHandle(cfg.SEGMENTOR_CFG['logger_handle_cfg'])
-    training_logging_manager_cfg = copy.deepcopy(cfg.SEGMENTOR_CFG['training_logging_manager_cfg'])
-    if ('logger_handle_cfg' not in training_logging_manager_cfg) and ('logger_handle' not in training_logging_manager_cfg):
-        training_logging_manager_cfg['logger_handle'] = logger_handle
-    training_logging_manager = TrainingLoggingManager(**training_logging_manager_cfg)
-    # number of gpus, for distribued training, only support a process for a GPU
-    ngpus_per_node = torch.cuda.device_count()
-    if ngpus_per_node != cmd_args.nproc_per_node:
-        if (cmd_args.local_rank == 0) and (int(os.environ.get('SLURM_PROCID', 0)) == 0): 
-            logger_handle.warning('ngpus_per_node is not equal to nproc_per_node, force ngpus_per_node = nproc_per_node by default')
-        ngpus_per_node = cmd_args.nproc_per_node
-    # instanced Trainer
-    client = Trainer(
-        cfg=cfg, ngpus_per_node=ngpus_per_node, logger_handle=logger_handle, cmd_args=cmd_args, cfg_file_path=cfg_file_path,
-        training_logging_manager=training_logging_manager, 
-    )
-    client.start()
-
-
-'''debug'''
+'''run'''
 if __name__ == '__main__':
-    main()
+    # parse arguments
+    cmd_args = parsecmdargs()
+    # instanced Trainer
+    client = Trainer(cmd_args=cmd_args)
+    # start
+    client.start()

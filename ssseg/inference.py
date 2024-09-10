@@ -33,14 +33,14 @@ def parsecmdargs():
     parser.add_argument('--cfgfilepath', dest='cfgfilepath', help='config file path you want to use', type=str, required=True)
     parser.add_argument('--ckptspath', dest='ckptspath', help='checkpoints you want to resume from', type=str, required=True)
     parser.add_argument('--ema', dest='ema', help='please add --ema if you want to load ema weights for segmentors', default=False, action='store_true')
-    args = parser.parse_args()
-    return args
+    cmd_args = parser.parse_args()
+    return cmd_args
 
 
 '''Inferencer'''
 class Inferencer():
-    def __init__(self):
-        self.cmd_args = parsecmdargs()
+    def __init__(self, cmd_args):
+        self.cmd_args = cmd_args
         self.cfg, self.cfg_file_path = ConfigParser()(self.cmd_args.cfgfilepath)
         assert self.cmd_args.imagepath or self.cmd_args.imagedir, 'imagepath or imagedir should be specified'
         # open full fp32
@@ -48,6 +48,7 @@ class Inferencer():
         torch.backends.cudnn.allow_tf32 = False
     '''start'''
     def start(self):
+        # initialize necessary variables
         cmd_args, cfg, cfg_file_path = self.cmd_args, self.cfg, self.cfg_file_path
         # touch work dir and output dir
         touchdir(cfg.SEGMENTOR_CFG['work_dir'])
@@ -121,8 +122,12 @@ class Inferencer():
                 cv2.imwrite(os.path.join(cfg.SEGMENTOR_CFG['work_dir'], imagepath.split('/')[-1].split('.')[0] + '.png'), image)
 
 
-'''debug'''
+'''run'''
 if __name__ == '__main__':
     with torch.no_grad():
-        client = Inferencer()
+        # parse arguments
+        cmd_args = parsecmdargs()
+        # instanced Inferencer
+        client = Inferencer(cmd_args=cmd_args)
+        # start
         client.start()
