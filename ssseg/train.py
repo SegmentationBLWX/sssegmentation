@@ -231,28 +231,26 @@ class Trainer():
         dataloader = BuildDistributedDataloader(dataset=dataset, dataloader_cfg=dataloader_cfg['test'])
         # start to eval
         segmentor.eval()
-        inference_cfg, all_preds, all_gts = cfg.SEGMENTOR_CFG['inference'], [], []
+        inference_cfg, seg_preds, seg_gts = cfg.SEGMENTOR_CFG['inference'], [], []
         align_corners = segmentor.module.align_corners if hasattr(segmentor, 'module') else segmentor.align_corners
         with torch.no_grad():
             dataloader.sampler.set_epoch(0)
             pbar = tqdm(enumerate(dataloader))
             for batch_idx, samples_meta in pbar:
                 pbar.set_description('Processing %s/%s in rank %s' % (batch_idx+1, len(dataloader), rank_id))
-                imageids, images, widths, heights, gts = samples_meta['id'], samples_meta['image'], samples_meta['width'], samples_meta['height'], samples_meta['seg_target']
-                outputs = segmentor.module.inference(images) if hasattr(segmentor, 'module') else segmentor.inference(images)
-                for idx in range(len(outputs)):
-                    output = F.interpolate(outputs[idx: idx+1], size=(heights[idx], widths[idx]), mode='bilinear', align_corners=align_corners)
-                    pred = (torch.argmax(output[0], dim=0)).cpu().numpy().astype(np.int32)
-                    all_preds.append([imageids[idx], pred])
-                    gt = gts[idx].cpu().numpy().astype(np.int32)
-                    gt[gt >= dataset.num_classes] = -1
-                    all_gts.append(gt)
+                seg_logits = segmentor.module.inference(samples_meta['image']) if hasattr(segmentor, 'module') else segmentor.inference(samples_meta['image'])
+                for seg_idx in range(len(seg_logits)):
+                    seg_logit = F.interpolate(seg_logits[seg_idx: seg_idx+1], size=(samples_meta['height'][seg_idx], samples_meta['width'][seg_idx]), mode='bilinear', align_corners=align_corners)
+                    seg_pred = (torch.argmax(seg_logit[0], dim=0)).cpu().numpy().astype(np.int32)
+                    seg_preds.append([samples_meta['id'][seg_idx], seg_pred])
+                    seg_gt = samples_meta['seg_target'][seg_idx].cpu().numpy().astype(np.int32)
+                    seg_gt[seg_gt >= dataset.num_classes] = -1
+                    seg_gts.append(seg_gt)
         # post process
-        all_preds, all_gts, all_ids = postprocesspredgtpairs(all_preds=all_preds, all_gts=all_gts, cmd_args=cmd_args, cfg=cfg, logger_handle=logger_handle)
+        seg_preds, seg_gts, seg_ids = postprocesspredgtpairs(seg_preds=seg_preds, seg_gts=seg_gts, cmd_args=cmd_args, cfg=cfg, logger_handle=logger_handle)
         if rank_id == 0:
             result = dataset.evaluate(
-                seg_preds=all_preds, seg_targets=all_gts, metric_list=inference_cfg.get('metric_list', ['iou', 'miou']),
-                num_classes=cfg.SEGMENTOR_CFG['num_classes'], ignore_index=-1,
+                seg_preds=seg_preds, seg_targets=seg_gts, metric_list=inference_cfg.get('metric_list', ['iou', 'miou']), num_classes=cfg.SEGMENTOR_CFG['num_classes'], ignore_index=-1,
             )
             logger_handle.info(result)
         segmentor.train()

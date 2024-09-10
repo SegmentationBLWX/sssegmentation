@@ -74,7 +74,7 @@ class Tester():
     '''start tester'''
     def start(self):
         # initialize necessary variables
-        all_preds, all_gts = [], []
+        seg_preds, seg_gts = [], []
         cfg, ngpus_per_node, logger_handle, cmd_args, cfg_file_path = self.cfg, self.ngpus_per_node, self.logger_handle, self.cmd_args, self.cfg_file_path
         rank_id = int(os.environ['SLURM_PROCID']) if 'SLURM_PROCID' in os.environ else cmd_args.local_rank
         # build dataset and dataloader
@@ -112,38 +112,36 @@ class Tester():
             pbar = tqdm(enumerate(dataloader))
             for batch_idx, samples_meta in pbar:
                 pbar.set_description('Processing %s/%s in rank %s' % (batch_idx+1, len(dataloader), rank_id))
-                imageids, images, widths, heights, gts = samples_meta['id'], samples_meta['image'], samples_meta['width'], samples_meta['height'], samples_meta['seg_target']
                 infer_tricks, align_corners = inference_cfg['tricks'], segmentor.module.align_corners
                 cascade_cfg = infer_tricks.get('cascade', {'key_for_pre_output': 'memory_gather_logits', 'times': 1, 'forward_default_args': None})
-                for idx in range(cascade_cfg['times']):
+                for time_idx in range(cascade_cfg['times']):
                     forward_args = None
-                    if idx > 0: 
-                        outputs_list = [F.interpolate(outputs, size=outputs_list[-1].shape[2:], mode='bilinear', align_corners=align_corners) for outputs in outputs_list]
-                        forward_args = {cascade_cfg['key_for_pre_output']: sum(outputs_list) / len(outputs_list)}
+                    if time_idx > 0: 
+                        seg_logits_list = [F.interpolate(seg_logits, size=seg_logits_list[-1].shape[2:], mode='bilinear', align_corners=align_corners) for seg_logits in seg_logits_list]
+                        forward_args = {cascade_cfg['key_for_pre_output']: sum(seg_logits_list) / len(seg_logits_list)}
                         if cascade_cfg['forward_default_args'] is not None: 
                             forward_args.update(cascade_cfg['forward_default_args'])
-                    outputs_list = segmentor.module.auginference(images, forward_args)
-                for idx in range(len(outputs_list[0])):
-                    output = [F.interpolate(outputs[idx: idx+1], size=(heights[idx], widths[idx]), mode='bilinear', align_corners=align_corners) for outputs in outputs_list]
-                    output = sum(output) / len(output)
-                    pred = (torch.argmax(output[0], dim=0)).cpu().numpy().astype(np.int32)
-                    all_preds.append([imageids[idx], pred])
-                    gt = gts[idx].cpu().numpy().astype(np.int32)
-                    gt[gt >= dataset.num_classes] = -1
-                    all_gts.append(gt)
+                    seg_logits_list = segmentor.module.auginference(samples_meta['image'], forward_args)
+                for seg_idx in range(len(seg_logits_list[0])):
+                    seg_logit_list = [F.interpolate(seg_logits[seg_idx: seg_idx+1], size=(samples_meta['height'][seg_idx], samples_meta['width'][seg_idx]), mode='bilinear', align_corners=align_corners) for seg_logits in seg_logits_list]
+                    seg_logit = sum(seg_logit_list) / len(seg_logit_list)
+                    seg_pred = (torch.argmax(seg_logit[0], dim=0)).cpu().numpy().astype(np.int32)
+                    seg_preds.append([samples_meta['id'][seg_idx], seg_pred])
+                    seg_gt = samples_meta['seg_target'][seg_idx].cpu().numpy().astype(np.int32)
+                    seg_gt[seg_gt >= dataset.num_classes] = -1
+                    seg_gts.append(seg_gt)
         # post process
-        all_preds, all_gts, all_ids = postprocesspredgtpairs(all_preds=all_preds, all_gts=all_gts, cmd_args=cmd_args, cfg=cfg, logger_handle=logger_handle)
+        seg_preds, seg_gts, seg_ids = postprocesspredgtpairs(seg_preds=seg_preds, seg_gts=seg_gts, cmd_args=cmd_args, cfg=cfg, logger_handle=logger_handle)
         # evaluate
         if (cmd_args.local_rank == 0) and (int(os.environ.get('SLURM_PROCID', 0)) == 0):
             dataset = BuildDataset(mode='TEST', logger_handle=logger_handle, dataset_cfg=cfg.SEGMENTOR_CFG['dataset'])
             if cmd_args.evalmode == 'local':
                 result = dataset.evaluate(
-                    seg_preds=all_preds, seg_targets=all_gts, metric_list=cfg.SEGMENTOR_CFG['inference'].get('metric_list', ['iou', 'miou']),
-                    num_classes=cfg.SEGMENTOR_CFG['num_classes'], ignore_index=-1,
+                    seg_preds=seg_preds, seg_targets=seg_gts, metric_list=cfg.SEGMENTOR_CFG['inference'].get('metric_list', ['iou', 'miou']), num_classes=cfg.SEGMENTOR_CFG['num_classes'], ignore_index=-1,
                 )
                 logger_handle.info(result)
             else:
-                dataset.formatresults(all_preds, all_ids, savedir=os.path.join(cfg.SEGMENTOR_CFG['work_dir'], 'results'))
+                dataset.formatresults(seg_preds, seg_ids, savedir=os.path.join(cfg.SEGMENTOR_CFG['work_dir'], 'results'))
 
 
 '''run'''
