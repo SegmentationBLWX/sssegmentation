@@ -58,7 +58,7 @@ class BaseSegmentor(nn.Module):
         inference_cfg = self.cfg['inference']
         assert inference_cfg['mode'] in ['whole', 'slide']
         use_probs_before_resize = inference_cfg['tricks']['use_probs_before_resize']
-        images = images.type(torch.cuda.FloatTensor if torch.cuda.is_available() else torch.FloatTensor)
+        images = images.to(device=next(self.parameters()).device, dtype=next(self.parameters()).dtype)
         # inference
         if inference_cfg['mode'] == 'whole':
             if forward_args is None: seg_logits = self(SSSegInputStructure(images=images, mode=self.mode)).seg_logits
