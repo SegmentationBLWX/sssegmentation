@@ -20,6 +20,14 @@ class SSSegOutputStructure:
     '''postinit'''
     def __post_init__(self):
         self.validate()
+    '''addfield'''
+    def addfield(self, field_name, field_value):
+        assert not hasattr(self, field_name), f'field_name {field_name} already exits, call .setvariable if you want set value for it'
+        setattr(self, field_name, field_value)
+    '''delfield'''
+    def delfield(self, field_name):
+        assert hasattr(self, field_name), f'field_name {field_name} does not exits'
+        delattr(self, field_name)
     '''validate'''
     def validate(self):
         if not self.auto_validate: return
@@ -60,6 +68,14 @@ class SSSegInputStructure:
     '''postinit'''
     def __post_init__(self):
         self.validate()
+    '''addfield'''
+    def addfield(self, field_name, field_value):
+        assert not hasattr(self, field_name), f'field_name {field_name} already exits, call .setvariable if you want set value for it'
+        setattr(self, field_name, field_value)
+    '''delfield'''
+    def delfield(self, field_name):
+        assert hasattr(self, field_name), f'field_name {field_name} does not exits'
+        delattr(self, field_name)
     '''validate'''
     def validate(self):
         if not self.auto_validate: return
