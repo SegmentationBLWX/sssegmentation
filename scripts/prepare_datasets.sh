@@ -232,6 +232,9 @@ elif [[ "$OPT" == "coco" ]]; then
         wget https://github.com/SegmentationBLWX/modelstore/releases/download/ssseg_datasets/COCO.zip.017
         wget https://github.com/SegmentationBLWX/modelstore/releases/download/ssseg_datasets/COCO.zip.018
         7z x COCO.zip.001
+        cd COCO
+        unzip stuffthingmaps_trainval2017.zip
+        cd ..
     } || {
         echo "Fail to download ${DATASET} dataset."
         exit 0
