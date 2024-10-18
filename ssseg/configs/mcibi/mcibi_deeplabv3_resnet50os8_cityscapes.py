@@ -9,6 +9,8 @@ from .._base_ import DATASET_CFG_CITYSCAPES_512x1024, DATALOADER_CFG_BS16
 SEGMENTOR_CFG = copy.deepcopy(SEGMENTOR_CFG)
 # modify dataset config
 SEGMENTOR_CFG['dataset'] = DATASET_CFG_CITYSCAPES_512x1024.copy()
+SEGMENTOR_CFG['dataset']['train']['set'] = 'trainval'
+SEGMENTOR_CFG['dataset']['test']['set'] = 'test'
 # modify dataloader config
 SEGMENTOR_CFG['dataloader'] = DATALOADER_CFG_BS16.copy()
 # modify scheduler config
