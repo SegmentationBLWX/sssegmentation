@@ -250,7 +250,7 @@ class Trainer():
         seg_preds, seg_gts, seg_ids = postprocesspredgtpairs(seg_preds=seg_preds, seg_gts=seg_gts, cmd_args=cmd_args, cfg=cfg, logger_handle=logger_handle)
         if rank_id == 0:
             result = dataset.evaluate(
-                seg_preds=seg_preds, seg_targets=seg_gts, num_classes=cfg.SEGMENTOR_CFG['num_classes'], ignore_index=-1, **cfg.SEGMENTOR_CFG['inference'].get('evaluate', {})
+                seg_preds=seg_preds, seg_targets=seg_gts, metric_list=inference_cfg.get('metric_list', ['iou', 'miou']), num_classes=cfg.SEGMENTOR_CFG['num_classes'], ignore_index=-1,
             )
             logger_handle.info(result)
         segmentor.train()
