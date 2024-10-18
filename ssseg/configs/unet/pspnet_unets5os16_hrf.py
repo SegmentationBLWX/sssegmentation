@@ -25,7 +25,7 @@ SEGMENTOR_CFG['inference'] = {
     'tricks': {
         'multiscale': [1], 'flip': False, 'use_probs_before_resize': True
     },
-    'metric_list': ['dice', 'mdice'],
+    'evaluate': {'metric_list': ['dice', 'mdice']},
 }
 SEGMENTOR_CFG['work_dir'] = os.path.split(__file__)[-1].split('.')[0]
 SEGMENTOR_CFG['evaluate_results_filename'] = f"{os.path.split(__file__)[-1].split('.')[0]}.pkl"

@@ -137,7 +137,7 @@ class Tester():
             dataset = BuildDataset(mode='TEST', logger_handle=logger_handle, dataset_cfg=cfg.SEGMENTOR_CFG['dataset'])
             if cmd_args.evalmode == 'local':
                 result = dataset.evaluate(
-                    seg_preds=seg_preds, seg_targets=seg_gts, metric_list=cfg.SEGMENTOR_CFG['inference'].get('metric_list', ['iou', 'miou']), num_classes=cfg.SEGMENTOR_CFG['num_classes'], ignore_index=-1,
+                    seg_preds=seg_preds, seg_targets=seg_gts, num_classes=cfg.SEGMENTOR_CFG['num_classes'], ignore_index=-1, **cfg.SEGMENTOR_CFG['inference'].get('evaluate', {}),
                 )
                 logger_handle.info(result)
             else:
