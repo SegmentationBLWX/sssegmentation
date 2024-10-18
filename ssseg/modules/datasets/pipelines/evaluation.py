@@ -76,9 +76,9 @@ class Evaluation():
                 metric: np.nan_to_num(metric_value, nan=nan_to_num) for metric, metric_value in all_metric_results.items()
             })
         # return
-        all_metric_results['miou'] = all_metric_results['iou'].mean()
-        all_metric_results['mdice'] = all_metric_results['dice'].mean()
-        all_metric_results['mfscore'] = all_metric_results['fscore'].mean()
+        all_metric_results['miou'] = np.nanmean(all_metric_results['iou'])
+        all_metric_results['mdice'] = np.nanmean(all_metric_results['dice'])
+        all_metric_results['mfscore'] = np.nanmean(all_metric_results['fscore'])
         return all_metric_results
     '''calcuate the f-score value'''
     @staticmethod
