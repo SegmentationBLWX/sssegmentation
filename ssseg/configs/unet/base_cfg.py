@@ -31,7 +31,8 @@ SEGMENTOR_CFG = {
         'opts': {}, 
         'tricks': {
             'multiscale': [1], 'flip': False, 'use_probs_before_resize': False,
-        }
+        },
+        'evaluate': {'metric_list': ['dice', 'mdice']},
     },
     'scheduler': {
         'type': 'PolyScheduler', 'max_epochs': 0, 'power': 0.9,
