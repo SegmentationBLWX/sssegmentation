@@ -10,9 +10,11 @@ import torch
 import numbers
 import collections
 import numpy as np
+import collections.abc
 import torch.nn.functional as F
 from PIL import ImageFilter, Image
 from ...utils import BaseModuleBuilder
+from .utils import assertvalidprob, assertvalidimagesize, assertvalidrange, totuple
 
 
 '''_INTERPOLATION_CV2_CONVERTOR'''
@@ -26,8 +28,8 @@ _INTERPOLATION_CV2_CONVERTOR = {
 class Resize(object):
     def __init__(self, output_size, keep_ratio=True, min_size=None, scale_range=(0.5, 2.0), image_interpolation='bilinear', seg_target_interpolation='nearest', img2aug_pos_mapper_interpolation='nearest'):
         # assert
-        assert isinstance(scale_range, collections.abc.Sequence) or scale_range is None
-        assert isinstance(output_size, int) or (isinstance(output_size, collections.abc.Sequence) and len(output_size) == 2)
+        assertvalidrange(x_range=scale_range, allow_none=True)
+        assertvalidimagesize(image_size=output_size)
         # set attributes
         self.min_size = min_size
         self.keep_ratio = keep_ratio
@@ -35,7 +37,7 @@ class Resize(object):
         self.image_interpolation = _INTERPOLATION_CV2_CONVERTOR[image_interpolation]
         self.seg_target_interpolation = _INTERPOLATION_CV2_CONVERTOR[seg_target_interpolation]
         self.img2aug_pos_mapper_interpolation = _INTERPOLATION_CV2_CONVERTOR[img2aug_pos_mapper_interpolation]
-        self.output_size = (output_size, output_size) if isinstance(output_size, int) else output_size
+        self.output_size = totuple(output_size)
     '''call'''
     def __call__(self, sample_meta):
         # calculate output_size
@@ -74,11 +76,11 @@ class Resize(object):
 class RandomCrop(object):
     def __init__(self, crop_size, ignore_index=255, one_category_max_ratio=0.75):
         # assert
-        assert isinstance(crop_size, int) or (isinstance(crop_size, collections.abc.Sequence) and len(crop_size) == 2)
+        assertvalidimagesize(image_size=crop_size)
         # set attributes
         self.ignore_index = ignore_index
         self.one_category_max_ratio = one_category_max_ratio
-        self.crop_size = (crop_size, crop_size) if isinstance(crop_size, int) else crop_size
+        self.crop_size = totuple(crop_size)
     '''call'''
     def __call__(self, sample_meta):
         # avoid the cropped image is filled by only one category
@@ -156,7 +158,7 @@ class ResizeShortestEdge(object):
 class RandomShortestEdgeResize(object):
     def __init__(self, short_edge_range, max_size, **resize_kwargs):
         # assert
-        assert isinstance(short_edge_range, collections.abc.Sequence) and len(short_edge_range) == 2
+        assertvalidrange(short_edge_range)
         # set attributes
         self.max_size = max_size
         self.resize_kwargs = resize_kwargs
@@ -212,8 +214,7 @@ class RandomChoiceResize(object):
 class AdjustGamma(object):
     def __init__(self, gamma=1.0):
         # assert
-        assert gamma > 0.0
-        assert isinstance(gamma, float) or isinstance(gamma, int)
+        assert gamma > 0.0 and isinstance(gamma, numbers.Number)
         # set attributes
         self.gamma = gamma
         inv_gamma = 1.0 / gamma
@@ -241,8 +242,8 @@ class Rerange(object):
     def __init__(self, min_value=0, max_value=255):
         # assert
         assert min_value < max_value
-        assert isinstance(min_value, (float, int))
-        assert isinstance(max_value, (float, int))
+        assert isinstance(min_value, numbers.Number)
+        assert isinstance(max_value, numbers.Number)
         # set attributes
         self.min_value = min_value
         self.max_value = max_value
@@ -270,12 +271,11 @@ class Rerange(object):
 class CLAHE(object):
     def __init__(self, clip_limit=40.0, tile_grid_size=(8, 8)):
         # assert
-        assert isinstance(clip_limit, (float, int))
-        assert isinstance(tile_grid_size, collections.abc.Sequence)
-        assert len(tile_grid_size) == 2
+        assert isinstance(clip_limit, numbers.Number)
+        assertvalidimagesize(tile_grid_size)
         # set attribute
         self.clip_limit = clip_limit
-        self.tile_grid_size = tile_grid_size
+        self.tile_grid_size = totuple(tile_grid_size)
     '''call'''
     def __call__(self, sample_meta):
         sample_meta = self.clahe('image', sample_meta, self.clip_limit, self.tile_grid_size)
@@ -296,7 +296,7 @@ class RGB2Gray(object):
         # assert
         assert isinstance(weights, collections.abc.Sequence)
         assert out_channels is None or out_channels > 0
-        for item in weights: assert isinstance(item, (float, int))
+        for item in weights: assert isinstance(item, numbers.Number)
         # set attributes
         self.weights = weights
         self.out_channels = out_channels
@@ -326,18 +326,13 @@ class RGB2Gray(object):
 class RandomCutOut(object):
     def __init__(self, prob, n_holes, cutout_shape=None, cutout_ratio=None, image_fill_value=(0, 0, 0), seg_target_fill_value=255, img2aug_pos_mapper_fill_value=-1):
         # assert
-        assert 0 <= prob and prob <= 1
+        assertvalidprob(prob=prob)
         assert (cutout_shape is None) ^ (cutout_ratio is None), 'either cutout_shape or cutout_ratio should be specified'
-        assert (isinstance(cutout_shape, collections.abc.Sequence) or isinstance(cutout_ratio, collections.abc.Sequence))
-        if isinstance(n_holes, collections.abc.Sequence):
-            assert len(n_holes) == 2 and 0 <= n_holes[0] < n_holes[1]
-        else:
-            n_holes = (n_holes, n_holes)
-        if seg_target_fill_value is not None:
-            assert (isinstance(seg_target_fill_value, int) and 0 <= seg_target_fill_value and seg_target_fill_value <= 255)
+        assert (isinstance(cutout_shape, (collections.abc.Sequence, numbers.Number)) or isinstance(cutout_ratio, (collections.abc.Sequence, numbers.Number)))
+        assertvalidrange(n_holes)
         # set attributes
         self.prob = prob
-        self.n_holes = n_holes
+        self.n_holes = totuple(n_holes)
         self.image_fill_value = image_fill_value
         self.seg_target_fill_value = seg_target_fill_value
         self.img2aug_pos_mapper_fill_value = img2aug_pos_mapper_fill_value
@@ -364,7 +359,7 @@ class RandomCutOut(object):
         return sample_meta
     '''docutout'''
     def docutout(self):
-        return np.random.rand() < self.prob
+        return np.random.rand() <= self.prob
     '''generatepatches'''
     def generatepatches(self, image):
         cutout = self.docutout()
@@ -386,7 +381,10 @@ class RandomCutOut(object):
     @staticmethod
     def cutout(key, sample_meta, x1, y1, x2, y2, fill_value):
         if key not in sample_meta: return sample_meta
-        sample_meta[key][y1: y2, x1: x2, :] = fill_value
+        if len(sample_meta[key].shape) == 2:
+            sample_meta[key][y1: y2, x1: x2] = fill_value
+        else:
+            sample_meta[key][y1: y2, x1: x2, :] = fill_value
         return sample_meta
 
 
@@ -425,16 +423,16 @@ class AlbumentationsWrapper():
 
 '''RandomFlip'''
 class RandomFlip(object):
-    def __init__(self, flip_prob, fixed_seg_target_pairs=None):
+    def __init__(self, prob, fixed_seg_target_pairs=None):
         # assert
-        assert isinstance(flip_prob, float)
+        assertvalidprob(prob=prob)
         # set attributes
-        self.flip_prob = flip_prob
+        self.prob = prob
         self.fixed_seg_target_pairs = fixed_seg_target_pairs
     '''call'''
     def __call__(self, sample_meta):
         # flip
-        if np.random.rand() < self.flip_prob: return sample_meta
+        if np.random.rand() > self.prob: return sample_meta
         sample_meta = self.flip('image', sample_meta)
         sample_meta = self.flip('seg_target', sample_meta)
         sample_meta = self.flip('img2aug_pos_mapper', sample_meta)
@@ -459,8 +457,8 @@ class RandomFlip(object):
 class PhotoMetricDistortion(object):
     def __init__(self, brightness_delta=32, contrast_range=(0.5, 1.5), saturation_range=(0.5, 1.5), hue_delta=18):
         # assert
-        assert isinstance(contrast_range, collections.abc.Sequence) and len(contrast_range) == 2
-        assert isinstance(saturation_range, collections.abc.Sequence) and len(saturation_range) == 2
+        assertvalidrange(x_range=contrast_range)
+        assertvalidrange(x_range=saturation_range)
         # set attributes
         self.hue_delta = hue_delta
         self.brightness_delta = brightness_delta
@@ -512,11 +510,11 @@ class PhotoMetricDistortion(object):
 
 '''RandomRotation'''
 class RandomRotation(object):
-    def __init__(self, rotation_prob=0.5, angle_upper=30, image_fill_value=0.0, seg_target_fill_value=255, image_interpolation='bicubic', seg_target_interpolation='nearest', img2aug_pos_mapper_fill_value=-1, img2aug_pos_mapper_interpolation='nearest'):
+    def __init__(self, prob=0.5, angle_upper=30, image_fill_value=0.0, seg_target_fill_value=255, image_interpolation='bicubic', seg_target_interpolation='nearest', img2aug_pos_mapper_fill_value=-1, img2aug_pos_mapper_interpolation='nearest'):
         # assert
-        assert isinstance(rotation_prob, float)
+        assertvalidprob(prob=prob)
         # set attributes
-        self.rotation_prob = rotation_prob
+        self.prob = prob
         self.angle_upper = angle_upper
         self.image_fill_value = image_fill_value
         self.seg_target_fill_value = seg_target_fill_value
@@ -527,7 +525,7 @@ class RandomRotation(object):
     '''call'''
     def __call__(self, sample_meta):
         # prepare
-        if np.random.rand() < self.rotation_prob: return sample_meta
+        if np.random.rand() > self.prob: return sample_meta
         h_ori, w_ori = sample_meta['image'].shape[:2]
         rand_angle = np.random.randint(-self.angle_upper, self.angle_upper)
         matrix = cv2.getRotationMatrix2D(center=(w_ori / 2, h_ori / 2), angle=rand_angle, scale=1)
@@ -549,14 +547,15 @@ class RandomRotation(object):
 class RandomGaussianBlur(object):
     def __init__(self, prob=0.5, sigma=[0., 1.0], kernel_size=3):
         super(RandomGaussianBlur, self).__init__()
-        assert (isinstance(sigma, collections.abc.Sequence) and (len(sigma) == 2)) or isinstance(sigma, numbers.Number)
-        assert (isinstance(kernel_size, collections.abc.Sequence) and (len(kernel_size) == 2)) or isinstance(kernel_size, numbers.Number)
+        assertvalidprob(prob=prob)
+        assertvalidrange(sigma, allow_number=True)
+        assertvalidimagesize(kernel_size)
         self.prob = prob
-        self.sigma = sigma if isinstance(sigma, collections.abc.Sequence) else [sigma, sigma]
-        self.kernel_size = (kernel_size, kernel_size) if isinstance(kernel_size, numbers.Number) else kernel_size
+        self.sigma = totuple(sigma)
+        self.kernel_size = totuple(kernel_size)
     '''call'''
     def __call__(self, sample_meta):
-        if np.random.rand() < self.prob: return sample_meta
+        if np.random.rand() > self.prob: return sample_meta
         sigma = np.random.uniform(self.sigma[0], self.sigma[1])
         sample_meta = self.gaussianblur('image', sample_meta, self.kernel_size, sigma)
         return sample_meta
@@ -572,12 +571,13 @@ class RandomGaussianBlur(object):
 class PILRandomGaussianBlur(object):
     def __init__(self, prob=0.5, radius=[0., 1.0]):
         super(PILRandomGaussianBlur, self).__init__()
-        assert (isinstance(radius, collections.abc.Sequence) and (len(radius) == 2)) or isinstance(radius, numbers.Number)
+        assertvalidprob(prob=prob)
+        assertvalidrange(radius, allow_number=True)
         self.prob = prob
-        self.radius = radius if isinstance(radius, collections.abc.Sequence) else [radius, radius]
+        self.radius = totuple(radius)
     '''call'''
     def __call__(self, sample_meta):
-        if np.random.rand() < self.prob: return sample_meta
+        if np.random.rand() > self.prob: return sample_meta
         radius = np.random.uniform(self.radius[0], self.radius[1])
         sample_meta = self.gaussianblur('image', sample_meta, radius)
         return sample_meta
@@ -657,7 +657,7 @@ class Padding(object):
     def __init__(self, output_size, data_type='numpy', image_fill_value=0, seg_target_fill_value=255, edge_target_fill_value=255, img2aug_pos_mapper_fill_value=-1, output_size_auto_adaptive=True):
         # assert
         assert data_type in ['numpy', 'tensor']
-        assert isinstance(output_size, int) or (isinstance(output_size, collections.abc.Sequence) and len(output_size) == 2)
+        assertvalidimagesize(image_size=output_size)
         # set attributes
         self.data_type = data_type
         self.image_fill_value = image_fill_value
@@ -665,7 +665,7 @@ class Padding(object):
         self.edge_target_fill_value = edge_target_fill_value
         self.img2aug_pos_mapper_fill_value = img2aug_pos_mapper_fill_value
         self.output_size_auto_adaptive = output_size_auto_adaptive
-        self.output_size = (output_size, output_size) if isinstance(output_size, int) else output_size
+        self.output_size = totuple(output_size)
     '''call'''
     def __call__(self, sample_meta):
         # prepare
@@ -740,7 +740,7 @@ class Compose(object):
         self.record_img2aug_pos_mapper = record_img2aug_pos_mapper
     '''call'''
     def __call__(self, sample_meta):
-        if 'img2aug_pos_mapper' not in sample_meta:
+        if ('img2aug_pos_mapper' not in sample_meta) and self.record_img2aug_pos_mapper:
             sample_meta['img2aug_pos_mapper'] = np.arange(0, sample_meta['height'] * sample_meta['width']).reshape(sample_meta['height'], sample_meta['width'])
         for transform in self.transforms:
             sample_meta = transform(sample_meta)

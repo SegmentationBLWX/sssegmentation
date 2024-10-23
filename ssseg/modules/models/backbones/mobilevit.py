@@ -9,6 +9,7 @@ import math
 import torch
 import collections
 import torch.nn as nn
+import collections.abc
 import torch.nn.functional as F
 import torch.utils.model_zoo as model_zoo
 from .vit import TransformerEncoderLayer
@@ -325,8 +326,9 @@ class ConvMlp(nn.Module):
     @staticmethod
     def totuple(x):
         if isinstance(x, (int, bool, float)): return (x, x)
-        assert isinstance(x, tuple) and (len(x) == 2)
-        return x
+        assert isinstance(x, collections.abc.Sequence) and (len(x) == 2)
+        for n in x: assert isinstance(n, (int, bool, float))
+        return tuple(x)
 
 
 '''LinearTransformerBlock'''

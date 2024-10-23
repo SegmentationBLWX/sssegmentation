@@ -6,7 +6,9 @@ Author:
 '''
 import torch
 import itertools
+import collections
 import torch.nn as nn
+import collections.abc
 import torch.nn.functional as F
 import torch.utils.checkpoint as checkpoint
 from .samvit import LayerNorm2d
@@ -162,8 +164,9 @@ class PatchEmbed(nn.Module):
     @staticmethod
     def totuple(x):
         if isinstance(x, int): return (x, x)
-        assert isinstance(x, tuple) and (len(x) == 2)
-        return x
+        assert isinstance(x, collections.abc.Sequence) and (len(x) == 2)
+        for n in x: assert isinstance(n, int)
+        return tuple(x)
 
 
 '''PatchMerging'''

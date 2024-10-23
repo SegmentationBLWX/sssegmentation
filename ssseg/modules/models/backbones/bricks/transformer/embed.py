@@ -5,8 +5,9 @@ Author:
     Zhenchao Jin
 '''
 import math
-import torch
+import collections
 import torch.nn as nn
+import collections.abc
 import torch.nn.functional as F
 from ..normalization import BuildNormalization
 
@@ -20,7 +21,7 @@ class AdaptivePadding(nn.Module):
         self.kernel_size = self.totuple(kernel_size)
         self.stride = self.totuple(stride)
         self.dilation = self.totuple(dilation)
-    '''get pad shape'''
+    '''getpadshape'''
     def getpadshape(self, input_shape):
         input_h, input_w = input_shape
         kernel_h, kernel_w = self.kernel_size
@@ -39,12 +40,13 @@ class AdaptivePadding(nn.Module):
             elif self.padding == 'same':
                 x = F.pad(x, [pad_w // 2, pad_w - pad_w // 2, pad_h // 2, pad_h - pad_h // 2])
         return x
-    '''to tuple'''
+    '''totuple'''
     @staticmethod
     def totuple(x):
         if isinstance(x, int): return (x, x)
-        assert isinstance(x, tuple) and (len(x) == 2)
-        return x
+        assert isinstance(x, collections.abc.Sequence) and (len(x) == 2)
+        for n in x: assert isinstance(n, int)
+        return tuple(x)
 
 
 '''PatchEmbed'''

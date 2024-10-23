@@ -13,7 +13,7 @@ SEGMENTOR_CFG['dataset'] = DATASET_CFG_CITYSCAPES_512x1024.copy()
 SEGMENTOR_CFG['dataset']['train']['data_pipelines'] = [
     ('Resize', {'output_size': (2048, 1024), 'keep_ratio': True, 'scale_range': (0.5, 2.0)}),
     ('RandomCrop', {'crop_size': (512, 1024), 'one_category_max_ratio': 0.75}),
-    ('RandomFlip', {'flip_prob': 0.5}),
+    ('RandomFlip', {'prob': 0.5}),
     ('PhotoMetricDistortion', {}),
     ('Normalize', {'mean': [72.39239876, 82.90891754, 73.15835921], 'std': [1, 1, 1]}),
     ('ToTensor', {}),

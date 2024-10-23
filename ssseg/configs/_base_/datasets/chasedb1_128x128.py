@@ -12,7 +12,7 @@ DATASET_CFG_CHASEDB1_128x128 = {
         'data_pipelines': [
             ('Resize', {'output_size': (960, 999), 'keep_ratio': True, 'scale_range': (0.5, 2.0)}),
             ('RandomCrop', {'crop_size': (128, 128), 'one_category_max_ratio': 0.75}),
-            ('RandomFlip', {'flip_prob': 0.5}),
+            ('RandomFlip', {'prob': 0.5}),
             ('PhotoMetricDistortion', {}),
             ('Normalize', {'mean': [123.675, 116.28, 103.53], 'std': [58.395, 57.12, 57.375]}),
             ('ToTensor', {}),

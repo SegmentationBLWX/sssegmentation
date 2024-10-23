@@ -11,8 +11,8 @@ DATASET_CFG_LIP_473x473 = {
         'data_pipelines': [
             ('Resize', {'output_size': (520, 520), 'keep_ratio': False, 'scale_range': (0.75, 1.25)}),
             ('RandomCrop', {'crop_size': (473, 473), 'one_category_max_ratio': 0.75}),
-            ('RandomFlip', {'flip_prob': 0.5, 'fixed_seg_target_pairs': [(15, 14), (17, 16), (19, 18)]}),
-            ('RandomRotation', {'angle_upper': 30, 'rotation_prob': 0.4}),
+            ('RandomFlip', {'prob': 0.5, 'fixed_seg_target_pairs': [(15, 14), (17, 16), (19, 18)]}),
+            ('RandomRotation', {'angle_upper': 30, 'prob': 0.6}),
             ('PhotoMetricDistortion', {}),
             ('EdgeExtractor', {}),
             ('Normalize', {'mean': [123.675, 116.28, 103.53], 'std': [58.395, 57.12, 57.375]}),
