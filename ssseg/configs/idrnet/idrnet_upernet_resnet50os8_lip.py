@@ -26,5 +26,4 @@ SEGMENTOR_CFG['head']['use_sa_on_coarsecontext_after'] = False
 SEGMENTOR_CFG['head']['coarse_context'] = {'type': 'ppm', 'pool_scales': [1, 2, 3, 6]}
 SEGMENTOR_CFG['head']['fpn'] = {'in_channels_list': [256, 512, 1024, 2048], 'feats_channels': 512, 'out_channels': 512}
 SEGMENTOR_CFG['work_dir'] = os.path.split(__file__)[-1].split('.')[0]
-SEGMENTOR_CFG['evaluate_results_filename'] = f"{os.path.split(__file__)[-1].split('.')[0]}.pkl"
 SEGMENTOR_CFG['logger_handle_cfg']['logfilepath'] = os.path.join(SEGMENTOR_CFG['work_dir'], f"{os.path.split(__file__)[-1].split('.')[0]}.log")
