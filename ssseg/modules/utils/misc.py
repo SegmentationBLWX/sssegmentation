@@ -33,7 +33,8 @@ def postprocesspredgtpairs(seg_results, cmd_args, cfg, logger_handle):
     # TODO: bug occurs if use --pyt bash in slurm
     current_rank_id = int(os.environ['RANK'])
     # save results
-    work_dir = touchdirs(os.path.join(cfg.SEGMENTOR_CFG['work_dir'], 'inference_local_results'))
+    work_dir = os.path.join(cfg.SEGMENTOR_CFG['work_dir'], 'inference_local_results')
+    touchdirs(work_dir)
     filename = f'seg_results_{current_rank_id}.pkl'
     with open(os.path.join(work_dir, filename), 'wb') as fp:
         pickle.dump(seg_results, fp)
