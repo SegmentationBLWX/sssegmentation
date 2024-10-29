@@ -83,7 +83,7 @@ DATASET_CFG_ADE20k_512x512 = {
         'data_pipelines': [
             ('Resize', {'output_size': (2048, 512), 'keep_ratio': True, 'scale_range': (0.5, 2.0)}),
             ('RandomCrop', {'crop_size': (512, 512), 'one_category_max_ratio': 0.75}),
-            ('RandomFlip', {'flip_prob': 0.5}),
+            ('RandomFlip', {'prob': 0.5}),
             ('PhotoMetricDistortion', {}),
             ('Normalize', {'mean': [123.675, 116.28, 103.53], 'std': [58.395, 57.12, 57.375]}),
             ('ToTensor', {}),
@@ -126,7 +126,6 @@ SEGMENTOR_CFG = {
     'work_dir': 'ckpts', # directory used to save checkpoints and training and testing logs
     'eval_interval_epochs': 10, # evaluate models after "eval_interval_epochs" epochs
     'save_interval_epochs': 1, # save the checkpoints of models after "save_interval_epochs" epochs
-    'evaluate_results_filename': '', # path used to save the testing results used in `ssseg/test.py`
     'logger_handle_cfg': {'type': 'LocalLoggerHandle', 'logfilepath': ''}, # config used to instance logger_handle, which is used to print and save logs
     'training_logging_manager_cfg': {'log_interval_iters': 50}, # config used to instance training_logging_manager, which is used to manage training logs
     'norm_cfg': {'type': 'SyncBatchNorm'}, # config for normalization layer in the segmentor
@@ -146,11 +145,9 @@ SEGMENTOR_CFG = {
         'loss_cls': {'type': 'CrossEntropyLoss', 'scale_factor': 1.0, 'ignore_index': 255, 'reduction': 'mean'},
     }, # define objective functions, refer to "ssseg/modules/models/losses/builder.py" for more details
     'inference': {
-        'mode': 'whole',
-        'opts': {}, 
-        'tricks': {
-            'multiscale': [1], 'flip': False, 'use_probs_before_resize': False,
-        }
+        'forward': {'mode': 'whole', 'cropsize': None, 'stride': None},
+        'tta': {'multiscale': [1], 'flip': False, 'use_probs_before_resize': False},
+        'evaluate': {'metric_list': ['iou', 'miou']},
     }, # define the inference config, refer to "ssseg/test.py" for more details
     'scheduler': {
         'type': 'PolyScheduler', 'max_epochs': 0, 'power': 0.9,
@@ -194,7 +191,7 @@ DATASET_CFG_ADE20k_512x512 = {
         'data_pipelines': [
             ('Resize', {'output_size': (2048, 512), 'keep_ratio': True, 'scale_range': (0.5, 2.0)}),
             ('RandomCrop', {'crop_size': (512, 512), 'one_category_max_ratio': 0.75}),
-            ('RandomFlip', {'flip_prob': 0.5}),
+            ('RandomFlip', {'prob': 0.5}),
             ('PhotoMetricDistortion', {}),
             ('Normalize', {'mean': [123.675, 116.28, 103.53], 'std': [58.395, 57.12, 57.375]}),
             ('ToTensor', {}),
@@ -254,7 +251,7 @@ The value of the `data_pipelines` should be a `list` like following,
 SEGMENTOR_CFG['dataset']['train']['data_pipelines'] = [
     ('Resize', {'output_size': (2048, 512), 'keep_ratio': True, 'scale_range': (0.5, 2.0)}),
     ('RandomCrop', {'crop_size': (512, 512), 'one_category_max_ratio': 0.75}),
-    ('RandomFlip', {'flip_prob': 0.5}),
+    ('RandomFlip', {'prob': 0.5}),
     ('PhotoMetricDistortion', {}),
     ('Normalize', {'mean': [123.675, 116.28, 103.53], 'std': [58.395, 57.12, 57.375]}),
     ('ToTensor', {}),
