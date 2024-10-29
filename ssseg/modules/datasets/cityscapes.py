@@ -69,7 +69,6 @@ class CityScapesDataset(BaseDataset):
                 result_copy[result == trainId] = label.id
             return result_copy
         if not os.path.exists(savedir): os.mkdir(savedir)
-        result_files = []
         for idx in range(len(results)):
             result = results[idx]
             filename = filenames[idx]

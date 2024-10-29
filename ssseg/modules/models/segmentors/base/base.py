@@ -56,18 +56,20 @@ class BaseSegmentor(nn.Module):
     def inference(self, images, forward_args=None):
         # assert and initialize
         inference_cfg = self.cfg['inference']
-        assert inference_cfg['mode'] in ['whole', 'slide']
-        use_probs_before_resize = inference_cfg['tricks']['use_probs_before_resize']
+        assert inference_cfg['forward']['mode'] in ['whole', 'slide']
+        use_probs_before_resize = inference_cfg['tta']['use_probs_before_resize']
         images = images.to(device=next(self.parameters()).device, dtype=next(self.parameters()).dtype)
         # inference
-        if inference_cfg['mode'] == 'whole':
-            if forward_args is None: seg_logits = self(SSSegInputStructure(images=images, mode=self.mode)).seg_logits
-            else: seg_logits = self(SSSegInputStructure(images=images, mode=self.mode), **forward_args).seg_logits
-            if use_probs_before_resize: seg_logits = F.softmax(seg_logits, dim=1)
+        if inference_cfg['forward']['mode'] == 'whole':
+            if forward_args is None:
+                seg_logits = self(SSSegInputStructure(images=images, mode=self.mode)).seg_logits
+            else:
+                seg_logits = self(SSSegInputStructure(images=images, mode=self.mode), **forward_args).seg_logits
+            if use_probs_before_resize:
+                seg_logits = F.softmax(seg_logits, dim=1)
         else:
-            opts = inference_cfg['opts']
-            stride_h, stride_w = opts['stride']
-            cropsize_h, cropsize_w = opts['cropsize']
+            stride_h, stride_w = inference_cfg['forward']['stride']
+            cropsize_h, cropsize_w = inference_cfg['forward']['cropsize']
             batch_size, _, image_h, image_w = images.size()
             num_grids_h = max(image_h - cropsize_h + stride_h - 1, 0) // stride_h + 1
             num_grids_w = max(image_w - cropsize_w + stride_w - 1, 0) // stride_w + 1
@@ -79,10 +81,13 @@ class BaseSegmentor(nn.Module):
                     x2, y2 = min(x1 + cropsize_w, image_w), min(y1 + cropsize_h, image_h)
                     x1, y1 = max(x2 - cropsize_w, 0), max(y2 - cropsize_h, 0)
                     crop_images = images[:, :, y1:y2, x1:x2]
-                    if forward_args is None: seg_logits_crop = self(SSSegInputStructure(images=crop_images, mode=self.mode)).seg_logits
-                    else: seg_logits_crop = self(SSSegInputStructure(images=crop_images, mode=self.mode), **forward_args).seg_logits
+                    if forward_args is None:
+                        seg_logits_crop = self(SSSegInputStructure(images=crop_images, mode=self.mode)).seg_logits
+                    else:
+                        seg_logits_crop = self(SSSegInputStructure(images=crop_images, mode=self.mode), **forward_args).seg_logits
                     seg_logits_crop = F.interpolate(seg_logits_crop, size=crop_images.size()[2:], mode='bilinear', align_corners=self.align_corners)
-                    if use_probs_before_resize: seg_logits_crop = F.softmax(seg_logits_crop, dim=1)
+                    if use_probs_before_resize:
+                        seg_logits_crop = F.softmax(seg_logits_crop, dim=1)
                     seg_logits += F.pad(seg_logits_crop, (int(x1), int(seg_logits.shape[3] - x2), int(y1), int(seg_logits.shape[2] - y2)))
                     count_mat[:, :, y1:y2, x1:x2] += 1
             assert (count_mat == 0).sum() == 0
@@ -93,16 +98,16 @@ class BaseSegmentor(nn.Module):
     def auginference(self, images, forward_args=None):
         # initialize
         inference_cfg = self.cfg['inference']
-        infer_tricks, seg_logits_list = inference_cfg['tricks'], []
+        infer_tta_cfg, seg_logits_list = inference_cfg['tta'], []
         # iter to inference
-        for scale_factor in infer_tricks['multiscale']:
+        for scale_factor in infer_tta_cfg['multiscale']:
             images_scale = F.interpolate(images, scale_factor=scale_factor, mode='bilinear', align_corners=self.align_corners)
             seg_logits = self.inference(images=images_scale, forward_args=forward_args).cpu()
             seg_logits_list.append(seg_logits)
-            if infer_tricks['flip']:
+            if infer_tta_cfg['flip']:
                 images_scale_flip = torch.from_numpy(np.flip(images_scale.cpu().numpy(), axis=3).copy())
                 seg_logits_flip = self.inference(images=images_scale_flip, forward_args=forward_args)
-                fixed_seg_target_pairs = inference_cfg.get('fixed_seg_target_pairs', None)
+                fixed_seg_target_pairs = infer_tta_cfg.get('fixed_seg_target_pairs', None)
                 if fixed_seg_target_pairs is None:
                     for data_pipeline in self.cfg['dataset']['train']['data_pipelines']:
                         if 'RandomFlip' in data_pipeline:

@@ -235,7 +235,7 @@ Specifically, `set` means a certain division of the data set, usually including 
 The other arguments supported in `SEGMENTOR_CFG['dataset']` is listed as follows,
 
 - `repeat_times`: The default value is 1, if increase it in the config, the appeared times of one image in an epoch will increase accordingly,
-- `evalmode`: `local` or `server`, `server` denotes `seg_target` will be set as `None`.
+- `eval_env`: Used to specify evaluate environment, support `server` environment (only save the test results which could be submitted to the corresponding dataset's official website to obtain the segmentation performance) and `local` environment (the default environment, test segmentors with the local images and annotations provided by the corresponding dataset).
 
 If the users want to learn more about this part, it is recommended that you could jump to the [`ssseg/modules/datasets` directory](https://github.com/SegmentationBLWX/sssegmentation/tree/main/ssseg/modules/datasets) in SSSegmentation to read the source codes of dataset classes.
 

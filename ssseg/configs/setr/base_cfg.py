@@ -36,11 +36,9 @@ SEGMENTOR_CFG = {
         'loss_cls': {'type': 'CrossEntropyLoss', 'scale_factor': 1.0, 'ignore_index': 255, 'reduction': 'mean'},
     },
     'inference': {
-        'mode': 'slide',
-        'opts': {'cropsize': (512, 512), 'stride': (341, 341)}, 
-        'tricks': {
-            'multiscale': [1], 'flip': False, 'use_probs_before_resize': True,
-        }
+        'forward': {'mode': 'slide', 'cropsize': (512, 512), 'stride': (341, 341)},
+        'tta': {'multiscale': [1], 'flip': False, 'use_probs_before_resize': True},
+        'evaluate': {'metric_list': ['iou', 'miou']},
     },
     'scheduler': {
         'type': 'PolyScheduler', 'max_epochs': 0, 'power': 0.9,

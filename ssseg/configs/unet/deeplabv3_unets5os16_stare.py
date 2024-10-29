@@ -20,11 +20,8 @@ SEGMENTOR_CFG['head'] = {
     'in_channels': 64, 'feats_channels': 16, 'dilations': [1, 6, 12, 18], 'dropout': 0.1,
 }
 SEGMENTOR_CFG['inference'] = {
-    'mode': 'slide',
-    'opts': {'cropsize': (128, 128), 'stride': (85, 85)}, 
-    'tricks': {
-        'multiscale': [1], 'flip': False, 'use_probs_before_resize': True
-    },
+    'forward': {'mode': 'slide', 'cropsize': (128, 128), 'stride': (85, 85)},
+    'tta': {'multiscale': [1], 'flip': False, 'use_probs_before_resize': True},
     'evaluate': {'metric_list': ['dice', 'mdice']},
 }
 SEGMENTOR_CFG['work_dir'] = os.path.split(__file__)[-1].split('.')[0]

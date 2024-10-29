@@ -53,23 +53,15 @@ SEGMENTOR_CFG['logger_handle_cfg']['logfilepath'] = os.path.join(SEGMENTOR_CFG['
 # modify inference config
 # --single-scale
 SEGMENTOR_CFG['inference'] = {
-    'mode': 'slide',
-    'opts': {'cropsize': (640, 640), 'stride': (426, 426)}, 
-    'tricks': {
-        'multiscale': [1.0],
-        'flip': False,
-        'use_probs_before_resize': True
-    }
+    'forward': {'mode': 'slide', 'cropsize': (640, 640), 'stride': (426, 426)},
+    'tta': {'multiscale': [1], 'flip': False, 'use_probs_before_resize': True},
+    'evaluate': {'metric_list': ['iou', 'miou']},
 }
 # --multi-scale
 '''
 SEGMENTOR_CFG['inference'] = {
-    'mode': 'slide',
-    'opts': {'cropsize': (640, 640), 'stride': (426, 426)}, 
-    'tricks': {
-        'multiscale': [0.5, 0.75, 1.0, 1.25, 1.5, 1.75],
-        'flip': True,
-        'use_probs_before_resize': True
-    }
+    'forward': {'mode': 'slide', 'cropsize': (640, 640), 'stride': (426, 426)},
+    'tta': {'multiscale': [0.5, 0.75, 1.0, 1.25, 1.5, 1.75], 'flip': True, 'use_probs_before_resize': True},
+    'evaluate': {'metric_list': ['iou', 'miou']},
 }
 '''

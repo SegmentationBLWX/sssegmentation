@@ -36,12 +36,8 @@ SEGMENTOR_CFG['inference'] = SEGMENTOR_CFG['inference'].copy()
 # --multi-scale with flipping
 '''
 SEGMENTOR_CFG['inference'] = {
-    'mode': 'slide',
-    'opts': {'cropsize': (512, 512), 'stride': (341, 341)}, 
-    'tricks': {
-        'multiscale': [0.5, 0.75, 1.0, 1.25, 1.5, 1.75],
-        'flip': True,
-        'use_probs_before_resize': True
-    }
+    'forward': {'mode': 'slide', 'cropsize': (512, 512), 'stride': (341, 341)},
+    'tta': {'multiscale': [0.5, 0.75, 1.0, 1.25, 1.5, 1.75], 'flip': True, 'use_probs_before_resize': True},
+    'evaluate': {'metric_list': ['iou', 'miou']},
 }
 '''

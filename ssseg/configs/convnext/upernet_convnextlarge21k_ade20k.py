@@ -29,11 +29,9 @@ SEGMENTOR_CFG['auxiliary'] = {
     'in_channels': 768, 'out_channels': 512, 'dropout': 0.1,
 }
 SEGMENTOR_CFG['inference'] = {
-    'mode': 'slide',
-    'opts': {'cropsize': (640, 640), 'stride': (426, 426)},
-    'tricks': {
-        'multiscale': [1], 'flip': False, 'use_probs_before_resize': False
-    }
+    'forward': {'mode': 'slide', 'cropsize': (640, 640), 'stride': (426, 426)},
+    'tta': {'multiscale': [1], 'flip': False, 'use_probs_before_resize': False},
+    'evaluate': {'metric_list': ['iou', 'miou']},
 }
 SEGMENTOR_CFG['work_dir'] = os.path.split(__file__)[-1].split('.')[0]
 SEGMENTOR_CFG['evaluate_results_filename'] = f"{os.path.split(__file__)[-1].split('.')[0]}.pkl"

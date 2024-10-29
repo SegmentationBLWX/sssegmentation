@@ -4,8 +4,8 @@ Function:
 Author:
     Zhenchao Jin
 '''
-import os
 import time
+from .misc import ismainprocess
 from .modulebuilder import BaseModuleBuilder
 
 
@@ -14,7 +14,9 @@ class LocalLoggerHandle():
     def __init__(self, logfilepath):
         self.logfilepath = logfilepath
     '''log'''
-    def log(self, message, level='INFO', endwithnewline=True):
+    def log(self, message, level='INFO', endwithnewline=True, main_process_only=False):
+        if main_process_only and (not ismainprocess()):
+            return
         message = f'{time.strftime("%Y-%m-%d %H:%M:%S", time.localtime())} {level}  {message}'
         print(message)
         if not message.endswith('\n') and endwithnewline:
@@ -22,17 +24,17 @@ class LocalLoggerHandle():
         with open(self.logfilepath, 'a') as fp:
             fp.write(message)
     '''debug'''
-    def debug(self, message, endwithnewline=True):
-        self.log(message, 'DEBUG', endwithnewline)
+    def debug(self, message, endwithnewline=True, main_process_only=False):
+        self.log(message, 'DEBUG', endwithnewline, main_process_only)
     '''info'''
-    def info(self, message, endwithnewline=True):
-        self.log(message, 'INFO', endwithnewline)
+    def info(self, message, endwithnewline=True, main_process_only=False):
+        self.log(message, 'INFO', endwithnewline, main_process_only)
     '''warning'''
-    def warning(self, message, endwithnewline=True):
-        self.log(message, 'WARNING', endwithnewline)
+    def warning(self, message, endwithnewline=True, main_process_only=False):
+        self.log(message, 'WARNING', endwithnewline, main_process_only)
     '''error'''
-    def error(self, message, endwithnewline=True):
-        self.log(message, 'ERROR', endwithnewline)
+    def error(self, message, endwithnewline=True, main_process_only=False):
+        self.log(message, 'ERROR', endwithnewline, main_process_only)
 
 
 '''LoggerHandleBuilder'''
@@ -59,17 +61,17 @@ class TrainingLoggingManager():
         self.log_interval_epochs = log_interval_epochs
         self.logger_handle = BuildLoggerHandle(logger_handle_cfg=logger_handle_cfg) if logger_handle is None else logger_handle
     '''log'''
-    def autolog(self, local_rank=0):
+    def autolog(self, main_process_only=False):
         cur_epoch, cur_iter = self.basic_log_dict['cur_epoch'], self.basic_log_dict['cur_iter']
         if self.log_interval_iters is not None:
-            if (local_rank == 0) and (cur_iter % self.log_interval_iters == 0) and (int(os.environ.get('SLURM_PROCID', 0)) == 0):
+            if cur_iter % self.log_interval_iters == 0:
                 log_dict = self.getlogdict()
-                self.logger_handle.info(log_dict)
+                self.logger_handle.info(log_dict, main_process_only=main_process_only)
                 self.clear()
         else:
-            if (local_rank == 0) and (cur_epoch % self.log_interval_epochs == 0) and (int(os.environ.get('SLURM_PROCID', 0)) == 0):
+            if cur_epoch % self.log_interval_epochs == 0:
                 log_dict = self.getlogdict()
-                self.logger_handle.info(log_dict)
+                self.logger_handle.info(log_dict, main_process_only=main_process_only)
                 self.clear()
     '''update'''
     def update(self, basic_log_dict, losses_log_dict):

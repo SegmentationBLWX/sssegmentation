@@ -22,7 +22,7 @@ This script accepts several optional arguments, including:
 
 - `${NGPUS}`: The number of GPUS you want to use,
 - `${CFGFILEPATH}`: The config file path which is used to customize segmentors,
-- `--ckptspath`: Checkpoints you want to resume from, if you want to resume from the latest checkpoint in the `SEGMENTOR_CFG['work_dir']` automatically, you can specify it as `f'{work_dir}/epoch_last.pth'`,
+- `--ckptspath`: Checkpoints you want to resume from, if you want to resume from the latest checkpoint in the `SEGMENTOR_CFG['work_dir']` automatically, you can specify it as `f'{work_dir}/checkpoints-epoch-latest.pth'`,
 - `--slurm`: Please add `--slurm` if you are using slurm to spawn training jobs.
 
 Here, we provide some examples about training a segmentor on a single machine,
@@ -30,10 +30,10 @@ Here, we provide some examples about training a segmentor on a single machine,
 ```sh
 # train ANNNet
 bash scripts/dist_train.sh 4 ssseg/configs/annnet/annnet_resnet50os16_ade20k.py
-# load epoch_44.pth and then train ANNNet
-bash scripts/dist_train.sh 4 ssseg/configs/annnet/annnet_resnet50os16_ade20k.py --ckptspath annnet_resnet50os16_ade20k/epoch_44.pth
+# load checkpoints-epoch-44.pth and then resume training ANNNet
+bash scripts/dist_train.sh 4 ssseg/configs/annnet/annnet_resnet50os16_ade20k.py --ckptspath annnet_resnet50os16_ade20k/checkpoints-epoch-44.pth
 # auto resume
-bash scripts/dist_train.sh 4 ssseg/configs/annnet/annnet_resnet50os16_ade20k.py --ckptspath annnet_resnet50os16_ade20k/epoch_last.pth
+bash scripts/dist_train.sh 4 ssseg/configs/annnet/annnet_resnet50os16_ade20k.py --ckptspath annnet_resnet50os16_ade20k/checkpoints-epoch-latest.pth
 ```
 
 The last command will be very useful if you are training your segmentors in an unstable environment, *e.g.*, your program will be interrupted and restarted frequently.
@@ -51,7 +51,7 @@ This script accepts several optional arguments, including:
 - `${NGPUS}`: The number of GPUS you want to use,
 - `${CFGFILEPATH}`: The config file path which is used to customize segmentors,
 - `${CKPTSPATH}`: Checkpoints you want to resume from,
-- `--evalmode`: Used to specify evaluate mode, support server mode (only save the test results which could be submitted to the corresponding dataset's official website to obtain the segmentation performance) and local mode (the default mode, test segmentors with the local images and annotations provided by the corresponding dataset),
+- `--eval_env`: Used to specify evaluate environment, support `server` environment (only save the test results which could be submitted to the corresponding dataset's official website to obtain the segmentation performance) and `local` environment (the default environment, test segmentors with the local images and annotations provided by the corresponding dataset),
 - `--slurm`: Please add `--slurm` if you are using slurm to spawn testing jobs,
 - `--ema`: Please add `--ema` if you want to load ema weights for segmentors.
 
@@ -59,9 +59,9 @@ Here, we provide some examples about testing a segmentor on a single machine,
 
 ```sh
 # test ANNNet on ADE20k
-bash scripts/dist_test.sh 4 ssseg/configs/annnet/annnet_resnet50os16_ade20k.py annnet_resnet50os16_ade20k/epoch_130.pth
+bash scripts/dist_test.sh 4 ssseg/configs/annnet/annnet_resnet50os16_ade20k.py annnet_resnet50os16_ade20k/checkpoints-epoch-130.pth
 # test ANNNet on Cityscapes
-bash scripts/dist_test.sh 4 ssseg/configs/annnet/annnet_resnet50os16_cityscapes.py annnet_resnet50os16_cityscapes/epoch_220.pth
+bash scripts/dist_test.sh 4 ssseg/configs/annnet/annnet_resnet50os16_cityscapes.py annnet_resnet50os16_cityscapes/checkpoints-epoch-220.pth
 ```
 
 #### Training and Testing on Multiple Machines
@@ -82,7 +82,7 @@ This script accepts several optional arguments, including:
 - `${JOBNAME}`: The job name you want to show,
 - `${NGPUS}`: The number of GPUS you want to use,
 - `${CFGFILEPATH}`: The config file path which is used to customize segmentors,
-- `--ckptspath`: Checkpoints you want to resume from, if you want to resume from the latest checkpoint in the `SEGMENTOR_CFG['work_dir']` automatically, you can specify it as `f'{work_dir}/epoch_last.pth'`,
+- `--ckptspath`: Checkpoints you want to resume from, if you want to resume from the latest checkpoint in the `SEGMENTOR_CFG['work_dir']` automatically, you can specify it as `f'{work_dir}/checkpoints-epoch-latest.pth'`,
 - `--slurm`: Please add `--slurm` if you are using slurm to spawn training jobs.
 
 Here is an example of using 16 GPUs to train PSPNet on Slurm partition named *dev*,
@@ -108,14 +108,14 @@ This script accepts several optional arguments, including:
 - `${NGPUS}`: The number of GPUS you want to use,
 - `${CFGFILEPATH}`: The config file path which is used to customize segmentors,
 - `${CKPTSPATH}`: Checkpoints you want to resume from,
-- `--evalmode`: Used to specify evaluate mode, support server mode (only save the test results which could be submitted to the corresponding dataset's official website to obtain the segmentation performance) and local mode (the default mode, test segmentors with the local images and annotations provided by the corresponding dataset),
+- `--eval_env`: Used to specify evaluate environment, support `server` environment (only save the test results which could be submitted to the corresponding dataset's official website to obtain the segmentation performance) and `local` environment (the default environment, test segmentors with the local images and annotations provided by the corresponding dataset),
 - `--slurm`: Please add `--slurm` if you are using slurm to spawn testing jobs,
 - `--ema`: Please add `--ema` if you want to load ema weights for segmentors.
 
 Here is an example of using 16 GPUs to test PSPNet on Slurm partition named *dev*,
 
 ```sh
-bash scripts/slurm_test.sh dev pspnet 16 ssseg/configs/pspnet/pspnet_resnet101os8_ade20k.py pspnet_resnet101os8_ade20k/epoch_130.pth --slurm
+bash scripts/slurm_test.sh dev pspnet 16 ssseg/configs/pspnet/pspnet_resnet101os8_ade20k.py pspnet_resnet101os8_ade20k/checkpoints-epoch-130.pth --slurm
 ```
 
 Also, `--slurm` is required to set for slurm environment initialization.
@@ -145,9 +145,9 @@ Here are some example commands,
 
 ```sh
 # inference on a given image
-bash scripts/inference.sh ssseg/configs/pspnet/pspnet_resnet101os8_ade20k.py pspnet_resnet101os8_ade20k/epoch_130.pth --imagepath dog.jpg
+bash scripts/inference.sh ssseg/configs/pspnet/pspnet_resnet101os8_ade20k.py pspnet_resnet101os8_ade20k/checkpoints-epoch-130.pth --imagepath dog.jpg
 # inference on given images
-bash scripts/inference.sh ssseg/configs/pspnet/pspnet_resnet101os8_ade20k.py pspnet_resnet101os8_ade20k/epoch_130.pth --imagedir dogs
+bash scripts/inference.sh ssseg/configs/pspnet/pspnet_resnet101os8_ade20k.py pspnet_resnet101os8_ade20k/checkpoints-epoch-130.pth --imagedir dogs
 ```
 
 Please note that, if you specify `--imagedir` and `--imagepath` at the same time, only the value following `--imagedir` will be used.

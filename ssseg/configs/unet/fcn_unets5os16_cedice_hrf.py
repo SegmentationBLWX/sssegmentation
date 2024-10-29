@@ -23,11 +23,8 @@ SEGMENTOR_CFG['losses'] = {
     ],
 }
 SEGMENTOR_CFG['inference'] = {
-    'mode': 'slide',
-    'opts': {'cropsize': (256, 256), 'stride': (170, 170)}, 
-    'tricks': {
-        'multiscale': [1], 'flip': False, 'use_probs_before_resize': True
-    },
+    'forward': {'mode': 'slide', 'cropsize': (256, 256), 'stride': (170, 170)},
+    'tta': {'multiscale': [1], 'flip': False, 'use_probs_before_resize': True},
     'evaluate': {'metric_list': ['dice', 'mdice']},
 }
 SEGMENTOR_CFG['work_dir'] = os.path.split(__file__)[-1].split('.')[0]

@@ -16,12 +16,12 @@ import torch.distributed as dist
 from tqdm import tqdm
 try:
     from modules import (
-        BuildDistributedDataloader, BuildDistributedModel, touchdir, loadckpts, saveckpts, judgefileexist, postprocesspredgtpairs, initslurm,
+        BuildDistributedDataloader, BuildDistributedModel, touchdirs, loadckpts, saveckpts, judgefileexist, postprocesspredgtpairs, initslurm, ismainprocess,
         BuildDataset,  BuildSegmentor, BuildOptimizer, BuildScheduler, BuildLoggerHandle, TrainingLoggingManager, ConfigParser, EMASegmentor, SSSegInputStructure
     )
 except:
     from .modules import (
-        BuildDistributedDataloader, BuildDistributedModel, touchdir, loadckpts, saveckpts, judgefileexist, postprocesspredgtpairs, initslurm,
+        BuildDistributedDataloader, BuildDistributedModel, touchdirs, loadckpts, saveckpts, judgefileexist, postprocesspredgtpairs, initslurm, ismainprocess,
         BuildDataset,  BuildSegmentor, BuildOptimizer, BuildScheduler, BuildLoggerHandle, TrainingLoggingManager, ConfigParser, EMASegmentor, SSSegInputStructure
     )
 warnings.filterwarnings('ignore')
@@ -38,7 +38,13 @@ def parsecmdargs():
     cmd_args = parser.parse_args()
     if torch.__version__.startswith('2.'):
         cmd_args.local_rank = int(os.environ['LOCAL_RANK'])
-    if cmd_args.slurm: initslurm(cmd_args, str(8888 + random.randint(0, 1000)))
+    if cmd_args.slurm:
+        initslurm(cmd_args, str(8888 + random.randint(0, 1000)))
+    else:
+        if 'RANK' not in os.environ:
+            os.environ['RANK'] = str(cmd_args.local_rank)
+        if 'LOCAL_RANK' not in os.environ:
+            os.environ['LOCAL_RANK'] = str(cmd_args.local_rank)
     return cmd_args
 
 
@@ -49,7 +55,7 @@ class Trainer():
         config_parser = ConfigParser()
         cfg, cfg_file_path = config_parser(cmd_args.cfgfilepath)
         # touch work dir
-        touchdir(cfg.SEGMENTOR_CFG['work_dir'])
+        touchdirs(cfg.SEGMENTOR_CFG['work_dir'])
         config_parser.save(cfg.SEGMENTOR_CFG['work_dir'])
         # initialize logger_handle and training_logging_manager
         logger_handle = BuildLoggerHandle(cfg.SEGMENTOR_CFG['logger_handle_cfg'])
@@ -60,8 +66,7 @@ class Trainer():
         # number of gpus per node, for distribued training, only support a process for a GPU
         ngpus_per_node = torch.cuda.device_count()
         if ngpus_per_node != cmd_args.nproc_per_node:
-            if (cmd_args.local_rank == 0) and (int(os.environ.get('SLURM_PROCID', 0)) == 0): 
-                logger_handle.warning('ngpus_per_node is not equal to nproc_per_node, force ngpus_per_node = nproc_per_node by default')
+            logger_handle.warning('ngpus_per_node is not equal to nproc_per_node, force ngpus_per_node = nproc_per_node by default', main_process_only=True)
             ngpus_per_node = cmd_args.nproc_per_node
         # set attributes
         self.cfg = cfg
@@ -130,7 +135,7 @@ class Trainer():
             try:
                 segmentor.load_state_dict(ckpts['model'])
             except Exception as e:
-                logger_handle.warning(str(e) + '\n' + 'Try to load ckpts by using strict=False')
+                logger_handle.warning(str(e) + '\n' + 'Try to load ckpts by using strict=False', main_process_only=True)
                 segmentor.load_state_dict(ckpts['model'], strict=False)
             if 'optimizer' in ckpts: 
                 optimizer.load_state_dict(ckpts['optimizer'])
@@ -153,10 +158,9 @@ class Trainer():
         if fp16_type in ['pytorch']:
             segmentor.register_comm_hook(state=None, hook=comm_hooks.fp16_compress_hook)
         # print config
-        if (cmd_args.local_rank == 0) and (int(os.environ.get('SLURM_PROCID', 0)) == 0):
-            logger_handle.info(f'Config file path: {cfg_file_path}')
-            logger_handle.info(f'Config details: \n{cfg.SEGMENTOR_CFG}')
-            logger_handle.info(f'Resume from: {cmd_args.ckptspath}')
+        logger_handle.info(f'Config file path: {cfg_file_path}', main_process_only=True)
+        logger_handle.info(f'Config details: \n{cfg.SEGMENTOR_CFG}', main_process_only=True)
+        logger_handle.info(f'Resume from: {cmd_args.ckptspath}', main_process_only=True)
         # start to train the segmentor
         for epoch in range(start_epoch, end_epoch+1):
             # --set train
@@ -194,7 +198,7 @@ class Trainer():
                     'learning_rate': learning_rate, 'ema': ema_cfg['momentum'] is not None, 'fp16': fp16_type is not None,
                 }
                 training_logging_manager.update(basic_log_dict, losses_log_dict)
-                training_logging_manager.autolog(cmd_args.local_rank)
+                training_logging_manager.autolog(main_process_only=True)
             scheduler.cur_epoch = epoch
             # --save ckpts
             if (epoch % cfg.SEGMENTOR_CFG['save_interval_epochs'] == 0) or (epoch == end_epoch):
@@ -206,23 +210,21 @@ class Trainer():
                     state_dict['amp'] = apex.amp.state_dict()
                 elif fp16_type in ['pytorch']:
                     state_dict['grad_scaler'] = grad_scaler.state_dict()
-                savepath = os.path.join(cfg.SEGMENTOR_CFG['work_dir'], 'epoch_%s.pth' % epoch)
-                if (cmd_args.local_rank == 0) and (int(os.environ.get('SLURM_PROCID', 0)) == 0):
+                savepath = os.path.join(cfg.SEGMENTOR_CFG['work_dir'], f'checkpoints-epoch-{epoch}.pth')
+                if ismainprocess():
                     saveckpts(state_dict, savepath)
             # --eval ckpts
             if (epoch % cfg.SEGMENTOR_CFG['eval_interval_epochs'] == 0) or (epoch == end_epoch):
-                if (cmd_args.local_rank == 0) and (int(os.environ.get('SLURM_PROCID', 0)) == 0):
-                    self.logger_handle.info(f'Evaluate {cfg.SEGMENTOR_CFG["type"]} at epoch {epoch}')
+                self.logger_handle.info(f'Evaluate {cfg.SEGMENTOR_CFG["type"]} at epoch {epoch}', main_process_only=True)
                 self.evaluate(segmentor)
                 if ema_cfg['momentum'] is not None:
-                    if (cmd_args.local_rank == 0) and (int(os.environ.get('SLURM_PROCID', 0)) == 0):
-                        self.logger_handle.info(f'Evaluate EMA of {cfg.SEGMENTOR_CFG["type"]} at epoch {epoch}')
+                    self.logger_handle.info(f'Evaluate EMA of {cfg.SEGMENTOR_CFG["type"]} at epoch {epoch}', main_process_only=True)
                     self.evaluate(segmentor_ema.segmentor_ema.cuda(cmd_args.local_rank))
     '''evaluate'''
     def evaluate(self, segmentor):
-        cfg, ngpus_per_node, logger_handle, cmd_args, cfg_file_path = self.cfg, self.ngpus_per_node, self.logger_handle, self.cmd_args, self.cfg_file_path
-        # TODO: bug occurs if use --pyt bash
-        rank_id = int(os.environ['SLURM_PROCID']) if 'SLURM_PROCID' in os.environ else cmd_args.local_rank
+        cfg, logger_handle, cmd_args, cfg_file_path = self.cfg, self.logger_handle, self.cmd_args, self.cfg_file_path
+        # TODO: bug occurs if use --pyt bash in slurm
+        rank_id = int(os.environ['RANK'])
         # build dataset and dataloader
         dataset = BuildDataset(mode='TEST', logger_handle=logger_handle, dataset_cfg=cfg.SEGMENTOR_CFG['dataset'])
         assert dataset.num_classes == cfg.SEGMENTOR_CFG['num_classes'], 'parsed config file %s error' % cfg_file_path
@@ -231,7 +233,7 @@ class Trainer():
         dataloader = BuildDistributedDataloader(dataset=dataset, dataloader_cfg=dataloader_cfg['test'])
         # start to eval
         segmentor.eval()
-        inference_cfg, seg_preds, seg_gts = cfg.SEGMENTOR_CFG['inference'], [], []
+        seg_results = {}
         align_corners = segmentor.module.align_corners if hasattr(segmentor, 'module') else segmentor.align_corners
         with torch.no_grad():
             dataloader.sampler.set_epoch(0)
@@ -242,17 +244,16 @@ class Trainer():
                 for seg_idx in range(len(seg_logits)):
                     seg_logit = F.interpolate(seg_logits[seg_idx: seg_idx+1], size=(samples_meta['height'][seg_idx], samples_meta['width'][seg_idx]), mode='bilinear', align_corners=align_corners)
                     seg_pred = (torch.argmax(seg_logit[0], dim=0)).cpu().numpy().astype(np.int32)
-                    seg_preds.append([samples_meta['id'][seg_idx], seg_pred])
                     seg_gt = samples_meta['seg_target'][seg_idx].cpu().numpy().astype(np.int32)
                     seg_gt[seg_gt >= dataset.num_classes] = -1
-                    seg_gts.append(seg_gt)
+                    seg_results[samples_meta['id'][seg_idx]] = {'seg_pred': seg_pred, 'seg_gt': seg_gt}
         # post process
-        seg_preds, seg_gts, seg_ids = postprocesspredgtpairs(seg_preds=seg_preds, seg_gts=seg_gts, cmd_args=cmd_args, cfg=cfg, logger_handle=logger_handle)
-        if rank_id == 0:
+        seg_preds, seg_gts, _ = postprocesspredgtpairs(seg_results=seg_results, cmd_args=cmd_args, cfg=cfg, logger_handle=logger_handle)
+        if ismainprocess():
             result = dataset.evaluate(
-                seg_preds=seg_preds, seg_targets=seg_gts, num_classes=cfg.SEGMENTOR_CFG['num_classes'], ignore_index=-1, **cfg.SEGMENTOR_CFG['inference'].get('evaluate', {}),
+                seg_preds=seg_preds, seg_gts=seg_gts, num_classes=cfg.SEGMENTOR_CFG['num_classes'], ignore_index=-1, **cfg.SEGMENTOR_CFG['inference'].get('evaluate', {}),
             )
-            logger_handle.info(result)
+            logger_handle.info(result, main_process_only=True)
         segmentor.train()
 
 
