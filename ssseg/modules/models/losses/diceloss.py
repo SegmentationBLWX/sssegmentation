@@ -39,19 +39,13 @@ class DiceLoss(nn.Module):
         one_hot_target = F.one_hot(torch.clamp(target.long(), 0, num_classes - 1), num_classes=num_classes)
         valid_mask = (target != dice_cfg['ignore_index']).long()
         loss = self.diceloss(prediction, one_hot_target, valid_mask, **dice_cfg)
-        if dice_cfg['reduction'] == 'mean':
-            loss = loss.mean()
-        elif dice_cfg['reduction'] == 'sum':
-            loss = loss.sum()
-        else:
-            assert dice_cfg['reduction'] == 'none', 'only support reduction in [mean, sum, none]'
         loss = loss * scale_factor
         if lowest_loss_value is not None:
             loss = torch.abs(loss - lowest_loss_value) + lowest_loss_value
         # return
         return loss
     '''diceloss'''
-    def diceloss(self, pred, target, valid_mask, smooth=1, exponent=2, class_weight=None, ignore_index=255):
+    def diceloss(self, pred, target, valid_mask, smooth=1, exponent=2, class_weight=None, ignore_index=255, reduction='mean'):
         assert pred.shape[0] == target.shape[0]
         total_loss = 0
         num_classes = pred.shape[1]
@@ -60,7 +54,14 @@ class DiceLoss(nn.Module):
                 dice_loss = self.binarydiceloss(pred[:, i], target[..., i], valid_mask=valid_mask, smooth=smooth, exponent=exponent)
                 if class_weight is not None: dice_loss *= class_weight[i]
                 total_loss += dice_loss
-        return total_loss / num_classes
+        loss = total_loss / num_classes
+        if reduction == 'mean':
+            loss = loss.mean()
+        elif reduction == 'sum':
+            loss = loss.sum()
+        else:
+            assert reduction == 'none', 'only support reduction in [mean, sum, none]'
+        return loss
     '''binarydiceloss'''
     @staticmethod
     def binarydiceloss(pred, target, valid_mask, smooth=1, exponent=2):
