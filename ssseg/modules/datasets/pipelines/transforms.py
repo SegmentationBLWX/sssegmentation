@@ -14,7 +14,7 @@ import collections.abc
 import torch.nn.functional as F
 from PIL import ImageFilter, Image
 from ...utils import BaseModuleBuilder
-from .utils import assertvalidprob, assertvalidimagesize, assertvalidrange, totuple
+from .misc import assertvalidprob, assertvalidimagesize, assertvalidrange, totuple
 
 
 '''_INTERPOLATION_CV2_CONVERTOR'''

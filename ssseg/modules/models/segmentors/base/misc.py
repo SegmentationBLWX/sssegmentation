@@ -1,6 +1,6 @@
 '''
 Function:
-    Implementation of Utils
+    Implementation of segmentors-related functions
 Author:
     Zhenchao Jin
 '''
