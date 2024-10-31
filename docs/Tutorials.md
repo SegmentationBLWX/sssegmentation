@@ -101,7 +101,7 @@ DATASET_CFG_ADE20k_512x512 = {
 }
 DATALOADER_CFG_BS16 = {
     'expected_total_train_bs_for_assert': 16, # it is defined for asserting whether the users adopt the correct batch size for training the models
-	'auto_adapt_to_expected_train_bs': True, # if set Ture, the "expected_total_train_bs_for_assert" will be used to determine the value of "batch_size_per_gpu" rather than using the specified value in the config
+    'auto_adapt_to_expected_train_bs': True, # if set Ture, the "expected_total_train_bs_for_assert" will be used to determine the value of "batch_size_per_gpu" rather than using the specified value in the config
     'train': {
         'batch_size_per_gpu': 2, # number of images in each gpu during training
         'num_workers_per_gpu': 2, # number of workers for dataloader in each gpu during training
