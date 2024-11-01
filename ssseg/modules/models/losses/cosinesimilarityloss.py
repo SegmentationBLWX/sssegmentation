@@ -24,7 +24,6 @@ class CosineSimilarityLoss(nn.Module):
         # fetch attributes
         scale_factor, reduction, lowest_loss_value = self.scale_factor, self.reduction, self.lowest_loss_value
         # calculate loss
-        assert x_src.shape == x_tgt.shape
         loss = 1 - F.cosine_similarity(x_src, x_tgt, dim=1)
         if reduction == 'mean':
             loss = loss.mean()

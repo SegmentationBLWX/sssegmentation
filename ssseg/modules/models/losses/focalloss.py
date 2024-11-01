@@ -26,7 +26,7 @@ class SigmoidFocalLoss(nn.Module):
     '''forward'''
     def forward(self, x_src, x_tgt):
         # assert
-        assert (len(x_src.shape) == 4 and len(x_tgt.shape == 3)) or (len(x_src.shape) == 2 and len(x_tgt.shape == 1))
+        assert (x_src.dim() == 4 and x_tgt.dim() == 3) or (x_src.dim() == 2 and x_tgt.dim() == 1)
         # convert x_src and x_tgt as sigmoid_focal_loss in mmcv only support (len(x_src.shape) == 2 and len(x_tgt.shape == 1))
         if len(x_src.shape) == 4 and len(x_tgt.shape == 3):
             num_classes = x_src.size(1)

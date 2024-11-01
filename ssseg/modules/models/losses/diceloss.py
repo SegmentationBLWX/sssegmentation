@@ -24,7 +24,7 @@ class DiceLoss(nn.Module):
     '''forward'''
     def forward(self, x_src, x_tgt):
         # assert
-        assert (len(x_src.shape) == 4 and len(x_tgt.shape == 3)) or (len(x_src.shape) == 2 and len(x_tgt.shape == 1))
+        assert (x_src.dim() == 4 and x_tgt.dim() == 3) or (x_src.dim() == 2 and x_tgt.dim() == 1)
         # fetch attributes
         smooth, exponent, reduction, ignore_index = self.smooth, self.exponent, self.reduction, self.ignore_index
         class_weight, scale_factor, lowest_loss_value = self.class_weight, self.scale_factor, self.lowest_loss_value

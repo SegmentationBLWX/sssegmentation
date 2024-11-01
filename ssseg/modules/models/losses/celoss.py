@@ -22,7 +22,7 @@ class CrossEntropyLoss(nn.Module):
     '''forward'''
     def forward(self, x_src, x_tgt):
         # assert
-        assert (len(x_src.shape) == 4 and len(x_tgt.shape == 3)) or (len(x_src.shape) == 2 and len(x_tgt.shape == 1)) or (x_src.size() == x_tgt.size())
+        assert (x_src.dim() == 4 and x_tgt.dim() == 3) or (x_src.dim() == 2 and x_tgt.dim() == 1) or (x_src.size() == x_tgt.size())
         # fetch attributes
         weight, reduction, ignore_index = self.weight, self.reduction, self.ignore_index
         scale_factor, label_smoothing, lowest_loss_value = self.scale_factor, self.label_smoothing, self.lowest_loss_value
@@ -54,7 +54,7 @@ class BinaryCrossEntropyLoss(nn.Module):
     '''forward'''
     def forward(self, x_src, x_tgt):
         # assert
-        assert (len(x_src.shape) == 4 and len(x_tgt.shape == 3)) or (len(x_src.shape) == 2 and len(x_tgt.shape == 1)) or (x_src.size() == x_tgt.size())
+        assert (x_src.dim() == 4 and x_tgt.dim() == 3) or (x_src.dim() == 2 and x_tgt.dim() == 1) or (x_src.size() == x_tgt.size())
         # convert x_src and x_tgt
         if x_src.dim() == 4:
             num_classes = x_src.size(1)
