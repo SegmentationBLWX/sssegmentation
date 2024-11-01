@@ -170,9 +170,9 @@ class Trainer():
             for batch_idx, samples_meta in enumerate(dataloader):
                 learning_rate = scheduler.updatelr()
                 data_meta = SSSegInputStructure(
-                    mode='TRAIN', images=samples_meta['image'].type(torch.cuda.FloatTensor), seg_targets=samples_meta['seg_target'].type(torch.cuda.FloatTensor),
-                    edge_targets=samples_meta['edge_target'].type(torch.cuda.FloatTensor) if 'edge_target' in samples_meta else None,
-                    img2aug_pos_mapper=samples_meta['img2aug_pos_mapper'].type(torch.cuda.FloatTensor) if 'img2aug_pos_mapper' in samples_meta else None,
+                    mode='TRAIN', images=samples_meta['image'].type(torch.cuda.FloatTensor), seg_targets=samples_meta['seg_target'].type(torch.cuda.LongTensor),
+                    edge_targets=samples_meta['edge_target'].type(torch.cuda.LongTensor) if 'edge_target' in samples_meta else None,
+                    img2aug_pos_mapper=samples_meta['img2aug_pos_mapper'].type(torch.cuda.LongTensor) if 'img2aug_pos_mapper' in samples_meta else None,
                 )
                 optimizer.zero_grad()
                 forward_kwargs = {'learning_rate': learning_rate, 'epoch': epoch} if cfg.SEGMENTOR_CFG['type'] in ['MCIBI', 'MCIBIPlusPlus'] else {}

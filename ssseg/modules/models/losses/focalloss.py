@@ -24,17 +24,24 @@ class SigmoidFocalLoss(nn.Module):
         self.scale_factor = scale_factor
         self.lowest_loss_value = lowest_loss_value
     '''forward'''
-    def forward(self, prediction, target):
+    def forward(self, x_src, x_tgt):
+        # assert
+        assert (len(x_src.shape) == 4 and len(x_tgt.shape == 3)) or (len(x_src.shape) == 2 and len(x_tgt.shape == 1))
+        # convert x_src and x_tgt as sigmoid_focal_loss in mmcv only support (len(x_src.shape) == 2 and len(x_tgt.shape == 1))
+        if len(x_src.shape) == 4 and len(x_tgt.shape == 3):
+            num_classes = x_src.size(1)
+            x_src = x_src.permute(0, 2, 3, 1).contiguous().view(-1, num_classes)
+            x_tgt = x_tgt.reshape(-1)
         # fetch attributes
         alpha, gamma, weight, lowest_loss_value = self.alpha, self.gamma, self.weight, self.lowest_loss_value
         scale_factor, reduction, ignore_index = self.scale_factor, self.reduction, self.ignore_index
         # filter according to ignore_index
         if ignore_index is not None:
-            num_classes = prediction.size(-1)
-            mask = (target != ignore_index)
-            prediction, target = prediction[mask].view(-1, num_classes), target[mask].view(-1)
-        # calculate loss
-        loss = sigmoid_focal_loss(prediction, target.long(), gamma, alpha, weight, reduction)
+            num_classes = x_src.size(1)
+            valid_mask = (x_tgt != ignore_index)
+            x_src, x_tgt = x_src[valid_mask].view(-1, num_classes), x_tgt[valid_mask].view(-1)
+        # calculate loss, sigmoid_focal_loss requires all input x_tgt as torch.LongTensor
+        loss = sigmoid_focal_loss(x_src, x_tgt.long(), gamma, alpha, weight, reduction)
         loss = loss * scale_factor
         if lowest_loss_value is not None:
             loss = torch.abs(loss - lowest_loss_value) + lowest_loss_value

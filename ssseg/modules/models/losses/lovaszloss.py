@@ -9,7 +9,7 @@ import torch.nn as nn
 import torch.nn.functional as F
 
 
-'''LovaszGrad: computes gradient of the lovasz extension w.r.t sorted errors'''
+'''LovaszGrad'''
 def LovaszGrad(gt_sorted):
     p = len(gt_sorted)
     gts = gt_sorted.sum()
@@ -20,7 +20,7 @@ def LovaszGrad(gt_sorted):
     return jaccard
 
 
-'''FlattenBinaryLogits: flattens predictions in the batch (binary case), remove labels equal to ignore_index.'''
+'''FlattenBinaryLogits'''
 def FlattenBinaryLogits(logits, labels, ignore_index=None):
     logits = logits.view(-1)
     labels = labels.view(-1)
@@ -31,7 +31,7 @@ def FlattenBinaryLogits(logits, labels, ignore_index=None):
     return vlogits, vlabels
 
 
-'''FlattenProbs: flattens predictions in the batch'''
+'''FlattenProbs'''
 def FlattenProbs(probs, labels, ignore_index=None):
     if probs.dim() == 3:
         B, H, W = probs.size()
@@ -60,14 +60,14 @@ def LovaszHingeFlat(logits, labels):
 
 
 '''LovaszHingeLoss'''
-def LovaszHingeLoss(prediction, target, scale_factor=1.0, per_image=False, reduction='mean', ignore_index=255, lowest_loss_value=None):
+def LovaszHingeLoss(x_src, x_tgt, scale_factor=1.0, per_image=False, reduction='mean', ignore_index=255, lowest_loss_value=None):
     # calculate the loss
     lovasz_cfg = {'per_image': per_image, 'reduction': reduction, 'ignore_index': ignore_index}
     if lovasz_cfg['per_image']:
-        loss = [LovaszHingeFlat(*FlattenBinaryLogits(logit.unsqueeze(0), label.unsqueeze(0), lovasz_cfg['ignore_index'])) for logit, label in zip(prediction, target)]
+        loss = [LovaszHingeFlat(*FlattenBinaryLogits(logit.unsqueeze(0), label.unsqueeze(0), lovasz_cfg['ignore_index'])) for logit, label in zip(x_src, x_tgt)]
         loss = torch.stack(loss)
     else:
-        loss = LovaszHingeFlat(*FlattenBinaryLogits(prediction, target, lovasz_cfg['ignore_index']))
+        loss = LovaszHingeFlat(*FlattenBinaryLogits(x_src, x_tgt, lovasz_cfg['ignore_index']))
     if lovasz_cfg['reduction'] == 'mean':
         loss = loss.mean()
     elif lovasz_cfg['reduction'] == 'sum':
@@ -107,17 +107,17 @@ def LovaszSoftmaxFlat(probs, labels, classes='present', class_weight=None):
 
 
 '''LovaszSoftmaxLoss'''
-def LovaszSoftmaxLoss(prediction, target, scale_factor=1.0, per_image=False, classes='present', reduction='mean', ignore_index=255, class_weight=None, lowest_loss_value=None):
+def LovaszSoftmaxLoss(x_src, x_tgt, scale_factor=1.0, per_image=False, classes='present', reduction='mean', ignore_index=255, class_weight=None, lowest_loss_value=None):
     # calculate the loss
-    prediction = F.softmax(prediction, dim=1)
+    x_src = F.softmax(x_src, dim=1)
     if class_weight is not None:
-        class_weight = class_weight.type_as(prediction)
+        class_weight = class_weight.type_as(x_src)
     lovasz_cfg = {'per_image': per_image, 'classes': classes, 'reduction': reduction, 'ignore_index': ignore_index, 'class_weight': class_weight}
     if lovasz_cfg['per_image']:
-        loss = [LovaszSoftmaxFlat(*FlattenProbs(prob.unsqueeze(0), label.unsqueeze(0), lovasz_cfg['ignore_index']), classes=lovasz_cfg['classes'], class_weight=lovasz_cfg['class_weight']) for prob, label in zip(prediction, target)]
+        loss = [LovaszSoftmaxFlat(*FlattenProbs(prob.unsqueeze(0), label.unsqueeze(0), lovasz_cfg['ignore_index']), classes=lovasz_cfg['classes'], class_weight=lovasz_cfg['class_weight']) for prob, label in zip(x_src, x_tgt)]
         loss = torch.stack(loss)
     else:
-        loss = LovaszSoftmaxFlat(*FlattenProbs(prediction, target, lovasz_cfg['ignore_index']), classes=lovasz_cfg['classes'], class_weight=lovasz_cfg['class_weight'])
+        loss = LovaszSoftmaxFlat(*FlattenProbs(x_src, x_tgt, lovasz_cfg['ignore_index']), classes=lovasz_cfg['classes'], class_weight=lovasz_cfg['class_weight'])
     if lovasz_cfg['reduction'] == 'mean':
         loss = loss.mean()
     elif lovasz_cfg['reduction'] == 'sum':
@@ -139,7 +139,7 @@ class LovaszLoss(nn.Module):
         self.mode = mode
         self.loss_args = kwargs
     '''forward'''
-    def forward(self, prediction, target):
+    def forward(self, x_src, x_tgt):
         # fetch attributes
         mode = self.mode
         # supported modes
@@ -148,7 +148,7 @@ class LovaszLoss(nn.Module):
         }
         # construct loss_cfg
         lovasz_args = self.loss_args.copy()
-        lovasz_args.update({'prediction': prediction, 'target': target})
+        lovasz_args.update({'x_src': x_src, 'x_tgt': x_tgt})
         # calculate loss
         loss = supported_modes[mode](**lovasz_args)
         # return
