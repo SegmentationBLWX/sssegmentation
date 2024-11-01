@@ -48,7 +48,7 @@ class BaseDataset(torch.utils.data.Dataset):
     '''len'''
     def __len__(self):
         return len(self.imageids) * self.repeat_times
-    '''read sample_meta'''
+    '''read'''
     def read(self, imagepath, annpath=None):
         # read image
         image = cv2.imread(imagepath)

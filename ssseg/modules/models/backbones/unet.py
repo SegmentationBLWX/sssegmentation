@@ -170,7 +170,7 @@ class UNet(nn.Module):
             x = self.decoder[i](enc_outs[i], x)
             dec_outs.append(x)
         return dec_outs
-    '''check input divisible'''
+    '''checkinputdivisible'''
     def checkinputdivisible(self, x):
         h, w = x.shape[-2:]
         whole_downsample_rate = 1

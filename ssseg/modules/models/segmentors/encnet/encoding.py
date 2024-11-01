@@ -20,7 +20,7 @@ class Encoding(nn.Module):
         self.codewords = nn.Parameter(torch.empty(num_codes, channels, dtype=torch.float).uniform_(-std, std), requires_grad=True)
         # [num_codes]
         self.scale = nn.Parameter(torch.empty(num_codes, dtype=torch.float).uniform_(-1, 0), requires_grad=True)
-    '''scaled l2'''
+    '''scaledl2'''
     @staticmethod
     def scaledl2(x, codewords, scale):
         batch_size = x.size(0)

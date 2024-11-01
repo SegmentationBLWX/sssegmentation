@@ -44,14 +44,14 @@ class _NonLocalNd(nn.Module, metaclass=ABCMeta):
         pairwise_weight = torch.matmul(theta_x, phi_x)
         pairwise_weight = pairwise_weight.softmax(dim=-1)
         return pairwise_weight
-    '''embedded gaussian'''
+    '''embeddedgaussian'''
     def embeddedgaussian(self, theta_x, phi_x):
         pairwise_weight = torch.matmul(theta_x, phi_x)
         if self.use_scale:
             pairwise_weight /= theta_x.shape[-1]**0.5
         pairwise_weight = pairwise_weight.softmax(dim=-1)
         return pairwise_weight
-    '''dot product'''
+    '''dotproduct'''
     def dotproduct(self, theta_x, phi_x):
         pairwise_weight = torch.matmul(theta_x, phi_x)
         pairwise_weight /= pairwise_weight.shape[-1]

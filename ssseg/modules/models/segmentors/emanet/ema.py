@@ -43,7 +43,7 @@ class EMAModule(nn.Module):
             bases = F.normalize(bases, dim=1, p=2)
             self.bases = (1 - self.momentum) * self.bases + self.momentum * bases
         return feats_recon
-    '''reduce mean when distributed training'''
+    '''reducemean'''
     def reducemean(self, tensor):
         if not (dist.is_available() and dist.is_initialized()):
             return tensor

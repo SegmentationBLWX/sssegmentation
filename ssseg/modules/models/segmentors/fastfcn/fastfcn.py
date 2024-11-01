@@ -26,9 +26,9 @@ class FastFCN(BaseSegmentor):
         self.segmentor = supported_segmentors[cfg['segmentor']](cfg, mode)
         # build jpu neck
         jpu_cfg = head_cfg['jpu']
-        if 'act_cfg' not in jpu_cfg: jpu_cfg.update({'act_cfg': self.act_cfg})
-        if 'norm_cfg' not in jpu_cfg: jpu_cfg.update({'norm_cfg': self.norm_cfg})
-        if 'align_corners' not in jpu_cfg: jpu_cfg.update({'align_corners': self.align_corners})
+        if 'act_cfg' not in jpu_cfg: jpu_cfg.update({'act_cfg': act_cfg})
+        if 'norm_cfg' not in jpu_cfg: jpu_cfg.update({'norm_cfg': norm_cfg})
+        if 'align_corners' not in jpu_cfg: jpu_cfg.update({'align_corners': align_corners})
         self.jpu_neck = JPU(**jpu_cfg)
         self.segmentor.transforminputs = self.transforminputs
         # freeze normalization layer if necessary

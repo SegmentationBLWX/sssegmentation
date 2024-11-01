@@ -29,10 +29,10 @@ class TransformerEncoderLayer(nn.Module):
         self.norm2 = BuildNormalization(placeholder=d_model, norm_cfg=norm_cfg)
         # act
         self.activation = BuildActivation(act_cfg)
-    '''with pos embed'''
+    '''withposembed'''
     def withposembed(self, tensor, pos=None):
         return tensor if pos is None else tensor + pos
-    '''norm_before=False forward'''
+    '''normafterforward'''
     def normafterforward(self, src, src_mask=None, src_key_padding_mask=None, pos=None):
         q = k = self.withposembed(src, pos)
         src2 = self.self_attn(q, k, value=src, attn_mask=src_mask, key_padding_mask=src_key_padding_mask)[0]
@@ -42,7 +42,7 @@ class TransformerEncoderLayer(nn.Module):
         src = src + self.dropout2(src2)
         src = self.norm2(src)
         return src
-    '''norm_before=True forward'''
+    '''normbeforeforward'''
     def normbeforeforward(self, src, src_mask=None, src_key_padding_mask=None, pos=None):
         src2 = self.norm1(src)
         q = k = self.withposembed(src2, pos)
@@ -95,10 +95,10 @@ class TransformerDecoderLayer(nn.Module):
         self.dropout3 = nn.Dropout(dropout)
         # act
         self.activation = BuildActivation(act_cfg)
-    '''with pos embed'''
+    '''withposembed'''
     def withposembed(self, tensor, pos=None):
         return tensor if pos is None else tensor + pos
-    '''norm_before=False forward'''
+    '''normafterforward'''
     def normafterforward(self, tgt, memory, tgt_mask=None, memory_mask=None, tgt_key_padding_mask=None, memory_key_padding_mask=None, pos=None, query_pos=None):
         q = k = self.withposembed(tgt, query_pos)
         tgt = tgt + self.dropout1(self.self_attn(q, k, value=tgt, attn_mask=tgt_mask, key_padding_mask=tgt_key_padding_mask)[0])
@@ -108,7 +108,7 @@ class TransformerDecoderLayer(nn.Module):
         tgt = tgt + self.dropout3(self.linear2(self.dropout(self.activation(self.linear1(tgt)))))
         tgt = self.norm3(tgt)
         return tgt
-    '''norm_before=True forward'''
+    '''normbeforeforward'''
     def normbeforeforward(self, tgt, memory, tgt_mask=None, memory_mask=None, tgt_key_padding_mask=None, memory_key_padding_mask=None, pos=None, query_pos=None):
         tgt_norm = self.norm1(tgt)
         q = k = self.withposembed(tgt_norm, query_pos)
@@ -160,7 +160,7 @@ class Transformer(nn.Module):
         self.decoder = TransformerDecoder(decoder_layer, num_decoder_layers, decoder_norm, return_intermediate=return_intermediate_dec)
         # reset parameters
         self.resetparameters()
-    '''reset parameters'''
+    '''resetparameters'''
     def resetparameters(self):
         for p in self.parameters():
             if p.dim() > 1: nn.init.xavier_uniform_(p)

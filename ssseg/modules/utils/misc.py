@@ -1,6 +1,6 @@
 '''
 Function:
-    Implementation of Utils
+    Implementation of Other Utils
 Author:
     Zhenchao Jin
 '''

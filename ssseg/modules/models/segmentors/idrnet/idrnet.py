@@ -259,7 +259,7 @@ class IDRNet(BaseSegmentor):
         else:
             ssseg_outputs = SSSegOutputStructure(mode=self.mode, seg_logits=preds_stage2)
         return ssseg_outputs
-    '''insert dl_cls_representations into feats'''
+    '''insertdlrepresentations'''
     def insertdlrepresentations(self, feats, logits):
         # dl_cls_representations: (num_classes, C)
         dl_cls_representations = self.dl_cls_representations.data.type_as(feats).clone()
@@ -278,7 +278,7 @@ class IDRNet(BaseSegmentor):
         feats_withdl = feats_withdl.permute(0, 3, 1, 2).contiguous()
         # return
         return feats_withdl
-    '''obtain intervention-driven context'''
+    '''obtainidcontext'''
     def obtainidcontext(self, context, logits, class_relations, intervention_clsids=None, remove_negative_cls_relation=True):
         # obtain intervention-driven contextual information
         batch_size, num_channels, context_h, context_w = context.size()
@@ -345,7 +345,7 @@ class IDRNet(BaseSegmentor):
                 id_context_batch[batch_idx] = id_context
         # return
         return id_context_batch, valid_clsids_batch
-    '''update dl_cls_representations'''
+    '''updatedlclsreps'''
     def updatedlclsreps(self, feats, gts, momentum, img_size):
         with torch.no_grad():
             # feats: (B, H, W, C)

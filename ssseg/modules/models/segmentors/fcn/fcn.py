@@ -64,12 +64,12 @@ class DepthwiseSeparableFCN(BaseSegmentor):
             if idx == 0:
                 conv = DepthwiseSeparableConv2d(
                     in_channels=head_cfg['in_channels'], out_channels=head_cfg['feats_channels'], kernel_size=3, stride=1, padding=1,
-                    norm_cfg=self.norm_cfg, act_cfg=self.act_cfg,
+                    norm_cfg=norm_cfg, act_cfg=act_cfg,
                 )
             else:
                 conv = DepthwiseSeparableConv2d(
                     in_channels=head_cfg['feats_channels'], out_channels=head_cfg['feats_channels'], kernel_size=3, stride=1, padding=1,
-                    norm_cfg=self.norm_cfg, act_cfg=self.act_cfg,
+                    norm_cfg=norm_cfg, act_cfg=act_cfg,
                 )
             convs.append(conv)
         convs.append(nn.Dropout2d(head_cfg['dropout']))

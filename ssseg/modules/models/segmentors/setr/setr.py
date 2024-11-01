@@ -13,7 +13,7 @@ from ....utils import SSSegOutputStructure
 from ...backbones import BuildActivation, BuildNormalization
 
 
-'''Naive upsampling head and Progressive upsampling head of SETR'''
+'''SETRUP'''
 class SETRUP(BaseSegmentor):
     def __init__(self, cfg, mode):
         super(SETRUP, self).__init__(cfg, mode)
@@ -63,14 +63,14 @@ class SETRUP(BaseSegmentor):
         else:
             ssseg_outputs = SSSegOutputStructure(mode=self.mode, seg_logits=seg_logits)
         return ssseg_outputs
-    '''norm layer'''
+    '''norm'''
     def norm(self, x, norm_layer):
         n, c, h, w = x.shape
         x = x.reshape(n, c, h * w).transpose(2, 1).contiguous()
         x = norm_layer(x)
         x = x.transpose(1, 2).reshape(n, c, h, w).contiguous()
         return x
-    '''build decoder'''
+    '''builddecoder'''
     def builddecoder(self, decoder_cfg):
         layers, norm_cfg, act_cfg, num_classes, align_corners, kernel_size = [], self.norm_cfg.copy(), self.act_cfg.copy(), self.cfg['num_classes'], self.align_corners, decoder_cfg['kernel_size']
         for idx in range(decoder_cfg['num_convs']):
@@ -86,7 +86,7 @@ class SETRUP(BaseSegmentor):
         return nn.Sequential(*layers)
 
 
-'''Multi level feature aggretation head of SETR'''
+'''SETRMLA'''
 class SETRMLA(BaseSegmentor):
     def __init__(self, cfg, mode):
         super(SETRMLA, self).__init__(cfg, mode)
@@ -154,7 +154,7 @@ class SETRMLA(BaseSegmentor):
         else:
             ssseg_outputs = SSSegOutputStructure(mode=self.mode, seg_logits=seg_logits)
         return ssseg_outputs
-    '''build decoder'''
+    '''builddecoder'''
     def builddecoder(self, decoder_cfg):
         layers, norm_cfg, act_cfg, num_classes, align_corners, kernel_size = [], self.norm_cfg.copy(), self.act_cfg.copy(), self.cfg['num_classes'], self.align_corners, decoder_cfg['kernel_size']
         for idx in range(decoder_cfg['num_convs']):

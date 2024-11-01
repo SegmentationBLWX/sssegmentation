@@ -74,23 +74,11 @@ class DynamicConv2d(nn.Module):
         if self.bias is not None:
             aggregate_bias = torch.mm(softmax_attention, self.bias).view(-1)
             output = F.conv2d(
-                input=x,
-                weight=aggregate_weight,
-                bias=aggregate_bias,
-                stride=self.stride,
-                padding=self.padding,
-                dilation=self.dilation,
-                groups=self.groups * batch_size,
+                input=x, weight=aggregate_weight, bias=aggregate_bias, stride=self.stride, padding=self.padding, dilation=self.dilation, groups=self.groups * batch_size,
             )
         else:
             output = F.conv2d(
-                input=x,
-                weight=aggregate_weight,
-                bias=None,
-                stride=self.stride,
-                padding=self.padding,
-                dilation=self.dilation,
-                groups=self.groups * batch_size,
+                input=x, weight=aggregate_weight, bias=None, stride=self.stride, padding=self.padding, dilation=self.dilation, groups=self.groups * batch_size,
             )
         output = output.view(batch_size, self.out_channels, output.size(-2), output.size(-1))
         if hasattr(self, 'norm'): output = self.norm(output)

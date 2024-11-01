@@ -18,7 +18,7 @@ class Evaluation():
         self.all_metric_results = self.totalareatometrics(
             total_area_intersect=total_area_intersect, total_area_union=total_area_union, total_area_pred_label=total_area_pred_label, total_area_label=total_area_label, nan_to_num=nan_to_num, beta=beta,
         )
-    '''calculate total intersection and union'''
+    '''totalintersectandunion'''
     @staticmethod
     def totalintersectandunion(results, gt_seg_maps, num_classes, ignore_index=-1):
         total_area_intersect = torch.zeros((num_classes, ), dtype=torch.float64)
@@ -32,7 +32,7 @@ class Evaluation():
             total_area_pred_label += area_pred_label
             total_area_label += area_label
         return total_area_intersect, total_area_union, total_area_pred_label, total_area_label
-    '''calculate intersection and union'''
+    '''intersectandunion'''
     @staticmethod
     def intersectandunion(pred_label, label, num_classes, ignore_index=-1):
         # convert to torch.array
@@ -50,7 +50,7 @@ class Evaluation():
         area_union = area_pred_label + area_label - area_intersect
         # return
         return area_intersect, area_union, area_pred_label, area_label
-    '''calculate evaluation metrics'''
+    '''totalareatometrics'''
     @staticmethod
     def totalareatometrics(total_area_intersect, total_area_union, total_area_pred_label, total_area_label, nan_to_num=None, beta=1):
         # all metrics
@@ -80,7 +80,7 @@ class Evaluation():
         all_metric_results['mdice'] = np.nanmean(all_metric_results['dice'])
         all_metric_results['mfscore'] = np.nanmean(all_metric_results['fscore'])
         return all_metric_results
-    '''calcuate the f-score value'''
+    '''calcuatefscore'''
     @staticmethod
     def calcuatefscore(precision, recall, beta=1):
         score = (1 + beta**2) * (precision * recall) / ((beta**2 * precision) + recall)

@@ -252,7 +252,7 @@ class PCPVT(nn.Module):
         state_dict = self.twinsconvert(structure_type, state_dict)
         # load state_dict
         self.load_state_dict(state_dict, strict=False)
-    '''twins convert'''
+    '''twinsconvert'''
     @staticmethod
     def twinsconvert(structure_type, ckpt):
         new_ckpt = OrderedDict()

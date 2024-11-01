@@ -8,7 +8,7 @@ import torch
 import torch.nn as nn
 
 
-'''Pyramid Pooling Module (Concat only)'''
+'''PPMConcat'''
 class PPMConcat(nn.Module):
     def __init__(self, pool_scales):
         super(PPMConcat, self).__init__()

@@ -80,7 +80,7 @@ class ENCNet(BaseSegmentor):
         else:
             ssseg_outputs = SSSegOutputStructure(mode=self.mode, seg_logits=seg_logits)
         return ssseg_outputs
-    '''convert to onehot labels'''
+    '''onehot'''
     def onehot(self, labels, num_classes):
         batch_size = labels.size(0)
         labels_onehot = labels.new_zeros((batch_size, num_classes))

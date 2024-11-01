@@ -148,7 +148,7 @@ class VisionTransformer(nn.Module):
                 pos_size = int(math.sqrt(state_dict['pos_embed'].shape[1] - 1))
                 state_dict['pos_embed'] = self.resizeposembed(state_dict['pos_embed'], (h // self.patch_size, w // self.patch_size), (pos_size, pos_size), self.interpolate_mode)
         self.load_state_dict(state_dict, strict=False)
-    '''vit convert'''
+    '''vitconvert'''
     @staticmethod
     def vitconvert(ckpt):
         from collections import OrderedDict
@@ -173,7 +173,7 @@ class VisionTransformer(nn.Module):
                 new_k = k
             new_ckpt[new_k] = v
         return new_ckpt
-    '''positiong embeding method'''
+    '''posembeding'''
     def posembeding(self, patched_img, hw_shape, pos_embed):
         assert patched_img.ndim == 3 and pos_embed.ndim == 3, 'the shapes of patched_img and pos_embed must be [B, L, C]'
         x_len, pos_len = patched_img.shape[1], pos_embed.shape[1]
@@ -185,7 +185,7 @@ class VisionTransformer(nn.Module):
                 raise ValueError('Unexpected shape of pos_embed, got {}.'.format(pos_embed.shape))
             pos_embed = self.resizeposembed(pos_embed, hw_shape, (pos_h, pos_w), self.interpolate_mode)
         return self.drop_after_pos(patched_img + pos_embed)
-    '''resize pos_embed weights'''
+    '''resizeposembed'''
     @staticmethod
     def resizeposembed(pos_embed, input_shpae, pos_shape, mode):
         assert pos_embed.ndim == 3, 'shape of pos_embed must be [B, L, C]'

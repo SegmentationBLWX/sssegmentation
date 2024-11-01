@@ -123,11 +123,11 @@ class PointRend(BaseSegmentor):
             refined_seg_logits = refined_seg_logits.view(batch_size, channels, height, width)
         ssseg_outputs.setvariable('seg_logits', refined_seg_logits)
         return ssseg_outputs
-    '''sample from coarse grained features'''
+    '''getcoarsepointfeats'''
     def getcoarsepointfeats(self, seg_logits, points):
         coarse_feats = PointSample(seg_logits, points, align_corners=self.align_corners)
         return coarse_feats
-    '''sample from fine grained features'''
+    '''getfinegrainedpointfeats'''
     def getfinegrainedpointfeats(self, x, points):
         fine_grained_feats_list = [PointSample(_, points, align_corners=self.align_corners) for _ in x]
         if len(fine_grained_feats_list) > 1:
@@ -135,12 +135,12 @@ class PointRend(BaseSegmentor):
         else:
             fine_grained_feats = fine_grained_feats_list[0]
         return fine_grained_feats
-    '''estimate uncertainty based on seg logits'''
+    '''calculateuncertainty'''
     @staticmethod
     def calculateuncertainty(seg_logits):
         top2_scores = torch.topk(seg_logits, k=2, dim=1)[0]
         return (top2_scores[:, 1] - top2_scores[:, 0]).unsqueeze(1)
-    '''sample points for training'''
+    '''getpointstrain'''
     def getpointstrain(self, seg_logits, uncertainty_func, cfg):
         # set attrs
         num_points = cfg['num_points']
@@ -164,7 +164,7 @@ class PointRend(BaseSegmentor):
             point_coords = torch.cat((point_coords, rand_point_coords), dim=1)
         # return
         return point_coords
-    '''sample points for testing'''
+    '''getpointstest'''
     def getpointstest(self, seg_logits, uncertainty_func, cfg):
         num_points = cfg['subdivision_num_points']
         uncertainty_map = uncertainty_func(seg_logits)
