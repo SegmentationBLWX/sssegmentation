@@ -6,8 +6,8 @@ Author:
 '''
 from .l1loss import L1Loss
 from .mseloss import MSELoss
-from .klloss import KLDivLoss
 from .diceloss import DiceLoss
+from .kldivloss import KLDivLoss
 from .focalloss import FocalLoss
 from .lovaszloss import LovaszLoss
 from ...utils import BaseModuleBuilder
