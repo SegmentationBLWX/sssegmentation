@@ -7,9 +7,9 @@ Author:
 from .l1loss import L1Loss
 from .klloss import KLDivLoss
 from .diceloss import DiceLoss
+from .focalloss import FocalLoss
 from .lovaszloss import LovaszLoss
 from ...utils import BaseModuleBuilder
-from .focalloss import SigmoidFocalLoss
 from .cosinesimilarityloss import CosineSimilarityLoss
 from .celoss import CrossEntropyLoss, BinaryCrossEntropyLoss
 
@@ -18,8 +18,8 @@ from .celoss import CrossEntropyLoss, BinaryCrossEntropyLoss
 class LossBuilder(BaseModuleBuilder):
     REGISTERED_MODULES = {
         'L1Loss': L1Loss, 'DiceLoss': DiceLoss, 'KLDivLoss': KLDivLoss, 'LovaszLoss': LovaszLoss,
-        'CrossEntropyLoss': CrossEntropyLoss, 'SigmoidFocalLoss': SigmoidFocalLoss,
-        'CosineSimilarityLoss': CosineSimilarityLoss, 'BinaryCrossEntropyLoss': BinaryCrossEntropyLoss,
+        'CrossEntropyLoss': CrossEntropyLoss, 'FocalLoss': FocalLoss, 'CosineSimilarityLoss': CosineSimilarityLoss, 
+        'BinaryCrossEntropyLoss': BinaryCrossEntropyLoss,
     }
     '''build'''
     def build(self, loss_cfg):
