@@ -1,6 +1,6 @@
 '''
 Function:
-    Implementation of CosineSimilarityLoss
+    Implementation of MSELoss
 Author:
     Zhenchao Jin
 '''
@@ -10,11 +10,10 @@ import torch.nn.functional as F
 from .misc import reducelosswithweight
 
 
-'''CosineSimilarityLoss'''
-class CosineSimilarityLoss(nn.Module):
+'''MSELoss'''
+class MSELoss(nn.Module):
     def __init__(self, scale_factor=1.0, reduction='mean', lowest_loss_value=None):
-        super(CosineSimilarityLoss, self).__init__()
-        assert reduction in ['mean', 'sum', 'none']
+        super(MSELoss, self).__init__()
         self.reduction = reduction
         self.scale_factor = scale_factor
         self.lowest_loss_value = lowest_loss_value
@@ -22,10 +21,10 @@ class CosineSimilarityLoss(nn.Module):
     def forward(self, x_src, x_tgt, weight=None):
         # assert
         assert x_src.shape == x_tgt.shape, 'invalid shape of x_src or x_tgt'
-        if weight is None: weight = torch.ones(x_src.shape[0], *x_src.shape[2:]).type_as(x_src)
-        assert x_src.size(0) == weight.size(0) and x_src.shape[2:] == weight.shape[1:], 'invalid shape of weight'
+        if weight is None: weight = torch.ones_like(x_src)
+        assert weight.shape == x_src.shape, 'invalid shape of weight'
         # calculate loss
-        loss = 1 - F.cosine_similarity(x_src, x_tgt, dim=1)
+        loss = F.mse_loss(x_src, x_tgt, reduction='none')
         # reduce loss with weight
         loss = reducelosswithweight(loss, weight, self.reduction, None)
         # rescale loss
@@ -41,16 +40,16 @@ if __name__ == '__main__':
     for _ in range(3):
         batch_size, c, h, w = 4, 512, 64, 64
         x_src, x_tgt = torch.rand(batch_size, c, h, w), torch.rand(batch_size, c, h, w)
-        weight = torch.rand(batch_size, h, w)
+        weight = torch.rand(batch_size, c, h, w)
         # cuda or cpu
         print('*** TEST on CUDA and CPU ***')
-        print(CosineSimilarityLoss(reduction='mean')(x_src, x_tgt))
-        print((1 - F.cosine_similarity(x_src, x_tgt, dim=1)).mean())
-        print(CosineSimilarityLoss(reduction='mean')(x_src.cuda(), x_tgt.cuda()))
-        print((1 - F.cosine_similarity(x_src.cuda(), x_tgt.cuda(), dim=1)).mean())
+        print(MSELoss(reduction='mean')(x_src, x_tgt))
+        print(F.mse_loss(x_src, x_tgt, reduction='mean'))
+        print(MSELoss(reduction='mean')(x_src.cuda(), x_tgt.cuda()))
+        print(F.mse_loss(x_src.cuda(), x_tgt.cuda(), reduction='mean'))
         # weight
         print('*** TEST on CUDA and CPU with weight ***')
-        print(CosineSimilarityLoss(reduction='mean')(x_src, x_tgt, weight))
-        print(((1 - F.cosine_similarity(x_src, x_tgt, dim=1)) * weight).mean())
-        print(CosineSimilarityLoss(reduction='mean')(x_src.cuda(), x_tgt.cuda(), weight.cuda()))
-        print(((1 - F.cosine_similarity(x_src.cuda(), x_tgt.cuda(), dim=1)) * weight.cuda()).mean())
+        print(MSELoss(reduction='mean')(x_src, x_tgt, weight))
+        print((F.mse_loss(x_src, x_tgt, reduction='none') * weight).mean())
+        print(MSELoss(reduction='mean')(x_src.cuda(), x_tgt.cuda(), weight.cuda()))
+        print((F.mse_loss(x_src.cuda(), x_tgt.cuda(), reduction='none') * weight.cuda()).mean())

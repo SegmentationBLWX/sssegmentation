@@ -11,6 +11,8 @@ import torch
 def reduceloss(loss, reduction='mean', avg_factor=None):
     assert reduction in ['mean', 'sum', 'none']
     if reduction == 'mean':
+        if avg_factor is None:
+            return torch.mean(loss)
         return torch.sum(loss) / avg_factor
     elif reduction == 'sum':
         return torch.sum(loss)

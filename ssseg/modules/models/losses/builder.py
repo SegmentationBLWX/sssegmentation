@@ -5,6 +5,7 @@ Author:
     Zhenchao Jin
 '''
 from .l1loss import L1Loss
+from .mseloss import MSELoss
 from .klloss import KLDivLoss
 from .diceloss import DiceLoss
 from .focalloss import FocalLoss
@@ -17,9 +18,9 @@ from .celoss import CrossEntropyLoss, BinaryCrossEntropyLoss
 '''LossBuilder'''
 class LossBuilder(BaseModuleBuilder):
     REGISTERED_MODULES = {
-        'L1Loss': L1Loss, 'DiceLoss': DiceLoss, 'KLDivLoss': KLDivLoss, 'LovaszLoss': LovaszLoss,
-        'CrossEntropyLoss': CrossEntropyLoss, 'FocalLoss': FocalLoss, 'CosineSimilarityLoss': CosineSimilarityLoss, 
-        'BinaryCrossEntropyLoss': BinaryCrossEntropyLoss,
+        'L1Loss': L1Loss, 'MSELoss': MSELoss, 'FocalLoss': FocalLoss, 'CosineSimilarityLoss': CosineSimilarityLoss, 
+        'DiceLoss': DiceLoss, 'KLDivLoss': KLDivLoss, 'LovaszLoss': LovaszLoss, 'CrossEntropyLoss': CrossEntropyLoss, 
+        'BinaryCrossEntropyLoss': BinaryCrossEntropyLoss, 
     }
     '''build'''
     def build(self, loss_cfg):
