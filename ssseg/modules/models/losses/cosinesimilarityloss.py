@@ -22,8 +22,6 @@ class CosineSimilarityLoss(nn.Module):
     def forward(self, x_src, x_tgt, weight=None):
         # assert
         assert x_src.shape == x_tgt.shape, 'invalid shape of x_src or x_tgt'
-        if weight is None: weight = torch.ones(x_src.shape[0], *x_src.shape[2:]).type_as(x_src)
-        assert x_src.size(0) == weight.size(0) and x_src.shape[2:] == weight.shape[1:], 'invalid shape of weight'
         # calculate loss
         loss = 1 - F.cosine_similarity(x_src, x_tgt, dim=1)
         # reduce loss with weight

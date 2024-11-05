@@ -37,7 +37,7 @@ SEGMENTOR_CFG.update({
     },
     'losses': {
         'loss_aux': {'type': 'CrossEntropyLoss', 'scale_factor': 0.4, 'ignore_index': 255, 'reduction': 'mean'},
-        'loss_se': {'type': 'BinaryCrossEntropyLoss', 'scale_factor': 0.2, 'reduction': 'mean'},
+        'loss_se': {'type': 'CrossEntropyLoss', 'scale_factor': 0.2, 'reduction': 'mean', 'use_sigmoid': True},
         'loss_cls': {'type': 'CrossEntropyLoss', 'scale_factor': 1.0, 'ignore_index': 255, 'reduction': 'mean'},
     }
 })

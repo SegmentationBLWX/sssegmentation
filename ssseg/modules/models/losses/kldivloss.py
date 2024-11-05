@@ -22,15 +22,14 @@ class KLDivLoss(nn.Module):
     def forward(self, x_src, x_tgt, weight=None):
         # assert
         assert x_src.shape == x_tgt.shape, 'invalid shape of x_src or x_tgt'
-        if weight is None: weight = torch.ones_like(x_src)
-        assert x_src.shape == weight.shape, 'invalid shape of weight'
         # calculate loss
         x_src = F.log_softmax(x_src / self.temperature, dim=1)
         x_tgt = F.softmax(x_tgt / self.temperature, dim=1)
         loss = F.kl_div(x_src, x_tgt, reduction='none', log_target=False)
         loss = loss * self.temperature**2
         # reduce loss with weight
-        loss = loss * weight
+        if weight is not None:
+            loss = loss * weight
         batch_size = x_src.shape[0]
         if self.reduction == 'mean':
             loss = loss.mean()

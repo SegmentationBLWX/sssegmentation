@@ -21,8 +21,6 @@ class MSELoss(nn.Module):
     def forward(self, x_src, x_tgt, weight=None):
         # assert
         assert x_src.shape == x_tgt.shape, 'invalid shape of x_src or x_tgt'
-        if weight is None: weight = torch.ones_like(x_src)
-        assert weight.shape == x_src.shape, 'invalid shape of weight'
         # calculate loss
         loss = F.mse_loss(x_src, x_tgt, reduction='none')
         # reduce loss with weight

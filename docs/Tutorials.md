@@ -503,23 +503,22 @@ Now, SSSegmentation supports the following loss types,
 
 ```python
 REGISTERED_MODULES = {
-    'L1Loss': L1Loss, 'DiceLoss': DiceLoss, 'KLDivLoss': KLDivLoss, 'LovaszLoss': LovaszLoss,
-    'CrossEntropyLoss': CrossEntropyLoss, 'SigmoidFocalLoss': SigmoidFocalLoss,
-    'CosineSimilarityLoss': CosineSimilarityLoss, 'BinaryCrossEntropyLoss': BinaryCrossEntropyLoss,
+    'L1Loss': L1Loss, 'MSELoss': MSELoss, 'FocalLoss': FocalLoss, 'CosineSimilarityLoss': CosineSimilarityLoss, 
+    'DiceLoss': DiceLoss, 'KLDivLoss': KLDivLoss, 'LovaszLoss': LovaszLoss, 'CrossEntropyLoss': CrossEntropyLoss, 
 }
 ```
 
 Here we also list some common arguments and their explanation,
 
 - `scale_factor`: The return loss value is equal to the original loss times `scale_factor`,
-- `ignore_index`: Specifies a target value that is ignored and does not contribute to the input gradient,
+- `ignore_index`: For input target with labels, it is used to specify a target value that is ignored and does not contribute to the input gradient, for input target with logits, it is used to specify a class channel that is ignored and does not contribute to the input gradient,
 - `lowest_loss_value`: If `lowest_loss_value` is set, the return loss value is equal to `min(lowest_loss_value, scale_factor * original loss)`, this argument is designed according to the paper [Do We Need Zero Training Loss After Achieving Zero Training Error? - ICML 2020](https://arxiv.org/pdf/2002.08709.pdf).
 
 To learn more about how to set the specific arguments for each loss function, you can jump to [`ssseg/modules/models/losses` directory](https://github.com/SegmentationBLWX/sssegmentation/tree/main/ssseg/modules/models/losses) to check the source codes of each loss function.
 
 #### Add New Custom Loss
 
-If the users want to add a new custom loss, you should first create a new file in [`ssseg/modules/models/losses` directory](https://github.com/SegmentationBLWX/sssegmentation/tree/main/ssseg/modules/models/losses), *e.g.*, [`ssseg/modules/models/losses/klloss.py`](https://github.com/SegmentationBLWX/sssegmentation/blob/main/ssseg/modules/models/losses/klloss.py).
+If the users want to add a new custom loss, you should first create a new file in [`ssseg/modules/models/losses` directory](https://github.com/SegmentationBLWX/sssegmentation/tree/main/ssseg/modules/models/losses), *e.g.*, [`ssseg/modules/models/losses/kldivloss.py`](https://github.com/SegmentationBLWX/sssegmentation/blob/main/ssseg/modules/models/losses/kldivloss.py).
 
 Then, you can define the loss function in this file by yourselves, *e.g.*,
 
