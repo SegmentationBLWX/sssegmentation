@@ -64,9 +64,9 @@ bash scripts/dist_test.sh 4 ssseg/configs/annnet/annnet_resnet50os16_ade20k.py a
 bash scripts/dist_test.sh 4 ssseg/configs/annnet/annnet_resnet50os16_cityscapes.py annnet_resnet50os16_cityscapes/checkpoints-epoch-220.pth
 ```
 
-#### Training and Testing on Multiple Machines
+#### Training and Testing on Multiple Machines with Slurm
 
-Now, we only support training with multiple machines using Slurm, where Slurm is a good job scheduling system for computing clusters.
+In SSSegmentation, we support training with multiple machines using Slurm, where Slurm is a good job scheduling system for computing clusters.
 
 **1. Training a segmentor**
 
@@ -118,7 +118,61 @@ Here is an example of using 16 GPUs to test PSPNet on Slurm partition named *dev
 bash scripts/slurm_test.sh dev pspnet 16 ssseg/configs/pspnet/pspnet_resnet101os8_ade20k.py pspnet_resnet101os8_ade20k/checkpoints-epoch-130.pth --slurm
 ```
 
-Also, `--slurm` is required to set for slurm environment initialization.
+Similar to use slurm to spawn training jobs, `--slurm` is required to set for slurm environment initialization.
+
+#### Training and Testing on Multiple Machines with AML
+
+In SSSegmentation, we also support training with multiple machines using AML, where Azure Machine Learning (AML) is a cloud-based platform that enables data scientists and developers to build, train, and deploy machine learning models efficiently at scale. It offers end-to-end tools for automating workflows, managing experiments, and utilizing Azure’s compute resources for robust ML model training and deployment.
+
+**1. Training a segmentor**
+
+On a cluster managed by AML, you can use `scripts/aml_train.sh` to spawn training jobs in the pre-defined `job.yaml` file. It supports both single-node and multi-node training. The basic usage is as follows,
+
+```sh
+bash scripts/aml_train.sh ${CFGFILEPATH} [optional arguments]
+```
+
+This script accepts several optional arguments, including:
+
+- `${CFGFILEPATH}`: The config file path which is used to customize segmentors,
+- `--ckptspath`: Checkpoints you want to resume from, if you want to resume from the latest checkpoint in the `SEGMENTOR_CFG['work_dir']` automatically, you can specify it as `f'{work_dir}/checkpoints-epoch-latest.pth'`,
+- `--slurm`: Please add `--slurm` if you are using slurm to spawn training jobs.
+
+Here is an example of spawning training jobs in the pre-defined `job.yaml` file,
+
+```yaml
+jobs:
+  - name: fcn_resnet50os8_ade20k
+    sku: 2xG8
+    command:
+      - bash scripts/aml_train.sh ssseg/configs/fcn/fcn_resnet50os8_ade20k.py
+```
+
+**2. Testing a segmentor**
+
+Similar to the training task, SSSegmentation provides `scripts/aml_test.sh` to spawn testing jobs in the pre-defined `job.yaml` file. The basic usage is as follows,
+
+```sh
+bash scripts/aml_test.sh ${CFGFILEPATH} ${CKPTSPATH} [optional arguments]
+```
+
+This script accepts several optional arguments, including:
+
+- `${CFGFILEPATH}`: The config file path which is used to customize segmentors,
+- `${CKPTSPATH}`: Checkpoints you want to resume from,
+- `--eval_env`: Used to specify evaluate environment, support `server` environment (only save the test results which could be submitted to the corresponding dataset's official website to obtain the segmentation performance) and `local` environment (the default environment, test segmentors with the local images and annotations provided by the corresponding dataset),
+- `--slurm`: Please add `--slurm` if you are using slurm to spawn testing jobs,
+- `--ema`: Please add `--ema` if you want to load ema weights for segmentors.
+
+Here is an example of spawning testing jobs in the pre-defined `job.yaml` file,
+
+```sh
+jobs:
+  - name: fcn_resnet50os8_ade20k
+    sku: 2xG8
+    command:
+      - bash scripts/aml_test.sh ssseg/configs/fcn/fcn_resnet50os8_ade20k.py fcn_resnet50os8_ade20k/checkpoints-epoch-130.pth
+```
 
 
 ## Inference with Segmentors Integrated in SSSegmentation

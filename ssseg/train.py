@@ -45,6 +45,10 @@ def parsecmdargs():
             os.environ['RANK'] = str(cmd_args.local_rank)
         if 'LOCAL_RANK' not in os.environ:
             os.environ['LOCAL_RANK'] = str(cmd_args.local_rank)
+        if 'WORLD_SIZE' not in os.environ:
+            os.environ['WORLD_SIZE'] = str(cmd_args.nproc_per_node)
+        if 'LOCAL_WORLD_SIZE' not in os.environ:
+            os.environ['LOCAL_WORLD_SIZE'] = str(cmd_args.nproc_per_node)
     return cmd_args
 
 
@@ -63,14 +67,9 @@ class Trainer():
         if ('logger_handle_cfg' not in training_logging_manager_cfg) and ('logger_handle' not in training_logging_manager_cfg):
             training_logging_manager_cfg['logger_handle'] = logger_handle
         training_logging_manager = TrainingLoggingManager(**training_logging_manager_cfg)
-        # number of gpus per node, for distribued training, only support a process for a GPU
-        ngpus_per_node = torch.cuda.device_count()
-        if ngpus_per_node != cmd_args.nproc_per_node:
-            logger_handle.warning('ngpus_per_node is not equal to nproc_per_node, force ngpus_per_node = nproc_per_node by default', main_process_only=True)
-            ngpus_per_node = cmd_args.nproc_per_node
         # set attributes
         self.cfg = cfg
-        self.ngpus_per_node = ngpus_per_node
+        self.num_total_processes = int(os.environ['WORLD_SIZE'])
         self.logger_handle = logger_handle
         self.cmd_args = cmd_args
         self.cfg_file_path = cfg_file_path
@@ -84,7 +83,7 @@ class Trainer():
     '''start trainer'''
     def start(self):
         # initialize necessary variables
-        cfg, ngpus_per_node, logger_handle, cmd_args, cfg_file_path, training_logging_manager = self.cfg, self.ngpus_per_node, self.logger_handle, self.cmd_args, self.cfg_file_path, self.training_logging_manager
+        cfg, num_total_processes, logger_handle, cmd_args, cfg_file_path, training_logging_manager = self.cfg, self.num_total_processes, self.logger_handle, self.cmd_args, self.cfg_file_path, self.training_logging_manager
         # build dataset and dataloader
         dataset = BuildDataset(mode='TRAIN', logger_handle=logger_handle, dataset_cfg=cfg.SEGMENTOR_CFG['dataset'])
         assert dataset.num_classes == cfg.SEGMENTOR_CFG['num_classes'], 'parsed config file %s error' % cfg_file_path
@@ -92,10 +91,10 @@ class Trainer():
         auto_adapt_to_expected_train_bs = dataloader_cfg.pop('auto_adapt_to_expected_train_bs')
         expected_total_train_bs_for_assert = dataloader_cfg.pop('expected_total_train_bs_for_assert')
         if auto_adapt_to_expected_train_bs:
-            dataloader_cfg['train']['batch_size_per_gpu'] = expected_total_train_bs_for_assert // ngpus_per_node
+            dataloader_cfg['train']['batch_size_per_gpu'] = expected_total_train_bs_for_assert // num_total_processes
         dataloader_cfg['train']['batch_size'], dataloader_cfg['train']['num_workers'] = dataloader_cfg['train'].pop('batch_size_per_gpu'), dataloader_cfg['train'].pop('num_workers_per_gpu')
         dataloader_cfg['test']['batch_size'], dataloader_cfg['test']['num_workers'] = dataloader_cfg['test'].pop('batch_size_per_gpu'), dataloader_cfg['test'].pop('num_workers_per_gpu')
-        assert expected_total_train_bs_for_assert == dataloader_cfg['train']['batch_size'] * ngpus_per_node
+        assert expected_total_train_bs_for_assert == dataloader_cfg['train']['batch_size'] * num_total_processes
         dataloader = BuildDistributedDataloader(dataset=dataset, dataloader_cfg=dataloader_cfg['train'])
         # build segmentor
         segmentor = BuildSegmentor(segmentor_cfg=cfg.SEGMENTOR_CFG, mode='TRAIN')

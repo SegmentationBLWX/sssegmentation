@@ -47,6 +47,10 @@ def parsecmdargs():
             os.environ['RANK'] = str(cmd_args.local_rank)
         if 'LOCAL_RANK' not in os.environ:
             os.environ['LOCAL_RANK'] = str(cmd_args.local_rank)
+        if 'WORLD_SIZE' not in os.environ:
+            os.environ['WORLD_SIZE'] = str(cmd_args.nproc_per_node)
+        if 'LOCAL_WORLD_SIZE' not in os.environ:
+            os.environ['LOCAL_WORLD_SIZE'] = str(cmd_args.nproc_per_node)
     return cmd_args
 
 
@@ -59,14 +63,9 @@ class Tester():
         touchdirs(cfg.SEGMENTOR_CFG['work_dir'])
         # initialize logger_handle
         logger_handle = BuildLoggerHandle(cfg.SEGMENTOR_CFG['logger_handle_cfg'])
-        # number of gpus per node, for distribued testing, only support a process for a GPU
-        ngpus_per_node = torch.cuda.device_count()
-        if ngpus_per_node != cmd_args.nproc_per_node:
-            logger_handle.warning('ngpus_per_node is not equal to nproc_per_node, force ngpus_per_node = nproc_per_node by default', main_process_only=True)
-            ngpus_per_node = cmd_args.nproc_per_node
         # set attributes
         self.cfg = cfg
-        self.ngpus_per_node = ngpus_per_node
+        self.num_total_processes = int(os.environ['WORLD_SIZE'])
         self.logger_handle = logger_handle
         self.cmd_args = cmd_args
         self.cfg_file_path = cfg_file_path
