@@ -91,7 +91,7 @@ def parserequirements(fname='requirements.txt', with_version=True):
 def getextensions():
     ext_modules = []
     if SSSEG_WITH_OPS:
-        srcs = ["ssseg/modules/models/extensions/samv2/connected_components.cu"]
+        srcs = ["ssseg/extensions/samv2/connected_components.cu"]
         compile_args = {
             'cxx': [], 'nvcc': ['-DCUDA_HAS_FP16=1', '-D__CUDA_NO_HALF_OPERATORS__', '-D__CUDA_NO_HALF_CONVERSIONS__', '-D__CUDA_NO_HALF2_OPERATORS__'],
         }
