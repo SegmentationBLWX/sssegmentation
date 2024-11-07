@@ -12,7 +12,8 @@ from ...backbones import BuildNormalization, BuildActivation
 
 '''DefaultAuxiliaryDecoder'''
 class DefaultAuxiliaryDecoder(nn.Sequential):
-    def __init__(self, auxiliary_cfg: dict):
+    def __init__(self, **kwargs):
+        auxiliary_cfg = kwargs
         num_convs, dec = auxiliary_cfg.get('num_convs', 1), []
         for idx in range(num_convs):
             if idx == 0:
@@ -47,7 +48,7 @@ class AuxiliaryDecoderBuilder(BaseModuleBuilder):
             auxiliary_cfg['act_cfg'] = act_cfg
         if 'num_classes' not in auxiliary_cfg:
             auxiliary_cfg['num_classes'] = num_classes
-        super().build(auxiliary_cfg)
+        return super().build(auxiliary_cfg)
 
 
 '''BuildAuxiliaryDecoder'''
