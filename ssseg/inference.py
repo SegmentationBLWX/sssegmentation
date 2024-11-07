@@ -26,13 +26,13 @@ warnings.filterwarnings('ignore')
 
 '''parsecmdargs'''
 def parsecmdargs():
-    parser = argparse.ArgumentParser(description='SSSegmentation is an open source supervised semantic segmentation toolbox based on PyTorch')
-    parser.add_argument('--imagedir', dest='imagedir', help='image directory, which means we let the segmentor inference on the images existed in the given image directory', type=str)
-    parser.add_argument('--imagepath', dest='imagepath', help='image path, which means we let the segmentor inference on the given image', type=str)
-    parser.add_argument('--outputdir', dest='outputdir', help='directory to save output image(s)', type=str, default='inference_outputs')
-    parser.add_argument('--cfgfilepath', dest='cfgfilepath', help='config file path you want to use', type=str, required=True)
-    parser.add_argument('--ckptspath', dest='ckptspath', help='checkpoints you want to resume from', type=str, required=True)
-    parser.add_argument('--ema', dest='ema', help='please add --ema if you want to load ema weights for segmentors', default=False, action='store_true')
+    parser = argparse.ArgumentParser(description='SSSegmentation is an open source supervised semantic segmentation toolbox based on PyTorch.')
+    parser.add_argument('--imagedir', dest='imagedir', help='Directory containing images for inference by the segmentor.', type=str)
+    parser.add_argument('--imagepath', dest='imagepath', help='Path to the image for inference by the segmentor.', type=str)
+    parser.add_argument('--outputdir', dest='outputdir', help='Destination directory for saving the output image(s).', type=str, default='inference_outputs')
+    parser.add_argument('--cfgfilepath', dest='cfgfilepath', help='The config file path which is used to customize segmentors.', type=str, required=True)
+    parser.add_argument('--ckptspath', dest='ckptspath', help='Specify the checkpoint to use for inference.', type=str, required=True)
+    parser.add_argument('--ema', dest='ema', help='Please add --ema if you want to load ema weights of segmentors for inference.', default=False, action='store_true')
     cmd_args = parser.parse_args()
     return cmd_args
 

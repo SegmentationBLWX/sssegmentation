@@ -20,9 +20,9 @@ bash scripts/dist_train.sh ${NGPUS} ${CFGFILEPATH} [optional arguments]
 
 This script accepts several optional arguments, including:
 
-- `${NGPUS}`: The number of GPUS you want to use,
-- `${CFGFILEPATH}`: The config file path which is used to customize segmentors,
-- `--ckptspath`: Checkpoints you want to resume from, if you want to resume from the latest checkpoint in the `SEGMENTOR_CFG['work_dir']` automatically, you can specify it as `f'{work_dir}/checkpoints-epoch-latest.pth'`,
+- `${NGPUS}`: The total number of processes for your training, which is usually the total number of GPUs you are using for distributed training.
+- `${CFGFILEPATH}`: The config file path which is used to customize segmentors.
+- `--ckptspath`: Specify the checkpoint from which to resume training. To automatically resume from the latest checkpoint in `SEGMENTOR_CFG['work_dir']`, set it to `f"{SEGMENTOR_CFG['work_dir']}/checkpoints-epoch-latest.pth"`.
 - `--slurm`: Please add `--slurm` if you are using slurm to spawn training jobs.
 
 Here, we provide some examples about training a segmentor on a single machine,
@@ -48,12 +48,12 @@ bash scripts/dist_test.sh ${NGPUS} ${CFGFILEPATH} ${CKPTSPATH} [optional argumen
 
 This script accepts several optional arguments, including:
 
-- `${NGPUS}`: The number of GPUS you want to use,
-- `${CFGFILEPATH}`: The config file path which is used to customize segmentors,
-- `${CKPTSPATH}`: Checkpoints you want to resume from,
-- `--eval_env`: Used to specify evaluate environment, support `server` environment (only save the test results which could be submitted to the corresponding dataset's official website to obtain the segmentation performance) and `local` environment (the default environment, test segmentors with the local images and annotations provided by the corresponding dataset),
-- `--slurm`: Please add `--slurm` if you are using slurm to spawn testing jobs,
-- `--ema`: Please add `--ema` if you want to load ema weights for segmentors.
+- `${NGPUS}`: The total number of processes for your testing, which is usually the total number of GPUs you are using for distributed testing.
+- `${CFGFILEPATH}`: The config file path which is used to customize segmentors.
+- `${CKPTSPATH}`: Specify the checkpoint to use for performance testing. To automatically test the latest checkpoint in `SEGMENTOR_CFG['work_dir']`, set it to `f"{SEGMENTOR_CFG['work_dir']}/checkpoints-epoch-latest.pth"`.
+- `--eval_env`: Select the environment for evaluating segmentor performance, support `server` environment (only save the test results which could be submitted to the corresponding dataset's official website to obtain the segmentation performance) and `local` environment (the default environment, test segmentors with the local images and annotations provided by the corresponding dataset).
+- `--slurm`: Please add `--slurm` if you are using slurm to spawn testing jobs.
+- `--ema`: Please add `--ema` if you want to load ema weights of segmentors for performance testing.
 
 Here, we provide some examples about testing a segmentor on a single machine,
 
@@ -78,12 +78,12 @@ bash scripts/slurm_train.sh ${PARTITION} ${JOBNAME} ${NGPUS} ${CFGFILEPATH} [opt
 
 This script accepts several optional arguments, including:
 
-- `${PARTITION}`: The Slurm partition you want to use,
-- `${JOBNAME}`: The job name you want to show,
-- `${NGPUS}`: The number of GPUS you want to use,
-- `${CFGFILEPATH}`: The config file path which is used to customize segmentors,
-- `--ckptspath`: Checkpoints you want to resume from, if you want to resume from the latest checkpoint in the `SEGMENTOR_CFG['work_dir']` automatically, you can specify it as `f'{work_dir}/checkpoints-epoch-latest.pth'`,
-- `--slurm`: Please add `--slurm` if you are using slurm to spawn training jobs.
+- `${PARTITION}`: Specify the name of the partition (or queue) where the job will be submitted, defining a set of resources and job scheduling policies.
+- `${JOBNAME}`: Specify the name of the job, which is used for job identification, monitoring, and logging in the job queue.
+- `${NGPUS}`: The total number of processes for your training, which is usually the total number of GPUs you are using for distributed training.
+- `${CFGFILEPATH}`: The config file path which is used to customize segmentors.
+- `--ckptspath`: Specify the checkpoint from which to resume training. To automatically resume from the latest checkpoint in `SEGMENTOR_CFG['work_dir']`, set it to `f"{SEGMENTOR_CFG['work_dir']}/checkpoints-epoch-latest.pth"`.
+- `--slurm`: Please add `--slurm` if you are using slurm to spawn testing jobs.
 
 Here is an example of using 16 GPUs to train PSPNet on Slurm partition named *dev*,
 
@@ -95,7 +95,7 @@ Please note that, `--slurm` is required to set for environment initialization if
 
 **2. Testing a segmentor**
 
-Similar to the training task, SSSegmentation provides `scripts/slurm_test.sh` to spawn testing jobs. The basic usage is as follows,
+On a cluster managed by Slurm, SSSegmentation provides `scripts/slurm_test.sh` to spawn testing jobs. The basic usage is as follows,
 
 ```sh
 bash scripts/slurm_test.sh ${PARTITION} ${JOBNAME} ${NGPUS} ${CFGFILEPATH} ${CKPTSPATH} [optional arguments]
@@ -103,14 +103,14 @@ bash scripts/slurm_test.sh ${PARTITION} ${JOBNAME} ${NGPUS} ${CFGFILEPATH} ${CKP
 
 This script accepts several optional arguments, including:
 
-- `${PARTITION}`: The Slurm partition you want to use,
-- `${JOBNAME}`: The job name you want to show,
-- `${NGPUS}`: The number of GPUS you want to use,
-- `${CFGFILEPATH}`: The config file path which is used to customize segmentors,
-- `${CKPTSPATH}`: Checkpoints you want to resume from,
-- `--eval_env`: Used to specify evaluate environment, support `server` environment (only save the test results which could be submitted to the corresponding dataset's official website to obtain the segmentation performance) and `local` environment (the default environment, test segmentors with the local images and annotations provided by the corresponding dataset),
-- `--slurm`: Please add `--slurm` if you are using slurm to spawn testing jobs,
-- `--ema`: Please add `--ema` if you want to load ema weights for segmentors.
+- `${PARTITION}`: Specify the name of the partition (or queue) where the job will be submitted, defining a set of resources and job scheduling policies.
+- `${JOBNAME}`: Specify the name of the job, which is used for job identification, monitoring, and logging in the job queue.
+- `${NGPUS}`: The total number of processes for your testing, which is usually the total number of GPUs you are using for distributed testing.
+- `${CFGFILEPATH}`: The config file path which is used to customize segmentors.
+- `${CKPTSPATH}`: Specify the checkpoint to use for performance testing. To automatically test the latest checkpoint in `SEGMENTOR_CFG['work_dir']`, set it to `f"{SEGMENTOR_CFG['work_dir']}/checkpoints-epoch-latest.pth"`.
+- `--eval_env`: Select the environment for evaluating segmentor performance, support `server` environment (only save the test results which could be submitted to the corresponding dataset's official website to obtain the segmentation performance) and `local` environment (the default environment, test segmentors with the local images and annotations provided by the corresponding dataset).
+- `--slurm`: Please add `--slurm` if you are using slurm to spawn testing jobs.
+- `--ema`: Please add `--ema` if you want to load ema weights of segmentors for performance testing.
 
 Here is an example of using 16 GPUs to test PSPNet on Slurm partition named *dev*,
 
@@ -118,7 +118,7 @@ Here is an example of using 16 GPUs to test PSPNet on Slurm partition named *dev
 bash scripts/slurm_test.sh dev pspnet 16 ssseg/configs/pspnet/pspnet_resnet101os8_ade20k.py pspnet_resnet101os8_ade20k/checkpoints-epoch-130.pth --slurm
 ```
 
-Similar to use slurm to spawn training jobs, `--slurm` is required to set for slurm environment initialization.
+Please note that, `--slurm` is required to set for environment initialization if you are using slurm to spawn testing jobs.
 
 #### Training and Testing on Multiple Machines with AML
 
@@ -129,13 +129,14 @@ In SSSegmentation, we also support training with multiple machines using AML, wh
 On a cluster managed by AML, you can use `scripts/aml_train.sh` to spawn training jobs in the pre-defined `job.yaml` file. It supports both single-node and multi-node training. The basic usage is as follows,
 
 ```sh
-bash scripts/aml_train.sh ${CFGFILEPATH} [optional arguments]
+bash scripts/aml_train.sh ${NGPUS_PER_NODE} ${CFGFILEPATH} [optional arguments]
 ```
 
 This script accepts several optional arguments, including:
 
-- `${CFGFILEPATH}`: The config file path which is used to customize segmentors,
-- `--ckptspath`: Checkpoints you want to resume from, if you want to resume from the latest checkpoint in the `SEGMENTOR_CFG['work_dir']` automatically, you can specify it as `f'{work_dir}/checkpoints-epoch-latest.pth'`,
+- `${NGPUS_PER_NODE}`: The number of processes per node, which is usually the number of GPUs per node you are using for distributed training.
+- `${CFGFILEPATH}`: The config file path which is used to customize segmentors.
+- `--ckptspath`: Specify the checkpoint from which to resume training. To automatically resume from the latest checkpoint in `SEGMENTOR_CFG['work_dir']`, set it to `f"{SEGMENTOR_CFG['work_dir']}/checkpoints-epoch-latest.pth"`.
 - `--slurm`: Please add `--slurm` if you are using slurm to spawn training jobs.
 
 Here is an example of spawning training jobs in the pre-defined `job.yaml` file,
@@ -145,24 +146,25 @@ jobs:
   - name: fcn_resnet50os8_ade20k
     sku: 2xG8
     command:
-      - bash scripts/aml_train.sh ssseg/configs/fcn/fcn_resnet50os8_ade20k.py
+      - bash scripts/aml_train.sh 8 ssseg/configs/fcn/fcn_resnet50os8_ade20k.py
 ```
 
 **2. Testing a segmentor**
 
-Similar to the training task, SSSegmentation provides `scripts/aml_test.sh` to spawn testing jobs in the pre-defined `job.yaml` file. The basic usage is as follows,
+On a cluster managed by AML, SSSegmentation provides `scripts/aml_test.sh` to spawn testing jobs in the pre-defined `job.yaml` file. The basic usage is as follows,
 
 ```sh
-bash scripts/aml_test.sh ${CFGFILEPATH} ${CKPTSPATH} [optional arguments]
+bash scripts/aml_test.sh ${NGPUS_PER_NODE} ${CFGFILEPATH} ${CKPTSPATH} [optional arguments]
 ```
 
 This script accepts several optional arguments, including:
 
-- `${CFGFILEPATH}`: The config file path which is used to customize segmentors,
-- `${CKPTSPATH}`: Checkpoints you want to resume from,
-- `--eval_env`: Used to specify evaluate environment, support `server` environment (only save the test results which could be submitted to the corresponding dataset's official website to obtain the segmentation performance) and `local` environment (the default environment, test segmentors with the local images and annotations provided by the corresponding dataset),
-- `--slurm`: Please add `--slurm` if you are using slurm to spawn testing jobs,
-- `--ema`: Please add `--ema` if you want to load ema weights for segmentors.
+- `${NGPUS_PER_NODE}`: The number of processes per node, which is usually the number of GPUs per node you are using for distributed testing.
+- `${CFGFILEPATH}`: The config file path which is used to customize segmentors.
+- `${CKPTSPATH}`: Specify the checkpoint to use for performance testing. To automatically test the latest checkpoint in `SEGMENTOR_CFG['work_dir']`, set it to `f"{SEGMENTOR_CFG['work_dir']}/checkpoints-epoch-latest.pth"`.
+- `--eval_env`: Select the environment for evaluating segmentor performance, support `server` environment (only save the test results which could be submitted to the corresponding dataset's official website to obtain the segmentation performance) and `local` environment (the default environment, test segmentors with the local images and annotations provided by the corresponding dataset).
+- `--slurm`: Please add `--slurm` if you are using slurm to spawn testing jobs.
+- `--ema`: Please add `--ema` if you want to load ema weights of segmentors for performance testing.
 
 Here is an example of spawning testing jobs in the pre-defined `job.yaml` file,
 
@@ -188,12 +190,12 @@ bash scripts/inference.sh ${CFGFILEPATH} ${CKPTSPATH} [optional arguments]
 
 This script accepts several optional arguments, including:
 
-- `${CFGFILEPATH}`: The config file path which is used to customize segmentors,
-- `${CKPTSPATH}`: Checkpoints you want to resume from,
-- `--outputdir`: The directory used to save output image(s),
-- `--imagepath`: Image path, which means we let the segmentor inference on the given image,
-- `--imagedir`: Image directory, which means we let the segmentor inference on the images existed in the given image directory,
-- `--ema`: Please add `--ema` if you want to load ema weights for segmentors.
+- `${CFGFILEPATH}`: The config file path which is used to customize segmentors.
+- `${CKPTSPATH}`: Specify the checkpoint to use for inference.
+- `--outputdir`: Destination directory for saving the output image(s).
+- `--imagepath`: Path to the image for inference by the segmentor.
+- `--imagedir`: Directory containing images for inference by the segmentor.
+- `--ema`: Please add --ema if you want to load ema weights of segmentors for inference.
 
 Here are some example commands,
 

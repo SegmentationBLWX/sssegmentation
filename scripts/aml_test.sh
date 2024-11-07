@@ -9,8 +9,9 @@ if [ "$RANK" -eq 0 ]; then
 else
     MASTER_IP=$(ssh node-0 "hostname -I")
 fi
-CFGFILEPATH=$1
-CKPTSPATH=$2
+NGPUS_PER_NODE=$1
+CFGFILEPATH=$2
+CKPTSPATH=$3
 TORCHVERSION=`python -c 'import torch; print(torch.__version__)'`
 
 # echo info
@@ -21,16 +22,16 @@ echo "Master Port: $MASTER_PORT"
 
 # start testing
 if [[ $TORCHVERSION == "2."* ]]; then
-    torchrun --nnodes=${NODE_COUNT} --nproc_per_node=${AZUREML_NUM_GPUS} --master_addr=${MASTER_IP} --master_port=${MASTER_PORT} --node_rank=${RANK} \
-        ssseg/test.py --nproc_per_node ${AZUREML_NUM_GPUS} --cfgfilepath $CFGFILEPATH --ckptspath $CKPTSPATH ${@:4}
+    torchrun --nnodes=${NODE_COUNT} --nproc_per_node=${NGPUS_PER_NODE} --master_addr=${MASTER_IP} --master_port=${MASTER_PORT} --node_rank=${RANK} \
+        ssseg/test.py --nproc_per_node ${NGPUS_PER_NODE} --cfgfilepath $CFGFILEPATH --ckptspath $CKPTSPATH ${@:4}
 else
     python -m torch.distributed.launch \
         --nnodes=${NODE_COUNT} \
         --node_rank=${RANK} \
         --master_addr=${MASTER_IP} \
-        --nproc_per_node=${AZUREML_NUM_GPUS} \
+        --nproc_per_node=${NGPUS_PER_NODE} \
         --master_port=${MASTER_PORT} \
-        ssseg/test.py --nproc_per_node ${AZUREML_NUM_GPUS} \
+        ssseg/test.py --nproc_per_node ${NGPUS_PER_NODE} \
                     --cfgfilepath $CFGFILEPATH \
                     --ckptspath $CKPTSPATH ${@:4}
 fi

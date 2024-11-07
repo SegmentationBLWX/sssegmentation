@@ -9,7 +9,8 @@ if [ "$RANK" -eq 0 ]; then
 else
     MASTER_IP=$(ssh node-0 "hostname -I")
 fi
-CFGFILEPATH=$1
+NGPUS_PER_NODE=$1
+CFGFILEPATH=$2
 TORCHVERSION=`python -c 'import torch; print(torch.__version__)'`
 
 # echo info
@@ -20,15 +21,15 @@ echo "Master Port: $MASTER_PORT"
 
 # start training
 if [[ $TORCHVERSION == "2."* ]]; then
-    torchrun --nnodes=${NODE_COUNT} --nproc_per_node=${AZUREML_NUM_GPUS} --master_addr=${MASTER_IP} --master_port=${MASTER_PORT} --node_rank=${RANK} \
-        ssseg/train.py --nproc_per_node ${AZUREML_NUM_GPUS} --cfgfilepath $CFGFILEPATH ${@:3}
+    torchrun --nnodes=${NODE_COUNT} --nproc_per_node=${NGPUS_PER_NODE} --master_addr=${MASTER_IP} --master_port=${MASTER_PORT} --node_rank=${RANK} \
+        ssseg/train.py --nproc_per_node ${NGPUS_PER_NODE} --cfgfilepath $CFGFILEPATH ${@:3}
 else
     python -m torch.distributed.launch \
         --nnodes=${NODE_COUNT} \
         --node_rank=${RANK} \
         --master_addr=${MASTER_IP} \
-        --nproc_per_node=${AZUREML_NUM_GPUS} \
+        --nproc_per_node=${NGPUS_PER_NODE} \
         --master_port=${MASTER_PORT} \
-        ssseg/train.py --nproc_per_node ${AZUREML_NUM_GPUS} \
+        ssseg/train.py --nproc_per_node ${NGPUS_PER_NODE} \
                     --cfgfilepath $CFGFILEPATH ${@:3}
 fi

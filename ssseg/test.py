@@ -29,14 +29,14 @@ warnings.filterwarnings('ignore')
 
 '''parsecmdargs'''
 def parsecmdargs():
-    parser = argparse.ArgumentParser(description='SSSegmentation is an open source supervised semantic segmentation toolbox based on PyTorch')
-    parser.add_argument('--local_rank', '--local-rank', dest='local_rank', help='node rank for distributed testing', default=0, type=int)
-    parser.add_argument('--nproc_per_node', dest='nproc_per_node', help='number of process per node', default=8, type=int)
-    parser.add_argument('--cfgfilepath', dest='cfgfilepath', help='config file path you want to use', type=str, required=True)
-    parser.add_argument('--eval_env', dest='eval_env', help='evaluate environment, support server and local', default='local', type=str, choices=['server', 'local'])
-    parser.add_argument('--ckptspath', dest='ckptspath', help='checkpoints you want to resume from', type=str, required=True)
-    parser.add_argument('--slurm', dest='slurm', help='please add --slurm if you are using slurm', default=False, action='store_true')
-    parser.add_argument('--ema', dest='ema', help='please add --ema if you want to load ema weights for segmentors', default=False, action='store_true')
+    parser = argparse.ArgumentParser(description='SSSegmentation is an open source supervised semantic segmentation toolbox based on PyTorch.')
+    parser.add_argument('--local_rank', '--local-rank', dest='local_rank', help='The rank of the worker within a local worker group.', default=0, type=int)
+    parser.add_argument('--nproc_per_node', dest='nproc_per_node', help='The number of processes per node.', default=8, type=int)
+    parser.add_argument('--cfgfilepath', dest='cfgfilepath', help='The config file path which is used to customize segmentors.', type=str, required=True)
+    parser.add_argument('--eval_env', dest='eval_env', help='Select the environment for evaluating segmentor performance, support server or local (default).', default='local', type=str, choices=['server', 'local'])
+    parser.add_argument('--ckptspath', dest='ckptspath', help='Specify the checkpoint to use for performance testing.', type=str, required=True)
+    parser.add_argument('--slurm', dest='slurm', help='Please add --slurm if you are using slurm to spawn testing jobs.', default=False, action='store_true')
+    parser.add_argument('--ema', dest='ema', help='Please add --ema if you want to load ema weights of segmentors for performance testing.', default=False, action='store_true')
     cmd_args = parser.parse_args()
     if torch.__version__.startswith('2.'):
         cmd_args.local_rank = int(os.environ['LOCAL_RANK'])
