@@ -99,6 +99,7 @@ DATASET_CFG_ADE20k_512x512 = {
         ], # define some pre-processing operations for the loaded images and segmentation targets during testing, you can refer to "ssseg/modules/datasets/pipelines" for more details
     }
 }
+# dataloader configs
 DATALOADER_CFG_BS16 = {
     'expected_total_train_bs_for_assert': 16, # it is defined for asserting whether the users adopt the correct batch size for training the models
     'auto_adapt_to_expected_train_bs': True, # if set Ture, the "expected_total_train_bs_for_assert" will be used to determine the value of "batch_size_per_gpu" rather than using the specified value in the config
@@ -117,12 +118,13 @@ DATALOADER_CFG_BS16 = {
         'drop_last': False, # whether to drop out the last images which cannot form a batch size of "expected_total_train_bs_for_assert" during testing
     }
 }
+# segmentor configs
 SEGMENTOR_CFG = {
     'type': 'PSPNet', # the segmentor type defined in "ssseg/modules/models/segmentors/builder.py"
     'num_classes': -1, # number of classes in the dataset
     'benchmark': True, # set True for speeding up training
     'align_corners': False, # align_corners in torch.nn.functional.interpolate
-    'backend': 'nccl', # backend for DDP training and testing
+    'init_process_group_cfg': {'backend': 'nccl', 'timeout': 7200}, # config to instance torch.nn.distributed.init_process_group()
     'work_dir': 'ckpts', # directory used to save checkpoints and training and testing logs
     'eval_interval_epochs': 10, # evaluate models after "eval_interval_epochs" epochs
     'save_interval_epochs': 1, # save the checkpoints of models after "save_interval_epochs" epochs
