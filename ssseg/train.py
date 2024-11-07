@@ -14,6 +14,7 @@ import numpy as np
 import torch.nn.functional as F
 import torch.distributed as dist
 from tqdm import tqdm
+from datetime import timedelta
 try:
     from modules import (
         BuildDistributedDataloader, BuildDistributedModel, touchdirs, loadckpts, saveckpts, judgefileexist, postprocesspredgtpairs, initslurm, ismainprocess,
@@ -76,7 +77,7 @@ class Trainer():
         self.training_logging_manager = training_logging_manager
         assert torch.cuda.is_available(), 'cuda is not available'
         # init distributed training
-        dist.init_process_group(**self.cfg.SEGMENTOR_CFG.get('init_process_group_cfg', {'backend': 'nccl', 'timeout': 7200}))
+        dist.init_process_group(**self.cfg.SEGMENTOR_CFG.get('init_process_group_cfg', {'backend': 'nccl', 'timeout': timedelta(seconds=36000)}))
         # open full fp32
         torch.backends.cuda.matmul.allow_tf32 = False
         torch.backends.cudnn.allow_tf32 = False
