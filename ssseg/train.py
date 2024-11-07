@@ -221,7 +221,7 @@ class Trainer():
                     self.evaluate(segmentor_ema.segmentor_ema.cuda(cmd_args.local_rank))
     '''evaluate'''
     def evaluate(self, segmentor):
-        cfg, logger_handle, cmd_args, cfg_file_path = self.cfg, self.logger_handle, self.cmd_args, self.cfg_file_path
+        cfg, logger_handle, cfg_file_path = self.cfg, self.logger_handle, self.cfg_file_path
         # TODO: bug occurs if use --pyt bash in slurm
         rank_id = int(os.environ['RANK'])
         # build dataset and dataloader
@@ -247,7 +247,7 @@ class Trainer():
                     seg_gt[seg_gt >= dataset.num_classes] = -1
                     seg_results[samples_meta['id'][seg_idx]] = {'seg_pred': seg_pred, 'seg_gt': seg_gt}
         # post process
-        seg_preds, seg_gts, _ = postprocesspredgtpairs(seg_results=seg_results, cmd_args=cmd_args, cfg=cfg, logger_handle=logger_handle)
+        seg_preds, seg_gts, _ = postprocesspredgtpairs(seg_results=seg_results, cfg=cfg, logger_handle=logger_handle)
         if ismainprocess():
             result = dataset.evaluate(
                 seg_preds=seg_preds, seg_gts=seg_gts, num_classes=cfg.SEGMENTOR_CFG['num_classes'], ignore_index=-1, **cfg.SEGMENTOR_CFG['inference'].get('evaluate', {}),

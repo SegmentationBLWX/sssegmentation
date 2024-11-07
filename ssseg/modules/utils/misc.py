@@ -29,25 +29,25 @@ def ismainprocess():
 
 
 '''postprocesspredgtpairs'''
-def postprocesspredgtpairs(seg_results, cmd_args, cfg, logger_handle):
+def postprocesspredgtpairs(seg_results, cfg, logger_handle):
     # TODO: bug occurs if use --pyt bash in slurm
-    current_rank_id = int(os.environ['RANK'])
+    process_id = int(os.environ['RANK'])
     # save results
     work_dir = os.path.join(cfg.SEGMENTOR_CFG['work_dir'], 'inference_local_results')
     touchdirs(work_dir)
-    filename = f'seg_results_{current_rank_id}.pkl'
+    filename = f'seg_results_{process_id}.pkl'
     with open(os.path.join(work_dir, filename), 'wb') as fp:
         pickle.dump(seg_results, fp)
-    rank = torch.tensor([current_rank_id], device='cuda')
-    rank_list = [rank.clone() for _ in range(cmd_args.nproc_per_node)]
-    dist.all_gather(rank_list, rank)
-    logger_handle.info('Rank %s finished' % int(rank.item()))
-    # post-process
-    if current_rank_id == 0:
+    process_id = torch.tensor([process_id], device='cuda')
+    process_ids = [process_id.clone() for _ in range(int(os.environ['WORLD_SIZE']))]
+    dist.all_gather(process_ids, process_id)
+    logger_handle.info('Rank %s finished' % int(os.environ['RANK']))
+    # post-process, here we assume that all nodes share a common storage space during multi-node training
+    if int(os.environ['RANK']) == 0:
         seg_results_gather = {}
-        for rank in rank_list:
-            rank = str(int(rank.item()))
-            filename = f'seg_results_{rank}.pkl'
+        for process_id in process_ids:
+            process_id = str(int(process_id.item()))
+            filename = f'seg_results_{process_id}.pkl'
             fp = open(os.path.join(work_dir, filename), 'rb')
             seg_results = pickle.load(fp)
             seg_results_gather.update(seg_results)
