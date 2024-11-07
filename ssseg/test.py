@@ -131,6 +131,7 @@ class Tester():
                     seg_gt = samples_meta['seg_target'][seg_idx].cpu().numpy().astype(np.int32)
                     seg_gt[seg_gt >= dataset.num_classes] = -1
                     seg_results[samples_meta['id'][seg_idx]] = {'seg_pred': seg_pred, 'seg_gt': seg_gt}
+        dist.barrier()
         # post process
         seg_preds, seg_gts, seg_ids = postprocesspredgtpairs(seg_results=seg_results, cfg=cfg, logger_handle=logger_handle)
         # evaluate
