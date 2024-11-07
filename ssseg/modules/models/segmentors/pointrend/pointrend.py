@@ -9,6 +9,7 @@ import numpy as np
 import torch.nn as nn
 import torch.nn.functional as F
 from ..base import FPN, BaseSegmentor
+from ...losses import calculatelosses
 from ....utils import SSSegOutputStructure
 from ...backbones import BuildActivation, BuildNormalization
 try:
@@ -90,13 +91,13 @@ class PointRend(BaseSegmentor):
                 if self.coarse_pred_each_layer:
                     feats_concat = torch.cat([feats_concat, coarse_point_feats], dim=1)
             seg_logits = self.decoder(feats_concat)
-            point_labels = PointSample(data_meta.gettargets()['seg_targets'].unsqueeze(1).float(), points, mode='nearest', align_corners=self.align_corners)
+            point_labels = PointSample(data_meta.getannotations()['seg_targets'].unsqueeze(1).float(), points, mode='nearest', align_corners=self.align_corners)
             point_labels = point_labels.squeeze(1).long()
-            targets = data_meta.gettargets()
-            targets['point_labels'] = point_labels
+            annotations = data_meta.getannotations()
+            annotations['point_labels'] = point_labels
             seg_logits_aux = F.interpolate(seg_logits_aux, size=img_size, mode='bilinear', align_corners=self.align_corners)
-            loss, losses_log_dict = self.calculatelosses(
-                predictions={'loss_cls': seg_logits, 'loss_aux': seg_logits_aux}, targets=targets, losses_cfg=self.cfg['losses'], map_preds_to_tgts_dict={'loss_cls': 'point_labels', 'loss_aux': 'seg_targets'}
+            loss, losses_log_dict = calculatelosses(
+                predictions={'loss_cls': seg_logits, 'loss_aux': seg_logits_aux}, annotations=annotations, losses_cfg=self.cfg['losses'], preds_to_tgts_mapping={'loss_cls': 'point_labels', 'loss_aux': 'seg_targets'}, pixel_sampler=self.pixel_sampler
             )
             ssseg_outputs.setvariable('loss', loss)
             ssseg_outputs.setvariable('losses_log_dict', losses_log_dict)

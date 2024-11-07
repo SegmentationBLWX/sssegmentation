@@ -8,6 +8,7 @@ import copy
 import torch.nn as nn
 import torch.nn.functional as F
 from ..base import BaseSegmentor
+from ...losses import calculatelosses
 from ....utils import SSSegOutputStructure
 from .objectcontext import ObjectContextBlock
 from .spatialgather import SpatialGatherModule
@@ -63,8 +64,8 @@ class OCRNet(BaseSegmentor):
         if self.mode in ['TRAIN', 'TRAIN_DEVELOP']:
             seg_logits = F.interpolate(seg_logits, size=img_size, mode='bilinear', align_corners=self.align_corners)
             seg_logits_aux = F.interpolate(seg_logits_aux, size=img_size, mode='bilinear', align_corners=self.align_corners)
-            loss, losses_log_dict = self.calculatelosses(
-                predictions={'loss_cls': seg_logits, 'loss_aux': seg_logits_aux}, targets=data_meta.gettargets(), losses_cfg=self.cfg['losses']
+            loss, losses_log_dict = calculatelosses(
+                predictions={'loss_cls': seg_logits, 'loss_aux': seg_logits_aux}, annotations=data_meta.getannotations(), losses_cfg=self.cfg['losses'], pixel_sampler=self.pixel_sampler
             )
             ssseg_outputs = SSSegOutputStructure(mode=self.mode, loss=loss, losses_log_dict=losses_log_dict) if self.mode == 'TRAIN' else SSSegOutputStructure(mode=self.mode, loss=loss, losses_log_dict=losses_log_dict, seg_logits=seg_logits)
         else:

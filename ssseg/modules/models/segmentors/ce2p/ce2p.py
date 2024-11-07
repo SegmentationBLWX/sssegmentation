@@ -9,6 +9,7 @@ import torch
 import torch.nn as nn
 import torch.nn.functional as F
 from ..base import BaseSegmentor
+from ...losses import calculatelosses
 from .epm import EdgePerceivingModule
 from ..pspnet import PyramidPoolingModule
 from ....utils import SSSegOutputStructure
@@ -86,7 +87,7 @@ class CE2P(BaseSegmentor):
             preds_stage1 = self.decoder_stage1[-1](feats_stage1)
             preds_stage1 = F.interpolate(preds_stage1, size=img_size, mode='bilinear', align_corners=self.align_corners)
             preds_stage2 = F.interpolate(preds_stage2, size=img_size, mode='bilinear', align_corners=self.align_corners)
-            edge_targets, losses_cfg = data_meta.gettargets()['edge_targets'], copy.deepcopy(self.cfg['losses'])
+            edge_targets, losses_cfg = data_meta.getannotations()['edge_targets'], copy.deepcopy(self.cfg['losses'])
             num_neg_edge, num_pos_edge = torch.sum(edge_targets == 0, dtype=torch.float), torch.sum(edge_targets == 1, dtype=torch.float)
             weight_pos_edge, weight_neg_edge = num_neg_edge / (num_pos_edge + num_neg_edge), num_pos_edge / (num_pos_edge + num_neg_edge)
             cls_weight_edge = torch.Tensor([weight_neg_edge, weight_pos_edge]).type_as(edge_targets)
@@ -94,13 +95,13 @@ class CE2P(BaseSegmentor):
                 if 'edge' in loss_name:
                     if isinstance(losses_cfg[loss_name], list):
                         for loss_idx in range(len(losses_cfg[loss_name])):
-                            losses_cfg[loss_name][loss_idx]['weight'] = cls_weight_edge
+                            losses_cfg[loss_name][loss_idx]['class_weight'] = cls_weight_edge
                     else:
                         assert isinstance(losses_cfg[loss_name], dict)
-                        losses_cfg[loss_name]['weight'] = cls_weight_edge
-            loss, losses_log_dict = self.calculatelosses(
-                predictions={'loss_cls_stage1': preds_stage1, 'loss_cls_stage2': preds_stage2, 'loss_edge': edge}, targets=data_meta.gettargets(), losses_cfg=losses_cfg,
-                map_preds_to_tgts_dict={'loss_cls_stage1': 'seg_targets', 'loss_cls_stage2': 'seg_targets', 'loss_edge': 'edge_targets'},
+                        losses_cfg[loss_name]['class_weight'] = cls_weight_edge
+            loss, losses_log_dict = calculatelosses(
+                predictions={'loss_cls_stage1': preds_stage1, 'loss_cls_stage2': preds_stage2, 'loss_edge': edge}, annotations=data_meta.getannotations(), losses_cfg=losses_cfg,
+                preds_to_tgts_mapping={'loss_cls_stage1': 'seg_targets', 'loss_cls_stage2': 'seg_targets', 'loss_edge': 'edge_targets'}, pixel_sampler=self.pixel_sampler,
             )
             ssseg_outputs = SSSegOutputStructure(mode=self.mode, loss=loss, losses_log_dict=losses_log_dict) if self.mode == 'TRAIN' else SSSegOutputStructure(mode=self.mode, loss=loss, losses_log_dict=losses_log_dict, seg_logits=preds_stage2)
         else:

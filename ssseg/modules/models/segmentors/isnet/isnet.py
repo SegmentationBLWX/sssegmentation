@@ -9,6 +9,7 @@ import torch
 import torch.nn as nn
 import torch.nn.functional as F
 from ..base import BaseSegmentor
+from ...losses import calculatelosses
 from .imagelevel import ImageLevelContext
 from ....utils import SSSegOutputStructure
 from .semanticlevel import SemanticLevelContext
@@ -93,13 +94,13 @@ class ISNet(BaseSegmentor):
         # return according to the mode
         if self.mode in ['TRAIN', 'TRAIN_DEVELOP']:
             predictions = self.customizepredsandlosses(
-                seg_logits=preds_stage2, targets=data_meta.gettargets(), backbone_outputs=backbone_outputs, losses_cfg=self.cfg['losses'], img_size=img_size, auto_calc_loss=False,
+                seg_logits=preds_stage2, annotations=data_meta.getannotations(), backbone_outputs=backbone_outputs, losses_cfg=self.cfg['losses'], img_size=img_size, auto_calc_loss=False,
             )
             preds_stage2 = predictions.pop('loss_cls')
             preds_stage1 = F.interpolate(preds_stage1, size=img_size, mode='bilinear', align_corners=self.align_corners)
             predictions.update({'loss_cls_stage1': preds_stage1, 'loss_cls_stage2': preds_stage2})
-            loss, losses_log_dict = self.calculatelosses(
-                predictions=predictions, targets=data_meta.gettargets(), losses_cfg=self.cfg['losses']
+            loss, losses_log_dict = calculatelosses(
+                predictions=predictions, annotations=data_meta.getannotations(), losses_cfg=self.cfg['losses'], pixel_sampler=self.pixel_sampler
             )
             ssseg_outputs = SSSegOutputStructure(mode=self.mode, loss=loss, losses_log_dict=losses_log_dict) if self.mode == 'TRAIN' else SSSegOutputStructure(mode=self.mode, loss=loss, losses_log_dict=losses_log_dict, seg_logits=preds_stage2)
         else:

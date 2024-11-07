@@ -95,11 +95,11 @@ class SSSegInputStructure:
     '''getsetvariables'''
     def getsetvariables(self):
         return {k: v for k, v in self.__dict__.items() if v is not None and k not in ['mode', 'auto_validate']}
-    '''gettargets'''
-    def gettargets(self):
-        targets = {}
+    '''getannotations'''
+    def getannotations(self):
+        annotations = {}
         if self.seg_targets is not None:
-            targets.update({'seg_targets': self.seg_targets})
+            annotations.update({'seg_targets': self.seg_targets})
         if self.edge_targets is not None:
-            targets.update({'edge_targets': self.edge_targets})
-        return targets
+            annotations.update({'edge_targets': self.edge_targets})
+        return annotations
