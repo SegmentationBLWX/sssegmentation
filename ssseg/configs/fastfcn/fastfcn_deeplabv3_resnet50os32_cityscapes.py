@@ -20,7 +20,7 @@ SEGMENTOR_CFG.update({
     'align_corners': False,
     'type': 'FastFCN',
     'segmentor': 'Deeplabv3',
-    'backend': 'nccl',
+    'init_process_group_cfg': {'backend': 'nccl', 'timeout': 7200},
     'norm_cfg': {'type': 'SyncBatchNorm'},
     'act_cfg': {'type': 'ReLU', 'inplace': True},
     'backbone': {

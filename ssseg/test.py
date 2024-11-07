@@ -71,7 +71,7 @@ class Tester():
         self.cfg_file_path = cfg_file_path
         assert torch.cuda.is_available(), 'cuda is not available'
         # init distributed training
-        dist.init_process_group(backend=self.cfg.SEGMENTOR_CFG.get('backend', 'nccl'))
+        dist.init_process_group(**self.cfg.SEGMENTOR_CFG.get('init_process_group_cfg', {'backend': 'nccl', 'timeout': 7200}))
         # open full fp32
         torch.backends.cuda.matmul.allow_tf32 = False
         torch.backends.cudnn.allow_tf32 = False
@@ -90,6 +90,7 @@ class Tester():
         # build segmentor
         cfg.SEGMENTOR_CFG['backbone']['pretrained'] = False
         segmentor = BuildSegmentor(segmentor_cfg=cfg.SEGMENTOR_CFG, mode='TEST')
+        dist.barrier()
         torch.cuda.set_device(cmd_args.local_rank)
         segmentor.cuda(cmd_args.local_rank)
         # load ckpts

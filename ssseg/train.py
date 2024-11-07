@@ -76,7 +76,7 @@ class Trainer():
         self.training_logging_manager = training_logging_manager
         assert torch.cuda.is_available(), 'cuda is not available'
         # init distributed training
-        dist.init_process_group(backend=self.cfg.SEGMENTOR_CFG.get('backend', 'nccl'))
+        dist.init_process_group(**self.cfg.SEGMENTOR_CFG.get('init_process_group_cfg', {'backend': 'nccl', 'timeout': 7200}))
         # open full fp32
         torch.backends.cuda.matmul.allow_tf32 = False
         torch.backends.cudnn.allow_tf32 = False
@@ -98,6 +98,7 @@ class Trainer():
         dataloader = BuildDistributedDataloader(dataset=dataset, dataloader_cfg=dataloader_cfg['train'])
         # build segmentor
         segmentor = BuildSegmentor(segmentor_cfg=cfg.SEGMENTOR_CFG, mode='TRAIN')
+        dist.barrier()
         torch.cuda.set_device(cmd_args.local_rank)
         segmentor.cuda(cmd_args.local_rank)
         torch.backends.cudnn.benchmark = cfg.SEGMENTOR_CFG['benchmark']

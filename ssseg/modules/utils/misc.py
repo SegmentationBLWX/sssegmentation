@@ -42,7 +42,6 @@ def postprocesspredgtpairs(seg_results, cfg, logger_handle):
     process_ids = [process_id.clone() for _ in range(int(os.environ['WORLD_SIZE']))]
     dist.all_gather(process_ids, process_id)
     logger_handle.info('Rank %s finished' % int(os.environ['RANK']))
-    dist.barrier()
     # post-process, here we assume that all nodes share a common storage space during multi-node training
     if int(os.environ['RANK']) == 0:
         seg_results_gather = {}

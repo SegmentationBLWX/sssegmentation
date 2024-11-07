@@ -4,7 +4,7 @@ SEGMENTOR_CFG = {
     'benchmark': True,
     'type': 'NonLocalNet',
     'align_corners': False,
-    'backend': 'nccl',
+    'init_process_group_cfg': {'backend': 'nccl', 'timeout': 7200},
     'work_dir': 'ckpts',
     'eval_interval_epochs': 10,
     'save_interval_epochs': 1,

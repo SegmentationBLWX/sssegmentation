@@ -4,7 +4,7 @@ SEGMENTOR_CFG = {
     'num_classes': -1,
     'align_corners': False,
     'type': 'Deeplabv3Plus',
-    'backend': 'nccl',
+    'init_process_group_cfg': {'backend': 'nccl', 'timeout': 7200},
     'work_dir': 'ckpts',
     'eval_interval_epochs': 10,
     'save_interval_epochs': 1,
