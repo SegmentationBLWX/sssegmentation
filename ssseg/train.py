@@ -249,12 +249,14 @@ class Trainer():
         dist.barrier()
         # post process
         seg_preds, seg_gts, _ = postprocesspredgtpairs(seg_results=seg_results, cfg=cfg, logger_handle=logger_handle)
+        dist.barrier()
         if ismainprocess():
             result = dataset.evaluate(
                 seg_preds=seg_preds, seg_gts=seg_gts, num_classes=cfg.SEGMENTOR_CFG['num_classes'], ignore_index=-1, **cfg.SEGMENTOR_CFG['inference'].get('evaluate', {}),
             )
             logger_handle.info(result, main_process_only=True)
         segmentor.train()
+        dist.barrier()
 
 
 '''run'''

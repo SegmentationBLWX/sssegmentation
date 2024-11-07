@@ -134,6 +134,7 @@ class Tester():
         dist.barrier()
         # post process
         seg_preds, seg_gts, seg_ids = postprocesspredgtpairs(seg_results=seg_results, cfg=cfg, logger_handle=logger_handle)
+        dist.barrier()
         # evaluate
         if ismainprocess():
             dataset = BuildDataset(mode='TEST', logger_handle=logger_handle, dataset_cfg=cfg.SEGMENTOR_CFG['dataset'])
@@ -144,6 +145,7 @@ class Tester():
                 logger_handle.info(result, main_process_only=True)
             else:
                 dataset.formatresults(seg_preds, seg_ids, savedir=os.path.join(cfg.SEGMENTOR_CFG['work_dir'], 'inference_server_results'))
+        dist.barrier()
 
 
 '''run'''
