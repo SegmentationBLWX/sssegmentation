@@ -73,6 +73,7 @@ To help the users have a basic idea of a complete config and the modules in SSSe
 
 ```python
 import os
+from datetime import timedelta
 
 # dataset configs
 DATASET_CFG_ADE20k_512x512 = {
@@ -124,7 +125,7 @@ SEGMENTOR_CFG = {
     'num_classes': -1, # number of classes in the dataset
     'benchmark': True, # set True for speeding up training
     'align_corners': False, # align_corners in torch.nn.functional.interpolate
-    'init_process_group_cfg': {'backend': 'nccl', 'timeout': 7200}, # config to instance torch.distributed.init_process_group()
+    'init_process_group_cfg': {'backend': 'nccl', 'timeout': timedelta(seconds=36000)}, # config to instance torch.distributed.init_process_group()
     'work_dir': 'ckpts', # directory used to save checkpoints and training and testing logs
     'eval_interval_epochs': 10, # evaluate models after "eval_interval_epochs" epochs
     'save_interval_epochs': 1, # save the checkpoints of models after "save_interval_epochs" epochs
