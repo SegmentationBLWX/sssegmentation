@@ -70,7 +70,7 @@ class DynamicConv2d(nn.Module):
         x = x.view(1, -1, h, w)
         weight = self.weight.view(self.K, -1)
         aggregate_weight = torch.mm(softmax_attention, weight)
-        aggregate_weight = aggregate_weight.view(-1, in_channels, self.kernel_size, self.kernel_size)
+        aggregate_weight = aggregate_weight.view(-1, in_channels//self.groups, self.kernel_size, self.kernel_size)
         if self.bias is not None:
             aggregate_bias = torch.mm(softmax_attention, self.bias).view(-1)
             output = F.conv2d(
