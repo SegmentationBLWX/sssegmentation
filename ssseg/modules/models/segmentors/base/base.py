@@ -67,6 +67,8 @@ class BaseSegmentor(nn.Module):
             stride_h, stride_w = inference_cfg['forward']['stride']
             cropsize_h, cropsize_w = inference_cfg['forward']['cropsize']
             batch_size, _, image_h, image_w = images.size()
+            if (image_h > image_w and cropsize_h < cropsize_w) or (image_h < image_w and cropsize_h > cropsize_w):
+                cropsize_h, cropsize_w = cropsize_w, cropsize_h
             num_grids_h = max(image_h - cropsize_h + stride_h - 1, 0) // stride_h + 1
             num_grids_w = max(image_w - cropsize_w + stride_w - 1, 0) // stride_w + 1
             seg_logits = images.new_zeros((batch_size, self.cfg['num_classes'], image_h, image_w))
