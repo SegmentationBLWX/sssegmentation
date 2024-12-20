@@ -55,20 +55,16 @@ class BaseSegmentor(nn.Module):
         assert inference_cfg['forward']['mode'] in ['whole', 'slide']
         use_probs_before_resize = inference_cfg['tta']['use_probs_before_resize']
         images = images.to(device=next(self.parameters()).device, dtype=next(self.parameters()).dtype)
+        if forward_args is None: forward_args = {}
         # inference
         if inference_cfg['forward']['mode'] == 'whole':
-            if forward_args is None:
-                seg_logits = self(SSSegInputStructure(images=images, mode=self.mode)).seg_logits
-            else:
-                seg_logits = self(SSSegInputStructure(images=images, mode=self.mode), **forward_args).seg_logits
+            seg_logits = self(SSSegInputStructure(images=images, mode=self.mode), **forward_args).seg_logits
             if use_probs_before_resize:
                 seg_logits = F.softmax(seg_logits, dim=1)
         else:
             stride_h, stride_w = inference_cfg['forward']['stride']
             cropsize_h, cropsize_w = inference_cfg['forward']['cropsize']
             batch_size, _, image_h, image_w = images.size()
-            if (image_h > image_w and cropsize_h < cropsize_w) or (image_h < image_w and cropsize_h > cropsize_w):
-                cropsize_h, cropsize_w = cropsize_w, cropsize_h
             num_grids_h = max(image_h - cropsize_h + stride_h - 1, 0) // stride_h + 1
             num_grids_w = max(image_w - cropsize_w + stride_w - 1, 0) // stride_w + 1
             seg_logits = images.new_zeros((batch_size, self.cfg['num_classes'], image_h, image_w))
@@ -79,10 +75,7 @@ class BaseSegmentor(nn.Module):
                     x2, y2 = min(x1 + cropsize_w, image_w), min(y1 + cropsize_h, image_h)
                     x1, y1 = max(x2 - cropsize_w, 0), max(y2 - cropsize_h, 0)
                     crop_images = images[:, :, y1:y2, x1:x2]
-                    if forward_args is None:
-                        seg_logits_crop = self(SSSegInputStructure(images=crop_images, mode=self.mode)).seg_logits
-                    else:
-                        seg_logits_crop = self(SSSegInputStructure(images=crop_images, mode=self.mode), **forward_args).seg_logits
+                    seg_logits_crop = self(SSSegInputStructure(images=crop_images, mode=self.mode), **forward_args).seg_logits
                     seg_logits_crop = F.interpolate(seg_logits_crop, size=crop_images.size()[2:], mode='bilinear', align_corners=self.align_corners)
                     if use_probs_before_resize:
                         seg_logits_crop = F.softmax(seg_logits_crop, dim=1)
