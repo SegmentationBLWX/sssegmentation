@@ -90,7 +90,7 @@ class CE2P(BaseSegmentor):
             edge_targets, losses_cfg = data_meta.getannotations()['edge_targets'], copy.deepcopy(self.cfg['losses'])
             num_neg_edge, num_pos_edge = torch.sum(edge_targets == 0, dtype=torch.float), torch.sum(edge_targets == 1, dtype=torch.float)
             weight_pos_edge, weight_neg_edge = num_neg_edge / (num_pos_edge + num_neg_edge), num_pos_edge / (num_pos_edge + num_neg_edge)
-            cls_weight_edge = torch.Tensor([weight_neg_edge, weight_pos_edge]).type_as(edge_targets)
+            cls_weight_edge = torch.Tensor([weight_neg_edge, weight_pos_edge]).to(edge_targets.device)
             for loss_name in list(losses_cfg.keys()):
                 if 'edge' in loss_name:
                     if isinstance(losses_cfg[loss_name], list):
