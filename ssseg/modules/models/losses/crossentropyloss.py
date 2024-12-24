@@ -11,7 +11,7 @@ from .misc import reducelosswithweight, bchw2nc
 
 
 '''crossentropy'''
-def crossentropy(x_src, x_tgt, weight=None, class_weight=None, reduction='mean', ignore_index=-100, label_smoothing=None):
+def crossentropy(x_src, x_tgt, weight=None, class_weight=None, reduction='mean', ignore_index=-100, label_smoothing=None, norm_loss_with_class_weight=True):
     # convert x_src and x_tgt, mainly for adapting to low-version Pytorch
     original_shape, num_classes = x_src.shape, x_src.size(1)
     assert num_classes > 1, 'num classes of inputs should be larger than 1'
@@ -50,6 +50,8 @@ def crossentropy(x_src, x_tgt, weight=None, class_weight=None, reduction='mean',
         class_weight = class_weight.reshape(1, -1)
         loss = loss * class_weight
         avg_factor = (class_weight * x_tgt).sum()
+        if not norm_loss_with_class_weight:
+            avg_factor = None
     else:
         avg_factor = None
     # reduce loss with weight
@@ -63,7 +65,7 @@ def crossentropy(x_src, x_tgt, weight=None, class_weight=None, reduction='mean',
 
 
 '''binarycrossentropy'''
-def binarycrossentropy(x_src, x_tgt, weight=None, class_weight=None, reduction='mean', ignore_index=-100):
+def binarycrossentropy(x_src, x_tgt, weight=None, class_weight=None, reduction='mean', ignore_index=-100, norm_loss_with_class_weight=True):
     # convert x_src and x_tgt to tensor with shape (N, num_classes)
     original_shape, num_classes = x_src.shape, x_src.size(1)
     if x_src.shape == x_tgt.shape:
@@ -98,6 +100,8 @@ def binarycrossentropy(x_src, x_tgt, weight=None, class_weight=None, reduction='
         class_weight = class_weight.reshape(1, -1)
         loss = loss * class_weight
         avg_factor = (class_weight * x_tgt).sum()
+        if not norm_loss_with_class_weight:
+            avg_factor = None
     else:
         avg_factor = None
     # reduce loss with weight
@@ -112,7 +116,7 @@ def binarycrossentropy(x_src, x_tgt, weight=None, class_weight=None, reduction='
 
 '''CrossEntropyLoss'''
 class CrossEntropyLoss(nn.Module):
-    def __init__(self, use_sigmoid=False, reduction='mean', class_weight=None, scale_factor=1.0, lowest_loss_value=None, label_smoothing=None, ignore_index=-100):
+    def __init__(self, use_sigmoid=False, reduction='mean', class_weight=None, scale_factor=1.0, lowest_loss_value=None, label_smoothing=None, ignore_index=-100, norm_loss_with_class_weight=True):
         super(CrossEntropyLoss, self).__init__()
         self.use_sigmoid = use_sigmoid
         self.reduction = reduction
@@ -121,15 +125,16 @@ class CrossEntropyLoss(nn.Module):
         self.lowest_loss_value = lowest_loss_value
         self.label_smoothing = label_smoothing
         self.ignore_index = ignore_index
+        self.norm_loss_with_class_weight = norm_loss_with_class_weight
     '''forward'''
     def forward(self, x_src, x_tgt, weight=None):
         # assert
         assert (x_src.shape == x_tgt.shape) or (x_src.size(0) == x_tgt.size(0) and x_src.shape[2:] == x_tgt.shape[1:]), 'invalid shape of x_src or x_tgt'
         # calculate loss
         if self.use_sigmoid:
-            loss = binarycrossentropy(x_src, x_tgt, weight=weight, class_weight=self.class_weight, reduction=self.reduction, ignore_index=self.ignore_index)
+            loss = binarycrossentropy(x_src, x_tgt, weight=weight, class_weight=self.class_weight, reduction=self.reduction, ignore_index=self.ignore_index, norm_loss_with_class_weight=self.norm_loss_with_class_weight)
         else:
-            loss = crossentropy(x_src, x_tgt, weight=weight, class_weight=self.class_weight, reduction=self.reduction, ignore_index=self.ignore_index, label_smoothing=self.label_smoothing)
+            loss = crossentropy(x_src, x_tgt, weight=weight, class_weight=self.class_weight, reduction=self.reduction, ignore_index=self.ignore_index, label_smoothing=self.label_smoothing, norm_loss_with_class_weight=self.norm_loss_with_class_weight)
         # rescale loss
         loss = loss * self.scale_factor
         if self.lowest_loss_value is not None:

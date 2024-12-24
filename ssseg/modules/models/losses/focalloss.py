@@ -17,7 +17,7 @@ except:
 
 
 '''pysigmoidfocalloss'''
-def pysigmoidfocalloss(x_src, x_tgt, weight=None, gamma=2.0, alpha=0.25, class_weight=None, ignore_index=-100, reduction='mean'):
+def pysigmoidfocalloss(x_src, x_tgt, weight=None, gamma=2.0, alpha=0.25, class_weight=None, ignore_index=-100, reduction='mean', norm_loss_with_class_weight=True):
     # convert x_src and x_tgt to tensor with shape (N, num_classes)
     original_shape, num_classes = x_src.shape, x_src.size(1)
     if x_src.shape == x_tgt.shape:
@@ -55,6 +55,8 @@ def pysigmoidfocalloss(x_src, x_tgt, weight=None, gamma=2.0, alpha=0.25, class_w
         class_weight = class_weight.reshape(1, -1)
         loss = loss * class_weight
         avg_factor = (class_weight * x_tgt).sum()
+        if not norm_loss_with_class_weight:
+            avg_factor = None
     else:
         avg_factor = None
     # reduce loss with weight
@@ -68,7 +70,7 @@ def pysigmoidfocalloss(x_src, x_tgt, weight=None, gamma=2.0, alpha=0.25, class_w
 
 
 '''sigmoidfocalloss'''
-def sigmoidfocalloss(x_src, x_tgt, weight=None, gamma=2.0, alpha=0.25, class_weight=None, ignore_index=-100, reduction='mean'):
+def sigmoidfocalloss(x_src, x_tgt, weight=None, gamma=2.0, alpha=0.25, class_weight=None, ignore_index=-100, reduction='mean', norm_loss_with_class_weight=True):
     # mmcv.ops._sigmoid_focal_loss only accept x_tgt with class labels, e.g., (B, C, H, W) as inputs and (B, H, W) as targets
     if x_src.shape == x_tgt.shape or x_src.shape[1] == 1:
         return pysigmoidfocalloss(x_src, x_tgt, weight=weight, gamma=gamma, alpha=alpha, class_weight=class_weight, ignore_index=ignore_index, reduction=reduction)
@@ -96,6 +98,8 @@ def sigmoidfocalloss(x_src, x_tgt, weight=None, gamma=2.0, alpha=0.25, class_wei
         x_tgt = F.one_hot(x_tgt, num_classes=num_classes+1).float()
         x_tgt = x_tgt[:, :num_classes]
         avg_factor = (class_weight * x_tgt).sum()
+        if not norm_loss_with_class_weight:
+            avg_factor = None
     else:
         avg_factor = None
     # reduce loss with weight
@@ -109,7 +113,7 @@ def sigmoidfocalloss(x_src, x_tgt, weight=None, gamma=2.0, alpha=0.25, class_wei
 
 
 '''pysoftmaxfocalloss'''
-def pysoftmaxfocalloss(x_src, x_tgt, weight=None, gamma=2.0, alpha=0.25, class_weight=None, ignore_index=-100, reduction='mean'):
+def pysoftmaxfocalloss(x_src, x_tgt, weight=None, gamma=2.0, alpha=0.25, class_weight=None, ignore_index=-100, reduction='mean', norm_loss_with_class_weight=True):
     # convert x_src and x_tgt to tensor with shape (N, num_classes)
     original_shape, num_classes = x_src.shape, x_src.size(1)
     assert num_classes > 1, 'num classes of inputs should be larger than 1'
@@ -146,6 +150,8 @@ def pysoftmaxfocalloss(x_src, x_tgt, weight=None, gamma=2.0, alpha=0.25, class_w
         class_weight = class_weight.reshape(1, -1)
         loss = loss * class_weight
         avg_factor = (class_weight * x_tgt).sum()
+        if not norm_loss_with_class_weight:
+            avg_factor = None
     else:
         avg_factor = None
     # reduce loss with weight
@@ -159,7 +165,7 @@ def pysoftmaxfocalloss(x_src, x_tgt, weight=None, gamma=2.0, alpha=0.25, class_w
 
 
 '''softmaxfocalloss'''
-def softmaxfocalloss(x_src, x_tgt, weight=None, gamma=2.0, alpha=0.25, class_weight=None, ignore_index=-100, reduction='mean'):
+def softmaxfocalloss(x_src, x_tgt, weight=None, gamma=2.0, alpha=0.25, class_weight=None, ignore_index=-100, reduction='mean', norm_loss_with_class_weight=True):
     # mmcv.ops._softmax_focal_loss only accept x_tgt with class labels, e.g., (B, C, H, W) as inputs and (B, H, W) as targets
     if x_src.shape == x_tgt.shape:
         return pysoftmaxfocalloss(x_src, x_tgt, weight=weight, gamma=gamma, alpha=alpha, class_weight=class_weight, ignore_index=ignore_index, reduction=reduction)
@@ -182,6 +188,8 @@ def softmaxfocalloss(x_src, x_tgt, weight=None, gamma=2.0, alpha=0.25, class_wei
         if ignore_index_mask is None:
             class_weight = class_weight[torch.arange(num_classes) != ignore_index]
         avg_factor = class_weight[x_tgt].sum()
+        if not norm_loss_with_class_weight:
+            avg_factor = None
     else:
         avg_factor = None
     loss = _softmax_focal_loss(x_src, x_tgt, gamma, alpha, class_weight, 'none')
@@ -197,7 +205,7 @@ def softmaxfocalloss(x_src, x_tgt, weight=None, gamma=2.0, alpha=0.25, class_wei
 
 '''FocalLoss'''
 class FocalLoss(nn.Module):
-    def __init__(self, use_sigmoid=True, scale_factor=1.0, gamma=2, alpha=0.25, class_weight=None, reduction='mean', ignore_index=-100, lowest_loss_value=None):
+    def __init__(self, use_sigmoid=True, scale_factor=1.0, gamma=2, alpha=0.25, class_weight=None, reduction='mean', ignore_index=-100, lowest_loss_value=None, norm_loss_with_class_weight=True):
         super(FocalLoss, self).__init__()
         self.use_sigmoid = use_sigmoid
         self.alpha = alpha
@@ -207,6 +215,7 @@ class FocalLoss(nn.Module):
         self.ignore_index = ignore_index
         self.scale_factor = scale_factor
         self.lowest_loss_value = lowest_loss_value
+        self.norm_loss_with_class_weight = norm_loss_with_class_weight
     '''forward'''
     def forward(self, x_src, x_tgt, weight=None):
         # assert
@@ -214,14 +223,14 @@ class FocalLoss(nn.Module):
         # calculate loss
         if self.use_sigmoid:
             if torch.cuda.is_available() and x_src.is_cuda and _sigmoid_focal_loss is not None:
-                loss = sigmoidfocalloss(x_src, x_tgt, weight=weight, gamma=self.gamma, alpha=self.alpha, class_weight=self.class_weight, ignore_index=self.ignore_index, reduction=self.reduction)
+                loss = sigmoidfocalloss(x_src, x_tgt, weight=weight, gamma=self.gamma, alpha=self.alpha, class_weight=self.class_weight, ignore_index=self.ignore_index, reduction=self.reduction, norm_loss_with_class_weight=self.norm_loss_with_class_weight)
             else:
-                loss = pysigmoidfocalloss(x_src, x_tgt, weight=weight, gamma=self.gamma, alpha=self.alpha, class_weight=self.class_weight, ignore_index=self.ignore_index, reduction=self.reduction)
+                loss = pysigmoidfocalloss(x_src, x_tgt, weight=weight, gamma=self.gamma, alpha=self.alpha, class_weight=self.class_weight, ignore_index=self.ignore_index, reduction=self.reduction, norm_loss_with_class_weight=self.norm_loss_with_class_weight)
         else:
             if torch.cuda.is_available() and x_src.is_cuda and _softmax_focal_loss is not None:
-                loss = softmaxfocalloss(x_src, x_tgt, weight=weight, gamma=self.gamma, alpha=self.alpha, class_weight=self.class_weight, ignore_index=self.ignore_index, reduction=self.reduction)
+                loss = softmaxfocalloss(x_src, x_tgt, weight=weight, gamma=self.gamma, alpha=self.alpha, class_weight=self.class_weight, ignore_index=self.ignore_index, reduction=self.reduction, norm_loss_with_class_weight=self.norm_loss_with_class_weight)
             else:
-                loss = pysoftmaxfocalloss(x_src, x_tgt, weight=weight, gamma=self.gamma, alpha=self.alpha, class_weight=self.class_weight, ignore_index=self.ignore_index, reduction=self.reduction)
+                loss = pysoftmaxfocalloss(x_src, x_tgt, weight=weight, gamma=self.gamma, alpha=self.alpha, class_weight=self.class_weight, ignore_index=self.ignore_index, reduction=self.reduction, norm_loss_with_class_weight=self.norm_loss_with_class_weight)
         # rescale loss
         loss = loss * self.scale_factor
         if self.lowest_loss_value is not None:
