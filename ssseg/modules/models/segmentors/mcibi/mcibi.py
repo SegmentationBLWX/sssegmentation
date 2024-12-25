@@ -142,4 +142,4 @@ class MCIBI(BaseSegmentor):
         loss_memory_log = loss_memory.data.clone()
         if dist.is_available() and dist.is_initialized():
             dist.all_reduce(loss_memory_log.div_(dist.get_world_size()), op=dist.ReduceOp.SUM)
-        return loss_memory, loss_memory_log
+        return loss_memory, loss_memory_log.item()
