@@ -118,8 +118,8 @@ class MCIBI(BaseSegmentor):
                 loss_memory, loss_memory_log = self.calculatememoryloss(stored_memory)
                 loss += loss_memory
                 losses_log_dict['loss_memory'] = loss_memory_log
-                total = losses_log_dict.pop('total') + losses_log_dict['loss_memory']
-                losses_log_dict['total'] = total
+                loss_total = losses_log_dict.pop('loss_total') + losses_log_dict['loss_memory']
+                losses_log_dict['loss_total'] = loss_total
             ssseg_outputs = SSSegOutputStructure(mode=self.mode, loss=loss, losses_log_dict=losses_log_dict) if self.mode == 'TRAIN' else SSSegOutputStructure(mode=self.mode, loss=loss, losses_log_dict=losses_log_dict, seg_logits=preds_stage2)
         else:
             ssseg_outputs = SSSegOutputStructure(mode=self.mode, seg_logits=preds_stage2)
