@@ -138,7 +138,7 @@ class MCIBI(BaseSegmentor):
         preds_memory = self.decoder_stage2(stored_memory)
         target = torch.range(0, num_classes - 1).type_as(stored_memory).long()
         target = target.unsqueeze(1).repeat(1, num_feats_per_cls).view(-1)
-        loss_memory = calculateloss(preds_memory.sequeeze(-1).sequeeze(-1), target, self.cfg['head']['loss_cfg'])
+        loss_memory = calculateloss(preds_memory.squeeze(-1).squeeze(-1), target, self.cfg['head']['loss_cfg'])
         loss_memory_log = loss_memory.data.clone()
         if dist.is_available() and dist.is_initialized():
             dist.all_reduce(loss_memory_log.div_(dist.get_world_size()), op=dist.ReduceOp.SUM)
