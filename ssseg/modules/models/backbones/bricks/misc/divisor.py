@@ -1,6 +1,6 @@
 '''
 Function:
-    Implementation of some utils
+    Implementation of divisor
 Author:
     Zhenchao Jin
 '''

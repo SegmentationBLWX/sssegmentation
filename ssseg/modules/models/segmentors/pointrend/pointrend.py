@@ -9,6 +9,7 @@ import numpy as np
 import torch.nn as nn
 import torch.nn.functional as F
 from ..base import FPN, BaseSegmentor
+from ...losses import calculatelosses
 from ....utils import SSSegOutputStructure
 from ...backbones import BuildActivation, BuildNormalization
 try:
@@ -90,13 +91,13 @@ class PointRend(BaseSegmentor):
                 if self.coarse_pred_each_layer:
                     feats_concat = torch.cat([feats_concat, coarse_point_feats], dim=1)
             seg_logits = self.decoder(feats_concat)
-            point_labels = PointSample(data_meta.gettargets()['seg_targets'].unsqueeze(1).float(), points, mode='nearest', align_corners=self.align_corners)
+            point_labels = PointSample(data_meta.getannotations()['seg_targets'].unsqueeze(1).float(), points, mode='nearest', align_corners=self.align_corners)
             point_labels = point_labels.squeeze(1).long()
-            targets = data_meta.gettargets()
-            targets['point_labels'] = point_labels
+            annotations = data_meta.getannotations()
+            annotations['point_labels'] = point_labels
             seg_logits_aux = F.interpolate(seg_logits_aux, size=img_size, mode='bilinear', align_corners=self.align_corners)
-            loss, losses_log_dict = self.calculatelosses(
-                predictions={'loss_cls': seg_logits, 'loss_aux': seg_logits_aux}, targets=targets, losses_cfg=self.cfg['losses'], map_preds_to_tgts_dict={'loss_cls': 'point_labels', 'loss_aux': 'seg_targets'}
+            loss, losses_log_dict = calculatelosses(
+                predictions={'loss_cls': seg_logits, 'loss_aux': seg_logits_aux}, annotations=annotations, losses_cfg=self.cfg['losses'], preds_to_tgts_mapping={'loss_cls': 'point_labels', 'loss_aux': 'seg_targets'}, pixel_sampler=self.pixel_sampler
             )
             ssseg_outputs.setvariable('loss', loss)
             ssseg_outputs.setvariable('losses_log_dict', losses_log_dict)
@@ -123,11 +124,11 @@ class PointRend(BaseSegmentor):
             refined_seg_logits = refined_seg_logits.view(batch_size, channels, height, width)
         ssseg_outputs.setvariable('seg_logits', refined_seg_logits)
         return ssseg_outputs
-    '''sample from coarse grained features'''
+    '''getcoarsepointfeats'''
     def getcoarsepointfeats(self, seg_logits, points):
         coarse_feats = PointSample(seg_logits, points, align_corners=self.align_corners)
         return coarse_feats
-    '''sample from fine grained features'''
+    '''getfinegrainedpointfeats'''
     def getfinegrainedpointfeats(self, x, points):
         fine_grained_feats_list = [PointSample(_, points, align_corners=self.align_corners) for _ in x]
         if len(fine_grained_feats_list) > 1:
@@ -135,12 +136,12 @@ class PointRend(BaseSegmentor):
         else:
             fine_grained_feats = fine_grained_feats_list[0]
         return fine_grained_feats
-    '''estimate uncertainty based on seg logits'''
+    '''calculateuncertainty'''
     @staticmethod
     def calculateuncertainty(seg_logits):
         top2_scores = torch.topk(seg_logits, k=2, dim=1)[0]
         return (top2_scores[:, 1] - top2_scores[:, 0]).unsqueeze(1)
-    '''sample points for training'''
+    '''getpointstrain'''
     def getpointstrain(self, seg_logits, uncertainty_func, cfg):
         # set attrs
         num_points = cfg['num_points']
@@ -164,7 +165,7 @@ class PointRend(BaseSegmentor):
             point_coords = torch.cat((point_coords, rand_point_coords), dim=1)
         # return
         return point_coords
-    '''sample points for testing'''
+    '''getpointstest'''
     def getpointstest(self, seg_logits, uncertainty_func, cfg):
         num_points = cfg['subdivision_num_points']
         uncertainty_map = uncertainty_func(seg_logits)

@@ -9,7 +9,7 @@ import sys
 import importlib
 import importlib.util
 import dill as pickle
-from .io import touchdir
+from .io import touchdirs
 
 
 '''ConfigParser'''
@@ -50,7 +50,7 @@ class ConfigParser():
     '''save'''
     def save(self, work_dir=''):
         work_dir = os.path.join(work_dir, 'configs')
-        touchdir(work_dir)
+        touchdirs(work_dir)
         savepath = os.path.join(work_dir, os.path.basename(self.cfg_file_path) + '.pkl')
         return pickle.dump(self.cfg, open(savepath, 'wb'))
     '''call'''

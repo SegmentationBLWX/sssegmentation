@@ -4,11 +4,9 @@ SEGMENTOR_CFG = {
     'num_classes': -1,
     'benchmark': True,
     'align_corners': False,
-    'backend': 'nccl',
     'work_dir': 'ckpts',
     'eval_interval_epochs': 10,
     'save_interval_epochs': 1,
-    'evaluate_results_filename': '',
     'logger_handle_cfg': {'type': 'LocalLoggerHandle', 'logfilepath': ''},
     'training_logging_manager_cfg': {'log_interval_iters': 50},
     'norm_cfg': {'type': 'SyncBatchNorm'},
@@ -26,11 +24,9 @@ SEGMENTOR_CFG = {
         'loss_cls': {'type': 'CrossEntropyLoss', 'scale_factor': 1.0, 'ignore_index': 255, 'reduction': 'mean'},
     },
     'inference': {
-        'mode': 'whole',
-        'opts': {}, 
-        'tricks': {
-            'multiscale': [1], 'flip': False, 'use_probs_before_resize': True,
-        }
+        'forward': {'mode': 'whole', 'cropsize': None, 'stride': None},
+        'tta': {'multiscale': [1], 'flip': False, 'use_probs_before_resize': True},
+        'evaluate': {'metric_list': ['iou', 'miou']},
     },
     'scheduler': {
         'type': 'PolyScheduler', 'max_epochs': 0, 'power': 1.0, 'min_lr': 0.0, 'warmup_cfg': {'type': 'linear', 'ratio': 1e-6, 'iters': 1500},

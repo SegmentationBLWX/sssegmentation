@@ -46,7 +46,7 @@ class ContextBlock(nn.Module):
             )
         else:
             self.channel_mul_conv = None
-    '''spatial pool'''
+    '''spatialpool'''
     def spatialpool(self, x):
         batch, channel, height, width = x.size()
         if self.pooling_type == 'att':

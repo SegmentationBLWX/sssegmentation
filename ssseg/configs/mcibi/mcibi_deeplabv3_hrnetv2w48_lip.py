@@ -28,7 +28,6 @@ SEGMENTOR_CFG['head']['update_cfg']['momentum_cfg']['base_lr'] = 0.007
 SEGMENTOR_CFG['auxiliary'] = None
 SEGMENTOR_CFG['losses'].pop('loss_aux')
 SEGMENTOR_CFG['work_dir'] = os.path.split(__file__)[-1].split('.')[0]
-SEGMENTOR_CFG['evaluate_results_filename'] = f"{os.path.split(__file__)[-1].split('.')[0]}.pkl"
 SEGMENTOR_CFG['logger_handle_cfg']['logfilepath'] = os.path.join(SEGMENTOR_CFG['work_dir'], f"{os.path.split(__file__)[-1].split('.')[0]}.log")
 
 
@@ -38,12 +37,8 @@ SEGMENTOR_CFG['inference'] = SEGMENTOR_CFG['inference'].copy()
 # --single-scale with flipping
 '''
 SEGMENTOR_CFG['inference'] = {
-    'mode': 'whole',
-    'opts': {}, 
-    'tricks': {
-        'multiscale': [1],
-        'flip': True,
-        'use_probs_before_resize': False
-    }
+    'forward': {'mode': 'whole', 'cropsize': None, 'stride': None},
+    'tta': {'multiscale': [1], 'flip': True, 'use_probs_before_resize': False},
+    'evaluate': {'metric_list': ['iou', 'miou']},
 }
 '''

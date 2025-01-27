@@ -10,6 +10,7 @@ import torch.nn as nn
 import torch.nn.functional as F
 from ..deeplabv3 import ASPP
 from ..base import BaseSegmentor
+from ...losses import calculatelosses
 from ..base import SelfAttentionBlock
 from .memoryv2 import FeaturesMemoryV2
 from ..pspnet import PyramidPoolingModule
@@ -106,7 +107,7 @@ class MCIBIPlusPlus(BaseSegmentor):
         assert memory_input.shape[2:] == memory_gather_logits.shape[2:]
         if (self.mode == 'TRAIN') and (kwargs['epoch'] < self.cfg['head'].get('warmup_epoch', 0)):
             with torch.no_grad():
-                gt = data_meta.gettargets()['seg_targets']
+                gt = data_meta.getannotations()['seg_targets']
                 gt = F.interpolate(gt.unsqueeze(1), size=memory_gather_logits.shape[2:], mode='nearest')[:, 0, :, :]
                 assert len(gt.shape) == 3, 'seg_targets format error'
                 preds_gt = gt.new_zeros(memory_gather_logits.shape).type_as(memory_gather_logits)
@@ -147,7 +148,7 @@ class MCIBIPlusPlus(BaseSegmentor):
         # forward according to the mode
         if self.mode in ['TRAIN', 'TRAIN_DEVELOP']:
             predictions = self.customizepredsandlosses(
-                seg_logits=preds_cls, targets=data_meta.gettargets(), backbone_outputs=backbone_outputs, losses_cfg=self.cfg['losses'], img_size=img_size, auto_calc_loss=False,
+                seg_logits=preds_cls, annotations=data_meta.getannotations(), backbone_outputs=backbone_outputs, losses_cfg=self.cfg['losses'], img_size=img_size, auto_calc_loss=False,
             )
             preds_cls = predictions.pop('loss_cls')
             preds_pr = F.interpolate(preds_pr, size=img_size, mode='bilinear', align_corners=self.align_corners)
@@ -158,10 +159,10 @@ class MCIBIPlusPlus(BaseSegmentor):
             with torch.no_grad():
                 self.memory_module.update(
                     features=F.interpolate(pixel_representations, size=img_size, mode='bilinear', align_corners=self.align_corners), 
-                    segmentation=data_meta.gettargets()['seg_targets'], learning_rate=kwargs['learning_rate'], **self.cfg['head']['update_cfg']
+                    segmentation=data_meta.getannotations()['seg_targets'], learning_rate=kwargs['learning_rate'], **self.cfg['head']['update_cfg']
                 )
-            loss, losses_log_dict = self.calculatelosses(
-                predictions=predictions, targets=data_meta.gettargets(), losses_cfg=self.cfg['losses'],
+            loss, losses_log_dict = calculatelosses(
+                predictions=predictions, annotations=data_meta.getannotations(), losses_cfg=self.cfg['losses'], pixel_sampler=self.pixel_sampler
             )
             ssseg_outputs = SSSegOutputStructure(mode=self.mode, loss=loss, losses_log_dict=losses_log_dict) if self.mode == 'TRAIN' else SSSegOutputStructure(mode=self.mode, loss=loss, losses_log_dict=losses_log_dict, seg_logits=preds_cls)
         else:

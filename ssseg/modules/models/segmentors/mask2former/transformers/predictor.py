@@ -8,7 +8,7 @@ import torch
 import torch.nn as nn
 import torch.nn.functional as F
 from ...maskformer.transformers.predictor import MLP
-from ....backbones import PositionEmbeddingSine, BuildActivation, BuildNormalization
+from ....backbones import PositionEmbeddingSine, BuildActivation
 
 
 '''SelfAttentionLayer'''

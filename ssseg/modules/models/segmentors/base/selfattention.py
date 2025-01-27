@@ -72,7 +72,7 @@ class SelfAttentionBlock(nn.Module):
         if self.out_project is not None:
             context = self.out_project(context)
         return context
-    '''build project'''
+    '''buildproject'''
     def buildproject(self, in_channels, out_channels, num_convs, use_norm, norm_cfg, act_cfg):
         if use_norm:
             convs = [nn.Sequential(

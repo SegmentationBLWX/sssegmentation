@@ -53,18 +53,18 @@ class HRModule(nn.Module):
                     y += self.fuse_layers[i][j](x[j])
             x_fuse.append(self.relu(y))
         return x_fuse
-    '''check branches'''
+    '''checkbranches'''
     def checkbranches(self, num_branches, num_blocks, in_channels, num_channels):
         assert num_branches == len(num_blocks), 'num_branches should be equal to len(num_blocks)'
         assert num_branches == len(num_channels), 'num_branches should be equal to len(num_channels)'
         assert num_branches == len(in_channels), 'num_branches should be equal to len(in_channels)'
-    '''make branches'''
+    '''makebranches'''
     def makebranches(self, num_branches, block, num_blocks, num_channels, norm_cfg=None, act_cfg=None):
         branches = []
         for i in range(num_branches):
             branches.append(self.makebranch(i, block, num_blocks, num_channels, norm_cfg=norm_cfg, act_cfg=act_cfg))
         return nn.ModuleList(branches)
-    '''make one branch'''
+    '''makebranch'''
     def makebranch(self, branch_index, block, num_blocks, num_channels, stride=1, norm_cfg=None, act_cfg=None):
         downsample = None
         if stride != 1 or self.in_channels[branch_index] != num_channels[branch_index] * block.expansion:
@@ -78,7 +78,7 @@ class HRModule(nn.Module):
         for i in range(1, num_blocks[branch_index]):
             layers.append(block(self.in_channels[branch_index], num_channels[branch_index], norm_cfg=norm_cfg, act_cfg=act_cfg))
         return nn.Sequential(*layers)
-    '''make fuse layer'''
+    '''makefuselayers'''
     def makefuselayers(self, norm_cfg=None, act_cfg=None):
         if self.num_branches == 1: return None
         num_branches = self.num_branches
@@ -243,7 +243,7 @@ class HRNet(nn.Module):
         out = torch.cat([F.interpolate(y, size=(h, w), mode='bilinear', align_corners=False) for y in y_list], dim=1)
         outs = [out]
         return tuple(outs)
-    '''make stage'''
+    '''makestage'''
     def makestage(self, layer_config, in_channels, multiscale_output=True, norm_cfg=None, act_cfg=None):
         num_modules = layer_config['num_modules']
         num_branches = layer_config['num_branches']
@@ -258,7 +258,7 @@ class HRNet(nn.Module):
                 reset_multiscale_output = True
             hr_modules.append(HRModule(num_branches, block, num_blocks, in_channels, num_channels, reset_multiscale_output, norm_cfg, act_cfg))
         return nn.Sequential(*hr_modules), in_channels
-    '''make layer'''
+    '''makelayer'''
     def makelayer(self, block, inplanes, planes, num_blocks, stride=1, norm_cfg=None, act_cfg=None):
         downsample = None
         if stride != 1 or inplanes != planes * block.expansion:
@@ -276,7 +276,7 @@ class HRNet(nn.Module):
                 block(inplanes, planes, norm_cfg=norm_cfg, act_cfg=act_cfg)
             )
         return nn.Sequential(*layers)
-    '''make transition layer'''
+    '''maketransitionlayer'''
     def maketransitionlayer(self, num_channels_pre_layer, num_channels_cur_layer, norm_cfg=None, act_cfg=None):
         num_branches_cur = len(num_channels_cur_layer)
         num_branches_pre = len(num_channels_pre_layer)

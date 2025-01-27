@@ -5,21 +5,21 @@ Author:
     Zhenchao Jin
 '''
 from .l1loss import L1Loss
-from .klloss import KLDivLoss
+from .mseloss import MSELoss
 from .diceloss import DiceLoss
+from .kldivloss import KLDivLoss
+from .focalloss import FocalLoss
 from .lovaszloss import LovaszLoss
 from ...utils import BaseModuleBuilder
-from .focalloss import SigmoidFocalLoss
+from .crossentropyloss import CrossEntropyLoss
 from .cosinesimilarityloss import CosineSimilarityLoss
-from .celoss import CrossEntropyLoss, BinaryCrossEntropyLoss
 
 
 '''LossBuilder'''
 class LossBuilder(BaseModuleBuilder):
     REGISTERED_MODULES = {
-        'L1Loss': L1Loss, 'DiceLoss': DiceLoss, 'KLDivLoss': KLDivLoss, 'LovaszLoss': LovaszLoss,
-        'CrossEntropyLoss': CrossEntropyLoss, 'SigmoidFocalLoss': SigmoidFocalLoss,
-        'CosineSimilarityLoss': CosineSimilarityLoss, 'BinaryCrossEntropyLoss': BinaryCrossEntropyLoss,
+        'L1Loss': L1Loss, 'MSELoss': MSELoss, 'FocalLoss': FocalLoss, 'CosineSimilarityLoss': CosineSimilarityLoss, 
+        'DiceLoss': DiceLoss, 'KLDivLoss': KLDivLoss, 'LovaszLoss': LovaszLoss, 'CrossEntropyLoss': CrossEntropyLoss, 
     }
     '''build'''
     def build(self, loss_cfg):

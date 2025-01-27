@@ -45,7 +45,7 @@ class FCN(BaseSegmentor):
         # forward according to the mode
         if self.mode in ['TRAIN', 'TRAIN_DEVELOP']:
             loss, losses_log_dict = self.customizepredsandlosses(
-                seg_logits=seg_logits, targets=data_meta.gettargets(), backbone_outputs=backbone_outputs, losses_cfg=self.cfg['losses'], img_size=img_size,
+                seg_logits=seg_logits, annotations=data_meta.getannotations(), backbone_outputs=backbone_outputs, losses_cfg=self.cfg['losses'], img_size=img_size,
             )
             ssseg_outputs = SSSegOutputStructure(mode=self.mode, loss=loss, losses_log_dict=losses_log_dict) if self.mode == 'TRAIN' else SSSegOutputStructure(mode=self.mode, loss=loss, losses_log_dict=losses_log_dict, seg_logits=seg_logits)
         else:
@@ -64,12 +64,12 @@ class DepthwiseSeparableFCN(BaseSegmentor):
             if idx == 0:
                 conv = DepthwiseSeparableConv2d(
                     in_channels=head_cfg['in_channels'], out_channels=head_cfg['feats_channels'], kernel_size=3, stride=1, padding=1,
-                    norm_cfg=self.norm_cfg, act_cfg=self.act_cfg,
+                    norm_cfg=norm_cfg, act_cfg=act_cfg,
                 )
             else:
                 conv = DepthwiseSeparableConv2d(
                     in_channels=head_cfg['feats_channels'], out_channels=head_cfg['feats_channels'], kernel_size=3, stride=1, padding=1,
-                    norm_cfg=self.norm_cfg, act_cfg=self.act_cfg,
+                    norm_cfg=norm_cfg, act_cfg=act_cfg,
                 )
             convs.append(conv)
         convs.append(nn.Dropout2d(head_cfg['dropout']))
@@ -92,7 +92,7 @@ class DepthwiseSeparableFCN(BaseSegmentor):
         # forward according to the mode
         if self.mode in ['TRAIN', 'TRAIN_DEVELOP']:
             loss, losses_log_dict = self.customizepredsandlosses(
-                seg_logits=seg_logits, targets=data_meta.gettargets(), backbone_outputs=backbone_outputs, losses_cfg=self.cfg['losses'], img_size=img_size,
+                seg_logits=seg_logits, annotations=data_meta.getannotations(), backbone_outputs=backbone_outputs, losses_cfg=self.cfg['losses'], img_size=img_size,
             )
             ssseg_outputs = SSSegOutputStructure(mode=self.mode, loss=loss, losses_log_dict=losses_log_dict) if self.mode == 'TRAIN' else SSSegOutputStructure(mode=self.mode, loss=loss, losses_log_dict=losses_log_dict, seg_logits=seg_logits)
         else:

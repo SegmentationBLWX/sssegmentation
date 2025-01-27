@@ -25,5 +25,7 @@ def initslurm(cmd_args, master_port='29000'):
     os.environ['RANK'] = str(rank)
     os.environ['LOCAL_RANK'] = str(gpu)
     os.environ['WORLD_SIZE'] = str(world_size)
+    os.environ['LOCAL_WORLD_SIZE'] = str(torch.cuda.device_count())
     cmd_args.local_rank = int(os.environ['LOCAL_RANK'])
+    cmd_args.nproc_per_node = int(os.environ['LOCAL_WORLD_SIZE'])
     return True

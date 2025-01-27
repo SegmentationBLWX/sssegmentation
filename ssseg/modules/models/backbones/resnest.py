@@ -166,7 +166,7 @@ class ResNeSt(ResNet):
                 structure_type=structure_type, pretrained_model_path=pretrained_model_path, default_model_urls=DEFAULT_MODEL_URLS
             )
             self.load_state_dict(state_dict, strict=False)
-    '''make res layer'''
+    '''makelayer'''
     def makelayer(self, block, inplanes, planes, num_blocks, stride=1, dilation=1, contract_dilation=True, use_avg_for_downsample=False, norm_cfg=None, act_cfg=None):
         downsample = None
         dilations = [dilation] * num_blocks

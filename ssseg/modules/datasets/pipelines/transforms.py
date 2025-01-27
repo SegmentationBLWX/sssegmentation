@@ -14,7 +14,7 @@ import collections.abc
 import torch.nn.functional as F
 from PIL import ImageFilter, Image
 from ...utils import BaseModuleBuilder
-from .utils import assertvalidprob, assertvalidimagesize, assertvalidrange, totuple
+from .misc import assertvalidprob, assertvalidimagesize, assertvalidrange, totuple
 
 
 '''_INTERPOLATION_CV2_CONVERTOR'''
@@ -473,11 +473,11 @@ class PhotoMetricDistortion(object):
         sample_meta['image'] = self.hue(sample_meta['image'])
         if mode == 0: sample_meta['image'] = self.contrast(sample_meta['image'])
         return sample_meta
-    '''brightness distortion'''
+    '''brightness'''
     def brightness(self, image):
         if not np.random.randint(2): return image
         return self.convert(image, beta=np.random.uniform(-self.brightness_delta, self.brightness_delta))
-    '''contrast distortion'''
+    '''contrast'''
     def contrast(self, image):
         if not np.random.randint(2): return image
         return self.convert(image, alpha=np.random.uniform(self.contrast_lower, self.contrast_upper))
@@ -487,21 +487,21 @@ class PhotoMetricDistortion(object):
     '''hsv2rgb'''
     def hsv2rgb(self, image):
         return cv2.cvtColor(image, cv2.COLOR_HSV2RGB)
-    '''saturation distortion'''
+    '''saturation'''
     def saturation(self, image):
         if not np.random.randint(2): return image
         image = self.rgb2hsv(image)
         image[..., 1] = self.convert(image[..., 1], alpha=np.random.uniform(self.saturation_lower, self.saturation_upper))
         image = self.hsv2rgb(image)
         return image
-    '''hue distortion'''
+    '''hue'''
     def hue(self, image):
         if not np.random.randint(2): return image
         image = self.rgb2hsv(image)
         image[..., 0] = (image[..., 0].astype(int) + np.random.randint(-self.hue_delta, self.hue_delta)) % 180
         image = self.hsv2rgb(image)
         return image
-    '''multiple with alpha and add beat with clip'''
+    '''convert'''
     def convert(self, image, alpha=1, beta=0):
         image = image.astype(np.float32) * alpha + beta
         image = np.clip(image, 0, 255)

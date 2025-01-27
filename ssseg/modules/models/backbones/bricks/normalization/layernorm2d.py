@@ -4,7 +4,6 @@ Function:
 Author:
     Zhenchao Jin
 '''
-import torch
 import torch.nn as nn
 import torch.nn.functional as F
 

@@ -20,13 +20,9 @@ SEGMENTOR_CFG['head'] = {
     'in_channels': 64, 'feats_channels': 16, 'pool_scales': [1, 2, 3, 6], 'dropout': 0.1,
 }
 SEGMENTOR_CFG['inference'] = {
-    'mode': 'slide',
-    'opts': {'cropsize': (64, 64), 'stride': (42, 42)}, 
-    'tricks': {
-        'multiscale': [1], 'flip': False, 'use_probs_before_resize': True
-    },
+    'forward': {'mode': 'slide', 'cropsize': (64, 64), 'stride': (42, 42)},
+    'tta': {'multiscale': [1], 'flip': False, 'use_probs_before_resize': True},
     'evaluate': {'metric_list': ['dice', 'mdice']},
 }
 SEGMENTOR_CFG['work_dir'] = os.path.split(__file__)[-1].split('.')[0]
-SEGMENTOR_CFG['evaluate_results_filename'] = f"{os.path.split(__file__)[-1].split('.')[0]}.pkl"
 SEGMENTOR_CFG['logger_handle_cfg']['logfilepath'] = os.path.join(SEGMENTOR_CFG['work_dir'], f"{os.path.split(__file__)[-1].split('.')[0]}.log")

@@ -9,11 +9,12 @@ import torch.nn as nn
 import torch.nn.functional as F
 from .mla import MLANeck
 from ..base import BaseSegmentor
+from ...losses import calculatelosses
 from ....utils import SSSegOutputStructure
 from ...backbones import BuildActivation, BuildNormalization
 
 
-'''Naive upsampling head and Progressive upsampling head of SETR'''
+'''SETRUP'''
 class SETRUP(BaseSegmentor):
     def __init__(self, cfg, mode):
         super(SETRUP, self).__init__(cfg, mode)
@@ -58,19 +59,19 @@ class SETRUP(BaseSegmentor):
                 seg_logits_aux = dec(out)
                 seg_logits_aux = F.interpolate(seg_logits_aux, size=img_size, mode='bilinear', align_corners=self.align_corners)
                 predictions[f'loss_aux{idx+1}'] = seg_logits_aux
-            loss, losses_log_dict = self.calculatelosses(predictions=predictions, targets=data_meta.gettargets(), losses_cfg=self.cfg['losses'])
+            loss, losses_log_dict = calculatelosses(predictions=predictions, annotations=data_meta.getannotations(), losses_cfg=self.cfg['losses'], pixel_sampler=self.pixel_sampler)
             ssseg_outputs = SSSegOutputStructure(mode=self.mode, loss=loss, losses_log_dict=losses_log_dict) if self.mode == 'TRAIN' else SSSegOutputStructure(mode=self.mode, loss=loss, losses_log_dict=losses_log_dict, seg_logits=seg_logits)
         else:
             ssseg_outputs = SSSegOutputStructure(mode=self.mode, seg_logits=seg_logits)
         return ssseg_outputs
-    '''norm layer'''
+    '''norm'''
     def norm(self, x, norm_layer):
         n, c, h, w = x.shape
         x = x.reshape(n, c, h * w).transpose(2, 1).contiguous()
         x = norm_layer(x)
         x = x.transpose(1, 2).reshape(n, c, h, w).contiguous()
         return x
-    '''build decoder'''
+    '''builddecoder'''
     def builddecoder(self, decoder_cfg):
         layers, norm_cfg, act_cfg, num_classes, align_corners, kernel_size = [], self.norm_cfg.copy(), self.act_cfg.copy(), self.cfg['num_classes'], self.align_corners, decoder_cfg['kernel_size']
         for idx in range(decoder_cfg['num_convs']):
@@ -86,7 +87,7 @@ class SETRUP(BaseSegmentor):
         return nn.Sequential(*layers)
 
 
-'''Multi level feature aggretation head of SETR'''
+'''SETRMLA'''
 class SETRMLA(BaseSegmentor):
     def __init__(self, cfg, mode):
         super(SETRMLA, self).__init__(cfg, mode)
@@ -149,12 +150,12 @@ class SETRMLA(BaseSegmentor):
                 seg_logits_aux = dec(out)
                 seg_logits_aux = F.interpolate(seg_logits_aux, size=img_size, mode='bilinear', align_corners=self.align_corners)
                 predictions[f'loss_aux{idx+1}'] = seg_logits_aux
-            loss, losses_log_dict = self.calculatelosses(predictions=predictions, targets=data_meta.gettargets(), losses_cfg=self.cfg['losses'])
+            loss, losses_log_dict = calculatelosses(predictions=predictions, annotations=data_meta.getannotations(), losses_cfg=self.cfg['losses'])
             ssseg_outputs = SSSegOutputStructure(mode=self.mode, loss=loss, losses_log_dict=losses_log_dict) if self.mode == 'TRAIN' else SSSegOutputStructure(mode=self.mode, loss=loss, losses_log_dict=losses_log_dict, seg_logits=seg_logits)
         else:
             ssseg_outputs = SSSegOutputStructure(mode=self.mode, seg_logits=seg_logits)
         return ssseg_outputs
-    '''build decoder'''
+    '''builddecoder'''
     def builddecoder(self, decoder_cfg):
         layers, norm_cfg, act_cfg, num_classes, align_corners, kernel_size = [], self.norm_cfg.copy(), self.act_cfg.copy(), self.cfg['num_classes'], self.align_corners, decoder_cfg['kernel_size']
         for idx in range(decoder_cfg['num_convs']):

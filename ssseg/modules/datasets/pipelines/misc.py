@@ -1,6 +1,6 @@
 '''
 Function:
-    Utils for pipelines
+    Implementation of pipelines-related functions
 Author:
     Zhenchao Jin
 '''

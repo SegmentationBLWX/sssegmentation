@@ -17,7 +17,7 @@ class HungarianMatcher(nn.Module):
         self.cost_class = cost_class
         self.cost_mask = cost_mask
         self.cost_dice = cost_dice
-    '''memory efficient forward'''
+    '''memoryefficientforward'''
     @torch.no_grad()
     def memoryefficientforward(self, outputs, targets):
         bs, num_queries = outputs['pred_logits'].shape[:2]
@@ -40,7 +40,7 @@ class HungarianMatcher(nn.Module):
     @torch.no_grad()
     def forward(self, outputs, targets):
         return self.memoryefficientforward(outputs, targets)
-    '''dice loss'''
+    '''diceloss'''
     def diceloss(self, inputs, targets):
         inputs = inputs.sigmoid()
         inputs = inputs.flatten(1)
@@ -48,7 +48,7 @@ class HungarianMatcher(nn.Module):
         denominator = inputs.sum(-1)[:, None] + targets.sum(-1)[None, :]
         loss = 1 - (numerator + 1) / (denominator + 1)
         return loss
-    '''sigmoid focal loss'''
+    '''sigmoidfocalloss'''
     def sigmoidfocalloss(self, inputs, targets, alpha=0.25, gamma=2.0):
         hw = inputs.shape[1]
         prob = inputs.sigmoid()

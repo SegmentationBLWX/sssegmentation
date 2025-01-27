@@ -46,30 +46,21 @@ SEGMENTOR_CFG['head']['context_within_image']['is_on'] = True
 SEGMENTOR_CFG['head']['context_within_image']['use_self_attention'] = True
 SEGMENTOR_CFG['auxiliary'] = {'in_channels': 768, 'out_channels': 512, 'dropout': 0.1}
 SEGMENTOR_CFG['work_dir'] = os.path.split(__file__)[-1].split('.')[0]
-SEGMENTOR_CFG['evaluate_results_filename'] = f"{os.path.split(__file__)[-1].split('.')[0]}.pkl"
 SEGMENTOR_CFG['logger_handle_cfg']['logfilepath'] = os.path.join(SEGMENTOR_CFG['work_dir'], f"{os.path.split(__file__)[-1].split('.')[0]}.log")
 
 
 # modify inference config
 # --single-scale
 SEGMENTOR_CFG['inference'] = {
-    'mode': 'slide',
-    'opts': {'cropsize': (640, 640), 'stride': (426, 426)}, 
-    'tricks': {
-        'multiscale': [1.0],
-        'flip': False,
-        'use_probs_before_resize': True
-    }
+    'forward': {'mode': 'slide', 'cropsize': (640, 640), 'stride': (426, 426)},
+    'tta': {'multiscale': [1], 'flip': False, 'use_probs_before_resize': True},
+    'evaluate': {'metric_list': ['iou', 'miou']},
 }
 # --multi-scale
 '''
 SEGMENTOR_CFG['inference'] = {
-    'mode': 'slide',
-    'opts': {'cropsize': (640, 640), 'stride': (426, 426)}, 
-    'tricks': {
-        'multiscale': [0.5, 0.75, 1.0, 1.25, 1.5, 1.75],
-        'flip': True,
-        'use_probs_before_resize': True
-    }
+    'forward': {'mode': 'slide', 'cropsize': (640, 640), 'stride': (426, 426)},
+    'tta': {'multiscale': [0.5, 0.75, 1.0, 1.25, 1.5, 1.75], 'flip': True, 'use_probs_before_resize': True},
+    'evaluate': {'metric_list': ['iou', 'miou']},
 }
 '''

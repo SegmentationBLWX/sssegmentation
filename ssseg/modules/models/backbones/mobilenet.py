@@ -171,7 +171,7 @@ class MobileNetV3(nn.Module):
                 key = '.'.join(key.split('.')[1:])
                 state_dict[key] = value
         self.load_state_dict(state_dict, strict=False)
-    '''make layers'''
+    '''makelayers'''
     def makelayers(self, in_channels, arch_type, reduction_factor, outstride, norm_cfg=None, act_cfg=None):
         layers, act_cfg_default = [], act_cfg.copy()
         # build the first layer

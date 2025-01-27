@@ -17,3 +17,15 @@ The results may have slight differences compared to those from `chainercv`, but 
 
 Some models in SSSegmentation use the `scipy.interpolate.interp2d` function, which has been removed in SciPy 1.14.0. 
 Therefore, if you encounter this situation, you need to manually downgrade your SciPy version.
+
+### your_script.sh: line xxx: $'\r': command not found
+
+The error typically happens when a script written on Windows (which uses `\r\n` line endings) is run on a Unix-based system (which expects `\n` line endings).
+The `\r` (carriage return) character is interpreted as part of the command, leading to the command not found error.
+
+Here's how to fix it:
+
+- If you have dos2unix installed, you can convert the file in place: `dos2unix your_script.sh`,
+- You can also use sed to remove `\r` characters: `sed -i 's/\r$//' your_script.sh`.
+
+After converting the line endings, try running your script again. This should resolve the issue.

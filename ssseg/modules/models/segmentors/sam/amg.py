@@ -65,7 +65,7 @@ class MaskData():
                 self._stats[k] = v.detach().cpu().numpy()
 
 
-'''filter masks at the edge of a crop, but not at the edge of the original image'''
+'''isboxnearcropedge'''
 def isboxnearcropedge(boxes, crop_box, orig_box, atol=20.0):
     crop_box_torch = torch.as_tensor(crop_box, dtype=torch.float, device=boxes.device)
     orig_box_torch = torch.as_tensor(orig_box, dtype=torch.float, device=boxes.device)
@@ -92,7 +92,7 @@ def batchiterator(batch_size, *args):
         yield [arg[b * batch_size : (b + 1) * batch_size] for arg in args]
 
 
-'''encodes masks to an uncompressed RLE, in the format expected by pycoco tools'''
+'''masktorlepytorch'''
 def masktorlepytorch(tensor):
     # put in fortran order and flatten h,w
     b, h, w = tensor.shape
@@ -115,7 +115,7 @@ def masktorlepytorch(tensor):
     return out
 
 
-'''compute a binary mask from an uncompressed RLE'''
+'''rletomask'''
 def rletomask(rle):
     h, w = rle['size']
     mask = np.empty(h * w, dtype=bool)
@@ -147,7 +147,7 @@ def calculatestabilityscore(masks, mask_threshold, threshold_offset):
     return intersections / unions
 
 
-'''generates a 2D grid of points evenly spaced in [0,1]x[0,1]'''
+'''buildpointgrid'''
 def buildpointgrid(n_per_side):
     offset = 1 / (2 * n_per_side)
     points_one_side = np.linspace(offset, 1 - offset, n_per_side)
@@ -157,7 +157,7 @@ def buildpointgrid(n_per_side):
     return points
 
 
-'''generates point grids for all crop layers'''
+'''buildalllayerpointgrids'''
 def buildalllayerpointgrids(n_per_side, n_layers, scale_per_layer):
     points_by_layer = []
     for i in range(n_layers + 1):
@@ -166,7 +166,7 @@ def buildalllayerpointgrids(n_per_side, n_layers, scale_per_layer):
     return points_by_layer
 
 
-'''generates a list of crop boxes of different sizes. each layer has (2**i)**2 boxes for the ith layer'''
+'''generatecropboxes'''
 def generatecropboxes(im_size, n_layers, overlap_ratio):
     crop_boxes, layer_idxs = [], []
     im_h, im_w = im_size

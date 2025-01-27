@@ -65,7 +65,7 @@ class Mask2Former(BaseSegmentor):
         # forward according to the mode
         ssseg_outputs = SSSegOutputStructure(mode=self.mode, auto_validate=False)
         if self.mode in ['TRAIN', 'TRAIN_DEVELOP']:
-            losses_dict = self.criterion(predictions, data_meta.gettargets())
+            losses_dict = self.criterion(predictions, data_meta.getannotations())
             for k in list(losses_dict.keys()):
                 if k in self.criterion.weight_dict:
                     losses_dict[k] *= self.criterion.weight_dict[k]

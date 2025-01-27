@@ -11,11 +11,11 @@ import numpy as np
 import collections
 import scipy.io as sio
 from PIL import Image
+from .pipelines import Evaluation, Compose, BuildDataTransform
 try:
     from chainercv.evaluations import eval_semantic_segmentation
 except:
     eval_semantic_segmentation = None
-from .pipelines import Evaluation, DataTransformBuilder, Compose, BuildDataTransform
 
 
 '''BaseDataset'''
@@ -48,12 +48,12 @@ class BaseDataset(torch.utils.data.Dataset):
     '''len'''
     def __len__(self):
         return len(self.imageids) * self.repeat_times
-    '''read sample_meta'''
+    '''read'''
     def read(self, imagepath, annpath=None):
         # read image
         image = cv2.imread(imagepath)
         # read annotation
-        if self.mode == 'TRAIN' or (self.mode == 'TEST' and self.dataset_cfg.get('evalmode', 'local') == 'local'):
+        if self.mode == 'TRAIN' or (self.mode == 'TEST' and self.dataset_cfg.get('eval_env', 'local') == 'local'):
             assert (annpath is not None) and os.path.exists(annpath)
             assert annpath.split('.')[-1] in ['png', 'mat']
             if annpath.endswith('.png'):
@@ -78,19 +78,19 @@ class BaseDataset(torch.utils.data.Dataset):
         # return
         return sample_meta
     '''evaluate'''
-    def evaluate(self, seg_preds, seg_targets, metric_list=['iou', 'miou'], num_classes=None, ignore_index=-1, nan_to_num=None, beta=1.0):
+    def evaluate(self, seg_preds, seg_gts, metric_list=['iou', 'miou'], num_classes=None, ignore_index=-1, nan_to_num=None, beta=1.0):
         # basic evaluation
         if eval_semantic_segmentation is None:
             result = {}
         else:
-            result = eval_semantic_segmentation(seg_preds, seg_targets)
+            result = eval_semantic_segmentation(seg_preds, seg_gts)
         # selected result
         selected_result, eval_client = {}, None
         for metric in metric_list:
             if metric in result:
                 selected_result[metric] = result[metric]
             else:
-                if eval_client is None: eval_client = Evaluation(seg_preds, seg_targets, num_classes, ignore_index, nan_to_num, beta)
+                if eval_client is None: eval_client = Evaluation(seg_preds, seg_gts, num_classes, ignore_index, nan_to_num, beta)
                 assert metric in eval_client.all_metric_results
                 selected_result[metric] = eval_client.all_metric_results[metric]
         # insert class names for iou and dice
@@ -128,7 +128,7 @@ class BaseDataset(torch.utils.data.Dataset):
         if self.mode == 'TEST':
             seg_target = sample_meta.pop('seg_target')
             if seg_target is None:
-                assert self.dataset_cfg.get('evalmode', 'local') == 'server'
+                assert self.dataset_cfg.get('eval_env', 'local') == 'server'
                 seg_target = torch.zeros((sample_meta['height'], sample_meta['width']))
         sample_meta = self.transforms(sample_meta)
         if self.mode == 'TEST':

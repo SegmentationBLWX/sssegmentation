@@ -7,6 +7,7 @@ Author:
 import torch.nn as nn
 import torch.nn.functional as F
 from ..base import BaseSegmentor
+from ...losses import calculatelosses
 from .cam import ChannelAttentionModule
 from .pam import PositionAttentionModule
 from ....utils import SSSegOutputStructure
@@ -78,7 +79,7 @@ class DANet(BaseSegmentor):
         # forward according to the mode
         if self.mode in ['TRAIN', 'TRAIN_DEVELOP']:
             predictions = self.customizepredsandlosses(
-                seg_logits=preds_pamcam, targets=data_meta.gettargets(), backbone_outputs=backbone_outputs, losses_cfg=self.cfg['losses'], img_size=img_size, auto_calc_loss=False,
+                seg_logits=preds_pamcam, annotations=data_meta.getannotations(), backbone_outputs=backbone_outputs, losses_cfg=self.cfg['losses'], img_size=img_size, auto_calc_loss=False,
             )
             preds_pamcam = predictions.pop('loss_cls')
             preds_pam = self.decoder_pam(feats_pam)
@@ -86,8 +87,8 @@ class DANet(BaseSegmentor):
             preds_cam = self.decoder_cam(feats_cam)
             preds_cam = F.interpolate(preds_cam, size=img_size, mode='bilinear', align_corners=self.align_corners)
             predictions.update({'loss_cls_pam': preds_pam, 'loss_cls_cam': preds_cam, 'loss_cls_pamcam': preds_pamcam})
-            loss, losses_log_dict = self.calculatelosses(
-                predictions=predictions, targets=data_meta.gettargets(), losses_cfg=self.cfg['losses']
+            loss, losses_log_dict = calculatelosses(
+                predictions=predictions, annotations=data_meta.getannotations(), losses_cfg=self.cfg['losses'], pixel_sampler=self.pixel_sampler
             )
             ssseg_outputs = SSSegOutputStructure(mode=self.mode, loss=loss, losses_log_dict=losses_log_dict) if self.mode == 'TRAIN' else SSSegOutputStructure(mode=self.mode, loss=loss, losses_log_dict=losses_log_dict, seg_logits=preds_pamcam)
         else:

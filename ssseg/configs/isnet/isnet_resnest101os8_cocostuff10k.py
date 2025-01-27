@@ -23,7 +23,6 @@ SEGMENTOR_CFG['backbone'] = {
     'type': 'ResNeSt', 'depth': 101, 'structure_type': 'resnest101', 'pretrained': True, 'outstride': 8, 'selected_indices': (0, 1, 2, 3),
 }
 SEGMENTOR_CFG['work_dir'] = os.path.split(__file__)[-1].split('.')[0]
-SEGMENTOR_CFG['evaluate_results_filename'] = f"{os.path.split(__file__)[-1].split('.')[0]}.pkl"
 SEGMENTOR_CFG['logger_handle_cfg']['logfilepath'] = os.path.join(SEGMENTOR_CFG['work_dir'], f"{os.path.split(__file__)[-1].split('.')[0]}.log")
 
 
@@ -33,12 +32,8 @@ SEGMENTOR_CFG['inference'] = SEGMENTOR_CFG['inference'].copy()
 # --multi-scale with flipping
 '''
 SEGMENTOR_CFG['inference'] = {
-    'mode': 'whole',
-    'opts': {}, 
-    'tricks': {
-        'multiscale': [0.5, 0.75, 1.0, 1.25, 1.5],
-        'flip': True,
-        'use_probs_before_resize': True
-    }
+    'forward': {'mode': 'whole', 'cropsize': None, 'stride': None},
+    'tta': {'multiscale': [0.5, 0.75, 1.0, 1.25, 1.5], 'flip': True, 'use_probs_before_resize': True},
+    'evaluate': {'metric_list': ['iou', 'miou']},
 }
 '''

@@ -7,10 +7,11 @@
 [![PyPI - Python Version](https://img.shields.io/pypi/pyversions/sssegmentation)](https://pypi.org/project/sssegmentation/)
 [![PyPI](https://img.shields.io/pypi/v/sssegmentation)](https://pypi.org/project/sssegmentation)
 [![license](https://img.shields.io/github/license/SegmentationBLWX/sssegmentation.svg)](https://github.com/SegmentationBLWX/sssegmentation/blob/main/LICENSE)
-[![PyPI - Downloads](https://pepy.tech/badge/sssegmentation)](https://pypi.org/project/sssegmentation/)
+[![PyPI - Downloads](https://static.pepy.tech/badge/sssegmentation)](https://pypi.org/project/sssegmentation/)
 [![PyPI - Downloads](https://img.shields.io/pypi/dm/sssegmentation?style=flat-square)](https://pypi.org/project/sssegmentation/)
 [![issue resolution](https://isitmaintained.com/badge/resolution/SegmentationBLWX/sssegmentation.svg)](https://github.com/SegmentationBLWX/sssegmentation/issues)
 [![open issues](https://isitmaintained.com/badge/open/SegmentationBLWX/sssegmentation.svg)](https://github.com/SegmentationBLWX/sssegmentation/issues)
+[![GitHub last commit (main)](https://img.shields.io/github/last-commit/SegmentationBLWX/sssegmentation/main.svg)](https://github.com/SegmentationBLWX/sssegmentation/commits/main/)
 
 Documents: https://sssegmentation.readthedocs.io/en/latest/
 

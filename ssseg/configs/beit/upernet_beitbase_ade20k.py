@@ -15,7 +15,6 @@ SEGMENTOR_CFG['dataloader'] = DATALOADER_CFG_BS16.copy()
 SEGMENTOR_CFG['scheduler']['max_epochs'] = 130
 # modify other segmentor configs
 SEGMENTOR_CFG['num_classes'] = 150
-SEGMENTOR_CFG['inference']['tricks']['use_probs_before_resize'] = True
+SEGMENTOR_CFG['inference']['tta']['use_probs_before_resize'] = True
 SEGMENTOR_CFG['work_dir'] = os.path.split(__file__)[-1].split('.')[0]
-SEGMENTOR_CFG['evaluate_results_filename'] = f"{os.path.split(__file__)[-1].split('.')[0]}.pkl"
 SEGMENTOR_CFG['logger_handle_cfg']['logfilepath'] = os.path.join(SEGMENTOR_CFG['work_dir'], f"{os.path.split(__file__)[-1].split('.')[0]}.log")

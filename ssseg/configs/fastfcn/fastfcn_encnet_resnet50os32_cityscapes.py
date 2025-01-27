@@ -20,7 +20,6 @@ SEGMENTOR_CFG.update({
     'align_corners': False,
     'type': 'FastFCN',
     'segmentor': 'ENCNet',
-    'backend': 'nccl',
     'norm_cfg': {'type': 'SyncBatchNorm'},
     'act_cfg': {'type': 'ReLU', 'inplace': True},
     'backbone': {
@@ -37,10 +36,9 @@ SEGMENTOR_CFG.update({
     },
     'losses': {
         'loss_aux': {'type': 'CrossEntropyLoss', 'scale_factor': 0.4, 'ignore_index': 255, 'reduction': 'mean'},
-        'loss_se': {'type': 'BinaryCrossEntropyLoss', 'scale_factor': 0.2, 'reduction': 'mean'},
+        'loss_se': {'type': 'CrossEntropyLoss', 'scale_factor': 0.2, 'reduction': 'mean', 'use_sigmoid': True},
         'loss_cls': {'type': 'CrossEntropyLoss', 'scale_factor': 1.0, 'ignore_index': 255, 'reduction': 'mean'},
     }
 })
 SEGMENTOR_CFG['work_dir'] = os.path.split(__file__)[-1].split('.')[0]
-SEGMENTOR_CFG['evaluate_results_filename'] = f"{os.path.split(__file__)[-1].split('.')[0]}.pkl"
 SEGMENTOR_CFG['logger_handle_cfg']['logfilepath'] = os.path.join(SEGMENTOR_CFG['work_dir'], f"{os.path.split(__file__)[-1].split('.')[0]}.log")

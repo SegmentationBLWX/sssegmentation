@@ -11,7 +11,7 @@ from ..base import SelfAttentionBlock
 from ...backbones import BuildNormalization
 
 
-'''Asymmetric Fusion Non-local Block (AFNB)'''
+'''AFNBlock'''
 class AFNBlock(nn.Module):
     def __init__(self, low_in_channels, high_in_channels, transform_channels, out_channels, query_scales, key_pool_scales, norm_cfg=None, act_cfg=None):
         super(AFNBlock, self).__init__()

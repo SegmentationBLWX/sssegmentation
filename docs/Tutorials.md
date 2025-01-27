@@ -73,6 +73,7 @@ To help the users have a basic idea of a complete config and the modules in SSSe
 
 ```python
 import os
+from datetime import timedelta
 
 # dataset configs
 DATASET_CFG_ADE20k_512x512 = {
@@ -83,7 +84,7 @@ DATASET_CFG_ADE20k_512x512 = {
         'data_pipelines': [
             ('Resize', {'output_size': (2048, 512), 'keep_ratio': True, 'scale_range': (0.5, 2.0)}),
             ('RandomCrop', {'crop_size': (512, 512), 'one_category_max_ratio': 0.75}),
-            ('RandomFlip', {'flip_prob': 0.5}),
+            ('RandomFlip', {'prob': 0.5}),
             ('PhotoMetricDistortion', {}),
             ('Normalize', {'mean': [123.675, 116.28, 103.53], 'std': [58.395, 57.12, 57.375]}),
             ('ToTensor', {}),
@@ -99,9 +100,10 @@ DATASET_CFG_ADE20k_512x512 = {
         ], # define some pre-processing operations for the loaded images and segmentation targets during testing, you can refer to "ssseg/modules/datasets/pipelines" for more details
     }
 }
+# dataloader configs
 DATALOADER_CFG_BS16 = {
     'expected_total_train_bs_for_assert': 16, # it is defined for asserting whether the users adopt the correct batch size for training the models
-	'auto_adapt_to_expected_train_bs': True, # if set Ture, the "expected_total_train_bs_for_assert" will be used to determine the value of "batch_size_per_gpu" rather than using the specified value in the config
+    'auto_adapt_to_expected_train_bs': True, # if set Ture, the "expected_total_train_bs_for_assert" will be used to determine the value of "batch_size_per_gpu" rather than using the specified value in the config
     'train': {
         'batch_size_per_gpu': 2, # number of images in each gpu during training
         'num_workers_per_gpu': 2, # number of workers for dataloader in each gpu during training
@@ -117,16 +119,16 @@ DATALOADER_CFG_BS16 = {
         'drop_last': False, # whether to drop out the last images which cannot form a batch size of "expected_total_train_bs_for_assert" during testing
     }
 }
+# segmentor configs
 SEGMENTOR_CFG = {
     'type': 'PSPNet', # the segmentor type defined in "ssseg/modules/models/segmentors/builder.py"
     'num_classes': -1, # number of classes in the dataset
     'benchmark': True, # set True for speeding up training
     'align_corners': False, # align_corners in torch.nn.functional.interpolate
-    'backend': 'nccl', # backend for DDP training and testing
+    'init_process_group_cfg': {'backend': 'nccl', 'timeout': timedelta(seconds=36000)}, # config to instance torch.distributed.init_process_group()
     'work_dir': 'ckpts', # directory used to save checkpoints and training and testing logs
     'eval_interval_epochs': 10, # evaluate models after "eval_interval_epochs" epochs
     'save_interval_epochs': 1, # save the checkpoints of models after "save_interval_epochs" epochs
-    'evaluate_results_filename': '', # path used to save the testing results used in `ssseg/test.py`
     'logger_handle_cfg': {'type': 'LocalLoggerHandle', 'logfilepath': ''}, # config used to instance logger_handle, which is used to print and save logs
     'training_logging_manager_cfg': {'log_interval_iters': 50}, # config used to instance training_logging_manager, which is used to manage training logs
     'norm_cfg': {'type': 'SyncBatchNorm'}, # config for normalization layer in the segmentor
@@ -146,11 +148,9 @@ SEGMENTOR_CFG = {
         'loss_cls': {'type': 'CrossEntropyLoss', 'scale_factor': 1.0, 'ignore_index': 255, 'reduction': 'mean'},
     }, # define objective functions, refer to "ssseg/modules/models/losses/builder.py" for more details
     'inference': {
-        'mode': 'whole',
-        'opts': {}, 
-        'tricks': {
-            'multiscale': [1], 'flip': False, 'use_probs_before_resize': False,
-        }
+        'forward': {'mode': 'whole', 'cropsize': None, 'stride': None},
+        'tta': {'multiscale': [1], 'flip': False, 'use_probs_before_resize': False},
+        'evaluate': {'metric_list': ['iou', 'miou']},
     }, # define the inference config, refer to "ssseg/test.py" for more details
     'scheduler': {
         'type': 'PolyScheduler', 'max_epochs': 0, 'power': 0.9,
@@ -194,7 +194,7 @@ DATASET_CFG_ADE20k_512x512 = {
         'data_pipelines': [
             ('Resize', {'output_size': (2048, 512), 'keep_ratio': True, 'scale_range': (0.5, 2.0)}),
             ('RandomCrop', {'crop_size': (512, 512), 'one_category_max_ratio': 0.75}),
-            ('RandomFlip', {'flip_prob': 0.5}),
+            ('RandomFlip', {'prob': 0.5}),
             ('PhotoMetricDistortion', {}),
             ('Normalize', {'mean': [123.675, 116.28, 103.53], 'std': [58.395, 57.12, 57.375]}),
             ('ToTensor', {}),
@@ -235,7 +235,7 @@ Specifically, `set` means a certain division of the data set, usually including 
 The other arguments supported in `SEGMENTOR_CFG['dataset']` is listed as follows,
 
 - `repeat_times`: The default value is 1, if increase it in the config, the appeared times of one image in an epoch will increase accordingly,
-- `evalmode`: `local` or `server`, `server` denotes `seg_target` will be set as `None`.
+- `eval_env`: Used to specify evaluate environment, support `server` environment (only save the test results which could be submitted to the corresponding dataset's official website to obtain the segmentation performance) and `local` environment (the default environment, test segmentors with the local images and annotations provided by the corresponding dataset).
 
 If the users want to learn more about this part, it is recommended that you could jump to the [`ssseg/modules/datasets` directory](https://github.com/SegmentationBLWX/sssegmentation/tree/main/ssseg/modules/datasets) in SSSegmentation to read the source codes of dataset classes.
 
@@ -254,7 +254,7 @@ The value of the `data_pipelines` should be a `list` like following,
 SEGMENTOR_CFG['dataset']['train']['data_pipelines'] = [
     ('Resize', {'output_size': (2048, 512), 'keep_ratio': True, 'scale_range': (0.5, 2.0)}),
     ('RandomCrop', {'crop_size': (512, 512), 'one_category_max_ratio': 0.75}),
-    ('RandomFlip', {'flip_prob': 0.5}),
+    ('RandomFlip', {'prob': 0.5}),
     ('PhotoMetricDistortion', {}),
     ('Normalize', {'mean': [123.675, 116.28, 103.53], 'std': [58.395, 57.12, 57.375]}),
     ('ToTensor', {}),
@@ -506,23 +506,22 @@ Now, SSSegmentation supports the following loss types,
 
 ```python
 REGISTERED_MODULES = {
-    'L1Loss': L1Loss, 'DiceLoss': DiceLoss, 'KLDivLoss': KLDivLoss, 'LovaszLoss': LovaszLoss,
-    'CrossEntropyLoss': CrossEntropyLoss, 'SigmoidFocalLoss': SigmoidFocalLoss,
-    'CosineSimilarityLoss': CosineSimilarityLoss, 'BinaryCrossEntropyLoss': BinaryCrossEntropyLoss,
+    'L1Loss': L1Loss, 'MSELoss': MSELoss, 'FocalLoss': FocalLoss, 'CosineSimilarityLoss': CosineSimilarityLoss, 
+    'DiceLoss': DiceLoss, 'KLDivLoss': KLDivLoss, 'LovaszLoss': LovaszLoss, 'CrossEntropyLoss': CrossEntropyLoss, 
 }
 ```
 
 Here we also list some common arguments and their explanation,
 
 - `scale_factor`: The return loss value is equal to the original loss times `scale_factor`,
-- `ignore_index`: Specifies a target value that is ignored and does not contribute to the input gradient,
+- `ignore_index`: For input target with labels, it is used to specify a target value that is ignored and does not contribute to the input gradient, for input target with logits, it is used to specify a class channel that is ignored and does not contribute to the input gradient,
 - `lowest_loss_value`: If `lowest_loss_value` is set, the return loss value is equal to `min(lowest_loss_value, scale_factor * original loss)`, this argument is designed according to the paper [Do We Need Zero Training Loss After Achieving Zero Training Error? - ICML 2020](https://arxiv.org/pdf/2002.08709.pdf).
 
 To learn more about how to set the specific arguments for each loss function, you can jump to [`ssseg/modules/models/losses` directory](https://github.com/SegmentationBLWX/sssegmentation/tree/main/ssseg/modules/models/losses) to check the source codes of each loss function.
 
 #### Add New Custom Loss
 
-If the users want to add a new custom loss, you should first create a new file in [`ssseg/modules/models/losses` directory](https://github.com/SegmentationBLWX/sssegmentation/tree/main/ssseg/modules/models/losses), *e.g.*, [`ssseg/modules/models/losses/klloss.py`](https://github.com/SegmentationBLWX/sssegmentation/blob/main/ssseg/modules/models/losses/klloss.py).
+If the users want to add a new custom loss, you should first create a new file in [`ssseg/modules/models/losses` directory](https://github.com/SegmentationBLWX/sssegmentation/tree/main/ssseg/modules/models/losses), *e.g.*, [`ssseg/modules/models/losses/kldivloss.py`](https://github.com/SegmentationBLWX/sssegmentation/blob/main/ssseg/modules/models/losses/kldivloss.py).
 
 Then, you can define the loss function in this file by yourselves, *e.g.*,
 

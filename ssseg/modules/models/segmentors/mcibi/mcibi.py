@@ -14,6 +14,7 @@ from ..base import BaseSegmentor
 from .memory import FeaturesMemory
 from ..pspnet import PyramidPoolingModule
 from ....utils import SSSegOutputStructure
+from ...losses import calculatelosses, calculateloss
 from ...backbones import BuildActivation, BuildNormalization
 
 
@@ -100,7 +101,7 @@ class MCIBI(BaseSegmentor):
         # forward according to the mode
         if self.mode in ['TRAIN', 'TRAIN_DEVELOP']:
             predictions = self.customizepredsandlosses(
-                seg_logits=preds_stage2, targets=data_meta.gettargets(), backbone_outputs=backbone_outputs, losses_cfg=self.cfg['losses'], img_size=img_size, auto_calc_loss=False,
+                seg_logits=preds_stage2, annotations=data_meta.getannotations(), backbone_outputs=backbone_outputs, losses_cfg=self.cfg['losses'], img_size=img_size, auto_calc_loss=False,
             )
             preds_stage2 = predictions.pop('loss_cls')
             preds_stage1 = F.interpolate(preds_stage1, size=img_size, mode='bilinear', align_corners=self.align_corners)
@@ -108,17 +109,17 @@ class MCIBI(BaseSegmentor):
             with torch.no_grad():
                 self.memory_module.update(
                     features=F.interpolate(memory_input, size=img_size, mode='bilinear', align_corners=self.align_corners), 
-                    segmentation=data_meta.gettargets()['seg_targets'], learning_rate=kwargs['learning_rate'], **self.cfg['head']['update_cfg']
+                    segmentation=data_meta.getannotations()['seg_targets'], learning_rate=kwargs['learning_rate'], **self.cfg['head']['update_cfg']
                 )
-            loss, losses_log_dict = self.calculatelosses(
-                predictions=predictions, targets=data_meta.gettargets(), losses_cfg=self.cfg['losses']
+            loss, losses_log_dict = calculatelosses(
+                predictions=predictions, annotations=data_meta.getannotations(), losses_cfg=self.cfg['losses'], pixel_sampler=self.pixel_sampler
             )
             if (kwargs['epoch'] > 1) and self.cfg['head']['use_loss']:
                 loss_memory, loss_memory_log = self.calculatememoryloss(stored_memory)
                 loss += loss_memory
                 losses_log_dict['loss_memory'] = loss_memory_log
-                total = losses_log_dict.pop('total') + losses_log_dict['loss_memory']
-                losses_log_dict['total'] = total
+                loss_total = losses_log_dict.pop('loss_total') + losses_log_dict['loss_memory']
+                losses_log_dict['loss_total'] = loss_total
             ssseg_outputs = SSSegOutputStructure(mode=self.mode, loss=loss, losses_log_dict=losses_log_dict) if self.mode == 'TRAIN' else SSSegOutputStructure(mode=self.mode, loss=loss, losses_log_dict=losses_log_dict, seg_logits=preds_stage2)
         else:
             ssseg_outputs = SSSegOutputStructure(mode=self.mode, seg_logits=preds_stage2)
@@ -137,8 +138,8 @@ class MCIBI(BaseSegmentor):
         preds_memory = self.decoder_stage2(stored_memory)
         target = torch.range(0, num_classes - 1).type_as(stored_memory).long()
         target = target.unsqueeze(1).repeat(1, num_feats_per_cls).view(-1)
-        loss_memory = self.calculateloss(preds_memory, target, self.cfg['head']['loss_cfg'])
+        loss_memory = calculateloss(preds_memory.squeeze(-1).squeeze(-1), target, self.cfg['head']['loss_cfg'])
         loss_memory_log = loss_memory.data.clone()
         if dist.is_available() and dist.is_initialized():
             dist.all_reduce(loss_memory_log.div_(dist.get_world_size()), op=dist.ReduceOp.SUM)
-        return loss_memory, loss_memory_log
+        return loss_memory, loss_memory_log.item()

@@ -12,6 +12,7 @@ import torch.nn as nn
 import torch.nn.functional as F
 import torch.distributed as dist
 from ..deeplabv3 import ASPP
+from ...losses import calculatelosses
 from ..pspnet import PyramidPoolingModule
 from ....utils import SSSegOutputStructure
 from ..base import BaseSegmentor, SelfAttentionBlock
@@ -219,8 +220,8 @@ class IDRNet(BaseSegmentor):
                 preds_anchor_stage2 = F.interpolate(preds_stage2, size=img_size, mode='bilinear', align_corners=self.align_corners)
                 preds_anchor_stage2 = preds_anchor_stage2.permute(0, 2, 3, 1).contiguous()
                 for batch_idx in range(feats.shape[0]):
-                    gts_iter = data_meta.gettargets()['seg_targets'][batch_idx]
-                    clsids = data_meta.gettargets()['seg_targets'][batch_idx].unique()
+                    gts_iter = data_meta.getannotations()['seg_targets'][batch_idx]
+                    clsids = data_meta.getannotations()['seg_targets'][batch_idx].unique()
                     logits_intervention_stage2_iter, logits_anchor_stage2_iter = preds_intervention_stage2[batch_idx], preds_anchor_stage2[batch_idx]
                     for clsid in clsids:
                         clsid = int(clsid.item())
@@ -244,22 +245,22 @@ class IDRNet(BaseSegmentor):
                         setattr(self, syn, nn.Parameter(attr, requires_grad=False))
             # --update dl_cls_representations
             momentum = self.cfg['head']['dlclsreps_momentum']
-            self.updatedlclsreps(feats, data_meta.gettargets()['seg_targets'], momentum, img_size)
+            self.updatedlclsreps(feats, data_meta.getannotations()['seg_targets'], momentum, img_size)
             # --calculate losses
             predictions = self.customizepredsandlosses(
-                seg_logits=preds_stage2, targets=data_meta.gettargets(), backbone_outputs=backbone_outputs, losses_cfg=self.cfg['losses'], img_size=img_size, auto_calc_loss=False,
+                seg_logits=preds_stage2, annotations=data_meta.getannotations(), backbone_outputs=backbone_outputs, losses_cfg=self.cfg['losses'], img_size=img_size, auto_calc_loss=False,
             )
             preds_stage2 = predictions.pop('loss_cls')
             preds_stage1 = F.interpolate(preds_stage1, size=img_size, mode='bilinear', align_corners=self.align_corners)
             predictions.update({'loss_cls_stage1': preds_stage1, 'loss_cls_stage2': preds_stage2})
-            loss, losses_log_dict = self.calculatelosses(
-                predictions=predictions, targets=data_meta.gettargets(), losses_cfg=self.cfg['losses'],
+            loss, losses_log_dict = calculatelosses(
+                predictions=predictions, annotations=data_meta.getannotations(), losses_cfg=self.cfg['losses'], pixel_sampler=self.pixel_sampler
             )
             ssseg_outputs = SSSegOutputStructure(mode=self.mode, loss=loss, losses_log_dict=losses_log_dict) if self.mode == 'TRAIN' else SSSegOutputStructure(mode=self.mode, loss=loss, losses_log_dict=losses_log_dict, seg_logits=preds_stage2)
         else:
             ssseg_outputs = SSSegOutputStructure(mode=self.mode, seg_logits=preds_stage2)
         return ssseg_outputs
-    '''insert dl_cls_representations into feats'''
+    '''insertdlrepresentations'''
     def insertdlrepresentations(self, feats, logits):
         # dl_cls_representations: (num_classes, C)
         dl_cls_representations = self.dl_cls_representations.data.type_as(feats).clone()
@@ -278,7 +279,7 @@ class IDRNet(BaseSegmentor):
         feats_withdl = feats_withdl.permute(0, 3, 1, 2).contiguous()
         # return
         return feats_withdl
-    '''obtain intervention-driven context'''
+    '''obtainidcontext'''
     def obtainidcontext(self, context, logits, class_relations, intervention_clsids=None, remove_negative_cls_relation=True):
         # obtain intervention-driven contextual information
         batch_size, num_channels, context_h, context_w = context.size()
@@ -345,7 +346,7 @@ class IDRNet(BaseSegmentor):
                 id_context_batch[batch_idx] = id_context
         # return
         return id_context_batch, valid_clsids_batch
-    '''update dl_cls_representations'''
+    '''updatedlclsreps'''
     def updatedlclsreps(self, feats, gts, momentum, img_size):
         with torch.no_grad():
             # feats: (B, H, W, C)

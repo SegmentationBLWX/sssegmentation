@@ -38,7 +38,7 @@ def getsdpasettings():
 
 '''getconnectedcomponents'''
 def getconnectedcomponents(mask):
-    from ssseg import _C
+    from ssseg.extensions.samv2 import _C
     return _C.get_connected_componnets(mask.to(torch.uint8).contiguous())
 
 

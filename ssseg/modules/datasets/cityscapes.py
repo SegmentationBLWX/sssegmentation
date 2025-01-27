@@ -58,7 +58,7 @@ class CityScapesDataset(BaseDataset):
         sample_meta = self.synctransforms(sample_meta)
         # return
         return sample_meta
-    '''format results for test set of Cityscapes'''
+    '''formatresults'''
     @staticmethod
     def formatresults(results, filenames, to_label_id=True, savedir='results'):
         assert len(filenames) == len(results)
@@ -69,7 +69,6 @@ class CityScapesDataset(BaseDataset):
                 result_copy[result == trainId] = label.id
             return result_copy
         if not os.path.exists(savedir): os.mkdir(savedir)
-        result_files = []
         for idx in range(len(results)):
             result = results[idx]
             filename = filenames[idx]

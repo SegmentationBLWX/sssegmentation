@@ -33,21 +33,9 @@ class FeaturesMemory(nn.Module):
             self.self_attentions = nn.ModuleList()
             for _ in range(self.num_feats_per_cls):
                 self_attention = SelfAttentionBlock(
-                    key_in_channels=feats_channels,
-                    query_in_channels=feats_channels,
-                    transform_channels=transform_channels,
-                    out_channels=feats_channels,
-                    share_key_query=False,
-                    query_downsample=None,
-                    key_downsample=None,
-                    key_query_num_convs=2,
-                    value_out_num_convs=1,
-                    key_query_norm=True,
-                    value_out_norm=True,
-                    matmul_norm=True,
-                    with_out_project=True,
-                    norm_cfg=norm_cfg,
-                    act_cfg=act_cfg,
+                    key_in_channels=feats_channels, query_in_channels=feats_channels, transform_channels=transform_channels, out_channels=feats_channels,
+                    share_key_query=False, query_downsample=None, key_downsample=None, key_query_num_convs=2, value_out_num_convs=1, key_query_norm=True,
+                    value_out_norm=True, matmul_norm=True, with_out_project=True, norm_cfg=norm_cfg, act_cfg=act_cfg,
                 )
                 self.self_attentions.append(self_attention)
             self.fuse_memory_conv = nn.Sequential(
@@ -57,21 +45,9 @@ class FeaturesMemory(nn.Module):
             )
         else:
             self.self_attention = SelfAttentionBlock(
-                key_in_channels=feats_channels,
-                query_in_channels=feats_channels,
-                transform_channels=transform_channels,
-                out_channels=feats_channels,
-                share_key_query=False,
-                query_downsample=None,
-                key_downsample=None,
-                key_query_num_convs=2,
-                value_out_num_convs=1,
-                key_query_norm=True,
-                value_out_norm=True,
-                matmul_norm=True,
-                with_out_project=True,
-                norm_cfg=norm_cfg,
-                act_cfg=act_cfg,
+                key_in_channels=feats_channels, query_in_channels=feats_channels, transform_channels=transform_channels, out_channels=feats_channels,
+                share_key_query=False, query_downsample=None, key_downsample=None, key_query_num_convs=2, value_out_num_convs=1, key_query_norm=True,
+                value_out_norm=True, matmul_norm=True, with_out_project=True, norm_cfg=norm_cfg, act_cfg=act_cfg,
             )
         # whether need to fuse the contextual information within the input image
         self.bottleneck = nn.Sequential(
@@ -81,21 +57,9 @@ class FeaturesMemory(nn.Module):
         )
         if use_context_within_image:
             self.self_attention_ms = SelfAttentionBlock(
-                key_in_channels=feats_channels,
-                query_in_channels=feats_channels,
-                transform_channels=transform_channels,
-                out_channels=feats_channels,
-                share_key_query=False,
-                query_downsample=None,
-                key_downsample=None,
-                key_query_num_convs=2,
-                value_out_num_convs=1,
-                key_query_norm=True,
-                value_out_norm=True,
-                matmul_norm=True,
-                with_out_project=True,
-                norm_cfg=norm_cfg,
-                act_cfg=act_cfg,
+                key_in_channels=feats_channels, query_in_channels=feats_channels, transform_channels=transform_channels, out_channels=feats_channels,
+                share_key_query=False, query_downsample=None, key_downsample=None, key_query_num_convs=2, value_out_num_convs=1, key_query_norm=True,
+                value_out_norm=True, matmul_norm=True, with_out_project=True, norm_cfg=norm_cfg, act_cfg=act_cfg,
             )
             self.bottleneck_ms = nn.Sequential(
                 nn.Conv2d(feats_channels * 2, out_channels, kernel_size=3, stride=1, padding=1, bias=False),

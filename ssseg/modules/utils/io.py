@@ -17,12 +17,21 @@ def judgefileexist(filepath):
 
 
 '''touchdir'''
-def touchdir(dirname):
-    if not os.path.exists(dirname):
-        try: os.mkdir(dirname)
-        except: pass
-        return False
-    return True
+def touchdir(directory):
+    if not os.path.exists(directory):
+        try:
+            os.mkdir(directory)
+        except:
+            pass
+
+
+'''touchdirs'''
+def touchdirs(directory):
+    if not os.path.exists(directory):
+        try:
+            os.makedirs(directory)
+        except:
+            pass
 
 
 '''loadckpts'''
@@ -41,7 +50,7 @@ def saveckpts(ckpts, savepath, make_soft_link=True, soft_link_dst=None):
     save_response = torch.save(ckpts, savepath)
     if make_soft_link:
         if soft_link_dst is None:
-            soft_link_dst = os.path.join(os.path.dirname(savepath), 'epoch_last.pth')
+            soft_link_dst = os.path.join(os.path.dirname(savepath), 'checkpoints-epoch-latest.pth')
         symlink(savepath, soft_link_dst)
     return save_response
 

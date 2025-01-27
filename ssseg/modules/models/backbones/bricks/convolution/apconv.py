@@ -7,6 +7,7 @@ Author:
 import math
 import torch.nn as nn
 import torch.nn.functional as F
+from ..activation import BuildActivation
 from ..normalization import BuildNormalization
 
 
@@ -14,14 +15,8 @@ from ..normalization import BuildNormalization
 class AdptivePaddingConv2d(nn.Conv2d):
     def __init__(self, in_channels, out_channels, kernel_size, stride=1, padding=0, dilation=1, groups=1, bias=True, norm_cfg=None, act_cfg=None):
         super(AdptivePaddingConv2d, self).__init__(
-            in_channels=in_channels, 
-            out_channels=out_channels, 
-            kernel_size=kernel_size, 
-            stride=stride, 
-            padding=0,
-            dilation=dilation, 
-            groups=groups, 
-            bias=bias
+            in_channels=in_channels, out_channels=out_channels, kernel_size=kernel_size, stride=stride, padding=0,
+            dilation=dilation, groups=groups, bias=bias
         )
         if norm_cfg is not None: 
             self.norm = BuildNormalization(placeholder=out_channels, norm_cfg=norm_cfg)

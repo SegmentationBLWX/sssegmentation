@@ -9,11 +9,11 @@ import torch
 import numpy as np
 import torch.nn as nn
 import torch.nn.functional as F
-import torch.distributed as dist
-from ...losses import BuildLoss
+from ...losses import calculatelosses
 from ....utils import SSSegInputStructure
 from ...samplers import BuildPixelSampler
-from ...backbones import BuildBackbone, BuildActivation, BuildNormalization, NormalizationBuilder
+from .auxiliary import BuildAuxiliaryDecoder
+from ...backbones import BuildBackbone, NormalizationBuilder
 
 
 '''BaseSegmentor'''
@@ -34,7 +34,7 @@ class BaseSegmentor(nn.Module):
     def forward(self, data_meta):
         raise NotImplementedError('not to be implemented')
     '''customizepredsandlosses'''
-    def customizepredsandlosses(self, seg_logits, targets, backbone_outputs, losses_cfg, img_size, auto_calc_loss=True, map_preds_to_tgts_dict=None):
+    def customizepredsandlosses(self, seg_logits, annotations, backbone_outputs, losses_cfg, img_size, auto_calc_loss=True, preds_to_tgts_mapping=None):
         seg_logits = F.interpolate(seg_logits, size=img_size, mode='bilinear', align_corners=self.align_corners)
         predictions = {'loss_cls': seg_logits}
         if hasattr(self, 'auxiliary_decoder'):
@@ -43,31 +43,27 @@ class BaseSegmentor(nn.Module):
                 assert len(backbone_outputs) >= len(self.auxiliary_decoder)
                 backbone_outputs = backbone_outputs[-len(self.auxiliary_decoder):]
                 for idx, (out, dec) in enumerate(zip(backbone_outputs, self.auxiliary_decoder)):
-                    seg_logits_aux = dec(out)
-                    seg_logits_aux = F.interpolate(seg_logits_aux, size=img_size, mode='bilinear', align_corners=self.align_corners)
-                    predictions[f'loss_aux{idx+1}'] = seg_logits_aux
+                    predictions[f'loss_aux{idx+1}'] = F.interpolate(dec(out), size=img_size, mode='bilinear', align_corners=self.align_corners)
             else:
-                seg_logits_aux = self.auxiliary_decoder(backbone_outputs[-1])
-                seg_logits_aux = F.interpolate(seg_logits_aux, size=img_size, mode='bilinear', align_corners=self.align_corners)
-                predictions = {'loss_cls': seg_logits, 'loss_aux': seg_logits_aux}
+                predictions['loss_aux'] = F.interpolate(self.auxiliary_decoder(backbone_outputs[-1]), size=img_size, mode='bilinear', align_corners=self.align_corners)
         if not auto_calc_loss: return predictions
-        return self.calculatelosses(predictions=predictions, targets=targets, losses_cfg=losses_cfg, map_preds_to_tgts_dict=map_preds_to_tgts_dict)
+        return calculatelosses(predictions=predictions, annotations=annotations, losses_cfg=losses_cfg, preds_to_tgts_mapping=preds_to_tgts_mapping, pixel_sampler=self.pixel_sampler)
     '''inference'''
     def inference(self, images, forward_args=None):
         # assert and initialize
         inference_cfg = self.cfg['inference']
-        assert inference_cfg['mode'] in ['whole', 'slide']
-        use_probs_before_resize = inference_cfg['tricks']['use_probs_before_resize']
+        assert inference_cfg['forward']['mode'] in ['whole', 'slide']
+        use_probs_before_resize = inference_cfg['tta']['use_probs_before_resize']
         images = images.to(device=next(self.parameters()).device, dtype=next(self.parameters()).dtype)
+        if forward_args is None: forward_args = {}
         # inference
-        if inference_cfg['mode'] == 'whole':
-            if forward_args is None: seg_logits = self(SSSegInputStructure(images=images, mode=self.mode)).seg_logits
-            else: seg_logits = self(SSSegInputStructure(images=images, mode=self.mode), **forward_args).seg_logits
-            if use_probs_before_resize: seg_logits = F.softmax(seg_logits, dim=1)
+        if inference_cfg['forward']['mode'] == 'whole':
+            seg_logits = self(SSSegInputStructure(images=images, mode=self.mode), **forward_args).seg_logits
+            if use_probs_before_resize:
+                seg_logits = F.softmax(seg_logits, dim=1)
         else:
-            opts = inference_cfg['opts']
-            stride_h, stride_w = opts['stride']
-            cropsize_h, cropsize_w = opts['cropsize']
+            stride_h, stride_w = inference_cfg['forward']['stride']
+            cropsize_h, cropsize_w = inference_cfg['forward']['cropsize']
             batch_size, _, image_h, image_w = images.size()
             num_grids_h = max(image_h - cropsize_h + stride_h - 1, 0) // stride_h + 1
             num_grids_w = max(image_w - cropsize_w + stride_w - 1, 0) // stride_w + 1
@@ -79,10 +75,10 @@ class BaseSegmentor(nn.Module):
                     x2, y2 = min(x1 + cropsize_w, image_w), min(y1 + cropsize_h, image_h)
                     x1, y1 = max(x2 - cropsize_w, 0), max(y2 - cropsize_h, 0)
                     crop_images = images[:, :, y1:y2, x1:x2]
-                    if forward_args is None: seg_logits_crop = self(SSSegInputStructure(images=crop_images, mode=self.mode)).seg_logits
-                    else: seg_logits_crop = self(SSSegInputStructure(images=crop_images, mode=self.mode), **forward_args).seg_logits
+                    seg_logits_crop = self(SSSegInputStructure(images=crop_images, mode=self.mode), **forward_args).seg_logits
                     seg_logits_crop = F.interpolate(seg_logits_crop, size=crop_images.size()[2:], mode='bilinear', align_corners=self.align_corners)
-                    if use_probs_before_resize: seg_logits_crop = F.softmax(seg_logits_crop, dim=1)
+                    if use_probs_before_resize:
+                        seg_logits_crop = F.softmax(seg_logits_crop, dim=1)
                     seg_logits += F.pad(seg_logits_crop, (int(x1), int(seg_logits.shape[3] - x2), int(y1), int(seg_logits.shape[2] - y2)))
                     count_mat[:, :, y1:y2, x1:x2] += 1
             assert (count_mat == 0).sum() == 0
@@ -93,16 +89,16 @@ class BaseSegmentor(nn.Module):
     def auginference(self, images, forward_args=None):
         # initialize
         inference_cfg = self.cfg['inference']
-        infer_tricks, seg_logits_list = inference_cfg['tricks'], []
+        infer_tta_cfg, seg_logits_list = inference_cfg['tta'], []
         # iter to inference
-        for scale_factor in infer_tricks['multiscale']:
+        for scale_factor in infer_tta_cfg['multiscale']:
             images_scale = F.interpolate(images, scale_factor=scale_factor, mode='bilinear', align_corners=self.align_corners)
             seg_logits = self.inference(images=images_scale, forward_args=forward_args).cpu()
             seg_logits_list.append(seg_logits)
-            if infer_tricks['flip']:
+            if infer_tta_cfg['flip']:
                 images_scale_flip = torch.from_numpy(np.flip(images_scale.cpu().numpy(), axis=3).copy())
                 seg_logits_flip = self.inference(images=images_scale_flip, forward_args=forward_args)
-                fixed_seg_target_pairs = inference_cfg.get('fixed_seg_target_pairs', None)
+                fixed_seg_target_pairs = infer_tta_cfg.get('fixed_seg_target_pairs', None)
                 if fixed_seg_target_pairs is None:
                     for data_pipeline in self.cfg['dataset']['train']['data_pipelines']:
                         if 'RandomFlip' in data_pipeline:
@@ -132,34 +128,12 @@ class BaseSegmentor(nn.Module):
         return outs
     '''setauxiliarydecoder'''
     def setauxiliarydecoder(self, auxiliary_cfg):
-        norm_cfg, act_cfg, num_classes = self.norm_cfg.copy(), self.act_cfg.copy(), self.cfg['num_classes']
         if auxiliary_cfg is None: return
-        if isinstance(auxiliary_cfg, dict):
-            auxiliary_cfg = [auxiliary_cfg]
+        if isinstance(auxiliary_cfg, dict): auxiliary_cfg = [auxiliary_cfg]
         self.auxiliary_decoder = nn.ModuleList()
         for aux_cfg in auxiliary_cfg:
-            num_convs = aux_cfg.get('num_convs', 1)
-            dec = []
-            for idx in range(num_convs):
-                if idx == 0:
-                    dec += [nn.Conv2d(aux_cfg['in_channels'], aux_cfg['out_channels'], kernel_size=3, stride=1, padding=1, bias=False),]
-                else:
-                    dec += [nn.Conv2d(aux_cfg['out_channels'], aux_cfg['out_channels'], kernel_size=3, stride=1, padding=1, bias=False),]
-                dec += [
-                    BuildNormalization(placeholder=aux_cfg['out_channels'], norm_cfg=norm_cfg),
-                    BuildActivation(act_cfg)
-                ]
-                if 'upsample' in aux_cfg:
-                    dec += [nn.Upsample(**aux_cfg['upsample'])]
-            dec.append(nn.Dropout2d(aux_cfg['dropout']))
-            if num_convs > 0:
-                dec.append(nn.Conv2d(aux_cfg['out_channels'], num_classes, kernel_size=1, stride=1, padding=0))
-            else:
-                dec.append(nn.Conv2d(aux_cfg['in_channels'], num_classes, kernel_size=1, stride=1, padding=0))
-            dec = nn.Sequential(*dec)
-            self.auxiliary_decoder.append(dec)
-        if len(self.auxiliary_decoder) == 1:
-            self.auxiliary_decoder = self.auxiliary_decoder[0]
+            self.auxiliary_decoder.append(BuildAuxiliaryDecoder(auxiliary_cfg=aux_cfg, norm_cfg=self.norm_cfg.copy(), act_cfg=self.act_cfg.copy(), num_classes=self.cfg['num_classes']))
+        if len(self.auxiliary_decoder) == 1: self.auxiliary_decoder = self.auxiliary_decoder[0]
     '''setbackbone'''
     def setbackbone(self, cfg):
         if 'backbone' not in cfg: return
@@ -182,54 +156,6 @@ class BaseSegmentor(nn.Module):
                 module.eval()
                 for p in module.parameters():
                     p.requires_grad = False
-    '''calculatelosses'''
-    def calculatelosses(self, predictions, targets, losses_cfg, map_preds_to_tgts_dict=None):
-        assert len(predictions) == len(losses_cfg), 'length of losses_cfg should be equal to the one of predictions'
-        # apply pixel sampler
-        if hasattr(self, 'pixel_sampler') and self.pixel_sampler is not None:
-            predictions_new, targets_new, map_preds_to_tgts_dict_new = {}, {}, {}
-            for key in predictions.keys():
-                if map_preds_to_tgts_dict is None:
-                    predictions_new[key], targets_new[key] = self.pixel_sampler.sample(predictions[key], targets['seg_targets'])
-                else:
-                    predictions_new[key], targets_new[key] = self.pixel_sampler.sample(predictions[key], targets[map_preds_to_tgts_dict[key]])
-                map_preds_to_tgts_dict_new[key] = key
-            predictions, targets, map_preds_to_tgts_dict = predictions_new, targets_new, map_preds_to_tgts_dict_new
-        # calculate loss according to losses_cfg
-        losses_log_dict = {}
-        for loss_name, loss_cfg in losses_cfg.items():
-            if map_preds_to_tgts_dict is None:
-                losses_log_dict[loss_name] = self.calculateloss(
-                    prediction=predictions[loss_name], target=targets['seg_targets'], loss_cfg=loss_cfg,
-                )
-            else:
-                losses_log_dict[loss_name] = self.calculateloss(
-                    prediction=predictions[loss_name], target=targets[map_preds_to_tgts_dict[loss_name]], loss_cfg=loss_cfg,
-                )
-        # summarize and convert losses_log_dict
-        loss = 0
-        for loss_key, loss_value in losses_log_dict.items():
-            loss_value = loss_value.mean()
-            loss = loss + loss_value
-            loss_value = loss_value.data.clone()
-            if dist.is_available() and dist.is_initialized():
-                dist.all_reduce(loss_value.div_(dist.get_world_size()), op=dist.ReduceOp.SUM)
-            losses_log_dict[loss_key] = loss_value.item()
-        losses_log_dict.update({'loss_total': sum(losses_log_dict.values())})
-        # return the loss and losses_log_dict
-        return loss, losses_log_dict
-    '''calculateloss'''
-    def calculateloss(self, prediction, target, loss_cfg):
-        assert isinstance(loss_cfg, (dict, list))
-        # calculate the loss, dict means single-type loss and list represents multiple-type losses
-        if isinstance(loss_cfg, dict):
-            loss = BuildLoss(loss_cfg)(prediction, target)
-        else:
-            loss = 0
-            for l_cfg in loss_cfg:
-                loss = loss + BuildLoss(l_cfg)(prediction, target)
-        # return the loss
-        return loss
     '''train'''
     def train(self, mode=True):
         self.mode = 'TRAIN' if mode else 'TEST'

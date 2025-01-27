@@ -15,24 +15,24 @@ import torch.nn.functional as F
 from tqdm import tqdm
 try:
     from modules import (
-        BuildDataset, BuildSegmentor, BuildLoggerHandle, ConfigParser, touchdir, loadckpts
+        BuildDataset, BuildSegmentor, BuildLoggerHandle, ConfigParser, touchdirs, loadckpts
     )
 except:
     from .modules import (
-        BuildDataset, BuildSegmentor, BuildLoggerHandle, ConfigParser, touchdir, loadckpts
+        BuildDataset, BuildSegmentor, BuildLoggerHandle, ConfigParser, touchdirs, loadckpts
     )
 warnings.filterwarnings('ignore')
 
 
 '''parsecmdargs'''
 def parsecmdargs():
-    parser = argparse.ArgumentParser(description='SSSegmentation is an open source supervised semantic segmentation toolbox based on PyTorch')
-    parser.add_argument('--imagedir', dest='imagedir', help='image directory, which means we let the segmentor inference on the images existed in the given image directory', type=str)
-    parser.add_argument('--imagepath', dest='imagepath', help='image path, which means we let the segmentor inference on the given image', type=str)
-    parser.add_argument('--outputdir', dest='outputdir', help='directory to save output image(s)', type=str, default='inference_outputs')
-    parser.add_argument('--cfgfilepath', dest='cfgfilepath', help='config file path you want to use', type=str, required=True)
-    parser.add_argument('--ckptspath', dest='ckptspath', help='checkpoints you want to resume from', type=str, required=True)
-    parser.add_argument('--ema', dest='ema', help='please add --ema if you want to load ema weights for segmentors', default=False, action='store_true')
+    parser = argparse.ArgumentParser(description='SSSegmentation is an open source supervised semantic segmentation toolbox based on PyTorch.')
+    parser.add_argument('--imagedir', dest='imagedir', help='Directory containing images for inference by the segmentor.', type=str)
+    parser.add_argument('--imagepath', dest='imagepath', help='Path to the image for inference by the segmentor.', type=str)
+    parser.add_argument('--outputdir', dest='outputdir', help='Destination directory for saving the output image(s).', type=str, default='inference_outputs')
+    parser.add_argument('--cfgfilepath', dest='cfgfilepath', help='The config file path which is used to customize segmentors.', type=str, required=True)
+    parser.add_argument('--ckptspath', dest='ckptspath', help='Specify the checkpoint to use for inference.', type=str, required=True)
+    parser.add_argument('--ema', dest='ema', help='Please add --ema if you want to load ema weights of segmentors for inference.', default=False, action='store_true')
     cmd_args = parser.parse_args()
     return cmd_args
 
@@ -49,10 +49,10 @@ class Inferencer():
     '''start'''
     def start(self):
         # initialize necessary variables
-        cmd_args, cfg, cfg_file_path = self.cmd_args, self.cfg, self.cfg_file_path
+        cmd_args, cfg = self.cmd_args, self.cfg
         # touch work dir and output dir
-        touchdir(cfg.SEGMENTOR_CFG['work_dir'])
-        touchdir(cmd_args.outputdir)
+        touchdirs(cfg.SEGMENTOR_CFG['work_dir'])
+        touchdirs(cmd_args.outputdir)
         # cuda detect
         use_cuda = torch.cuda.is_available()
         # initialize logger_handle
@@ -62,17 +62,16 @@ class Inferencer():
         segmentor = BuildSegmentor(segmentor_cfg=cfg.SEGMENTOR_CFG, mode='TEST')
         if use_cuda: segmentor = segmentor.cuda()
         # build dataset
-        cfg.SEGMENTOR_CFG['dataset']['evalmode'] = 'server'
+        cfg.SEGMENTOR_CFG['dataset']['test']['eval_env'] = 'server'
         dataset = BuildDataset(mode='TEST', logger_handle=logger_handle, dataset_cfg=cfg.SEGMENTOR_CFG['dataset'])
         # build palette
         palette = dataset.palette
         # load ckpts
-        cmd_args.local_rank = 0
         ckpts = loadckpts(cmd_args.ckptspath)
         try:
             segmentor.load_state_dict(ckpts['model'] if not cmd_args.ema else ckpts['model_ema'])
         except Exception as e:
-            logger_handle.warning(str(e) + '\n' + 'Try to load ckpts by using strict=False')
+            logger_handle.warning(str(e) + '\n' + 'Try to load ckpts by using strict=False', main_process_only=True)
             segmentor.load_state_dict(ckpts['model'] if not cmd_args.ema else ckpts['model_ema'], strict=False)
         # set eval
         segmentor.eval()
@@ -90,8 +89,8 @@ class Inferencer():
             if imagepath.split('.')[-1] not in ['jpg', 'jpeg', 'png']: 
                 continue
             pbar.set_description('Processing %s' % imagepath)
-            infer_tricks = inference_cfg['tricks']
-            cascade_cfg = infer_tricks.get('cascade', {'key_for_pre_output': 'memory_gather_logits', 'times': 1, 'forward_default_args': None})
+            infer_tta_cfg = inference_cfg['tta']
+            cascade_cfg = infer_tta_cfg.get('cascade', {'key_for_pre_output': 'memory_gather_logits', 'times': 1, 'forward_default_args': None})
             sample_meta = dataset.read(imagepath)
             image = sample_meta['image']
             sample_meta = dataset.synctransforms(sample_meta)
@@ -99,22 +98,22 @@ class Inferencer():
             for idx in range(cascade_cfg['times']):
                 forward_args = None
                 if idx > 0: 
-                    output_list = [
-                        F.interpolate(outputs, size=output_list[-1].shape[2:], mode='bilinear', align_corners=segmentor.align_corners) for outputs in output_list
+                    seg_logits_list = [
+                        F.interpolate(seg_logits, size=seg_logits_list[-1].shape[2:], mode='bilinear', align_corners=segmentor.align_corners) for seg_logits in seg_logits_list
                     ]
-                    forward_args = {cascade_cfg['key_for_pre_output']: sum(output_list) / len(output_list)}
+                    forward_args = {cascade_cfg['key_for_pre_output']: sum(seg_logits_list) / len(seg_logits_list)}
                     if cascade_cfg['forward_default_args'] is not None: 
                         forward_args.update(cascade_cfg['forward_default_args'])
-                output_list = segmentor.auginference(image_tensor, forward_args)
-            output_list = [
-                F.interpolate(output, size=(sample_meta['height'], sample_meta['width']), mode='bilinear', align_corners=segmentor.align_corners) for output in output_list
+                seg_logits_list = segmentor.auginference(image_tensor, forward_args)
+            seg_logits_list = [
+                F.interpolate(seg_logits, size=(sample_meta['height'], sample_meta['width']), mode='bilinear', align_corners=segmentor.align_corners) for seg_logits in seg_logits_list
             ]
-            output = sum(output_list) / len(output_list)
-            pred = (torch.argmax(output[0], dim=0)).cpu().numpy().astype(np.int32)
-            mask = np.zeros((pred.shape[0], pred.shape[1], 3), dtype=np.uint8)
+            seg_logits = sum(seg_logits_list) / len(seg_logits_list)
+            seg_pred = (torch.argmax(seg_logits[0], dim=0)).cpu().numpy().astype(np.int32)
+            seg_mask = np.zeros((seg_pred.shape[0], seg_pred.shape[1], 3), dtype=np.uint8)
             for clsid, color in enumerate(palette):
-                mask[pred == clsid, :] = np.array(color)[::-1]
-            image = image * 0.5 + mask * 0.5
+                seg_mask[seg_pred == clsid, :] = np.array(color)[::-1]
+            image = image * 0.5 + seg_mask * 0.5
             image = image.astype(np.uint8)
             if cmd_args.outputdir:
                 cv2.imwrite(os.path.join(cmd_args.outputdir, imagepath.split('/')[-1].split('.')[0] + '.png'), image)
