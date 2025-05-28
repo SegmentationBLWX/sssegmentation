@@ -22,6 +22,24 @@ class SSSegOutputStructure:
     '''postinit'''
     def __post_init__(self):
         self.validate()
+    '''getitem'''
+    def __getitem__(self, idx) -> "SSSegOutputStructure":
+        all_fields = self.getsetvariables()
+        init_field_names = self.__dataclass_fields__.keys()
+        init_fields, extra_fields = {}, {}
+        for k, v in all_fields.items():
+            if isinstance(v, torch.Tensor):
+                sliced_v = v[idx]
+            else:
+                raise TypeError(f"unsupported field type for indexing: {k} ({type(v)})")
+            if k in init_field_names:
+                init_fields[k] = sliced_v
+            else:
+                extra_fields[k] = sliced_v
+        instance = SSSegOutputStructure(mode=self.mode, auto_validate=self.auto_validate, **init_fields)
+        for k, v in extra_fields.items():
+            instance.addfield(k, v)
+        return instance
     '''addfield'''
     def addfield(self, field_name, field_value):
         assert not hasattr(self, field_name), f'field_name {field_name} already exits, call .setvariable if you want set value for it'
@@ -84,6 +102,24 @@ class SSSegInputStructure:
     '''postinit'''
     def __post_init__(self):
         self.validate()
+    '''getitem'''
+    def __getitem__(self, idx) -> "SSSegInputStructure":
+        all_fields = self.getsetvariables()
+        init_field_names = self.__dataclass_fields__.keys()
+        init_fields, extra_fields = {}, {}
+        for k, v in all_fields.items():
+            if isinstance(v, torch.Tensor):
+                sliced_v = v[idx]
+            else:
+                raise TypeError(f"unsupported field type for indexing: {k} ({type(v)})")
+            if k in init_field_names:
+                init_fields[k] = sliced_v
+            else:
+                extra_fields[k] = sliced_v
+        instance = SSSegInputStructure(mode=self.mode, auto_validate=self.auto_validate, **init_fields)
+        for k, v in extra_fields.items():
+            instance.addfield(k, v)
+        return instance
     '''addfield'''
     def addfield(self, field_name, field_value):
         assert not hasattr(self, field_name), f'field_name {field_name} already exits, call .setvariable if you want set value for it'
