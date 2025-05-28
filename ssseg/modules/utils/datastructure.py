@@ -4,7 +4,9 @@ Function:
 Author:
     Zhenchao Jin
 '''
+import copy
 import torch
+from typing import List
 from typing import Optional
 from dataclasses import dataclass, field
 
@@ -54,6 +56,20 @@ class SSSegOutputStructure:
     '''getsetvariables'''
     def getsetvariables(self):
         return {k: v for k, v in self.__dict__.items() if v is not None and k not in ['mode', 'auto_validate']}
+    '''stack'''
+    @staticmethod
+    def stack(instances: List["SSSegOutputStructure"], dim: int = 0) -> "SSSegOutputStructure":
+        assert all(isinstance(x, SSSegOutputStructure) for x in instances), "all inputs should be SSSegOutputStructure"
+        assert len(instances) > 0, "no instances to stack"
+        ref = instances[0]
+        stacked = copy.deepcopy(ref)
+        for field_name, _ in ref.getsetvariables().items():
+            all_vals = [getattr(x, field_name) for x in instances]
+            if all(isinstance(v, torch.Tensor) for v in all_vals):
+                stacked.setvariable(field_name, torch.stack(all_vals, dim=dim))
+            else:
+                raise TypeError(f"cannot concatenate non-Tensor field: {field_name}")
+        return stacked
 
 
 '''SSSegInputStructure'''
@@ -103,3 +119,17 @@ class SSSegInputStructure:
         if self.edge_targets is not None:
             annotations.update({'edge_targets': self.edge_targets})
         return annotations
+    '''stack'''
+    @staticmethod
+    def stack(instances: List["SSSegInputStructure"], dim: int = 0) -> "SSSegInputStructure":
+        assert all(isinstance(x, SSSegInputStructure) for x in instances), "all inputs should be SSSegInputStructure"
+        assert len(instances) > 0, "no instances to stack"
+        ref = instances[0]
+        stacked = copy.deepcopy(ref)
+        for field_name, _ in ref.getsetvariables().items():
+            all_vals = [getattr(x, field_name) for x in instances]
+            if all(isinstance(v, torch.Tensor) for v in all_vals):
+                stacked.setvariable(field_name, torch.stack(all_vals, dim=dim))
+            else:
+                raise TypeError(f"cannot concatenate non-Tensor field: {field_name}")
+        return stacked
