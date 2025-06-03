@@ -1,6 +1,17 @@
 '''initialize'''
-from .default_dataloader_bs8 import DATALOADER_CFG_BS8
-from .default_dataloader_bs16 import DATALOADER_CFG_BS16
-from .default_dataloader_bs32 import DATALOADER_CFG_BS32
-from .default_dataloader_bs40 import DATALOADER_CFG_BS40
-from .default_dataloader_bs64 import DATALOADER_CFG_BS64
+import os
+import importlib
+from .default_dataloader import DataloaderConfig
+
+
+'''auto import all'''
+__all__ = []
+for fname in os.listdir(os.path.dirname(__file__)):
+    if fname.endswith(".py") and fname != "__init__.py":
+        module_name = fname[:-3]
+        module = importlib.import_module(f".{module_name}", package=__name__)
+        for attr_name in dir(module):
+            attr = getattr(module, attr_name)
+            if isinstance(attr, DataloaderConfig):
+                globals()[attr_name] = attr
+                __all__.append(attr_name)
