@@ -1,12 +1,13 @@
 '''drive_64x64'''
 import os
+from .default_dataset import DatasetConfig
 
 
 '''DATASET_CFG_DRIVE_64x64'''
-DATASET_CFG_DRIVE_64x64 = {
-    'type': 'DRIVEDataset',
-    'rootdir': os.path.join(os.getcwd(), 'DRIVE'),
-    'train': {
+DATASET_CFG_DRIVE_64x64 = DatasetConfig(
+    type='DRIVEDataset',
+    rootdir=os.path.join(os.getcwd(), 'DRIVE'),
+    train={
         'set': 'train',
         'repeat_times': 32000,
         'data_pipelines': [
@@ -17,14 +18,14 @@ DATASET_CFG_DRIVE_64x64 = {
             ('Normalize', {'mean': [123.675, 116.28, 103.53], 'std': [58.395, 57.12, 57.375]}),
             ('ToTensor', {}),
             ('Padding', {'output_size': (64, 64), 'data_type': 'tensor'}),
-        ],
+        ]
     },
-    'test': {
+    test={
         'set': 'val',
         'data_pipelines': [
             ('Resize', {'output_size': (584, 565), 'keep_ratio': True, 'scale_range': None}),
             ('Normalize', {'mean': [123.675, 116.28, 103.53], 'std': [58.395, 57.12, 57.375]}),
             ('ToTensor', {}),
-        ],
+        ]
     }
-}
+)
