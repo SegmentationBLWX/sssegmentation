@@ -1,29 +1,29 @@
-'''SEGMENTOR_CFG for DNLNet'''
+'''SEGMENTOR_CFG for MobileViT'''
 from .default_segmentor import SegmentorConfig
 
 
-'''DNLNET_SEGMENTOR_CFG'''
-DNLNET_SEGMENTOR_CFG = {
-    'num_classes': -1,
+'''MOBILEVIT_SEGMENTOR_CFG'''
+MOBILEVIT_SEGMENTOR_CFG = {
     'benchmark': True,
-    'type': 'DNLNet',
+    'num_classes': -1,
     'align_corners': False,
+    'type': 'Deeplabv3',
     'work_dir': 'ckpts',
-    'eval_interval_epochs': 10,
+    'eval_interval_epochs': 1,
     'save_interval_epochs': 1,
     'logger_handle_cfg': {'type': 'LocalLoggerHandle', 'logfilepath': ''},
     'training_logging_manager_cfg': {'log_interval_iters': 50},
     'norm_cfg': {'type': 'SyncBatchNorm'},
     'act_cfg': {'type': 'ReLU', 'inplace': True},
+    'ema_cfg': {'momentum': 0.0005, 'device': 'cpu'},
     'backbone': {
-        'type': 'ResNet', 'depth': 101, 'structure_type': 'resnet101conv3x3stem',
-        'pretrained': True, 'outstride': 8, 'use_conv3x3_stem': True, 'selected_indices': (2, 3),
+        'type': 'MobileViT', 'structure_type': 'mobilevit-small', 'pretrained': True, 'selected_indices': (3, 4),
     },
     'head': {
-        'in_channels': 2048, 'feats_channels': 512, 'use_scale': True, 'mode': 'embeddedgaussian', 'reduction': 2, 'temperature': 0.05, 'dropout': 0.1,
+        'in_channels': 640, 'feats_channels': 512, 'dilations': [1, 12, 24, 36], 'dropout': 0.1,
     },
     'auxiliary': {
-        'in_channels': 1024, 'out_channels': 512, 'dropout': 0.1,
+        'in_channels': 128, 'out_channels': 512, 'dropout': 0.1,
     },
     'losses': {
         'loss_aux': {'type': 'CrossEntropyLoss', 'scale_factor': 0.4, 'ignore_index': 255, 'reduction': 'mean'},
@@ -35,9 +35,12 @@ DNLNET_SEGMENTOR_CFG = {
         'evaluate': {'metric_list': ['iou', 'miou']},
     },
     'scheduler': {
-        'type': 'PolyScheduler', 'max_epochs': 0, 'power': 0.9,
+        'type': 'CosineScheduler', 'max_epochs': 0, 'by_epoch': True, 'min_lr': 1.e-6, 'warmup_cfg': {'type': 'linear', 'ratio': 1e-6, 'iters': 500},
         'optimizer': {
-            'type': 'SGD', 'lr': 0.01, 'momentum': 0.9, 'weight_decay': 5e-4, 'params_rules': {},
+            'type': 'AdamW', 'lr': 0.0009, 'betas': (0.9, 0.999), 'weight_decay': 0.01,
+            'params_rules': {
+                'norm': dict(wd_multiplier=0.),
+            },
         }
     },
     'dataset': None,

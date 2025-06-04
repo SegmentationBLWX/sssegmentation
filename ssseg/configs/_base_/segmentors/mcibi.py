@@ -1,12 +1,12 @@
-'''SEGMENTOR_CFG for DNLNet'''
+'''SEGMENTOR_CFG for MCIBI'''
 from .default_segmentor import SegmentorConfig
 
 
-'''DNLNET_SEGMENTOR_CFG'''
-DNLNET_SEGMENTOR_CFG = {
+'''MCIBI_SEGMENTOR_CFG'''
+MCIBI_SEGMENTOR_CFG = {
+    'type': 'MCIBI',
     'num_classes': -1,
     'benchmark': True,
-    'type': 'DNLNet',
     'align_corners': False,
     'work_dir': 'ckpts',
     'eval_interval_epochs': 10,
@@ -17,17 +17,26 @@ DNLNET_SEGMENTOR_CFG = {
     'act_cfg': {'type': 'ReLU', 'inplace': True},
     'backbone': {
         'type': 'ResNet', 'depth': 101, 'structure_type': 'resnet101conv3x3stem',
-        'pretrained': True, 'outstride': 8, 'use_conv3x3_stem': True, 'selected_indices': (2, 3),
+        'pretrained': True, 'outstride': 8, 'use_conv3x3_stem': True, 'selected_indices': (0, 1, 2, 3),
     },
     'head': {
-        'in_channels': 2048, 'feats_channels': 512, 'use_scale': True, 'mode': 'embeddedgaussian', 'reduction': 2, 'temperature': 0.05, 'dropout': 0.1,
+        'downsample_backbone': {'kernel_size': 3, 'stride': 1, 'padding': 1, 'bias': False},
+        'context_within_image': {'is_on': True, 'type': ['ppm', 'aspp'][1], 'cfg': {'dilations': [1, 12, 24, 36]}},
+        'use_hard_aggregate': False, 'in_channels': 2048, 'feats_channels': 512, 'transform_channels': 256,
+        'out_channels': 512, 'num_feats_per_cls': 1, 'use_loss': True, 'loss_cfg': {'type': 'CrossEntropyLoss', 'scale_factor': 1.0, 'reduction': 'mean'},
+        'update_cfg': {
+            'strategy': 'cosine_similarity', 'ignore_index': 255,
+            'momentum_cfg': {'base_momentum': 0.9, 'base_lr': 0.01, 'adjust_by_learning_rate': True}
+        },
+        'dropout': 0.1,
     },
     'auxiliary': {
         'in_channels': 1024, 'out_channels': 512, 'dropout': 0.1,
     },
     'losses': {
         'loss_aux': {'type': 'CrossEntropyLoss', 'scale_factor': 0.4, 'ignore_index': 255, 'reduction': 'mean'},
-        'loss_cls': {'type': 'CrossEntropyLoss', 'scale_factor': 1.0, 'ignore_index': 255, 'reduction': 'mean'},
+        'loss_cls_stage1': {'type': 'CrossEntropyLoss', 'scale_factor': 0.4, 'ignore_index': 255, 'reduction': 'mean'},
+        'loss_cls_stage2': {'type': 'CrossEntropyLoss', 'scale_factor': 1.0, 'ignore_index': 255, 'reduction': 'mean'},
     },
     'inference': {
         'forward': {'mode': 'whole', 'cropsize': None, 'stride': None},

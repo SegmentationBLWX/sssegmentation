@@ -1,13 +1,13 @@
-'''SEGMENTOR_CFG for Deeplabv3Plus'''
+'''SEGMENTOR_CFG for MCIBI++'''
 from .default_segmentor import SegmentorConfig
 
 
-'''DEEPLABV3PLUS_SEGMENTOR_CFG'''
-DEEPLABV3PLUS_SEGMENTOR_CFG = {
-    'benchmark': True,
+'''MCIBIPLUSPLUS_SEGMENTOR_CFG'''
+MCIBIPLUSPLUS_SEGMENTOR_CFG = {
+    'type': 'MCIBIPlusPlus',
     'num_classes': -1,
+    'benchmark': True,
     'align_corners': False,
-    'type': 'Deeplabv3Plus',
     'work_dir': 'ckpts',
     'eval_interval_epochs': 10,
     'save_interval_epochs': 1,
@@ -20,13 +20,28 @@ DEEPLABV3PLUS_SEGMENTOR_CFG = {
         'pretrained': True, 'outstride': 8, 'use_conv3x3_stem': True, 'selected_indices': (0, 1, 2, 3),
     },
     'head': {
-        'in_channels': [256, 2048], 'feats_channels': 512, 'shortcut_channels': 48, 'dilations': [1, 6, 12, 18], 'dropout': 0.1,
+        'context_within_image': {
+            'is_on': False, 'type': ['ppm', 'aspp'][1],
+            'cfg': {'pool_scales': [1, 2, 3, 6], 'dilations': [1, 12, 24, 36]}
+        },
+        'warmup_epoch': 0, 'use_hard_aggregate': False, 'downsample_before_sa': False,
+        'force_use_preds_pr': False, 'fuse_memory_cwi_before_fpn': True, 'in_channels': 2048,
+        'feats_channels': 512, 'transform_channels': 256, 'out_channels': 512,
+        'update_cfg': {
+            'ignore_index': 255,
+            'momentum_cfg': {'base_momentum': 0.1, 'base_lr': None, 'adjust_by_learning_rate': False},
+        },
+        'decoder': {
+            'pr': {'in_channels': 512, 'out_channels': 512, 'dropout': 0.1},
+            'cwi': {'in_channels': 512, 'out_channels': 512, 'dropout': 0.1},
+            'cls': {'in_channels': 512, 'out_channels': 512, 'dropout': 0.1},
+        },
     },
-    'auxiliary': {
-        'in_channels': 1024, 'out_channels': 512, 'dropout': 0.1,
-    },
+    'auxiliary': {'in_channels': 1024, 'out_channels': 512, 'dropout': 0.1},
     'losses': {
         'loss_aux': {'type': 'CrossEntropyLoss', 'scale_factor': 0.4, 'ignore_index': 255, 'reduction': 'mean'},
+        'loss_pr': {'type': 'CrossEntropyLoss', 'scale_factor': 0.4, 'ignore_index': 255, 'reduction': 'mean'},
+        'loss_cwi': {'type': 'CrossEntropyLoss', 'scale_factor': 1.0, 'ignore_index': 255, 'reduction': 'mean'},
         'loss_cls': {'type': 'CrossEntropyLoss', 'scale_factor': 1.0, 'ignore_index': 255, 'reduction': 'mean'},
     },
     'inference': {

@@ -1,12 +1,12 @@
-'''SEGMENTOR_CFG for DNLNet'''
+'''SEGMENTOR_CFG for SemanticFPN'''
 from .default_segmentor import SegmentorConfig
 
 
-'''DNLNET_SEGMENTOR_CFG'''
-DNLNET_SEGMENTOR_CFG = {
+'''SEMANTICFPN_SEGMENTOR_CFG'''
+SEMANTICFPN_SEGMENTOR_CFG = {
+    'type': 'SemanticFPN',
     'num_classes': -1,
     'benchmark': True,
-    'type': 'DNLNet',
     'align_corners': False,
     'work_dir': 'ckpts',
     'eval_interval_epochs': 10,
@@ -17,16 +17,13 @@ DNLNET_SEGMENTOR_CFG = {
     'act_cfg': {'type': 'ReLU', 'inplace': True},
     'backbone': {
         'type': 'ResNet', 'depth': 101, 'structure_type': 'resnet101conv3x3stem',
-        'pretrained': True, 'outstride': 8, 'use_conv3x3_stem': True, 'selected_indices': (2, 3),
+        'pretrained': True, 'outstride': 32, 'use_conv3x3_stem': True, 'selected_indices': (0, 1, 2, 3),
     },
     'head': {
-        'in_channels': 2048, 'feats_channels': 512, 'use_scale': True, 'mode': 'embeddedgaussian', 'reduction': 2, 'temperature': 0.05, 'dropout': 0.1,
-    },
-    'auxiliary': {
-        'in_channels': 1024, 'out_channels': 512, 'dropout': 0.1,
+        'in_channels_list': [256, 512, 1024, 2048], 'feats_channels': 256, 'upsample_cfg': {'mode': 'nearest'},
+        'feature_stride_list': [4, 8, 16, 32], 'scale_head_channels': 128, 'dropout': 0.1,
     },
     'losses': {
-        'loss_aux': {'type': 'CrossEntropyLoss', 'scale_factor': 0.4, 'ignore_index': 255, 'reduction': 'mean'},
         'loss_cls': {'type': 'CrossEntropyLoss', 'scale_factor': 1.0, 'ignore_index': 255, 'reduction': 'mean'},
     },
     'inference': {

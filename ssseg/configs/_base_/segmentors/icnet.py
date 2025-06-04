@@ -1,12 +1,12 @@
-'''SEGMENTOR_CFG for DNLNet'''
+'''SEGMENTOR_CFG for ICNet'''
 from .default_segmentor import SegmentorConfig
 
 
-'''DNLNET_SEGMENTOR_CFG'''
-DNLNET_SEGMENTOR_CFG = {
+'''ICNET_SEGMENTOR_CFG'''
+ICNET_SEGMENTOR_CFG = {
+    'type': 'ICNet',
     'num_classes': -1,
     'benchmark': True,
-    'type': 'DNLNet',
     'align_corners': False,
     'work_dir': 'ckpts',
     'eval_interval_epochs': 10,
@@ -17,16 +17,18 @@ DNLNET_SEGMENTOR_CFG = {
     'act_cfg': {'type': 'ReLU', 'inplace': True},
     'backbone': {
         'type': 'ResNet', 'depth': 101, 'structure_type': 'resnet101conv3x3stem',
-        'pretrained': True, 'outstride': 8, 'use_conv3x3_stem': True, 'selected_indices': (2, 3),
+        'pretrained': True, 'outstride': 8, 'use_conv3x3_stem': True, 'selected_indices': (0, 1, 2),
     },
     'head': {
-        'in_channels': 2048, 'feats_channels': 512, 'use_scale': True, 'mode': 'embeddedgaussian', 'reduction': 2, 'temperature': 0.05, 'dropout': 0.1,
+        'encoder': {}, 'in_channels_list': (64, 256, 256), 'feats_channels': 128, 'dropout': 0.1,
     },
-    'auxiliary': {
-        'in_channels': 1024, 'out_channels': 512, 'dropout': 0.1,
-    },
+    'auxiliary': [
+        {'in_channels': 128, 'out_channels': 128, 'dropout': 0.1, 'num_convs': 1},
+        {'in_channels': 128, 'out_channels': 128, 'dropout': 0.1, 'num_convs': 1},
+    ],
     'losses': {
-        'loss_aux': {'type': 'CrossEntropyLoss', 'scale_factor': 0.4, 'ignore_index': 255, 'reduction': 'mean'},
+        'loss_aux1': {'type': 'CrossEntropyLoss', 'scale_factor': 0.4, 'ignore_index': 255, 'reduction': 'mean'},
+        'loss_aux2': {'type': 'CrossEntropyLoss', 'scale_factor': 0.4, 'ignore_index': 255, 'reduction': 'mean'},
         'loss_cls': {'type': 'CrossEntropyLoss', 'scale_factor': 1.0, 'ignore_index': 255, 'reduction': 'mean'},
     },
     'inference': {

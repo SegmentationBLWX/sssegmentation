@@ -1,10 +1,10 @@
-'''SEGMENTOR_CFG for ConvNeXt'''
+'''SEGMENTOR_CFG for OCRNet'''
 from .default_segmentor import SegmentorConfig
 
 
-'''CONVNEXT_SEGMENTOR_CFG'''
-CONVNEXT_SEGMENTOR_CFG = {
-    'type': 'UPerNet',
+'''OCRNET_SEGMENTOR_CFG'''
+OCRNET_SEGMENTOR_CFG = {
+    'type': 'OCRNet',
     'num_classes': -1,
     'benchmark': True,
     'align_corners': False,
@@ -16,29 +16,27 @@ CONVNEXT_SEGMENTOR_CFG = {
     'norm_cfg': {'type': 'SyncBatchNorm'},
     'act_cfg': {'type': 'ReLU', 'inplace': True},
     'backbone': {
-        'type': 'ConvNeXt', 'structure_type': 'convnext_base', 'arch': 'base', 'pretrained': True, 'drop_path_rate': 0.4,
-        'layer_scale_init_value': 1.0, 'gap_before_final_norm': False, 'selected_indices': (0, 1, 2, 3), 'norm_cfg': {'type': 'LayerNorm2d', 'eps': 1e-6},
+        'type': 'HRNet', 'structure_type': 'hrnetv2_w18', 'arch': 'hrnetv2_w18', 'pretrained': True, 'selected_indices': (0, 0),
     },
     'head': {
-        'in_channels_list': [128, 256, 512, 1024], 'feats_channels': 512, 'pool_scales': [1, 2, 3, 6], 'dropout': 0.1,
+        'in_channels': sum([18, 36, 72, 144]), 'feats_channels': 512, 'transform_channels': 256, 'scale': 1, 'dropout': 0,
     },
     'auxiliary': {
-        'in_channels': 512, 'out_channels': 512, 'dropout': 0.1,
+        'in_channels': sum([18, 36, 72, 144]), 'out_channels': 512, 'dropout': 0,
     },
     'losses': {
         'loss_aux': {'type': 'CrossEntropyLoss', 'scale_factor': 0.4, 'ignore_index': 255, 'reduction': 'mean'},
         'loss_cls': {'type': 'CrossEntropyLoss', 'scale_factor': 1.0, 'ignore_index': 255, 'reduction': 'mean'},
     },
     'inference': {
-        'forward': {'mode': 'slide', 'cropsize': (512, 512), 'stride': (341, 341)},
+        'forward': {'mode': 'whole', 'cropsize': None, 'stride': None},
         'tta': {'multiscale': [1], 'flip': False, 'use_probs_before_resize': False},
         'evaluate': {'metric_list': ['iou', 'miou']},
     },
     'scheduler': {
         'type': 'PolyScheduler', 'max_epochs': 0, 'power': 0.9,
         'optimizer': {
-            'type': 'AdamW', 'lr': 0.0001, 'betas': (0.9, 0.999), 'weight_decay': 0.05,
-            'params_rules': {'type': 'LearningRateDecayParamsConstructor', 'decay_rate': 0.9, 'decay_type': 'stage_wise', 'num_layers': 12},
+            'type': 'SGD', 'lr': 0.01, 'momentum': 0.9, 'weight_decay': 5e-4, 'params_rules': {},
         }
     },
     'dataset': None,

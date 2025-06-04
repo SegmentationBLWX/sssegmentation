@@ -1,9 +1,9 @@
-'''SEGMENTOR_CFG for ConvNeXt'''
+'''SEGMENTOR_CFG for MAE'''
 from .default_segmentor import SegmentorConfig
 
 
-'''CONVNEXT_SEGMENTOR_CFG'''
-CONVNEXT_SEGMENTOR_CFG = {
+'''MAE_SEGMENTOR_CFG'''
+MAE_SEGMENTOR_CFG = {
     'type': 'UPerNet',
     'num_classes': -1,
     'benchmark': True,
@@ -16,14 +16,17 @@ CONVNEXT_SEGMENTOR_CFG = {
     'norm_cfg': {'type': 'SyncBatchNorm'},
     'act_cfg': {'type': 'ReLU', 'inplace': True},
     'backbone': {
-        'type': 'ConvNeXt', 'structure_type': 'convnext_base', 'arch': 'base', 'pretrained': True, 'drop_path_rate': 0.4,
-        'layer_scale_init_value': 1.0, 'gap_before_final_norm': False, 'selected_indices': (0, 1, 2, 3), 'norm_cfg': {'type': 'LayerNorm2d', 'eps': 1e-6},
+        'type': 'MAE', 'structure_type': 'mae_pretrain_vit_base', 'pretrained': True, 
+        'img_size': (512, 512), 'patch_size': 16, 'embed_dims': 768, 'num_layers': 12,
+        'num_heads': 12, 'mlp_ratio': 4, 'init_values': 1.0, 'drop_path_rate': 0.1,
+        'selected_indices': (0, 1, 2, 3), 'norm_cfg': {'type': 'LayerNorm', 'eps': 1e-6},
     },
     'head': {
-        'in_channels_list': [128, 256, 512, 1024], 'feats_channels': 512, 'pool_scales': [1, 2, 3, 6], 'dropout': 0.1,
+        'feature2pyramid': {'embed_dim': 768, 'rescales': [4, 2, 1, 0.5]}, 'in_channels_list': [768, 768, 768, 768], 
+        'feats_channels': 768, 'pool_scales': [1, 2, 3, 6], 'dropout': 0.1,
     },
     'auxiliary': {
-        'in_channels': 512, 'out_channels': 512, 'dropout': 0.1,
+        'in_channels': 768, 'out_channels': 512, 'dropout': 0.1,
     },
     'losses': {
         'loss_aux': {'type': 'CrossEntropyLoss', 'scale_factor': 0.4, 'ignore_index': 255, 'reduction': 'mean'},
@@ -35,10 +38,11 @@ CONVNEXT_SEGMENTOR_CFG = {
         'evaluate': {'metric_list': ['iou', 'miou']},
     },
     'scheduler': {
-        'type': 'PolyScheduler', 'max_epochs': 0, 'power': 0.9,
+        'type': 'PolyScheduler', 'max_epochs': 0, 'power': 1.0, 'min_lr': 0.0, 
+        'warmup_cfg': {'type': 'linear', 'ratio': 1e-6, 'iters': 1500},
         'optimizer': {
-            'type': 'AdamW', 'lr': 0.0001, 'betas': (0.9, 0.999), 'weight_decay': 0.05,
-            'params_rules': {'type': 'LearningRateDecayParamsConstructor', 'decay_rate': 0.9, 'decay_type': 'stage_wise', 'num_layers': 12},
+            'type': 'AdamW', 'lr': 1e-4, 'betas': (0.9, 0.999), 'weight_decay': 0.05, 
+            'params_rules': {'type': 'LearningRateDecayParamsConstructor', 'num_layers': 12, 'decay_rate': 0.65, 'decay_type': 'layer_wise_vit'},
         }
     },
     'dataset': None,
