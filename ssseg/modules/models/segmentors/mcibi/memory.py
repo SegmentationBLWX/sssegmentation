@@ -113,7 +113,7 @@ class FeaturesMemory(nn.Module):
             memory_output = self.bottleneck_ms(torch.cat([feats_ms, memory_output], dim=1))
         return self.memory.data, memory_output
     '''update'''
-    def update(self, features, segmentation, ignore_index=255, strategy='cosine_similarity', momentum_cfg=None, learning_rate=None):
+    def update(self, features, segmentation, ignore_index=-100, strategy='cosine_similarity', momentum_cfg=None, learning_rate=None):
         assert strategy in ['mean', 'cosine_similarity']
         batch_size, num_channels, h, w = features.size()
         momentum = momentum_cfg['base_momentum']

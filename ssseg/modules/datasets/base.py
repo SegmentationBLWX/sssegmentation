@@ -65,6 +65,7 @@ class BaseDataset(torch.utils.data.Dataset):
                 seg_target = sio.loadmat(annpath)
                 if self.dataset_cfg['type'] in ['COCOStuff10kDataset']:
                     seg_target = seg_target['S']
+            seg_target = seg_target.astype(np.float32)
         else:
             seg_target = None
         # auto transform seg_target to train labels

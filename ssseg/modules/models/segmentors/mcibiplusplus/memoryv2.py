@@ -89,7 +89,7 @@ class FeaturesMemoryV2(nn.Module):
         memory_output = self.bottleneck(torch.cat([feats, selected_memory], dim=1))
         return memory.data, memory_output
     '''update'''
-    def update(self, features, segmentation, ignore_index=255, momentum_cfg=None, learning_rate=None):
+    def update(self, features, segmentation, ignore_index=-100, momentum_cfg=None, learning_rate=None):
         batch_size, num_channels, h, w = features.size()
         momentum = momentum_cfg['base_momentum']
         if momentum_cfg['adjust_by_learning_rate']:

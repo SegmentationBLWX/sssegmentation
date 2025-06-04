@@ -11,7 +11,7 @@ from .base import BasePixelSampler
 
 '''OHEMPixelSampler'''
 class OHEMPixelSampler(BasePixelSampler):
-    def __init__(self, loss_func=None, thresh=None, min_kept_per_image=100000, ignore_index=255):
+    def __init__(self, loss_func=None, thresh=None, min_kept_per_image=100000, ignore_index=-100):
         super(OHEMPixelSampler, self).__init__()
         # assert
         assert min_kept_per_image > 1
