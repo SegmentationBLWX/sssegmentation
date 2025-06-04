@@ -1,14 +1,12 @@
 '''mask2former_swinsmall_cityscapes'''
 import os
-import copy
-from .base_cfg import SEGMENTOR_CFG
-from .._base_ import DATASET_CFG_CITYSCAPES_512x1024, DATALOADER_CFG_BS16
+from .._base_ import REGISTERED_SEGMENTOR_CONFIGS, REGISTERED_DATASET_CONFIGS, REGISTERED_DATALOADER_CONFIGS
 
 
 # deepcopy
-SEGMENTOR_CFG = copy.deepcopy(SEGMENTOR_CFG)
+SEGMENTOR_CFG = REGISTERED_SEGMENTOR_CONFIGS['MASK2FORMER_SEGMENTOR_CFG'].copy()
 # modify dataset config
-SEGMENTOR_CFG['dataset'] = DATASET_CFG_CITYSCAPES_512x1024.copy()
+SEGMENTOR_CFG['dataset'] = REGISTERED_DATASET_CONFIGS['DATASET_CFG_CITYSCAPES_512x1024'].copy()
 SEGMENTOR_CFG['dataset']['train']['data_pipelines'][0] = (
     'RandomChoiceResize', {
         'scales': [int(1024 * x * 0.1) for x in range(5, 21)], 
@@ -17,7 +15,7 @@ SEGMENTOR_CFG['dataset']['train']['data_pipelines'][0] = (
     }
 )
 # modify dataloader config
-SEGMENTOR_CFG['dataloader'] = DATALOADER_CFG_BS16.copy()
+SEGMENTOR_CFG['dataloader'] = REGISTERED_DATALOADER_CONFIGS['DATALOADER_CFG_BS16'].copy()
 # modify scheduler config
 SEGMENTOR_CFG['scheduler']['max_epochs'] = 500
 SEGMENTOR_CFG['scheduler']['min_lr'] = 0.0
