@@ -3,26 +3,26 @@ from .default_segmentor import SegmentorConfig
 
 
 '''MASK2FORMER_SEGMENTOR_CFG'''
-MASK2FORMER_SEGMENTOR_CFG = {
-    'type': 'Mask2Former',
-    'num_classes': -1,
-    'benchmark': True,
-    'align_corners': False,
-    'work_dir': 'ckpts',
-    'eval_interval_epochs': 10,
-    'save_interval_epochs': 1,
-    'logger_handle_cfg': {'type': 'LocalLoggerHandle', 'logfilepath': ''},
-    'training_logging_manager_cfg': {'log_interval_iters': 50},
-    'norm_cfg': {'type': 'SyncBatchNorm'},
-    'act_cfg': {'type': 'ReLU', 'inplace': True},
-    'backbone': {
+MASK2FORMER_SEGMENTOR_CFG = SegmentorConfig(
+    type='Mask2Former',
+    num_classes=-1,
+    benchmark=True,
+    align_corners=False,
+    work_dir='ckpts',
+    eval_interval_epochs=10,
+    save_interval_epochs=1,
+    logger_handle_cfg={'type': 'LocalLoggerHandle', 'logfilepath': ''},
+    training_logging_manager_cfg={'log_interval_iters': 50},
+    norm_cfg={'type': 'SyncBatchNorm'},
+    act_cfg={'type': 'ReLU', 'inplace': True},
+    backbone={
         'type': 'SwinTransformer', 'structure_type': 'swin_base_patch4_window12_384_22k', 'pretrained': True,
         'selected_indices': (0, 1, 2, 3), 'norm_cfg': {'type': 'LayerNorm'},
         'pretrain_img_size': 384, 'in_channels': 3, 'embed_dims': 128, 'patch_size': 4, 'window_size': 12, 'mlp_ratio': 4,
         'depths': [2, 2, 18, 2], 'num_heads': [4, 8, 16, 32], 'qkv_bias': True, 'qk_scale': None, 'patch_norm': True,
         'drop_rate': 0., 'attn_drop_rate': 0., 'drop_path_rate': 0.3, 'use_abs_pos_embed': False,
     },
-    'head': {
+    head={
         'deep_supervision': True,
         'pixel_decoder': {
             'common_stride': 4, 'transformer_dropout': 0.0, 'transformer_nheads': 8, 'transformer_dim_feedforward': 1024, 
@@ -42,14 +42,14 @@ MASK2FORMER_SEGMENTOR_CFG = {
             'eos_coef': 0.1, 'losses': ['labels', 'masks'], 
         },
     },
-    'auxiliary': None,
-    'losses': {},
-    'inference': {
+    auxiliary=None,
+    losses={},
+    inference={
         'forward': {'mode': 'whole', 'cropsize': None, 'stride': None},
         'tta': {'multiscale': [1], 'flip': False, 'use_probs_before_resize': False},
         'evaluate': {'metric_list': ['iou', 'miou']},
     },
-    'scheduler': {
+    scheduler={
         'type': 'PolyScheduler', 'max_epochs': 0, 'power': 0.9,
         'optimizer': {
             'type': 'AdamW', 'lr': 0.0001, 'betas': (0.9, 0.999), 'weight_decay': 0.05, 'eps': 1e-8,
@@ -66,9 +66,9 @@ MASK2FORMER_SEGMENTOR_CFG = {
             },
         }
     },
-    'dataset': None,
-    'dataloader': None,
-}
+    dataset=None,
+    dataloader=None,
+)
 for stage_id, num_blocks in enumerate(MASK2FORMER_SEGMENTOR_CFG['backbone']['depths']):
     for block_id in range(num_blocks):
         MASK2FORMER_SEGMENTOR_CFG['scheduler']['optimizer']['params_rules'].update({
