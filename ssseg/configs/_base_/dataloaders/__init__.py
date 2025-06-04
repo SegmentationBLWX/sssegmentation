@@ -5,7 +5,7 @@ from .default_dataloader import DataloaderConfig
 
 
 '''register dataloaders'''
-REGISTERED_DATALOADERS = {}
+REGISTERED_DATALOADER_CONFIGS = {}
 for fname in os.listdir(os.path.dirname(__file__)):
     if fname.endswith(".py") and fname != "__init__.py" and fname != "default_dataloader.py":
         module_name = fname[:-3]
@@ -13,4 +13,4 @@ for fname in os.listdir(os.path.dirname(__file__)):
         for attr_name in dir(module):
             attr = getattr(module, attr_name)
             if isinstance(attr, DataloaderConfig):
-                REGISTERED_DATALOADERS[attr_name] = attr
+                REGISTERED_DATALOADER_CONFIGS[attr_name] = attr
