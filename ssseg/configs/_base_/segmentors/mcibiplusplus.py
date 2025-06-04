@@ -28,7 +28,7 @@ MCIBIPLUSPLUS_SEGMENTOR_CFG = SegmentorConfig(
         'force_use_preds_pr': False, 'fuse_memory_cwi_before_fpn': True, 'in_channels': 2048,
         'feats_channels': 512, 'transform_channels': 256, 'out_channels': 512,
         'update_cfg': {
-            'ignore_index': 255,
+            'ignore_index': -100,
             'momentum_cfg': {'base_momentum': 0.1, 'base_lr': None, 'adjust_by_learning_rate': False},
         },
         'decoder': {
@@ -39,10 +39,10 @@ MCIBIPLUSPLUS_SEGMENTOR_CFG = SegmentorConfig(
     },
     auxiliary={'in_channels': 1024, 'out_channels': 512, 'dropout': 0.1},
     losses={
-        'loss_aux': {'type': 'CrossEntropyLoss', 'scale_factor': 0.4, 'ignore_index': 255, 'reduction': 'mean'},
-        'loss_pr': {'type': 'CrossEntropyLoss', 'scale_factor': 0.4, 'ignore_index': 255, 'reduction': 'mean'},
-        'loss_cwi': {'type': 'CrossEntropyLoss', 'scale_factor': 1.0, 'ignore_index': 255, 'reduction': 'mean'},
-        'loss_cls': {'type': 'CrossEntropyLoss', 'scale_factor': 1.0, 'ignore_index': 255, 'reduction': 'mean'},
+        'loss_aux': {'type': 'CrossEntropyLoss', 'scale_factor': 0.4, 'ignore_index': -100, 'reduction': 'mean'},
+        'loss_pr': {'type': 'CrossEntropyLoss', 'scale_factor': 0.4, 'ignore_index': -100, 'reduction': 'mean'},
+        'loss_cwi': {'type': 'CrossEntropyLoss', 'scale_factor': 1.0, 'ignore_index': -100, 'reduction': 'mean'},
+        'loss_cls': {'type': 'CrossEntropyLoss', 'scale_factor': 1.0, 'ignore_index': -100, 'reduction': 'mean'},
     },
     inference={
         'forward': {'mode': 'whole', 'cropsize': None, 'stride': None},

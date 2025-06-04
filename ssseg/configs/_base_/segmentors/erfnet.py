@@ -23,7 +23,7 @@ ERFNET_SEGMENTOR_CFG = SegmentorConfig(
     },
     auxiliary=None,
     losses={
-        'loss_cls': {'type': 'CrossEntropyLoss', 'scale_factor': 1.0, 'ignore_index': 255, 'reduction': 'mean'},
+        'loss_cls': {'type': 'CrossEntropyLoss', 'scale_factor': 1.0, 'ignore_index': -100, 'reduction': 'mean'},
     },
     inference={
         'forward': {'mode': 'whole', 'cropsize': None, 'stride': None},

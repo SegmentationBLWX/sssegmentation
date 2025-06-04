@@ -22,15 +22,15 @@ IDRNET_SEGMENTOR_CFG = SegmentorConfig(
     head={
         'in_channels': 2048, 'feats_channels': 512, 'refine_idcontext_channels': 256, 'refine_coarsecontext_channels': 256,
         'use_sa_on_coarsecontext_before': False, 'use_sa_on_coarsecontext_after': False, 'use_fpn_before': False, 'use_fpn_after': True,
-        'force_stage1_use_oripr': False, 'clsrelation_momentum': 0.1, 'dlclsreps_momentum': 0.1, 'ignore_index': 255, 'dropout': 0.1,
+        'force_stage1_use_oripr': False, 'clsrelation_momentum': 0.1, 'dlclsreps_momentum': 0.1, 'ignore_index': -100, 'dropout': 0.1,
     },
     auxiliary={
         'in_channels': 1024, 'out_channels': 512, 'dropout': 0.1,
     },
     losses={
-        'loss_aux': {'type': 'CrossEntropyLoss', 'scale_factor': 0.4, 'ignore_index': 255, 'reduction': 'mean'},
-        'loss_cls_stage1': {'type': 'CrossEntropyLoss', 'scale_factor': 0.4, 'ignore_index': 255, 'reduction': 'mean'},
-        'loss_cls_stage2': {'type': 'CrossEntropyLoss', 'scale_factor': 1.0, 'ignore_index': 255, 'reduction': 'mean'},
+        'loss_aux': {'type': 'CrossEntropyLoss', 'scale_factor': 0.4, 'ignore_index': -100, 'reduction': 'mean'},
+        'loss_cls_stage1': {'type': 'CrossEntropyLoss', 'scale_factor': 0.4, 'ignore_index': -100, 'reduction': 'mean'},
+        'loss_cls_stage2': {'type': 'CrossEntropyLoss', 'scale_factor': 1.0, 'ignore_index': -100, 'reduction': 'mean'},
     },
     inference={
         'forward': {'mode': 'whole', 'cropsize': None, 'stride': None},

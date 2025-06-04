@@ -24,9 +24,9 @@ SEGMENTOR_CFG['scheduler']['max_epochs'] = 60
 # modify other segmentor configs
 SEGMENTOR_CFG['num_classes'] = 21
 SEGMENTOR_CFG['losses'] = {
-    'loss_cls_stage1': {'type': 'CrossEntropyLoss', 'scale_factor': 1.0, 'ignore_index': 255, 'reduction': 'mean'},
-    'loss_cls_stage2': {'type': 'CrossEntropyLoss', 'scale_factor': 1.0, 'ignore_index': 255, 'reduction': 'mean'},
-    'loss_edge': {'type': 'CrossEntropyLoss', 'scale_factor': 1.0, 'ignore_index': 255, 'reduction': 'mean', 'norm_loss_with_class_weight': False}
+    'loss_cls_stage1': {'type': 'CrossEntropyLoss', 'scale_factor': 1.0, 'ignore_index': -100, 'reduction': 'mean'},
+    'loss_cls_stage2': {'type': 'CrossEntropyLoss', 'scale_factor': 1.0, 'ignore_index': -100, 'reduction': 'mean'},
+    'loss_edge': {'type': 'CrossEntropyLoss', 'scale_factor': 1.0, 'ignore_index': -100, 'reduction': 'mean', 'norm_loss_with_class_weight': False}
 }
 SEGMENTOR_CFG['work_dir'] = os.path.split(__file__)[-1].split('.')[0]
 SEGMENTOR_CFG['logger_handle_cfg']['logfilepath'] = os.path.join(SEGMENTOR_CFG['work_dir'], f"{os.path.split(__file__)[-1].split('.')[0]}.log")
