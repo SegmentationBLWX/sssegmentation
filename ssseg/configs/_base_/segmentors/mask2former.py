@@ -69,12 +69,12 @@ MASK2FORMER_SEGMENTOR_CFG = {
     'dataset': None,
     'dataloader': None,
 }
-for stage_id, num_blocks in enumerate(SEGMENTOR_CFG['backbone']['depths']):
+for stage_id, num_blocks in enumerate(MASK2FORMER_SEGMENTOR_CFG['backbone']['depths']):
     for block_id in range(num_blocks):
-        SEGMENTOR_CFG['scheduler']['optimizer']['params_rules'].update({
+        MASK2FORMER_SEGMENTOR_CFG['scheduler']['optimizer']['params_rules'].update({
             f'backbone_net.stages.{stage_id}.blocks.{block_id}.norm': dict(lr_multiplier=0.1, wd_multiplier=0.0)
         })
-for stage_id in range(len(SEGMENTOR_CFG['backbone']['depths']) - 1):
-    SEGMENTOR_CFG['scheduler']['optimizer']['params_rules'].update({
+for stage_id in range(len(MASK2FORMER_SEGMENTOR_CFG['backbone']['depths']) - 1):
+    MASK2FORMER_SEGMENTOR_CFG['scheduler']['optimizer']['params_rules'].update({
         f'backbone_net.stages.{stage_id}.downsample.norm': dict(lr_multiplier=0.1, wd_multiplier=0.0)
     })
