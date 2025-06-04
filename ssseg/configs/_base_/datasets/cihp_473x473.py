@@ -1,12 +1,13 @@
 '''cihp_473x473'''
 import os
+from .default_dataset import DatasetConfig
 
 
 '''DATASET_CFG_CIHP_473x473'''
-DATASET_CFG_CIHP_473x473 = {
-    'type': 'CIHPDataset',
-    'rootdir': os.path.join(os.getcwd(), 'CIHP'),
-    'train': {
+DATASET_CFG_CIHP_473x473 = DatasetConfig(
+    type='CIHPDataset',
+    rootdir=os.path.join(os.getcwd(), 'CIHP'),
+    train={
         'set': 'train',
         'data_pipelines': [
             ('Resize', {'output_size': (520, 520), 'keep_ratio': False, 'scale_range': (0.75, 1.25)}),
@@ -18,14 +19,14 @@ DATASET_CFG_CIHP_473x473 = {
             ('Normalize', {'mean': [123.675, 116.28, 103.53], 'std': [58.395, 57.12, 57.375]}),
             ('ToTensor', {}),
             ('Padding', {'output_size': (473, 473), 'data_type': 'tensor'}),
-        ],
+        ]
     },
-    'test': {
+    test={
         'set': 'val',
         'data_pipelines': [
             ('Resize', {'output_size': (473, 473), 'keep_ratio': False, 'scale_range': None}),
             ('Normalize', {'mean': [123.675, 116.28, 103.53], 'std': [58.395, 57.12, 57.375]}),
             ('ToTensor', {}),
-        ],
+        ]
     }
-}
+)

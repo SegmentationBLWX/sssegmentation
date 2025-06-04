@@ -1,23 +1,16 @@
 '''initialize'''
-from .atr_473x473 import DATASET_CFG_ATR_473x473
-from .lip_473x473 import DATASET_CFG_LIP_473x473
-from .drive_64x64 import DATASET_CFG_DRIVE_64x64
-from .hrf_256x256 import DATASET_CFG_HRF_256x256
-from .cihp_473x473 import DATASET_CFG_CIHP_473x473
-from .vspw_512x512 import DATASET_CFG_VSPW_512x512
-from .stare_128x128 import DATASET_CFG_STARE_128x128
-from .ade20k_512x512 import DATASET_CFG_ADE20k_512x512
-from .ade20k_640x640 import DATASET_CFG_ADE20k_640x640
-from .vocaug_512x512 import DATASET_CFG_VOCAUG_512x512
-from .chasedb1_128x128 import DATASET_CFG_CHASEDB1_128x128
-from .cocovocsub_512x512 import DATASET_CFG_COCOVOCSUB_512x512
-from .cityscapes_832x832 import DATASET_CFG_CITYSCAPES_832x832
-from .cityscapes_512x1024 import DATASET_CFG_CITYSCAPES_512x1024
-from .cocostuff10k_512x512 import DATASET_CFG_COCOStuff10k_512x512
-from .cocostuff10k_640x640 import DATASET_CFG_COCOStuff10k_640x640
-from .cityscapes_1024x1024 import DATASET_CFG_CITYSCAPES_1024x1024
-from .pascalcontext_480x480 import DATASET_CFG_PASCALCONTEXT_480x480
-from .pascalcontext59_480x480 import DATASET_CFG_PASCALCONTEXT59_480x480
-from .pascalcontext59_640x640 import DATASET_CFG_PASCALCONTEXT59_640x640
-from .vocaug_mobilevit_512x512 import DATASET_CFG_VOCAUG_MOBILEVIT_512x512
-from .cocovocsub_mobilevit_512x512 import DATASET_CFG_COCOVOCSUB_MOBILEVIT_512x512
+import os
+import importlib
+from .default_dataset import DatasetConfig
+
+
+'''register datasets'''
+REGISTERED_DATASET_CONFIGS = {}
+for fname in os.listdir(os.path.dirname(__file__)):
+    if fname.endswith(".py") and fname != "__init__.py" and fname != "default_dataset.py":
+        module_name = fname[:-3]
+        module = importlib.import_module(f".{module_name}", package=__name__)
+        for attr_name in dir(module):
+            attr = getattr(module, attr_name)
+            if isinstance(attr, DatasetConfig):
+                REGISTERED_DATASET_CONFIGS[attr_name] = attr

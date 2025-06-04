@@ -1,14 +1,12 @@
 '''ce2p_resnet50os16_voc'''
 import os
-import copy
-from .base_cfg import SEGMENTOR_CFG
-from .._base_ import DATASET_CFG_VOCAUG_512x512, DATALOADER_CFG_BS16
+from .._base_ import REGISTERED_SEGMENTOR_CONFIGS, REGISTERED_DATASET_CONFIGS, REGISTERED_DATALOADER_CONFIGS
 
 
 # deepcopy
-SEGMENTOR_CFG = copy.deepcopy(SEGMENTOR_CFG)
+SEGMENTOR_CFG = REGISTERED_SEGMENTOR_CONFIGS['CE2P_SEGMENTOR_CFG'].copy()
 # modify dataset config
-SEGMENTOR_CFG['dataset'] = DATASET_CFG_VOCAUG_512x512.copy()
+SEGMENTOR_CFG['dataset'] = REGISTERED_DATASET_CONFIGS['DATASET_CFG_VOCAUG_512x512'].copy()
 SEGMENTOR_CFG['dataset']['train']['data_pipelines'] = [
     ('Resize', {'output_size': (2048, 512), 'keep_ratio': True, 'scale_range': (0.5, 2.0)}),
     ('RandomCrop', {'crop_size': (512, 512), 'one_category_max_ratio': 0.75}),
@@ -20,7 +18,7 @@ SEGMENTOR_CFG['dataset']['train']['data_pipelines'] = [
     ('Padding', {'output_size': (512, 512), 'data_type': 'tensor'}),
 ]
 # modify dataloader config
-SEGMENTOR_CFG['dataloader'] = DATALOADER_CFG_BS16.copy()
+SEGMENTOR_CFG['dataloader'] = REGISTERED_DATALOADER_CONFIGS['DATALOADER_CFG_BS16'].copy()
 # modify scheduler config
 SEGMENTOR_CFG['scheduler']['max_epochs'] = 60
 # modify other segmentor configs

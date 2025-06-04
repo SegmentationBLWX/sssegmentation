@@ -1,16 +1,14 @@
 '''mcibiplusplus_upernet_resnest101os8_cocostuff10k'''
 import os
-import copy
-from .base_cfg import SEGMENTOR_CFG
-from .._base_ import DATASET_CFG_COCOStuff10k_512x512, DATALOADER_CFG_BS32
+from .._base_ import REGISTERED_SEGMENTOR_CONFIGS, REGISTERED_DATASET_CONFIGS, REGISTERED_DATALOADER_CONFIGS
 
 
 # deepcopy
-SEGMENTOR_CFG = copy.deepcopy(SEGMENTOR_CFG)
+SEGMENTOR_CFG = REGISTERED_SEGMENTOR_CONFIGS['MCIBIPLUSPLUS_SEGMENTOR_CFG'].copy()
 # modify dataset config
-SEGMENTOR_CFG['dataset'] = DATASET_CFG_COCOStuff10k_512x512.copy()
+SEGMENTOR_CFG['dataset'] = REGISTERED_DATASET_CONFIGS['DATASET_CFG_COCOStuff10k_512x512'].copy()
 # modify dataloader config
-SEGMENTOR_CFG['dataloader'] = DATALOADER_CFG_BS32.copy()
+SEGMENTOR_CFG['dataloader'] = REGISTERED_DATALOADER_CONFIGS['DATALOADER_CFG_BS32'].copy()
 # modify scheduler config
 SEGMENTOR_CFG['scheduler']['max_epochs'] = 150
 SEGMENTOR_CFG['scheduler']['min_lr'] = 1e-4
