@@ -1,4 +1,5 @@
 '''default_dataset'''
+import copy
 from typing import Any, Dict
 from dataclasses import dataclass, field
 from collections.abc import MutableMapping
@@ -48,3 +49,6 @@ class DatasetConfig(MutableMapping):
         core = {k: v for k, v in self.__dict__.items() if k != '_extra'}
         merged = {**core, **self._extra}
         return f"DatasetConfig({merged})"
+    '''copy'''
+    def copy(self):
+        return copy.deepcopy(self)

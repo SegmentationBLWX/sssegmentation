@@ -1,4 +1,5 @@
 '''default_segmentor'''
+import copy
 from typing import Any, Dict
 from dataclasses import dataclass, field
 from collections.abc import MutableMapping
@@ -66,3 +67,6 @@ class SegmentorConfig(MutableMapping):
         core = {k: v for k, v in self.__dict__.items() if k != '_extra'}
         merged = {**core, **self._extra}
         return f"SegmentorConfig({merged})"
+    '''copy'''
+    def copy(self):
+        return copy.deepcopy(self)
