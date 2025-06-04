@@ -18,10 +18,10 @@ SEGMENTOR_CFG['head'] = {
     'in_channels': 64, 'feats_channels': 16, 'pool_scales': [1, 2, 3, 6], 'dropout': 0.1,
 }
 SEGMENTOR_CFG['losses'] = {
-    'loss_aux': {'type': 'CrossEntropyLoss', 'scale_factor': 0.4, 'ignore_index': 255, 'reduction': 'mean'},
+    'loss_aux': {'type': 'CrossEntropyLoss', 'scale_factor': 0.4, 'ignore_index': -100, 'reduction': 'mean'},
     'loss_cls': [
-        {'type': 'CrossEntropyLoss', 'scale_factor': 1.0, 'ignore_index': 255, 'reduction': 'mean'},
-        {'type': 'DiceLoss', 'scale_factor': 3.0, 'ignore_index': 255, 'reduction': 'mean'},
+        {'type': 'CrossEntropyLoss', 'scale_factor': 1.0, 'ignore_index': -100, 'reduction': 'mean'},
+        {'type': 'DiceLoss', 'scale_factor': 3.0, 'ignore_index': -100, 'reduction': 'mean'},
     ],
 }
 SEGMENTOR_CFG['inference'] = {

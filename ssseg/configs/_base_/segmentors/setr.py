@@ -32,10 +32,10 @@ SETR_SEGMENTOR_CFG = SegmentorConfig(
         {'in_channels': 1024, 'out_channels': 256, 'dropout': 0, 'num_convs': 1, 'scale_factor': 4, 'kernel_size': 3},
     ],
     losses={
-        'loss_aux1': {'type': 'CrossEntropyLoss', 'scale_factor': 0.4, 'ignore_index': 255, 'reduction': 'mean'},
-        'loss_aux2': {'type': 'CrossEntropyLoss', 'scale_factor': 0.4, 'ignore_index': 255, 'reduction': 'mean'},
-        'loss_aux3': {'type': 'CrossEntropyLoss', 'scale_factor': 0.4, 'ignore_index': 255, 'reduction': 'mean'},
-        'loss_cls': {'type': 'CrossEntropyLoss', 'scale_factor': 1.0, 'ignore_index': 255, 'reduction': 'mean'},
+        'loss_aux1': {'type': 'CrossEntropyLoss', 'scale_factor': 0.4, 'ignore_index': -100, 'reduction': 'mean'},
+        'loss_aux2': {'type': 'CrossEntropyLoss', 'scale_factor': 0.4, 'ignore_index': -100, 'reduction': 'mean'},
+        'loss_aux3': {'type': 'CrossEntropyLoss', 'scale_factor': 0.4, 'ignore_index': -100, 'reduction': 'mean'},
+        'loss_cls': {'type': 'CrossEntropyLoss', 'scale_factor': 1.0, 'ignore_index': -100, 'reduction': 'mean'},
     },
     inference={
         'forward': {'mode': 'slide', 'cropsize': (512, 512), 'stride': (341, 341)},

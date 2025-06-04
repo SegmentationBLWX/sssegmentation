@@ -25,8 +25,8 @@ OCRNET_SEGMENTOR_CFG = SegmentorConfig(
         'in_channels': sum([18, 36, 72, 144]), 'out_channels': 512, 'dropout': 0,
     },
     losses={
-        'loss_aux': {'type': 'CrossEntropyLoss', 'scale_factor': 0.4, 'ignore_index': 255, 'reduction': 'mean'},
-        'loss_cls': {'type': 'CrossEntropyLoss', 'scale_factor': 1.0, 'ignore_index': 255, 'reduction': 'mean'},
+        'loss_aux': {'type': 'CrossEntropyLoss', 'scale_factor': 0.4, 'ignore_index': -100, 'reduction': 'mean'},
+        'loss_cls': {'type': 'CrossEntropyLoss', 'scale_factor': 1.0, 'ignore_index': -100, 'reduction': 'mean'},
     },
     inference={
         'forward': {'mode': 'whole', 'cropsize': None, 'stride': None},

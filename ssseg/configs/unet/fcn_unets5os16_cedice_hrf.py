@@ -14,10 +14,10 @@ SEGMENTOR_CFG['scheduler']['max_epochs'] = 1
 # modify other segmentor configs
 SEGMENTOR_CFG['num_classes'] = 2
 SEGMENTOR_CFG['losses'] = {
-    'loss_aux': {'type': 'CrossEntropyLoss', 'scale_factor': 0.4, 'ignore_index': 255, 'reduction': 'mean'},
+    'loss_aux': {'type': 'CrossEntropyLoss', 'scale_factor': 0.4, 'ignore_index': -100, 'reduction': 'mean'},
     'loss_cls': [
-        {'type': 'CrossEntropyLoss', 'scale_factor': 1.0, 'ignore_index': 255, 'reduction': 'mean'},
-        {'type': 'DiceLoss', 'scale_factor': 3.0, 'ignore_index': 255, 'reduction': 'mean'},
+        {'type': 'CrossEntropyLoss', 'scale_factor': 1.0, 'ignore_index': -100, 'reduction': 'mean'},
+        {'type': 'DiceLoss', 'scale_factor': 3.0, 'ignore_index': -100, 'reduction': 'mean'},
     ],
 }
 SEGMENTOR_CFG['inference'] = {

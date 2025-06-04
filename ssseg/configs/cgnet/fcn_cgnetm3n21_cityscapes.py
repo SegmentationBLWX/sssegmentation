@@ -30,7 +30,7 @@ SEGMENTOR_CFG['scheduler']['min_lr'] = 1e-4
 SEGMENTOR_CFG['num_classes'] = 19
 SEGMENTOR_CFG['losses'] = {
     'loss_cls': {
-        'type': 'CrossEntropyLoss', 'scale_factor': 1.0, 'ignore_index': 255, 'reduction': 'mean', 
+        'type': 'CrossEntropyLoss', 'scale_factor': 1.0, 'ignore_index': -100, 'reduction': 'mean', 
         'class_weight': [2.5959933, 6.7415504, 3.5354059, 9.8663225, 9.690899, 9.369352, 10.289121, 9.953208, 4.3097677, 9.490387, 7.674431, 9.396905, 10.347791, 6.3927646, 10.226669, 10.241062, 10.280587, 10.396974, 10.055647],
     },
 }

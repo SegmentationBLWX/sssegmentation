@@ -74,7 +74,7 @@ class Resize(object):
 
 '''RandomCrop'''
 class RandomCrop(object):
-    def __init__(self, crop_size, ignore_index=255, one_category_max_ratio=0.75):
+    def __init__(self, crop_size, ignore_index=-100, one_category_max_ratio=0.75):
         # assert
         assertvalidimagesize(image_size=crop_size)
         # set attributes
@@ -324,7 +324,7 @@ class RGB2Gray(object):
 
 '''RandomCutOut'''
 class RandomCutOut(object):
-    def __init__(self, prob, n_holes, cutout_shape=None, cutout_ratio=None, image_fill_value=(0, 0, 0), seg_target_fill_value=255, img2aug_pos_mapper_fill_value=-1):
+    def __init__(self, prob, n_holes, cutout_shape=None, cutout_ratio=None, image_fill_value=(0, 0, 0), seg_target_fill_value=-100, img2aug_pos_mapper_fill_value=-1):
         # assert
         assertvalidprob(prob=prob)
         assert (cutout_shape is None) ^ (cutout_ratio is None), 'either cutout_shape or cutout_ratio should be specified'
@@ -510,7 +510,7 @@ class PhotoMetricDistortion(object):
 
 '''RandomRotation'''
 class RandomRotation(object):
-    def __init__(self, prob=0.5, angle_upper=30, image_fill_value=0.0, seg_target_fill_value=255, image_interpolation='bicubic', seg_target_interpolation='nearest', img2aug_pos_mapper_fill_value=-1, img2aug_pos_mapper_interpolation='nearest'):
+    def __init__(self, prob=0.5, angle_upper=30, image_fill_value=0.0, seg_target_fill_value=-100, image_interpolation='bicubic', seg_target_interpolation='nearest', img2aug_pos_mapper_fill_value=-1, img2aug_pos_mapper_interpolation='nearest'):
         # assert
         assertvalidprob(prob=prob)
         # set attributes
@@ -598,7 +598,7 @@ class PILRandomGaussianBlur(object):
 
 '''EdgeExtractor'''
 class EdgeExtractor(object):
-    def __init__(self, edge_width=3, ignore_index=255):
+    def __init__(self, edge_width=3, ignore_index=-100):
         # assert
         assert isinstance(edge_width, int)
         # set attributes
@@ -654,7 +654,7 @@ class Normalize(object):
 
 '''Padding'''
 class Padding(object):
-    def __init__(self, output_size, data_type='numpy', image_fill_value=0, seg_target_fill_value=255, edge_target_fill_value=255, img2aug_pos_mapper_fill_value=-1, output_size_auto_adaptive=True):
+    def __init__(self, output_size, data_type='numpy', image_fill_value=0, seg_target_fill_value=-100, edge_target_fill_value=-100, img2aug_pos_mapper_fill_value=-1, output_size_auto_adaptive=True):
         # assert
         assert data_type in ['numpy', 'tensor']
         assertvalidimagesize(image_size=output_size)

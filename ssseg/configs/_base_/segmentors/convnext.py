@@ -26,8 +26,8 @@ SEGMENTOR_CFG = SegmentorConfig(
         'in_channels': 512, 'out_channels': 512, 'dropout': 0.1,
     },
     losses={
-        'loss_aux': {'type': 'CrossEntropyLoss', 'scale_factor': 0.4, 'ignore_index': 255, 'reduction': 'mean'},
-        'loss_cls': {'type': 'CrossEntropyLoss', 'scale_factor': 1.0, 'ignore_index': 255, 'reduction': 'mean'},
+        'loss_aux': {'type': 'CrossEntropyLoss', 'scale_factor': 0.4, 'ignore_index': -100, 'reduction': 'mean'},
+        'loss_cls': {'type': 'CrossEntropyLoss', 'scale_factor': 1.0, 'ignore_index': -100, 'reduction': 'mean'},
     },
     inference={
         'forward': {'mode': 'slide', 'cropsize': (512, 512), 'stride': (341, 341)},

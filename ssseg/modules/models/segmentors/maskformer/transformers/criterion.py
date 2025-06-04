@@ -84,7 +84,7 @@ class SetCriterion(nn.Module):
         loss_map = {'labels': self.losslabels, 'masks': self.lossmasks}
         return loss_map[loss_type](outputs, targets, indices, num_masks)
     '''formattargets'''
-    def formattargets(self, seg, ignore_index=255, background_idx=0):
+    def formattargets(self, seg, ignore_index=-100, background_idx=0):
         labels, masks = [], []
         for label in torch.unique(seg):
             if int(label) == ignore_index: continue

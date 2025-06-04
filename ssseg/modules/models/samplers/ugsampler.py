@@ -11,7 +11,7 @@ from .base import BasePixelSampler
 
 '''UGSampler'''
 class UGSampler(BasePixelSampler):
-    def __init__(self, num_points, oversample_ratio, importance_sample_ratio, ignore_index=255, num_classes=None, reformat_target=True):
+    def __init__(self, num_points, oversample_ratio, importance_sample_ratio, ignore_index=-100, num_classes=None, reformat_target=True):
         super(UGSampler, self).__init__()
         # assert
         assert oversample_ratio >= 1

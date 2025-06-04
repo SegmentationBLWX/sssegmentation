@@ -51,7 +51,7 @@ class ADE20kDataset(BaseDataset):
         (255, 255, 0), (0, 153, 255), (0, 41, 255), (0, 255, 204), (41, 0, 255), (41, 255, 0), (173, 0, 255), (0, 245, 255), (71, 0, 255), (122, 0, 255), (0, 255, 184),
         (0, 92, 255), (184, 255, 0), (0, 133, 255), (255, 214, 0), (25, 194, 194), (102, 255, 0), (92, 0, 255)
     ]
-    clsid2label = {0: 255}
+    clsid2label = {0: -100}
     for i in range(1, num_classes+1): clsid2label[i] = i - 1
     assert num_classes == len(classnames) and num_classes == len(palette)
     def __init__(self, mode, logger_handle, dataset_cfg):

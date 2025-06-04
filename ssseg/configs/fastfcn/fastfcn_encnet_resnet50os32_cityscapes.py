@@ -33,9 +33,9 @@ SEGMENTOR_CFG.update({
         'in_channels': 1024, 'out_channels': 512, 'dropout': 0.1,
     },
     'losses': {
-        'loss_aux': {'type': 'CrossEntropyLoss', 'scale_factor': 0.4, 'ignore_index': 255, 'reduction': 'mean'},
+        'loss_aux': {'type': 'CrossEntropyLoss', 'scale_factor': 0.4, 'ignore_index': -100, 'reduction': 'mean'},
         'loss_se': {'type': 'CrossEntropyLoss', 'scale_factor': 0.2, 'reduction': 'mean', 'use_sigmoid': True},
-        'loss_cls': {'type': 'CrossEntropyLoss', 'scale_factor': 1.0, 'ignore_index': 255, 'reduction': 'mean'},
+        'loss_cls': {'type': 'CrossEntropyLoss', 'scale_factor': 1.0, 'ignore_index': -100, 'reduction': 'mean'},
     }
 })
 SEGMENTOR_CFG['work_dir'] = os.path.split(__file__)[-1].split('.')[0]

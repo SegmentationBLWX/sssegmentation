@@ -10,8 +10,8 @@ FASTFCN_SEGMENTOR_CFG = SegmentorConfig(
     logger_handle_cfg={'type': 'LocalLoggerHandle', 'logfilepath': ''},
     training_logging_manager_cfg={'log_interval_iters': 50},
     losses={
-        'loss_aux': {'type': 'CrossEntropyLoss', 'scale_factor': 0.4, 'ignore_index': 255, 'reduction': 'mean'},
-        'loss_cls': {'type': 'CrossEntropyLoss', 'scale_factor': 1.0, 'ignore_index': 255, 'reduction': 'mean'},
+        'loss_aux': {'type': 'CrossEntropyLoss', 'scale_factor': 0.4, 'ignore_index': -100, 'reduction': 'mean'},
+        'loss_cls': {'type': 'CrossEntropyLoss', 'scale_factor': 1.0, 'ignore_index': -100, 'reduction': 'mean'},
     },
     inference={
         'forward': {'mode': 'whole', 'cropsize': None, 'stride': None},

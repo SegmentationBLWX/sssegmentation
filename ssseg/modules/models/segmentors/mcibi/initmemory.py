@@ -53,7 +53,7 @@ CONFIG = {
         'pretrained': True, 'outstride': 8, 'use_conv3x3_stem': True, 'selected_indices': (2, 3),
     },
     'memory': {
-        'num_feats_per_cls': 1, 'feats_len': 2048, 'ignore_index': 255, 'align_corners': False,
+        'num_feats_per_cls': 1, 'feats_len': 2048, 'ignore_index': -100, 'align_corners': False,
         'savepath': 'init_memory.npy', 'type': ['random_select', 'clustering'][1],
     }
 }
