@@ -91,7 +91,7 @@ class PatchEmbed(nn.Module):
 
 '''PatchMerging'''
 class PatchMerging(nn.Module):
-    def __init__(self, in_channels, out_channels, kernel_size=2, stride=None, padding='corner', dilation=1, bias=False, norm_cfg=None):
+    def __init__(self, in_channels, out_channels, kernel_size=2, stride=None, padding='corner', dilation=1, bias=False, norm_cfg={'type': 'LayerNorm'}):
         super(PatchMerging, self).__init__()
         # initialize
         self.in_channels = in_channels
