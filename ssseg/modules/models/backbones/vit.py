@@ -34,6 +34,9 @@ class TransformerEncoderLayer(nn.Module):
                  qkv_bias=True, act_cfg=None, norm_cfg=None, batch_first=True, attn_cfg=dict(), ffn_cfg=dict(), use_checkpoint=False):
         super(TransformerEncoderLayer, self).__init__()
         self.ln1 = BuildNormalization(placeholder=embed_dims, norm_cfg=norm_cfg)
+        # Note: for ssseg with version <= 1.6.0, we also add dropout_cfg in attn_cfg which seems unreasonable, 
+        # thus the latest ssseg has removed it which may influence the segmentor training results if the segmentors involve this layer.
+        # This means that you may not be able to reproduce the results we report with the latest ssseg, and it is not clear whether this will be better or worse.
         attn_cfg.update(dict(
             embed_dims=embed_dims, num_heads=num_heads, attn_drop=attn_drop_rate, proj_drop=drop_rate, batch_first=batch_first, bias=qkv_bias,
         ))
