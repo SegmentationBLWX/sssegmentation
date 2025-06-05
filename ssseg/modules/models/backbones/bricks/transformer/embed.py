@@ -5,10 +5,10 @@ Author:
     Zhenchao Jin
 '''
 import math
-import collections
+import torch
 import torch.nn as nn
-import collections.abc
 import torch.nn.functional as F
+from ..misc import tolen2tuple
 from ..normalization import BuildNormalization
 
 
@@ -18,9 +18,9 @@ class AdaptivePadding(nn.Module):
         super(AdaptivePadding, self).__init__()
         assert padding in ('same', 'corner')
         self.padding = padding
-        self.kernel_size = self.totuple(kernel_size)
-        self.stride = self.totuple(stride)
-        self.dilation = self.totuple(dilation)
+        self.kernel_size = tolen2tuple(kernel_size)
+        self.stride = tolen2tuple(stride)
+        self.dilation = tolen2tuple(dilation)
     '''getpadshape'''
     def getpadshape(self, input_shape):
         input_h, input_w = input_shape
@@ -40,13 +40,6 @@ class AdaptivePadding(nn.Module):
             elif self.padding == 'same':
                 x = F.pad(x, [pad_w // 2, pad_w - pad_w // 2, pad_h // 2, pad_h - pad_h // 2])
         return x
-    '''totuple'''
-    @staticmethod
-    def totuple(x):
-        if isinstance(x, int): return (x, x)
-        assert isinstance(x, collections.abc.Sequence) and (len(x) == 2)
-        for n in x: assert isinstance(n, int)
-        return tuple(x)
 
 
 '''PatchEmbed'''
@@ -56,16 +49,16 @@ class PatchEmbed(nn.Module):
         # initialize
         self.embed_dims = embed_dims
         if stride is None: stride = kernel_size
-        stride = AdaptivePadding.totuple(stride)
-        dilation = AdaptivePadding.totuple(dilation)
-        kernel_size = AdaptivePadding.totuple(kernel_size)
+        stride = tolen2tuple(stride)
+        dilation = tolen2tuple(dilation)
+        kernel_size = tolen2tuple(kernel_size)
         # adaptive padding
         self.adap_padding = None
         if isinstance(padding, str):
             self.adap_padding = AdaptivePadding(kernel_size=kernel_size, stride=stride, dilation=dilation, padding=padding)
             padding = 0
         # projection
-        padding = AdaptivePadding.totuple(padding)
+        padding = tolen2tuple(padding)
         self.projection = nn.Conv2d(in_channels, embed_dims, kernel_size=kernel_size, stride=stride, padding=padding, bias=bias, dilation=dilation)
         # norm
         self.norm = None
@@ -75,7 +68,7 @@ class PatchEmbed(nn.Module):
         self.init_input_size = None
         self.init_out_size = None
         if input_size:
-            input_size = AdaptivePadding.totuple(input_size)
+            input_size = tolen2tuple(input_size)
             self.init_input_size = input_size
             if self.adap_padding:
                 pad_h, pad_w = self.adap_padding.getpadshape(input_size)
@@ -87,7 +80,7 @@ class PatchEmbed(nn.Module):
             w_out = (input_size[1] + 2 * padding[1] - dilation[1] * (kernel_size[1] - 1) - 1) // stride[1] + 1
             self.init_out_size = (h_out, w_out)
     '''forward'''
-    def forward(self, x):
+    def forward(self, x: torch.Tensor):
         if self.adap_padding: x = self.adap_padding(x)
         x = self.projection(x)
         out_size = (x.shape[2], x.shape[3])
@@ -105,16 +98,16 @@ class PatchMerging(nn.Module):
         self.out_channels = out_channels
         if stride: stride = stride
         else: stride = kernel_size
-        stride = AdaptivePadding.totuple(stride)
-        dilation = AdaptivePadding.totuple(dilation)
-        kernel_size = AdaptivePadding.totuple(kernel_size)
+        stride = tolen2tuple(stride)
+        dilation = tolen2tuple(dilation)
+        kernel_size = tolen2tuple(kernel_size)
         # adaptive padding
         self.adap_padding = None
         if isinstance(padding, str):
             self.adap_padding = AdaptivePadding(kernel_size=kernel_size, stride=stride, dilation=dilation, padding=padding)
             padding = 0
         # sampler
-        padding = AdaptivePadding.totuple(padding)
+        padding = tolen2tuple(padding)
         self.sampler = nn.Unfold(kernel_size=kernel_size, dilation=dilation, padding=padding, stride=stride)
         # norm
         sample_dim = kernel_size[0] * kernel_size[1] * in_channels
@@ -124,7 +117,7 @@ class PatchMerging(nn.Module):
         # reduction
         self.reduction = nn.Linear(sample_dim, out_channels, bias=bias)
     '''forward'''
-    def forward(self, x, input_size):
+    def forward(self, x: torch.Tensor, input_size):
         B, L, C = x.shape
         H, W = input_size
         assert L == H * W, 'input feature has wrong size'
