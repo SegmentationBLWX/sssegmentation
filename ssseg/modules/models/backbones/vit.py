@@ -11,7 +11,7 @@ import torch.nn as nn
 import torch.nn.functional as F
 import torch.utils.model_zoo as model_zoo
 import torch.utils.checkpoint as checkpoint
-from .bricks import BuildNormalization, MultiheadAttention, PatchEmbed, FFN
+from .bricks import BuildNormalization, MultiheadAttention, PatchEmbed, FFN, tolen2tuple
 
 
 '''DEFAULT_MODEL_URLS'''
@@ -35,19 +35,24 @@ class TransformerEncoderLayer(nn.Module):
         super(TransformerEncoderLayer, self).__init__()
         self.ln1 = BuildNormalization(placeholder=embed_dims, norm_cfg=norm_cfg)
         attn_cfg.update(dict(
-            embed_dims=embed_dims, num_heads=num_heads, attn_drop=attn_drop_rate, proj_drop=drop_rate, 
-            dropout_cfg={'type': 'DropPath', 'drop_prob': drop_path_rate}, batch_first=batch_first, bias=qkv_bias,
+            embed_dims=embed_dims, num_heads=num_heads, attn_drop=attn_drop_rate, proj_drop=drop_rate, batch_first=batch_first, bias=qkv_bias,
         ))
-        self.attn = MultiheadAttention(**attn_cfg)
+        self.buildattn(attn_cfg)
         self.ln2 = BuildNormalization(placeholder=embed_dims, norm_cfg=norm_cfg)
         ffn_cfg.update(dict(
             embed_dims=embed_dims, feedforward_channels=feedforward_channels, num_fcs=num_fcs, ffn_drop=drop_rate,
             dropout_cfg={'type': 'DropPath', 'drop_prob': drop_path_rate}, act_cfg=act_cfg,
         ))
-        self.ffn = FFN(**ffn_cfg)
+        self.buildffn(ffn_cfg)
         self.use_checkpoint = use_checkpoint
+    '''buildattn'''
+    def buildattn(self, attn_cfg):
+        self.attn = MultiheadAttention(**attn_cfg)
+    '''buildffn'''
+    def buildffn(self, ffn_cfg):
+        self.ffn = FFN(**ffn_cfg)
     '''forward'''
-    def forward(self, x):
+    def forward(self, x: torch.Tensor):
         def _forward(x):
             x = self.attn(self.ln1(x), identity=x)
             x = self.ffn(self.ln2(x), identity=x)
@@ -61,19 +66,22 @@ class TransformerEncoderLayer(nn.Module):
 
 '''VisionTransformer'''
 class VisionTransformer(nn.Module):
-    def __init__(self, structure_type, img_size=224, patch_size=16, in_channels=3, embed_dims=768, num_layers=12, num_heads=12, mlp_ratio=4, out_indices=(9, 14, 19, 23), qkv_bias=True,
-                 drop_rate=0., attn_drop_rate=0., drop_path_rate=0., with_cls_token=True, output_cls_token=False, norm_cfg={'type': 'LayerNorm', 'eps': 1e-6}, act_cfg={'type': 'GELU'}, 
-                 patch_norm=False, final_norm=False, interpolate_mode='bilinear', num_fcs=2, use_checkpoint=False, pretrained=True, pretrained_model_path=''):
+    def __init__(self, structure_type, img_size=224, patch_size=16, patch_pad='corner', in_channels=3, embed_dims=768, num_layers=12, num_heads=12, mlp_ratio=4, out_origin=False, out_indices=(9, 14, 19, 23),
+                 qkv_bias=True, drop_rate=0., attn_drop_rate=0., drop_path_rate=0., with_cls_token=True, output_cls_token=False, norm_cfg={'type': 'LayerNorm', 'eps': 1e-6}, act_cfg={'type': 'GELU'}, 
+                 patch_norm=False, patch_bias=False, pre_norm=False, final_norm=False, interpolate_mode='bilinear', num_fcs=2, use_checkpoint=False, pretrained=True, pretrained_model_path=''):
         super(VisionTransformer, self).__init__()
+        img_size = tolen2tuple(img_size)
         # set attributes
         self.structure_type = structure_type
         self.img_size = img_size
         self.patch_size = patch_size
+        self.patch_pad = patch_pad
         self.in_channels = in_channels
         self.embed_dims = embed_dims
         self.num_layers = num_layers
         self.num_heads = num_heads
         self.mlp_ratio = mlp_ratio
+        self.out_origin = out_origin
         self.out_indices = out_indices
         self.qkv_bias = qkv_bias
         self.drop_rate = drop_rate
@@ -84,28 +92,30 @@ class VisionTransformer(nn.Module):
         self.norm_cfg = norm_cfg
         self.act_cfg = act_cfg
         self.patch_norm = patch_norm
+        self.patch_bias = patch_bias
+        self.pre_norm = pre_norm
+        self.final_norm = final_norm
         self.num_fcs = num_fcs
         self.pretrained = pretrained
         self.pretrained_model_path = pretrained_model_path
         self.interpolate_mode = interpolate_mode
         self.use_checkpoint = use_checkpoint
-        self.final_norm = final_norm
         # assert
         if output_cls_token: assert with_cls_token, 'with_cls_token must be True if set output_cls_token to True.'
         if structure_type in AUTO_ASSERT_STRUCTURE_TYPES:
             for key, value in AUTO_ASSERT_STRUCTURE_TYPES[structure_type].items():
                 assert hasattr(self, key) and (getattr(self, key) == value)
-        if isinstance(img_size, int): img_size = (img_size, img_size)
-        self.img_size = img_size
         # Image to Patch Embedding
         self.patch_embed = PatchEmbed(
             in_channels=in_channels, embed_dims=embed_dims, kernel_size=patch_size, stride=patch_size,
-            padding='corner', norm_cfg=norm_cfg if patch_norm else None,
+            padding=patch_pad, bias=patch_bias, norm_cfg=norm_cfg if patch_norm else None,
         )
         num_patches = (img_size[0] // patch_size) * (img_size[1] // patch_size)
         self.cls_token = nn.Parameter(torch.zeros(1, 1, embed_dims))
         self.pos_embed = nn.Parameter(torch.zeros(1, num_patches + 1, embed_dims))
         self.drop_after_pos = nn.Dropout(p=drop_rate)
+        if self.pre_norm:
+            self.ln_pre = BuildNormalization(placeholder=embed_dims, norm_cfg=norm_cfg)
         if isinstance(out_indices, int):
             if out_indices == -1:
                 out_indices = num_layers - 1
@@ -123,7 +133,6 @@ class VisionTransformer(nn.Module):
                 drop_rate=drop_rate, drop_path_rate=dpr[i], num_fcs=num_fcs, qkv_bias=qkv_bias, act_cfg=act_cfg, norm_cfg=norm_cfg,
                 batch_first=True, use_checkpoint=use_checkpoint,
             ))
-        
         if final_norm:
             self.ln1 = BuildNormalization(placeholder=embed_dims, norm_cfg=norm_cfg)
         # load pretrained weights
@@ -174,7 +183,7 @@ class VisionTransformer(nn.Module):
             new_ckpt[new_k] = v
         return new_ckpt
     '''posembeding'''
-    def posembeding(self, patched_img, hw_shape, pos_embed):
+    def posembeding(self, patched_img: torch.Tensor, hw_shape, pos_embed: torch.Tensor):
         assert patched_img.ndim == 3 and pos_embed.ndim == 3, 'the shapes of patched_img and pos_embed must be [B, L, C]'
         x_len, pos_len = patched_img.shape[1], pos_embed.shape[1]
         if x_len != pos_len:
@@ -187,7 +196,7 @@ class VisionTransformer(nn.Module):
         return self.drop_after_pos(patched_img + pos_embed)
     '''resizeposembed'''
     @staticmethod
-    def resizeposembed(pos_embed, input_shpae, pos_shape, mode):
+    def resizeposembed(pos_embed: torch.Tensor, input_shpae, pos_shape, mode):
         assert pos_embed.ndim == 3, 'shape of pos_embed must be [B, L, C]'
         pos_h, pos_w = pos_shape
         cls_token_weight = pos_embed[:, 0:1]
@@ -198,7 +207,7 @@ class VisionTransformer(nn.Module):
         pos_embed = torch.cat((cls_token_weight, pos_embed_weight), dim=1)
         return pos_embed
     '''forward'''
-    def forward(self, inputs):
+    def forward(self, inputs: torch.Tensor):
         batch_size = inputs.shape[0]
         x, hw_shape = self.patch_embed(inputs)
         # stole cls_tokens impl from Phil Wang, thanks
@@ -208,7 +217,21 @@ class VisionTransformer(nn.Module):
         # remove class token for transformer encoder input
         if not self.with_cls_token:
             x = x[:, 1:]
+        # pre norm
+        if self.pre_norm:
+            x = self.ln_pre(x)
+        # construct outputs
         outs = []
+        if self.out_origin:
+            if self.with_cls_token:
+                out = x[:, 1:]
+            else:
+                out = x
+            B, _, C = out.shape
+            out = out.reshape(B, hw_shape[0], hw_shape[1], C).permute(0, 3, 1, 2).contiguous()
+            if self.output_cls_token:
+                out = [out, x[:, 0]]
+            outs.append(out)
         for i, layer in enumerate(self.layers):
             x = layer(x)
             if i == len(self.layers) - 1:
