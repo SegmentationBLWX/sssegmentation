@@ -4,7 +4,9 @@ Function:
 Author:
     Zhenchao Jin
 '''
+import torch
 import torch.nn as nn
+import torch.utils.checkpoint as checkpoint
 from ...utils import loadpretrainedweights
 from .bricks import BuildNormalization, BuildActivation
 
@@ -27,7 +29,7 @@ AUTO_ASSERT_STRUCTURE_TYPES = {}
 '''BasicBlock'''
 class BasicBlock(nn.Module):
     expansion = 1
-    def __init__(self, inplanes, planes, stride=1, dilation=1, downsample=None, norm_cfg=None, act_cfg=None):
+    def __init__(self, inplanes, planes, stride=1, dilation=1, downsample=None, style='pytorch', use_checkpoint=False, norm_cfg=None, act_cfg=None):
         super(BasicBlock, self).__init__()
         self.conv1 = nn.Conv2d(inplanes, planes, kernel_size=3, stride=stride, padding=dilation, dilation=dilation, bias=False)
         self.bn1 = BuildNormalization(placeholder=planes, norm_cfg=norm_cfg)
@@ -37,16 +39,23 @@ class BasicBlock(nn.Module):
         self.downsample = downsample
         self.stride = stride
         self.dilation = dilation
+        self.use_checkpoint = use_checkpoint
     '''forward'''
-    def forward(self, x):
-        identity = x
-        out = self.conv1(x)
-        out = self.bn1(out)
-        out = self.relu(out)
-        out = self.conv2(out)
-        out = self.bn2(out)
-        if self.downsample is not None: identity = self.downsample(x)
-        out += identity
+    def forward(self, x: torch.Tensor):
+        def _forward(x):
+            identity = x
+            out = self.conv1(x)
+            out = self.bn1(out)
+            out = self.relu(out)
+            out = self.conv2(out)
+            out = self.bn2(out)
+            if self.downsample is not None: identity = self.downsample(x)
+            out += identity
+            return out
+        if self.use_checkpoint and x.requires_grad:
+            out = checkpoint.checkpoint(_forward, x)
+        else:
+            out = _forward(x)
         out = self.relu(out)
         return out
 
@@ -54,31 +63,52 @@ class BasicBlock(nn.Module):
 '''Bottleneck'''
 class Bottleneck(nn.Module):
     expansion = 4
-    def __init__(self, inplanes, planes, stride=1, dilation=1, downsample=None, norm_cfg=None, act_cfg=None):
+    def __init__(self, inplanes, planes, stride=1, dilation=1, downsample=None, style='pytorch', use_checkpoint=False, norm_cfg=None, act_cfg=None):
         super(Bottleneck, self).__init__()
-        self.conv1 = nn.Conv2d(inplanes, planes, kernel_size=1, stride=1, padding=0, bias=False)
+        assert style in ['pytorch', 'caffe']
+        # set attributes
+        self.inplanes = inplanes
+        self.planes = planes
+        self.stride = stride
+        self.dilation = dilation
+        self.downsample = downsample
+        self.style = style
+        self.use_checkpoint = use_checkpoint
+        self.norm_cfg = norm_cfg
+        self.act_cfg = act_cfg
+        # build layers
+        if self.style == 'pytorch':
+            self.conv1_stride = 1
+            self.conv2_stride = stride
+        else:
+            self.conv1_stride = stride
+            self.conv2_stride = 1
+        self.conv1 = nn.Conv2d(inplanes, planes, kernel_size=1, stride=self.conv1_stride, padding=0, bias=False)
         self.bn1 = BuildNormalization(placeholder=planes, norm_cfg=norm_cfg)
-        self.conv2 = nn.Conv2d(planes, planes, kernel_size=3, stride=stride, padding=dilation, dilation=dilation, bias=False)
+        self.conv2 = nn.Conv2d(planes, planes, kernel_size=3, stride=self.conv2_stride, padding=dilation, dilation=dilation, bias=False)
         self.bn2 = BuildNormalization(placeholder=planes, norm_cfg=norm_cfg)
         self.conv3 = nn.Conv2d(planes, planes * self.expansion, kernel_size=1, stride=1, padding=0, bias=False)
         self.bn3 = BuildNormalization(placeholder=planes * self.expansion, norm_cfg=norm_cfg)
         self.relu = BuildActivation(act_cfg)
-        self.downsample = downsample
-        self.stride = stride
-        self.dilation = dilation
     '''forward'''
-    def forward(self, x):
-        identity = x
-        out = self.conv1(x)
-        out = self.bn1(out)
-        out = self.relu(out)
-        out = self.conv2(out)
-        out = self.bn2(out)
-        out = self.relu(out)
-        out = self.conv3(out)
-        out = self.bn3(out)
-        if self.downsample is not None: identity = self.downsample(x)
-        out += identity
+    def forward(self, x: torch.Tensor):
+        def _forward(x):
+            identity = x
+            out = self.conv1(x)
+            out = self.bn1(out)
+            out = self.relu(out)
+            out = self.conv2(out)
+            out = self.bn2(out)
+            out = self.relu(out)
+            out = self.conv3(out)
+            out = self.bn3(out)
+            if self.downsample is not None: identity = self.downsample(x)
+            out += identity
+            return out
+        if self.use_checkpoint and x.requires_grad:
+            out = checkpoint.checkpoint(_forward, x)
+        else:
+            out = _forward(x)
         out = self.relu(out)
         return out
 
