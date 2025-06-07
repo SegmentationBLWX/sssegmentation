@@ -21,7 +21,7 @@ AUTO_ASSERT_STRUCTURE_TYPES = {}
 class SpatialPath(nn.Module):
     def __init__(self, in_channels=3, num_channels_list=(64, 64, 64, 128), norm_cfg=None, act_cfg=None):
         super(SpatialPath, self).__init__()
-        assert len(num_channels_list) == 4
+        assert len(num_channels_list) == 4, 'Length of input channels list of Spatial Path must be 4!'
         self.layers = []
         for idx in range(len(num_channels_list)):
             layer_name = f'layer{idx + 1}'
@@ -80,7 +80,7 @@ class AttentionRefinementModule(nn.Module):
 class ContextPath(nn.Module):
     def __init__(self, backbone_cfg, context_channels_list=(128, 256, 512), norm_cfg=None, act_cfg=None):
         super(ContextPath, self).__init__()
-        assert len(context_channels_list) == 3
+        assert len(context_channels_list) == 3, 'Length of input channels of Context Path must be 3!'
         if 'norm_cfg' not in backbone_cfg: backbone_cfg['norm_cfg'] = norm_cfg
         self.backbone_net = self.buildbackbone(backbone_cfg)
         self.arm16 = AttentionRefinementModule(context_channels_list[1], context_channels_list[0], norm_cfg=norm_cfg, act_cfg=act_cfg)
