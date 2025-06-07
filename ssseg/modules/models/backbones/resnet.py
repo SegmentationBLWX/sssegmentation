@@ -192,7 +192,7 @@ class ResNet(nn.Module):
             )
             self.load_state_dict(state_dict, strict=False)
     '''makelayer'''
-    def makelayer(self, block, inplanes, planes, num_blocks, stride=1, dilation=1, contract_dilation=True, use_avg_for_downsample=False, norm_cfg=None, act_cfg=None, style='pytorch', use_checkpoint=False):
+    def makelayer(self, block, inplanes, planes, num_blocks, stride=1, dilation=1, contract_dilation=True, use_avg_for_downsample=False, norm_cfg=None, act_cfg=None, style='pytorch', use_checkpoint=False, block_extra_args=None):
         downsample = None
         dilations = [dilation] * num_blocks
         if contract_dilation and dilation > 1: dilations[0] = dilation // 2
@@ -209,9 +209,10 @@ class ResNet(nn.Module):
                     BuildNormalization(placeholder=planes * block.expansion, norm_cfg=norm_cfg)
                 )
         layers = []
-        layers.append(block(inplanes, planes, stride=stride, dilation=dilations[0], downsample=downsample, norm_cfg=norm_cfg, act_cfg=act_cfg, style=style, use_checkpoint=use_checkpoint))
+        if block_extra_args is None: block_extra_args = dict()
+        layers.append(block(inplanes, planes, stride=stride, dilation=dilations[0], downsample=downsample, norm_cfg=norm_cfg, act_cfg=act_cfg, style=style, use_checkpoint=use_checkpoint, **block_extra_args))
         for i in range(1, num_blocks): 
-            layers.append(block(planes * block.expansion, planes, stride=1, dilation=dilations[i], norm_cfg=norm_cfg, act_cfg=act_cfg, style=style, use_checkpoint=use_checkpoint))
+            layers.append(block(planes * block.expansion, planes, stride=1, dilation=dilations[i], norm_cfg=norm_cfg, act_cfg=act_cfg, style=style, use_checkpoint=use_checkpoint, **block_extra_args))
         return nn.Sequential(*layers)
     '''forward'''
     def forward(self, x):
