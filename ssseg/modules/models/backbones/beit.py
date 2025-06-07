@@ -50,6 +50,9 @@ class BEiTAttention(nn.Module):
         self.attn_drop = nn.Dropout(attn_drop_rate)
         self.proj = nn.Linear(embed_dims, embed_dims)
         self.proj_drop = nn.Dropout(proj_drop_rate)
+        self.initweights()
+    '''initweights'''
+    def initweights(self):
         truncnormal(self.relative_position_bias_table, std=0.02)
     '''initrelposembedding'''
     def initrelposembedding(self):
