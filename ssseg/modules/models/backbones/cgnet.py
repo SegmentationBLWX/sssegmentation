@@ -62,7 +62,7 @@ class ContextGuidedBlock(nn.Module):
         padding = (kernel_size - 1) // 2
         # instance modules
         self.conv1x1 = nn.Sequential(
-            nn.Conv2d(in_channels, channels, kernel_size=kernel_size, stride=stride, padding=padding, bias=False),
+            nn.Conv2d(in_channels, channels, kernel_size=kernel_size, stride=stride, padding=padding, bias=False if norm_cfg is not None else True),
             BuildNormalization(placeholder=channels, norm_cfg=norm_cfg),
             BuildActivation(act_cfg),
         )
@@ -140,7 +140,7 @@ class CGNet(nn.Module):
         self.stem = nn.ModuleList()
         for i in range(3):
             self.stem.append(nn.Sequential(
-                nn.Conv2d(cur_channels, num_channels[0], kernel_size=3, stride=2 if i == 0 else 1, padding=1, bias=False),
+                nn.Conv2d(cur_channels, num_channels[0], kernel_size=3, stride=2 if i == 0 else 1, padding=1, bias=False if norm_cfg is not None else True),
                 BuildNormalization(placeholder=num_channels[0], norm_cfg=norm_cfg),
                 BuildActivation(act_cfg),
             ))

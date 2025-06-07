@@ -30,7 +30,7 @@ class PoolingPyramidModule(nn.ModuleList):
         for pool_scale in pool_scales:
             self.append(nn.Sequential(
                 nn.AdaptiveAvgPool2d(pool_scale),
-                nn.Conv2d(in_channels, out_channels, kernel_size=1, stride=1, padding=0, bias=False),
+                nn.Conv2d(in_channels, out_channels, kernel_size=1, stride=1, padding=0, bias=False if norm_cfg is not None else True),
                 BuildNormalization(placeholder=out_channels, norm_cfg=norm_cfg),
                 BuildActivation(act_cfg),
             ))
@@ -53,7 +53,7 @@ class LearningToDownsample(nn.Module):
         self.dw_act_cfg = dw_act_cfg
         dw_channels1, dw_channels2 = dw_channels
         self.conv = nn.Sequential(
-            nn.Conv2d(in_channels, dw_channels1, kernel_size=3, stride=2, padding=1, bias=False),
+            nn.Conv2d(in_channels, dw_channels1, kernel_size=3, stride=2, padding=1, bias=False if norm_cfg is not None else True),
             BuildNormalization(placeholder=dw_channels1, norm_cfg=norm_cfg),
             BuildActivation(act_cfg),
         )
@@ -88,7 +88,7 @@ class GlobalFeatureExtractor(nn.Module):
         self.bottleneck3 = self.makelayer(block_channels[1], block_channels[2], num_blocks[2], strides[2], expand_ratio)
         self.ppm = PoolingPyramidModule(pool_scales, block_channels[2], block_channels[2] // 4, norm_cfg=self.norm_cfg, act_cfg=self.act_cfg, align_corners=align_corners)
         self.out = nn.Sequential(
-            nn.Conv2d(block_channels[2] * 2, out_channels, kernel_size=3, stride=1, padding=1, bias=False),
+            nn.Conv2d(block_channels[2] * 2, out_channels, kernel_size=3, stride=1, padding=1, bias=False if norm_cfg is not None else True),
             BuildNormalization(placeholder=out_channels, norm_cfg=norm_cfg),
             BuildActivation(act_cfg),
         )
@@ -119,16 +119,16 @@ class FeatureFusionModule(nn.Module):
         self.align_corners = align_corners
         # define modules
         self.dwconv = nn.Sequential(
-            nn.Conv2d(lower_in_channels, out_channels, kernel_size=3, stride=1, padding=1, groups=out_channels, bias=False),
+            nn.Conv2d(lower_in_channels, out_channels, kernel_size=3, stride=1, padding=1, groups=out_channels, bias=False if norm_cfg is not None else True),
             BuildNormalization(placeholder=out_channels, norm_cfg=norm_cfg),
             BuildActivation(dwconv_act_cfg),
         )
         self.conv_lower_res = nn.Sequential(
-            nn.Conv2d(out_channels, out_channels, kernel_size=1, stride=1, padding=0, bias=False),
+            nn.Conv2d(out_channels, out_channels, kernel_size=1, stride=1, padding=0, bias=False if norm_cfg is not None else True),
             BuildNormalization(placeholder=out_channels, norm_cfg=norm_cfg),
         )
         self.conv_higher_res = nn.Sequential(
-            nn.Conv2d(higher_in_channels, out_channels, kernel_size=1, stride=1, padding=0, bias=False),
+            nn.Conv2d(higher_in_channels, out_channels, kernel_size=1, stride=1, padding=0, bias=False if norm_cfg is not None else True),
             BuildNormalization(placeholder=out_channels, norm_cfg=norm_cfg),
         )
         self.act = BuildActivation(conv_act_cfg)

@@ -28,19 +28,19 @@ class SpatialPath(nn.Module):
             self.layers.append(layer_name)
             if idx == 0:
                 conv = nn.Sequential(
-                    nn.Conv2d(in_channels, num_channels_list[idx], kernel_size=7, stride=2, padding=3, bias=False),
+                    nn.Conv2d(in_channels, num_channels_list[idx], kernel_size=7, stride=2, padding=3, bias=False if norm_cfg is not None else True),
                     BuildNormalization(placeholder=num_channels_list[idx], norm_cfg=norm_cfg),
                     BuildActivation(act_cfg),
                 )
             elif idx == len(num_channels_list) - 1:
                 conv = nn.Sequential(
-                    nn.Conv2d(num_channels_list[idx - 1], num_channels_list[idx], kernel_size=1, stride=1, padding=0, bias=False),
+                    nn.Conv2d(num_channels_list[idx - 1], num_channels_list[idx], kernel_size=1, stride=1, padding=0, bias=False if norm_cfg is not None else True),
                     BuildNormalization(placeholder=num_channels_list[idx], norm_cfg=norm_cfg),
                     BuildActivation(act_cfg),
                 )
             else:
                 conv = nn.Sequential(
-                    nn.Conv2d(num_channels_list[idx - 1], num_channels_list[idx], kernel_size=3, stride=2, padding=1, bias=False),
+                    nn.Conv2d(num_channels_list[idx - 1], num_channels_list[idx], kernel_size=3, stride=2, padding=1, bias=False if norm_cfg is not None else True),
                     BuildNormalization(placeholder=num_channels_list[idx], norm_cfg=norm_cfg),
                     BuildActivation(act_cfg),
                 )
@@ -58,13 +58,13 @@ class AttentionRefinementModule(nn.Module):
     def __init__(self, in_channels, out_channels, norm_cfg=None, act_cfg=None):
         super(AttentionRefinementModule, self).__init__()
         self.conv_layer = nn.Sequential(
-            nn.Conv2d(in_channels, out_channels, kernel_size=3, stride=1, padding=1, bias=False),
+            nn.Conv2d(in_channels, out_channels, kernel_size=3, stride=1, padding=1, bias=False if norm_cfg is not None else True),
             BuildNormalization(placeholder=out_channels, norm_cfg=norm_cfg),
             BuildActivation(act_cfg),
         )
         self.atten_conv_layer = nn.Sequential(
             nn.AdaptiveAvgPool2d((1, 1)),
-            nn.Conv2d(out_channels, out_channels, kernel_size=1, stride=1, padding=0, bias=False),
+            nn.Conv2d(out_channels, out_channels, kernel_size=1, stride=1, padding=0, bias=False if norm_cfg is not None else True),
             BuildNormalization(placeholder=out_channels, norm_cfg=norm_cfg),
             nn.Sigmoid(),
         )
@@ -86,18 +86,18 @@ class ContextPath(nn.Module):
         self.arm16 = AttentionRefinementModule(context_channels_list[1], context_channels_list[0], norm_cfg=norm_cfg, act_cfg=act_cfg)
         self.arm32 = AttentionRefinementModule(context_channels_list[2], context_channels_list[0], norm_cfg=norm_cfg, act_cfg=act_cfg)
         self.conv_head32 = nn.Sequential(
-            nn.Conv2d(context_channels_list[0], context_channels_list[0], kernel_size=3, stride=1, padding=1, bias=False),
+            nn.Conv2d(context_channels_list[0], context_channels_list[0], kernel_size=3, stride=1, padding=1, bias=False if norm_cfg is not None else True),
             BuildNormalization(placeholder=context_channels_list[0], norm_cfg=norm_cfg),
             BuildActivation(act_cfg),
         )
         self.conv_head16 = nn.Sequential(
-            nn.Conv2d(context_channels_list[0], context_channels_list[0], kernel_size=3, stride=1, padding=1, bias=False),
+            nn.Conv2d(context_channels_list[0], context_channels_list[0], kernel_size=3, stride=1, padding=1, bias=False if norm_cfg is not None else True),
             BuildNormalization(placeholder=context_channels_list[0], norm_cfg=norm_cfg),
             BuildActivation(act_cfg),
         )
         self.gap_conv = nn.Sequential(
             nn.AdaptiveAvgPool2d((1, 1)),
-            nn.Conv2d(context_channels_list[2], context_channels_list[0], kernel_size=1, stride=1, padding=0, bias=False),
+            nn.Conv2d(context_channels_list[2], context_channels_list[0], kernel_size=1, stride=1, padding=0, bias=False if norm_cfg is not None else True),
             BuildNormalization(placeholder=context_channels_list[0], norm_cfg=norm_cfg),
             BuildActivation(act_cfg),
         )
@@ -130,13 +130,13 @@ class FeatureFusionModule(nn.Module):
     def __init__(self, in_channels, out_channels, norm_cfg=None, act_cfg=None):
         super(FeatureFusionModule, self).__init__()
         self.conv1 = nn.Sequential(
-            nn.Conv2d(in_channels, out_channels, kernel_size=1, stride=1, padding=0, bias=False),
+            nn.Conv2d(in_channels, out_channels, kernel_size=1, stride=1, padding=0, bias=False if norm_cfg is not None else True),
             BuildNormalization(placeholder=out_channels, norm_cfg=norm_cfg),
             BuildActivation(act_cfg),
         )
         self.gap = nn.AdaptiveAvgPool2d((1, 1))
         self.conv_atten = nn.Sequential(
-            nn.Conv2d(out_channels, out_channels, kernel_size=1, stride=1, padding=0, bias=False),
+            nn.Conv2d(out_channels, out_channels, kernel_size=1, stride=1, padding=0, bias=False if norm_cfg is not None else True),
             BuildNormalization(placeholder=out_channels, norm_cfg=norm_cfg),
             BuildActivation(act_cfg),
             nn.Sigmoid(),
