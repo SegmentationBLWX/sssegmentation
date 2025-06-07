@@ -46,7 +46,7 @@ class DetailBranch(nn.Module):
                 ))
         self.detail_branch = nn.ModuleList(detail_branch)
     '''forward'''
-    def forward(self, x):
+    def forward(self, x: torch.Tensor):
         for stage in self.detail_branch:
             x = stage(x)
         return x
@@ -119,7 +119,7 @@ class GELayer(nn.Module):
         )
         self.act = BuildActivation(act_cfg)
     '''forward'''
-    def forward(self, x):
+    def forward(self, x: torch.Tensor):
         identity = x
         x = self.conv1(x)
         x = self.dwconv(x)
@@ -156,7 +156,7 @@ class CEBlock(nn.Module):
             BuildActivation(act_cfg),
         )
     '''forward'''
-    def forward(self, x):
+    def forward(self, x: torch.Tensor):
         identity = x
         x = self.gap(x)
         x = self.conv_gap(x)
@@ -196,7 +196,7 @@ class SemanticBranch(nn.Module):
         )
         self.semantic_stages.append(f'stage{len(semantic_channels)}_CEBlock')
     '''forward'''
-    def forward(self, x):
+    def forward(self, x: torch.Tensor):
         semantic_outs = []
         for stage_name in self.semantic_stages:
             semantic_stage = getattr(self, stage_name)
@@ -236,7 +236,7 @@ class BGALayer(nn.Module):
             BuildActivation(act_cfg),
         )
     '''forward'''
-    def forward(self, x_d, x_s):
+    def forward(self, x_d: torch.Tensor, x_s: torch.Tensor):
         detail_dwconv = self.detail_dwconv(x_d)
         detail_down = self.detail_down(x_d)
         semantic_conv = self.semantic_conv(x_s)
@@ -283,7 +283,7 @@ class BiSeNetV2(nn.Module):
             )
             self.load_state_dict(state_dict, strict=False)
     '''forward'''
-    def forward(self, x):
+    def forward(self, x: torch.Tensor):
         x_detail = self.detail(x)
         x_semantic_lst = self.semantic(x)
         x_head = self.bga(x_detail, x_semantic_lst[-1])
