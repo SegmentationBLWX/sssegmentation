@@ -25,7 +25,7 @@ AUTO_ASSERT_STRUCTURE_TYPES = {}
 class MobileNetV2(nn.Module):
     arch_settings = [[1, 16, 1], [6, 24, 2], [6, 32, 3], [6, 64, 4], [6, 96, 3], [6, 160, 3], [6, 320, 1]]
     def __init__(self, structure_type, in_channels=3, widen_factor=1, outstride=8, out_indices=(1, 2, 4, 6), norm_cfg={'type': 'SyncBatchNorm'}, 
-                 act_cfg={'type': 'ReLU6', 'inplace': True}, pretrained=True, pretrained_model_path=''):
+                 act_cfg={'type': 'ReLU6', 'inplace': True}, pretrained=True, pretrained_model_path='', use_checkpoint=False):
         super(MobileNetV2, self).__init__()
         # set attributes
         self.out_indices = out_indices
@@ -37,6 +37,7 @@ class MobileNetV2(nn.Module):
         self.act_cfg = act_cfg
         self.pretrained = pretrained
         self.pretrained_model_path = pretrained_model_path
+        self.use_checkpoint = use_checkpoint
         # assert
         if structure_type in AUTO_ASSERT_STRUCTURE_TYPES:
             for key, value in AUTO_ASSERT_STRUCTURE_TYPES[structure_type].items():
@@ -47,7 +48,7 @@ class MobileNetV2(nn.Module):
             16: ((1, 2, 2, 2, 1, 1, 1), (1, 1, 1, 1, 1, 2, 2)),
             32: ((1, 2, 2, 2, 1, 2, 1), (1, 1, 1, 1, 1, 1, 1)),
         }
-        assert outstride in outstride_to_strides_and_dilations, 'unsupport outstride %s in MobileNetV2' % outstride
+        assert outstride in outstride_to_strides_and_dilations, f'invalid outstride {outstride} in MobileNetV2'
         stride_list, dilation_list = outstride_to_strides_and_dilations[outstride]
         # conv1
         self.in_channels = makedivisible(32 * widen_factor, 8)
@@ -104,7 +105,7 @@ class MobileNetV2(nn.Module):
             layers.append(
                 InvertedResidual(
                     self.in_channels,  out_channels, stride=stride if i == 0 else 1, expand_ratio=expand_ratio, 
-                    dilation=dilation if i == 0 else 1, norm_cfg=norm_cfg, act_cfg=act_cfg
+                    dilation=dilation if i == 0 else 1, norm_cfg=norm_cfg, act_cfg=act_cfg, use_checkpoint=self.use_checkpoint
                 )
             )
             self.in_channels = out_channels
