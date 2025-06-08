@@ -87,7 +87,7 @@ class EfficientMultiheadAttention(MultiheadAttention):
             self.sr = nn.Conv2d(embed_dims, embed_dims, kernel_size=sr_ratio, stride=sr_ratio, padding=0)
             self.norm = BuildNormalization(placeholder=embed_dims, norm_cfg=norm_cfg)
     '''forward'''
-    def forward(self, x, hw_shape, identity=None):
+    def forward(self, x: torch.Tensor, hw_shape, identity=None):
         x_q = x
         if self.sr_ratio > 1:
             x_kv = nlctonchw(x, hw_shape)
@@ -123,7 +123,7 @@ class TransformerEncoderLayer(nn.Module):
         )
         self.use_checkpoint = use_checkpoint
     '''forward'''
-    def forward(self, x, hw_shape):
+    def forward(self, x: torch.Tensor, hw_shape):
         def _forward(x):
             x = self.attn(self.norm1(x), hw_shape, identity=x)
             x = self.ffn(self.norm2(x), hw_shape, identity=x)
