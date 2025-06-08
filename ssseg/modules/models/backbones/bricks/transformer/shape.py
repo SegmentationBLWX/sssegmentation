@@ -8,7 +8,7 @@ import torch
 
 
 '''nlctonchw'''
-def nlctonchw(x, hw_shape):
+def nlctonchw(x: torch.Tensor, hw_shape):
     H, W = hw_shape
     assert len(x.shape) == 3
     B, L, C = x.shape
@@ -17,13 +17,13 @@ def nlctonchw(x, hw_shape):
 
 
 '''nchwtonlc'''
-def nchwtonlc(x):
+def nchwtonlc(x: torch.Tensor):
     assert len(x.shape) == 4
     return x.flatten(2).transpose(1, 2).contiguous()
 
 
 '''nchw2nlc2nchw'''
-def nchw2nlc2nchw(module, x, contiguous=False, **kwargs):
+def nchw2nlc2nchw(module, x: torch.Tensor, contiguous=False, **kwargs):
     B, C, H, W = x.shape
     if not contiguous:
         x = x.flatten(2).transpose(1, 2)
@@ -37,7 +37,7 @@ def nchw2nlc2nchw(module, x, contiguous=False, **kwargs):
 
 
 '''nlc2nchw2nlc'''
-def nlc2nchw2nlc(module, x, hw_shape, contiguous=False, **kwargs):
+def nlc2nchw2nlc(module, x: torch.Tensor, hw_shape, contiguous=False, **kwargs):
     H, W = hw_shape
     assert len(x.shape) == 3
     B, L, C = x.shape
