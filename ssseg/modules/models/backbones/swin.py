@@ -12,7 +12,7 @@ import torch.nn.functional as F
 import torch.utils.model_zoo as model_zoo
 import torch.utils.checkpoint as checkpoint
 from collections import OrderedDict
-from .bricks import BuildNormalization, BuildDropout, FFN, PatchEmbed, PatchMerging
+from .bricks import BuildNormalization, BuildDropout, FFN, PatchEmbed, PatchMerging, tolen2tuple
 
 
 '''DEFAULT_MODEL_URLS'''
@@ -122,7 +122,7 @@ class ShiftWindowMSA(nn.Module):
         self.shift_size = shift_size
         assert 0 <= self.shift_size < self.window_size
         self.w_msa = WindowMSA(
-            embed_dims=embed_dims, num_heads=num_heads, window_size=(window_size, window_size), qkv_bias=qkv_bias,
+            embed_dims=embed_dims, num_heads=num_heads, window_size=tolen2tuple(window_size), qkv_bias=qkv_bias,
             qk_scale=qk_scale, attn_drop_rate=attn_drop_rate, proj_drop_rate=proj_drop_rate,
         )
         self.drop = BuildDropout(dropout_cfg)
@@ -213,7 +213,7 @@ class SwinBlock(nn.Module):
             act_cfg=act_cfg, add_identity=True,
         )
     '''forward'''
-    def forward(self, x, hw_shape):
+    def forward(self, x: torch.Tensor, hw_shape):
         def _forward(x):
             identity = x
             x = self.norm1(x)
@@ -291,7 +291,7 @@ class SwinTransformer(nn.Module):
         if structure_type in AUTO_ASSERT_STRUCTURE_TYPES:
             for key, value in AUTO_ASSERT_STRUCTURE_TYPES[structure_type].items():
                 assert hasattr(self, key) and (getattr(self, key) == value)
-        if isinstance(pretrain_img_size, int): pretrain_img_size = (pretrain_img_size, pretrain_img_size)
+        pretrain_img_size = tolen2tuple(pretrain_img_size)
         self.pretrain_img_size = pretrain_img_size
         # patch embedding
         self.patch_embed = PatchEmbed(
