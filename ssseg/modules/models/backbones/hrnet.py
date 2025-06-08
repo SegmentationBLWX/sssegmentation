@@ -26,7 +26,7 @@ AUTO_ASSERT_STRUCTURE_TYPES = {}
 
 '''HRModule'''
 class HRModule(nn.Module):
-    def __init__(self, num_branches, block, num_blocks, in_channels, num_channels, multiscale_output=True, norm_cfg=None, act_cfg=None):
+    def __init__(self, num_branches, block, num_blocks, in_channels, num_channels, multiscale_output=True, norm_cfg=None, act_cfg=None, use_checkpoint=False):
         super(HRModule, self).__init__()
         self.checkbranches(num_branches, num_blocks, in_channels, num_channels)
         self.in_channels = in_channels
@@ -35,6 +35,7 @@ class HRModule(nn.Module):
         self.branches = self.makebranches(num_branches, block, num_blocks, num_channels, norm_cfg, act_cfg)
         self.fuse_layers = self.makefuselayers(norm_cfg, act_cfg)
         self.relu = BuildActivation(act_cfg)
+        self.use_checkpoint = use_checkpoint
     '''forward'''
     def forward(self, x):
         if self.num_branches == 1:
@@ -73,10 +74,10 @@ class HRModule(nn.Module):
                 BuildNormalization(placeholder=num_channels[branch_index] * block.expansion, norm_cfg=norm_cfg),
             )
         layers = []
-        layers.append(block(self.in_channels[branch_index], num_channels[branch_index], stride, downsample=downsample, norm_cfg=norm_cfg, act_cfg=act_cfg))
+        layers.append(block(self.in_channels[branch_index], num_channels[branch_index], stride, downsample=downsample, norm_cfg=norm_cfg, act_cfg=act_cfg, use_checkpoint=self.use_checkpoint))
         self.in_channels[branch_index] = num_channels[branch_index] * block.expansion
         for i in range(1, num_blocks[branch_index]):
-            layers.append(block(self.in_channels[branch_index], num_channels[branch_index], norm_cfg=norm_cfg, act_cfg=act_cfg))
+            layers.append(block(self.in_channels[branch_index], num_channels[branch_index], norm_cfg=norm_cfg, act_cfg=act_cfg, use_checkpoint=self.use_checkpoint))
         return nn.Sequential(*layers)
     '''makefuselayers'''
     def makefuselayers(self, norm_cfg=None, act_cfg=None):
@@ -150,8 +151,8 @@ class HRNet(nn.Module):
             'stage4': {'num_modules': 3, 'num_branches': 4, 'block': 'BASIC', 'num_blocks': (4, 4, 4, 4), 'num_channels': (48, 96, 192, 384),},
         },
     }
-    def __init__(self, structure_type, arch='hrnetv2_w18_small', in_channels=3, norm_cfg={'type': 'SyncBatchNorm'}, 
-                 act_cfg={'type': 'ReLU', 'inplace': True}, pretrained=True, pretrained_model_path=''):
+    def __init__(self, structure_type, arch='hrnetv2_w18_small', in_channels=3, norm_cfg={'type': 'SyncBatchNorm'}, multiscale_output=True,
+                 act_cfg={'type': 'ReLU', 'inplace': True}, pretrained=True, pretrained_model_path='', use_checkpoint=False):
         super(HRNet, self).__init__()
         # set attributes
         self.structure_type = structure_type
@@ -161,6 +162,8 @@ class HRNet(nn.Module):
         self.act_cfg = act_cfg
         self.pretrained = pretrained
         self.pretrained_model_path = pretrained_model_path
+        self.use_checkpoint = use_checkpoint
+        self.multiscale_output = multiscale_output
         # assert
         if structure_type in AUTO_ASSERT_STRUCTURE_TYPES:
             for key, value in AUTO_ASSERT_STRUCTURE_TYPES[structure_type].items():
@@ -203,7 +206,7 @@ class HRNet(nn.Module):
         block = self.blocks_dict[block_type]
         num_channels = [channel * block.expansion for channel in num_channels]
         self.transition3 = self.maketransitionlayer(pre_stage_channels, num_channels, norm_cfg=norm_cfg, act_cfg=act_cfg)
-        self.stage4, pre_stage_channels = self.makestage(self.stage4_cfg, num_channels, norm_cfg=norm_cfg, act_cfg=act_cfg)
+        self.stage4, pre_stage_channels = self.makestage(self.stage4_cfg, num_channels, multiscale_output=multiscale_output, norm_cfg=norm_cfg, act_cfg=act_cfg)
         # load pretrained weights
         if pretrained:
             state_dict = loadpretrainedweights(
@@ -214,6 +217,7 @@ class HRNet(nn.Module):
     def forward(self, x):
         x = self.conv1(x)
         x = self.bn1(x)
+        x = self.relu(x)
         x = self.conv2(x)
         x = self.bn2(x)
         x = self.relu(x)
@@ -256,7 +260,7 @@ class HRNet(nn.Module):
                 reset_multiscale_output = False
             else:
                 reset_multiscale_output = True
-            hr_modules.append(HRModule(num_branches, block, num_blocks, in_channels, num_channels, reset_multiscale_output, norm_cfg, act_cfg))
+            hr_modules.append(HRModule(num_branches, block, num_blocks, in_channels, num_channels, reset_multiscale_output, norm_cfg, act_cfg, use_checkpoint=self.use_checkpoint))
         return nn.Sequential(*hr_modules), in_channels
     '''makelayer'''
     def makelayer(self, block, inplanes, planes, num_blocks, stride=1, norm_cfg=None, act_cfg=None):
@@ -268,12 +272,12 @@ class HRNet(nn.Module):
             )
         layers = []
         layers.append(
-            block(inplanes, planes, stride, downsample=downsample, norm_cfg=norm_cfg, act_cfg=act_cfg)
+            block(inplanes, planes, stride, downsample=downsample, norm_cfg=norm_cfg, act_cfg=act_cfg, use_checkpoint=self.use_checkpoint)
         )
         inplanes = planes * block.expansion
         for i in range(1, num_blocks):
             layers.append(
-                block(inplanes, planes, norm_cfg=norm_cfg, act_cfg=act_cfg)
+                block(inplanes, planes, norm_cfg=norm_cfg, act_cfg=act_cfg, use_checkpoint=self.use_checkpoint)
             )
         return nn.Sequential(*layers)
     '''maketransitionlayer'''
