@@ -56,7 +56,7 @@ class GSAEncoderLayer(nn.Module):
             embed_dims=embed_dims, feedforward_channels=feedforward_channels, num_fcs=num_fcs, ffn_drop=drop_rate,
             dropout_cfg=dropout_cfg, act_cfg=act_cfg, add_identity=False,
         )
-        self.drop_path = BuildDropout(dropout_cfg) if (dropout_cfg and (drop_path_rate > 0.)) else nn.Identity()
+        self.drop_path = BuildDropout(dropout_cfg) if (drop_path_rate > 0.) else nn.Identity()
     '''forward'''
     def forward(self, x, hw_shape):
         x = x + self.drop_path(self.attn(self.norm1(x), hw_shape, identity=0.))
@@ -81,7 +81,7 @@ class LocallyGroupedSelfAttention(nn.Module):
         self.proj = nn.Linear(embed_dims, embed_dims)
         self.proj_drop = nn.Dropout(proj_drop_rate)
     '''forward'''
-    def forward(self, x, hw_shape):
+    def forward(self, x: torch.Tensor, hw_shape):
         b, n, c = x.shape
         h, w = hw_shape
         x = x.view(b, h, w, c)
@@ -132,7 +132,7 @@ class LSAEncoderLayer(nn.Module):
             embed_dims=embed_dims, feedforward_channels=feedforward_channels, num_fcs=num_fcs, ffn_drop=drop_rate,
             dropout_cfg=dropout_cfg, act_cfg=act_cfg, add_identity=False,
         )
-        self.drop_path = BuildDropout(dropout_cfg) if (dropout_cfg and (drop_path_rate > 0.)) else nn.Identity()
+        self.drop_path = BuildDropout(dropout_cfg) if (drop_path_rate > 0.) else nn.Identity()
     '''forward'''
     def forward(self, x, hw_shape):
         x = x + self.drop_path(self.attn(self.norm1(x), hw_shape))
@@ -147,7 +147,7 @@ class ConditionalPositionEncoding(nn.Module):
         self.stride = stride
         self.proj = nn.Conv2d(in_channels, embed_dims, kernel_size=3, stride=stride, padding=1, bias=True, groups=embed_dims)
     '''forward'''
-    def forward(self, x, hw_shape):
+    def forward(self, x: torch.Tensor, hw_shape):
         b, n, c = x.shape
         h, w = hw_shape
         feat_token = x
@@ -221,7 +221,7 @@ class PCPVT(nn.Module):
         if pretrained:
             self.loadpretrainedweights(structure_type, pretrained_model_path)
     '''forward'''
-    def forward(self, x):
+    def forward(self, x: torch.Tensor):
         outputs, b = list(), x.shape[0]
         for i in range(len(self.depths)):
             x, hw_shape = self.patch_embeds[i](x)
