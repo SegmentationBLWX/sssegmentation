@@ -276,14 +276,13 @@ For a deeper understanding, users are encouraged to explore the [`ssseg/modules/
 
 #### Customize Data Pipelines
 
-Constructing data pipelines is used to preprocess the input data (*e.g.*, images and segmentation masks) for the following training and testing of the segmentors.
+In SSSegmentation, data pipelines are used to preprocess input samples such as images and segmentation masks before feeding them into the segmentor for training or testing. 
+These pipelines are defined in the dataset configuration under,
 
-Specifically, it is defined at,
+- `SEGMENTOR_CFG['dataset']['train']['data_pipelines']`: Data transformations applied during training.
+- `SEGMENTOR_CFG['dataset']['test']['data_pipelines']`: Data transformations applied during testing.
 
-- `SEGMENTOR_CFG['dataset']['train']['data_pipelines']`: The constructed data pipelines for training,
-- `SEGMENTOR_CFG['dataset']['test']['data_pipelines']`: The constructed data pipelines for testing.
-
-The value of the `data_pipelines` should be a `list` like following,
+Each `data_pipelines` entry is a `list` of operations, with each operation represented as either a `tuple` or `dict`. Below is an example,
 
 ```python
 SEGMENTOR_CFG['dataset']['train']['data_pipelines'] = [
@@ -297,7 +296,7 @@ SEGMENTOR_CFG['dataset']['train']['data_pipelines'] = [
 ]
 ```
 
-And each item in the list should be a `tuple` or `dict`. For example, it could be,
+Each operation can be expressed as,
 
 ```
 # tuple
@@ -306,9 +305,10 @@ And each item in the list should be a `tuple` or `dict`. For example, it could b
 {'type': 'Resize', 'output_size': (2048, 512), 'keep_ratio': True, 'scale_range': (0.5, 2.0)}
 ```
 
-where `Resize` means a data transform method defined in [`ssseg/modules/datasets/pipelines/transforms.py`](https://github.com/SegmentationBLWX/sssegmentation/blob/main/ssseg/modules/datasets/pipelines/transforms.py) and other values denote for the arguments for instancing the corresponding data transform method.
+Here, `Resize` refers to a transformation method implemented in [`ssseg/modules/datasets/pipelines/transforms.py`](https://github.com/SegmentationBLWX/sssegmentation/blob/main/ssseg/modules/datasets/pipelines/transforms.py), 
+while the second element or the associated keys specify its initialization arguments.
 
-Here is a list of supported data transform methods,
+The following data transformation methods are currently registered,
 
 ```python
 REGISTERED_MODULES = {
@@ -320,10 +320,9 @@ REGISTERED_MODULES = {
 }
 ```
 
-To learn the functions of each data transform method, please check the source codes in [`ssseg/modules/datasets/pipelines/transforms.py`](https://github.com/SegmentationBLWX/sssegmentation/blob/main/ssseg/modules/datasets/pipelines/transforms.py) by yourselves.
+You can refer to the source code of each method in [`ssseg/modules/datasets/pipelines/transforms.py`](https://github.com/SegmentationBLWX/sssegmentation/blob/main/ssseg/modules/datasets/pipelines/transforms.py) to understand their functionality and configuration options.
 
-It is worth mentioning that SSSegmentation provides `AlbumentationsWrapper` to make the users leverage the data augmentation algorithms implemented in [albumentations](https://albumentations.ai/docs/).
-Here is an example of calling `AlbumentationsWrapper`,
+SSSegmentation also supports `AlbumentationsWrapper`, which allows you to integrate any [Albumentations](https://albumentations.ai/docs/) transformation within your pipeline. Here’s an example,
 
 ```python
 SEGMENTOR_CFG['dataset']['train']['data_pipelines'] = [
@@ -333,7 +332,9 @@ SEGMENTOR_CFG['dataset']['train']['data_pipelines'] = [
 ]
 ```
 
-Finally, if you want to define the data transform method by yourselves during developing, you can first write the transform method like following,
+Each `albu_cfg` specifies an Albumentations transformation using its native API parameters.
+
+You can also define your own transformation methods. For example,
 
 ```
 class RGB2Gray(object):
@@ -367,7 +368,7 @@ class RGB2Gray(object):
         return sample_meta
 ```
 
-Then, import `DataTransformBuilder` and register this method,
+To register this custom transformation,
 
 ```python
 from ssseg.modules import DataTransformBuilder
@@ -376,13 +377,15 @@ data_transformer_builder = DataTransformBuilder()
 data_transformer_builder.register('RGB2Gray', RGB2Gray)
 ```
 
-From this, you can call `data_transformer_builder.build` to build your own defined transform algorithms as well as the original supported data transform methods.
+Once registered, your custom transform can be used in the same way as built-in transformations, via `data_transformer_builder.build(...)`.
+This modular and extensible design enables users to flexibly construct and experiment with various data pipelines tailored to different datasets and model requirements.
 
 #### Add New Custom Dataset
 
-SSSegmentation provides `BaseDataset` class to help the users quickly add a new custom dataset. 
+SSSegmentation provides a flexible base class, `BaseDataset`, to help users quickly integrate their own custom datasets.
 
-Specifically, you can directly inherit this class to define your own dataset class. Here is an example code to add `SuperviselyDataset` dataset in SSSegmentation [`ssseg/modules/datasets` directory](https://github.com/SegmentationBLWX/sssegmentation/tree/main/ssseg/modules/datasets) by using `BaseDataset`,
+To add a new dataset, simply subclass `BaseDataset` and implement the dataset-specific logic. 
+Below is an example of how to add a `SuperviselyDataset` class under the [`ssseg/modules/datasets`](https://github.com/SegmentationBLWX/sssegmentation/tree/main/ssseg/modules/datasets) directory.
 
 ```
 import os
@@ -408,20 +411,24 @@ class SuperviselyDataset(BaseDataset):
         self.imageids = [str(_id) for _id in self.imageids]
 ```
 
-In `__init__`, you are required to set some attributes including:
+When implementing the `__init__` method, the following attributes should be defined,
 
-- `image_dir`: Image file directory,
-- `ann_dir`: Annotation file directory (*i.e.*, the directory used to save ground truth segmentation masks),
-- `image_ext`: Image file extension, default value is `.jpg`,
-- `ann_ext`: Annotation file extension, default value is `.png`,
-- `imageids`: The image file names.
+- `image_dir`: Path to the directory containing input images.
+- `ann_dir`: Path to the directory containing ground truth segmentation masks.
+- `image_ext` (*str, default='.jpg'*): File extension for annotations.
+- `ann_ext` (*str, default='.png'*): File extension for images.
+- `imageids`: A list of image IDs or filenames (without extension).
 
-Besides, `clsid2label` could be set for transferring the label ids in ground truth segmentation mask to continuous training ids automatically during training. 
-For example, `clsid2label = {10: 1}` means if the class id in ground truth segmentation mask is 10, they will be set as class id 1 before feeding into the models.
-Other attributes `classnames` is used to set the class names in the dataset, `palette` is used to set the colors for each class during [Inference with Segmentors Integrated in SSSegmentation](https://sssegmentation.readthedocs.io/en/latest/QuickRun.html#inference-with-segmentors-integrated-in-sssegmentation) and `num_classes` represents the number of the classes existed in the dataset.
+In addition, the following class-level attributes can be customized,
 
-After that, you should add this custom dataset class in [`ssseg/modules/datasets/builder.py`](https://github.com/SegmentationBLWX/sssegmentation/blob/main/ssseg/modules/datasets/builder.py) if you want to use it by simply modifying `SEGMENTOR_CFG['dataset']`.
-Of course, you can also register this custom dataset by the following codes,
+- `classnames`: A list of semantic class names.
+- `clsid2label` (*optional*): A dictionary for remapping original label IDs in the segmentation masks to training IDs. For example, `clsid2label = {10: 1}` means that pixels with value 10 in the original mask will be mapped to class ID 1 before training.
+- `palette`: A list of RGB tuples defining the visualization color for each class.
+- `num_classes`: The total number of semantic classes in the dataset.
+
+To make the custom dataset usable within the configuration system, you have two options.
+
+(1) Register it manually via code, 
 
 ```python
 from ssseg.modules import DatasetBuilder
@@ -430,9 +437,12 @@ dataset_builder = DatasetBuilder()
 dataset_builder.register('SuperviselyDataset', SuperviselyDataset)
 ```
 
-From this, you can also call `dataset_builder.build` to build your own defined dataset class as well as the original supported data classes.
+This allows you to call `dataset_builder.build(...)` to instantiate your custom dataset just like the built-in ones.
 
-Finally, the users could jump to the [`ssseg/modules/datasets` directory](https://github.com/SegmentationBLWX/sssegmentation/tree/main/ssseg/modules/datasets) in SSSegmentation to read more source codes of the supported dataset classes and thus better learn how to customize the dataset classes in SSSegmentation.
+(2) **(Recommended)** Add it to the dataset registry in [`ssseg/modules/datasets/builder.py`](https://github.com/SegmentationBLWX/sssegmentation/blob/main/ssseg/modules/datasets/builder.py), so it can be automatically referenced using `SEGMENTOR_CFG['dataset']['type']`.
+
+For more examples and deeper insight into how datasets are handled internally, you are encouraged to explore the [`ssseg/modules/datasets`](https://github.com/SegmentationBLWX/sssegmentation/tree/main/ssseg/modules/datasets) directory. 
+Studying the existing dataset classes will help you effectively customize and extend the dataset handling in SSSegmentation for your specific use case.
 
 
 ## Customize Backbones
