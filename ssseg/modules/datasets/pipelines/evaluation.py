@@ -21,6 +21,7 @@ class Evaluation():
     '''totalintersectandunion'''
     @staticmethod
     def totalintersectandunion(results, gt_seg_maps, num_classes, ignore_index=-1):
+        # when using mixed precision training, this part may raise an error. Please manually cast it to float32 to fix the issue
         total_area_intersect = torch.zeros((num_classes, ), dtype=torch.float64)
         total_area_union = torch.zeros((num_classes, ), dtype=torch.float64)
         total_area_pred_label = torch.zeros((num_classes, ), dtype=torch.float64)
