@@ -6,7 +6,20 @@ Author:
 '''
 import os
 import torch
+import tempfile
 import torch.utils.model_zoo as model_zoo
+from tqdm import tqdm
+
+
+'''downloadwithprogress'''
+def downloadwithprogress(url, filename):
+    import requests
+    response = requests.get(url, stream=True)
+    total = int(response.headers.get('content-length', 0))
+    with open(filename, 'wb') as file, tqdm(desc=f"Downloading {os.path.basename(filename)}", total=total, unit='B', unit_scale=True, unit_divisor=1024) as bar:
+        for data in response.iter_content(chunk_size=1024):
+            size = file.write(data)
+            bar.update(size)
 
 
 '''judgefileexist'''
@@ -38,10 +51,14 @@ def touchdirs(directory):
 def loadckpts(ckptspath, map_to_cpu=True):
     if os.path.islink(ckptspath):
         ckptspath = os.readlink(ckptspath)
-    if map_to_cpu: 
-        ckpts = torch.load(ckptspath, map_location=torch.device('cpu'))
-    else: 
-        ckpts = torch.load(ckptspath)
+    if ckptspath.startswith("http://") or ckptspath.startswith("https://"):
+        with tempfile.NamedTemporaryFile(delete=False) as tmp_file:
+            tmp_path = tmp_file.name
+        downloadwithprogress(ckptspath, tmp_path)
+        ckpts = torch.load(tmp_path, map_location='cpu' if map_to_cpu else None)
+        os.remove(tmp_path)
+    else:
+        ckpts = torch.load(ckptspath, map_location='cpu' if map_to_cpu else None)
     return ckpts
 
 
