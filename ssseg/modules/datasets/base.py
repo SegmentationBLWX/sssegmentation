@@ -30,6 +30,8 @@ class BaseDataset(torch.utils.data.Dataset):
         self.dataset_cfg = dataset_cfg
         self.logger_handle = logger_handle
         self.repeat_times = dataset_cfg.get('repeat_times', 1)
+        self.ignore_index = dataset_cfg.get('ignore_index', -100)
+        self.auto_correct_invalid_seg_target = dataset_cfg.get('auto_correct_invalid_seg_target', False)
         self.transforms = self.constructtransforms(self.dataset_cfg.get('data_pipelines', []), self.dataset_cfg.get('record_img2aug_pos_mapper', False))
     '''getitem'''
     def __getitem__(self, index):
@@ -72,6 +74,12 @@ class BaseDataset(torch.utils.data.Dataset):
         if hasattr(self, 'clsid2label') and seg_target is not None:
             for key, value in self.clsid2label.items():
                 seg_target[seg_target == key] = value
+            # double check invalid labels in seg_target
+            invalid_mask = ((seg_target < 0) | (seg_target >= self.num_classes)) & (seg_target != self.ignore_index)
+            if self.auto_correct_invalid_seg_target and invalid_mask.sum() > 0:
+                seg_target[invalid_mask] = self.ignore_index
+            else:
+                assert invalid_mask.sum() == 0, 'invalid values in seg_target, set auto_correct_invalid_seg_target as `True` in dataset_cfg may quickly dissolve this issue'
         # construct sample_meta
         sample_meta = {
             'image': image, 'seg_target': seg_target, 'width': image.shape[1], 'height': image.shape[0],

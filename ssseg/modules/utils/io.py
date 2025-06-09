@@ -42,7 +42,7 @@ def touchdir(directory):
 def touchdirs(directory):
     if not os.path.exists(directory):
         try:
-            os.makedirs(directory)
+            os.makedirs(directory, exist_ok=True)
         except:
             pass
 
