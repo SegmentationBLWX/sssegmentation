@@ -9,43 +9,53 @@ We incorporate modular design into our config system, which is convenient to con
 
 #### Config File Structure
 
-Now, there are 2 basic component types under `ssseg/configs/_base_`, *i.e.*, `datasets` and `dataloaders`, which are responsible for defining configs of various datasets with different runtime settings (*e.g.*, batch size, image size, data augmentation, to name a few).
+Now, there are two basic component types under `ssseg/configs/_base_`, *i.e.*, `datasets` and `dataloaders`, which define configurations for various datasets under different runtime settings (*e.g.*, batch size, image size, data augmentation, to name a few).
 
-For example, to train FCN segmentor on Pascal VOC dataset (assuming that we hope the total batch size is 16 and the training image size is 512x512), you can import the corresponding pre-defined config like this,
+For example, to train an FCN segmentor on the Pascal VOC dataset (assuming a total batch size of 16 and an image size of 512×512), you can import the corresponding pre-defined configs like this,
 
 ```python
-from .._base_ import DATASET_CFG_VOCAUG_512x512, DATALOADER_CFG_BS16
+from .._base_ import REGISTERED_SEGMENTOR_CONFIGS, REGISTERED_DATASET_CONFIGS, REGISTERED_DATALOADER_CONFIGS
 ```
 
-Then, modify `SEGMENTOR_CFG` in the corresponding method config file (*e.g.*, `ssseg/configs/fcn/fcn_resnet50os16_voc.py`) as follows,
+Then, modify `SEGMENTOR_CFG` in the method-specific config file (*e.g.*, `ssseg/configs/fcn/fcn_resnet50os16_voc.py`) as follows,
 
 ```python
+# deepcopy
+SEGMENTOR_CFG = REGISTERED_SEGMENTOR_CONFIGS['FCN_SEGMENTOR_CFG'].copy()
 # modify dataset config
-SEGMENTOR_CFG['dataset'] = DATASET_CFG_VOCAUG_512x512.copy()
+SEGMENTOR_CFG['dataset'] = REGISTERED_DATASET_CONFIGS['DATASET_CFG_VOCAUG_512x512'].copy()
 # modify dataloader config
-SEGMENTOR_CFG['dataloader'] = DATALOADER_CFG_BS16.copy()
+SEGMENTOR_CFG['dataloader'] = REGISTERED_DATALOADER_CONFIGS['DATALOADER_CFG_BS16'].copy()
 ```
 
-From this, you are not required to define the same dataloader and dataset configs over and over again if you just want to follow the conventional training and testing settings of various datasets to train your segmentors.
+With this modular structure, you no longer need to repeatedly define dataloader and dataset configs when using standard settings across segmentation tasks.
 
-Next, we talk about config files in specific segmentation algorithm directories (*e.g.*, `ssseg/configs/fcn` directory). 
-There is also one and only one `base_cfg.py` used to define some necessary configs for the corresponding algorithm (*e.g.*, `ssseg/configs/fcn/base_cfg.py` is used to define the basic configs for FCN segmentation algorithm).
-Like loading configs from `ssseg/configs/_base_`, you can also import the `base_cfg.py` and simply modify some key values in `SEGMENTOR_CFG` to customize and train the corresponding segmentor.
+Next, let’s discuss config files in specific segmentation algorithm directories (*e.g.*, `ssseg/configs/fcn`). 
+Previously (`SSSegmentation <= 1.6.0`), each method folder contained a `base_cfg.py` file to define the core configuration for that algorithm. 
+Now, these base configs have been moved to `ssseg/configs/_base_/segmentors/` and renamed according to the algorithm name (*e.g.*, `fcn.py` for FCN, `deeplabv3.py` for DeepLabV3).
+You can import the corresponding base segmentor config like this:
 
-For instance, to customize FCN with ResNet-50-D16 backbone and train it on Pascal VOC dataset, you can create a config file in `ssseg/configs/fcn` directory, named `fcn_resnet50os16_voc.py` and write in some contents like this,
+```
+# way1
+from .._base_ import REGISTERED_SEGMENTOR_CONFIGS
+SEGMENTOR_CFG = REGISTERED_SEGMENTOR_CONFIGS['FCN_SEGMENTOR_CFG'].copy()
+# way2
+from .._base_.segmentors.fcn import FCN_SEGMENTOR_CFG as SEGMENTOR_CFG
+```
+
+Then, customize and train the model by modifying key fields. For instance, to use FCN with a ResNet-50-D16 backbone on Pascal VOC, you can create a config file named `fcn_resnet50os16_voc.py` under `ssseg/configs/fcn`,
 
 ```python
-import copy
-from .base_cfg import SEGMENTOR_CFG
-from .._base_ import DATASET_CFG_VOCAUG_512x512, DATALOADER_CFG_BS16
+import os
+from .._base_ import REGISTERED_SEGMENTOR_CONFIGS, REGISTERED_DATASET_CONFIGS, REGISTERED_DATALOADER_CONFIGS
 
 
 # deepcopy
-SEGMENTOR_CFG = copy.deepcopy(SEGMENTOR_CFG)
+SEGMENTOR_CFG = REGISTERED_SEGMENTOR_CONFIGS['FCN_SEGMENTOR_CFG'].copy()
 # modify dataset config
-SEGMENTOR_CFG['dataset'] = DATASET_CFG_VOCAUG_512x512.copy()
+SEGMENTOR_CFG['dataset'] = REGISTERED_DATASET_CONFIGS['DATASET_CFG_VOCAUG_512x512'].copy()
 # modify dataloader config
-SEGMENTOR_CFG['dataloader'] = DATALOADER_CFG_BS16.copy()
+SEGMENTOR_CFG['dataloader'] = REGISTERED_DATALOADER_CONFIGS['DATALOADER_CFG_BS16'].copy()
 # modify scheduler config
 SEGMENTOR_CFG['scheduler']['max_epochs'] = 60
 # modify other segmentor configs
@@ -54,33 +64,31 @@ SEGMENTOR_CFG['backbone'] = {
     'type': 'ResNet', 'depth': 50, 'structure_type': 'resnet50conv3x3stem',
     'pretrained': True, 'outstride': 16, 'use_conv3x3_stem': True, 'selected_indices': (2, 3),
 }
-SEGMENTOR_CFG['work_dir'] = 'fcn_resnet50os16_voc'
-SEGMENTOR_CFG['logfilepath'] = 'fcn_resnet50os16_voc/fcn_resnet50os16_voc.log'
-SEGMENTOR_CFG['resultsavepath'] = 'fcn_resnet50os16_voc/fcn_resnet50os16_voc_results.pkl'
+SEGMENTOR_CFG['work_dir'] = os.path.split(__file__)[-1].split('.')[0]
+SEGMENTOR_CFG['logger_handle_cfg']['logfilepath'] = os.path.join(SEGMENTOR_CFG['work_dir'], f"{os.path.split(__file__)[-1].split('.')[0]}.log")
 ```
 
-After that, you can train this segmentor with the following command,
+To start training this model, run,
 
 ```sh
 bash scripts/dist_train.sh 4 ssseg/configs/fcn/fcn_resnet50os16_voc.py
 ```
 
-How relaxing and enjoyable! Maybe, you can read more config examples in `ssseg/configs` to help you learn about how to create a valid config file in SSSegmentation.
+How relaxing and enjoyable! You can explore more configuration examples under `ssseg/configs` to better understand how to define valid config files in SSSegmentation.
 
 #### An Example of PSPNet
 
-To help the users have a basic idea of a complete config and the modules in SSSegmentation, we make brief comments on the config of PSPNet using ResNet-101-D8 as the following,
+To help users understand the structure of a complete config and the modular components in SSSegmentation, 
+we provide a commented example using PSPNet with ResNet-101-D8, reflecting the new configuration system based on `SegmentorConfig`, `DatasetConfig` and `DataloaderConfig`.
+
+**Dataset Configuration**,
 
 ```python
-import os
-from datetime import timedelta
-
-# dataset configs
-DATASET_CFG_ADE20k_512x512 = {
-    'type': 'ADE20kDataset', # the dataset type used to instance the specific dataset class in builder.py defined in "ssseg/modules/datasets/builder.py"
-    'rootdir': os.path.join(os.getcwd(), 'ADE20k'), # the corresponding dataset path you download
-    'train': {
-        'set': 'train', # train the models with the train set defined in the dataset
+DATASET_CFG_ADE20k_512x512 = DatasetConfig(
+    type='ADE20kDataset',  # dataset type; used to instantiate dataset class in builder.py
+    rootdir=os.path.join(os.getcwd(), 'ADE20k'),  # path to dataset directory
+    train={
+        'set': 'train',  # split used for training
         'data_pipelines': [
             ('Resize', {'output_size': (2048, 512), 'keep_ratio': True, 'scale_range': (0.5, 2.0)}),
             ('RandomCrop', {'crop_size': (512, 512), 'one_category_max_ratio': 0.75}),
@@ -89,82 +97,98 @@ DATASET_CFG_ADE20k_512x512 = {
             ('Normalize', {'mean': [123.675, 116.28, 103.53], 'std': [58.395, 57.12, 57.375]}),
             ('ToTensor', {}),
             ('Padding', {'output_size': (512, 512), 'data_type': 'tensor'}),
-        ], # define some pre-processing operations for the loaded images and segmentation targets during training, you can refer to "ssseg/modules/datasets/pipelines" for more details
+        ]  # data preprocessing pipeline for training; see ssseg/modules/datasets/pipelines
     },
-    'test': {
-        'set': 'val', # test the models with the validation set defined in the dataset
+    test={
+        'set': 'val',
         'data_pipelines': [
             ('Resize', {'output_size': (2048, 512), 'keep_ratio': True, 'scale_range': None}),
             ('Normalize', {'mean': [123.675, 116.28, 103.53], 'std': [58.395, 57.12, 57.375]}),
             ('ToTensor', {}),
-        ], # define some pre-processing operations for the loaded images and segmentation targets during testing, you can refer to "ssseg/modules/datasets/pipelines" for more details
+        ]  # data preprocessing pipeline for validation
     }
-}
-# dataloader configs
-DATALOADER_CFG_BS16 = {
-    'expected_total_train_bs_for_assert': 16, # it is defined for asserting whether the users adopt the correct batch size for training the models
-    'auto_adapt_to_expected_train_bs': True, # if set Ture, the "expected_total_train_bs_for_assert" will be used to determine the value of "batch_size_per_gpu" rather than using the specified value in the config
-    'train': {
-        'batch_size_per_gpu': 2, # number of images in each gpu during training
-        'num_workers_per_gpu': 2, # number of workers for dataloader in each gpu during training
-        'shuffle': True, # whether to shuffle the image order during training
-        'pin_memory': True, # whether to achieve higher bandwidth between the host and the device using pinned memory during training
-        'drop_last': True, # whether to drop out the last images which cannot form a batch size of "expected_total_train_bs_for_assert" during training
+)
+```
+
+**Dataloader Configuration**,
+
+```python
+DATALOADER_CFG_BS16 = DataloaderConfig(
+    # Expected total training batch size across all GPUs. This is used to verify whether users set a reasonable batch size and detect misconfiguration.
+    expected_total_train_bs_for_assert=16,
+    # If True, the framework will automatically calculate the per-GPU batch size based on the number of available GPUs and `expected_total_train_bs_for_assert`.
+    # If False, the values in `train['batch_size_per_gpu']` will be used directly.
+    auto_adapt_to_expected_train_bs=True,
+    train={
+        'batch_size_per_gpu': 2,   # Number of training samples per GPU (used only when `auto_adapt_to_expected_train_bs` is False).
+        'num_workers_per_gpu': 2,  # Number of worker processes per GPU for loading data in parallel.
+        'shuffle': True,           # Whether to shuffle the training data at each epoch.
+        'pin_memory': True,        # If True, the data loader will copy tensors into CUDA pinned memory before returning them. This can accelerate host-to-device transfers.
+        'drop_last': True,         # If True, drops the last incomplete batch during training if the dataset size is not divisible by the batch size. Useful to maintain consistent batch sizes.
     },
-    'test': {
-        'batch_size_per_gpu': 1, # number of images in each gpu during testing
-        'num_workers_per_gpu': 2, # number of workers for dataloader in each gpu during testing
-        'shuffle': False, # whether to shuffle the image order during testing
-        'pin_memory': True, # whether to achieve higher bandwidth between the host and the device using pinned memory during testing
-        'drop_last': False, # whether to drop out the last images which cannot form a batch size of "expected_total_train_bs_for_assert" during testing
+    test={
+        'batch_size_per_gpu': 1,  # Number of validation/test samples per GPU, only support setting as 1 now.
+        'num_workers_per_gpu': 2, # Number of worker processes per GPU for loading validation/test data.
+        'shuffle': False,         # Whether to shuffle the test data. Usually set to False for reproducibility.
+        'pin_memory': True,       # Whether to enable pinned memory for test data loading.
+        'drop_last': False,       # Whether to drop the last incomplete test batch. Usually set to False to ensure full evaluation.
     }
-}
-# segmentor configs
-SEGMENTOR_CFG = {
-    'type': 'PSPNet', # the segmentor type defined in "ssseg/modules/models/segmentors/builder.py"
-    'num_classes': -1, # number of classes in the dataset
-    'benchmark': True, # set True for speeding up training
-    'align_corners': False, # align_corners in torch.nn.functional.interpolate
-    'init_process_group_cfg': {'backend': 'nccl', 'timeout': timedelta(seconds=36000)}, # config to instance torch.distributed.init_process_group()
-    'work_dir': 'ckpts', # directory used to save checkpoints and training and testing logs
-    'eval_interval_epochs': 10, # evaluate models after "eval_interval_epochs" epochs
-    'save_interval_epochs': 1, # save the checkpoints of models after "save_interval_epochs" epochs
-    'logger_handle_cfg': {'type': 'LocalLoggerHandle', 'logfilepath': ''}, # config used to instance logger_handle, which is used to print and save logs
-    'training_logging_manager_cfg': {'log_interval_iters': 50}, # config used to instance training_logging_manager, which is used to manage training logs
-    'norm_cfg': {'type': 'SyncBatchNorm'}, # config for normalization layer in the segmentor
-    'act_cfg': {'type': 'ReLU', 'inplace': True}, # config for activation layer in the segmentor
-    'backbone': {
+)
+```
+
+**Segmentor Configuration**
+
+```python
+PSPNET_SEGMENTOR_CFG = SegmentorConfig(
+    type='PSPNet',  # segmentor type defined in ssseg/modules/models/segmentors
+    num_classes=-1,  # number of output classes (to be set later)
+    benchmark=True,  # enables cudnn.benchmark for performance
+    align_corners=False,  # used in torch.nn.functional.interpolate
+    work_dir='ckpts',  # directory for logs and checkpoints
+    eval_interval_epochs=10,  # evaluation frequency
+    save_interval_epochs=1,  # checkpoint saving frequency
+    logger_handle_cfg={'type': 'LocalLoggerHandle', 'logfilepath': ''},
+    training_logging_manager_cfg={'log_interval_iters': 50},
+    norm_cfg={'type': 'SyncBatchNorm'},  # normalization config
+    act_cfg={'type': 'ReLU', 'inplace': True},  # activation config
+    # backbone config (ResNet-101 with 3x3 stem)
+    backbone={
         'type': 'ResNet', 'depth': 101, 'structure_type': 'resnet101conv3x3stem',
         'pretrained': True, 'outstride': 8, 'use_conv3x3_stem': True, 'selected_indices': (2, 3),
-    }, # define backbones, refer to "ssseg/modules/models/backbones/builder.py" for more details
-    'head': {
+    },
+    # PSPNet head
+    head={
         'in_channels': 2048, 'feats_channels': 512, 'pool_scales': [1, 2, 3, 6], 'dropout': 0.1,
-    }, # define decoder heads, refer to "ssseg/modules/models/segmentors" for more details
-    'auxiliary': {
+    },
+    # auxiliary decoder head
+    auxiliary={
         'in_channels': 1024, 'out_channels': 512, 'dropout': 0.1,
-    }, # define auxiliary decoder, refer to "ssseg/modules/models/segmentors/base/base.py" for more details
-    'losses': {
-        'loss_aux': {'type': 'CrossEntropyLoss', 'scale_factor': 0.4, 'ignore_index': 255, 'reduction': 'mean'},
-        'loss_cls': {'type': 'CrossEntropyLoss', 'scale_factor': 1.0, 'ignore_index': 255, 'reduction': 'mean'},
-    }, # define objective functions, refer to "ssseg/modules/models/losses/builder.py" for more details
-    'inference': {
+    },
+    # loss functions
+    losses={
+        'loss_aux': {'type': 'CrossEntropyLoss', 'scale_factor': 0.4, 'ignore_index': -100, 'reduction': 'mean'},
+        'loss_cls': {'type': 'CrossEntropyLoss', 'scale_factor': 1.0, 'ignore_index': -100, 'reduction': 'mean'},
+    },
+    # inference settings
+    inference={
         'forward': {'mode': 'whole', 'cropsize': None, 'stride': None},
         'tta': {'multiscale': [1], 'flip': False, 'use_probs_before_resize': False},
         'evaluate': {'metric_list': ['iou', 'miou']},
-    }, # define the inference config, refer to "ssseg/test.py" for more details
-    'scheduler': {
+    },
+    # scheduler and optimizer
+    scheduler={
         'type': 'PolyScheduler', 'max_epochs': 0, 'power': 0.9,
         'optimizer': {
             'type': 'SGD', 'lr': 0.01, 'momentum': 0.9, 'weight_decay': 5e-4, 'params_rules': {},
         }
-    }, # define the scheduler configs, refer to "ssseg/modules/models/schedulers/builder.py" for more details
-    'dataset': DATASET_CFG_ADE20k_512x512, # define the dataset configs
-    'dataloader': DATALOADER_CFG_BS16, # define the dataloader configs
-}
+    },
+    # dataset and dataloader (to be assigned later)
+    dataset=None,
+    dataloader=None,
+)
 ```
 
-In the following sections, we will give more explanations and examples about each module specified in the config above.
-
+In the next sections, we’ll dive deeper into each module and its options to help you fully customize your segmentation pipeline.
 
 ## Customize Datasets
 
