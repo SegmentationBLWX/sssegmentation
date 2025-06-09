@@ -190,30 +190,39 @@ PSPNET_SEGMENTOR_CFG = SegmentorConfig(
 
 In the next sections, we’ll dive deeper into each module and its options to help you fully customize your segmentation pipeline.
 
+
 ## Customize Datasets
 
-Dataset classes in SSSegmentation have two functions: (1) load data information after data preparation and (2) construct `sample_meta` for the subsequent segmentor training and testing.
+In SSSegmentation, dataset classes serve two primary purposes,
 
-The type of `sample_meta` is `dict` which includes several keys:
+- Loading dataset information after data preparation.
+- Constructing `sample_meta` dictionaries that encapsulate all necessary metadata required for training and testing the segmentor.
 
-- `image`: The loaded image data, 
-- `seg_target`: The loaded ground truth segmentation mask data,
-- `width` and `height`: The original size of the image (*i.e.*, the image size before pre-processing by the data transforms),
-- `id`: The image id of the loaded image data.
+Each `sample_meta` is a `dict` containing the following keys,
 
-Thanks to the modular design in SSSegmentation, we can simply modify the configs in `SEGMENTOR_CFG['dataset']` to train one segmentor on various datasets.
+- `image`: The loaded input image tensor.
+- `seg_target`: The corresponding ground truth segmentation mask.
+- `edge_target` (*optional*): The edge mask derived from the segmentation mask.
+- `img2aug_pos_mapper` (*optional*): A pixel-wise mapping from the original image to its augmented counterpart.
+- `width` and `height`: The original dimensions of the image (*i.e.*, before any data augmentation or resizing).
+- `id`: A unique identifier for the image.
+
+Thanks to SSSegmentation’s modular design, switching datasets is as simple as updating the `SEGMENTOR_CFG['dataset']` field—enabling flexible experimentation across different datasets without code changes.
 
 #### Dataset Config Structure
 
-An example of dataset config is as follows,
+The dataset configuration in SSSegmentation is defined using the `DatasetConfig` class. Below is an example for configuring the ADE20k dataset with 512×512 input size,
 
 ```python
 import os
+from .default_dataset import DatasetConfig
 
-DATASET_CFG_ADE20k_512x512 = {
-    'type': 'ADE20kDataset',
-    'rootdir': os.path.join(os.getcwd(), 'ADE20k'),
-    'train': {
+
+'''DATASET_CFG_ADE20k_512x512'''
+DATASET_CFG_ADE20k_512x512 = DatasetConfig(
+    type='ADE20kDataset',
+    rootdir=os.path.join(os.getcwd(), 'ADE20k'),
+    train={
         'set': 'train',
         'data_pipelines': [
             ('Resize', {'output_size': (2048, 512), 'keep_ratio': True, 'scale_range': (0.5, 2.0)}),
@@ -223,20 +232,20 @@ DATASET_CFG_ADE20k_512x512 = {
             ('Normalize', {'mean': [123.675, 116.28, 103.53], 'std': [58.395, 57.12, 57.375]}),
             ('ToTensor', {}),
             ('Padding', {'output_size': (512, 512), 'data_type': 'tensor'}),
-        ],
+        ]
     },
-    'test': {
+    test={
         'set': 'val',
         'data_pipelines': [
             ('Resize', {'output_size': (2048, 512), 'keep_ratio': True, 'scale_range': None}),
             ('Normalize', {'mean': [123.675, 116.28, 103.53], 'std': [58.395, 57.12, 57.375]}),
             ('ToTensor', {}),
-        ],
+        ]
     }
-}
+)
 ```
 
-where `type` denotes the dataset you want to train on. Now, SSSegmentation supports the following dataset types,
+The `type`field specifies the dataset class to use. SSSegmentation currently supports the following dataset types,
 
 ```python
 REGISTERED_MODULES = {
@@ -249,19 +258,21 @@ REGISTERED_MODULES = {
 }
 ```
 
-The keyword `rootdir` is used to specify the data set path. It is recommended to symlink the dataset root to `$SSSEGMENTATION/` or directly run `bash scripts/prepare_datasets.sh $DATASETNAME` in `$SSSEGMENTATION/` so that you don't need to modify the default `rootdir` for each dataset.
+**Tip:** It is recommended to symlink the dataset folder to the `$SSSEGMENTATION/` root or simply run `bash scripts/prepare_datasets.sh $DATASETNAME` in `$SSSEGMENTATION/`. This way, the default `rootdir` does not need to be manually modified in most cases.
 
-The keyword `train` and `test` are used to specify the configs for model training and testing. 
-And the value type of `SEGMENTOR_CFG['dataset']['train']` and `SEGMENTOR_CFG['dataset']['test']` is `dict`.
-Specifically, `set` means a certain division of the data set, usually including train set (set as `train`), validation set (set as `val`) and test set (set as `test`). 
-`data_pipelines` is used to define data transforms to pre-process `sample_meta` before feeding into the models, more details please refer to [Customize Data Pipelines](https://sssegmentation.readthedocs.io/en/latest/Tutorials.html#customize-data-pipelines).
+The `train` and `test` fields define the configuration for training and evaluation splits, respectively. Both are dictionaries with the following keys,
 
-The other arguments supported in `SEGMENTOR_CFG['dataset']` is listed as follows,
+- `set`: Indicates which subset of the data to use (*e.g.*, `train`, `val`, `test`).
+- `data_pipelines`: A list of transformation operations applied sequentially to the input. These transforms are used to preprocess the `sample_meta` objects before they are passed into the model. See [Customize Data Pipelines](https://sssegmentation.readthedocs.io/en/latest/Tutorials.html#customize-data-pipelines) for details.
 
-- `repeat_times`: The default value is 1, if increase it in the config, the appeared times of one image in an epoch will increase accordingly,
-- `eval_env`: Used to specify evaluate environment, support `server` environment (only save the test results which could be submitted to the corresponding dataset's official website to obtain the segmentation performance) and `local` environment (the default environment, test segmentors with the local images and annotations provided by the corresponding dataset).
+Additional optional fields supported in `SEGMENTOR_CFG['dataset']` include,
 
-If the users want to learn more about this part, it is recommended that you could jump to the [`ssseg/modules/datasets` directory](https://github.com/SegmentationBLWX/sssegmentation/tree/main/ssseg/modules/datasets) in SSSegmentation to read the source codes of dataset classes.
+- `repeat_times` (*int, default=1*): If set to a value >1, each image will appear multiple times within an epoch, which can be useful for small datasets.
+- `eval_env` (*str, default='local'*): Defines the evaluation environment. Options: `local` (evaluate using local ground truth annotations) and `server` (only saves predicted results for submission to external servers).
+- `ignore_index` (*int, default=-100*): Label index to ignore during loss computation and evaluation.
+- `auto_correct_invalid_seg_target (*bool, default=False*)`: If True, automatically fixes invalid pixel values in segmentation targets.
+
+For a deeper understanding, users are encouraged to explore the [`ssseg/modules/datasets`](https://github.com/SegmentationBLWX/sssegmentation/tree/main/ssseg/modules/datasets) directory, where the dataset class definitions and data loading logic are implemented.
 
 #### Customize Data Pipelines
 
