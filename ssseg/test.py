@@ -131,7 +131,7 @@ class Tester():
                     seg_logit = sum(seg_logit_list) / len(seg_logit_list)
                     seg_pred = (torch.argmax(seg_logit[0], dim=0)).cpu().numpy().astype(np.int32)
                     seg_gt = samples_meta['seg_target'][seg_idx].cpu().numpy().astype(np.int32)
-                    seg_gt[seg_gt >= dataset.num_classes] = -1
+                    seg_gt[seg_gt >= dataset.num_classes | seg_gt < 0] = -1
                     seg_results[samples_meta['id'][seg_idx]] = {'seg_pred': seg_pred, 'seg_gt': seg_gt}
         dist.barrier()
         # post process

@@ -22,6 +22,7 @@ class VOCDataset(BaseDataset):
         (192, 0, 0), (64, 128, 0), (192, 128, 0), (64, 0, 128), (192, 0, 128), (64, 128, 128), (192, 128, 128), (0, 64, 0),
         (128, 64, 0), (0, 192, 0), (128, 192, 0), (0, 64, 128)
     ]
+    clsid2label = {255: -100}
     assert num_classes == len(classnames) and num_classes == len(palette)
     def __init__(self, mode, logger_handle, dataset_cfg):
         super(VOCDataset, self).__init__(mode=mode, logger_handle=logger_handle, dataset_cfg=dataset_cfg)
@@ -56,6 +57,7 @@ class PascalContextDataset(BaseDataset):
         (140, 140, 140), (250, 10, 15), (20, 255, 0), (31, 255, 0), (255, 31, 0), (255, 224, 0), (153, 255, 0), (0, 0, 255),
         (255, 71, 0), (0, 235, 255), (0, 173, 255), (31, 0, 255)
     ]
+    clsid2label = {255: -100}
     assert num_classes == len(classnames) and num_classes == len(palette)
     def __init__(self, mode, logger_handle, dataset_cfg):
         super(PascalContextDataset, self).__init__(mode=mode, logger_handle=logger_handle, dataset_cfg=dataset_cfg)
@@ -90,7 +92,7 @@ class PascalContext59Dataset(BaseDataset):
         (140, 140, 140), (250, 10, 15), (20, 255, 0), (31, 255, 0), (255, 31, 0), (255, 224, 0), (153, 255, 0), (0, 0, 255),
         (255, 71, 0), (0, 235, 255), (0, 173, 255), (31, 0, 255)
     ]
-    clsid2label = {0: -100}
+    clsid2label = {0: -100, 255: -100}
     for i in range(1, num_classes+1): clsid2label[i] = i - 1
     assert num_classes == len(classnames) and num_classes == len(palette)
     def __init__(self, mode, logger_handle, dataset_cfg):
