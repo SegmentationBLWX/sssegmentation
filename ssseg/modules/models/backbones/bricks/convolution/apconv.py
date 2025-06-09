@@ -5,6 +5,7 @@ Author:
     Zhenchao Jin
 '''
 import math
+import torch
 import torch.nn as nn
 import torch.nn.functional as F
 from ..activation import BuildActivation
@@ -23,7 +24,7 @@ class AdptivePaddingConv2d(nn.Conv2d):
         if act_cfg is not None: 
             self.activation = BuildActivation(act_cfg)
     '''forward'''
-    def forward(self, x):
+    def forward(self, x: torch.Tensor):
         img_h, img_w = x.size()[-2:]
         kernel_h, kernel_w = self.weight.size()[-2:]
         stride_h, stride_w = self.stride

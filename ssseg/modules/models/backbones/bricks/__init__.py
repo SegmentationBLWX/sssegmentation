@@ -9,7 +9,7 @@ from .normalization import (
     NormalizationBuilder, BuildNormalization
 )
 from .misc import (
-    Scale, L2Norm, makedivisible, truncnormal
+    Scale, L2Norm, LayerScale, makedivisible, truncnormal, tolen2tuple
 )
 from .transformer import (
     FFN, MultiheadAttention, PatchEmbed, PatchMerging, AdaptivePadding, PositionEmbeddingSine, nchwtonlc, nlctonchw, nlc2nchw2nlc, nchw2nlc2nchw

@@ -6,6 +6,7 @@ Author:
 '''
 import torch
 import torch.nn as nn
+import torch.utils.checkpoint as checkpoint
 from ...utils import loadpretrainedweights
 from .bricks import BuildNormalization, BuildActivation
 
@@ -18,11 +19,12 @@ AUTO_ASSERT_STRUCTURE_TYPES = {}
 
 '''GlobalContextExtractor'''
 class GlobalContextExtractor(nn.Module):
-    def __init__(self, channels, reduction=16):
+    def __init__(self, channels, reduction=16, use_checkpoint=False):
         super(GlobalContextExtractor, self).__init__()
         assert reduction >= 1 and channels >= reduction
         self.channels = channels
         self.reduction = reduction
+        self.use_checkpoint = use_checkpoint
         self.avg_pool = nn.AdaptiveAvgPool2d(1)
         self.fc = nn.Sequential(
             nn.Linear(channels, channels // reduction), 
@@ -31,18 +33,25 @@ class GlobalContextExtractor(nn.Module):
             nn.Sigmoid()
         )
     '''forward'''
-    def forward(self, x):
-        batch_size, num_channels = x.size()[:2]
-        y = self.avg_pool(x).view(batch_size, num_channels)
-        y = self.fc(y).view(batch_size, num_channels, 1, 1)
-        return x * y
+    def forward(self, x: torch.Tensor):
+        def _forward(x: torch.Tensor):
+            batch_size, num_channels = x.size()[:2]
+            y = self.avg_pool(x).view(batch_size, num_channels)
+            y = self.fc(y).view(batch_size, num_channels, 1, 1)
+            return x * y
+        if self.use_checkpoint and x.requires_grad:
+            out = checkpoint.checkpoint(_forward, x)
+        else:
+            out = _forward(x)
+        return out
 
 
 '''ContextGuidedBlock'''
 class ContextGuidedBlock(nn.Module):
-    def __init__(self, in_channels, out_channels, dilation=2, reduction=16, skip_connect=True, downsample=False, norm_cfg=None, act_cfg=None):
+    def __init__(self, in_channels, out_channels, dilation=2, reduction=16, skip_connect=True, downsample=False, norm_cfg=None, act_cfg=None, use_checkpoint=False):
         super(ContextGuidedBlock, self).__init__()
         # set attrs
+        self.use_checkpoint = use_checkpoint
         self.downsample = downsample
         self.skip_connect = skip_connect and not downsample
         channels = out_channels if downsample else out_channels // 2
@@ -53,7 +62,7 @@ class ContextGuidedBlock(nn.Module):
         padding = (kernel_size - 1) // 2
         # instance modules
         self.conv1x1 = nn.Sequential(
-            nn.Conv2d(in_channels, channels, kernel_size=kernel_size, stride=stride, padding=padding, bias=False),
+            nn.Conv2d(in_channels, channels, kernel_size=kernel_size, stride=stride, padding=padding, bias=False if norm_cfg is not None else True),
             BuildNormalization(placeholder=channels, norm_cfg=norm_cfg),
             BuildActivation(act_cfg),
         )
@@ -63,20 +72,26 @@ class ContextGuidedBlock(nn.Module):
         self.activate = nn.PReLU(2 * channels)
         if downsample:
             self.bottleneck = nn.Conv2d(2 * channels, out_channels, kernel_size=1, stride=1, padding=0, bias=False)
-        self.f_glo = GlobalContextExtractor(out_channels, reduction)
+        self.f_glo = GlobalContextExtractor(out_channels, reduction, use_checkpoint)
     '''forward'''
-    def forward(self, x):
-        out = self.conv1x1(x)
-        loc = self.f_loc(out)
-        sur = self.f_sur(out)
-        joi_feat = torch.cat([loc, sur], 1)
-        joi_feat = self.bn(joi_feat)
-        joi_feat = self.activate(joi_feat)
-        if self.downsample:
-            joi_feat = self.bottleneck(joi_feat)
-        out = self.f_glo(joi_feat)
-        if self.skip_connect:
-            return x + out
+    def forward(self, x: torch.Tensor):
+        def _forward(x: torch.Tensor):
+            out = self.conv1x1(x)
+            loc = self.f_loc(out)
+            sur = self.f_sur(out)
+            joi_feat = torch.cat([loc, sur], 1)
+            joi_feat = self.bn(joi_feat)
+            joi_feat = self.activate(joi_feat)
+            if self.downsample:
+                joi_feat = self.bottleneck(joi_feat)
+            out = self.f_glo(joi_feat)
+            if self.skip_connect:
+                return x + out
+            return out
+        if self.use_checkpoint and x.requires_grad:
+            out = checkpoint.checkpoint(_forward, x)
+        else:
+            out = _forward(x)
         return out
 
 
@@ -97,8 +112,7 @@ class InputInjection(nn.Module):
 '''CGNet'''
 class CGNet(nn.Module):
     def __init__(self, structure_type, in_channels=3, num_channels=(32, 64, 128), num_blocks=(3, 21), dilations=(2, 4), reductions=(8, 16), 
-                 norm_cfg={'type': 'SyncBatchNorm'}, act_cfg={'type': 'PReLU'}, pretrained=False, pretrained_model_path=''):
-        super(CGNet, self).__init__()
+                 norm_cfg={'type': 'SyncBatchNorm'}, act_cfg={'type': 'PReLU'}, use_checkpoint=False, pretrained=False, pretrained_model_path=''):
         # set attributes
         self.structure_type = structure_type
         self.in_channels = in_channels
@@ -108,6 +122,7 @@ class CGNet(nn.Module):
         self.reductions = reductions
         self.norm_cfg = norm_cfg
         self.act_cfg = act_cfg
+        self.use_checkpoint = use_checkpoint
         self.pretrained = pretrained
         self.pretrained_model_path = pretrained_model_path
         if 'type' in self.act_cfg and self.act_cfg['type'] == 'PReLU':
@@ -125,7 +140,7 @@ class CGNet(nn.Module):
         self.stem = nn.ModuleList()
         for i in range(3):
             self.stem.append(nn.Sequential(
-                nn.Conv2d(cur_channels, num_channels[0], kernel_size=3, stride=2 if i == 0 else 1, padding=1, bias=False),
+                nn.Conv2d(cur_channels, num_channels[0], kernel_size=3, stride=2 if i == 0 else 1, padding=1, bias=False if norm_cfg is not None else True),
                 BuildNormalization(placeholder=num_channels[0], norm_cfg=norm_cfg),
                 BuildActivation(act_cfg),
             ))
@@ -145,7 +160,7 @@ class CGNet(nn.Module):
         for i in range(num_blocks[0]):
             self.level1.append(ContextGuidedBlock(
                 in_channels=cur_channels if i == 0 else num_channels[1], out_channels=num_channels[1], dilation=dilations[0], 
-                reduction=reductions[0], skip_connect=True, downsample=(i == 0), norm_cfg=norm_cfg, act_cfg=act_cfg,
+                reduction=reductions[0], skip_connect=True, downsample=(i == 0), norm_cfg=norm_cfg, act_cfg=act_cfg, use_checkpoint=use_checkpoint
             ))
         cur_channels = 2 * num_channels[1] + in_channels
         self.norm_prelu_1 = nn.Sequential(
@@ -157,7 +172,7 @@ class CGNet(nn.Module):
         for i in range(num_blocks[1]):
             self.level2.append(ContextGuidedBlock(
                 in_channels=cur_channels if i == 0 else num_channels[2], out_channels=num_channels[2], dilation=dilations[1],
-                reduction=reductions[1], skip_connect=True, downsample=(i == 0), norm_cfg=norm_cfg, act_cfg=act_cfg,
+                reduction=reductions[1], skip_connect=True, downsample=(i == 0), norm_cfg=norm_cfg, act_cfg=act_cfg, use_checkpoint=use_checkpoint,
             ))
         cur_channels = 2 * num_channels[2]
         self.norm_prelu_2 = nn.Sequential(

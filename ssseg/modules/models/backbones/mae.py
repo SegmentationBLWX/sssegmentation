@@ -8,8 +8,7 @@ import os
 import torch
 import torch.nn as nn
 import torch.utils.model_zoo as model_zoo
-from .beit import BEiT
-from .beit import BEiTTransformerEncoderLayer as MAETransformerEncoderLayer
+from .beit import BEiT, BEiTAttention, BEiTTransformerEncoderLayer
 
 
 '''DEFAULT_MODEL_URLS'''
@@ -18,6 +17,20 @@ DEFAULT_MODEL_URLS = {
 }
 '''AUTO_ASSERT_STRUCTURE_TYPES'''
 AUTO_ASSERT_STRUCTURE_TYPES = {}
+
+
+'''MAEAttention'''
+class MAEAttention(BEiTAttention):
+    '''initweights'''
+    def initweights(self):
+        pass
+
+
+'''MAETransformerEncoderLayer'''
+class MAETransformerEncoderLayer(BEiTTransformerEncoderLayer):
+    '''buildattn'''
+    def buildattn(self, attn_cfg):
+        self.attn = MAEAttention(**attn_cfg)
 
 
 '''MAE'''
@@ -88,7 +101,7 @@ class MAE(BEiT):
                 state_dict['pos_embed'] = new_pos_embed
         return state_dict
     '''forward'''
-    def forward(self, inputs):
+    def forward(self, inputs: torch.Tensor):
         B = inputs.shape[0]
         x, hw_shape = self.patch_embed(inputs)
         cls_tokens = self.cls_token.expand(B, -1, -1)

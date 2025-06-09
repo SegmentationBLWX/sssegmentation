@@ -6,6 +6,7 @@ Author:
 '''
 import torch
 import torch.nn as nn
+import torch.utils.checkpoint as checkpoint
 from ...utils import loadpretrainedweights
 from .bricks import BuildNormalization, BuildActivation
 
@@ -18,48 +19,57 @@ AUTO_ASSERT_STRUCTURE_TYPES = {}
 
 '''BasicConvBlock'''
 class BasicConvBlock(nn.Module):
-    def __init__(self, in_channels, out_channels, num_convs=2, stride=1, dilation=1, norm_cfg=None, act_cfg=None):
+    def __init__(self, in_channels, out_channels, num_convs=2, stride=1, dilation=1, use_checkpoint=False, norm_cfg=None, act_cfg=None):
         super(BasicConvBlock, self).__init__()
+        self.use_checkpoint = use_checkpoint
         convs = []
         for i in range(num_convs):
             in_c, out_c = in_channels if i == 0 else out_channels, out_channels
             s, d, p = stride if i == 0 else 1, 1 if i == 0 else dilation, 1 if i == 0 else dilation
             conv = nn.Sequential(
-                nn.Conv2d(in_c, out_c, kernel_size=3, stride=s, padding=p, dilation=d, bias=False),
+                nn.Conv2d(in_c, out_c, kernel_size=3, stride=s, padding=p, dilation=d, bias=False if norm_cfg is not None else True),
                 BuildNormalization(placeholder=out_c, norm_cfg=norm_cfg),
                 BuildActivation(act_cfg),
             )
             convs.append(conv)
         self.convs = nn.Sequential(*convs)
     '''forward'''
-    def forward(self, x):
-        out = self.convs(x)
+    def forward(self, x: torch.Tensor):
+        if self.use_checkpoint and x.requires_grad:
+            out = checkpoint.checkpoint(self.convs, x)
+        else:
+            out = self.convs(x)
         return out
 
 
 '''DeconvModule'''
 class DeconvModule(nn.Module):
-    def __init__(self, in_channels, out_channels, norm_cfg=None, act_cfg=None, kernel_size=4, scale_factor=2):
+    def __init__(self, in_channels, out_channels, use_checkpoint=False, norm_cfg=None, act_cfg=None, kernel_size=4, scale_factor=2):
         super(DeconvModule, self).__init__()
         assert (kernel_size - scale_factor >= 0) and (kernel_size - scale_factor) % 2 == 0
+        self.use_checkpoint = use_checkpoint
         self.deconv_upsamping = nn.Sequential(
             nn.ConvTranspose2d(in_channels, out_channels, kernel_size=kernel_size, stride=scale_factor, padding=(kernel_size - scale_factor) // 2),
             BuildNormalization(placeholder=out_channels, norm_cfg=norm_cfg),
             BuildActivation(act_cfg),
         )
     '''forward'''
-    def forward(self, x):
-        out = self.deconv_upsamping(x)
+    def forward(self, x: torch.Tensor):
+        if self.use_checkpoint and x.requires_grad:
+            out = checkpoint.checkpoint(self.deconv_upsamping, x)
+        else:
+            out = self.deconv_upsamping(x)
         return out
 
 
 '''InterpConv'''
 class InterpConv(nn.Module):
-    def __init__(self, in_channels, out_channels, norm_cfg=None, act_cfg=None, conv_first=False, kernel_size=1, stride=1, padding=0, 
+    def __init__(self, in_channels, out_channels, norm_cfg=None, act_cfg=None, conv_first=False, kernel_size=1, stride=1, padding=0, bias=False, use_checkpoint=False,
                  upsample_cfg=dict(scale_factor=2, mode='bilinear', align_corners=False)):
         super(InterpConv, self).__init__()
+        self.use_checkpoint = use_checkpoint
         conv = nn.Sequential(
-            nn.Conv2d(in_channels, out_channels, kernel_size=kernel_size, stride=stride, padding=padding, bias=False),
+            nn.Conv2d(in_channels, out_channels, kernel_size=kernel_size, stride=stride, padding=padding, bias=bias),
             BuildNormalization(placeholder=out_channels, norm_cfg=norm_cfg),
             BuildActivation(act_cfg),
         )
@@ -69,29 +79,35 @@ class InterpConv(nn.Module):
         else:
             self.interp_upsample = nn.Sequential(upsample, conv)
     '''forward'''
-    def forward(self, x):
-        out = self.interp_upsample(x)
+    def forward(self, x: torch.Tensor):
+        if self.use_checkpoint and x.requires_grad:
+            out = checkpoint.checkpoint(self.interp_upsample, x)
+        else:
+            out = self.interp_upsample(x)
         return out
 
 
 '''UpConvBlock'''
 class UpConvBlock(nn.Module):
     def __init__(self, conv_block, in_channels, skip_channels, out_channels, num_convs=2, stride=1, dilation=1,
-                 norm_cfg=None, act_cfg=None, upsample_type='InterpConv'):
+                 norm_cfg=None, act_cfg=None, upsample_cfg=dict(type='InterpConv'), use_checkpoint=False):
         super(UpConvBlock, self).__init__()
         supported_upsamples = {
             'InterpConv': InterpConv, 'DeconvModule': DeconvModule,
         }
         self.conv_block = conv_block(
             in_channels=2 * skip_channels, out_channels=out_channels, num_convs=num_convs, stride=stride,
-            dilation=dilation, norm_cfg=norm_cfg, act_cfg=act_cfg
+            dilation=dilation, norm_cfg=norm_cfg, act_cfg=act_cfg, use_checkpoint=use_checkpoint,
         )
-        if upsample_type is not None:
-            assert upsample_type in supported_upsamples, 'unsupport upsample_type %s' % upsample_type
-            self.upsample = supported_upsamples[upsample_type](in_channels=in_channels, out_channels=skip_channels, norm_cfg=norm_cfg, act_cfg=act_cfg)
+        if upsample_cfg is not None:
+            upsample_type = upsample_cfg.pop('type')
+            upsample_cfg.update(dict(
+                in_channels=in_channels, out_channels=skip_channels, norm_cfg=norm_cfg, act_cfg=act_cfg, use_checkpoint=use_checkpoint
+            ))
+            self.upsample = supported_upsamples[upsample_type](**upsample_cfg)
         else:
             self.upsample = nn.Sequential(
-                nn.Conv2d(in_channels, skip_channels, kernel_size=1, stride=1, padding=0, bias=False),
+                nn.Conv2d(in_channels, skip_channels, kernel_size=1, stride=1, padding=0, bias=False if norm_cfg is not None else True),
                 BuildNormalization(placeholder=skip_channels, norm_cfg=norm_cfg),
                 BuildActivation(act_cfg),
             )
@@ -106,8 +122,8 @@ class UpConvBlock(nn.Module):
 '''UNet'''
 class UNet(nn.Module):
     def __init__(self, structure_type, in_channels=3, base_channels=64, num_stages=5, strides=(1, 1, 1, 1, 1), enc_num_convs=(2, 2, 2, 2, 2), dec_num_convs=(2, 2, 2, 2),
-                 downsamples=(True, True, True, True), enc_dilations=(1, 1, 1, 1, 1), dec_dilations=(1, 1, 1, 1), norm_cfg={'type': 'SyncBatchNorm'}, 
-                 act_cfg={'type': 'ReLU', 'inplace': True}, upsample_type='InterpConv', pretrained=False, pretrained_model_path=''):
+                 downsamples=(True, True, True, True), enc_dilations=(1, 1, 1, 1, 1), dec_dilations=(1, 1, 1, 1), use_checkpoint=False, norm_cfg={'type': 'SyncBatchNorm'}, 
+                 act_cfg={'type': 'ReLU', 'inplace': True}, upsample_cfg=dict(type='InterpConv'), pretrained=False, pretrained_model_path=''):
         super(UNet, self).__init__()
         # set attributes
         self.structure_type = structure_type
@@ -122,9 +138,10 @@ class UNet(nn.Module):
         self.dec_dilations = dec_dilations
         self.norm_cfg = norm_cfg
         self.act_cfg = act_cfg
-        self.upsample_type = upsample_type
+        self.upsample_cfg = upsample_cfg
         self.pretrained = pretrained
         self.pretrained_model_path = pretrained_model_path
+        self.use_checkpoint = use_checkpoint
         # assert
         assert (len(strides) == num_stages) and (len(enc_num_convs) == num_stages) \
             and (len(dec_num_convs) == (num_stages - 1)) and (len(downsamples) == (num_stages - 1)) \
@@ -144,11 +161,11 @@ class UNet(nn.Module):
                 self.decoder.append(UpConvBlock(
                     conv_block=BasicConvBlock, in_channels=base_channels * 2**i, skip_channels=base_channels * 2**(i - 1), 
                     out_channels=base_channels * 2**(i - 1), num_convs=dec_num_convs[i - 1], stride=1, dilation=dec_dilations[i - 1], 
-                    norm_cfg=norm_cfg, act_cfg=act_cfg, upsample_type=upsample_type if upsample else None,
+                    use_checkpoint=use_checkpoint, norm_cfg=norm_cfg, act_cfg=act_cfg, upsample_cfg=upsample_cfg if upsample else None,
                 ))
             enc_conv_block.append(BasicConvBlock(
                 in_channels=in_channels, out_channels=base_channels * 2**i, num_convs=enc_num_convs[i], stride=strides[i],
-                dilation=enc_dilations[i], norm_cfg=norm_cfg, act_cfg=act_cfg,
+                dilation=enc_dilations[i], norm_cfg=norm_cfg, act_cfg=act_cfg, use_checkpoint=use_checkpoint
             ))
             self.encoder.append((nn.Sequential(*enc_conv_block)))
             in_channels = base_channels * 2**i

@@ -83,7 +83,7 @@ class UpsamplerBlock(nn.Module):
 class ERFNet(nn.Module):
     def __init__(self, structure_type, in_channels=3, enc_downsample_channels=(16, 64, 128), enc_stage_non_bottlenecks=(5, 8), enc_non_bottleneck_dilations=(2, 4, 8, 16),
                  enc_non_bottleneck_channels=(64, 128), dec_upsample_channels=(64, 16), dec_stages_non_bottleneck=(2, 2), dec_non_bottleneck_channels=(64, 16),
-                 dropout_ratio=0.1, norm_cfg={'type': 'SyncBatchNorm'}, act_cfg={'type': 'PReLU'}, pretrained=False, pretrained_model_path=''):
+                 dropout_ratio=0.1, norm_cfg={'type': 'SyncBatchNorm'}, act_cfg={'type': 'ReLU', 'inplace': True}, pretrained=False, pretrained_model_path=''):
         super(ERFNet, self).__init__()
         # set attributes
         self.structure_type = structure_type
@@ -101,12 +101,12 @@ class ERFNet(nn.Module):
         self.pretrained = pretrained
         self.pretrained_model_path = pretrained_model_path
         # assert
-        assert len(enc_downsample_channels) == len(dec_upsample_channels) + 1
-        assert len(enc_downsample_channels) == len(enc_stage_non_bottlenecks) + 1
-        assert len(enc_downsample_channels) == len(enc_non_bottleneck_channels) + 1
-        assert enc_stage_non_bottlenecks[-1] % len(enc_non_bottleneck_dilations) == 0
-        assert len(dec_upsample_channels) == len(dec_stages_non_bottleneck)
-        assert len(dec_stages_non_bottleneck) == len(dec_non_bottleneck_channels)
+        assert len(enc_downsample_channels) == len(dec_upsample_channels) + 1, 'Number of downsample block of encoder does not match number of upsample block of decoder'
+        assert len(enc_downsample_channels) == len(enc_stage_non_bottlenecks) + 1, 'Number of downsample block of encoder does not match number of Non-bottleneck block of encoder'
+        assert len(enc_downsample_channels) == len(enc_non_bottleneck_channels) + 1, 'Number of downsample block of encoder does not match number of channels of Non-bottleneck block of encoder'
+        assert enc_stage_non_bottlenecks[-1] % len(enc_non_bottleneck_dilations) == 0, 'Number of Non-bottleneck block of encoder does not match number of Non-bottleneck block of encoder'
+        assert len(dec_upsample_channels) == len(dec_stages_non_bottleneck), 'Number of upsample block of decoder does not match number of Non-bottleneck block of decoder'
+        assert len(dec_stages_non_bottleneck) == len(dec_non_bottleneck_channels), 'Number of Non-bottleneck block of decoder does not match number of channels of Non-bottleneck block of decoder'
         if structure_type in AUTO_ASSERT_STRUCTURE_TYPES:
             for key, value in AUTO_ASSERT_STRUCTURE_TYPES[structure_type].items():
                 assert hasattr(self, key) and (getattr(self, key) == value)

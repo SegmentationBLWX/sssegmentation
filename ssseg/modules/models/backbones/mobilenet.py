@@ -25,7 +25,7 @@ AUTO_ASSERT_STRUCTURE_TYPES = {}
 class MobileNetV2(nn.Module):
     arch_settings = [[1, 16, 1], [6, 24, 2], [6, 32, 3], [6, 64, 4], [6, 96, 3], [6, 160, 3], [6, 320, 1]]
     def __init__(self, structure_type, in_channels=3, widen_factor=1, outstride=8, out_indices=(1, 2, 4, 6), norm_cfg={'type': 'SyncBatchNorm'}, 
-                 act_cfg={'type': 'ReLU6', 'inplace': True}, pretrained=True, pretrained_model_path=''):
+                 act_cfg={'type': 'ReLU6', 'inplace': True}, pretrained=True, pretrained_model_path='', use_checkpoint=False):
         super(MobileNetV2, self).__init__()
         # set attributes
         self.out_indices = out_indices
@@ -37,6 +37,7 @@ class MobileNetV2(nn.Module):
         self.act_cfg = act_cfg
         self.pretrained = pretrained
         self.pretrained_model_path = pretrained_model_path
+        self.use_checkpoint = use_checkpoint
         # assert
         if structure_type in AUTO_ASSERT_STRUCTURE_TYPES:
             for key, value in AUTO_ASSERT_STRUCTURE_TYPES[structure_type].items():
@@ -47,7 +48,7 @@ class MobileNetV2(nn.Module):
             16: ((1, 2, 2, 2, 1, 1, 1), (1, 1, 1, 1, 1, 2, 2)),
             32: ((1, 2, 2, 2, 1, 2, 1), (1, 1, 1, 1, 1, 1, 1)),
         }
-        assert outstride in outstride_to_strides_and_dilations, 'unsupport outstride %s in MobileNetV2' % outstride
+        assert outstride in outstride_to_strides_and_dilations, f'invalid outstride {outstride} in MobileNetV2'
         stride_list, dilation_list = outstride_to_strides_and_dilations[outstride]
         # conv1
         self.in_channels = makedivisible(32 * widen_factor, 8)
@@ -104,7 +105,7 @@ class MobileNetV2(nn.Module):
             layers.append(
                 InvertedResidual(
                     self.in_channels,  out_channels, stride=stride if i == 0 else 1, expand_ratio=expand_ratio, 
-                    dilation=dilation if i == 0 else 1, norm_cfg=norm_cfg, act_cfg=act_cfg
+                    dilation=dilation if i == 0 else 1, norm_cfg=norm_cfg, act_cfg=act_cfg, use_checkpoint=self.use_checkpoint
                 )
             )
             self.in_channels = out_channels
@@ -129,7 +130,7 @@ class MobileNetV3(nn.Module):
         ],
     }
     def __init__(self, structure_type, in_channels=3, arch_type='large', outstride=8, out_indices=(1, 3, 16), reduction_factor=1, norm_cfg={'type': 'SyncBatchNorm'}, 
-                 act_cfg={'type': 'HardSwish'}, pretrained=True, pretrained_model_path=''):
+                 act_cfg={'type': 'HardSwish'}, pretrained=True, pretrained_model_path='', use_checkpoint=False):
         super(MobileNetV3, self).__init__()
         # set attributes
         self.structure_type = structure_type
@@ -142,10 +143,11 @@ class MobileNetV3(nn.Module):
         self.act_cfg = act_cfg
         self.pretrained = pretrained
         self.pretrained_model_path = pretrained_model_path
+        self.use_checkpoint = use_checkpoint
         # assert
         assert arch_type in self.arch_settings
         assert isinstance(reduction_factor, int) and reduction_factor > 0
-        assert outstride in [8, 16, 32], 'unsupport outstride %s in MobileNetV3' % outstride
+        assert outstride in [8], f'invalid outstride {outstride} in MobileNetV3'
         if structure_type in AUTO_ASSERT_STRUCTURE_TYPES:
             for key, value in AUTO_ASSERT_STRUCTURE_TYPES[structure_type].items():
                 assert hasattr(self, key) and (getattr(self, key) == value)
@@ -195,8 +197,8 @@ class MobileNetV3(nn.Module):
                     'channels': mid_channels, 'ratio': 4, 'act_cfgs': ({'type': 'ReLU'}, {'type': 'HardSigmoid', 'bias': 3.0, 'divisor': 6.0})
                 }
             layer = InvertedResidualV3(
-                in_channels=in_channels, out_channels=out_channels, mid_channels=mid_channels, kernel_size=kernel_size,
-                stride=stride, se_cfg=se_cfg, with_expand_conv=(in_channels != mid_channels), norm_cfg=norm_cfg, act_cfg=act_cfg,
+                in_channels=in_channels, out_channels=out_channels, mid_channels=mid_channels, kernel_size=kernel_size, stride=stride, se_cfg=se_cfg, 
+                with_expand_conv=(in_channels != mid_channels), norm_cfg=norm_cfg, act_cfg=act_cfg, use_checkpoint=self.use_checkpoint
             )
             in_channels = out_channels
             layer_name = 'layer{}'.format(i + 1)
@@ -205,23 +207,21 @@ class MobileNetV3(nn.Module):
         # build the last layer
         out_channels = 576 if arch_type == 'small' else 960
         layer = nn.Sequential()
-        layer.add_module('conv', nn.Conv2d(in_channels, out_channels, kernel_size=1, stride=1, dilation={8: 4, 16: 2, 32: 1}[outstride], padding=0, bias=False))
+        layer.add_module('conv', nn.Conv2d(in_channels, out_channels, kernel_size=1, stride=1, dilation=4, padding=0, bias=False))
         layer.add_module('bn', BuildNormalization(placeholder=out_channels, norm_cfg=norm_cfg))
         layer.add_module('activation', BuildActivation(act_cfg_default))
         layer_name = 'layer{}'.format(len(layer_setting) + 1)
         self.add_module(layer_name, layer)
         layers.append(layer_name)
         # convert backbone MobileNetV3 to a semantic segmentation version
-        if outstride == 32: return layers
         if arch_type == 'small':
             self.layer4.depthwise_conv[0].stride = (1, 1)
-            if outstride == 8:
-                self.layer9.depthwise_conv[0].stride = (1, 1)
+            self.layer9.depthwise_conv[0].stride = (1, 1)
             for i in range(4, len(layers)):
                 layer = getattr(self, layers[i])
                 if isinstance(layer, InvertedResidualV3): modified_module = layer.depthwise_conv[0]
                 else: modified_module = layer[0]
-                if i < 9 or (outstride == 16):
+                if i < 9:
                     modified_module.dilation = (2, 2)
                     pad = 2
                 else:
@@ -232,13 +232,12 @@ class MobileNetV3(nn.Module):
                     modified_module.padding = (pad, pad)
         else:
             self.layer7.depthwise_conv[0].stride = (1, 1)
-            if outstride == 8:
-                self.layer13.depthwise_conv[0].stride = (1, 1)
+            self.layer13.depthwise_conv[0].stride = (1, 1)
             for i in range(7, len(layers)):
                 layer = getattr(self, layers[i])
                 if isinstance(layer, InvertedResidualV3): modified_module = layer.depthwise_conv[0]
                 else: modified_module = layer[0]
-                if i < 13 or (outstride == 16):
+                if i < 13:
                     modified_module.dilation = (2, 2)
                     pad = 2
                 else:

@@ -25,28 +25,28 @@ class DetailBranch(nn.Module):
         for i in range(len(detail_channels)):
             if i == 0:
                 detail_branch.append(nn.Sequential(
-                    nn.Conv2d(in_channels, detail_channels[i], kernel_size=3, stride=2, padding=1, bias=False),
+                    nn.Conv2d(in_channels, detail_channels[i], kernel_size=3, stride=2, padding=1, bias=False if norm_cfg is not None else True),
                     BuildNormalization(placeholder=detail_channels[i], norm_cfg=norm_cfg),
                     BuildActivation(act_cfg),
-                    nn.Conv2d(detail_channels[i], detail_channels[i], kernel_size=3, stride=1, padding=1, bias=False),
+                    nn.Conv2d(detail_channels[i], detail_channels[i], kernel_size=3, stride=1, padding=1, bias=False if norm_cfg is not None else True),
                     BuildNormalization(placeholder=detail_channels[i], norm_cfg=norm_cfg),
                     BuildActivation(act_cfg),
                 ))
             else:
                 detail_branch.append(nn.Sequential(
-                    nn.Conv2d(detail_channels[i - 1], detail_channels[i], kernel_size=3, stride=2, padding=1, bias=False),
+                    nn.Conv2d(detail_channels[i - 1], detail_channels[i], kernel_size=3, stride=2, padding=1, bias=False if norm_cfg is not None else True),
                     BuildNormalization(placeholder=detail_channels[i], norm_cfg=norm_cfg),
                     BuildActivation(act_cfg),
-                    nn.Conv2d(detail_channels[i], detail_channels[i], kernel_size=3, stride=1, padding=1, bias=False),
+                    nn.Conv2d(detail_channels[i], detail_channels[i], kernel_size=3, stride=1, padding=1, bias=False if norm_cfg is not None else True),
                     BuildNormalization(placeholder=detail_channels[i], norm_cfg=norm_cfg),
                     BuildActivation(act_cfg),
-                    nn.Conv2d(detail_channels[i], detail_channels[i], kernel_size=3, stride=1, padding=1, bias=False),
+                    nn.Conv2d(detail_channels[i], detail_channels[i], kernel_size=3, stride=1, padding=1, bias=False if norm_cfg is not None else True),
                     BuildNormalization(placeholder=detail_channels[i], norm_cfg=norm_cfg),
                     BuildActivation(act_cfg),
                 ))
         self.detail_branch = nn.ModuleList(detail_branch)
     '''forward'''
-    def forward(self, x):
+    def forward(self, x: torch.Tensor):
         for stage in self.detail_branch:
             x = stage(x)
         return x
@@ -57,21 +57,21 @@ class StemBlock(nn.Module):
     def __init__(self, in_channels=3, out_channels=16, norm_cfg=None, act_cfg=None):
         super(StemBlock, self).__init__()
         self.conv_first = nn.Sequential(
-            nn.Conv2d(in_channels, out_channels, kernel_size=3, stride=2, padding=1, bias=False),
+            nn.Conv2d(in_channels, out_channels, kernel_size=3, stride=2, padding=1, bias=False if norm_cfg is not None else True),
             BuildNormalization(placeholder=out_channels, norm_cfg=norm_cfg),
             BuildActivation(act_cfg),
         )
         self.convs = nn.Sequential(
-            nn.Conv2d(out_channels, out_channels // 2, kernel_size=1, stride=1, padding=0, bias=False),
+            nn.Conv2d(out_channels, out_channels // 2, kernel_size=1, stride=1, padding=0, bias=False if norm_cfg is not None else True),
             BuildNormalization(placeholder=out_channels//2, norm_cfg=norm_cfg),
             BuildActivation(act_cfg),
-            nn.Conv2d(out_channels // 2, out_channels, kernel_size=3, stride=2, padding=1, bias=False),
+            nn.Conv2d(out_channels // 2, out_channels, kernel_size=3, stride=2, padding=1, bias=False if norm_cfg is not None else True),
             BuildNormalization(placeholder=out_channels, norm_cfg=norm_cfg),
             BuildActivation(act_cfg),
         )
         self.pool = nn.MaxPool2d(kernel_size=3, stride=2, padding=1, ceil_mode=False)
         self.fuse_last = nn.Sequential(
-            nn.Conv2d(out_channels * 2, out_channels, kernel_size=3, stride=1, padding=1, bias=False),
+            nn.Conv2d(out_channels * 2, out_channels, kernel_size=3, stride=1, padding=1, bias=False if norm_cfg is not None else True),
             BuildNormalization(placeholder=out_channels, norm_cfg=norm_cfg),
             BuildActivation(act_cfg),
         )
@@ -90,22 +90,22 @@ class GELayer(nn.Module):
         super(GELayer, self).__init__()
         mid_channel = in_channels * exp_ratio
         self.conv1 = nn.Sequential(
-            nn.Conv2d(in_channels, in_channels, kernel_size=3, stride=1, padding=1, bias=False),
+            nn.Conv2d(in_channels, in_channels, kernel_size=3, stride=1, padding=1, bias=False if norm_cfg is not None else True),
             BuildNormalization(placeholder=in_channels, norm_cfg=norm_cfg),
             BuildActivation(act_cfg),
         )
         if stride == 1:
             self.dwconv = nn.Sequential(
-                nn.Conv2d(in_channels, mid_channel, kernel_size=3, stride=stride, padding=1, groups=in_channels, bias=False),
+                nn.Conv2d(in_channels, mid_channel, kernel_size=3, stride=stride, padding=1, groups=in_channels, bias=False if norm_cfg is not None else True),
                 BuildNormalization(placeholder=mid_channel, norm_cfg=norm_cfg),
                 BuildActivation(act_cfg),
             )
             self.shortcut = None
         else:
             self.dwconv = nn.Sequential(
-                nn.Conv2d(in_channels, mid_channel, kernel_size=3, stride=stride, padding=1, groups=in_channels, bias=False),
+                nn.Conv2d(in_channels, mid_channel, kernel_size=3, stride=stride, padding=1, groups=in_channels, bias=False if norm_cfg is not None else True),
                 BuildNormalization(placeholder=mid_channel, norm_cfg=norm_cfg),
-                nn.Conv2d(mid_channel, mid_channel, kernel_size=3, stride=1, padding=1, groups=mid_channel, bias=False),
+                nn.Conv2d(mid_channel, mid_channel, kernel_size=3, stride=1, padding=1, groups=mid_channel, bias=False if norm_cfg is not None else True),
                 BuildNormalization(placeholder=mid_channel, norm_cfg=norm_cfg),
                 BuildActivation(act_cfg),
             )
@@ -114,12 +114,12 @@ class GELayer(nn.Module):
                 dw_norm_cfg=norm_cfg, dw_act_cfg=None, pw_norm_cfg=norm_cfg, pw_act_cfg=None,
             ))
         self.conv2 = nn.Sequential(
-            nn.Conv2d(mid_channel, out_channels, kernel_size=1, stride=1, padding=0, bias=False),
+            nn.Conv2d(mid_channel, out_channels, kernel_size=1, stride=1, padding=0, bias=False if norm_cfg is not None else True),
             BuildNormalization(placeholder=out_channels, norm_cfg=norm_cfg),
         )
         self.act = BuildActivation(act_cfg)
     '''forward'''
-    def forward(self, x):
+    def forward(self, x: torch.Tensor):
         identity = x
         x = self.conv1(x)
         x = self.dwconv(x)
@@ -146,17 +146,17 @@ class CEBlock(nn.Module):
             BuildNormalization(placeholder=in_channels, norm_cfg=norm_cfg),
         )
         self.conv_gap = nn.Sequential(
-            nn.Conv2d(in_channels, out_channels, kernel_size=1, stride=1, padding=0, bias=False),
+            nn.Conv2d(in_channels, out_channels, kernel_size=1, stride=1, padding=0, bias=False if norm_cfg is not None else True),
             BuildNormalization(placeholder=out_channels, norm_cfg=norm_cfg),
             BuildActivation(act_cfg),
         )
         self.conv_last = nn.Sequential(
-            nn.Conv2d(out_channels, out_channels, kernel_size=3, stride=1, padding=1, bias=False),
+            nn.Conv2d(out_channels, out_channels, kernel_size=3, stride=1, padding=1, bias=False if norm_cfg is not None else True),
             BuildNormalization(placeholder=out_channels, norm_cfg=norm_cfg),
             BuildActivation(act_cfg),
         )
     '''forward'''
-    def forward(self, x):
+    def forward(self, x: torch.Tensor):
         identity = x
         x = self.gap(x)
         x = self.conv_gap(x)
@@ -196,7 +196,7 @@ class SemanticBranch(nn.Module):
         )
         self.semantic_stages.append(f'stage{len(semantic_channels)}_CEBlock')
     '''forward'''
-    def forward(self, x):
+    def forward(self, x: torch.Tensor):
         semantic_outs = []
         for stage_name in self.semantic_stages:
             semantic_stage = getattr(self, stage_name)
@@ -218,12 +218,12 @@ class BGALayer(nn.Module):
             dw_norm_cfg=norm_cfg, dw_act_cfg=None, pw_norm_cfg=None, pw_act_cfg=None,
         ))
         self.detail_down = nn.Sequential(
-            nn.Conv2d(out_channels, out_channels, kernel_size=3, stride=2, padding=1, bias=False),
+            nn.Conv2d(out_channels, out_channels, kernel_size=3, stride=2, padding=1, bias=False if norm_cfg is not None else True),
             BuildNormalization(placeholder=out_channels, norm_cfg=norm_cfg),
             nn.AvgPool2d(kernel_size=3, stride=2, padding=1, ceil_mode=False),
         )
         self.semantic_conv = nn.Sequential(
-            nn.Conv2d(out_channels, out_channels, kernel_size=3, stride=1, padding=1, bias=False),
+            nn.Conv2d(out_channels, out_channels, kernel_size=3, stride=1, padding=1, bias=False if norm_cfg is not None else True),
             BuildNormalization(placeholder=out_channels, norm_cfg=norm_cfg),
         )
         self.semantic_dwconv = nn.Sequential(DepthwiseSeparableConv2d(
@@ -231,12 +231,12 @@ class BGALayer(nn.Module):
             dw_norm_cfg=norm_cfg, dw_act_cfg=None, pw_norm_cfg=None, pw_act_cfg=None,
         ))
         self.conv = nn.Sequential(
-            nn.Conv2d(out_channels, out_channels, kernel_size=3, stride=1, padding=1, bias=False),
+            nn.Conv2d(out_channels, out_channels, kernel_size=3, stride=1, padding=1, bias=False if norm_cfg is not None else True),
             BuildNormalization(placeholder=out_channels, norm_cfg=norm_cfg),
             BuildActivation(act_cfg),
         )
     '''forward'''
-    def forward(self, x_d, x_s):
+    def forward(self, x_d: torch.Tensor, x_s: torch.Tensor):
         detail_dwconv = self.detail_dwconv(x_d)
         detail_down = self.detail_down(x_d)
         semantic_conv = self.semantic_conv(x_s)
@@ -283,7 +283,7 @@ class BiSeNetV2(nn.Module):
             )
             self.load_state_dict(state_dict, strict=False)
     '''forward'''
-    def forward(self, x):
+    def forward(self, x: torch.Tensor):
         x_detail = self.detail(x)
         x_semantic_lst = self.semantic(x)
         x_head = self.bga(x_detail, x_semantic_lst[-1])

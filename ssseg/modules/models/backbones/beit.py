@@ -12,7 +12,7 @@ import torch.nn.functional as F
 import torch.utils.model_zoo as model_zoo
 from scipy import interpolate
 from .vit import TransformerEncoderLayer as VisionTransformerEncoderLayer
-from .bricks import BuildNormalization, PatchEmbed, BuildDropout, truncnormal
+from .bricks import BuildNormalization, PatchEmbed, BuildDropout, truncnormal, tolen2tuple
 
 
 '''DEFAULT_MODEL_URLS'''
@@ -50,6 +50,9 @@ class BEiTAttention(nn.Module):
         self.attn_drop = nn.Dropout(attn_drop_rate)
         self.proj = nn.Linear(embed_dims, embed_dims)
         self.proj_drop = nn.Dropout(proj_drop_rate)
+        self.initweights()
+    '''initweights'''
+    def initweights(self):
         truncnormal(self.relative_position_bias_table, std=0.02)
     '''initrelposembedding'''
     def initrelposembedding(self):
@@ -80,7 +83,7 @@ class BEiTAttention(nn.Module):
         relative_position_index[0, 0] = self.num_relative_distance - 1
         self.register_buffer('relative_position_index', relative_position_index)
     '''forward'''
-    def forward(self, x):
+    def forward(self, x: torch.Tensor):
         B, N, C = x.shape
         if self.bias == 'qv_bias':
             k_bias = torch.zeros_like(self.v_bias, requires_grad=False)
@@ -110,19 +113,24 @@ class BEiTAttention(nn.Module):
 class BEiTTransformerEncoderLayer(VisionTransformerEncoderLayer):
     def __init__(self, embed_dims, num_heads, feedforward_channels, attn_drop_rate=0., drop_path_rate=0., num_fcs=2, bias='qv_bias', 
                  act_cfg=None, norm_cfg=None, window_size=None, attn_cfg=dict(), ffn_cfg=dict(add_identity=False), init_values=None):
-        super(BEiTTransformerEncoderLayer, self).__init__(
-            embed_dims=embed_dims, num_heads=num_heads, feedforward_channels=feedforward_channels, attn_drop_rate=attn_drop_rate,
-            drop_path_rate=0., drop_rate=0., num_fcs=num_fcs, qkv_bias=bias, act_cfg=act_cfg, norm_cfg=norm_cfg, attn_cfg=dict(), 
-            ffn_cfg=ffn_cfg
-        )
-        dropout_cfg = dict(type='DropPath', drop_prob=drop_path_rate)
-        self.drop_path = BuildDropout(dropout_cfg) if dropout_cfg else nn.Identity()
-        self.gamma_1 = nn.Parameter(init_values * torch.ones((embed_dims)), requires_grad=True)
-        self.gamma_2 = nn.Parameter(init_values * torch.ones((embed_dims)), requires_grad=True)
         attn_cfg.update(dict(
             window_size=window_size, qk_scale=None, embed_dims=embed_dims, num_heads=num_heads,
             attn_drop_rate=attn_drop_rate, proj_drop_rate=0., bias=bias,
         ))
+        super(BEiTTransformerEncoderLayer, self).__init__(
+            embed_dims=embed_dims, num_heads=num_heads, feedforward_channels=feedforward_channels, attn_drop_rate=attn_drop_rate,
+            drop_path_rate=0., drop_rate=0., num_fcs=num_fcs, qkv_bias=bias, act_cfg=act_cfg, norm_cfg=norm_cfg, attn_cfg=attn_cfg, 
+            ffn_cfg=ffn_cfg
+        )
+        dropout_cfg = dict(type='DropPath', drop_prob=drop_path_rate)
+        self.drop_path = BuildDropout(dropout_cfg) if dropout_cfg else nn.Identity()
+        self.gamma_1 = nn.Parameter(init_values * torch.ones(embed_dims), requires_grad=True)
+        self.gamma_2 = nn.Parameter(init_values * torch.ones(embed_dims), requires_grad=True)
+    '''buildattn'''
+    def buildattn(self, attn_cfg: dict):
+        valid_keys = ['embed_dims', 'num_heads', 'window_size', 'bias', 'qk_scale', 'attn_drop_rate', 'proj_drop_rate']
+        for key in list(attn_cfg.keys()):
+            if key not in valid_keys: attn_cfg.pop(key)
         self.attn = BEiTAttention(**attn_cfg)
     '''forward'''
     def forward(self, x):
@@ -137,7 +145,7 @@ class BEiT(nn.Module):
                  out_indices=(3, 5, 7, 11), qv_bias=True, attn_drop_rate=0., drop_path_rate=0.1, norm_cfg={'type': 'LayerNorm', 'eps': 1e-6}, 
                  act_cfg={'type': 'GELU'}, patch_norm=False, final_norm=False, num_fcs=2, init_values=0.1, pretrained=True, pretrained_model_path=''):
         super(BEiT, self).__init__()
-        img_size = img_size if isinstance(img_size, tuple) else (img_size, img_size)
+        img_size = tolen2tuple(img_size)
         # set attributes
         self.structure_type = structure_type
         self.img_size = img_size
@@ -178,7 +186,7 @@ class BEiT(nn.Module):
         self.buildpatchembedding()
         self.buildlayers()
         if final_norm:
-            self.norm1 = BuildNormalization(placeholder=embed_dims, norm_cfg=norm_cfg)
+            self.ln1 = BuildNormalization(placeholder=embed_dims, norm_cfg=norm_cfg)
         # load pretrained weights
         if pretrained:
             self.loadpretrainedweights(structure_type, pretrained_model_path)
@@ -306,7 +314,7 @@ class BEiT(nn.Module):
             x = layer(x)
             if i == len(self.layers) - 1:
                 if self.final_norm:
-                    x = self.norm1(x)
+                    x = self.ln1(x)
             if i in self.out_indices:
                 out = x[:, 1:]
                 B, _, C = out.shape

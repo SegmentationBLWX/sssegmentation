@@ -18,6 +18,6 @@ class HardSigmoid(nn.Module):
         self.min_value = min_value
         self.max_value = max_value
     '''forward'''
-    def forward(self, x):
+    def forward(self, x: torch.Tensor):
         x = (x + self.bias) / self.divisor
         return x.clamp_(self.min_value, self.max_value)

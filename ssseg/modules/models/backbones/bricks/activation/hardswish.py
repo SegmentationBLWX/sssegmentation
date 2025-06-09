@@ -14,5 +14,5 @@ class HardSwish(nn.Module):
         super(HardSwish, self).__init__()
         self.act = nn.ReLU6(inplace)
     '''forward'''
-    def forward(self, x):
+    def forward(self, x: torch.Tensor):
         return x * self.act(x + 3) / 6
