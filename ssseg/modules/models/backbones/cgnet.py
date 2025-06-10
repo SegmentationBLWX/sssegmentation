@@ -113,6 +113,7 @@ class InputInjection(nn.Module):
 class CGNet(nn.Module):
     def __init__(self, structure_type, in_channels=3, num_channels=(32, 64, 128), num_blocks=(3, 21), dilations=(2, 4), reductions=(8, 16), 
                  norm_cfg={'type': 'SyncBatchNorm'}, act_cfg={'type': 'PReLU'}, use_checkpoint=False, pretrained=False, pretrained_model_path=''):
+        super(CGNet, self).__init__()
         # set attributes
         self.structure_type = structure_type
         self.in_channels = in_channels
