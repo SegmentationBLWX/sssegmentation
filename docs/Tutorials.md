@@ -136,7 +136,7 @@ DATALOADER_CFG_BS16 = DataloaderConfig(
 )
 ```
 
-**Segmentor Configuration**
+**Segmentor Configuration**,
 
 ```python
 PSPNET_SEGMENTOR_CFG = SegmentorConfig(

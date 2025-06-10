@@ -99,8 +99,8 @@ class Trainer():
         dataloader = BuildDistributedDataloader(dataset=dataset, dataloader_cfg=dataloader_cfg['train'])
         # build segmentor
         segmentor = BuildSegmentor(segmentor_cfg=cfg.SEGMENTOR_CFG, mode='TRAIN')
-        dist.barrier()
         torch.cuda.set_device(cmd_args.local_rank)
+        dist.barrier()
         segmentor.cuda(cmd_args.local_rank)
         torch.backends.cudnn.benchmark = cfg.SEGMENTOR_CFG['benchmark']
         # build optimizer
@@ -221,6 +221,8 @@ class Trainer():
                 if ema_cfg['momentum'] is not None:
                     self.logger_handle.info(f'Evaluate EMA of {cfg.SEGMENTOR_CFG["type"]} at epoch {epoch}', main_process_only=True)
                     self.evaluate(segmentor_ema.segmentor_ema.cuda(cmd_args.local_rank))
+            # --release cache
+            torch.cuda.empty_cache()
     '''evaluate'''
     def evaluate(self, segmentor):
         cfg, logger_handle, cfg_file_path = self.cfg, self.logger_handle, self.cfg_file_path
