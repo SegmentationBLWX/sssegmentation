@@ -3,7 +3,7 @@ from .default_segmentor import SegmentorConfig
 
 
 '''CONVNEXT_SEGMENTOR_CFG'''
-SEGMENTOR_CFG = SegmentorConfig(
+CONVNEXT_SEGMENTOR_CFG = SegmentorConfig(
     type='UPerNet',
     num_classes=-1,
     benchmark=True,
