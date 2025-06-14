@@ -447,11 +447,11 @@ Studying the existing dataset classes will help you effectively customize and ex
 
 ## Customize Backbones
 
-Backbone is the image encoder that transforms an image to feature maps, such as a ResNet-50 without the last fully connected layer.
+A backbone serves as the image encoder that transforms an input image into feature maps. For example, a typical backbone could be a ResNet-50 without its final fully connected layer.
 
 #### Backbone Config Structure
 
-An example of backbone config is as follows,
+A typical backbone configuration in `SEGMENTOR_CFG` is shown below:
 
 ```python
 SEGMENTOR_CFG['backbone'] = {
@@ -460,7 +460,13 @@ SEGMENTOR_CFG['backbone'] = {
 }
 ```
 
-where `type` denotes the backbone network you want to employ. Now, SSSegmentation supports the following backbone types,
+where,
+
+- `type`: Specifies the backbone model to use.
+- `depth`: Indicates the depth of the network (if applicable).
+- Other fields are used to configure the behavior of the selected backbone.
+
+SSSegmentation currently supports the following backbone types:
 
 ```python
 REGISTERED_MODULES = {
@@ -473,24 +479,28 @@ REGISTERED_MODULES = {
 }
 ```
 
-The other arguments in `SEGMENTOR_CFG['backbone']` are set for instancing the corresponding backbone network. 
+Additional configuration parameters in `SEGMENTOR_CFG['backbone']` vary depending on the specific backbone. Some commonly used parameters include:
 
-Here we also list some common arguments and their explanation,
+- `structure_type`: Defines the structure variant of the backbone (*e.g.*, `resnet101conv3x3stem` indicates a ResNet-101 with three 3×3 convolutions in the stem layer). This helps load corresponding pretrained weights automatically.
+- `pretrained`: Whether to load pretrained weights.
+- `pretrained_model_path`: If set to `None` and `pretrained=True`, the pretrained weights will be loaded automatically. Otherwise, weights are loaded from the specified path.
+- `out_indices`: Specifies which stages of the backbone to output. Most backbones are divided into stages, and this parameter selects which stages' outputs are used.
+- `norm_cfg`: Dictionary defining the normalization layer. See [customize-normalizations](https://sssegmentation.readthedocs.io/en/latest/Tutorials.html#customize-normalizations) for details.
+- `act_cfg`: Dictionary defining the activation function. See [customize-activations](https://sssegmentation.readthedocs.io/en/latest/Tutorials.html#customize-activations) for details.
 
-- `structure_type`: The structure type of the specified backbone network, *e.g.*, `resnet101conv3x3stem` means ResNet-101 using three 3x3 convolutions as the stem layer, it is useful if you want to load the pretrained backbone weights automatically,
-- `pretrained`: Whether to load the pretrained backbone weights,
-- `pretrained_model_path`: If you set `pretrained_model_path` as `None` and `pretrained` as `True`, SSSegmentation will load the pretrained backbone weights automatically, otherwise, load the pretrained backbone weights from the path specified by `pretrained_model_path`,
-- `out_indices`: Generally, a backbone network can be divided into several stages, `out_indices` is used to specify whether return the feature maps outputted by the corresponding backbone stage,
-- `norm_cfg`: The config of normalization layer, it should be a `dict`, refer to [customize-normalizations](https://sssegmentation.readthedocs.io/en/latest/Tutorials.html#customize-normalizations) more details,
-- `act_cfg`: The config of activation layer, it should be a `dict`, refer to [customize-activations](https://sssegmentation.readthedocs.io/en/latest/Tutorials.html#customize-activations) more details.
-
-To learn more about how to set the specific arguments for each backbone type, you can jump to [`ssseg/modules/models/backbones` directory](https://github.com/SegmentationBLWX/sssegmentation/tree/main/ssseg/modules/models/backbones) to check the source codes of each backbone network.
+To understand how to set arguments for each backbone type, refer to the source code in the [`ssseg/modules/models/backbones`](https://github.com/SegmentationBLWX/sssegmentation/tree/main/ssseg/modules/models/backbones) directory.
 
 #### Add New Custom Backbone
 
-If the users want to add a new custom backbone, you should first create a new file in [`ssseg/modules/models/backbones` directory](https://github.com/SegmentationBLWX/sssegmentation/tree/main/ssseg/modules/models/backbones), *e.g.*, [`ssseg/modules/models/backbones/mobilenet.py`](https://github.com/SegmentationBLWX/sssegmentation/tree/main/ssseg/modules/models/backbones/mobilenet.py).
+To add your own custom backbone, follow these steps:
 
-Then, you can define the backbone module in this file by yourselves, *e.g.*,
+**Step1: Create a New File**
+
+Add a new Python file under [`ssseg/modules/models/backbones`](https://github.com/SegmentationBLWX/sssegmentation/tree/main/ssseg/modules/models/backbones), such as [`ssseg/modules/models/backbones/mobilenet.py`](https://github.com/SegmentationBLWX/sssegmentation/tree/main/ssseg/modules/models/backbones/mobilenet.py).
+
+**Step2: Define the Backbone Module**
+
+Implement your custom backbone class in the file. For example,
 
 ```python
 import torch.nn as nn
@@ -503,8 +513,12 @@ class MobileNet(nn.Module):
         pass
 ```
 
-After that, you should add this custom backbone class in [`ssseg/modules/models/backbones/builder.py`](https://github.com/SegmentationBLWX/sssegmentation/blob/main/ssseg/modules/models/backbones/builder.py) if you want to use it by simply modifying `SEGMENTOR_CFG['backbone']`.
-Of course, you can also register this custom backbone by the following codes,
+**Step3: Register the Custom Backbone**
+
+You can register the new backbone in two ways.
+
+- Add to the Builder File: Modify [`ssseg/modules/models/backbones/builder.py`](https://github.com/SegmentationBLWX/sssegmentation/blob/main/ssseg/modules/models/backbones/builder.py) to include your new class.
+- Register Dynamically: Alternatively, register it manually with the following code,
 
 ```python
 from ssseg.modules import BackboneBuilder
@@ -513,9 +527,9 @@ backbone_builder = BackboneBuilder()
 backbone_builder.register('MobileNet', MobileNet)
 ```
 
-From this, you can also call `backbone_builder.build` to build your own defined backbone class as well as the original supported backbone classes.
+Once registered, you can use `backbone_builder.build(...)` to instantiate either your custom backbone or any of the existing ones.
 
-Finally, the users could jump to the [`ssseg/modules/models/backbones` directory](https://github.com/SegmentationBLWX/sssegmentation/tree/main/ssseg/modules/models/backbones) in SSSegmentation to read more source codes of the supported backbone classes and thus better learn how to customize the backbone classes in SSSegmentation.
+To gain a deeper understanding, refer to the existing implementation of supported backbones in the [`ssseg/modules/models/backbones`](https://github.com/SegmentationBLWX/sssegmentation/tree/main/ssseg/modules/models/backbones) directory.
 
 
 ## Customize Losses
