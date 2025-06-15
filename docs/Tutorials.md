@@ -529,7 +529,7 @@ To gain a deeper understanding, refer to the existing implementation of supporte
 
 ## Customize Losses
 
-Loss functions define the optimization objectives for the segmentation framework — for example, the commonly used [Cross Entropy Loss](https://en.wikipedia.org/wiki/Cross-entropy).
+Loss functions define the optimization objectives for the segmentation framework, for example, the commonly used [Cross Entropy Loss](https://en.wikipedia.org/wiki/Cross-entropy).
 
 #### Loss Config Structure
 
@@ -543,27 +543,7 @@ SEGMENTOR_CFG['losses'] = {
 ```
 
 This configuration is a dictionary with keys such as `loss_aux` and `loss_cls`, which distinguish between different loss components, typically used for the auxiliary head and main head respectively.
-
-Each value can be either a dictionary or a list of dictionaries. Within each dictionary,
-
-- `type` specifies the type of loss function to use.
-- The remaining key-value pairs define the initialization arguments for that loss function.
-
-For instance, in the configuration above,
-
-- `SEGMENTOR_CFG['losses']['loss_cls']` configures the loss for the main segmentation head.
-- `SEGMENTOR_CFG['losses']['loss_aux']` configures the loss for the auxiliary head.
-- `type='CrossEntropyLoss'` indicates the loss function type.
-- Additional parameters like `scale_factor`, `ignore_index` and `reduction` are used to initialize the `CrossEntropyLoss` class.
-
-If `loss_aux` or `loss_cls` is defined as a list of dictionaries, multiple loss terms will be computed and summed,
-
-```python
-loss = 0
-for l_cfg in SEGMENTOR_CFG['losses']['loss_aux']:
-    loss = loss + BuildLoss(l_cfg)(prediction, target)
-```
-
+Each value can be either a dictionary or a list of dictionaries. Within each dictionary, `type` specifies the type of loss function to be used.
 SSSegmentation currently supports the following built-in loss types,
 
 ```python
@@ -573,12 +553,21 @@ REGISTERED_MODULES = {
 }
 ```
 
-Here are commonly used arguments in loss configuration，
+The remaining key-value pairs serve as initialization arguments for the corresponding loss function. Commonly used arguments include,
 
-- `scale_factor`: A scaling multiplier applied to the computed loss.
-- `ignore_index`: Specifies a label value to be ignored during loss computation. For label-based targets, the corresponding pixels will be excluded from the gradient computation. For logit-based targets, the class channel with this index will be ignored.
-- `lowest_loss_value`: Optionally constrains the loss value with an upper bound. When set, the returned loss becomes `min(lowest_loss_value, scale_factor * original loss)`. This strategy is inspired by [Do We Need Zero Training Loss After Achieving Zero Training Error? - ICML 2020](https://arxiv.org/pdf/2002.08709.pdf).
+- `scale_factor` (*float, default: 1.0*): A scaling multiplier applied to the computed loss.
+- `ignore_index` (*int, default: -100*): Specifies a label value to be ignored during loss computation. For label-based targets, the corresponding pixels will be excluded from the gradient computation. For logit-based targets, the class channel with this index will be ignored.
+- `lowest_loss_value` (*float, default: None*): Optionally constrains the loss value with an upper bound. When set, the returned loss becomes `min(lowest_loss_value, scale_factor * original loss)`. This strategy is inspired by [Do We Need Zero Training Loss After Achieving Zero Training Error? - ICML 2020](https://arxiv.org/pdf/2002.08709.pdf).
 
+To support more complex training objectives, each loss component (*e.g.*, `loss_aux` or `loss_cls`) can also be defined as a list of dictionaries, where each dictionary specifies a separate loss term. During training, all specified loss terms will be computed and summed. For example,
+
+```python
+loss = 0
+for l_cfg in SEGMENTOR_CFG['losses']['loss_aux']:
+    loss = loss + BuildLoss(l_cfg)(prediction, target)
+```
+
+This design allows for flexible composition of multiple loss functions, enabling finer control over the training dynamics.
 For more details on configuring each loss type, refer to the source files in [`ssseg/modules/models/losses`](https://github.com/SegmentationBLWX/sssegmentation/tree/main/ssseg/modules/models/losses) directory.
 
 #### Add New Custom Loss
