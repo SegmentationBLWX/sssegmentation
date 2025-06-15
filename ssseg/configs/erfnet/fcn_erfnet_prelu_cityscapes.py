@@ -1,4 +1,4 @@
-'''fcn_erfnet_cityscapes'''
+'''fcn_erfnet_prelu_cityscapes'''
 import os
 from .._base_ import REGISTERED_SEGMENTOR_CONFIGS, REGISTERED_DATASET_CONFIGS, REGISTERED_DATALOADER_CONFIGS
 

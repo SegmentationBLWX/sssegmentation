@@ -81,7 +81,7 @@ How relaxing and enjoyable! You can explore more configuration examples under `s
 To help users understand the structure of a complete config and the modular components in SSSegmentation, 
 we provide a commented example using PSPNet with ResNet-101-D8, reflecting the new configuration system based on `SegmentorConfig`, `DatasetConfig` and `DataloaderConfig`.
 
-**Dataset Configuration**,
+(1) Dataset Configuration
 
 ```python
 DATASET_CFG_ADE20k_512x512 = DatasetConfig(
@@ -110,7 +110,7 @@ DATASET_CFG_ADE20k_512x512 = DatasetConfig(
 )
 ```
 
-**Dataloader Configuration**,
+(2) Dataloader Configuration
 
 ```python
 DATALOADER_CFG_BS16 = DataloaderConfig(
@@ -136,7 +136,7 @@ DATALOADER_CFG_BS16 = DataloaderConfig(
 )
 ```
 
-**Segmentor Configuration**,
+(3) Segmentor Configuration
 
 ```python
 PSPNET_SEGMENTOR_CFG = SegmentorConfig(
@@ -207,7 +207,7 @@ Each `sample_meta` is a `dict` containing the following keys,
 - `width` and `height`: The original dimensions of the image (*i.e.*, before any data augmentation or resizing).
 - `id`: A unique identifier for the image.
 
-Thanks to SSSegmentation’s modular design, switching datasets is as simple as updating the `SEGMENTOR_CFG['dataset']` field—enabling flexible experimentation across different datasets without code changes.
+Thanks to SSSegmentation’s modular design, switching between datasets requires nothing more than updating the `SEGMENTOR_CFG['dataset']` field, allowing for seamless experimentation across different datasets without modifying the underlying code.
 
 #### Dataset Config Structure
 
@@ -245,7 +245,7 @@ DATASET_CFG_ADE20k_512x512 = DatasetConfig(
 )
 ```
 
-The `type`field specifies the dataset class to use. SSSegmentation currently supports the following dataset types,
+The `type` field specifies the dataset class to use. SSSegmentation currently supports the following dataset types,
 
 ```python
 REGISTERED_MODULES = {
@@ -263,14 +263,14 @@ REGISTERED_MODULES = {
 The `train` and `test` fields define the configuration for training and evaluation splits, respectively. Both are dictionaries with the following keys,
 
 - `set`: Indicates which subset of the data to use (*e.g.*, `train`, `val`, `test`).
-- `data_pipelines`: A list of transformation operations applied sequentially to the input. These transforms are used to preprocess the `sample_meta` objects before they are passed into the model. See [Customize Data Pipelines](https://sssegmentation.readthedocs.io/en/latest/Tutorials.html#customize-data-pipelines) for details.
+- `data_pipelines`: A list of transformation operations applied sequentially to the input. These transforms are used to preprocess the `sample_meta` objects before they are passed into the model. See [customize-data-pipelines](https://sssegmentation.readthedocs.io/en/latest/Tutorials.html#customize-data-pipelines) for details.
 
 Additional optional fields supported in `SEGMENTOR_CFG['dataset']` include,
 
 - `repeat_times` (*int, default=1*): If set to a value >1, each image will appear multiple times within an epoch, which can be useful for small datasets.
 - `eval_env` (*str, default='local'*): Defines the evaluation environment. Options: `local` (evaluate using local ground truth annotations) and `server` (only saves predicted results for submission to external servers).
 - `ignore_index` (*int, default=-100*): Label index to ignore during loss computation and evaluation.
-- `auto_correct_invalid_seg_target (*bool, default=False*)`: If True, automatically fixes invalid pixel values in segmentation targets.
+- `auto_correct_invalid_seg_target` (*bool, default=False*): If True, automatically fixes invalid pixel values in segmentation targets.
 
 For a deeper understanding, users are encouraged to explore the [`ssseg/modules/datasets`](https://github.com/SegmentationBLWX/sssegmentation/tree/main/ssseg/modules/datasets) directory, where the dataset class definitions and data loading logic are implemented.
 
@@ -460,13 +460,7 @@ SEGMENTOR_CFG['backbone'] = {
 }
 ```
 
-where,
-
-- `type`: Specifies the backbone model to use.
-- `depth`: Indicates the depth of the network (if applicable).
-- Other fields are used to configure the behavior of the selected backbone.
-
-SSSegmentation currently supports the following backbone types:
+where `type` specifies the backbone model to be used. SSSegmentation currently supports the following backbone types:
 
 ```python
 REGISTERED_MODULES = {
@@ -632,11 +626,12 @@ To better understand how loss functions are implemented and structured, we recom
 
 ## Customize Schedulers
 
-Scheduler provides several methods to adjust the learning rate based on the number of epochs or iterations.
+Schedulers control how the learning rate evolves throughout training, based on either epochs or iterations. 
+They are crucial for accelerating convergence and improving training stability.
 
 #### Scheduler Config Structure
 
-An example of scheduler config is as follows,
+A typical scheduler configuration in `SEGMENTOR_CFG` looks like this,
 
 ```python
 SEGMENTOR_CFG['scheduler'] = {
@@ -647,7 +642,14 @@ SEGMENTOR_CFG['scheduler'] = {
 }
 ```
 
-where `type` denotes the scheduler you want to utilize during training. Now, SSSegmentation supports the following scheduler types,
+where,
+
+- `type`: Specifies the scheduler type. All additional arguments under `SEGMENTOR_CFG['scheduler']` are used to initialize the selected scheduler class.
+- `max_epochs`: Total number of training epochs.
+- `power`: The exponent for polynomial decay.
+- `optimizer`: A nested dictionary specifying the optimizer settings (see [`customize-optimizers`](https://sssegmentation.readthedocs.io/en/latest/Tutorials.html#customize-optimizers)).
+
+Currently supported scheduler types include,
 
 ```python
 REGISTERED_MODULES = {
@@ -655,12 +657,39 @@ REGISTERED_MODULES = {
 }
 ```
 
-The other arguments in `SEGMENTOR_CFG['scheduler']` are set for instancing the corresponding scheduler, where `SEGMENTOR_CFG['scheduler']['optimizer']` is the optimizer config used to build a optimizer for model training.
-The detailed instruction about building optimizer in SSSegmentation please refer to [`Customize Optimizers`](https://sssegmentation.readthedocs.io/en/latest/Tutorials.html#customize-optimizers).
-
-To learn more about how to set the specific arguments for each scheduler, you can jump to [`ssseg/modules/models/schedulers` directory](https://github.com/SegmentationBLWX/sssegmentation/tree/main/ssseg/modules/models/schedulers) to check the source codes of each scheduler class.
+For more details on individual schedulers, you may refer to the source code in the [`ssseg/modules/models/schedulers`](https://github.com/SegmentationBLWX/sssegmentation/tree/main/ssseg/modules/models/schedulers) directory.
 
 #### Customize Optimizers
+
+Optimizers are responsible for updating model parameters to minimize the loss function during training. A common example is [Stochastic Gradient Descent](https://en.wikipedia.org/wiki/Stochastic_gradient_descent).
+
+Optimizers are typically defined within the scheduler block,
+
+```python
+SEGMENTOR_CFG['scheduler']['optimizer'] = {
+    'type': 'SGD', 'lr': 0.01, 'momentum': 0.9, 'weight_decay': 5e-4, 'params_rules': {},
+}
+```
+
+where,
+
+- `type`: Specifies the optimizer type (*e.g.*, `SGD`, `Adam`). Other keys are passed to the optimizer constructor.
+- `params_rules`: Optional field for setting parameter-specific rules.
+
+Supported optimizers include,
+
+```python
+REGISTERED_MODULES = {
+    'SGD': optim.SGD, 'Adam': optim.Adam, 'AdamW': optim.AdamW, 'Adadelta': optim.Adadelta,
+}
+for optim_type in ['Adagrad', 'SparseAdam', 'Adamax', 'ASGD', 'LBFGS', 'NAdam', 'RAdam', 'RMSprop', 'Rprop']:
+    if hasattr(optim, optim_type):
+        REGISTERED_MODULES[optim_type] = getattr(optim, optim_type)
+```
+
+
+
+
 
 Optimizer is used to define the process of adjusting model parameters to reduce model error in each training step, such as the [Stochastic Gradient Descent](https://en.wikipedia.org/wiki/Stochastic_gradient_descent).
 
