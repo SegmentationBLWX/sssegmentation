@@ -882,24 +882,27 @@ To further understand how to customize segmentors, you are encouraged to review 
 
 ## Customize Auxiliary Heads
 
-Auxiliary head is the image decoder that transforms the shallow feature maps to a predicted segmentation mask.
-It is first introduced in [PSPNet](https://arxiv.org/pdf/1612.01105.pdf), which is used to help segmentation framework training.
+The auxiliary head is an additional decoder module that transforms shallow feature maps (typically from an intermediate backbone layer) into a segmentation prediction.
+It was first introduced in [PSPNet](https://arxiv.org/pdf/1612.01105.pdf) as an auxiliary supervision branch to help stabilize and improve training in deep segmentation networks.
 
 #### Auxiliary Head Config Structure
 
-An example of auxiliary head config is as follows,
+A typical auxiliary head configuration is defined in the `SEGMENTOR_CFG['auxiliary']` field. For example,
 
 ```python
 SEGMENTOR_CFG['auxiliary'] = {'in_channels': 1024, 'out_channels': 512, 'dropout': 0.1}
 ```
 
-With the arguments in `SEGMENTOR_CFG['auxiliary']`, the `setauxiliarydecoder` function defined in [`ssseg/modules/models/segmentors/base/base.py`](https://github.com/SegmentationBLWX/sssegmentation/blob/main/ssseg/modules/models/segmentors/base/base.py) will be called to build the auxiliary head.
+These arguments are passed to the `setauxiliarydecoder` function, which is responsible for building the auxiliary decoder. 
+The default implementation of this function is provided in [`ssseg/modules/models/segmentors/base/base.py`](https://github.com/SegmentationBLWX/sssegmentation/blob/main/ssseg/modules/models/segmentors/base/base.py). 
 
-To disable auxiliary head, you can simply set `SEGMENTOR_CFG['auxiliary']` as `None`.
+To disable the auxiliary head, simply set `SEGMENTOR_CFG['auxiliary'] = None`.
 
 #### Add New Custom Auxiliary Head
 
-If the users want to add a new custom auxiliary head, you can first define a new segmentor inherited from `BaseSegmentor` class like following, 
+To implement a custom auxiliary head, you can extend the `BaseSegmentor` class and override the `setauxiliarydecoder` method.
+
+**Step1: Define a Custom Segmentor**
 
 ```python
 from ..base import BaseSegmentor
@@ -912,7 +915,9 @@ class Deeplabv3(BaseSegmentor):
         pass
 ```
 
-After that, you can define the `setauxiliarydecoder` function in this class by yourselves, *e.g.*,
+**Step 2: Implement a Custom `setauxiliarydecoder` Method**
+
+You can now define your own logic for the auxiliary head by overriding the `setauxiliarydecoder` method,
 
 ```python
 from ..base import BaseSegmentor
@@ -927,7 +932,7 @@ class Deeplabv3(BaseSegmentor):
         pass
 ```
 
-And the arguments in `SEGMENTOR_CFG['auxiliary']` could be changed according to the new defined `setauxiliarydecoder` function.
+You can modify the contents of `SEGMENTOR_CFG['auxiliary']` to match the argument requirements of your custom `setauxiliarydecoder` method.
 
 
 ## Customize Normalizations
