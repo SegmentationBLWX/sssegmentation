@@ -1005,17 +1005,17 @@ Finally, users can explore the [`ssseg/modules/models/backbones/bricks/normaliza
 
 ## Customize Activations
 
-Activation layer is linear or non linear equation which processes the output of a neuron and bound it into a limited range of values (*e.g.*, `[0, +∞]`).
+Activation layers apply linear or nonlinear transformations to the output of a neuron, typically constraining the values within a specific range (*e.g.*, `[0, +∞]`), and are essential for introducing non-linearity into neural networks.
 
 #### Activation Config Structure
 
-An example of activation config is as follows,
+A typical activation layer configuration is defined as,
 
 ```python
 SEGMENTOR_CFG['act_cfg'] = {'type': 'ReLU', 'inplace': True}
 ```
 
-where `type` denotes the activation layer you want to employ. Now, SSSegmentation supports the following activation types,
+where `type` specifies the activation function to use. Currently, SSSegmentation supports the following activation types,
 
 ```python
 REGISTERED_MODULES = {
@@ -1025,15 +1025,21 @@ REGISTERED_MODULES = {
 }
 ```
 
-The other arguments in `SEGMENTOR_CFG['act_cfg']` are set for instancing the corresponding activation layer.
+Additional arguments in `SEGMENTOR_CFG['act_cfg']` can be used to configure the selected activation layer.
 
-To learn more about how to set the specific arguments for each activation function, you can jump to [`ssseg/modules/models/backbones/bricks/activation` directory](https://github.com/SegmentationBLWX/sssegmentation/tree/main/ssseg/modules/models/backbones/bricks/activation) to check the source codes of each activation function.
+For details on available arguments and implementations, refer to the [`ssseg/modules/models/backbones/bricks/activation`](https://github.com/SegmentationBLWX/sssegmentation/tree/main/ssseg/modules/models/backbones/bricks/activation) directory in the source code.
 
 #### Add New Custom Activation
 
-If the users want to add a new custom activation layer, you should first create a new file in [`ssseg/modules/models/backbones/bricks/activation` directory](https://github.com/SegmentationBLWX/sssegmentation/tree/main/ssseg/modules/models/backbones/bricks/activation), *e.g.*, [`ssseg/modules/models/backbones/bricks/activation/hardsigmoid.py`](https://github.com/SegmentationBLWX/sssegmentation/blob/main/ssseg/modules/models/backbones/bricks/activation/hardsigmoid.py).
+To implement a new custom activation function, follow these steps,
 
-Then, you can define the activation layer in this file by yourselves, *e.g.*,
+**Step1: Create a New Module File**
+
+Add a new Python file in the [`ssseg/modules/models/backbones/bricks/activation`](https://github.com/SegmentationBLWX/sssegmentation/tree/main/ssseg/modules/models/backbones/bricks/activation) directory, *e.g.*, [`ssseg/modules/models/backbones/bricks/activation/hardsigmoid.py`](https://github.com/SegmentationBLWX/sssegmentation/blob/main/ssseg/modules/models/backbones/bricks/activation/hardsigmoid.py).
+
+**Step2: Define the Activation Class**
+
+Implement the activation function in the new file. Example,
 
 ```python
 import torch.nn as nn
@@ -1046,8 +1052,9 @@ class HardSigmoid(nn.Module):
         pass
 ```
 
-After that, you should add this custom activation class in [`ssseg/modules/models/backbones/bricks/activation/builder.py`](https://github.com/SegmentationBLWX/sssegmentation/blob/main/ssseg/modules/models/backbones/bricks/activation/builder.py) if you want to use it by simply modifying `SEGMENTOR_CFG['act_cfg']` or `SEGMENTOR_CFG['backbone']['act_cfg']`.
-Of course, you can also register this custom activation layer by the following codes,
+**Step3: Register the Custom Activation**
+
+To make the custom activation available via config files, add it to [`ssseg/modules/models/backbones/bricks/activation/builder.py`](https://github.com/SegmentationBLWX/sssegmentation/blob/main/ssseg/modules/models/backbones/bricks/activation/builder.py). Alternatively, register it manually with,
 
 ```python
 from ssseg.modules import ActivationBuilder
@@ -1056,9 +1063,9 @@ act_builder = ActivationBuilder()
 act_builder.register('HardSigmoid', HardSigmoid)
 ```
 
-From this, you can also call `act_builder.build` to build your own defined activation layers as well as the original supported activation layers.
+You can then use `act_builder.build(...)` to construct both standard and custom activation layers.
 
-Finally, the users could jump to the [`ssseg/modules/models/backbones/bricks/activation` directory](https://github.com/SegmentationBLWX/sssegmentation/tree/main/ssseg/modules/models/backbones/bricks/activation) in SSSegmentation to read more source codes of the supported activation classes and thus better learn how to customize the activation layers in SSSegmentation.
+For more examples and implementation details, explore the [`ssseg/modules/models/backbones/bricks/activation`](https://github.com/SegmentationBLWX/sssegmentation/tree/main/ssseg/modules/models/backbones/bricks/activation) directory in the SSSegmentation codebase.
 
 
 ## Mixed Precision Training
@@ -1112,13 +1119,13 @@ You can refer to [Exponential-Moving-Average](https://leimao.github.io/blog/Expo
 
 To turn on EMA in SSSegmentation, you could modify the corresponding config file with the following codes,
 
-```
+```python
 SEGMENTOR_CFG['ema_cfg'] = {'momentum': 0.0005, 'device': 'cpu'}
 ```
 
 where `device` denotes perform EMA on CPU or GPU, `momentum` is the moving average weight which is used in the following codes,
 
-```
+```python
 ema_v * (1.0 - momentum)) + (momentum * cur_v)
 ```
 
