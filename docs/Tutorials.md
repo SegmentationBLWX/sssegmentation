@@ -81,7 +81,7 @@ How relaxing and enjoyable! You can explore more configuration examples under `s
 To help users understand the structure of a complete config and the modular components in SSSegmentation, 
 we provide a commented example using PSPNet with ResNet-101-D8, reflecting the new configuration system based on `SegmentorConfig`, `DatasetConfig` and `DataloaderConfig`.
 
-**Dataset Configuration**,
+(1) Dataset Configuration
 
 ```python
 DATASET_CFG_ADE20k_512x512 = DatasetConfig(
@@ -110,7 +110,7 @@ DATASET_CFG_ADE20k_512x512 = DatasetConfig(
 )
 ```
 
-**Dataloader Configuration**,
+(2) Dataloader Configuration
 
 ```python
 DATALOADER_CFG_BS16 = DataloaderConfig(
@@ -136,7 +136,7 @@ DATALOADER_CFG_BS16 = DataloaderConfig(
 )
 ```
 
-**Segmentor Configuration**,
+(3) Segmentor Configuration
 
 ```python
 PSPNET_SEGMENTOR_CFG = SegmentorConfig(
@@ -207,7 +207,7 @@ Each `sample_meta` is a `dict` containing the following keys,
 - `width` and `height`: The original dimensions of the image (*i.e.*, before any data augmentation or resizing).
 - `id`: A unique identifier for the image.
 
-Thanks to SSSegmentation’s modular design, switching datasets is as simple as updating the `SEGMENTOR_CFG['dataset']` field—enabling flexible experimentation across different datasets without code changes.
+Thanks to SSSegmentation’s modular design, switching between datasets requires nothing more than updating the `SEGMENTOR_CFG['dataset']` field, allowing for seamless experimentation across different datasets without modifying the underlying code.
 
 #### Dataset Config Structure
 
@@ -245,7 +245,7 @@ DATASET_CFG_ADE20k_512x512 = DatasetConfig(
 )
 ```
 
-The `type`field specifies the dataset class to use. SSSegmentation currently supports the following dataset types,
+The `type` field specifies the dataset class to use. SSSegmentation currently supports the following dataset types,
 
 ```python
 REGISTERED_MODULES = {
@@ -263,14 +263,14 @@ REGISTERED_MODULES = {
 The `train` and `test` fields define the configuration for training and evaluation splits, respectively. Both are dictionaries with the following keys,
 
 - `set`: Indicates which subset of the data to use (*e.g.*, `train`, `val`, `test`).
-- `data_pipelines`: A list of transformation operations applied sequentially to the input. These transforms are used to preprocess the `sample_meta` objects before they are passed into the model. See [Customize Data Pipelines](https://sssegmentation.readthedocs.io/en/latest/Tutorials.html#customize-data-pipelines) for details.
+- `data_pipelines`: A list of transformation operations applied sequentially to the input. These transforms are used to preprocess the `sample_meta` objects before they are passed into the model. See [customize-data-pipelines](https://sssegmentation.readthedocs.io/en/latest/Tutorials.html#customize-data-pipelines) for details.
 
 Additional optional fields supported in `SEGMENTOR_CFG['dataset']` include,
 
 - `repeat_times` (*int, default=1*): If set to a value >1, each image will appear multiple times within an epoch, which can be useful for small datasets.
 - `eval_env` (*str, default='local'*): Defines the evaluation environment. Options: `local` (evaluate using local ground truth annotations) and `server` (only saves predicted results for submission to external servers).
 - `ignore_index` (*int, default=-100*): Label index to ignore during loss computation and evaluation.
-- `auto_correct_invalid_seg_target (*bool, default=False*)`: If True, automatically fixes invalid pixel values in segmentation targets.
+- `auto_correct_invalid_seg_target` (*bool, default=False*): If True, automatically fixes invalid pixel values in segmentation targets.
 
 For a deeper understanding, users are encouraged to explore the [`ssseg/modules/datasets`](https://github.com/SegmentationBLWX/sssegmentation/tree/main/ssseg/modules/datasets) directory, where the dataset class definitions and data loading logic are implemented.
 
@@ -447,11 +447,11 @@ Studying the existing dataset classes will help you effectively customize and ex
 
 ## Customize Backbones
 
-Backbone is the image encoder that transforms an image to feature maps, such as a ResNet-50 without the last fully connected layer.
+A backbone serves as the image encoder that transforms an input image into feature maps. For example, a typical backbone could be a ResNet-50 without its final fully connected layer.
 
 #### Backbone Config Structure
 
-An example of backbone config is as follows,
+A typical backbone configuration in `SEGMENTOR_CFG` is shown below:
 
 ```python
 SEGMENTOR_CFG['backbone'] = {
@@ -460,7 +460,7 @@ SEGMENTOR_CFG['backbone'] = {
 }
 ```
 
-where `type` denotes the backbone network you want to employ. Now, SSSegmentation supports the following backbone types,
+where `type` specifies the backbone model to be used. SSSegmentation currently supports the following backbone types:
 
 ```python
 REGISTERED_MODULES = {
@@ -473,24 +473,28 @@ REGISTERED_MODULES = {
 }
 ```
 
-The other arguments in `SEGMENTOR_CFG['backbone']` are set for instancing the corresponding backbone network. 
+Additional configuration parameters in `SEGMENTOR_CFG['backbone']` vary depending on the specific backbone. Some commonly used parameters include:
 
-Here we also list some common arguments and their explanation,
+- `structure_type`: Defines the structure variant of the backbone (*e.g.*, `resnet101conv3x3stem` indicates a ResNet-101 with three 3×3 convolutions in the stem layer). This helps load corresponding pretrained weights automatically.
+- `pretrained`: Whether to load pretrained weights.
+- `pretrained_model_path`: If set to `None` and `pretrained=True`, the pretrained weights will be loaded automatically. Otherwise, weights are loaded from the specified path.
+- `out_indices`: Specifies which stages of the backbone to output. Most backbones are divided into stages, and this parameter selects which stages' outputs are used.
+- `norm_cfg`: Dictionary defining the normalization layer. See [customize-normalizations](https://sssegmentation.readthedocs.io/en/latest/Tutorials.html#customize-normalizations) for details.
+- `act_cfg`: Dictionary defining the activation function. See [customize-activations](https://sssegmentation.readthedocs.io/en/latest/Tutorials.html#customize-activations) for details.
 
-- `structure_type`: The structure type of the specified backbone network, *e.g.*, `resnet101conv3x3stem` means ResNet-101 using three 3x3 convolutions as the stem layer, it is useful if you want to load the pretrained backbone weights automatically,
-- `pretrained`: Whether to load the pretrained backbone weights,
-- `pretrained_model_path`: If you set `pretrained_model_path` as `None` and `pretrained` as `True`, SSSegmentation will load the pretrained backbone weights automatically, otherwise, load the pretrained backbone weights from the path specified by `pretrained_model_path`,
-- `out_indices`: Generally, a backbone network can be divided into several stages, `out_indices` is used to specify whether return the feature maps outputted by the corresponding backbone stage,
-- `norm_cfg`: The config of normalization layer, it should be a `dict`, refer to [customize-normalizations](https://sssegmentation.readthedocs.io/en/latest/Tutorials.html#customize-normalizations) more details,
-- `act_cfg`: The config of activation layer, it should be a `dict`, refer to [customize-activations](https://sssegmentation.readthedocs.io/en/latest/Tutorials.html#customize-activations) more details.
-
-To learn more about how to set the specific arguments for each backbone type, you can jump to [`ssseg/modules/models/backbones` directory](https://github.com/SegmentationBLWX/sssegmentation/tree/main/ssseg/modules/models/backbones) to check the source codes of each backbone network.
+To understand how to set arguments for each backbone type, refer to the source code in the [`ssseg/modules/models/backbones`](https://github.com/SegmentationBLWX/sssegmentation/tree/main/ssseg/modules/models/backbones) directory.
 
 #### Add New Custom Backbone
 
-If the users want to add a new custom backbone, you should first create a new file in [`ssseg/modules/models/backbones` directory](https://github.com/SegmentationBLWX/sssegmentation/tree/main/ssseg/modules/models/backbones), *e.g.*, [`ssseg/modules/models/backbones/mobilenet.py`](https://github.com/SegmentationBLWX/sssegmentation/tree/main/ssseg/modules/models/backbones/mobilenet.py).
+To add your own custom backbone, follow these steps:
 
-Then, you can define the backbone module in this file by yourselves, *e.g.*,
+**Step1: Create a New File**
+
+Add a new Python file under [`ssseg/modules/models/backbones`](https://github.com/SegmentationBLWX/sssegmentation/tree/main/ssseg/modules/models/backbones), such as [`ssseg/modules/models/backbones/mobilenet.py`](https://github.com/SegmentationBLWX/sssegmentation/tree/main/ssseg/modules/models/backbones/mobilenet.py).
+
+**Step2: Define the Backbone Module**
+
+Implement your custom backbone class in the file. For example,
 
 ```python
 import torch.nn as nn
@@ -503,8 +507,13 @@ class MobileNet(nn.Module):
         pass
 ```
 
-After that, you should add this custom backbone class in [`ssseg/modules/models/backbones/builder.py`](https://github.com/SegmentationBLWX/sssegmentation/blob/main/ssseg/modules/models/backbones/builder.py) if you want to use it by simply modifying `SEGMENTOR_CFG['backbone']`.
-Of course, you can also register this custom backbone by the following codes,
+**Step3: Register the Custom Backbone**
+
+You can register the new backbone in two ways.
+
+① Add to the Builder File: Modify [`ssseg/modules/models/backbones/builder.py`](https://github.com/SegmentationBLWX/sssegmentation/blob/main/ssseg/modules/models/backbones/builder.py) to include your new class.
+
+② Register Dynamically: Alternatively, register it manually with the following code,
 
 ```python
 from ssseg.modules import BackboneBuilder
@@ -513,18 +522,18 @@ backbone_builder = BackboneBuilder()
 backbone_builder.register('MobileNet', MobileNet)
 ```
 
-From this, you can also call `backbone_builder.build` to build your own defined backbone class as well as the original supported backbone classes.
+Once registered, you can use `backbone_builder.build(...)` to instantiate either your custom backbone or any of the existing ones.
 
-Finally, the users could jump to the [`ssseg/modules/models/backbones` directory](https://github.com/SegmentationBLWX/sssegmentation/tree/main/ssseg/modules/models/backbones) in SSSegmentation to read more source codes of the supported backbone classes and thus better learn how to customize the backbone classes in SSSegmentation.
+To gain a deeper understanding, refer to the existing implementation of supported backbones in the [`ssseg/modules/models/backbones`](https://github.com/SegmentationBLWX/sssegmentation/tree/main/ssseg/modules/models/backbones) directory.
 
 
 ## Customize Losses
 
-Loss is utilized to define the objective functions for the segmentation framework, such as the [Cross Entropy Loss](https://en.wikipedia.org/wiki/Cross-entropy).
+Loss functions define the optimization objectives for the segmentation framework, for example, the commonly used [Cross Entropy Loss](https://en.wikipedia.org/wiki/Cross-entropy).
 
 #### Loss Config Structure
 
-An example of loss config is as follows,
+A typical loss configuration in `SEGMENTOR_CFG` is shown below,
 
 ```python
 SEGMENTOR_CFG['losses'] = {
@@ -533,21 +542,9 @@ SEGMENTOR_CFG['losses'] = {
 }
 ```
 
-It is a `dict` including several keys like `loss_aux` and `loss_cls`, which is designed for distinguishing the loss config utilized in head or auxiliary head.
-The value corresponding to each key is also a `dict` or a list of `dict` and in each `dict`, `type` denotes the objective function type you want to adopt and the other arguments are set for instancing this objective function.
-
-In the example of loss config above, `SEGMENTOR_CFG['losses']['loss_cls']` is used to build losses in head and `SEGMENTOR_CFG['losses']['loss_aux']` is used to build losses in auxiliary head.
-`CrossEntropyLoss` represents the objective function type you want to adopt and `{'scale_factor': 1.0, 'ignore_index': 255, 'reduction': 'mean'}` contains the arguments for instancing the `CrossEntropyLoss`.
-
-And if `SEGMENTOR_CFG['losses']['loss_aux']` or `SEGMENTOR_CFG['losses']['loss_cls']` is a list of `dict`, the final loss will be calculated as,
-
-```python
-loss = 0
-for l_cfg in SEGMENTOR_CFG['losses']['loss_aux']:
-    loss = loss + BuildLoss(l_cfg)(prediction, target)
-```
-
-Now, SSSegmentation supports the following loss types,
+This configuration is a dictionary with keys such as `loss_aux` and `loss_cls`, which distinguish between different loss components, typically used for the auxiliary head and main head respectively.
+Each value can be either a dictionary or a list of dictionaries. Within each dictionary, `type` specifies the type of loss function to be used.
+SSSegmentation currently supports the following built-in loss types,
 
 ```python
 REGISTERED_MODULES = {
@@ -556,19 +553,34 @@ REGISTERED_MODULES = {
 }
 ```
 
-Here we also list some common arguments and their explanation,
+The remaining key-value pairs serve as initialization arguments for the corresponding loss function. Commonly used arguments include,
 
-- `scale_factor`: The return loss value is equal to the original loss times `scale_factor`,
-- `ignore_index`: For input target with labels, it is used to specify a target value that is ignored and does not contribute to the input gradient, for input target with logits, it is used to specify a class channel that is ignored and does not contribute to the input gradient,
-- `lowest_loss_value`: If `lowest_loss_value` is set, the return loss value is equal to `min(lowest_loss_value, scale_factor * original loss)`, this argument is designed according to the paper [Do We Need Zero Training Loss After Achieving Zero Training Error? - ICML 2020](https://arxiv.org/pdf/2002.08709.pdf).
+- `scale_factor` (*float, default: 1.0*): A scaling multiplier applied to the computed loss.
+- `ignore_index` (*int, default: -100*): Specifies a label value to be ignored during loss computation. For label-based targets, the corresponding pixels will be excluded from the gradient computation. For logit-based targets, the class channel with this index will be ignored.
+- `lowest_loss_value` (*float, default: None*): Optionally constrains the loss value with an upper bound. When set, the returned loss becomes `min(lowest_loss_value, scale_factor * original loss)`. This strategy is inspired by [Do We Need Zero Training Loss After Achieving Zero Training Error? - ICML 2020](https://arxiv.org/pdf/2002.08709.pdf).
 
-To learn more about how to set the specific arguments for each loss function, you can jump to [`ssseg/modules/models/losses` directory](https://github.com/SegmentationBLWX/sssegmentation/tree/main/ssseg/modules/models/losses) to check the source codes of each loss function.
+To support more complex training objectives, each loss component (*e.g.*, `loss_aux` or `loss_cls`) can also be defined as a list of dictionaries, where each dictionary specifies a separate loss term. During training, all specified loss terms will be computed and summed. For example,
+
+```python
+loss = 0
+for l_cfg in SEGMENTOR_CFG['losses']['loss_aux']:
+    loss = loss + BuildLoss(l_cfg)(prediction, target)
+```
+
+This design allows for flexible composition of multiple loss functions, enabling finer control over the training dynamics.
+For more details on configuring each loss type, refer to the source files in [`ssseg/modules/models/losses`](https://github.com/SegmentationBLWX/sssegmentation/tree/main/ssseg/modules/models/losses) directory.
 
 #### Add New Custom Loss
 
-If the users want to add a new custom loss, you should first create a new file in [`ssseg/modules/models/losses` directory](https://github.com/SegmentationBLWX/sssegmentation/tree/main/ssseg/modules/models/losses), *e.g.*, [`ssseg/modules/models/losses/kldivloss.py`](https://github.com/SegmentationBLWX/sssegmentation/blob/main/ssseg/modules/models/losses/kldivloss.py).
+To integrate a custom loss function into SSSegmentation, follow these steps,
 
-Then, you can define the loss function in this file by yourselves, *e.g.*,
+**Step1: Create a New File**
+
+Add a Python file to the [`ssseg/modules/models/losses`](https://github.com/SegmentationBLWX/sssegmentation/tree/main/ssseg/modules/models/losses) directory, for example, [`ssseg/modules/models/losses/kldivloss.py`](https://github.com/SegmentationBLWX/sssegmentation/blob/main/ssseg/modules/models/losses/kldivloss.py).
+
+**Step2: Define the Loss Class**
+
+Implement your custom loss function. For example,
 
 ```python
 import torch.nn as nn
@@ -581,8 +593,13 @@ class KLDivLoss(nn.Module):
         pass
 ```
 
-After that, you should add this custom loss class in [`ssseg/modules/models/losses/builder.py`](https://github.com/SegmentationBLWX/sssegmentation/blob/main/ssseg/modules/models/losses/builder.py) if you want to use it by simply modifying `SEGMENTOR_CFG['losses']`.
-Of course, you can also register this custom loss function by the following codes,
+**Step3: Register the Loss Function**
+
+You have two options,
+
+① Static Registration. Add the class name to the registration dictionary in [`ssseg/modules/models/losses/builder.py`](https://github.com/SegmentationBLWX/sssegmentation/blob/main/ssseg/modules/models/losses/builder.py).
+
+② Dynamic Registration. Alternatively, register the class programmatically,
 
 ```python
 from ssseg.modules import LossBuilder
@@ -591,18 +608,19 @@ loss_builder = LossBuilder()
 loss_builder.register('KLDivLoss', KLDivLoss)
 ```
 
-From this, you can also call `loss_builder.build` to build your own defined loss class as well as the original supported loss classes.
+After registration, you can call `loss_builder.build(...)` to instantiate your custom loss, just like with the built-in losses.
 
-Finally, the users could jump to the [`ssseg/modules/models/losses` directory](https://github.com/SegmentationBLWX/sssegmentation/tree/main/ssseg/modules/models/losses) in SSSegmentation to read more source codes of the supported loss classes and thus better learn how to customize the loss classes in SSSegmentation.
+To better understand how loss functions are implemented and structured, we recommend reviewing the source code in the [`ssseg/modules/models/losses`](https://github.com/SegmentationBLWX/sssegmentation/tree/main/ssseg/modules/models/losses) directory.
 
 
 ## Customize Schedulers
 
-Scheduler provides several methods to adjust the learning rate based on the number of epochs or iterations.
+Schedulers control how the learning rate evolves throughout training, based on either epochs or iterations. 
+They are crucial for accelerating convergence and improving training stability.
 
 #### Scheduler Config Structure
 
-An example of scheduler config is as follows,
+A typical learning rate scheduler configuration in `SEGMENTOR_CFG` is as follows,
 
 ```python
 SEGMENTOR_CFG['scheduler'] = {
@@ -613,7 +631,7 @@ SEGMENTOR_CFG['scheduler'] = {
 }
 ```
 
-where `type` denotes the scheduler you want to utilize during training. Now, SSSegmentation supports the following scheduler types,
+In this configuration, the `type` field specifies the scheduler strategy to be used. SSSegmentation currently supports the following built-in scheduler types,
 
 ```python
 REGISTERED_MODULES = {
@@ -621,16 +639,20 @@ REGISTERED_MODULES = {
 }
 ```
 
-The other arguments in `SEGMENTOR_CFG['scheduler']` are set for instancing the corresponding scheduler, where `SEGMENTOR_CFG['scheduler']['optimizer']` is the optimizer config used to build a optimizer for model training.
-The detailed instruction about building optimizer in SSSegmentation please refer to [`Customize Optimizers`](https://sssegmentation.readthedocs.io/en/latest/Tutorials.html#customize-optimizers).
+The remaining key-value pairs provide initialization arguments for the selected scheduler class. Commonly used arguments include,
 
-To learn more about how to set the specific arguments for each scheduler, you can jump to [`ssseg/modules/models/schedulers` directory](https://github.com/SegmentationBLWX/sssegmentation/tree/main/ssseg/modules/models/schedulers) to check the source codes of each scheduler class.
+- `max_epochs`: The total number of training epochs.
+- `power`: The exponent used for polynomial decay (applicable for `PolyScheduler`).
+- `optimizer`: A nested dictionary specifying the optimizer settings (see [`customize-optimizers`](https://sssegmentation.readthedocs.io/en/latest/Tutorials.html#customize-optimizers)).
+
+For in-depth information on each scheduler's implementation and additional options, please consult the source code in the [`ssseg/modules/models/schedulers`](https://github.com/SegmentationBLWX/sssegmentation/tree/main/ssseg/modules/models/schedulers) directory.
+
 
 #### Customize Optimizers
 
-Optimizer is used to define the process of adjusting model parameters to reduce model error in each training step, such as the [Stochastic Gradient Descent](https://en.wikipedia.org/wiki/Stochastic_gradient_descent).
+Optimizers play a central role in training by updating model parameters to minimize the loss function. A commonly used optimizer is [Stochastic Gradient Descent](https://en.wikipedia.org/wiki/Stochastic_gradient_descent), though many other variants are supported.
 
-Specifically, an example of optimizer config used to construct an optimizer for model training could be,
+In SSSegmentation, optimizers are typically defined inside the scheduler configuration block,
 
 ```python
 SEGMENTOR_CFG['scheduler']['optimizer'] = {
@@ -638,18 +660,22 @@ SEGMENTOR_CFG['scheduler']['optimizer'] = {
 }
 ```
 
-where `type` denotes the optimizer you want to utilize during training. Here is a list of supported optimizer types,
+where `type` specifies the optimizer to use. SSSegmentation supports a wide range of optimizers, including (**Note**: these optimizers are registered dynamically based on availability in `torch.optim`),
 
 ```python
 REGISTERED_MODULES = {
     'SGD': optim.SGD, 'Adam': optim.Adam, 'AdamW': optim.AdamW, 'Adadelta': optim.Adadelta,
 }
+for optim_type in ['Adagrad', 'SparseAdam', 'Adamax', 'ASGD', 'LBFGS', 'NAdam', 'RAdam', 'RMSprop', 'Rprop']:
+    if hasattr(optim, optim_type):
+        REGISTERED_MODULES[optim_type] = getattr(optim, optim_type)
 ```
 
-The other arguments in `SEGMENTOR_CFG['scheduler']['optimizer']` are set for instancing the corresponding optimizer.
+All other key-value pairs are passed as arguments to the optimizer's constructor.
+Among these arguments, the `params_rules` field enables fine-grained control over optimization settings for different parts of the model.
+This is useful for implementing training strategies such as layer-specific learning rates or selectively disabling weight decay.
 
-Among these arguments, `params_rules` could be set for implementing some training tricks. 
-For example, if you want to train the backbone network and the decoder layer with different learning rates, you can set `params_rules` as following,
+(1) Example 1: Assigning a lower learning rate to the backbone,
 
 ```python
 SEGMENTOR_CFG['scheduler']['optimizer']['params_rules'] = {
@@ -657,9 +683,9 @@ SEGMENTOR_CFG['scheduler']['optimizer']['params_rules'] = {
 }
 ```
 
-where `lr_multiplier = 0.1` means the learning rate of backbone network is one-tenth of the decoder layer.
+This configuration applies a learning rate that is 0.1× the base rate to all parameters under `backbone_net`, while keeping the weight decay unchanged.
 
-And if you want to set the weight decay of some layers in the segmentor as zeros, you can set `params_rules` as following,
+(2) Example 2: Disabling weight decay for specific components
 
 ```python
 SEGMENTOR_CFG['scheduler']['optimizer']['params_rules'] = {
@@ -669,11 +695,15 @@ SEGMENTOR_CFG['scheduler']['optimizer']['params_rules'] = {
 }
 ```
 
-You can refer to the [`ssseg/configs` directory](https://github.com/SegmentationBLWX/sssegmentation/tree/main/ssseg/configs) for more examples about implementing some training tricks by setting `params_rules`.
+This is commonly used to prevent regularization on embeddings or normalization layers. 
+For more real-world examples of how to leverage `params_rules` for custom optimization strategies, please refer to the [`ssseg/configs`](https://github.com/SegmentationBLWX/sssegmentation/tree/main/ssseg/configs) directory.
 
-Finally, if you want to customize the optimizer by yourselves during developing, you should first create a new file in [`ssseg/modules/models/optimizers` directory](https://github.com/SegmentationBLWX/sssegmentation/tree/main/ssseg/modules/models/optimizers), *e.g.*, `ssseg/modules/models/optimizers/sgd.py`.
+If you need to implement a custom optimizer for advanced use cases, you can easily extend SSSegmentation by following these steps.
 
-Then, you can define the optimization algorithm in this file by yourselves, *e.g.*,
+(1) Define Your Optimizer
+
+Create a new Python file in the [`ssseg/modules/models/optimizers`](https://github.com/SegmentationBLWX/sssegmentation/tree/main/ssseg/modules/models/optimizers), *e.g.*, `sgd.py`.
+In this file, you can define your custom optimizer class according to your specific requirements,
 
 ```python
 class SGD():
@@ -681,25 +711,37 @@ class SGD():
         pass
 ```
 
-After that, you should add this custom optimization algorithm in [`ssseg/modules/models/optimizers/builder.py`](https://github.com/SegmentationBLWX/sssegmentation/blob/main/ssseg/modules/models/optimizers/builder.py) if you want to use it by simply modifying `SEGMENTOR_CFG['scheduler']['optimizer']`.
-Of course, you can also register this custom optimization algorithm by the following codes,
+(2) Register the Optimizer
+
+To make your custom optimizer available via `SEGMENTOR_CFG['scheduler']['optimizer']`, you need to register it.
+There are two ways to do this,
+
+① Modify the central registry manually: Edit the [`ssseg/modules/models/optimizers/builder.py`](https://github.com/SegmentationBLWX/sssegmentation/blob/main/ssseg/modules/models/optimizers/builder.py) file and add your custom optimizer to the registration logic.
+
+② Register dynamically in your script or module: Use the `OptimizerBuilder` to register your custom optimizer at runtime,
 
 ```python
 from ssseg.modules import OptimizerBuilder
 
-optimizer_builder = NormalizationBuilder()
+optimizer_builder = OptimizerBuilder()
 optimizer_builder.register('SGD', SGD)
 ```
 
-From this, you can also call `optimizer_builder.build` to build your own defined optimization algorithms as well as the original supported optimization algorithms.
+This makes your optimizer accessible via `optimizer_builder.build(...)`. This flexible mechanism allows you to seamlessly integrate your own optimizer while retaining compatibility with the existing configuration system.
 
 #### Add New Custom Scheduler
 
-SSSegmentation provides `BaseScheduler` class to help the users quickly add a new custom scheduler.
+SSSegmentation provides a base class `BaseScheduler` to help users easily implement and integrate custom learning rate schedulers.
 
-Specifically, if the users want to add a new custom scheduler, you should first create a new file in [`ssseg/modules/models/schedulers` directory](https://github.com/SegmentationBLWX/sssegmentation/tree/main/ssseg/modules/models/schedulers), *e.g.*, [`ssseg/modules/models/schedulers/polyscheduler.py`](https://github.com/SegmentationBLWX/sssegmentation/blob/main/ssseg/modules/models/schedulers/polyscheduler.py).
+To add a new scheduler,
 
-Then, you can define the scheduler in this file by inheriting `BaseScheduler`, *e.g.*,
+**Step1: Create a New Scheduler File**
+
+First, create a new Python file in the [`ssseg/modules/models/schedulers`](https://github.com/SegmentationBLWX/sssegmentation/tree/main/ssseg/modules/models/schedulers) directory, *e.g.*, [`ssseg/modules/models/schedulers/polyscheduler.py`](https://github.com/SegmentationBLWX/sssegmentation/blob/main/ssseg/modules/models/schedulers/polyscheduler.py).
+
+**Step2: Define Your Scheduler Class**
+
+In this file, define your custom scheduler by inheriting from `BaseScheduler`. For example,
 
 ```python
 from .basescheduler import BaseScheduler
@@ -712,10 +754,11 @@ class PolyScheduler(BaseScheduler):
         pass
 ```
 
-where `updatelr` function is used to define the learning rate adjust strategy.
+The `updatelr` method should implement the logic for updating the learning rate at each training step or epoch.
 
-After that, you should add this custom scheduler class in [`ssseg/modules/models/schedulers/builder.py`](https://github.com/SegmentationBLWX/sssegmentation/blob/main/ssseg/modules/models/schedulers/builder.py) if you want to use it by simply modifying `SEGMENTOR_CFG['scheduler']`.
-Of course, you can also register this custom scheduler by the following codes,
+**Step3: Register Your Scheduler**
+
+To make your scheduler configurable via `SEGMENTOR_CFG['scheduler']`, register it in [`ssseg/modules/models/schedulers/builder.py`](https://github.com/SegmentationBLWX/sssegmentation/blob/main/ssseg/modules/models/schedulers/builder.py). Alternatively, you can register it dynamically using,
 
 ```python
 from ssseg.modules import SchedulerBuilder
@@ -724,16 +767,16 @@ scheduler_builder = SchedulerBuilder()
 scheduler_builder.register('PolyScheduler', PolyScheduler)
 ```
 
-From this, you can also call `scheduler_builder.build` to build your own defined schedulers as well as the original supported schedulers.
+Once registered, your custom scheduler can be instantiated through `scheduler_builder.build(...)`. This allows consistent integration with both built-in and user-defined schedulers.
 
-Finally, the users could jump to the [`ssseg/modules/models/schedulers` directory](https://github.com/SegmentationBLWX/sssegmentation/tree/main/ssseg/modules/models/schedulers) in SSSegmentation to read more source codes of the supported schedulers and thus better learn how to customize the schedulers in SSSegmentation.
+For further reference, you can explore the existing scheduler implementations in the [`ssseg/modules/models/schedulers`](https://github.com/SegmentationBLWX/sssegmentation/tree/main/ssseg/modules/models/schedulers) directory to better understand the structure and customization practices used in SSSegmentation.
 
 
 ## Customize Segmentors
 
-Segmentor will process the feature maps outputted by the backbone network, and transforms the feature maps to a predicted segmentation mask using a decoder head (*e.g.*, [Deeplabv3](https://arxiv.org/pdf/1706.05587.pdf) and [IDRNet](https://arxiv.org/pdf/2310.10755.pdf)).
+In SSSegmentation, a segmentor first applies a backbone network to extract multi-level feature maps from the input image, and then uses a decoder head to transform these features into semantic segmentation predictions (*e.g.*, [Deeplabv3](https://arxiv.org/pdf/1706.05587.pdf) and [IDRNet](https://arxiv.org/pdf/2310.10755.pdf)).
 
-Here is an example of head config,
+A typical segmentor head configuration looks like this,
 
 ```python
 SEGMENTOR_CFG['head'] = {
@@ -742,8 +785,7 @@ SEGMENTOR_CFG['head'] = {
 }
 ```
 
-These arguments will be used during instancing the segmentor where the segmentor type is specified in `SEGMENTOR_CFG['type']`.
-Now, SSSegmentation supports the following segmentor types,
+These arguments are used when instantiating the segmentor, whose type is specified in `SEGMENTOR_CFG['type']`. SSSegmentation currently supports the following segmentor types,
 
 ```python
 REGISTERED_MODULES = {
@@ -758,28 +800,73 @@ REGISTERED_MODULES = {
 }
 ```
 
-To learn more about how to set the specific arguments for each segmentor, you can jump to [`ssseg/modules/models/segmentors` directory](https://github.com/SegmentationBLWX/sssegmentation/tree/main/ssseg/modules/models/segmentors) to check the source codes of each segmentor.
+To explore the full list of supported segmentors and their configuration options, refer to the source code in the [`ssseg/modules/models/segmentors`](https://github.com/SegmentationBLWX/sssegmentation/tree/main/ssseg/modules/models/segmentors) directory.
 
-Also, SSSegmentation provides `BaseSegmentor` class to help the users quickly add a new custom segmentor.
+#### Add New Custom Segmentor
 
-Specifically, if the users want to add a new custom segmentor, you should first create a new file in [`ssseg/modules/models/segmentors` directory](https://github.com/SegmentationBLWX/sssegmentation/tree/main/ssseg/modules/models/segmentors), *e.g.*, [`ssseg/modules/models/segmentors/fcn/fcn.py`](https://github.com/SegmentationBLWX/sssegmentation/blob/main/ssseg/modules/models/segmentors/fcn/fcn.py).
+SSSegmentation provides a `BaseSegmentor` class to simplify the process of defining custom segmentors.
 
-Then, you can define the segmentor in this file by inheriting `BaseSegmentor`, *e.g.*,
+**Step1: Create a New Segmentor File**
+
+First, create a new Python file in the [`ssseg/modules/models/segmentors`](https://github.com/SegmentationBLWX/sssegmentation/tree/main/ssseg/modules/models/segmentors) directory, *e.g.*, [`ssseg/modules/models/segmentors/fcn/fcn.py`](https://github.com/SegmentationBLWX/sssegmentation/blob/main/ssseg/modules/models/segmentors/fcn/fcn.py).
+
+**Step2: Implement Your Segmentor Class**
+
+In the new file, define your custom segmentor by inheriting from `BaseSegmentor`,
 
 ```python
+import torch.nn as nn
 from ..base import BaseSegmentor
+from ....utils import SSSegOutputStructure
 
 '''FCN'''
 class FCN(BaseSegmentor):
     def __init__(self, cfg, mode):
         super(FCN, self).__init__(cfg, mode)
-	'''forward'''
-    def forward(self, x, targets=None):
-        pass
+        align_corners, norm_cfg, act_cfg, head_cfg = self.align_corners, self.norm_cfg, self.act_cfg, cfg['head']
+        # build decoder
+        convs = []
+        for idx in range(head_cfg.get('num_convs', 2)):
+            if idx == 0:
+                conv = nn.Conv2d(head_cfg['in_channels'], head_cfg['feats_channels'], kernel_size=3, stride=1, padding=1, bias=False)
+            else:
+                conv = nn.Conv2d(head_cfg['feats_channels'], head_cfg['feats_channels'], kernel_size=3, stride=1, padding=1, bias=False)
+            norm = BuildNormalization(placeholder=head_cfg['feats_channels'], norm_cfg=norm_cfg)
+            act = BuildActivation(act_cfg)
+            convs += [conv, norm, act]
+        convs.append(nn.Dropout2d(head_cfg['dropout']))
+        if head_cfg.get('num_convs', 2) > 0:
+            convs.append(nn.Conv2d(head_cfg['feats_channels'], cfg['num_classes'], kernel_size=1, stride=1, padding=0))
+        else:
+            convs.append(nn.Conv2d(head_cfg['in_channels'], cfg['num_classes'], kernel_size=1, stride=1, padding=0))
+        self.decoder = nn.Sequential(*convs)
+        # build auxiliary decoder
+        self.setauxiliarydecoder(cfg['auxiliary'])
+        # freeze normalization layer if necessary
+        if cfg.get('is_freeze_norm', False): self.freezenormalization()
+    '''forward'''
+    def forward(self, data_meta):
+        img_size = data_meta.images.size(2), data_meta.images.size(3)
+        # feed to backbone network
+        backbone_outputs = self.transforminputs(self.backbone_net(data_meta.images), selected_indices=self.cfg['backbone'].get('selected_indices'))
+        # feed to decoder
+        seg_logits = self.decoder(backbone_outputs[-1])
+        # forward according to the mode
+        if self.mode in ['TRAIN', 'TRAIN_DEVELOP']:
+            loss, losses_log_dict = self.customizepredsandlosses(
+                seg_logits=seg_logits, annotations=data_meta.getannotations(), backbone_outputs=backbone_outputs, losses_cfg=self.cfg['losses'], img_size=img_size,
+            )
+            ssseg_outputs = SSSegOutputStructure(mode=self.mode, loss=loss, losses_log_dict=losses_log_dict) if self.mode == 'TRAIN' else SSSegOutputStructure(mode=self.mode, loss=loss, losses_log_dict=losses_log_dict, seg_logits=seg_logits)
+        else:
+            ssseg_outputs = SSSegOutputStructure(mode=self.mode, seg_logits=seg_logits)
+        return ssseg_outputs
 ```
 
-After that, you should add this custom segmentor class in [`ssseg/modules/models/segmentors/builder.py`](https://github.com/SegmentationBLWX/sssegmentation/blob/main/ssseg/modules/models/segmentors/builder.py) if you want to use it by simply modifying `SEGMENTOR_CFG`.
-Of course, you can also register this custom segmentor by the following codes,
+The `forward` method should implement the model's inference and training behavior.
+
+**Step3: Register Your Segmentor**
+
+To enable configuration-based usage, register your custom segmentor class in [`ssseg/modules/models/segmentors/builder.py`](https://github.com/SegmentationBLWX/sssegmentation/blob/main/ssseg/modules/models/segmentors/builder.py). Alternatively, you can register it dynamically with,
 
 ```python
 from ssseg.modules import SegmentorBuilder
@@ -788,31 +875,34 @@ segmentor_builder = SegmentorBuilder()
 segmentor_builder.register('FCN', FCN)
 ```
 
-From this, you can also call `segmentor_builder.build` to build your own defined segmentors as well as the original supported segmentors.
+After registration, your custom segmentor can be built using `segmentor_builder.build(...)`. This approach ensures compatibility with both user-defined and built-in segmentor types.
 
-Finally, the users could jump to the [`ssseg/modules/models/segmentors` directory](https://github.com/SegmentationBLWX/sssegmentation/tree/main/ssseg/modules/models/segmentors) in SSSegmentation to read more source codes of the supported segmentors and thus better learn how to customize the segmentors in SSSegmentation.
+To further understand how to customize segmentors, you are encouraged to review the implementation of existing models in the [`ssseg/modules/models/segmentors`](https://github.com/SegmentationBLWX/sssegmentation/tree/main/ssseg/modules/models/segmentors) directory.
 
 
 ## Customize Auxiliary Heads
 
-Auxiliary head is the image decoder that transforms the shallow feature maps to a predicted segmentation mask.
-It is first introduced in [PSPNet](https://arxiv.org/pdf/1612.01105.pdf), which is used to help segmentation framework training.
+The auxiliary head is an additional decoder module that transforms shallow feature maps (typically from an intermediate backbone layer) into a segmentation prediction.
+It was first introduced in [PSPNet](https://arxiv.org/pdf/1612.01105.pdf) as an auxiliary supervision branch to help stabilize and improve training in deep segmentation networks.
 
 #### Auxiliary Head Config Structure
 
-An example of auxiliary head config is as follows,
+A typical auxiliary head configuration is defined in the `SEGMENTOR_CFG['auxiliary']` field. For example,
 
 ```python
 SEGMENTOR_CFG['auxiliary'] = {'in_channels': 1024, 'out_channels': 512, 'dropout': 0.1}
 ```
 
-With the arguments in `SEGMENTOR_CFG['auxiliary']`, the `setauxiliarydecoder` function defined in [`ssseg/modules/models/segmentors/base/base.py`](https://github.com/SegmentationBLWX/sssegmentation/blob/main/ssseg/modules/models/segmentors/base/base.py) will be called to build the auxiliary head.
+These arguments are passed to the `setauxiliarydecoder` function, which is responsible for building the auxiliary decoder. 
+The default implementation of this function is provided in [`ssseg/modules/models/segmentors/base/base.py`](https://github.com/SegmentationBLWX/sssegmentation/blob/main/ssseg/modules/models/segmentors/base/base.py). 
 
-To disable auxiliary head, you can simply set `SEGMENTOR_CFG['auxiliary']` as `None`.
+To disable the auxiliary head, simply set `SEGMENTOR_CFG['auxiliary'] = None`.
 
 #### Add New Custom Auxiliary Head
 
-If the users want to add a new custom auxiliary head, you can first define a new segmentor inherited from `BaseSegmentor` class like following, 
+To implement a custom auxiliary head, you can extend the `BaseSegmentor` class and override the `setauxiliarydecoder` method.
+
+**Step1: Define a Custom Segmentor**
 
 ```python
 from ..base import BaseSegmentor
@@ -825,7 +915,9 @@ class Deeplabv3(BaseSegmentor):
         pass
 ```
 
-After that, you can define the `setauxiliarydecoder` function in this class by yourselves, *e.g.*,
+**Step2: Implement a Custom `setauxiliarydecoder` Method**
+
+You can now define your own logic for the auxiliary head by overriding the `setauxiliarydecoder` method,
 
 ```python
 from ..base import BaseSegmentor
@@ -840,22 +932,24 @@ class Deeplabv3(BaseSegmentor):
         pass
 ```
 
-And the arguments in `SEGMENTOR_CFG['auxiliary']` could be changed according to the new defined `setauxiliarydecoder` function.
+You can modify the contents of `SEGMENTOR_CFG['auxiliary']` to match the argument requirements of your custom `setauxiliarydecoder` method.
 
 
 ## Customize Normalizations
 
-Normalization layer transforms the inputs to have zero mean and unit variance across some specific dimensions.
+Normalization layers standardize input features by adjusting their distribution to have zero mean and unit variance along specific dimensions. 
+This helps stabilize and accelerate training.
 
 #### Normalization Config Structure
 
-An example of normalization config is as follows,
+A typical normalization configuration is defined via the `SEGMENTOR_CFG['norm_cfg']` field. For example,
 
 ```python
 SEGMENTOR_CFG['norm_cfg'] = {'type': 'SyncBatchNorm'}
 ```
 
-where `type` denotes the normalization layer you want to leverage. Now, SSSegmentation supports the following normalization types,
+Here, the `type` field specifies the normalization method to be used. 
+SSSegmentation currently supports the following normalization types,
 
 ```python
 REGISTERED_MODULES = {
@@ -865,15 +959,21 @@ REGISTERED_MODULES = {
 }
 ```
 
-The other arguments in `SEGMENTOR_CFG['norm_cfg']` are set for instancing the corresponding normalization layer.
+Any additional arguments defined in `SEGMENTOR_CFG['norm_cfg']` will be passed to the constructor of the selected normalization layer.
 
-To learn more about how to set the specific arguments for each normalization layer, you can jump to [`ssseg/modules/models/backbones/bricks/normalization` directory](https://github.com/SegmentationBLWX/sssegmentation/tree/main/ssseg/modules/models/backbones/bricks/normalization) to check the source codes of each normalization layer.
+To explore implementation details or configuration requirements of individual normalization layers, refer to the source files in the [`ssseg/modules/models/backbones/bricks/normalization`](https://github.com/SegmentationBLWX/sssegmentation/tree/main/ssseg/modules/models/backbones/bricks/normalization) directory.
 
 #### Add New Custom Normalization
 
-If the users want to add a new custom normalization layer, you should first create a new file in [`ssseg/modules/models/backbones/bricks/normalization` directory](https://github.com/SegmentationBLWX/sssegmentation/tree/main/ssseg/modules/models/backbones/bricks/normalization), *e.g.*, [`ssseg/modules/models/backbones/bricks/normalization/grn.py`](https://github.com/SegmentationBLWX/sssegmentation/blob/main/ssseg/modules/models/backbones/bricks/normalization/grn.py).
+To integrate a custom normalization layer, follow these steps,
 
-Then, you can define the normalization layer in this file by yourselves, *e.g.*,
+**Step1: Create a New Module File**
+
+Add a new Python file under the [`ssseg/modules/models/backbones/bricks/normalization`](https://github.com/SegmentationBLWX/sssegmentation/tree/main/ssseg/modules/models/backbones/bricks/normalization) directory, *e.g.*, [`ssseg/modules/models/backbones/bricks/normalization/grn.py`](https://github.com/SegmentationBLWX/sssegmentation/blob/main/ssseg/modules/models/backbones/bricks/normalization/grn.py).
+
+**Step2: Implement Your Normalization Class**
+
+Define the custom layer in the new file. Example,
 
 ```python
 import torch.nn as nn
@@ -886,8 +986,10 @@ class GRN(nn.Module):
         pass
 ```
 
-After that, you should add this custom normalization class in [`ssseg/modules/models/backbones/bricks/normalization/builder.py`](https://github.com/SegmentationBLWX/sssegmentation/blob/main/ssseg/modules/models/backbones/bricks/normalization/builder.py) if you want to use it by simply modifying `SEGMENTOR_CFG['norm_cfg']` or `SEGMENTOR_CFG['backbone']['norm_cfg']`.
-Of course, you can also register this custom normalization layer by the following codes,
+**Register the New Layer**
+
+To use the custom normalization through the config file, register it in [`ssseg/modules/models/backbones/bricks/normalization/builder.py`](https://github.com/SegmentationBLWX/sssegmentation/blob/main/ssseg/modules/models/backbones/bricks/normalization/builder.py).
+Alternatively, you can register it dynamically using,
 
 ```python
 from ssseg.modules import NormalizationBuilder
@@ -896,24 +998,24 @@ norm_builder = NormalizationBuilder()
 norm_builder.register('GRN', GRN)
 ```
 
-From this, you can also call `norm_builder.build` to build your own defined normalization layers as well as the original supported normalization layers.
+You can then use `norm_builder.build(...)` to construct both built-in and custom normalization layers.
 
-Finally, the users could jump to the [`ssseg/modules/models/backbones/bricks/normalization` directory](https://github.com/SegmentationBLWX/sssegmentation/tree/main/ssseg/modules/models/backbones/bricks/normalization) in SSSegmentation to read more source codes of the supported normalization classes and thus better learn how to customize the normalization layers in SSSegmentation.
+Finally, users can explore the [`ssseg/modules/models/backbones/bricks/normalization`](https://github.com/SegmentationBLWX/sssegmentation/tree/main/ssseg/modules/models/backbones/bricks/normalization) directory in SSSegmentation to view the source code of supported normalization layers and learn how to customize their own.
 
 
 ## Customize Activations
 
-Activation layer is linear or non linear equation which processes the output of a neuron and bound it into a limited range of values (*e.g.*, `[0, +∞]`).
+Activation layers apply linear or nonlinear transformations to the output of a neuron, typically constraining the values within a specific range (*e.g.*, `[0, +∞]`), and are essential for introducing non-linearity into neural networks.
 
 #### Activation Config Structure
 
-An example of activation config is as follows,
+A typical activation layer configuration is defined as,
 
 ```python
 SEGMENTOR_CFG['act_cfg'] = {'type': 'ReLU', 'inplace': True}
 ```
 
-where `type` denotes the activation layer you want to employ. Now, SSSegmentation supports the following activation types,
+where `type` specifies the activation function to use. Currently, SSSegmentation supports the following activation types,
 
 ```python
 REGISTERED_MODULES = {
@@ -923,15 +1025,21 @@ REGISTERED_MODULES = {
 }
 ```
 
-The other arguments in `SEGMENTOR_CFG['act_cfg']` are set for instancing the corresponding activation layer.
+Additional arguments in `SEGMENTOR_CFG['act_cfg']` can be used to configure the selected activation layer.
 
-To learn more about how to set the specific arguments for each activation function, you can jump to [`ssseg/modules/models/backbones/bricks/activation` directory](https://github.com/SegmentationBLWX/sssegmentation/tree/main/ssseg/modules/models/backbones/bricks/activation) to check the source codes of each activation function.
+For details on available arguments and implementations, refer to the [`ssseg/modules/models/backbones/bricks/activation`](https://github.com/SegmentationBLWX/sssegmentation/tree/main/ssseg/modules/models/backbones/bricks/activation) directory in the source code.
 
 #### Add New Custom Activation
 
-If the users want to add a new custom activation layer, you should first create a new file in [`ssseg/modules/models/backbones/bricks/activation` directory](https://github.com/SegmentationBLWX/sssegmentation/tree/main/ssseg/modules/models/backbones/bricks/activation), *e.g.*, [`ssseg/modules/models/backbones/bricks/activation/hardsigmoid.py`](https://github.com/SegmentationBLWX/sssegmentation/blob/main/ssseg/modules/models/backbones/bricks/activation/hardsigmoid.py).
+To implement a new custom activation function, follow these steps,
 
-Then, you can define the activation layer in this file by yourselves, *e.g.*,
+**Step1: Create a New Module File**
+
+Add a new Python file in the [`ssseg/modules/models/backbones/bricks/activation`](https://github.com/SegmentationBLWX/sssegmentation/tree/main/ssseg/modules/models/backbones/bricks/activation) directory, *e.g.*, [`ssseg/modules/models/backbones/bricks/activation/hardsigmoid.py`](https://github.com/SegmentationBLWX/sssegmentation/blob/main/ssseg/modules/models/backbones/bricks/activation/hardsigmoid.py).
+
+**Step2: Define the Activation Class**
+
+Implement the activation function in the new file. Example,
 
 ```python
 import torch.nn as nn
@@ -944,8 +1052,9 @@ class HardSigmoid(nn.Module):
         pass
 ```
 
-After that, you should add this custom activation class in [`ssseg/modules/models/backbones/bricks/activation/builder.py`](https://github.com/SegmentationBLWX/sssegmentation/blob/main/ssseg/modules/models/backbones/bricks/activation/builder.py) if you want to use it by simply modifying `SEGMENTOR_CFG['act_cfg']` or `SEGMENTOR_CFG['backbone']['act_cfg']`.
-Of course, you can also register this custom activation layer by the following codes,
+**Step3: Register the Custom Activation**
+
+To make the custom activation available via config files, add it to [`ssseg/modules/models/backbones/bricks/activation/builder.py`](https://github.com/SegmentationBLWX/sssegmentation/blob/main/ssseg/modules/models/backbones/bricks/activation/builder.py). Alternatively, register it manually with,
 
 ```python
 from ssseg.modules import ActivationBuilder
@@ -954,9 +1063,9 @@ act_builder = ActivationBuilder()
 act_builder.register('HardSigmoid', HardSigmoid)
 ```
 
-From this, you can also call `act_builder.build` to build your own defined activation layers as well as the original supported activation layers.
+You can then use `act_builder.build(...)` to construct both standard and custom activation layers.
 
-Finally, the users could jump to the [`ssseg/modules/models/backbones/bricks/activation` directory](https://github.com/SegmentationBLWX/sssegmentation/tree/main/ssseg/modules/models/backbones/bricks/activation) in SSSegmentation to read more source codes of the supported activation classes and thus better learn how to customize the activation layers in SSSegmentation.
+For more examples and implementation details, explore the [`ssseg/modules/models/backbones/bricks/activation`](https://github.com/SegmentationBLWX/sssegmentation/tree/main/ssseg/modules/models/backbones/bricks/activation) directory in the SSSegmentation codebase.
 
 
 ## Mixed Precision Training
@@ -1010,13 +1119,13 @@ You can refer to [Exponential-Moving-Average](https://leimao.github.io/blog/Expo
 
 To turn on EMA in SSSegmentation, you could modify the corresponding config file with the following codes,
 
-```
+```python
 SEGMENTOR_CFG['ema_cfg'] = {'momentum': 0.0005, 'device': 'cpu'}
 ```
 
 where `device` denotes perform EMA on CPU or GPU, `momentum` is the moving average weight which is used in the following codes,
 
-```
+```python
 ema_v * (1.0 - momentum)) + (momentum * cur_v)
 ```
 
