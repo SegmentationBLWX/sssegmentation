@@ -915,7 +915,7 @@ class Deeplabv3(BaseSegmentor):
         pass
 ```
 
-**Step 2: Implement a Custom `setauxiliarydecoder` Method**
+**Step2: Implement a Custom `setauxiliarydecoder` Method**
 
 You can now define your own logic for the auxiliary head by overriding the `setauxiliarydecoder` method,
 
@@ -937,17 +937,19 @@ You can modify the contents of `SEGMENTOR_CFG['auxiliary']` to match the argumen
 
 ## Customize Normalizations
 
-Normalization layer transforms the inputs to have zero mean and unit variance across some specific dimensions.
+Normalization layers standardize input features by adjusting their distribution to have zero mean and unit variance along specific dimensions. 
+This helps stabilize and accelerate training.
 
 #### Normalization Config Structure
 
-An example of normalization config is as follows,
+A typical normalization configuration is defined via the `SEGMENTOR_CFG['norm_cfg']` field. For example,
 
 ```python
 SEGMENTOR_CFG['norm_cfg'] = {'type': 'SyncBatchNorm'}
 ```
 
-where `type` denotes the normalization layer you want to leverage. Now, SSSegmentation supports the following normalization types,
+Here, the `type` field specifies the normalization method to be used. 
+SSSegmentation currently supports the following normalization types,
 
 ```python
 REGISTERED_MODULES = {
@@ -957,15 +959,21 @@ REGISTERED_MODULES = {
 }
 ```
 
-The other arguments in `SEGMENTOR_CFG['norm_cfg']` are set for instancing the corresponding normalization layer.
+Any additional arguments defined in `SEGMENTOR_CFG['norm_cfg']` will be passed to the constructor of the selected normalization layer.
 
-To learn more about how to set the specific arguments for each normalization layer, you can jump to [`ssseg/modules/models/backbones/bricks/normalization` directory](https://github.com/SegmentationBLWX/sssegmentation/tree/main/ssseg/modules/models/backbones/bricks/normalization) to check the source codes of each normalization layer.
+To explore implementation details or configuration requirements of individual normalization layers, refer to the source files in the [`ssseg/modules/models/backbones/bricks/normalization`](https://github.com/SegmentationBLWX/sssegmentation/tree/main/ssseg/modules/models/backbones/bricks/normalization) directory.
 
 #### Add New Custom Normalization
 
-If the users want to add a new custom normalization layer, you should first create a new file in [`ssseg/modules/models/backbones/bricks/normalization` directory](https://github.com/SegmentationBLWX/sssegmentation/tree/main/ssseg/modules/models/backbones/bricks/normalization), *e.g.*, [`ssseg/modules/models/backbones/bricks/normalization/grn.py`](https://github.com/SegmentationBLWX/sssegmentation/blob/main/ssseg/modules/models/backbones/bricks/normalization/grn.py).
+To integrate a custom normalization layer, follow these steps,
 
-Then, you can define the normalization layer in this file by yourselves, *e.g.*,
+**Step1: Create a New Module File**
+
+Add a new Python file under the [`ssseg/modules/models/backbones/bricks/normalization`](https://github.com/SegmentationBLWX/sssegmentation/tree/main/ssseg/modules/models/backbones/bricks/normalization) directory, *e.g.*, [`ssseg/modules/models/backbones/bricks/normalization/grn.py`](https://github.com/SegmentationBLWX/sssegmentation/blob/main/ssseg/modules/models/backbones/bricks/normalization/grn.py).
+
+**Step2: Implement Your Normalization Class**
+
+Define the custom layer in the new file. Example,
 
 ```python
 import torch.nn as nn
@@ -978,8 +986,10 @@ class GRN(nn.Module):
         pass
 ```
 
-After that, you should add this custom normalization class in [`ssseg/modules/models/backbones/bricks/normalization/builder.py`](https://github.com/SegmentationBLWX/sssegmentation/blob/main/ssseg/modules/models/backbones/bricks/normalization/builder.py) if you want to use it by simply modifying `SEGMENTOR_CFG['norm_cfg']` or `SEGMENTOR_CFG['backbone']['norm_cfg']`.
-Of course, you can also register this custom normalization layer by the following codes,
+**Register the New Layer**
+
+To use the custom normalization through the config file, register it in [`ssseg/modules/models/backbones/bricks/normalization/builder.py`](https://github.com/SegmentationBLWX/sssegmentation/blob/main/ssseg/modules/models/backbones/bricks/normalization/builder.py).
+Alternatively, you can register it dynamically using,
 
 ```python
 from ssseg.modules import NormalizationBuilder
@@ -988,9 +998,9 @@ norm_builder = NormalizationBuilder()
 norm_builder.register('GRN', GRN)
 ```
 
-From this, you can also call `norm_builder.build` to build your own defined normalization layers as well as the original supported normalization layers.
+You can then use `norm_builder.build(...)` to construct both built-in and custom normalization layers.
 
-Finally, the users could jump to the [`ssseg/modules/models/backbones/bricks/normalization` directory](https://github.com/SegmentationBLWX/sssegmentation/tree/main/ssseg/modules/models/backbones/bricks/normalization) in SSSegmentation to read more source codes of the supported normalization classes and thus better learn how to customize the normalization layers in SSSegmentation.
+Finally, users can explore the [`ssseg/modules/models/backbones/bricks/normalization`](https://github.com/SegmentationBLWX/sssegmentation/tree/main/ssseg/modules/models/backbones/bricks/normalization) directory in SSSegmentation to view the source code of supported normalization layers and learn how to customize their own.
 
 
 ## Customize Activations
