@@ -511,9 +511,9 @@ class MobileNet(nn.Module):
 
 You can register the new backbone in two ways.
 
-(1) Add to the Builder File: Modify [`ssseg/modules/models/backbones/builder.py`](https://github.com/SegmentationBLWX/sssegmentation/blob/main/ssseg/modules/models/backbones/builder.py) to include your new class.
+① Add to the Builder File: Modify [`ssseg/modules/models/backbones/builder.py`](https://github.com/SegmentationBLWX/sssegmentation/blob/main/ssseg/modules/models/backbones/builder.py) to include your new class.
 
-(2) Register Dynamically: Alternatively, register it manually with the following code,
+② Register Dynamically: Alternatively, register it manually with the following code,
 
 ```python
 from ssseg.modules import BackboneBuilder
@@ -597,9 +597,9 @@ class KLDivLoss(nn.Module):
 
 You have two options,
 
-(1) Static Registration. Add the class name to the registration dictionary in [`ssseg/modules/models/losses/builder.py`](https://github.com/SegmentationBLWX/sssegmentation/blob/main/ssseg/modules/models/losses/builder.py).
+① Static Registration. Add the class name to the registration dictionary in [`ssseg/modules/models/losses/builder.py`](https://github.com/SegmentationBLWX/sssegmentation/blob/main/ssseg/modules/models/losses/builder.py).
 
-(2) Dynamic Registration. Alternatively, register the class programmatically,
+② Dynamic Registration. Alternatively, register the class programmatically,
 
 ```python
 from ssseg.modules import LossBuilder
@@ -620,7 +620,7 @@ They are crucial for accelerating convergence and improving training stability.
 
 #### Scheduler Config Structure
 
-A typical scheduler configuration in `SEGMENTOR_CFG` looks like this,
+A typical learning rate scheduler configuration in `SEGMENTOR_CFG` is as follows,
 
 ```python
 SEGMENTOR_CFG['scheduler'] = {
@@ -631,14 +631,7 @@ SEGMENTOR_CFG['scheduler'] = {
 }
 ```
 
-where,
-
-- `type`: Specifies the scheduler type. All additional arguments under `SEGMENTOR_CFG['scheduler']` are used to initialize the selected scheduler class.
-- `max_epochs`: Total number of training epochs.
-- `power`: The exponent for polynomial decay.
-- `optimizer`: A nested dictionary specifying the optimizer settings (see [`customize-optimizers`](https://sssegmentation.readthedocs.io/en/latest/Tutorials.html#customize-optimizers)).
-
-Currently supported scheduler types include,
+In this configuration, the `type` field specifies the scheduler strategy to be used. SSSegmentation currently supports the following built-in scheduler types,
 
 ```python
 REGISTERED_MODULES = {
@@ -646,13 +639,20 @@ REGISTERED_MODULES = {
 }
 ```
 
-For more details on individual schedulers, you may refer to the source code in the [`ssseg/modules/models/schedulers`](https://github.com/SegmentationBLWX/sssegmentation/tree/main/ssseg/modules/models/schedulers) directory.
+The remaining key-value pairs provide initialization arguments for the selected scheduler class. Commonly used arguments include,
+
+- `max_epochs`: The total number of training epochs.
+- `power`: The exponent used for polynomial decay (applicable for `PolyScheduler`).
+- `optimizer`: A nested dictionary specifying the optimizer settings (see [`customize-optimizers`](https://sssegmentation.readthedocs.io/en/latest/Tutorials.html#customize-optimizers)).
+
+For in-depth information on each scheduler's implementation and additional options, please consult the source code in the [`ssseg/modules/models/schedulers`](https://github.com/SegmentationBLWX/sssegmentation/tree/main/ssseg/modules/models/schedulers) directory.
+
 
 #### Customize Optimizers
 
-Optimizers are responsible for updating model parameters to minimize the loss function during training. A common example is [Stochastic Gradient Descent](https://en.wikipedia.org/wiki/Stochastic_gradient_descent).
+Optimizers play a central role in training by updating model parameters to minimize the loss function. A commonly used optimizer is [Stochastic Gradient Descent](https://en.wikipedia.org/wiki/Stochastic_gradient_descent), though many other variants are supported.
 
-Optimizers are typically defined within the scheduler block,
+In SSSegmentation, optimizers are typically defined inside the scheduler configuration block,
 
 ```python
 SEGMENTOR_CFG['scheduler']['optimizer'] = {
@@ -660,12 +660,7 @@ SEGMENTOR_CFG['scheduler']['optimizer'] = {
 }
 ```
 
-where,
-
-- `type`: Specifies the optimizer type (*e.g.*, `SGD`, `Adam`). Other keys are passed to the optimizer constructor.
-- `params_rules`: Optional field for setting parameter-specific rules.
-
-Supported optimizers include,
+where `type` specifies the optimizer to use. SSSegmentation supports a wide range of optimizers, including (**Note**: these optimizers are registered dynamically based on availability in `torch.optim`),
 
 ```python
 REGISTERED_MODULES = {
@@ -676,32 +671,11 @@ for optim_type in ['Adagrad', 'SparseAdam', 'Adamax', 'ASGD', 'LBFGS', 'NAdam', 
         REGISTERED_MODULES[optim_type] = getattr(optim, optim_type)
 ```
 
+All other key-value pairs are passed as arguments to the optimizer's constructor.
+Among these arguments, the `params_rules` field enables fine-grained control over optimization settings for different parts of the model.
+This is useful for implementing training strategies such as layer-specific learning rates or selectively disabling weight decay.
 
-
-
-
-Optimizer is used to define the process of adjusting model parameters to reduce model error in each training step, such as the [Stochastic Gradient Descent](https://en.wikipedia.org/wiki/Stochastic_gradient_descent).
-
-Specifically, an example of optimizer config used to construct an optimizer for model training could be,
-
-```python
-SEGMENTOR_CFG['scheduler']['optimizer'] = {
-    'type': 'SGD', 'lr': 0.01, 'momentum': 0.9, 'weight_decay': 5e-4, 'params_rules': {},
-}
-```
-
-where `type` denotes the optimizer you want to utilize during training. Here is a list of supported optimizer types,
-
-```python
-REGISTERED_MODULES = {
-    'SGD': optim.SGD, 'Adam': optim.Adam, 'AdamW': optim.AdamW, 'Adadelta': optim.Adadelta,
-}
-```
-
-The other arguments in `SEGMENTOR_CFG['scheduler']['optimizer']` are set for instancing the corresponding optimizer.
-
-Among these arguments, `params_rules` could be set for implementing some training tricks. 
-For example, if you want to train the backbone network and the decoder layer with different learning rates, you can set `params_rules` as following,
+(1) Example 1: Assigning a lower learning rate to the backbone,
 
 ```python
 SEGMENTOR_CFG['scheduler']['optimizer']['params_rules'] = {
@@ -709,9 +683,9 @@ SEGMENTOR_CFG['scheduler']['optimizer']['params_rules'] = {
 }
 ```
 
-where `lr_multiplier = 0.1` means the learning rate of backbone network is one-tenth of the decoder layer.
+This configuration applies a learning rate that is 0.1× the base rate to all parameters under `backbone_net`, while keeping the weight decay unchanged.
 
-And if you want to set the weight decay of some layers in the segmentor as zeros, you can set `params_rules` as following,
+(2) Example 2: Disabling weight decay for specific components
 
 ```python
 SEGMENTOR_CFG['scheduler']['optimizer']['params_rules'] = {
@@ -721,11 +695,15 @@ SEGMENTOR_CFG['scheduler']['optimizer']['params_rules'] = {
 }
 ```
 
-You can refer to the [`ssseg/configs` directory](https://github.com/SegmentationBLWX/sssegmentation/tree/main/ssseg/configs) for more examples about implementing some training tricks by setting `params_rules`.
+This is commonly used to prevent regularization on embeddings or normalization layers. 
+For more real-world examples of how to leverage `params_rules` for custom optimization strategies, please refer to the [`ssseg/configs`](https://github.com/SegmentationBLWX/sssegmentation/tree/main/ssseg/configs) directory.
 
-Finally, if you want to customize the optimizer by yourselves during developing, you should first create a new file in [`ssseg/modules/models/optimizers` directory](https://github.com/SegmentationBLWX/sssegmentation/tree/main/ssseg/modules/models/optimizers), *e.g.*, `ssseg/modules/models/optimizers/sgd.py`.
+If you need to implement a custom optimizer for advanced use cases, you can easily extend SSSegmentation by following these steps.
 
-Then, you can define the optimization algorithm in this file by yourselves, *e.g.*,
+(1) Define Your Optimizer
+
+Create a new Python file in the [`ssseg/modules/models/optimizers`](https://github.com/SegmentationBLWX/sssegmentation/tree/main/ssseg/modules/models/optimizers), *e.g.*, `sgd.py`.
+In this file, you can define your custom optimizer class according to your specific requirements,
 
 ```python
 class SGD():
@@ -733,25 +711,37 @@ class SGD():
         pass
 ```
 
-After that, you should add this custom optimization algorithm in [`ssseg/modules/models/optimizers/builder.py`](https://github.com/SegmentationBLWX/sssegmentation/blob/main/ssseg/modules/models/optimizers/builder.py) if you want to use it by simply modifying `SEGMENTOR_CFG['scheduler']['optimizer']`.
-Of course, you can also register this custom optimization algorithm by the following codes,
+(2) Register the Optimizer
+
+To make your custom optimizer available via `SEGMENTOR_CFG['scheduler']['optimizer']`, you need to register it.
+There are two ways to do this,
+
+① Modify the central registry manually: Edit the [`ssseg/modules/models/optimizers/builder.py`](https://github.com/SegmentationBLWX/sssegmentation/blob/main/ssseg/modules/models/optimizers/builder.py) file and add your custom optimizer to the registration logic.
+
+② Register dynamically in your script or module: Use the `OptimizerBuilder` to register your custom optimizer at runtime,
 
 ```python
 from ssseg.modules import OptimizerBuilder
 
-optimizer_builder = NormalizationBuilder()
+optimizer_builder = OptimizerBuilder()
 optimizer_builder.register('SGD', SGD)
 ```
 
-From this, you can also call `optimizer_builder.build` to build your own defined optimization algorithms as well as the original supported optimization algorithms.
+This makes your optimizer accessible via `optimizer_builder.build(...)`. This flexible mechanism allows you to seamlessly integrate your own optimizer while retaining compatibility with the existing configuration system.
 
 #### Add New Custom Scheduler
 
-SSSegmentation provides `BaseScheduler` class to help the users quickly add a new custom scheduler.
+SSSegmentation provides a base class `BaseScheduler` to help users easily implement and integrate custom learning rate schedulers.
 
-Specifically, if the users want to add a new custom scheduler, you should first create a new file in [`ssseg/modules/models/schedulers` directory](https://github.com/SegmentationBLWX/sssegmentation/tree/main/ssseg/modules/models/schedulers), *e.g.*, [`ssseg/modules/models/schedulers/polyscheduler.py`](https://github.com/SegmentationBLWX/sssegmentation/blob/main/ssseg/modules/models/schedulers/polyscheduler.py).
+To add a new scheduler,
 
-Then, you can define the scheduler in this file by inheriting `BaseScheduler`, *e.g.*,
+**Step1: Create a New Scheduler File**
+
+First, create a new Python file in the [`ssseg/modules/models/schedulers`](https://github.com/SegmentationBLWX/sssegmentation/tree/main/ssseg/modules/models/schedulers) directory, *e.g.*, [`ssseg/modules/models/schedulers/polyscheduler.py`](https://github.com/SegmentationBLWX/sssegmentation/blob/main/ssseg/modules/models/schedulers/polyscheduler.py).
+
+**Step2: Define Your Scheduler Class**
+
+In this file, define your custom scheduler by inheriting from `BaseScheduler`. For example,
 
 ```python
 from .basescheduler import BaseScheduler
@@ -764,10 +754,11 @@ class PolyScheduler(BaseScheduler):
         pass
 ```
 
-where `updatelr` function is used to define the learning rate adjust strategy.
+The `updatelr` method should implement the logic for updating the learning rate at each training step or epoch.
 
-After that, you should add this custom scheduler class in [`ssseg/modules/models/schedulers/builder.py`](https://github.com/SegmentationBLWX/sssegmentation/blob/main/ssseg/modules/models/schedulers/builder.py) if you want to use it by simply modifying `SEGMENTOR_CFG['scheduler']`.
-Of course, you can also register this custom scheduler by the following codes,
+**Step3: Register Your Scheduler**
+
+To make your scheduler configurable via `SEGMENTOR_CFG['scheduler']`, register it in [`ssseg/modules/models/schedulers/builder.py`](https://github.com/SegmentationBLWX/sssegmentation/blob/main/ssseg/modules/models/schedulers/builder.py). Alternatively, you can register it dynamically using,
 
 ```python
 from ssseg.modules import SchedulerBuilder
@@ -776,9 +767,9 @@ scheduler_builder = SchedulerBuilder()
 scheduler_builder.register('PolyScheduler', PolyScheduler)
 ```
 
-From this, you can also call `scheduler_builder.build` to build your own defined schedulers as well as the original supported schedulers.
+Once registered, your custom scheduler can be instantiated through `scheduler_builder.build(...)`. This allows consistent integration with both built-in and user-defined schedulers.
 
-Finally, the users could jump to the [`ssseg/modules/models/schedulers` directory](https://github.com/SegmentationBLWX/sssegmentation/tree/main/ssseg/modules/models/schedulers) in SSSegmentation to read more source codes of the supported schedulers and thus better learn how to customize the schedulers in SSSegmentation.
+For further reference, you can explore the existing scheduler implementations in the [`ssseg/modules/models/schedulers`](https://github.com/SegmentationBLWX/sssegmentation/tree/main/ssseg/modules/models/schedulers) directory to better understand the structure and customization practices used in SSSegmentation.
 
 
 ## Customize Segmentors
