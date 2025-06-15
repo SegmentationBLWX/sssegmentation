@@ -774,9 +774,9 @@ For further reference, you can explore the existing scheduler implementations in
 
 ## Customize Segmentors
 
-Segmentor will process the feature maps outputted by the backbone network, and transforms the feature maps to a predicted segmentation mask using a decoder head (*e.g.*, [Deeplabv3](https://arxiv.org/pdf/1706.05587.pdf) and [IDRNet](https://arxiv.org/pdf/2310.10755.pdf)).
+In SSSegmentation, a segmentor first applies a backbone network to extract multi-level feature maps from the input image, and then uses a decoder head to transform these features into semantic segmentation predictions (*e.g.*, [Deeplabv3](https://arxiv.org/pdf/1706.05587.pdf) and [IDRNet](https://arxiv.org/pdf/2310.10755.pdf)).
 
-Here is an example of head config,
+A typical segmentor head configuration looks like this,
 
 ```python
 SEGMENTOR_CFG['head'] = {
@@ -785,8 +785,7 @@ SEGMENTOR_CFG['head'] = {
 }
 ```
 
-These arguments will be used during instancing the segmentor where the segmentor type is specified in `SEGMENTOR_CFG['type']`.
-Now, SSSegmentation supports the following segmentor types,
+These arguments are used when instantiating the segmentor, whose type is specified in `SEGMENTOR_CFG['type']`. SSSegmentation currently supports the following segmentor types,
 
 ```python
 REGISTERED_MODULES = {
@@ -801,28 +800,73 @@ REGISTERED_MODULES = {
 }
 ```
 
-To learn more about how to set the specific arguments for each segmentor, you can jump to [`ssseg/modules/models/segmentors` directory](https://github.com/SegmentationBLWX/sssegmentation/tree/main/ssseg/modules/models/segmentors) to check the source codes of each segmentor.
+To explore the full list of supported segmentors and their configuration options, refer to the source code in the [`ssseg/modules/models/segmentors`](https://github.com/SegmentationBLWX/sssegmentation/tree/main/ssseg/modules/models/segmentors) directory.
 
-Also, SSSegmentation provides `BaseSegmentor` class to help the users quickly add a new custom segmentor.
+#### Add New Custom Segmentor
 
-Specifically, if the users want to add a new custom segmentor, you should first create a new file in [`ssseg/modules/models/segmentors` directory](https://github.com/SegmentationBLWX/sssegmentation/tree/main/ssseg/modules/models/segmentors), *e.g.*, [`ssseg/modules/models/segmentors/fcn/fcn.py`](https://github.com/SegmentationBLWX/sssegmentation/blob/main/ssseg/modules/models/segmentors/fcn/fcn.py).
+SSSegmentation provides a `BaseSegmentor` class to simplify the process of defining custom segmentors.
 
-Then, you can define the segmentor in this file by inheriting `BaseSegmentor`, *e.g.*,
+**Step1: Create a New Segmentor File**
+
+First, create a new Python file in the [`ssseg/modules/models/segmentors`](https://github.com/SegmentationBLWX/sssegmentation/tree/main/ssseg/modules/models/segmentors) directory, *e.g.*, [`ssseg/modules/models/segmentors/fcn/fcn.py`](https://github.com/SegmentationBLWX/sssegmentation/blob/main/ssseg/modules/models/segmentors/fcn/fcn.py).
+
+**Step2: Implement Your Segmentor Class**
+
+In the new file, define your custom segmentor by inheriting from `BaseSegmentor`,
 
 ```python
+import torch.nn as nn
 from ..base import BaseSegmentor
+from ....utils import SSSegOutputStructure
 
 '''FCN'''
 class FCN(BaseSegmentor):
     def __init__(self, cfg, mode):
         super(FCN, self).__init__(cfg, mode)
-	'''forward'''
-    def forward(self, x, targets=None):
-        pass
+        align_corners, norm_cfg, act_cfg, head_cfg = self.align_corners, self.norm_cfg, self.act_cfg, cfg['head']
+        # build decoder
+        convs = []
+        for idx in range(head_cfg.get('num_convs', 2)):
+            if idx == 0:
+                conv = nn.Conv2d(head_cfg['in_channels'], head_cfg['feats_channels'], kernel_size=3, stride=1, padding=1, bias=False)
+            else:
+                conv = nn.Conv2d(head_cfg['feats_channels'], head_cfg['feats_channels'], kernel_size=3, stride=1, padding=1, bias=False)
+            norm = BuildNormalization(placeholder=head_cfg['feats_channels'], norm_cfg=norm_cfg)
+            act = BuildActivation(act_cfg)
+            convs += [conv, norm, act]
+        convs.append(nn.Dropout2d(head_cfg['dropout']))
+        if head_cfg.get('num_convs', 2) > 0:
+            convs.append(nn.Conv2d(head_cfg['feats_channels'], cfg['num_classes'], kernel_size=1, stride=1, padding=0))
+        else:
+            convs.append(nn.Conv2d(head_cfg['in_channels'], cfg['num_classes'], kernel_size=1, stride=1, padding=0))
+        self.decoder = nn.Sequential(*convs)
+        # build auxiliary decoder
+        self.setauxiliarydecoder(cfg['auxiliary'])
+        # freeze normalization layer if necessary
+        if cfg.get('is_freeze_norm', False): self.freezenormalization()
+    '''forward'''
+    def forward(self, data_meta):
+        img_size = data_meta.images.size(2), data_meta.images.size(3)
+        # feed to backbone network
+        backbone_outputs = self.transforminputs(self.backbone_net(data_meta.images), selected_indices=self.cfg['backbone'].get('selected_indices'))
+        # feed to decoder
+        seg_logits = self.decoder(backbone_outputs[-1])
+        # forward according to the mode
+        if self.mode in ['TRAIN', 'TRAIN_DEVELOP']:
+            loss, losses_log_dict = self.customizepredsandlosses(
+                seg_logits=seg_logits, annotations=data_meta.getannotations(), backbone_outputs=backbone_outputs, losses_cfg=self.cfg['losses'], img_size=img_size,
+            )
+            ssseg_outputs = SSSegOutputStructure(mode=self.mode, loss=loss, losses_log_dict=losses_log_dict) if self.mode == 'TRAIN' else SSSegOutputStructure(mode=self.mode, loss=loss, losses_log_dict=losses_log_dict, seg_logits=seg_logits)
+        else:
+            ssseg_outputs = SSSegOutputStructure(mode=self.mode, seg_logits=seg_logits)
+        return ssseg_outputs
 ```
 
-After that, you should add this custom segmentor class in [`ssseg/modules/models/segmentors/builder.py`](https://github.com/SegmentationBLWX/sssegmentation/blob/main/ssseg/modules/models/segmentors/builder.py) if you want to use it by simply modifying `SEGMENTOR_CFG`.
-Of course, you can also register this custom segmentor by the following codes,
+The `forward` method should implement the model's inference and training behavior.
+
+**Step3: Register Your Segmentor**
+
+To enable configuration-based usage, register your custom segmentor class in [`ssseg/modules/models/segmentors/builder.py`](https://github.com/SegmentationBLWX/sssegmentation/blob/main/ssseg/modules/models/segmentors/builder.py). Alternatively, you can register it dynamically with,
 
 ```python
 from ssseg.modules import SegmentorBuilder
@@ -831,9 +875,9 @@ segmentor_builder = SegmentorBuilder()
 segmentor_builder.register('FCN', FCN)
 ```
 
-From this, you can also call `segmentor_builder.build` to build your own defined segmentors as well as the original supported segmentors.
+After registration, your custom segmentor can be built using `segmentor_builder.build(...)`. This approach ensures compatibility with both user-defined and built-in segmentor types.
 
-Finally, the users could jump to the [`ssseg/modules/models/segmentors` directory](https://github.com/SegmentationBLWX/sssegmentation/tree/main/ssseg/modules/models/segmentors) in SSSegmentation to read more source codes of the supported segmentors and thus better learn how to customize the segmentors in SSSegmentation.
+To further understand how to customize segmentors, you are encouraged to review the implementation of existing models in the [`ssseg/modules/models/segmentors`](https://github.com/SegmentationBLWX/sssegmentation/tree/main/ssseg/modules/models/segmentors) directory.
 
 
 ## Customize Auxiliary Heads
