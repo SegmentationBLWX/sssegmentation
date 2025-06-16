@@ -43,7 +43,8 @@ SEGMENTOR_CFG = REGISTERED_SEGMENTOR_CONFIGS['FCN_SEGMENTOR_CFG'].copy()
 from .._base_.segmentors.fcn import FCN_SEGMENTOR_CFG as SEGMENTOR_CFG
 ```
 
-Then, customize and train the model by modifying key fields. For instance, to use FCN with a ResNet-50-D16 backbone on Pascal VOC, you can create a config file named `fcn_resnet50os16_voc.py` under `ssseg/configs/fcn`,
+Then, customize and train the model by modifying key fields. 
+For instance, to use FCN with a ResNet-50-D16 backbone on Pascal VOC, you can create a config file named `fcn_resnet50os16_voc.py` under `ssseg/configs/fcn`, and writing in,
 
 ```python
 import os
@@ -911,7 +912,7 @@ from ..base import BaseSegmentor
 class Deeplabv3(BaseSegmentor):
     def __init__(self, arg1, arg2):
         pass
-    def forward(self, x, targets=None):
+    def forward(self, data_meta):
         pass
 ```
 
@@ -926,7 +927,7 @@ from ..base import BaseSegmentor
 class Deeplabv3(BaseSegmentor):
     def __init__(self, arg1, arg2):
         pass
-    def forward(self, x, targets=None):
+    def forward(self, data_meta):
         pass
     def setauxiliarydecoder(self, auxiliary_cfg):
         pass
