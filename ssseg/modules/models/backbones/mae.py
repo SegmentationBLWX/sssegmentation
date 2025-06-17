@@ -30,6 +30,9 @@ class MAEAttention(BEiTAttention):
 class MAETransformerEncoderLayer(BEiTTransformerEncoderLayer):
     '''buildattn'''
     def buildattn(self, attn_cfg):
+        valid_keys = ['embed_dims', 'num_heads', 'window_size', 'bias', 'qk_scale', 'attn_drop_rate', 'proj_drop_rate']
+        for key in list(attn_cfg.keys()):
+            if key not in valid_keys: attn_cfg.pop(key)
         self.attn = MAEAttention(**attn_cfg)
 
 
