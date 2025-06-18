@@ -71,7 +71,7 @@ class TransformerEncoderLayer(nn.Module):
 class VisionTransformer(nn.Module):
     def __init__(self, structure_type, img_size=224, patch_size=16, patch_pad='corner', in_channels=3, embed_dims=768, num_layers=12, num_heads=12, mlp_ratio=4, out_origin=False, out_indices=(9, 14, 19, 23),
                  qkv_bias=True, drop_rate=0., attn_drop_rate=0., drop_path_rate=0., with_cls_token=True, output_cls_token=False, norm_cfg={'type': 'LayerNorm', 'eps': 1e-6}, act_cfg={'type': 'GELU'}, 
-                 patch_norm=False, patch_bias=False, pre_norm=False, final_norm=False, interpolate_mode='bilinear', num_fcs=2, use_checkpoint=False, pretrained=True, pretrained_model_path=''):
+                 patch_norm=False, patch_bias=True, pre_norm=False, final_norm=False, interpolate_mode='bilinear', num_fcs=2, use_checkpoint=False, pretrained=True, pretrained_model_path=''):
         super(VisionTransformer, self).__init__()
         img_size = tolen2tuple(img_size)
         # set attributes
