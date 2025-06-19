@@ -28,6 +28,7 @@ AUTO_ASSERT_STRUCTURE_TYPES = {}
 class HRModule(nn.Module):
     def __init__(self, num_branches, block, num_blocks, in_channels, num_channels, multiscale_output=True, norm_cfg=None, act_cfg=None, use_checkpoint=False):
         super(HRModule, self).__init__()
+        self.use_checkpoint = use_checkpoint
         self.checkbranches(num_branches, num_blocks, in_channels, num_channels)
         self.in_channels = in_channels
         self.num_branches = num_branches
@@ -35,7 +36,6 @@ class HRModule(nn.Module):
         self.branches = self.makebranches(num_branches, block, num_blocks, num_channels, norm_cfg, act_cfg)
         self.fuse_layers = self.makefuselayers(norm_cfg, act_cfg)
         self.relu = BuildActivation(act_cfg)
-        self.use_checkpoint = use_checkpoint
     '''forward'''
     def forward(self, x):
         if self.num_branches == 1:
