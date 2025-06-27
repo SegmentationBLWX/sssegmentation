@@ -13,6 +13,14 @@ import torch.distributed as dist
 from .io import touchdirs
 
 
+'''ddpallreducemean'''
+def ddpallreducemean(tensor: torch.Tensor) -> torch.Tensor:
+    world_size = dist.get_world_size()
+    dist.all_reduce(tensor, op=dist.ReduceOp.SUM)
+    tensor /= world_size
+    return tensor
+
+
 '''setrandomseed'''
 def setrandomseed(seed):
     random.seed(seed)
