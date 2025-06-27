@@ -56,7 +56,7 @@ class OCRNet(BaseSegmentor):
         # feed to bottleneck
         feats = self.bottleneck(backbone_outputs[-1])
         # feed to ocr module
-        context = self.spatial_gather_module(feats, seg_logits_aux)
+        context = self.spatial_gather_module(feats, F.interpolate(seg_logits_aux, size=feats.shape[-2:], mode='bilinear', align_corners=self.align_corners))
         feats = self.object_context_block(feats, context)
         # feed to decoder
         seg_logits = self.decoder(feats)
