@@ -21,6 +21,12 @@
 
 ## Results
 
+#### PASCAL VOC
+
+| Backbone    | Pretrain               | Crop Size  | Schedule                                | Train/Eval Set     | mIoU   | Download                                                                                                                                                                                                                                                                                                                                                                     |
+| :-:         | :-:                    | :-:        | :-:                                     | :-:                | :-:    | :-:                                                                                                                                                                                                                                                                                                                                                                          |
+| MIT-B3      | ImageNet-1k-224x224    | 512x512    | LR/POLICY/BS/EPOCH: 0.00006/poly/16/60  | trainaug/val       | 81.98% | [cfg](https://raw.githubusercontent.com/SegmentationBLWX/sssegmentation/main/ssseg/configs/segformer/segformer_mitb3_voc.py) &#124; [model](https://github.com/SegmentationBLWX/modelstore/releases/download/ssseg_segformer/segformer_mitb3_voc.pth) &#124; [log](https://github.com/SegmentationBLWX/modelstore/releases/download/ssseg_segformer/segformer_mitb3_voc.log) |
+
 #### ADE20k
 
 | Backbone    | Pretrain               | Crop Size  | Schedule                                | Train/Eval Set  | mIoU   | Download                                                                                                                                                                                                                                                                                                                                                                              |
@@ -31,6 +37,12 @@
 | MIT-B3      | ImageNet-1k-224x224    | 512x512    | LR/POLICY/BS/EPOCH: 0.00006/poly/16/130 | train/val       | 48.31% | [cfg](https://raw.githubusercontent.com/SegmentationBLWX/sssegmentation/main/ssseg/configs/segformer/segformer_mitb3_ade20k.py) &#124; [model](https://github.com/SegmentationBLWX/modelstore/releases/download/ssseg_segformer/segformer_mitb3_ade20k.pth) &#124; [log](https://github.com/SegmentationBLWX/modelstore/releases/download/ssseg_segformer/segformer_mitb3_ade20k.log) |
 | MIT-B4      | ImageNet-1k-224x224    | 512x512    | LR/POLICY/BS/EPOCH: 0.00006/poly/16/130 | train/val       | 48.59% | [cfg](https://raw.githubusercontent.com/SegmentationBLWX/sssegmentation/main/ssseg/configs/segformer/segformer_mitb4_ade20k.py) &#124; [model](https://github.com/SegmentationBLWX/modelstore/releases/download/ssseg_segformer/segformer_mitb4_ade20k.pth) &#124; [log](https://github.com/SegmentationBLWX/modelstore/releases/download/ssseg_segformer/segformer_mitb4_ade20k.log) |
 | MIT-B5      | ImageNet-1k-224x224    | 512x512    | LR/POLICY/BS/EPOCH: 0.00006/poly/16/130 | train/val       | 49.61% | [cfg](https://raw.githubusercontent.com/SegmentationBLWX/sssegmentation/main/ssseg/configs/segformer/segformer_mitb5_ade20k.py) &#124; [model](https://github.com/SegmentationBLWX/modelstore/releases/download/ssseg_segformer/segformer_mitb5_ade20k.pth) &#124; [log](https://github.com/SegmentationBLWX/modelstore/releases/download/ssseg_segformer/segformer_mitb5_ade20k.log) |
+
+#### CityScapes
+
+| Backbone    | Pretrain               | Crop Size  | Schedule                                | Train/Eval Set  | mIoU   | Download                                                                                                                                                                                                                                                                                                                                                                                          |
+| :-:         | :-:                    | :-:        | :-:                                     | :-:             | :-:    | :-:                                                                                                                                                                                                                                                                                                                                                                                               |
+| MIT-B3      | ImageNet-1k-224x224    | 512x1024   | LR/POLICY/BS/EPOCH: 0.00006/poly/8/220  | train/val       |        | [cfg](https://raw.githubusercontent.com/SegmentationBLWX/sssegmentation/main/ssseg/configs/segformer/segformer_mitb3_cityscapes.py) &#124; [model](https://github.com/SegmentationBLWX/modelstore/releases/download/ssseg_segformer/segformer_mitb3_cityscapes.pth) &#124; [log](https://github.com/SegmentationBLWX/modelstore/releases/download/ssseg_segformer/segformer_mitb3_cityscapes.log) |
 
 
 ## More
