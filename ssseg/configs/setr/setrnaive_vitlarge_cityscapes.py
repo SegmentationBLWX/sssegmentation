@@ -24,5 +24,10 @@ SEGMENTOR_CFG.update({
         {'in_channels': 1024, 'out_channels': 256, 'dropout': 0, 'num_convs': 2, 'scale_factor': 4, 'kernel_size': 3},
     ],
 })
+SEGMENTOR_CFG['inference'] = {
+    'forward': {'mode': 'slide', 'cropsize': (768, 768), 'stride': (512, 512)},
+    'tta': {'multiscale': [1], 'flip': False, 'use_probs_before_resize': False},
+    'evaluate': {'metric_list': ['iou', 'miou']},
+}
 SEGMENTOR_CFG['work_dir'] = os.path.split(__file__)[-1].split('.')[0]
 SEGMENTOR_CFG['logger_handle_cfg']['logfilepath'] = os.path.join(SEGMENTOR_CFG['work_dir'], f"{os.path.split(__file__)[-1].split('.')[0]}.log")
