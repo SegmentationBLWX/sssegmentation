@@ -24,7 +24,7 @@ SEGMENTOR_CFG['head'] = {
 }
 SEGMENTOR_CFG['inference'] = {
     'forward': {'mode': 'slide', 'cropsize': (1024, 1024), 'stride': (768, 768)},
-    'tta': {'multiscale': [1], 'flip': False, 'use_probs_before_resize': False},
+    'tta': {'multiscale': [1], 'flip': False, 'use_probs_before_resize': True},
     'evaluate': {'metric_list': ['iou', 'miou']},
 }
 SEGMENTOR_CFG['work_dir'] = os.path.split(__file__)[-1].split('.')[0]
