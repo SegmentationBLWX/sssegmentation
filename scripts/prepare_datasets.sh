@@ -74,26 +74,25 @@ elif [[ "$OPT" == "pascalvoc" ]]; then
     rm -rf VOCdevkit.zip.001 VOCdevkit.zip.002 VOCdevkit.zip.003
 elif [[ "$OPT" == "cityscapes" ]]; then
     {
-        wget https://github.com/SegmentationBLWX/modelstore/releases/download/ssseg_datasets/CityScapes.zip
-        wget https://github.com/SegmentationBLWX/modelstore/releases/download/ssseg_datasets/CityScapes.z01
-        wget https://github.com/SegmentationBLWX/modelstore/releases/download/ssseg_datasets/CityScapes.z02
-        wget https://github.com/SegmentationBLWX/modelstore/releases/download/ssseg_datasets/CityScapes.z03
-        wget https://github.com/SegmentationBLWX/modelstore/releases/download/ssseg_datasets/CityScapes.z04
-        wget https://github.com/SegmentationBLWX/modelstore/releases/download/ssseg_datasets/CityScapes.z05
-        wget https://github.com/SegmentationBLWX/modelstore/releases/download/ssseg_datasets/CityScapes.z06
-        wget https://github.com/SegmentationBLWX/modelstore/releases/download/ssseg_datasets/CityScapes.z07
-        wget https://github.com/SegmentationBLWX/modelstore/releases/download/ssseg_datasets/CityScapes.z08
-        wget https://github.com/SegmentationBLWX/modelstore/releases/download/ssseg_datasets/CityScapes.z09
-        wget https://github.com/SegmentationBLWX/modelstore/releases/download/ssseg_datasets/CityScapes.z10
-        wget https://github.com/SegmentationBLWX/modelstore/releases/download/ssseg_datasets/CityScapes.z11
-        7z x CityScapes.zip
+        wget https://github.com/SegmentationBLWX/modelstore/releases/download/ssseg_datasets/CityScapes.7z.001
+        wget https://github.com/SegmentationBLWX/modelstore/releases/download/ssseg_datasets/CityScapes.7z.002
+        wget https://github.com/SegmentationBLWX/modelstore/releases/download/ssseg_datasets/CityScapes.7z.003
+        wget https://github.com/SegmentationBLWX/modelstore/releases/download/ssseg_datasets/CityScapes.7z.004
+        wget https://github.com/SegmentationBLWX/modelstore/releases/download/ssseg_datasets/CityScapes.7z.005
+        wget https://github.com/SegmentationBLWX/modelstore/releases/download/ssseg_datasets/CityScapes.7z.006
+        wget https://github.com/SegmentationBLWX/modelstore/releases/download/ssseg_datasets/CityScapes.7z.007
+        wget https://github.com/SegmentationBLWX/modelstore/releases/download/ssseg_datasets/CityScapes.7z.008
+        wget https://github.com/SegmentationBLWX/modelstore/releases/download/ssseg_datasets/CityScapes.7z.009
+        wget https://github.com/SegmentationBLWX/modelstore/releases/download/ssseg_datasets/CityScapes.7z.010
+        wget https://github.com/SegmentationBLWX/modelstore/releases/download/ssseg_datasets/CityScapes.7z.011
+        7z x CityScapes.7z.001
     } || {
         echo "Fail to download ${DATASET} dataset."
         exit 0
     }
-    rm -rf CityScapes.zip CityScapes.z01 CityScapes.z02 CityScapes.z03 CityScapes.z04 \
-           CityScapes.z04 CityScapes.z05 CityScapes.z06 CityScapes.z07 CityScapes.z08 \
-           CityScapes.z09 CityScapes.z10 CityScapes.z11 
+    rm -rf CityScapes.7z.001 CityScapes.7z.002 CityScapes.7z.003 CityScapes.7z.004 CityScapes.7z.005 \
+           CityScapes.7z.006 CityScapes.7z.007 CityScapes.7z.008 CityScapes.7z.009 CityScapes.7z.010 \
+           CityScapes.7z.011
 elif [[ "$OPT" == "atr" ]]; then
     {
         wget https://github.com/SegmentationBLWX/modelstore/releases/download/ssseg_datasets/ATR.tar.gz
