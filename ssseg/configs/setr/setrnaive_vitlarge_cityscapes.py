@@ -14,6 +14,13 @@ SEGMENTOR_CFG['scheduler']['max_epochs'] = 220
 # modify other segmentor configs
 SEGMENTOR_CFG.update({
     'num_classes': 19,
+    'backbone': {
+        'type': 'VisionTransformer', 'structure_type': 'jx_vit_large_p16_384', 'img_size': (768, 768), 'out_indices': (9, 14, 19, 23),
+        'norm_cfg': {'type': 'LayerNorm', 'eps': 1e-6}, 'pretrained': True, 'selected_indices': (0, 1, 2, 3),
+        'patch_size': 16, 'embed_dims': 1024, 'num_layers': 24, 'num_heads': 16, 'mlp_ratio': 4,
+        'qkv_bias': True, 'drop_rate': 0.1, 'attn_drop_rate': 0., 'drop_path_rate': 0., 'with_cls_token': True,
+        'output_cls_token': False, 'patch_norm': False, 'final_norm': False, 'num_fcs': 2,
+    },
     'head': {
         'in_channels_list': [1024, 1024, 1024, 1024], 'feats_channels': 256, 'dropout': 0, 'num_convs': 2,
         'scale_factor': 4, 'kernel_size': 3, 'norm_cfg': {'type': 'LayerNorm', 'eps': 1e-6},
