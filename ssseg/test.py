@@ -91,8 +91,8 @@ class Tester():
         # build segmentor
         cfg.SEGMENTOR_CFG['backbone']['pretrained'] = False
         segmentor = BuildSegmentor(segmentor_cfg=cfg.SEGMENTOR_CFG, mode='TEST')
-        dist.barrier()
         torch.cuda.set_device(cmd_args.local_rank)
+        dist.barrier()
         segmentor.cuda(cmd_args.local_rank)
         # load ckpts
         ckpts = loadckpts(cmd_args.ckptspath)
