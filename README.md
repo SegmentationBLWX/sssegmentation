@@ -3,17 +3,42 @@
 </div>
 <br />
 
-[![docs](https://img.shields.io/badge/docs-latest-blue)](https://sssegmentation.readthedocs.io/en/latest/)
-[![PyPI - Python Version](https://img.shields.io/pypi/pyversions/sssegmentation)](https://pypi.org/project/sssegmentation/)
-[![PyPI](https://img.shields.io/pypi/v/sssegmentation)](https://pypi.org/project/sssegmentation)
-[![license](https://img.shields.io/github/license/SegmentationBLWX/sssegmentation.svg)](https://github.com/SegmentationBLWX/sssegmentation/blob/main/LICENSE)
-[![PyPI - Downloads](https://static.pepy.tech/badge/sssegmentation)](https://pypi.org/project/sssegmentation/)
-[![PyPI - Downloads](https://img.shields.io/pypi/dm/sssegmentation?style=flat-square)](https://pypi.org/project/sssegmentation/)
-[![issue resolution](https://isitmaintained.com/badge/resolution/SegmentationBLWX/sssegmentation.svg)](https://github.com/SegmentationBLWX/sssegmentation/issues)
-[![open issues](https://isitmaintained.com/badge/open/SegmentationBLWX/sssegmentation.svg)](https://github.com/SegmentationBLWX/sssegmentation/issues)
-[![GitHub last commit (main)](https://img.shields.io/github/last-commit/SegmentationBLWX/sssegmentation/main.svg)](https://github.com/SegmentationBLWX/sssegmentation/commits/main/)
+<p align="center">
+  <a href="https://sssegmentation.readthedocs.io/en/latest/">
+    <img src="https://img.shields.io/badge/docs-latest-blue" alt="Docs">
+  </a>
+  <a href="https://pypi.org/project/sssegmentation/">
+    <img src="https://img.shields.io/pypi/pyversions/sssegmentation" alt="PyPI - Python Version">
+  </a>
+  <a href="https://pypi.org/project/sssegmentation">
+    <img src="https://img.shields.io/pypi/v/sssegmentation" alt="PyPI">
+  </a>
+  <a href="https://github.com/SegmentationBLWX/sssegmentation/blob/main/LICENSE">
+    <img src="https://img.shields.io/github/license/SegmentationBLWX/sssegmentation.svg" alt="License">
+  </a>
+  <a href="https://pypi.org/project/sssegmentation/">
+    <img src="https://static.pepy.tech/badge/sssegmentation" alt="PyPI - Downloads">
+  </a>
+  <a href="https://pypi.org/project/sssegmentation/">
+    <img src="https://static.pepy.tech/badge/sssegmentation/month" alt="PyPI - Downloads">
+  </a>
+  <a href="https://github.com/SegmentationBLWX/modelstore">
+    <img src="https://img.shields.io/github/downloads/SegmentationBLWX/modelstore/total?style=flat-square" alt="Release - Downloads">
+  </a>
+  <a href="https://github.com/SegmentationBLWX/sssegmentation/issues">
+    <img src="https://isitmaintained.com/badge/resolution/SegmentationBLWX/sssegmentation.svg" alt="Issue Resolution">
+  </a>
+  <a href="https://github.com/SegmentationBLWX/sssegmentation/issues">
+    <img src="https://isitmaintained.com/badge/open/SegmentationBLWX/sssegmentation.svg" alt="Open Issues">
+  </a>
+  <a href="https://github.com/SegmentationBLWX/sssegmentation/commits/main/">
+    <img src="https://img.shields.io/github/last-commit/SegmentationBLWX/sssegmentation/main.svg" alt="GitHub Last Commit (Main)">
+  </a>
+</p>
 
-Documents: https://sssegmentation.readthedocs.io/en/latest/
+<p align="center">
+  Documents: <a href="https://sssegmentation.readthedocs.io/en/latest/">https://sssegmentation.readthedocs.io/en/latest/</a>
+</p>
 
 
 ## What's New
