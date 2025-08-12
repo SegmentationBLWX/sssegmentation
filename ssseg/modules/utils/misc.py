@@ -13,6 +13,22 @@ import torch.distributed as dist
 from .io import touchdirs
 
 
+'''getgpupeakallocgb'''
+def getgpupeakallocgb(device=None):
+    if device is None: device = torch.cuda.current_device()
+    return round(torch.cuda.max_memory_allocated(device) / (1024 ** 3), 2)
+
+
+'''getgpupeakallocgbddp'''
+def getgpupeakallocgbddp():
+    assert dist.is_available() and dist.is_initialized()
+    local_peak = getgpupeakallocgb()
+    world_size = dist.get_world_size()
+    peaks = [0.0 for _ in range(world_size)]
+    dist.all_gather_object(peaks, local_peak)
+    return max(peaks)
+
+
 '''ddpallreducemean'''
 def ddpallreducemean(tensor: torch.Tensor) -> torch.Tensor:
     world_size = dist.get_world_size()

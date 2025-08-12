@@ -17,12 +17,12 @@ from tqdm import tqdm
 from datetime import timedelta
 try:
     from modules import (
-        BuildDistributedDataloader, BuildDistributedModel, touchdirs, loadckpts, saveckpts, judgefileexist, postprocesspredgtpairs, initslurm, ismainprocess,
+        BuildDistributedDataloader, BuildDistributedModel, touchdirs, loadckpts, saveckpts, judgefileexist, postprocesspredgtpairs, initslurm, ismainprocess, getgpupeakallocgbddp,
         BuildDataset,  BuildSegmentor, BuildOptimizer, BuildScheduler, BuildLoggerHandle, TrainingLoggingManager, ConfigParser, EMASegmentor, SSSegInputStructure
     )
 except:
     from .modules import (
-        BuildDistributedDataloader, BuildDistributedModel, touchdirs, loadckpts, saveckpts, judgefileexist, postprocesspredgtpairs, initslurm, ismainprocess,
+        BuildDistributedDataloader, BuildDistributedModel, touchdirs, loadckpts, saveckpts, judgefileexist, postprocesspredgtpairs, initslurm, ismainprocess, getgpupeakallocgbddp,
         BuildDataset,  BuildSegmentor, BuildOptimizer, BuildScheduler, BuildLoggerHandle, TrainingLoggingManager, ConfigParser, EMASegmentor, SSSegInputStructure
     )
 warnings.filterwarnings('ignore')
@@ -168,6 +168,7 @@ class Trainer():
             segmentor.train()
             dataloader.sampler.set_epoch(epoch)
             # --train epoch
+            scheduler.cur_epoch = epoch
             for batch_idx, samples_meta in enumerate(dataloader):
                 learning_rate = scheduler.updatelr()
                 data_meta = SSSegInputStructure(
@@ -197,10 +198,10 @@ class Trainer():
                     'cur_iter_in_cur_epoch': batch_idx+1, 'max_iters_in_cur_epoch': len(dataloader), 'segmentor': cfg.SEGMENTOR_CFG['type'], 
                     'backbone': cfg.SEGMENTOR_CFG['backbone']['structure_type'], 'dataset': cfg.SEGMENTOR_CFG['dataset']['type'], 
                     'learning_rate': learning_rate, 'ema': ema_cfg['momentum'] is not None, 'fp16': fp16_type is not None,
+                    'max_gpu_alloc_GB': getgpupeakallocgbddp(),
                 }
                 training_logging_manager.update(basic_log_dict, losses_log_dict)
                 training_logging_manager.autolog(main_process_only=True)
-            scheduler.cur_epoch = epoch
             # --save ckpts
             if (epoch % cfg.SEGMENTOR_CFG['save_interval_epochs'] == 0) or (epoch == end_epoch):
                 state_dict = scheduler.state()

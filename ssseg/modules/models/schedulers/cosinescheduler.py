@@ -26,8 +26,8 @@ class CosineScheduler(BaseScheduler):
             target_lr = min_lr + 0.5 * (base_lr - min_lr) * (1 + math.cos(math.pi * cur_epoch / max_epochs))
         else:
             target_lr = min_lr + 0.5 * (base_lr - min_lr) * (1 + math.cos(math.pi * cur_iter / max_iters))
-        if (warmup_cfg is not None) and (warmup_cfg['iters'] >= cur_iter):
-            target_lr = self.getwarmuplr(cur_iter, warmup_cfg, target_lr)
+        # conduct necessary warm up
+        target_lr = self.getwarmuplr(cur_iter=cur_iter, warmup_cfg=warmup_cfg, regular_lr=target_lr, cur_epoch=cur_epoch, by_epoch=by_epoch)
         # update learning rate
         for param_group in optimizer.param_groups:
             if params_rules and params_rules.get('type', 'DefaultParamsConstructor') == 'DefaultParamsConstructor':

@@ -4,6 +4,7 @@ Function:
 Author:
     Zhenchao Jin
 '''
+import torch
 from torch.nn.utils import clip_grad
 
 
@@ -37,19 +38,30 @@ class BaseScheduler():
     def updatelr(self):
         raise NotImplementedError('not to be implemented')
     '''getwarmuplr'''
-    def getwarmuplr(self, cur_iter, warmup_cfg, regular_lr):
-        warmup_type, warmup_ratio, warmup_iters = warmup_cfg['type'], warmup_cfg['ratio'], warmup_cfg['iters']
+    def getwarmuplr(self, cur_iter, warmup_cfg, regular_lr, cur_epoch=None, by_epoch=False):
+        if warmup_cfg is None: return regular_lr
+        # basic parameters to calculate warm up learning rate
+        if by_epoch:
+            warmup_type, warmup_ratio, warmup_length, cur_length = warmup_cfg['type'], warmup_cfg['ratio'], warmup_cfg['epochs'], cur_epoch
+        else:
+            warmup_type, warmup_ratio, warmup_length, cur_length = warmup_cfg['type'], warmup_cfg['ratio'], warmup_cfg['iters'], cur_iter
+        if cur_length > warmup_length: return regular_lr
+        # constant
         if warmup_type == 'constant':
             warmup_lr = regular_lr * warmup_ratio
+        # linear
         elif warmup_type == 'linear':
-            k = (1 - cur_iter / warmup_iters) * (1 - warmup_ratio)
+            k = (1 - cur_length / warmup_length) * (1 - warmup_ratio)
             warmup_lr = (1 - k) * regular_lr
+        # exp
         elif warmup_type == 'exp':
-            k = warmup_ratio**(1 - cur_iter / warmup_iters)
+            k = warmup_ratio**(1 - cur_length / warmup_length)
             warmup_lr = k * regular_lr
+        else:
+            raise NotImplementedError(f'warm up type {warmup_type} is not supported now')
         return warmup_lr
     '''clipgradients'''
-    def clipgradients(self, params, max_norm=35, norm_type=2):
+    def clipgradients(self, params: torch.nn.Parameter, max_norm=35, norm_type=2):
         params = list(filter(lambda p: p.requires_grad and p.grad is not None, params))
         if len(params) > 0:
             clip_grad.clip_grad_norm_(params, max_norm=max_norm, norm_type=norm_type)
