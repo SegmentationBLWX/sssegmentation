@@ -1,5 +1,6 @@
 '''initialize'''
 from .slurm import initslurm
+from .timer import TrainTimer
 from .env import EnvironmentCollector
 from .configparser import ConfigParser
 from .modulebuilder import BaseModuleBuilder

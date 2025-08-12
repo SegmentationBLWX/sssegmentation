@@ -13,5 +13,6 @@ from .models import (
 from .utils import (
     initslurm, setrandomseed, touchdir, loadckpts, saveckpts, loadpretrainedweights, symlink, judgefileexist, postprocesspredgtpairs, ismainprocess, touchdirs, ddpallreducemean,
     getgpupeakallocgbddp, getgpupeakallocgb,
-    LoggerHandleBuilder, TrainingLoggingManager, BaseModuleBuilder, ConfigParser, EnvironmentCollector, SSSegInputStructure, SSSegOutputStructure, BuildLoggerHandle,
+    LoggerHandleBuilder, TrainingLoggingManager, BaseModuleBuilder, ConfigParser, EnvironmentCollector, SSSegInputStructure, SSSegOutputStructure, TrainTimer,
+    BuildLoggerHandle,
 )
