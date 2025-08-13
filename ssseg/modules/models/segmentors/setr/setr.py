@@ -65,7 +65,7 @@ class SETRUP(BaseSegmentor):
             ssseg_outputs = SSSegOutputStructure(mode=self.mode, seg_logits=seg_logits)
         return ssseg_outputs
     '''norm'''
-    def norm(self, x, norm_layer):
+    def norm(self, x: torch.Tensor, norm_layer):
         n, c, h, w = x.shape
         x = x.reshape(n, c, h * w).transpose(2, 1).contiguous()
         x = norm_layer(x)
