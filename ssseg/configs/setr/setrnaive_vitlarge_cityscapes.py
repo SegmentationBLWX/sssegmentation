@@ -19,11 +19,11 @@ SEGMENTOR_CFG.update({
         'norm_cfg': {'type': 'LayerNorm', 'eps': 1e-6}, 'pretrained': True, 'selected_indices': (0, 1, 2, 3),
         'patch_size': 16, 'embed_dims': 1024, 'num_layers': 24, 'num_heads': 16, 'mlp_ratio': 4,
         'qkv_bias': True, 'drop_rate': 0., 'attn_drop_rate': 0., 'drop_path_rate': 0., 'with_cls_token': True,
-        'output_cls_token': False, 'patch_norm': False, 'final_norm': False, 'num_fcs': 2,
+        'output_cls_token': False, 'patch_norm': False, 'final_norm': False, 'num_fcs': 2, 'patch_bias': False,
     },
     'head': {
-        'in_channels_list': [1024, 1024, 1024, 1024], 'feats_channels': 256, 'dropout': 0, 'num_convs': 2,
-        'scale_factor': 4, 'kernel_size': 3, 'norm_cfg': {'type': 'LayerNorm', 'eps': 1e-6},
+        'in_channels_list': [1024, 1024, 1024, 1024], 'feats_channels': 256, 'dropout': 0, 'num_convs': 1,
+        'scale_factor': 4, 'kernel_size': 1, 'norm_cfg': {'type': 'LayerNorm', 'eps': 1e-6},
     },
     'auxiliary': [
         {'in_channels': 1024, 'out_channels': 256, 'dropout': 0, 'num_convs': 1, 'scale_factor': 4, 'kernel_size': 1},
