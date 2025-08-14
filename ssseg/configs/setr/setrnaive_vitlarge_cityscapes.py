@@ -11,6 +11,12 @@ SEGMENTOR_CFG['dataset'] = REGISTERED_DATASET_CONFIGS['DATASET_CFG_CITYSCAPES_76
 SEGMENTOR_CFG['dataloader'] = REGISTERED_DATALOADER_CONFIGS['DATALOADER_CFG_BS8'].copy()
 # modify scheduler config
 SEGMENTOR_CFG['scheduler']['max_epochs'] = 220
+SEGMENTOR_CFG['scheduler']['optimizer'] = {
+    'type': 'SGD', 'lr': 0.1, 'momentum': 0.9, 'weight_decay': 0.0,
+    'params_rules': {
+        'backbone_net': dict(lr_multiplier=0.1, wd_multiplier=1.0),
+    },
+}
 # modify other segmentor configs
 SEGMENTOR_CFG.update({
     'num_classes': 19,
