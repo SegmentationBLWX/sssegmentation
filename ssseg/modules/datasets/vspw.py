@@ -28,7 +28,7 @@ class VSPWDataset(BaseDataset):
         'food', 'instrument', 'train'
     ]
     palette = BaseDataset.randompalette(num_classes)
-    clsid2label = {0: -100, 254: -100}
+    clsid2label = {0: -100, 254: -100, 255: -100}
     for i in range(1, num_classes+1): clsid2label[i] = i - 1
     assert num_classes == len(classnames) and num_classes == len(palette)
     def __init__(self, mode, logger_handle, dataset_cfg):
