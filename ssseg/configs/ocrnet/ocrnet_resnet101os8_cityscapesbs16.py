@@ -21,10 +21,10 @@ SEGMENTOR_CFG['backbone'] = {
     'pretrained': True, 'outstride': 8, 'use_conv3x3_stem': True, 'selected_indices': (2, 3),
 }
 SEGMENTOR_CFG['head'] = {
-    'in_channels': 2048, 'feats_channels': 512, 'transform_channels': 256, 'scale': 1, 'dropout': 0,
+    'in_channels': 2048, 'feats_channels': 512, 'transform_channels': 256, 'scale': 1, 'dropout': 0.1,
 }
 SEGMENTOR_CFG['auxiliary'] = {
-    'in_channels': 1024, 'out_channels': 512, 'dropout': 0,
+    'in_channels': 1024, 'out_channels': 512, 'dropout': 0.1,
 }
 SEGMENTOR_CFG['work_dir'] = os.path.split(__file__)[-1].split('.')[0]
 SEGMENTOR_CFG['logger_handle_cfg']['logfilepath'] = os.path.join(SEGMENTOR_CFG['work_dir'], f"{os.path.split(__file__)[-1].split('.')[0]}.log")
