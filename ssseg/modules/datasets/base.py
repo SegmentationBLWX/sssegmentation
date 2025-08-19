@@ -11,6 +11,7 @@ import numpy as np
 import collections
 import scipy.io as sio
 from PIL import Image
+from .pipelines.misc import numpy2builtinnumber
 from .pipelines import Evaluation, Compose, BuildDataTransform
 try:
     from chainercv.evaluations import eval_semantic_segmentation
@@ -114,7 +115,7 @@ class BaseDataset(torch.utils.data.Dataset):
                 dice_dict[self.classnames[idx]] = item
             selected_result['dice'] = dice_dict
         # return
-        return selected_result      
+        return numpy2builtinnumber(selected_result)
     '''constructtransforms'''
     def constructtransforms(self, data_pipelines, record_img2aug_pos_mapper=False):
         transforms = []

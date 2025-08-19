@@ -6,6 +6,7 @@ Author:
 '''
 import numbers
 import collections
+import numpy as np
 import collections.abc
 
 
@@ -39,3 +40,15 @@ def totuple(x):
     assert isinstance(x, collections.abc.Sequence) and (len(x) == 2)
     for n in x: assert isinstance(n, numbers.Number)
     return tuple(x)
+
+
+'''numpy2builtinnumber'''
+def numpy2builtinnumber(obj):
+    if isinstance(obj, dict):
+        return {k: numpy2builtinnumber(v) for k, v in obj.items()}
+    elif isinstance(obj, (list, tuple)):
+        return [numpy2builtinnumber(v) for v in obj]
+    elif isinstance(obj, np.generic):
+        return obj.item()
+    else:
+        return obj
