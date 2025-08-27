@@ -152,7 +152,7 @@ class HRNet(nn.Module):
         },
     }
     def __init__(self, structure_type, arch='hrnetv2_w18_small', in_channels=3, norm_cfg={'type': 'SyncBatchNorm'}, multiscale_output=True,
-                 act_cfg={'type': 'ReLU', 'inplace': True}, pretrained=True, pretrained_model_path='', use_checkpoint=False):
+                 act_cfg={'type': 'ReLU', 'inplace': True}, pretrained=True, pretrained_model_path='', use_checkpoint=False, mcibi_version=False):
         super(HRNet, self).__init__()
         # set attributes
         self.structure_type = structure_type
@@ -164,6 +164,7 @@ class HRNet(nn.Module):
         self.pretrained_model_path = pretrained_model_path
         self.use_checkpoint = use_checkpoint
         self.multiscale_output = multiscale_output
+        self.mcibi_version = mcibi_version
         # assert
         if structure_type in AUTO_ASSERT_STRUCTURE_TYPES:
             for key, value in AUTO_ASSERT_STRUCTURE_TYPES[structure_type].items():
@@ -217,7 +218,7 @@ class HRNet(nn.Module):
     def forward(self, x):
         x = self.conv1(x)
         x = self.bn1(x)
-        x = self.relu(x)
+        if not self.mcibi_version: x = self.relu(x)
         x = self.conv2(x)
         x = self.bn2(x)
         x = self.relu(x)
