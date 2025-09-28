@@ -16,7 +16,7 @@ SEGMENTOR_CFG['scheduler']['max_epochs'] = 500
 # modify other segmentor configs
 SEGMENTOR_CFG['num_classes'] = 19
 SEGMENTOR_CFG['backbone'] = {
-    'type': 'HRNet', 'structure_type': 'hrnetv2_w48', 'arch': 'hrnetv2_w48', 'pretrained': True, 'selected_indices': (0, 0, 0, 0),
+    'type': 'HRNet', 'structure_type': 'hrnetv2_w48', 'arch': 'hrnetv2_w48', 'pretrained': True, 'selected_indices': (0, 0, 0, 0), 'mcibi_version': True,
 }
 SEGMENTOR_CFG['head']['use_loss'] = False
 SEGMENTOR_CFG['head']['downsample_backbone']['stride'] = 2
