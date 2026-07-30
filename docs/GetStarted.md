@@ -7,7 +7,7 @@ In this chapter, we demonstrate some necessary preparations before developing or
 
 ## Install SSSegmentation for Developing
 
-SSSegmentation works on Linux, Windows and macOS. It requires Python 3.7+, CUDA 10.2+ and PyTorch 1.8+. 
+SSSegmentation works on Linux, Windows and macOS. It requires Python 3.7+, CUDA 10.2+ and PyTorch 1.9+. 
 
 If you are experienced with Python and PyTorch and have already installed them, just skip this section and jump to the next section [Prepare Datasets](https://sssegmentation.readthedocs.io/en/latest/GetStarted.html#prepare-datasets).
 Otherwise, you can follow the instructions in this section for installing SSSegmentation.
