@@ -31,7 +31,7 @@ class SemanticLevelContext(nn.Module):
         inputs = x
         batch_size, num_channels, h, w = x.size()
         num_classes = preds.size(1)
-        feats_sl = torch.zeros(batch_size, h*w, num_channels).type_as(x)
+        feats_sl = torch.zeros(batch_size, h*w, num_channels, device=x.device, dtype=torch.float32)
         for batch_idx in range(batch_size):
             # (C, H, W), (num_classes, H, W) --> (H*W, C), (H*W, num_classes)
             feats_iter, preds_iter = x[batch_idx], preds[batch_idx]

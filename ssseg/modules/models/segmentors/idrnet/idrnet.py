@@ -323,7 +323,7 @@ class IDRNet(BaseSegmentor):
                 cls_contexts = torch.stack(cls_contexts)
                 selected_class_relations = torch.cat(selected_class_relations, dim=1)
                 if remove_negative_cls_relation:
-                    selected_class_relations[selected_class_relations <= 0] = -1e16
+                    selected_class_relations[selected_class_relations <= 0] = -1e4
                 selected_class_relations = F.softmax(selected_class_relations, dim=1)
                 selected_class_relations_tmp = []
                 for cls_id in valid_clsids:
